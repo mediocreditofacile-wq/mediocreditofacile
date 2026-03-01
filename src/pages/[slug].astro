@@ -1,0 +1,30 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Hero from '../components/Hero.astro';
+import Benefits from '../components/Benefits.astro';
+import HowItWorks from '../components/HowItWorks.astro';
+import ContactForm from '../components/ContactForm.astro';
+import Footer from '../components/Footer.astro';
+import landingPages from '../data/landing-pages.json';
+
+export function getStaticPaths() {
+  return landingPages.map((page) => ({
+    params: { slug: page.slug },
+    props: { page },
+  }));
+}
+
+const { page } = Astro.props;
+---
+
+<Layout title={page.metaTitle} description={page.metaDescription}>
+  <Header />
+  <main>
+    <Hero title={page.heroTitle} subtitle={page.heroSubtitle} />
+    <Benefits benefits={page.benefits} />
+    <HowItWorks />
+    <ContactForm />
+  </main>
+  <Footer />
+</Layout>

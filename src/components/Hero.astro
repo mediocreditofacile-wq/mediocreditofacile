@@ -1,0 +1,77 @@
+---
+interface Props {
+  title: string;
+  subtitle: string;
+}
+
+const { title, subtitle } = Astro.props;
+---
+
+<section class="hero">
+  <div class="hero__inner">
+    <h1 class="hero__title">{title}</h1>
+    <p class="hero__subtitle">{subtitle}</p>
+    <a href="#contatti" class="hero__cta">
+      Richiedi Informazioni
+      <span class="material-icons-outlined" aria-hidden="true">arrow_downward</span>
+    </a>
+  </div>
+</section>
+
+<style>
+  .hero {
+    background: linear-gradient(135deg, #ffffff 0%, #FFF5F0 100%);
+    color: var(--color-heading);
+    padding: 5rem 1.5rem 4.5rem;
+    text-align: center;
+  }
+
+  .hero__inner {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  .hero__title {
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    margin-bottom: 1.25rem;
+    color: var(--color-primary);
+  }
+
+  .hero__subtitle {
+    font-size: clamp(1.05rem, 2.5vw, 1.25rem);
+    line-height: 1.65;
+    color: var(--color-text);
+    margin-bottom: 2.5rem;
+  }
+
+  .hero__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--color-accent);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 1.05rem;
+    padding: 0.9rem 2rem;
+    border-radius: 8px;
+    transition: background 0.2s, transform 0.15s;
+  }
+
+  .hero__cta:hover {
+    background: var(--color-accent-hover);
+    transform: translateY(-1px);
+  }
+
+  .hero__cta .material-icons-outlined {
+    font-size: 1.15rem;
+  }
+
+  @media (max-width: 640px) {
+    .hero {
+      padding: 3.5rem 1.25rem 3rem;
+    }
+  }
+</style>

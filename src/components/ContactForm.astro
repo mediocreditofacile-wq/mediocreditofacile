@@ -1,0 +1,168 @@
+---
+
+---
+
+<section class="form-section" id="contatti">
+  <div class="form-section__inner">
+    <h2 class="form-section__heading">Richiedi Informazioni</h2>
+    <p class="form-section__sub">
+      Compila il modulo e ti ricontatteremo entro 24 ore lavorative. Nessun impegno.
+    </p>
+    <form
+      class="contact-form"
+      action="https://hooks.zapier.com/hooks/catch/PLACEHOLDER"
+      method="POST"
+    >
+      <div class="contact-form__field">
+        <label for="nome">Nome e Cognome</label>
+        <input
+          type="text"
+          id="nome"
+          name="nome"
+          placeholder="Mario Rossi"
+          required
+          autocomplete="name"
+        />
+      </div>
+      <div class="contact-form__field">
+        <label for="email">Email</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          placeholder="mario@azienda.it"
+          required
+          autocomplete="email"
+        />
+      </div>
+      <div class="contact-form__field">
+        <label for="telefono">Cellulare</label>
+        <input
+          type="tel"
+          id="telefono"
+          name="telefono"
+          placeholder="+39 333 123 4567"
+          required
+          autocomplete="tel"
+        />
+      </div>
+      <button type="submit" class="contact-form__submit">
+        Richiedi Informazioni
+        <span class="material-icons-outlined" aria-hidden="true">send</span>
+      </button>
+      <p class="contact-form__privacy">
+        Inviando il modulo accetti la nostra
+        <a href="/privacy-policy">informativa sulla privacy</a>.
+      </p>
+    </form>
+  </div>
+</section>
+
+<style>
+  .form-section {
+    padding: 4.5rem 1.5rem;
+    background: var(--color-bg);
+  }
+
+  .form-section__inner {
+    max-width: 520px;
+    margin: 0 auto;
+  }
+
+  .form-section__heading {
+    text-align: center;
+    font-size: clamp(1.5rem, 3.5vw, 2rem);
+    font-weight: 800;
+    color: var(--color-primary);
+    margin-bottom: 0.6rem;
+    letter-spacing: -0.02em;
+  }
+
+  .form-section__sub {
+    text-align: center;
+    color: var(--color-text-light);
+    margin-bottom: 2.5rem;
+    font-size: 1rem;
+  }
+
+  .contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .contact-form__field label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-primary);
+    margin-bottom: 0.35rem;
+  }
+
+  .contact-form__field input {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border: 1.5px solid var(--color-border);
+    border-radius: 8px;
+    font-family: var(--font-family);
+    font-size: 1rem;
+    color: var(--color-text);
+    background: var(--color-bg-alt);
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .contact-form__field input::placeholder {
+    color: #94a3b8;
+  }
+
+  .contact-form__field input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(102, 76, 205, 0.15);
+  }
+
+  .contact-form__submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background: var(--color-accent);
+    color: #ffffff;
+    font-family: var(--font-family);
+    font-weight: 700;
+    font-size: 1.05rem;
+    padding: 0.9rem 2rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    margin-top: 0.5rem;
+  }
+
+  .contact-form__submit:hover {
+    background: var(--color-accent-hover);
+    transform: translateY(-1px);
+  }
+
+  .contact-form__submit .material-icons-outlined {
+    font-size: 1.1rem;
+  }
+
+  .contact-form__privacy {
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--color-text-light);
+    margin-top: 0.25rem;
+  }
+
+  .contact-form__privacy a {
+    color: var(--color-primary);
+    text-decoration: underline;
+  }
+
+  @media (max-width: 640px) {
+    .form-section {
+      padding: 3rem 1.25rem;
+    }
+  }
+</style>

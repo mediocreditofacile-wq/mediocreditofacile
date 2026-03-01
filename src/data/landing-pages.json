@@ -1,0 +1,74 @@
+[
+  {
+    "slug": "noleggio-operativo",
+    "metaTitle": "Noleggio Operativo per Aziende | Mediocredito Facile",
+    "metaDescription": "Scopri il noleggio operativo per la tua azienda: nessun anticipo, canone fisso, benefici fiscali immediati. Richiedi una consulenza gratuita.",
+    "heroTitle": "Noleggio Operativo per la Tua Azienda",
+    "heroSubtitle": "Tecnologia, veicoli e attrezzature senza immobilizzare capitale. Canone fisso, deducibilit\u00e0 totale e zero pensieri.",
+    "benefits": [
+      {
+        "icon": "savings",
+        "title": "Zero Anticipo",
+        "description": "Nessun investimento iniziale: inizi subito a utilizzare ci\u00f2 che ti serve con un canone mensile fisso e prevedibile."
+      },
+      {
+        "icon": "receipt",
+        "title": "100% Deducibile",
+        "description": "Il canone di noleggio \u00e8 interamente deducibile dal reddito d\u2019impresa, riducendo il carico fiscale della tua azienda."
+      },
+      {
+        "icon": "speed",
+        "title": "Attivazione Rapida",
+        "description": "Processo snello e veloce: dalla richiesta all\u2019attivazione in pochi giorni, senza burocrazia inutile."
+      }
+    ]
+  },
+  {
+    "slug": "leasing-strumentale",
+    "metaTitle": "Leasing Strumentale per PMI | Mediocredito Facile",
+    "metaDescription": "Leasing strumentale su misura per PMI: macchinari, attrezzature e veicoli con condizioni vantaggiose. Confronta le migliori offerte.",
+    "heroTitle": "Leasing Strumentale su Misura per la Tua PMI",
+    "heroSubtitle": "Acquisisci macchinari, attrezzature e veicoli con rate flessibili e il vantaggio del riscatto finale.",
+    "benefits": [
+      {
+        "icon": "settings",
+        "title": "Beni Strumentali",
+        "description": "Macchinari, attrezzature, veicoli commerciali e tecnologia: tutto ci\u00f2 che serve alla tua produttivit\u00e0."
+      },
+      {
+        "icon": "handshake",
+        "title": "Condizioni Negoziate",
+        "description": "Confrontiamo le offerte dei principali istituti per garantirti le condizioni pi\u00f9 vantaggiose sul mercato."
+      },
+      {
+        "icon": "trending_up",
+        "title": "Riscatto Flessibile",
+        "description": "A fine contratto scegli tu: riscatta il bene a un prezzo concordato oppure restituiscilo senza impegni."
+      }
+    ]
+  },
+  {
+    "slug": "finanziamenti-pmi",
+    "metaTitle": "Finanziamenti per PMI | Mediocredito Facile",
+    "metaDescription": "Finanziamenti su misura per piccole e medie imprese: liquidit\u00e0, investimenti e crescita. Scopri la soluzione giusta per te.",
+    "heroTitle": "Finanziamenti su Misura per la Tua Impresa",
+    "heroSubtitle": "Liquidit\u00e0 per crescere, investire e cogliere nuove opportunit\u00e0. Ti guidiamo verso la soluzione finanziaria ideale.",
+    "benefits": [
+      {
+        "icon": "account_balance",
+        "title": "Multi-Istituto",
+        "description": "Accedi alle offerte di oltre 30 istituti finanziari: confrontiamo tassi e condizioni per trovare il meglio per te."
+      },
+      {
+        "icon": "schedule",
+        "title": "Risposta in 48h",
+        "description": "Dalla richiesta alla pre-delibera in sole 48 ore. Niente attese infinite: il tuo tempo vale."
+      },
+      {
+        "icon": "shield",
+        "title": "Consulenza Dedicata",
+        "description": "Un consulente esperto ti segue in ogni fase, dalla richiesta all\u2019erogazione, senza costi nascosti."
+      }
+    ]
+  }
+]

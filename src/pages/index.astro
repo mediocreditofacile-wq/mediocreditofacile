@@ -1,0 +1,157 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import landingPages from '../data/landing-pages.json';
+---
+
+<Layout
+  title="Mediocredito Facile — Noleggio, Leasing e Finanziamenti per PMI"
+  description="Mediocredito Facile: il tuo broker specializzato in noleggio operativo, leasing strumentale e finanziamenti per piccole e medie imprese italiane."
+>
+  <Header />
+  <main>
+    <section class="home-hero">
+      <div class="home-hero__inner">
+        <h1 class="home-hero__title">
+          Noleggio, Leasing e<br />Finanziamenti per la Tua Impresa
+        </h1>
+        <p class="home-hero__sub">
+          Confrontiamo le migliori soluzioni finanziarie per far crescere la tua PMI.
+          Zero anticipo, massima flessibilità.
+        </p>
+      </div>
+    </section>
+
+    <section class="home-services">
+      <div class="home-services__inner">
+        <h2 class="home-services__heading">I Nostri Servizi</h2>
+        <div class="home-services__grid">
+          {landingPages.map((lp) => (
+            <a href={`/${lp.slug}`} class="service-card">
+              <h3 class="service-card__title">{lp.heroTitle}</h3>
+              <p class="service-card__desc">{lp.heroSubtitle}</p>
+              <span class="service-card__link">
+                Scopri di più
+                <span class="material-icons-outlined" aria-hidden="true">arrow_forward</span>
+              </span>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  </main>
+  <Footer />
+</Layout>
+
+<style>
+  .home-hero {
+    background: linear-gradient(135deg, #ffffff 0%, #FFF5F0 100%);
+    color: var(--color-heading);
+    padding: 5rem 1.5rem 4.5rem;
+    text-align: center;
+  }
+
+  .home-hero__inner {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  .home-hero__title {
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    margin-bottom: 1.25rem;
+    color: var(--color-primary);
+  }
+
+  .home-hero__sub {
+    font-size: clamp(1.05rem, 2.5vw, 1.25rem);
+    line-height: 1.65;
+    color: var(--color-text);
+  }
+
+  .home-services {
+    padding: 4.5rem 1.5rem;
+  }
+
+  .home-services__inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+
+  .home-services__heading {
+    text-align: center;
+    font-size: clamp(1.5rem, 3.5vw, 2rem);
+    font-weight: 800;
+    color: var(--color-primary);
+    margin-bottom: 3rem;
+    letter-spacing: -0.02em;
+  }
+
+  .home-services__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+
+  .service-card {
+    display: flex;
+    flex-direction: column;
+    background: #ffffff;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 2rem 1.75rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .service-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(102, 76, 205, 0.1);
+  }
+
+  .service-card__title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    margin-bottom: 0.6rem;
+  }
+
+  .service-card__desc {
+    font-size: 0.95rem;
+    color: var(--color-text-light);
+    line-height: 1.6;
+    flex: 1;
+  }
+
+  .service-card__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin-top: 1.25rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--color-accent);
+  }
+
+  .service-card__link .material-icons-outlined {
+    font-size: 1rem;
+  }
+
+  @media (max-width: 768px) {
+    .home-services__grid {
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+    }
+
+    .home-hero {
+      padding: 3.5rem 1.25rem 3rem;
+    }
+
+    .home-services {
+      padding: 3rem 1.25rem;
+    }
+  }
+</style>

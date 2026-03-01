@@ -1,0 +1,81 @@
+---
+interface Props {
+  title: string;
+  description: string;
+}
+
+const { title, description } = Astro.props;
+---
+
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined"
+      rel="stylesheet"
+    />
+    <title>{title}</title>
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>
+
+<style is:global>
+  *,
+  *::before,
+  *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  :root {
+    --color-primary: #664CCD;
+    --color-primary-light: #8570D7;
+    --color-primary-bg: #E0DBF7;
+    --color-primary-dark: #061237;
+    --color-accent: #FE6F3A;
+    --color-accent-hover: #e55a2a;
+    --color-heading: #212121;
+    --color-bg: #ffffff;
+    --color-bg-alt: #F5FBFF;
+    --color-bg-alt-2: #F4F4F4;
+    --color-text: #293C5B;
+    --color-text-light: #64748b;
+    --color-border: #e2e8f0;
+    --font-family: 'Manrope', Inter, system-ui, sans-serif;
+    --max-width: 1120px;
+    --radius: 12px;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: var(--font-family);
+    color: var(--color-text);
+    background: var(--color-bg);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  img {
+    max-width: 100%;
+    display: block;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+</style>

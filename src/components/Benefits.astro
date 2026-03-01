@@ -1,0 +1,112 @@
+---
+interface Benefit {
+  icon: string;
+  title: string;
+  description: string;
+}
+
+interface Props {
+  benefits: Benefit[];
+}
+
+const { benefits } = Astro.props;
+---
+
+<section class="benefits">
+  <div class="benefits__inner">
+    <h2 class="benefits__heading">Perché scegliere Mediocredito Facile</h2>
+    <div class="benefits__grid">
+      {benefits.map((b) => (
+        <div class="benefit-card">
+          <div class="benefit-card__icon">
+            <span class="material-icons-outlined" aria-hidden="true">{b.icon}</span>
+          </div>
+          <h3 class="benefit-card__title">{b.title}</h3>
+          <p class="benefit-card__desc">{b.description}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .benefits {
+    padding: 4.5rem 1.5rem;
+    background: var(--color-bg-alt);
+  }
+
+  .benefits__inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+
+  .benefits__heading {
+    text-align: center;
+    font-size: clamp(1.5rem, 3.5vw, 2rem);
+    font-weight: 800;
+    color: var(--color-primary);
+    margin-bottom: 3rem;
+    letter-spacing: -0.02em;
+  }
+
+  .benefits__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+
+  .benefit-card {
+    background: #ffffff;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 2rem 1.75rem;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .benefit-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(102, 76, 205, 0.1);
+  }
+
+  .benefit-card__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--color-primary-bg);
+    color: var(--color-primary);
+    margin-bottom: 1.25rem;
+  }
+
+  .benefit-card__icon .material-icons-outlined {
+    font-size: 1.6rem;
+  }
+
+  .benefit-card__title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    margin-bottom: 0.6rem;
+  }
+
+  .benefit-card__desc {
+    font-size: 0.95rem;
+    color: var(--color-text-light);
+    line-height: 1.6;
+  }
+
+  @media (max-width: 768px) {
+    .benefits__grid {
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+    }
+
+    .benefits {
+      padding: 3rem 1.25rem;
+    }
+  }
+</style>

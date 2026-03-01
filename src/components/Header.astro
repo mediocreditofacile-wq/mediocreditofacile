@@ -1,0 +1,65 @@
+---
+
+---
+
+<header class="header">
+  <div class="header__inner">
+    <a href="/" class="header__logo" aria-label="Mediocredito Facile — Home">
+      <span class="header__logo-text">MEDIOCREDITO<strong>FACILE</strong></span>
+    </a>
+    <a href="tel:+393939957840" class="header__phone">
+      <span class="material-icons-outlined" aria-hidden="true">phone</span>
+      +39 393 995 7840
+    </a>
+  </div>
+</header>
+
+<style>
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--color-bg);
+    border-bottom: 1px solid var(--color-border);
+    backdrop-filter: blur(8px);
+  }
+
+  .header__inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 0.875rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .header__logo-text {
+    font-size: 1.25rem;
+    color: var(--color-primary);
+    letter-spacing: 0.04em;
+    font-weight: 700;
+  }
+
+  .header__logo-text strong {
+    color: var(--color-accent);
+    font-weight: 800;
+  }
+
+  .header__phone {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--color-primary);
+    transition: color 0.2s;
+  }
+
+  .header__phone:hover {
+    color: var(--color-accent);
+  }
+
+  .header__phone .material-icons-outlined {
+    font-size: 1.15rem;
+  }
+</style>
