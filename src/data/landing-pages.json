@@ -4,22 +4,22 @@
     "metaTitle": "Noleggio Operativo per Aziende | Mediocredito Facile",
     "metaDescription": "Scopri il noleggio operativo per la tua azienda: nessun anticipo, canone fisso, benefici fiscali immediati. Richiedi una consulenza gratuita.",
     "heroTitle": "Noleggio Operativo per la Tua Azienda",
-    "heroSubtitle": "Tecnologia, veicoli e attrezzature senza immobilizzare capitale. Canone fisso, deducibilit\u00e0 totale e zero pensieri.",
+    "heroSubtitle": "Tecnologia, veicoli e attrezzature senza immobilizzare capitale. Canone fisso, deducibilità totale e zero pensieri.",
     "benefits": [
       {
         "icon": "savings",
         "title": "Zero Anticipo",
-        "description": "Nessun investimento iniziale: inizi subito a utilizzare ci\u00f2 che ti serve con un canone mensile fisso e prevedibile."
+        "description": "Nessun investimento iniziale: inizi subito a utilizzare ciò che ti serve con un canone mensile fisso e prevedibile."
       },
       {
         "icon": "receipt",
         "title": "100% Deducibile",
-        "description": "Il canone di noleggio \u00e8 interamente deducibile dal reddito d\u2019impresa, riducendo il carico fiscale della tua azienda."
+        "description": "Il canone di noleggio è interamente deducibile dal reddito d'impresa, riducendo il carico fiscale della tua azienda."
       },
       {
         "icon": "speed",
         "title": "Attivazione Rapida",
-        "description": "Processo snello e veloce: dalla richiesta all\u2019attivazione in pochi giorni, senza burocrazia inutile."
+        "description": "Processo snello e veloce: dalla richiesta all'attivazione in pochi giorni, senza burocrazia inutile."
       }
     ]
   },
@@ -33,12 +33,12 @@
       {
         "icon": "settings",
         "title": "Beni Strumentali",
-        "description": "Macchinari, attrezzature, veicoli commerciali e tecnologia: tutto ci\u00f2 che serve alla tua produttivit\u00e0."
+        "description": "Macchinari, attrezzature, veicoli commerciali e tecnologia: tutto ciò che serve alla tua produttività."
       },
       {
         "icon": "handshake",
         "title": "Condizioni Negoziate",
-        "description": "Confrontiamo le offerte dei principali istituti per garantirti le condizioni pi\u00f9 vantaggiose sul mercato."
+        "description": "Confrontiamo le offerte dei principali istituti per garantirti le condizioni più vantaggiose sul mercato."
       },
       {
         "icon": "trending_up",
@@ -50,9 +50,9 @@
   {
     "slug": "finanziamenti-pmi",
     "metaTitle": "Finanziamenti per PMI | Mediocredito Facile",
-    "metaDescription": "Finanziamenti su misura per piccole e medie imprese: liquidit\u00e0, investimenti e crescita. Scopri la soluzione giusta per te.",
+    "metaDescription": "Finanziamenti su misura per piccole e medie imprese: liquidità, investimenti e crescita. Scopri la soluzione giusta per te.",
     "heroTitle": "Finanziamenti su Misura per la Tua Impresa",
-    "heroSubtitle": "Liquidit\u00e0 per crescere, investire e cogliere nuove opportunit\u00e0. Ti guidiamo verso la soluzione finanziaria ideale.",
+    "heroSubtitle": "Liquidità per crescere, investire e cogliere nuove opportunità. Ti guidiamo verso la soluzione finanziaria ideale.",
     "benefits": [
       {
         "icon": "account_balance",
@@ -67,7 +67,207 @@
       {
         "icon": "shield",
         "title": "Consulenza Dedicata",
-        "description": "Un consulente esperto ti segue in ogni fase, dalla richiesta all\u2019erogazione, senza costi nascosti."
+        "description": "Un consulente esperto ti segue in ogni fase, dalla richiesta all'erogazione, senza costi nascosti."
+      }
+    ]
+  },
+  {
+    "slug": "noleggio-fotovoltaico-zero-anticipo",
+    "metaTitle": "Fotovoltaico Aziendale Senza Anticipo | Mediocredito Facile",
+    "metaDescription": "Impianto fotovoltaico per la tua azienda con canone mensile fisso. Zero investimento iniziale, il risparmio in bolletta copre il canone dal primo mese.",
+    "heroTitle": "Fotovoltaico Aziendale Senza Anticipo",
+    "heroSubtitle": "Impianto fotovoltaico per la tua azienda con canone mensile fisso. Zero investimento iniziale, il risparmio in bolletta copre il canone dal primo mese.",
+    "ctaText": "Richiedi Preventivo Gratuito",
+    "benefits": [
+      {
+        "icon": "savings",
+        "title": "Zero anticipo",
+        "description": "Nessun esborso iniziale. Il canone mensile parte dal primo mese e si ripaga con il risparmio energetico."
+      },
+      {
+        "icon": "receipt",
+        "title": "Deducibilità 100%",
+        "description": "Il canone di noleggio è interamente deducibile come costo operativo. Vantaggio fiscale immediato."
+      },
+      {
+        "icon": "build",
+        "title": "Manutenzione inclusa",
+        "description": "Assistenza, manutenzione e assicurazione incluse nel canone. Nessun costo nascosto per tutta la durata."
+      }
+    ]
+  },
+  {
+    "slug": "noleggio-fotovoltaico-no-debito",
+    "metaTitle": "Fotovoltaico per PMI Senza Debiti in Bilancio | Mediocredito Facile",
+    "metaDescription": "Il noleggio operativo non è un finanziamento. Non appare in centrale rischi, non tocca i tuoi fidi bancari, non peggiora il rating.",
+    "heroTitle": "Fotovoltaico per PMI Senza Debiti in Bilancio",
+    "heroSubtitle": "Il noleggio operativo non è un finanziamento. Non appare in centrale rischi, non tocca i tuoi fidi bancari, non peggiora il rating.",
+    "ctaText": "Scopri Come Funziona",
+    "benefits": [
+      {
+        "icon": "account_balance_wallet",
+        "title": "Fuori bilancio",
+        "description": "Il noleggio operativo è un costo operativo (OPEX), non un debito. Il tuo bilancio resta pulito."
+      },
+      {
+        "icon": "verified",
+        "title": "Rating intatto",
+        "description": "Nessuna segnalazione in centrale rischi. Le tue linee di credito bancarie restano libere per il tuo business."
+      },
+      {
+        "icon": "lock",
+        "title": "Canone fisso e certo",
+        "description": "Sai esattamente quanto paghi ogni mese. Nessuna variazione, nessuna sorpresa per tutta la durata del contratto."
+      }
+    ]
+  },
+  {
+    "slug": "noleggio-fotovoltaico-canone-fisso",
+    "metaTitle": "Fotovoltaico a Canone Fisso: Zero Sorprese | Mediocredito Facile",
+    "metaDescription": "Basta business plan gonfiati e costi nascosti. Con il noleggio operativo il costo è certo: un canone mensile fisso con manutenzione e assicurazione incluse.",
+    "heroTitle": "Fotovoltaico a Canone Fisso: Zero Sorprese",
+    "heroSubtitle": "Basta business plan gonfiati e costi nascosti. Con il noleggio operativo il costo è certo: un canone mensile fisso con manutenzione e assicurazione incluse.",
+    "ctaText": "Calcola il Tuo Canone",
+    "benefits": [
+      {
+        "icon": "all_inclusive",
+        "title": "Canone tutto incluso",
+        "description": "Manutenzione ordinaria, straordinaria, assicurazione e assistenza tecnica. Tutto dentro il canone mensile."
+      },
+      {
+        "icon": "visibility",
+        "title": "Nessun costo nascosto",
+        "description": "Niente spese impreviste per inverter, sostituzione componenti o interventi tecnici. Il canone copre tutto."
+      },
+      {
+        "icon": "event",
+        "title": "Durata certa",
+        "description": "Contratto da 24 a 60 mesi. A scadenza scegli tu: riscatto, rinnovo o restituzione dell'impianto."
+      }
+    ]
+  },
+  {
+    "slug": "noleggio-fotovoltaico-senza-burocrazia",
+    "metaTitle": "Fotovoltaico Aziendale Senza Burocrazia | Mediocredito Facile",
+    "metaDescription": "Oltre il 50% degli impianti ispezionati perde incentivi per errori nelle pratiche. Col noleggio operativo il tuo costo è fisso, indipendentemente da bandi e incentivi.",
+    "heroTitle": "Fotovoltaico Aziendale Senza Burocrazia",
+    "heroSubtitle": "Oltre il 50% degli impianti ispezionati perde incentivi per errori nelle pratiche. Col noleggio operativo il tuo costo è fisso, indipendentemente da bandi e incentivi.",
+    "ctaText": "Parla con un Consulente",
+    "benefits": [
+      {
+        "icon": "task_alt",
+        "title": "Nessuna pratica GSE",
+        "description": "Il canone è fisso e non dipende dagli incentivi. Zero rischio di sanzioni o decurtazioni."
+      },
+      {
+        "icon": "eco",
+        "title": "Transizione 5.0 compatibile",
+        "description": "Vuoi combinare noleggio e credito d'imposta? Il nostro team agevolazioni ti segue in ogni passaggio."
+      },
+      {
+        "icon": "support_agent",
+        "title": "Tutto gestito da noi",
+        "description": "Dalla valutazione alla delibera, dalla documentazione all'attivazione. Un unico interlocutore per tutto il processo."
+      }
+    ]
+  },
+  {
+    "slug": "noleggio-fotovoltaico-breve-termine",
+    "metaTitle": "Fotovoltaico da 24 a 60 Mesi | Mediocredito Facile",
+    "metaDescription": "PPA e leasing bancario ti vincolano per 10-20 anni. Il noleggio operativo dura da 24 a 60 mesi. A fine contratto scegli tu cosa fare.",
+    "heroTitle": "Fotovoltaico da 24 a 60 Mesi, Non 20 Anni",
+    "heroSubtitle": "PPA e leasing bancario ti vincolano per 10-20 anni. Il noleggio operativo dura da 24 a 60 mesi. A fine contratto scegli tu cosa fare.",
+    "ctaText": "Richiedi Informazioni",
+    "benefits": [
+      {
+        "icon": "date_range",
+        "title": "Durata flessibile",
+        "description": "Scegli la durata più adatta: 24, 36, 48 o 60 mesi. Nessun vincolo ventennale."
+      },
+      {
+        "icon": "checklist",
+        "title": "Tre opzioni a scadenza",
+        "description": "Riscatta l'impianto a valore residuo, rinnova il contratto con tecnologia aggiornata, o restituisci senza costi."
+      },
+      {
+        "icon": "update",
+        "title": "Tecnologia aggiornata",
+        "description": "Con contratti più brevi puoi aggiornare l'impianto quando escono pannelli e inverter più efficienti."
+      }
+    ]
+  },
+  {
+    "slug": "noleggio-fotovoltaico-tetto-affitto",
+    "metaTitle": "Fotovoltaico Anche con Capannone in Affitto | Mediocredito Facile",
+    "metaDescription": "Il tetto non è tuo? Con il noleggio operativo l'impianto resta della società di noleggio. Serve solo un accordo col proprietario.",
+    "heroTitle": "Fotovoltaico Anche con Capannone in Affitto",
+    "heroSubtitle": "Il tetto non è tuo? Con il noleggio operativo l'impianto resta della società di noleggio. Serve solo un accordo col proprietario. Ti aiutiamo noi.",
+    "ctaText": "Verifica la Fattibilità",
+    "benefits": [
+      {
+        "icon": "home_work",
+        "title": "Impianto non tuo",
+        "description": "L'impianto è di proprietà della società di noleggio. Tu paghi il canone e usi l'energia. Nessun vincolo sul tetto."
+      },
+      {
+        "icon": "folder",
+        "title": "Documentazione gestita",
+        "description": "Ti aiutiamo con l'accordo col proprietario dell'immobile e il diritto di superficie. Zero complicazioni burocratiche."
+      },
+      {
+        "icon": "swap_horiz",
+        "title": "Trasferibile",
+        "description": "Se cambi sede, il contratto può essere gestito e trasferito. Nessun rischio di restare bloccato."
+      }
+    ]
+  },
+  {
+    "slug": "diventa-partner",
+    "metaTitle": "Diventa Partner | Mediocredito Facile",
+    "metaDescription": "Convenzionati gratuitamente. I tuoi clienti pagano un canone mensile, tu incassi l'intero importo alla delibera. Più vendite, zero rischio credito.",
+    "heroTitle": "Offri il Noleggio Operativo ai Tuoi Clienti",
+    "heroSubtitle": "Convenzionati gratuitamente. I tuoi clienti pagano un canone mensile, tu incassi l'intero importo alla delibera. Più vendite, zero rischio credito.",
+    "ctaText": "Diventa Partner",
+    "benefits": [
+      {
+        "icon": "payments",
+        "title": "Incasso immediato",
+        "description": "Alla delibera della pratica, fatturi l'intero importo alla società di noleggio. Nessuna attesa, nessuna rata da inseguire."
+      },
+      {
+        "icon": "card_giftcard",
+        "title": "Convenzione gratuita",
+        "description": "Non ci sono costi di attivazione né canoni mensili. Ti convenzionini una volta e usi il servizio quando serve."
+      },
+      {
+        "icon": "hub",
+        "title": "Più di 10 società",
+        "description": "Accesso a oltre 10 società di noleggio e leasing. Se una rifiuta, ne proviamo un'altra. Le probabilità di delibera aumentano."
+      }
+    ]
+  },
+  {
+    "slug": "finanza-veloce",
+    "metaTitle": "Finanzia il Tuo Investimento Aziendale | Mediocredito Facile",
+    "metaDescription": "Noleggio operativo, leasing e finanziamenti per la tua PMI. Confrontiamo oltre 10 società per trovare la soluzione migliore. Risposta in 48 ore.",
+    "heroTitle": "Finanzia il Tuo Investimento Aziendale",
+    "heroSubtitle": "Noleggio operativo, leasing e finanziamenti per la tua PMI. Confrontiamo oltre 10 società per trovare la soluzione migliore. Risposta in 48 ore.",
+    "ctaText": "Richiedi Preventivo",
+    "benefits": [
+      {
+        "icon": "compare_arrows",
+        "title": "Confronto multi-società",
+        "description": "Non ti affidi a un solo istituto. Confrontiamo le offerte di oltre 10 società per trovare condizioni e tassi migliori."
+      },
+      {
+        "icon": "schedule",
+        "title": "Risposta rapida",
+        "description": "Pre-valutazione in 24 ore, delibera entro 48. Niente settimane di attesa come con le banche tradizionali."
+      },
+      {
+        "icon": "person",
+        "title": "Un unico interlocutore",
+        "description": "Alberto ti segue dall'inizio alla fine. Una sola persona di riferimento per tutta la pratica."
       }
     ]
   }
