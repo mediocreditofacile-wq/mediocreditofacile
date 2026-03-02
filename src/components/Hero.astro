@@ -2,17 +2,20 @@
 interface Props {
   title: string;
   subtitle: string;
+  ctaText?: string;
+  backgroundImage?: string;
 }
 
-const { title, subtitle } = Astro.props;
+const { title, subtitle, ctaText = 'Richiedi Informazioni', backgroundImage } = Astro.props;
 ---
 
-<section class="hero">
+<section class:list={['hero', { 'hero--bg': backgroundImage }]} style={backgroundImage ? `background-image: url(${backgroundImage})` : undefined}>
+  {backgroundImage && <div class="hero__overlay" />}
   <div class="hero__inner">
     <h1 class="hero__title">{title}</h1>
     <p class="hero__subtitle">{subtitle}</p>
     <a href="#contatti" class="hero__cta">
-      Richiedi Informazioni
+      {ctaText}
       <span class="material-icons-outlined" aria-hidden="true">arrow_downward</span>
     </a>
   </div>
@@ -69,9 +72,41 @@ const { title, subtitle } = Astro.props;
     font-size: 1.15rem;
   }
 
+  /* Background image variant */
+  .hero--bg {
+    position: relative;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    padding: 6rem 1.5rem 5.5rem;
+  }
+
+  .hero__overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+  }
+
+  .hero--bg .hero__inner {
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero--bg .hero__title {
+    color: #ffffff;
+  }
+
+  .hero--bg .hero__subtitle {
+    color: rgba(255, 255, 255, 0.9);
+  }
+
   @media (max-width: 640px) {
     .hero {
       padding: 3.5rem 1.25rem 3rem;
+    }
+
+    .hero--bg {
+      padding: 4.5rem 1.25rem 4rem;
     }
   }
 </style>

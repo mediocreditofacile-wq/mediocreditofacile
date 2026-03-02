@@ -7,14 +7,18 @@ interface Benefit {
 
 interface Props {
   benefits: Benefit[];
+  image?: string;
 }
 
-const { benefits } = Astro.props;
+const { benefits, image } = Astro.props;
 ---
 
 <section class="benefits">
   <div class="benefits__inner">
     <h2 class="benefits__heading">Perché scegliere Mediocredito Facile</h2>
+    {image && (
+      <img src={image} alt="" class="benefits__image" loading="lazy" />
+    )}
     <div class="benefits__grid">
       {benefits.map((b) => (
         <div class="benefit-card">
@@ -26,6 +30,7 @@ const { benefits } = Astro.props;
         </div>
       ))}
     </div>
+    <p class="benefits__compare">Confrontiamo le offerte di oltre 10 società di noleggio per trovare la soluzione migliore per la tua azienda.</p>
   </div>
 </section>
 
@@ -47,6 +52,14 @@ const { benefits } = Astro.props;
     color: var(--color-primary);
     margin-bottom: 3rem;
     letter-spacing: -0.02em;
+  }
+
+  .benefits__image {
+    width: 100%;
+    max-height: 300px;
+    object-fit: cover;
+    border-radius: 12px;
+    margin-bottom: 2.5rem;
   }
 
   .benefits__grid {
@@ -97,6 +110,14 @@ const { benefits } = Astro.props;
     font-size: 0.95rem;
     color: var(--color-text-light);
     line-height: 1.6;
+  }
+
+  .benefits__compare {
+    text-align: center;
+    color: #293C5B;
+    font-size: 1.1rem;
+    margin-top: 2.5rem;
+    font-style: italic;
   }
 
   @media (max-width: 768px) {

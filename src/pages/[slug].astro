@@ -16,13 +16,14 @@ export function getStaticPaths() {
 }
 
 const { page } = Astro.props;
+const isFotovoltaico = page.slug.includes('fotovoltaico');
 ---
 
 <Layout title={page.metaTitle} description={page.metaDescription}>
-  <Header />
+  <Header minimal={true} />
   <main>
-    <Hero title={page.heroTitle} subtitle={page.heroSubtitle} />
-    <Benefits benefits={page.benefits} />
+    <Hero title={page.heroTitle} subtitle={page.heroSubtitle} ctaText={page.ctaText} backgroundImage={isFotovoltaico ? '/images/hero-fotovoltaico.png' : undefined} />
+    <Benefits benefits={page.benefits} image={isFotovoltaico ? '/images/pannelli-tetto.png' : undefined} />
     <HowItWorks />
     <ContactForm />
   </main>
