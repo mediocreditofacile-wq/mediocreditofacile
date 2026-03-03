@@ -1,0 +1,728 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<Layout
+  title="Diventa Partner Fornitore | Mediocredito Facile"
+  description="Convenzionati gratuitamente. I tuoi clienti pagano un canone mensile, tu incassi l'intero importo alla delibera. Più vendite, zero rischio credito."
+>
+  <Header minimal={true} />
+  <main>
+
+    <!-- HERO -->
+    <section class="dp-hero">
+      <div class="dp-hero__inner">
+        <span class="dp-hero__eyebrow">Diventa Partner Fornitore</span>
+        <h1 class="dp-hero__title">Trasforma i tuoi beni in canoni mensili. Vendi di più</h1>
+        <p class="dp-hero__sub">Mediocredito Facile ti attiva un canale dedicato e ti guida dalla simulazione alla liquidazione. Tu vendi, consegni, fatturi alla società di locazione.</p>
+        <a href="#form-top" class="dp-hero__cta">Registrati subito</a>
+        <p class="dp-hero__micro">Ti richiamiamo e ti attiviamo il canale partner.</p>
+      </div>
+    </section>
+
+    <!-- FORM TOP -->
+    <section class="dp-form" id="form-top">
+      <div class="dp-form__inner">
+        <form class="dp-form__form" action="https://hooks.zapier.com/hooks/catch/26268853/ul50ccv/" method="POST">
+          <input type="hidden" name="fonte" value="diventa-partner" />
+          <div class="dp-form__field">
+            <label for="dp-nome">Nome e Cognome</label>
+            <input type="text" id="dp-nome" name="nome" placeholder="Mario Rossi" required autocomplete="name" />
+          </div>
+          <div class="dp-form__field">
+            <label for="dp-cell">Cellulare</label>
+            <input type="tel" id="dp-cell" name="telefono" placeholder="+39 333 123 4567" required autocomplete="tel" />
+          </div>
+          <div class="dp-form__field">
+            <label for="dp-email">Email</label>
+            <input type="email" id="dp-email" name="email" placeholder="mario@azienda.it" required autocomplete="email" />
+          </div>
+          <div class="dp-form__field">
+            <label for="dp-exp">Come sei messo con il noleggio Operativo?</label>
+            <select id="dp-exp" name="esperienza" required>
+              <option value="" disabled selected>Seleziona...</option>
+              <option value="lo-conosco">Lo conosco già</option>
+              <option value="non-lo-conosco">Non lo conosco</option>
+              <option value="pratiche-respinte">Ho avuto pratiche respinte</option>
+            </select>
+          </div>
+          <button type="submit" class="dp-form__submit">Richiedi Attivazione</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- BENEFICI 4 CARD -->
+    <section class="dp-benefits">
+      <div class="dp-benefits__inner">
+        <div class="dp-benefits__grid">
+          <div class="dp-card">
+            <div class="dp-card__icon"><span class="material-icons-outlined" aria-hidden="true">storefront</span></div>
+            <h3 class="dp-card__title">Offri più soluzioni di noleggio</h3>
+            <p class="dp-card__desc">Proponi diverse soluzioni di canone di noleggio: dai 24 agli 84 mesi</p>
+          </div>
+          <div class="dp-card">
+            <div class="dp-card__icon"><span class="material-icons-outlined" aria-hidden="true">bolt</span></div>
+            <h3 class="dp-card__title">Genera preventivo e avvia la pratica in pochi click</h3>
+            <p class="dp-card__desc">Da simulazione a pratica in pochi step: carichi i dati, alleghi i documenti, invii la richiesta e prepari l'offerta.</p>
+          </div>
+          <div class="dp-card">
+            <div class="dp-card__icon"><span class="material-icons-outlined" aria-hidden="true">calculate</span></div>
+            <h3 class="dp-card__title">Calcola il canone in autonomia</h3>
+            <p class="dp-card__desc">Simulatore rapido: inserisci pochi dati e ottieni un range canone chiaro (durata, anticipo, servizi) per rispondere subito al cliente.</p>
+          </div>
+          <div class="dp-card">
+            <div class="dp-card__icon"><span class="material-icons-outlined" aria-hidden="true">monitoring</span></div>
+            <h3 class="dp-card__title">Monitora tutto fino alla decorrenza</h3>
+            <p class="dp-card__desc">Dashboard con stati chiari (valutazione → documenti → firma → decorrenza)</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VALUE PROPOSITION -->
+    <section class="dp-value">
+      <div class="dp-value__inner">
+        <p class="dp-value__eyebrow">Soluzioni smart per vendere di più: incassi subito, il cliente paga a canone.</p>
+        <h2 class="dp-value__title">Perché 3 rate quando puoi arrivare a 60?</h2>
+        <p class="dp-value__text">MediocreditoFacile trasforma ogni vendita in locazione operativa smart: tu incassi subito, i tuoi clienti privati o aziende pagano canoni 100% deducibili fino a 60 mesi, con assicurazione All-Risk inclusa. È semplice, sostenibile e pensato per far crescere il tuo business.</p>
+        <p class="dp-value__text">MediocreditoFacile supporta inoltre la tua attività: hai acquisti aziendali che preferisci gestire a noleggio? Desideri una linea di credito per i tuoi investimenti futuri o vuoi cedere beni recentemente acquistati per liberare capitale? Con MediocreditoFacile puoi mantenere i tuoi attuali fornitori e avere un mondo di opportunità a portata di click!</p>
+        <div class="dp-value__ctas">
+          <a href="#form-top" class="dp-btn dp-btn--accent">Registrati Gratis</a>
+          <a href="tel:+393939957840" class="dp-btn dp-btn--outline">Parla con un esperto</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- PERCHÉ TI CONVIENE -->
+    <section class="dp-why">
+      <div class="dp-why__inner">
+        <span class="dp-why__eyebrow">PERCHÉ TI CONVIENE</span>
+        <h2 class="dp-why__title">I vantaggi del noleggio operativo (per chi vende)</h2>
+        <p class="dp-why__intro">Tu proponi un canone. La società di locazione compra il bene da te. Tu fatturi a lei.</p>
+
+        <div class="dp-why__grid">
+          <div class="dp-why__item">
+            <span class="material-icons-outlined dp-why__icon" aria-hidden="true">speed</span>
+            <h3>Caricamento in 2 click e Delibera in 2 giorni</h3>
+            <p>Se la pratica è completa e ci sono tutti i documenti, l'esito può arrivare in 1–2 giorni lavorativi, così ti muovi subito con il cliente e incassi velocemente.</p>
+          </div>
+          <div class="dp-why__item">
+            <span class="material-icons-outlined dp-why__icon" aria-hidden="true">account_balance_wallet</span>
+            <h3>Il cliente paga l'uso, non immobilizza capitale</h3>
+            <p>La proprietà immobilizza capitale: l'utilizzo crea valore. Il canone libera risorse aziendali o permette utilizzo di strumenti altrimenti inaccessibili.</p>
+          </div>
+          <div class="dp-why__item">
+            <span class="material-icons-outlined dp-why__icon" aria-hidden="true">payments</span>
+            <h3>Pagamenti Veloci, Rischio Zero</h3>
+            <p>Non gestisci incassi rateali: ricevi rapidamente i pagamenti per ogni fornitura approvata. Riduci le attese, elimina il rischio insoluti e migliora la tua liquidità.</p>
+          </div>
+          <div class="dp-why__item">
+            <span class="material-icons-outlined dp-why__icon" aria-hidden="true">receipt</span>
+            <h3>Vantaggi fiscali e Servizi Inclusi</h3>
+            <p>Per molte aziende i canoni sono deducibili come costo, secondo regole fiscali. È una leva concreta che aiuta a chiudere. Come l'assicurazione all-risk e l'assistenza garantita.</p>
+          </div>
+          <div class="dp-why__item">
+            <span class="material-icons-outlined dp-why__icon" aria-hidden="true">savings</span>
+            <h3>Liquidità protetta</h3>
+            <p>Il cliente conserva cassa per scorte, marketing, personale e investimenti. Meno stress finanziario, più continuità operativa.</p>
+          </div>
+          <div class="dp-why__item">
+            <span class="material-icons-outlined dp-why__icon" aria-hidden="true">autorenew</span>
+            <h3>Fine contratto = nuova opportunità</h3>
+            <p>A fine contratto puoi riacquistare, rivendere (anche con mark-up) o gestire un usato. Risultato: più fidelizzazione e ricavi.</p>
+          </div>
+        </div>
+
+        <div class="dp-why__cta-wrap">
+          <a href="#form-top" class="dp-btn dp-btn--accent">Inizia Subito</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- SOLUZIONI / TABS -->
+    <section class="dp-solutions">
+      <div class="dp-solutions__inner">
+        <h2 class="dp-solutions__title">Il Noleggio Operativo è molto più di uno strumento di vendita</h2>
+
+        <div class="dp-tabs" id="dp-tabs">
+          <div class="dp-tabs__nav">
+            <button class="dp-tabs__btn active" data-tab="smart">Noleggio Smart</button>
+            <button class="dp-tabs__btn" data-tab="selfrent">Self Rent</button>
+            <button class="dp-tabs__btn" data-tab="leaseback">Lease Back</button>
+            <button class="dp-tabs__btn" data-tab="masterrent">Master Rent</button>
+          </div>
+
+          <div class="dp-tabs__panel active" data-panel="smart">
+            <h3>Il Noleggio Operativo Smart</h3>
+            <p>Trasforma ogni vendita in un canone mensile per il tuo cliente. Tu incassi subito dalla società di locazione, il cliente paga rate deducibili fino a 60 mesi con assicurazione All-Risk inclusa. Mediocredito Facile gestisce tutto: dalla simulazione alla decorrenza.</p>
+          </div>
+          <div class="dp-tabs__panel" data-panel="selfrent">
+            <h3>Self Rent — Noleggio per la tua azienda</h3>
+            <p>Devi acquistare attrezzature dai tuoi fornitori? Con SelfRent trasformi l'acquisto in noleggio operativo: canoni programmati, All-Risk nel canone e liquidità preservata. Mediocredito Facile ti guida su pratica e documenti, dall'avvio alla decorrenza.</p>
+          </div>
+          <div class="dp-tabs__panel" data-panel="leaseback">
+            <h3>Lease Back — Liquidità per la tua azienda</h3>
+            <p>Hai attrezzature a libro cespiti? Con LeaseBack cedi il bene e ottieni liquidità immediata, continuando a usarlo pagando un canone. Mediocredito Facile ti aiuta a trasformare un investimento già fatto in capitale per crescita e progetti urgenti.</p>
+          </div>
+          <div class="dp-tabs__panel" data-panel="masterrent">
+            <h3>Master Rent — Plafond dedicato valido 12 mesi</h3>
+            <p>Apri un plafond dedicato da utilizzare nei prossimi 12 mesi: ogni volta che vendi, trasformi l'ordine in noleggio in modo più rapido e ordinato, senza ripartire da zero. Le richieste sono già pre-approvate e il tuo cliente può pianificare gli investimenti con te.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FORM BOTTOM -->
+    <section class="dp-form dp-form--bottom" id="contatti">
+      <div class="dp-form__inner">
+        <h2 class="dp-form__heading">Attiva il tuo canale partner</h2>
+        <p class="dp-form__sub">Compila il modulo e ti ricontatteremo entro 24 ore lavorative.</p>
+        <form class="dp-form__form" action="https://hooks.zapier.com/hooks/catch/26268853/ul50ccv/" method="POST">
+          <input type="hidden" name="fonte" value="diventa-partner" />
+          <div class="dp-form__field">
+            <label for="dp-nome2">Nome e Cognome</label>
+            <input type="text" id="dp-nome2" name="nome" placeholder="Mario Rossi" required autocomplete="name" />
+          </div>
+          <div class="dp-form__field">
+            <label for="dp-cell2">Cellulare</label>
+            <input type="tel" id="dp-cell2" name="telefono" placeholder="+39 333 123 4567" required autocomplete="tel" />
+          </div>
+          <div class="dp-form__field">
+            <label for="dp-email2">Email</label>
+            <input type="email" id="dp-email2" name="email" placeholder="mario@azienda.it" required autocomplete="email" />
+          </div>
+          <div class="dp-form__field">
+            <label for="dp-exp2">Come sei messo con il noleggio Operativo?</label>
+            <select id="dp-exp2" name="esperienza" required>
+              <option value="" disabled selected>Seleziona...</option>
+              <option value="lo-conosco">Lo conosco già</option>
+              <option value="non-lo-conosco">Non lo conosco</option>
+              <option value="pratiche-respinte">Ho avuto pratiche respinte</option>
+            </select>
+          </div>
+          <button type="submit" class="dp-form__submit">Richiedi Attivazione</button>
+          <p class="dp-form__privacy">Inviando il modulo accetti la nostra <a href="/privacy">informativa sulla privacy</a>.</p>
+        </form>
+      </div>
+    </section>
+
+  </main>
+  <Footer />
+</Layout>
+
+<script>
+  const btns = document.querySelectorAll('.dp-tabs__btn');
+  const panels = document.querySelectorAll('.dp-tabs__panel');
+
+  btns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const tab = btn.getAttribute('data-tab');
+      btns.forEach((b) => b.classList.remove('active'));
+      panels.forEach((p) => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelector(`[data-panel="${tab}"]`)?.classList.add('active');
+    });
+  });
+</script>
+
+<style>
+  /* HERO */
+  .dp-hero {
+    background: linear-gradient(135deg, #1a0a3e 0%, #2d1b69 50%, #664CCD 100%);
+    color: #fff;
+    padding: 5rem 1.5rem 4rem;
+    text-align: center;
+  }
+
+  .dp-hero__inner {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  .dp-hero__eyebrow {
+    display: inline-block;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-accent);
+    margin-bottom: 1.25rem;
+  }
+
+  .dp-hero__title {
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    margin-bottom: 1.25rem;
+  }
+
+  .dp-hero__sub {
+    font-size: clamp(1rem, 2.5vw, 1.2rem);
+    line-height: 1.65;
+    color: rgba(255, 255, 255, 0.85);
+    margin-bottom: 2rem;
+  }
+
+  .dp-hero__cta {
+    display: inline-flex;
+    align-items: center;
+    background: var(--color-accent);
+    color: #fff;
+    font-weight: 700;
+    font-size: 1.1rem;
+    padding: 1rem 2.5rem;
+    border-radius: 8px;
+    transition: background 0.2s, transform 0.15s;
+  }
+
+  .dp-hero__cta:hover {
+    background: var(--color-accent-hover);
+    transform: translateY(-1px);
+  }
+
+  .dp-hero__micro {
+    margin-top: 0.75rem;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  /* FORM */
+  .dp-form {
+    padding: 3.5rem 1.5rem;
+    background: var(--color-bg-alt);
+  }
+
+  .dp-form--bottom {
+    background: var(--color-bg);
+  }
+
+  .dp-form__inner {
+    max-width: 520px;
+    margin: 0 auto;
+  }
+
+  .dp-form__heading {
+    text-align: center;
+    font-size: clamp(1.5rem, 3.5vw, 2rem);
+    font-weight: 800;
+    color: var(--color-primary);
+    margin-bottom: 0.5rem;
+  }
+
+  .dp-form__sub {
+    text-align: center;
+    color: var(--color-text-light);
+    margin-bottom: 2rem;
+    font-size: 1rem;
+  }
+
+  .dp-form__form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+  }
+
+  .dp-form__field label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-primary);
+    margin-bottom: 0.35rem;
+  }
+
+  .dp-form__field input,
+  .dp-form__field select {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border: 1.5px solid var(--color-border);
+    border-radius: 8px;
+    font-family: var(--font-family);
+    font-size: 1rem;
+    color: var(--color-text);
+    background: #fff;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .dp-form__field input:focus,
+  .dp-form__field select:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(102, 76, 205, 0.15);
+  }
+
+  .dp-form__submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-accent);
+    color: #fff;
+    font-family: var(--font-family);
+    font-weight: 700;
+    font-size: 1.05rem;
+    padding: 0.9rem 2rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    margin-top: 0.5rem;
+  }
+
+  .dp-form__submit:hover {
+    background: var(--color-accent-hover);
+    transform: translateY(-1px);
+  }
+
+  .dp-form__privacy {
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--color-text-light);
+    margin-top: 0.25rem;
+  }
+
+  .dp-form__privacy a {
+    color: var(--color-primary);
+    text-decoration: underline;
+  }
+
+  /* BENEFITS 4 CARD */
+  .dp-benefits {
+    padding: 4.5rem 1.5rem;
+    background: var(--color-bg);
+  }
+
+  .dp-benefits__inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+
+  .dp-benefits__grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+  }
+
+  .dp-card {
+    background: #fff;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 2rem 1.5rem;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .dp-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(102, 76, 205, 0.1);
+  }
+
+  .dp-card__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--color-primary-bg);
+    color: var(--color-primary);
+    margin-bottom: 1rem;
+  }
+
+  .dp-card__icon .material-icons-outlined {
+    font-size: 1.6rem;
+  }
+
+  .dp-card__title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    margin-bottom: 0.5rem;
+  }
+
+  .dp-card__desc {
+    font-size: 0.9rem;
+    color: var(--color-text-light);
+    line-height: 1.6;
+  }
+
+  /* VALUE PROPOSITION */
+  .dp-value {
+    padding: 4.5rem 1.5rem;
+    background: var(--color-bg-alt);
+  }
+
+  .dp-value__inner {
+    max-width: 760px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .dp-value__eyebrow {
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--color-accent);
+    margin-bottom: 1rem;
+  }
+
+  .dp-value__title {
+    font-size: clamp(1.5rem, 3.5vw, 2.2rem);
+    font-weight: 800;
+    color: var(--color-primary);
+    margin-bottom: 1.5rem;
+    letter-spacing: -0.02em;
+  }
+
+  .dp-value__text {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: var(--color-text);
+    margin-bottom: 1rem;
+    text-align: left;
+  }
+
+  .dp-value__ctas {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+  }
+
+  /* SHARED BUTTONS */
+  .dp-btn {
+    display: inline-flex;
+    align-items: center;
+    font-weight: 700;
+    font-size: 1rem;
+    padding: 0.85rem 2rem;
+    border-radius: 8px;
+    transition: background 0.2s, transform 0.15s;
+  }
+
+  .dp-btn:hover {
+    transform: translateY(-1px);
+  }
+
+  .dp-btn--accent {
+    background: var(--color-accent);
+    color: #fff;
+  }
+
+  .dp-btn--accent:hover {
+    background: var(--color-accent-hover);
+  }
+
+  .dp-btn--outline {
+    background: transparent;
+    color: var(--color-primary);
+    border: 2px solid var(--color-primary);
+  }
+
+  .dp-btn--outline:hover {
+    background: var(--color-primary-bg);
+  }
+
+  /* PERCHÉ TI CONVIENE */
+  .dp-why {
+    padding: 4.5rem 1.5rem;
+    background: var(--color-bg);
+  }
+
+  .dp-why__inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+
+  .dp-why__eyebrow {
+    display: block;
+    text-align: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--color-accent);
+    margin-bottom: 0.75rem;
+  }
+
+  .dp-why__title {
+    text-align: center;
+    font-size: clamp(1.5rem, 3.5vw, 2rem);
+    font-weight: 800;
+    color: var(--color-primary);
+    margin-bottom: 1rem;
+    letter-spacing: -0.02em;
+  }
+
+  .dp-why__intro {
+    text-align: center;
+    font-size: 1.05rem;
+    color: var(--color-text);
+    margin-bottom: 3rem;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .dp-why__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+
+  .dp-why__item {
+    padding: 1.5rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--color-border);
+    background: #fff;
+  }
+
+  .dp-why__icon {
+    font-size: 1.5rem;
+    color: var(--color-accent);
+    margin-bottom: 0.75rem;
+    display: block;
+  }
+
+  .dp-why__item h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    margin-bottom: 0.5rem;
+  }
+
+  .dp-why__item p {
+    font-size: 0.9rem;
+    color: var(--color-text-light);
+    line-height: 1.6;
+  }
+
+  .dp-why__cta-wrap {
+    text-align: center;
+    margin-top: 2.5rem;
+  }
+
+  /* SOLUTIONS / TABS */
+  .dp-solutions {
+    padding: 4.5rem 1.5rem;
+    background: var(--color-bg-alt);
+  }
+
+  .dp-solutions__inner {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .dp-solutions__title {
+    text-align: center;
+    font-size: clamp(1.5rem, 3.5vw, 2rem);
+    font-weight: 800;
+    color: var(--color-primary);
+    margin-bottom: 2.5rem;
+    letter-spacing: -0.02em;
+  }
+
+  .dp-tabs__nav {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+  }
+
+  .dp-tabs__btn {
+    background: #fff;
+    border: 1.5px solid var(--color-border);
+    border-radius: 8px;
+    padding: 0.65rem 1.25rem;
+    font-family: var(--font-family);
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--color-text);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .dp-tabs__btn:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+
+  .dp-tabs__btn.active {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: #fff;
+  }
+
+  .dp-tabs__panel {
+    display: none;
+    background: #fff;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 2.5rem 2rem;
+  }
+
+  .dp-tabs__panel.active {
+    display: block;
+  }
+
+  .dp-tabs__panel h3 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    margin-bottom: 1rem;
+  }
+
+  .dp-tabs__panel p {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: var(--color-text);
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 960px) {
+    .dp-benefits__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .dp-why__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .dp-hero {
+      padding: 3.5rem 1.25rem 3rem;
+    }
+
+    .dp-benefits__grid {
+      grid-template-columns: 1fr;
+    }
+
+    .dp-why__grid {
+      grid-template-columns: 1fr;
+    }
+
+    .dp-form {
+      padding: 2.5rem 1.25rem;
+    }
+
+    .dp-value,
+    .dp-why,
+    .dp-solutions,
+    .dp-benefits {
+      padding: 3rem 1.25rem;
+    }
+
+    .dp-tabs__nav {
+      flex-direction: column;
+    }
+
+    .dp-tabs__panel {
+      padding: 1.5rem 1.25rem;
+    }
+  }
+</style>

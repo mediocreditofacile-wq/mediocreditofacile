@@ -1,0 +1,732 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<Layout
+  title="Noleggio Operativo per Aziende | Mediocredito Facile"
+  description="Tecnologia, veicoli e attrezzature senza immobilizzare capitale. Canone fisso, deducibilità totale e zero pensieri. Richiedi una consulenza gratuita."
+>
+  <Header minimal={true} />
+  <main>
+
+    <!-- HERO -->
+    <section class="no-hero">
+      <div class="no-hero__inner">
+        <span class="no-hero__eyebrow">Noleggio Operativo per Aziende</span>
+        <h1 class="no-hero__title">Usa ciò che ti serve, paga solo un canone mensile</h1>
+        <p class="no-hero__sub">Tecnologia, veicoli, attrezzature e macchinari senza immobilizzare capitale. Canone fisso, 100% deducibile, manutenzione e assicurazione incluse.</p>
+        <a href="#form-top" class="no-hero__cta">Richiedi Preventivo Gratuito</a>
+        <p class="no-hero__micro">Risposta entro 24 ore. Nessun impegno.</p>
+      </div>
+    </section>
+
+    <!-- FORM TOP -->
+    <section class="no-form" id="form-top">
+      <div class="no-form__inner">
+        <form class="no-form__form" action="https://hooks.zapier.com/hooks/catch/26268853/ul50ccv/" method="POST">
+          <input type="hidden" name="fonte" value="noleggio-operativo" />
+          <div class="no-form__field">
+            <label for="no-nome">Nome e Cognome</label>
+            <input type="text" id="no-nome" name="nome" placeholder="Mario Rossi" required autocomplete="name" />
+          </div>
+          <div class="no-form__field">
+            <label for="no-cell">Cellulare</label>
+            <input type="tel" id="no-cell" name="telefono" placeholder="+39 333 123 4567" required autocomplete="tel" />
+          </div>
+          <div class="no-form__field">
+            <label for="no-email">Email</label>
+            <input type="email" id="no-email" name="email" placeholder="mario@azienda.it" required autocomplete="email" />
+          </div>
+          <div class="no-form__field">
+            <label for="no-need">Di cosa hai bisogno?</label>
+            <select id="no-need" name="esigenza" required>
+              <option value="" disabled selected>Seleziona...</option>
+              <option value="tecnologia">Tecnologia e IT</option>
+              <option value="veicoli">Veicoli commerciali</option>
+              <option value="attrezzature">Attrezzature e macchinari</option>
+              <option value="fotovoltaico">Impianto fotovoltaico</option>
+              <option value="altro">Altro</option>
+            </select>
+          </div>
+          <button type="submit" class="no-form__submit">Richiedi Preventivo Gratuito</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- BENEFICI 4 CARD -->
+    <section class="no-benefits">
+      <div class="no-benefits__inner">
+        <div class="no-benefits__grid">
+          <div class="no-card">
+            <div class="no-card__icon"><span class="material-icons-outlined" aria-hidden="true">savings</span></div>
+            <h3 class="no-card__title">Zero anticipo, canone fisso</h3>
+            <p class="no-card__desc">Nessun investimento iniziale. Inizi subito a utilizzare ciò che ti serve con un canone mensile fisso e prevedibile.</p>
+          </div>
+          <div class="no-card">
+            <div class="no-card__icon"><span class="material-icons-outlined" aria-hidden="true">receipt</span></div>
+            <h3 class="no-card__title">100% deducibile fiscalmente</h3>
+            <p class="no-card__desc">Il canone di noleggio è interamente deducibile dal reddito d'impresa, riducendo il carico fiscale della tua azienda.</p>
+          </div>
+          <div class="no-card">
+            <div class="no-card__icon"><span class="material-icons-outlined" aria-hidden="true">verified_user</span></div>
+            <h3 class="no-card__title">Assicurazione All-Risk inclusa</h3>
+            <p class="no-card__desc">Copertura completa contro furto, incendio, danni accidentali e guasti. Tutto già incluso nel canone mensile.</p>
+          </div>
+          <div class="no-card">
+            <div class="no-card__icon"><span class="material-icons-outlined" aria-hidden="true">build</span></div>
+            <h3 class="no-card__title">Manutenzione inclusa</h3>
+            <p class="no-card__desc">Assistenza tecnica, manutenzione ordinaria e straordinaria incluse. Nessun costo imprevisto per tutta la durata.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VALUE PROPOSITION -->
+    <section class="no-value">
+      <div class="no-value__inner">
+        <p class="no-value__eyebrow">La soluzione intelligente per la tua azienda</p>
+        <h2 class="no-value__title">Perché pagare tutto subito quando puoi noleggiare?</h2>
+        <p class="no-value__text">Con il noleggio operativo usi ciò che ti serve senza comprarlo. Paghi un canone mensile fisso e prevedibile che include tutto: assicurazione, manutenzione e assistenza. Il bene non entra nel tuo bilancio come debito, le tue linee di credito bancarie restano libere e il canone è 100% deducibile.</p>
+        <p class="no-value__text">Mediocredito Facile confronta le offerte di oltre 10 società di noleggio per trovare le condizioni migliori per te. Un unico interlocutore, dalla richiesta alla consegna del bene. Risposta in 24 ore, attivazione rapida, zero burocrazia.</p>
+        <div class="no-value__ctas">
+          <a href="#form-top" class="no-btn no-btn--accent">Richiedi Preventivo</a>
+          <a href="tel:+393939957840" class="no-btn no-btn--outline">Parla con un Consulente</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- PERCHÉ TI CONVIENE -->
+    <section class="no-why">
+      <div class="no-why__inner">
+        <span class="no-why__eyebrow">PERCHÉ TI CONVIENE</span>
+        <h2 class="no-why__title">I vantaggi del noleggio operativo per la tua azienda</h2>
+        <p class="no-why__intro">Usa ciò che ti serve, paga solo l'utilizzo. Senza debiti, senza sorprese.</p>
+
+        <div class="no-why__grid">
+          <div class="no-why__item">
+            <span class="material-icons-outlined no-why__icon" aria-hidden="true">account_balance_wallet</span>
+            <h3>Nessun debito in bilancio</h3>
+            <p>Il noleggio è un costo operativo (OPEX), non un finanziamento. Non appare in centrale rischi e non peggiora il tuo rating bancario.</p>
+          </div>
+          <div class="no-why__item">
+            <span class="material-icons-outlined no-why__icon" aria-hidden="true">speed</span>
+            <h3>Attivazione in pochi giorni</h3>
+            <p>Processo snello: dalla richiesta alla delibera in 24-48 ore. Niente settimane di attesa come con le banche tradizionali.</p>
+          </div>
+          <div class="no-why__item">
+            <span class="material-icons-outlined no-why__icon" aria-hidden="true">lock</span>
+            <h3>Canone fisso e certo</h3>
+            <p>Sai esattamente quanto paghi ogni mese per tutta la durata del contratto. Nessuna variazione, nessuna sorpresa.</p>
+          </div>
+          <div class="no-why__item">
+            <span class="material-icons-outlined no-why__icon" aria-hidden="true">receipt</span>
+            <h3>Vantaggi fiscali immediati</h3>
+            <p>Il canone è interamente deducibile come costo d'esercizio. Un vantaggio fiscale concreto che riduce l'imponibile della tua azienda.</p>
+          </div>
+          <div class="no-why__item">
+            <span class="material-icons-outlined no-why__icon" aria-hidden="true">savings</span>
+            <h3>Liquidità protetta</h3>
+            <p>Non immobilizzi capitale. Le tue risorse restano disponibili per scorte, personale, marketing e investimenti strategici.</p>
+          </div>
+          <div class="no-why__item">
+            <span class="material-icons-outlined no-why__icon" aria-hidden="true">autorenew</span>
+            <h3>Flessibilità a fine contratto</h3>
+            <p>A scadenza scegli tu: riscatta il bene a prezzo concordato, rinnova con tecnologia aggiornata, o restituisci senza costi.</p>
+          </div>
+        </div>
+
+        <div class="no-why__cta-wrap">
+          <a href="#form-top" class="no-btn no-btn--accent">Inizia Subito</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- SOLUZIONI / TABS -->
+    <section class="no-solutions">
+      <div class="no-solutions__inner">
+        <h2 class="no-solutions__title">Cosa puoi noleggiare con Mediocredito Facile</h2>
+
+        <div class="no-tabs" id="no-tabs">
+          <div class="no-tabs__nav">
+            <button class="no-tabs__btn active" data-tab="tech">Tecnologia e IT</button>
+            <button class="no-tabs__btn" data-tab="veicoli">Veicoli</button>
+            <button class="no-tabs__btn" data-tab="attrezzature">Attrezzature</button>
+            <button class="no-tabs__btn" data-tab="fotovoltaico">Fotovoltaico</button>
+          </div>
+
+          <div class="no-tabs__panel active" data-panel="tech">
+            <h3>Tecnologia e IT</h3>
+            <p>Computer, server, stampanti, monitor, centralini VoIP, tablet e dispositivi per il tuo team. Resta sempre aggiornato senza investimenti iniziali: a fine contratto puoi riscattare o rinnovare con l'ultima tecnologia. Canone fisso, assistenza e assicurazione All-Risk incluse.</p>
+          </div>
+          <div class="no-tabs__panel" data-panel="veicoli">
+            <h3>Veicoli Commerciali e Aziendali</h3>
+            <p>Furgoni, auto aziendali, veicoli commerciali e flotte. Noleggio operativo con manutenzione programmata, assicurazione e assistenza stradale incluse nel canone. Nessun anticipo, nessuna sorpresa. Ideale per chi ha bisogno di mobilità senza vincolare capitale.</p>
+          </div>
+          <div class="no-tabs__panel" data-panel="attrezzature">
+            <h3>Attrezzature e Macchinari</h3>
+            <p>Macchinari industriali, attrezzature da officina, apparecchiature medicali, arredamento professionale e molto altro. Trasforma un investimento in un costo operativo deducibile. Mediocredito Facile trova la società di noleggio con le condizioni migliori per il tuo settore.</p>
+          </div>
+          <div class="no-tabs__panel" data-panel="fotovoltaico">
+            <h3>Impianti Fotovoltaici</h3>
+            <p>Impianto fotovoltaico per la tua azienda a canone fisso. Zero anticipo, manutenzione e assicurazione incluse. Il risparmio in bolletta copre il canone dal primo mese. Anche se il tetto è in affitto. Da 24 a 60 mesi, a fine contratto scegli tu.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FORM BOTTOM -->
+    <section class="no-form no-form--bottom" id="contatti">
+      <div class="no-form__inner">
+        <h2 class="no-form__heading">Richiedi il tuo preventivo gratuito</h2>
+        <p class="no-form__sub">Compila il modulo e ti ricontatteremo entro 24 ore lavorative.</p>
+        <form class="no-form__form" action="https://hooks.zapier.com/hooks/catch/26268853/ul50ccv/" method="POST">
+          <input type="hidden" name="fonte" value="noleggio-operativo" />
+          <div class="no-form__field">
+            <label for="no-nome2">Nome e Cognome</label>
+            <input type="text" id="no-nome2" name="nome" placeholder="Mario Rossi" required autocomplete="name" />
+          </div>
+          <div class="no-form__field">
+            <label for="no-cell2">Cellulare</label>
+            <input type="tel" id="no-cell2" name="telefono" placeholder="+39 333 123 4567" required autocomplete="tel" />
+          </div>
+          <div class="no-form__field">
+            <label for="no-email2">Email</label>
+            <input type="email" id="no-email2" name="email" placeholder="mario@azienda.it" required autocomplete="email" />
+          </div>
+          <div class="no-form__field">
+            <label for="no-need2">Di cosa hai bisogno?</label>
+            <select id="no-need2" name="esigenza" required>
+              <option value="" disabled selected>Seleziona...</option>
+              <option value="tecnologia">Tecnologia e IT</option>
+              <option value="veicoli">Veicoli commerciali</option>
+              <option value="attrezzature">Attrezzature e macchinari</option>
+              <option value="fotovoltaico">Impianto fotovoltaico</option>
+              <option value="altro">Altro</option>
+            </select>
+          </div>
+          <button type="submit" class="no-form__submit">Richiedi Preventivo Gratuito</button>
+          <p class="no-form__privacy">Inviando il modulo accetti la nostra <a href="/privacy">informativa sulla privacy</a>.</p>
+        </form>
+      </div>
+    </section>
+
+  </main>
+  <Footer />
+</Layout>
+
+<script>
+  const btns = document.querySelectorAll('.no-tabs__btn');
+  const panels = document.querySelectorAll('.no-tabs__panel');
+
+  btns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const tab = btn.getAttribute('data-tab');
+      btns.forEach((b) => b.classList.remove('active'));
+      panels.forEach((p) => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelector(`[data-panel="${tab}"]`)?.classList.add('active');
+    });
+  });
+</script>
+
+<style>
+  /* HERO */
+  .no-hero {
+    background: linear-gradient(135deg, #1a0a3e 0%, #2d1b69 50%, #664CCD 100%);
+    color: #fff;
+    padding: 5rem 1.5rem 4rem;
+    text-align: center;
+  }
+
+  .no-hero__inner {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  .no-hero__eyebrow {
+    display: inline-block;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-accent);
+    margin-bottom: 1.25rem;
+  }
+
+  .no-hero__title {
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    margin-bottom: 1.25rem;
+  }
+
+  .no-hero__sub {
+    font-size: clamp(1rem, 2.5vw, 1.2rem);
+    line-height: 1.65;
+    color: rgba(255, 255, 255, 0.85);
+    margin-bottom: 2rem;
+  }
+
+  .no-hero__cta {
+    display: inline-flex;
+    align-items: center;
+    background: var(--color-accent);
+    color: #fff;
+    font-weight: 700;
+    font-size: 1.1rem;
+    padding: 1rem 2.5rem;
+    border-radius: 8px;
+    transition: background 0.2s, transform 0.15s;
+  }
+
+  .no-hero__cta:hover {
+    background: var(--color-accent-hover);
+    transform: translateY(-1px);
+  }
+
+  .no-hero__micro {
+    margin-top: 0.75rem;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  /* FORM */
+  .no-form {
+    padding: 3.5rem 1.5rem;
+    background: var(--color-bg-alt);
+  }
+
+  .no-form--bottom {
+    background: var(--color-bg);
+  }
+
+  .no-form__inner {
+    max-width: 520px;
+    margin: 0 auto;
+  }
+
+  .no-form__heading {
+    text-align: center;
+    font-size: clamp(1.5rem, 3.5vw, 2rem);
+    font-weight: 800;
+    color: var(--color-primary);
+    margin-bottom: 0.5rem;
+  }
+
+  .no-form__sub {
+    text-align: center;
+    color: var(--color-text-light);
+    margin-bottom: 2rem;
+    font-size: 1rem;
+  }
+
+  .no-form__form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+  }
+
+  .no-form__field label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-primary);
+    margin-bottom: 0.35rem;
+  }
+
+  .no-form__field input,
+  .no-form__field select {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border: 1.5px solid var(--color-border);
+    border-radius: 8px;
+    font-family: var(--font-family);
+    font-size: 1rem;
+    color: var(--color-text);
+    background: #fff;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .no-form__field input:focus,
+  .no-form__field select:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(102, 76, 205, 0.15);
+  }
+
+  .no-form__submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-accent);
+    color: #fff;
+    font-family: var(--font-family);
+    font-weight: 700;
+    font-size: 1.05rem;
+    padding: 0.9rem 2rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    margin-top: 0.5rem;
+  }
+
+  .no-form__submit:hover {
+    background: var(--color-accent-hover);
+    transform: translateY(-1px);
+  }
+
+  .no-form__privacy {
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--color-text-light);
+    margin-top: 0.25rem;
+  }
+
+  .no-form__privacy a {
+    color: var(--color-primary);
+    text-decoration: underline;
+  }
+
+  /* BENEFITS 4 CARD */
+  .no-benefits {
+    padding: 4.5rem 1.5rem;
+    background: var(--color-bg);
+  }
+
+  .no-benefits__inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+
+  .no-benefits__grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+  }
+
+  .no-card {
+    background: #fff;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 2rem 1.5rem;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .no-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(102, 76, 205, 0.1);
+  }
+
+  .no-card__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--color-primary-bg);
+    color: var(--color-primary);
+    margin-bottom: 1rem;
+  }
+
+  .no-card__icon .material-icons-outlined {
+    font-size: 1.6rem;
+  }
+
+  .no-card__title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    margin-bottom: 0.5rem;
+  }
+
+  .no-card__desc {
+    font-size: 0.9rem;
+    color: var(--color-text-light);
+    line-height: 1.6;
+  }
+
+  /* VALUE PROPOSITION */
+  .no-value {
+    padding: 4.5rem 1.5rem;
+    background: var(--color-bg-alt);
+  }
+
+  .no-value__inner {
+    max-width: 760px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .no-value__eyebrow {
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--color-accent);
+    margin-bottom: 1rem;
+  }
+
+  .no-value__title {
+    font-size: clamp(1.5rem, 3.5vw, 2.2rem);
+    font-weight: 800;
+    color: var(--color-primary);
+    margin-bottom: 1.5rem;
+    letter-spacing: -0.02em;
+  }
+
+  .no-value__text {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: var(--color-text);
+    margin-bottom: 1rem;
+    text-align: left;
+  }
+
+  .no-value__ctas {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+  }
+
+  /* SHARED BUTTONS */
+  .no-btn {
+    display: inline-flex;
+    align-items: center;
+    font-weight: 700;
+    font-size: 1rem;
+    padding: 0.85rem 2rem;
+    border-radius: 8px;
+    transition: background 0.2s, transform 0.15s;
+  }
+
+  .no-btn:hover {
+    transform: translateY(-1px);
+  }
+
+  .no-btn--accent {
+    background: var(--color-accent);
+    color: #fff;
+  }
+
+  .no-btn--accent:hover {
+    background: var(--color-accent-hover);
+  }
+
+  .no-btn--outline {
+    background: transparent;
+    color: var(--color-primary);
+    border: 2px solid var(--color-primary);
+  }
+
+  .no-btn--outline:hover {
+    background: var(--color-primary-bg);
+  }
+
+  /* PERCHÉ TI CONVIENE */
+  .no-why {
+    padding: 4.5rem 1.5rem;
+    background: var(--color-bg);
+  }
+
+  .no-why__inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+
+  .no-why__eyebrow {
+    display: block;
+    text-align: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--color-accent);
+    margin-bottom: 0.75rem;
+  }
+
+  .no-why__title {
+    text-align: center;
+    font-size: clamp(1.5rem, 3.5vw, 2rem);
+    font-weight: 800;
+    color: var(--color-primary);
+    margin-bottom: 1rem;
+    letter-spacing: -0.02em;
+  }
+
+  .no-why__intro {
+    text-align: center;
+    font-size: 1.05rem;
+    color: var(--color-text);
+    margin-bottom: 3rem;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .no-why__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+
+  .no-why__item {
+    padding: 1.5rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--color-border);
+    background: #fff;
+  }
+
+  .no-why__icon {
+    font-size: 1.5rem;
+    color: var(--color-accent);
+    margin-bottom: 0.75rem;
+    display: block;
+  }
+
+  .no-why__item h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    margin-bottom: 0.5rem;
+  }
+
+  .no-why__item p {
+    font-size: 0.9rem;
+    color: var(--color-text-light);
+    line-height: 1.6;
+  }
+
+  .no-why__cta-wrap {
+    text-align: center;
+    margin-top: 2.5rem;
+  }
+
+  /* SOLUTIONS / TABS */
+  .no-solutions {
+    padding: 4.5rem 1.5rem;
+    background: var(--color-bg-alt);
+  }
+
+  .no-solutions__inner {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .no-solutions__title {
+    text-align: center;
+    font-size: clamp(1.5rem, 3.5vw, 2rem);
+    font-weight: 800;
+    color: var(--color-primary);
+    margin-bottom: 2.5rem;
+    letter-spacing: -0.02em;
+  }
+
+  .no-tabs__nav {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+  }
+
+  .no-tabs__btn {
+    background: #fff;
+    border: 1.5px solid var(--color-border);
+    border-radius: 8px;
+    padding: 0.65rem 1.25rem;
+    font-family: var(--font-family);
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--color-text);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .no-tabs__btn:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+
+  .no-tabs__btn.active {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: #fff;
+  }
+
+  .no-tabs__panel {
+    display: none;
+    background: #fff;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 2.5rem 2rem;
+  }
+
+  .no-tabs__panel.active {
+    display: block;
+  }
+
+  .no-tabs__panel h3 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    margin-bottom: 1rem;
+  }
+
+  .no-tabs__panel p {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: var(--color-text);
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 960px) {
+    .no-benefits__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .no-why__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .no-hero {
+      padding: 3.5rem 1.25rem 3rem;
+    }
+
+    .no-benefits__grid {
+      grid-template-columns: 1fr;
+    }
+
+    .no-why__grid {
+      grid-template-columns: 1fr;
+    }
+
+    .no-form {
+      padding: 2.5rem 1.25rem;
+    }
+
+    .no-value,
+    .no-why,
+    .no-solutions,
+    .no-benefits {
+      padding: 3rem 1.25rem;
+    }
+
+    .no-tabs__nav {
+      flex-direction: column;
+    }
+
+    .no-tabs__panel {
+      padding: 1.5rem 1.25rem;
+    }
+  }
+</style>

@@ -5,12 +5,25 @@
 <footer class="footer">
   <div class="footer__inner">
     <p class="footer__brand">MEDIOCREDITO<strong>FACILE</strong></p>
+
+    <div class="footer__links">
+      <a href="/privacy">Privacy Policy</a>
+      <span class="footer__sep">|</span>
+      <a href="https://www.affida.credit/pagine/trasparenza" target="_blank" rel="noopener">Trasparenza</a>
+      <span class="footer__sep">|</span>
+      <a href="tel:+393939957840">+39 393 995 7840</a>
+      <span class="footer__sep">|</span>
+      <a href="mailto:mediocreditofacile@gmail.com">mediocreditofacile@gmail.com</a>
+    </div>
+
+    <div class="footer__legal">
+      <p>Collaboratore del Mediatore Affida. Autorizzazione ad Operare — Iscrizione OAM M325</p>
+      <p>Pagina pubblicitaria con finalità promozionale.</p>
+      <p>Per le condizioni contrattuali del servizio di mediazione creditizia, <a href="https://www.affida.credit/pagine/trasparenza" target="_blank" rel="noopener">Foglio informativo Affida</a></p>
+    </div>
+
     <p class="footer__copy">
       &copy; {new Date().getFullYear()} Mediocredito Facile &mdash; Tutti i diritti riservati.
-    </p>
-    <p class="footer__info">
-      Broker creditizio &mdash; Tel.
-      <a href="tel:+393939957840">+39 393 995 7840</a>
     </p>
   </div>
 </footer>
@@ -19,9 +32,10 @@
   .footer {
     background: #061237;
     color: rgba(255, 255, 255, 0.7);
-    padding: 2.5rem 1.5rem;
+    padding: 3rem 1.5rem 2rem;
     text-align: center;
-    font-size: 0.875rem;
+    font-size: 0.85rem;
+    line-height: 1.6;
   }
 
   .footer__inner {
@@ -30,9 +44,10 @@
   }
 
   .footer__brand {
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     color: #fff;
-    margin-bottom: 0.4rem;
+    margin-bottom: 1.25rem;
+    letter-spacing: 0.04em;
   }
 
   .footer__brand strong {
@@ -40,12 +55,67 @@
     font-weight: 800;
   }
 
-  .footer__copy {
-    margin-bottom: 0.25rem;
+  .footer__links {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
   }
 
-  .footer__info a {
+  .footer__links a {
+    color: rgba(255, 255, 255, 0.85);
+    transition: color 0.2s;
+  }
+
+  .footer__links a:hover {
     color: var(--color-accent);
+  }
+
+  .footer__sep {
+    color: rgba(255, 255, 255, 0.3);
+  }
+
+  .footer__legal {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 1.25rem;
+    margin-bottom: 1.25rem;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.8rem;
+  }
+
+  .footer__legal p {
+    margin-bottom: 0.3rem;
+  }
+
+  .footer__legal a {
+    color: rgba(255, 255, 255, 0.6);
     text-decoration: underline;
+    transition: color 0.2s;
+  }
+
+  .footer__legal a:hover {
+    color: var(--color-accent);
+  }
+
+  .footer__copy {
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 0.78rem;
+  }
+
+  @media (max-width: 640px) {
+    .footer {
+      padding: 2.5rem 1.25rem 1.5rem;
+    }
+
+    .footer__links {
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .footer__sep {
+      display: none;
+    }
   }
 </style>
