@@ -1,0 +1,732 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<Layout
+  title="Finanzia il Tuo Investimento Aziendale | Mediocredito Facile"
+  description="Noleggio operativo, leasing e finanziamenti per la tua PMI. Confrontiamo oltre 10 società per trovare la soluzione migliore. Risposta in 48 ore."
+>
+  <Header minimal={true} />
+  <main>
+
+    <!-- HERO -->
+    <section class="fv-hero">
+      <div class="fv-hero__inner">
+        <span class="fv-hero__eyebrow">Finanzia il Tuo Investimento</span>
+        <h1 class="fv-hero__title">Noleggio, leasing o finanziamento? Ti troviamo noi la soluzione migliore</h1>
+        <p class="fv-hero__sub">Confrontiamo oltre 10 società di noleggio, leasing e credito per trovare le condizioni più vantaggiose per la tua PMI. Pre-valutazione in 24 ore, delibera entro 48.</p>
+        <a href="#form-top" class="fv-hero__cta">Richiedi Preventivo Gratuito</a>
+        <p class="fv-hero__micro">Nessun impegno. Ti richiamiamo entro 24 ore.</p>
+      </div>
+    </section>
+
+    <!-- FORM TOP -->
+    <section class="fv-form" id="form-top">
+      <div class="fv-form__inner">
+        <form class="fv-form__form" action="https://hooks.zapier.com/hooks/catch/26268853/ul50ccv/" method="POST">
+          <input type="hidden" name="fonte" value="finanza-veloce" />
+          <div class="fv-form__field">
+            <label for="fv-nome">Nome e Cognome</label>
+            <input type="text" id="fv-nome" name="nome" placeholder="Mario Rossi" required autocomplete="name" />
+          </div>
+          <div class="fv-form__field">
+            <label for="fv-cell">Cellulare</label>
+            <input type="tel" id="fv-cell" name="telefono" placeholder="+39 333 123 4567" required autocomplete="tel" />
+          </div>
+          <div class="fv-form__field">
+            <label for="fv-email">Email</label>
+            <input type="email" id="fv-email" name="email" placeholder="mario@azienda.it" required autocomplete="email" />
+          </div>
+          <div class="fv-form__field">
+            <label for="fv-need">Che tipo di soluzione cerchi?</label>
+            <select id="fv-need" name="esigenza" required>
+              <option value="" disabled selected>Seleziona...</option>
+              <option value="noleggio-operativo">Noleggio operativo</option>
+              <option value="leasing">Leasing strumentale</option>
+              <option value="finanziamento">Finanziamento</option>
+              <option value="fotovoltaico">Fotovoltaico a noleggio</option>
+              <option value="non-so">Non so, vorrei un consiglio</option>
+            </select>
+          </div>
+          <button type="submit" class="fv-form__submit">Richiedi Preventivo Gratuito</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- BENEFICI 4 CARD -->
+    <section class="fv-benefits">
+      <div class="fv-benefits__inner">
+        <div class="fv-benefits__grid">
+          <div class="fv-card">
+            <div class="fv-card__icon"><span class="material-icons-outlined" aria-hidden="true">compare_arrows</span></div>
+            <h3 class="fv-card__title">Confronto multi-società</h3>
+            <p class="fv-card__desc">Non ti affidi a un solo istituto. Confrontiamo le offerte di oltre 10 società per trovare condizioni e tassi migliori per te.</p>
+          </div>
+          <div class="fv-card">
+            <div class="fv-card__icon"><span class="material-icons-outlined" aria-hidden="true">schedule</span></div>
+            <h3 class="fv-card__title">Risposta in 24-48 ore</h3>
+            <p class="fv-card__desc">Pre-valutazione in 24 ore, delibera entro 48. Niente settimane di attesa come con le banche tradizionali.</p>
+          </div>
+          <div class="fv-card">
+            <div class="fv-card__icon"><span class="material-icons-outlined" aria-hidden="true">person</span></div>
+            <h3 class="fv-card__title">Un unico interlocutore</h3>
+            <p class="fv-card__desc">Alberto ti segue dall'inizio alla fine. Una sola persona di riferimento per tutta la pratica, senza rimbalzi.</p>
+          </div>
+          <div class="fv-card">
+            <div class="fv-card__icon"><span class="material-icons-outlined" aria-hidden="true">workspace_premium</span></div>
+            <h3 class="fv-card__title">Zero costi per te</h3>
+            <p class="fv-card__desc">La nostra consulenza è gratuita. Nessuna commissione a tuo carico: il nostro compenso arriva dalla società che eroga il servizio.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VALUE PROPOSITION -->
+    <section class="fv-value">
+      <div class="fv-value__inner">
+        <p class="fv-value__eyebrow">Un broker al tuo fianco, non una banca</p>
+        <h2 class="fv-value__title">Perché affidarti a Mediocredito Facile?</h2>
+        <p class="fv-value__text">Quando hai bisogno di un bene per la tua azienda — un macchinario, un veicolo, un impianto fotovoltaico, della tecnologia — non hai tempo di girare tra banche e finanziarie. Mediocredito Facile lo fa per te: confrontiamo noleggio operativo, leasing strumentale e finanziamenti per trovarti la formula più conveniente.</p>
+        <p class="fv-value__text">Non siamo una banca e non siamo legati a un solo istituto. Lavoriamo con oltre 10 società per offrirti il tasso migliore, la durata giusta e le condizioni più flessibili. Tu ci dici cosa ti serve, noi ti presentiamo la soluzione — in 24 ore.</p>
+        <div class="fv-value__ctas">
+          <a href="#form-top" class="fv-btn fv-btn--accent">Richiedi Preventivo</a>
+          <a href="tel:+393939957840" class="fv-btn fv-btn--outline">Parla con Alberto</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- PERCHÉ TI CONVIENE -->
+    <section class="fv-why">
+      <div class="fv-why__inner">
+        <span class="fv-why__eyebrow">COME FUNZIONA</span>
+        <h2 class="fv-why__title">Dalla richiesta all'attivazione, tutto semplice</h2>
+        <p class="fv-why__intro">Tre passaggi per trovare la soluzione giusta. Nessuna burocrazia inutile.</p>
+
+        <div class="fv-why__grid">
+          <div class="fv-why__item">
+            <span class="material-icons-outlined fv-why__icon" aria-hidden="true">chat</span>
+            <h3>1. Raccontaci cosa ti serve</h3>
+            <p>Compila il modulo o chiamaci. Ci dici il bene che ti serve, l'importo indicativo e le tue preferenze. Noi analizziamo la tua situazione.</p>
+          </div>
+          <div class="fv-why__item">
+            <span class="material-icons-outlined fv-why__icon" aria-hidden="true">compare_arrows</span>
+            <h3>2. Confrontiamo le offerte</h3>
+            <p>Inviamo la tua richiesta a più società di noleggio, leasing e credito. Confrontiamo tassi, durate e condizioni per trovare la proposta migliore.</p>
+          </div>
+          <div class="fv-why__item">
+            <span class="material-icons-outlined fv-why__icon" aria-hidden="true">verified</span>
+            <h3>3. Scegli e attiva</h3>
+            <p>Ti presentiamo le opzioni, scegli quella che preferisci. Ti seguiamo nella documentazione e nella firma. In pochi giorni sei operativo.</p>
+          </div>
+          <div class="fv-why__item">
+            <span class="material-icons-outlined fv-why__icon" aria-hidden="true">receipt</span>
+            <h3>Vantaggi fiscali concreti</h3>
+            <p>Noleggio 100% deducibile, leasing con ammortamento accelerato, finanziamenti su misura. Ogni formula ha i suoi vantaggi fiscali.</p>
+          </div>
+          <div class="fv-why__item">
+            <span class="material-icons-outlined fv-why__icon" aria-hidden="true">account_balance_wallet</span>
+            <h3>Liquidità preservata</h3>
+            <p>Non immobilizzi capitale. Che tu scelga noleggio, leasing o finanziamento, paghi nel tempo e mantieni libere le tue risorse.</p>
+          </div>
+          <div class="fv-why__item">
+            <span class="material-icons-outlined fv-why__icon" aria-hidden="true">security</span>
+            <h3>Nessun vincolo, massima trasparenza</h3>
+            <p>Non sei obbligato ad accettare. Ti presentiamo le opzioni, tu decidi. Nessun costo nascosto, nessuna sorpresa in fase contrattuale.</p>
+          </div>
+        </div>
+
+        <div class="fv-why__cta-wrap">
+          <a href="#form-top" class="fv-btn fv-btn--accent">Inizia Subito</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- SOLUZIONI / TABS -->
+    <section class="fv-solutions">
+      <div class="fv-solutions__inner">
+        <h2 class="fv-solutions__title">Le soluzioni che confrontiamo per te</h2>
+
+        <div class="fv-tabs" id="fv-tabs">
+          <div class="fv-tabs__nav">
+            <button class="fv-tabs__btn active" data-tab="noleggio">Noleggio Operativo</button>
+            <button class="fv-tabs__btn" data-tab="leasing">Leasing Strumentale</button>
+            <button class="fv-tabs__btn" data-tab="finanziamento">Finanziamento</button>
+            <button class="fv-tabs__btn" data-tab="fotovoltaico">Fotovoltaico</button>
+          </div>
+
+          <div class="fv-tabs__panel active" data-panel="noleggio">
+            <h3>Noleggio Operativo</h3>
+            <p>Usi il bene pagando un canone mensile fisso. Nessun anticipo, manutenzione e assicurazione All-Risk incluse, 100% deducibile. Il bene non entra in bilancio come debito. A fine contratto scegli: riscatto, rinnovo o restituzione. Ideale per tecnologia, attrezzature, veicoli e fotovoltaico.</p>
+          </div>
+          <div class="fv-tabs__panel" data-panel="leasing">
+            <h3>Leasing Strumentale</h3>
+            <p>Acquisisci macchinari, attrezzature e veicoli con rate flessibili e il vantaggio del riscatto finale a prezzo concordato. Ammortamento accelerato, canoni deducibili, possibilità di personalizzare durata e anticipo. Confrontiamo le offerte dei principali istituti per garantirti le condizioni migliori.</p>
+          </div>
+          <div class="fv-tabs__panel" data-panel="finanziamento">
+            <h3>Finanziamento per PMI</h3>
+            <p>Liquidità per crescere, investire e cogliere nuove opportunità. Accedi alle offerte di oltre 30 istituti finanziari. Dalla richiesta alla pre-delibera in 48 ore. Un consulente dedicato ti segue in ogni fase, dalla richiesta all'erogazione, senza costi nascosti.</p>
+          </div>
+          <div class="fv-tabs__panel" data-panel="fotovoltaico">
+            <h3>Fotovoltaico a Noleggio</h3>
+            <p>Impianto fotovoltaico per la tua azienda con canone fisso mensile. Zero anticipo, manutenzione e assicurazione incluse. Il risparmio in bolletta copre il canone dal primo mese. Contratti da 24 a 60 mesi, anche con capannone in affitto. Nessun debito in bilancio.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FORM BOTTOM -->
+    <section class="fv-form fv-form--bottom" id="contatti">
+      <div class="fv-form__inner">
+        <h2 class="fv-form__heading">Trova la soluzione giusta per la tua azienda</h2>
+        <p class="fv-form__sub">Compila il modulo e ti ricontatteremo entro 24 ore lavorative.</p>
+        <form class="fv-form__form" action="https://hooks.zapier.com/hooks/catch/26268853/ul50ccv/" method="POST">
+          <input type="hidden" name="fonte" value="finanza-veloce" />
+          <div class="fv-form__field">
+            <label for="fv-nome2">Nome e Cognome</label>
+            <input type="text" id="fv-nome2" name="nome" placeholder="Mario Rossi" required autocomplete="name" />
+          </div>
+          <div class="fv-form__field">
+            <label for="fv-cell2">Cellulare</label>
+            <input type="tel" id="fv-cell2" name="telefono" placeholder="+39 333 123 4567" required autocomplete="tel" />
+          </div>
+          <div class="fv-form__field">
+            <label for="fv-email2">Email</label>
+            <input type="email" id="fv-email2" name="email" placeholder="mario@azienda.it" required autocomplete="email" />
+          </div>
+          <div class="fv-form__field">
+            <label for="fv-need2">Che tipo di soluzione cerchi?</label>
+            <select id="fv-need2" name="esigenza" required>
+              <option value="" disabled selected>Seleziona...</option>
+              <option value="noleggio-operativo">Noleggio operativo</option>
+              <option value="leasing">Leasing strumentale</option>
+              <option value="finanziamento">Finanziamento</option>
+              <option value="fotovoltaico">Fotovoltaico a noleggio</option>
+              <option value="non-so">Non so, vorrei un consiglio</option>
+            </select>
+          </div>
+          <button type="submit" class="fv-form__submit">Richiedi Preventivo Gratuito</button>
+          <p class="fv-form__privacy">Inviando il modulo accetti la nostra <a href="/privacy">informativa sulla privacy</a>.</p>
+        </form>
+      </div>
+    </section>
+
+  </main>
+  <Footer />
+</Layout>
+
+<script>
+  const btns = document.querySelectorAll('.fv-tabs__btn');
+  const panels = document.querySelectorAll('.fv-tabs__panel');
+
+  btns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const tab = btn.getAttribute('data-tab');
+      btns.forEach((b) => b.classList.remove('active'));
+      panels.forEach((p) => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelector(`[data-panel="${tab}"]`)?.classList.add('active');
+    });
+  });
+</script>
+
+<style>
+  /* HERO */
+  .fv-hero {
+    background: linear-gradient(135deg, #1a0a3e 0%, #2d1b69 50%, #664CCD 100%);
+    color: #fff;
+    padding: 5rem 1.5rem 4rem;
+    text-align: center;
+  }
+
+  .fv-hero__inner {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  .fv-hero__eyebrow {
+    display: inline-block;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-accent);
+    margin-bottom: 1.25rem;
+  }
+
+  .fv-hero__title {
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    margin-bottom: 1.25rem;
+  }
+
+  .fv-hero__sub {
+    font-size: clamp(1rem, 2.5vw, 1.2rem);
+    line-height: 1.65;
+    color: rgba(255, 255, 255, 0.85);
+    margin-bottom: 2rem;
+  }
+
+  .fv-hero__cta {
+    display: inline-flex;
+    align-items: center;
+    background: var(--color-accent);
+    color: #fff;
+    font-weight: 700;
+    font-size: 1.1rem;
+    padding: 1rem 2.5rem;
+    border-radius: 8px;
+    transition: background 0.2s, transform 0.15s;
+  }
+
+  .fv-hero__cta:hover {
+    background: var(--color-accent-hover);
+    transform: translateY(-1px);
+  }
+
+  .fv-hero__micro {
+    margin-top: 0.75rem;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  /* FORM */
+  .fv-form {
+    padding: 3.5rem 1.5rem;
+    background: var(--color-bg-alt);
+  }
+
+  .fv-form--bottom {
+    background: var(--color-bg);
+  }
+
+  .fv-form__inner {
+    max-width: 520px;
+    margin: 0 auto;
+  }
+
+  .fv-form__heading {
+    text-align: center;
+    font-size: clamp(1.5rem, 3.5vw, 2rem);
+    font-weight: 800;
+    color: var(--color-primary);
+    margin-bottom: 0.5rem;
+  }
+
+  .fv-form__sub {
+    text-align: center;
+    color: var(--color-text-light);
+    margin-bottom: 2rem;
+    font-size: 1rem;
+  }
+
+  .fv-form__form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+  }
+
+  .fv-form__field label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-primary);
+    margin-bottom: 0.35rem;
+  }
+
+  .fv-form__field input,
+  .fv-form__field select {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border: 1.5px solid var(--color-border);
+    border-radius: 8px;
+    font-family: var(--font-family);
+    font-size: 1rem;
+    color: var(--color-text);
+    background: #fff;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .fv-form__field input:focus,
+  .fv-form__field select:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(102, 76, 205, 0.15);
+  }
+
+  .fv-form__submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-accent);
+    color: #fff;
+    font-family: var(--font-family);
+    font-weight: 700;
+    font-size: 1.05rem;
+    padding: 0.9rem 2rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    margin-top: 0.5rem;
+  }
+
+  .fv-form__submit:hover {
+    background: var(--color-accent-hover);
+    transform: translateY(-1px);
+  }
+
+  .fv-form__privacy {
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--color-text-light);
+    margin-top: 0.25rem;
+  }
+
+  .fv-form__privacy a {
+    color: var(--color-primary);
+    text-decoration: underline;
+  }
+
+  /* BENEFITS 4 CARD */
+  .fv-benefits {
+    padding: 4.5rem 1.5rem;
+    background: var(--color-bg);
+  }
+
+  .fv-benefits__inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+
+  .fv-benefits__grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+  }
+
+  .fv-card {
+    background: #fff;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 2rem 1.5rem;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .fv-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(102, 76, 205, 0.1);
+  }
+
+  .fv-card__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--color-primary-bg);
+    color: var(--color-primary);
+    margin-bottom: 1rem;
+  }
+
+  .fv-card__icon .material-icons-outlined {
+    font-size: 1.6rem;
+  }
+
+  .fv-card__title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    margin-bottom: 0.5rem;
+  }
+
+  .fv-card__desc {
+    font-size: 0.9rem;
+    color: var(--color-text-light);
+    line-height: 1.6;
+  }
+
+  /* VALUE PROPOSITION */
+  .fv-value {
+    padding: 4.5rem 1.5rem;
+    background: var(--color-bg-alt);
+  }
+
+  .fv-value__inner {
+    max-width: 760px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .fv-value__eyebrow {
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--color-accent);
+    margin-bottom: 1rem;
+  }
+
+  .fv-value__title {
+    font-size: clamp(1.5rem, 3.5vw, 2.2rem);
+    font-weight: 800;
+    color: var(--color-primary);
+    margin-bottom: 1.5rem;
+    letter-spacing: -0.02em;
+  }
+
+  .fv-value__text {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: var(--color-text);
+    margin-bottom: 1rem;
+    text-align: left;
+  }
+
+  .fv-value__ctas {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+  }
+
+  /* SHARED BUTTONS */
+  .fv-btn {
+    display: inline-flex;
+    align-items: center;
+    font-weight: 700;
+    font-size: 1rem;
+    padding: 0.85rem 2rem;
+    border-radius: 8px;
+    transition: background 0.2s, transform 0.15s;
+  }
+
+  .fv-btn:hover {
+    transform: translateY(-1px);
+  }
+
+  .fv-btn--accent {
+    background: var(--color-accent);
+    color: #fff;
+  }
+
+  .fv-btn--accent:hover {
+    background: var(--color-accent-hover);
+  }
+
+  .fv-btn--outline {
+    background: transparent;
+    color: var(--color-primary);
+    border: 2px solid var(--color-primary);
+  }
+
+  .fv-btn--outline:hover {
+    background: var(--color-primary-bg);
+  }
+
+  /* COME FUNZIONA */
+  .fv-why {
+    padding: 4.5rem 1.5rem;
+    background: var(--color-bg);
+  }
+
+  .fv-why__inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+
+  .fv-why__eyebrow {
+    display: block;
+    text-align: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--color-accent);
+    margin-bottom: 0.75rem;
+  }
+
+  .fv-why__title {
+    text-align: center;
+    font-size: clamp(1.5rem, 3.5vw, 2rem);
+    font-weight: 800;
+    color: var(--color-primary);
+    margin-bottom: 1rem;
+    letter-spacing: -0.02em;
+  }
+
+  .fv-why__intro {
+    text-align: center;
+    font-size: 1.05rem;
+    color: var(--color-text);
+    margin-bottom: 3rem;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .fv-why__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+
+  .fv-why__item {
+    padding: 1.5rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--color-border);
+    background: #fff;
+  }
+
+  .fv-why__icon {
+    font-size: 1.5rem;
+    color: var(--color-accent);
+    margin-bottom: 0.75rem;
+    display: block;
+  }
+
+  .fv-why__item h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    margin-bottom: 0.5rem;
+  }
+
+  .fv-why__item p {
+    font-size: 0.9rem;
+    color: var(--color-text-light);
+    line-height: 1.6;
+  }
+
+  .fv-why__cta-wrap {
+    text-align: center;
+    margin-top: 2.5rem;
+  }
+
+  /* SOLUTIONS / TABS */
+  .fv-solutions {
+    padding: 4.5rem 1.5rem;
+    background: var(--color-bg-alt);
+  }
+
+  .fv-solutions__inner {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .fv-solutions__title {
+    text-align: center;
+    font-size: clamp(1.5rem, 3.5vw, 2rem);
+    font-weight: 800;
+    color: var(--color-primary);
+    margin-bottom: 2.5rem;
+    letter-spacing: -0.02em;
+  }
+
+  .fv-tabs__nav {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+  }
+
+  .fv-tabs__btn {
+    background: #fff;
+    border: 1.5px solid var(--color-border);
+    border-radius: 8px;
+    padding: 0.65rem 1.25rem;
+    font-family: var(--font-family);
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--color-text);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .fv-tabs__btn:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+
+  .fv-tabs__btn.active {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: #fff;
+  }
+
+  .fv-tabs__panel {
+    display: none;
+    background: #fff;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 2.5rem 2rem;
+  }
+
+  .fv-tabs__panel.active {
+    display: block;
+  }
+
+  .fv-tabs__panel h3 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    margin-bottom: 1rem;
+  }
+
+  .fv-tabs__panel p {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: var(--color-text);
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 960px) {
+    .fv-benefits__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .fv-why__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .fv-hero {
+      padding: 3.5rem 1.25rem 3rem;
+    }
+
+    .fv-benefits__grid {
+      grid-template-columns: 1fr;
+    }
+
+    .fv-why__grid {
+      grid-template-columns: 1fr;
+    }
+
+    .fv-form {
+      padding: 2.5rem 1.25rem;
+    }
+
+    .fv-value,
+    .fv-why,
+    .fv-solutions,
+    .fv-benefits {
+      padding: 3rem 1.25rem;
+    }
+
+    .fv-tabs__nav {
+      flex-direction: column;
+    }
+
+    .fv-tabs__panel {
+      padding: 1.5rem 1.25rem;
+    }
+  }
+</style>
