@@ -1,0 +1,25 @@
+google_ads:
+  customer_id: "5572178058"  # account Google Ads (senza trattini)
+
+scoring:
+  pause_threshold_cost: 10.00
+  reward_cpc_percentile: 40
+  reward_ctr_percentile: 60
+  review_min_conversions: 1
+  auto_approve_pause: false
+
+exclusions:
+  file: data/exclusions.yaml
+
+landing_pages_path: ../src/data/landing-pages.json
+
+schedule:
+  daily_run: "08:00"
+  weekly_report_day: "monday"
+  monthly_report_day: 1
+
+anomaly:
+  cost_increase_pct: 50
+  cpc_increase_pct: 30
+  ctr_decrease_pct: 40
+  conversions_decrease_pct: 50
