@@ -6,7 +6,7 @@
 
 **Architecture:** Python monorepo (`mcf-ads-engine/`) with four modules (Collector, Analyzer, Generator, Dashboard) connected via a shared `data/proposals/YYYY-MM-DD.json` file. The dashboard (FastAPI + Alpine.js on localhost:5000) is the human approval gate before any write action reaches Google Ads or Git.
 
-**Tech Stack:** Python 3.12 · google-ads · anthropic · FastAPI · uvicorn · Resend · PyYAML · python-dotenv · pytest · Alpine.js (CDN)
+**Tech Stack:** Python 3.12 · google-ads · anthropic · FastAPI · uvicorn · Resend · PyYAML · python-dotenv · pytest · Alpine.js (CDN) · **claude-opus-4-6** (per copy, analisi KW, generazione landing)
 
 ---
 
@@ -674,7 +674,7 @@ def parse_variants_response(raw: str) -> list[str]:
 def suggest_kw_variants(keyword: str, campaign: str, api_key: str) -> list[str]:
     client = anthropic.Anthropic(api_key=api_key)
     message = client.messages.create(
-        model="claude-sonnet-4-6",
+        model="claude-opus-4-6",
         max_tokens=512,
         messages=[{
             "role": "user",
@@ -1172,7 +1172,7 @@ def validate_landing(landing: dict) -> None:
 def generate_landing(input_text: str, existing_slugs: list[str], api_key: str) -> dict:
     client = anthropic.Anthropic(api_key=api_key)
     message = client.messages.create(
-        model="claude-sonnet-4-6",
+        model="claude-opus-4-6",
         max_tokens=1024,
         messages=[{
             "role": "user",
@@ -1365,7 +1365,7 @@ def validate_rsa_copy(copy: dict) -> None:
 def generate_rsa_copy(landing_slug: str, hero_title: str, keywords: list[str], api_key: str) -> dict:
     client = anthropic.Anthropic(api_key=api_key)
     message = client.messages.create(
-        model="claude-sonnet-4-6",
+        model="claude-opus-4-6",
         max_tokens=1024,
         messages=[{
             "role": "user",

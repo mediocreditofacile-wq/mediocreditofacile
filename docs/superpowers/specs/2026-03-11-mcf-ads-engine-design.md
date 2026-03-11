@@ -50,7 +50,7 @@ Il sistema si chiama **MCF Ads Engine** ed è composto da 4 blocchi:
 | Dashboard server | FastAPI |
 | Dashboard UI | HTML + Alpine.js |
 | Google Ads integration | google-ads-python (libreria ufficiale) |
-| AI generation | Claude API (claude-sonnet-4-6) |
+| AI generation | Claude API (claude-opus-4-6) |
 | Deploy landing | Git commit → Vercel (auto-deploy da branch `main`) |
 | Email notifiche | Resend (gratuito fino a 3k/mese) |
 | Configurazione | `config.yaml` + variabili d'ambiente per segreti |
