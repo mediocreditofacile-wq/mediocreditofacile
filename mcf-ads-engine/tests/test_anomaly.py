@@ -154,3 +154,45 @@ def test_detect_anomalies_campaign_level():
     campaign_names = [c["campaign"] for c in result["campaigns"]]
     assert "Camp B" in campaign_names
     assert "Camp A" not in campaign_names
+
+
+from notifier.email import build_anomaly_html
+
+
+def _make_anomaly_result():
+    return {
+        "date": "2026-03-11",
+        "account": {
+            "today": {"cost": 45.0, "clicks": 200, "impressions": 4000,
+                      "conversions": 3.0, "cpc": 0.225, "ctr": 0.05},
+            "avg_7d": {"cost": 28.0, "clicks": 200, "impressions": 4000,
+                       "conversions": 3.0, "cpc": 0.14, "ctr": 0.05},
+            "anomalies": [{"metric": "cost", "today": 45.0, "avg_7d": 28.0, "delta_pct": 60.7}],
+        },
+        "campaigns": [
+            {
+                "campaign": "Fotovoltaico Aziendale",
+                "today": {"cost": 45.0, "clicks": 200, "impressions": 4000,
+                          "conversions": 3.0, "cpc": 0.225, "ctr": 0.05},
+                "avg_7d": {"cost": 28.0, "clicks": 200, "impressions": 4000,
+                           "conversions": 3.0, "cpc": 0.14, "ctr": 0.05},
+                "anomalies": [{"metric": "cost", "today": 45.0, "avg_7d": 28.0, "delta_pct": 60.7}],
+            }
+        ],
+    }
+
+
+def test_build_anomaly_html_contains_delta():
+    result = _make_anomaly_result()
+    html = build_anomaly_html(result, "2026-03-11")
+    assert "2026-03-11" in html
+    assert "60.7" in html
+    assert "cost" in html.lower()
+    assert "Fotovoltaico Aziendale" in html
+
+
+def test_build_anomaly_html_shows_today_vs_avg():
+    result = _make_anomaly_result()
+    html = build_anomaly_html(result, "2026-03-11")
+    assert "45.0" in html   # today cost
+    assert "28.0" in html   # avg_7d cost
