@@ -67,7 +67,12 @@ def fetch_keyword_performance(customer_id: str, yaml_path: str = "google-ads.yam
     return keywords
 
 
-DAILY_GAQL = """
+def fetch_daily_metrics(customer_id: str, yaml_path: str = "google-ads.yaml") -> list:
+    """Scarica 8 giorni di dati giornalieri per campagna per il rilevamento anomalie."""
+    from datetime import date, timedelta
+    today = date.today()
+    start = today - timedelta(days=8)
+    query = f"""
 SELECT
   campaign.name,
   segments.date,
@@ -76,18 +81,14 @@ SELECT
   metrics.impressions,
   metrics.conversions
 FROM campaign
-WHERE segments.date DURING LAST_8_DAYS
+WHERE segments.date >= '{start.isoformat()}' AND segments.date <= '{today.isoformat()}'
   AND campaign.status = 'ENABLED'
   AND campaign.advertising_channel_type = 'SEARCH'
 ORDER BY segments.date ASC
 """
-
-
-def fetch_daily_metrics(customer_id: str, yaml_path: str = "google-ads.yaml") -> list:
-    """Scarica 8 giorni di dati giornalieri per campagna per il rilevamento anomalie."""
     client = GoogleAdsClient.load_from_storage(yaml_path)
     service = client.get_service("GoogleAdsService")
-    response = service.search(customer_id=customer_id, query=DAILY_GAQL)
+    response = service.search(customer_id=customer_id, query=query)
 
     rows = []
     for api_row in response:
