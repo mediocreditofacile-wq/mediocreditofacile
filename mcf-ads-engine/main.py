@@ -1,0 +1,107 @@
+# mcf-ads-engine/main.py
+import json
+import os
+import sys
+import yaml
+from datetime import date
+from pathlib import Path
+from dotenv import load_dotenv
+
+from collector.google_ads import fetch_keyword_performance, fetch_daily_metrics
+from analyzer.scorer import score_keywords, load_exclusions
+from analyzer.suggester import suggest_kw_variants
+from analyzer.anomaly import detect_anomalies
+from notifier.email import send_daily_report, send_anomaly_alert
+
+load_dotenv()
+
+
+def load_config(path: str = "config.yaml") -> dict:
+    with open(path) as f:
+        return yaml.safe_load(f)
+
+
+def build_proposals(scores: dict, date_str: str) -> dict:
+    return {
+        "date": date_str,
+        "to_pause": scores["to_pause"],
+        "to_reward": scores["to_reward"],
+        "to_review": scores["to_review"],
+        "landing_proposals": [],
+        "campaign_drafts": [],
+    }
+
+
+def save_json(data: dict, path: Path) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "w") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
+
+def run_daily():
+    config = load_config()
+    today = date.today().isoformat()
+    api_key = os.environ["ANTHROPIC_API_KEY"]
+
+    print(f"[{today}] Fetching keyword data from Google Ads...")
+    try:
+        keywords = fetch_keyword_performance(
+            customer_id=config["google_ads"]["customer_id"],
+            yaml_path="google-ads.yaml",
+        )
+    except Exception as e:
+        print(f"[ERROR] Google Ads API failed: {e}")
+        sys.exit(1)
+
+    save_json(keywords, Path(f"data/raw/{today}.json"))
+    print(f"[{today}] {len(keywords)} keywords fetched.")
+
+    exclusions = load_exclusions(config["exclusions"]["file"])
+    scores = score_keywords(keywords, config, exclusions)
+
+    print(f"[{today}] Suggesting KW variants for {len(scores['to_reward'])} rewarded KWs...")
+    for kw in scores["to_reward"]:
+        try:
+            kw["suggested_kw_variants"] = suggest_kw_variants(
+                kw["keyword"], kw["campaign"], api_key
+            )
+        except Exception as e:
+            print(f"[WARN] Variant suggestion failed for '{kw['keyword']}': {e}")
+            kw["suggested_kw_variants"] = []
+
+    proposals = build_proposals(scores, today)
+    save_json(proposals, Path(f"data/proposals/{today}.json"))
+    print(f"[{today}] Proposals saved.")
+
+    # Anomaly detection — addizionale, non blocca il report normale
+    try:
+        daily_data = fetch_daily_metrics(
+            customer_id=config["google_ads"]["customer_id"],
+            yaml_path="google-ads.yaml",
+        )
+        anomaly_thresholds = config.get("anomaly", {})
+        anomaly_result = detect_anomalies(daily_data, anomaly_thresholds)
+        if anomaly_result["account"]["anomalies"] or anomaly_result["campaigns"]:
+            send_anomaly_alert(
+                result=anomaly_result,
+                api_key=os.environ["RESEND_API_KEY"],
+                to_email=os.environ["NOTIFICATION_EMAIL"],
+                date_str=today,
+            )
+            print(f"[{today}] Anomaly alert sent.")
+        else:
+            print(f"[{today}] No anomalies detected.")
+    except Exception as e:
+        print(f"[WARN] Anomaly check failed (skipping): {e}")
+
+    send_daily_report(
+        proposals=proposals,
+        api_key=os.environ["RESEND_API_KEY"],
+        to_email=os.environ["NOTIFICATION_EMAIL"],
+        date_str=today,
+    )
+    print(f"[{today}] Daily report sent. Done.")
+
+
+if __name__ == "__main__":
+    run_daily()
