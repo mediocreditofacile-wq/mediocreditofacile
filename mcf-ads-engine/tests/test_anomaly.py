@@ -33,7 +33,9 @@ def test_fetch_daily_metrics_returns_list():
     assert row["ctr"] == round(50 / 1000, 4)
 
 
+import pytest
 from analyzer.anomaly import compute_account_totals
+from analyzer.anomaly import detect_anomalies
 
 
 def test_compute_account_totals_aggregates_by_date():
@@ -55,3 +57,100 @@ def test_compute_account_totals_aggregates_by_date():
     # cpc = cost/clicks, ctr = clicks/impressions — recomputed from totals
     assert totals["2026-03-10"]["cpc"] == round(15.0 / 30, 4)
     assert totals["2026-03-10"]["ctr"] == round(30 / 600, 4)
+
+
+def _make_daily_data(today_cost, baseline_cost_per_day=20.0, today_date="2026-03-11"):
+    """Helper: 7 giorni di baseline + 1 giorno odierno, una sola campagna."""
+    rows = []
+    dates = [
+        "2026-03-04", "2026-03-05", "2026-03-06", "2026-03-07",
+        "2026-03-08", "2026-03-09", "2026-03-10",
+    ]
+    for d in dates:
+        rows.append({
+            "date": d, "campaign": "Camp A",
+            "cost": baseline_cost_per_day, "clicks": 100,
+            "impressions": 2000, "conversions": 2.0,
+            "cpc": baseline_cost_per_day / 100,
+            "ctr": round(100 / 2000, 4),
+        })
+    rows.append({
+        "date": today_date, "campaign": "Camp A",
+        "cost": today_cost, "clicks": 100,
+        "impressions": 2000, "conversions": 2.0,
+        "cpc": today_cost / 100,
+        "ctr": round(100 / 2000, 4),
+    })
+    return rows
+
+
+def test_detect_anomalies_cost_spike():
+    # costo oggi = 32 (+60% vs media 20) → soglia 50% → anomalia
+    thresholds = {"cost_increase_pct": 50, "cpc_increase_pct": 30,
+                  "ctr_decrease_pct": 40, "conversions_decrease_pct": 50}
+    data = _make_daily_data(today_cost=32.0)
+    result = detect_anomalies(data, thresholds)
+    assert result["date"] == "2026-03-11"
+    anomaly_metrics = [a["metric"] for a in result["account"]["anomalies"]]
+    assert "cost" in anomaly_metrics
+    delta = next(a for a in result["account"]["anomalies"] if a["metric"] == "cost")
+    assert delta["delta_pct"] == pytest.approx(60.0, abs=0.1)
+
+
+def test_detect_anomalies_no_anomaly():
+    thresholds = {"cost_increase_pct": 50, "cpc_increase_pct": 30,
+                  "ctr_decrease_pct": 40, "conversions_decrease_pct": 50}
+    data = _make_daily_data(today_cost=21.0)  # +5% — sotto soglia
+    result = detect_anomalies(data, thresholds)
+    assert result["account"]["anomalies"] == []
+    assert result["campaigns"] == []
+
+
+def test_detect_anomalies_ctr_drop():
+    # CTR oggi dimezzato rispetto alla baseline
+    rows = []
+    dates = [
+        "2026-03-04", "2026-03-05", "2026-03-06", "2026-03-07",
+        "2026-03-08", "2026-03-09", "2026-03-10",
+    ]
+    for d in dates:
+        rows.append({
+            "date": d, "campaign": "Camp A",
+            "cost": 20.0, "clicks": 100, "impressions": 1000,
+            "conversions": 2.0, "cpc": 0.2, "ctr": 0.1,
+        })
+    rows.append({
+        "date": "2026-03-11", "campaign": "Camp A",
+        "cost": 20.0, "clicks": 50, "impressions": 1000,
+        "conversions": 2.0, "cpc": 0.4, "ctr": 0.05,
+    })
+    thresholds = {"cost_increase_pct": 50, "cpc_increase_pct": 30,
+                  "ctr_decrease_pct": 40, "conversions_decrease_pct": 50}
+    result = detect_anomalies(rows, thresholds)
+    anomaly_metrics = [a["metric"] for a in result["account"]["anomalies"]]
+    assert "ctr" in anomaly_metrics
+
+
+def test_detect_anomalies_campaign_level():
+    # Due campagne: solo Camp B ha anomalia
+    rows = []
+    dates = [
+        "2026-03-04", "2026-03-05", "2026-03-06", "2026-03-07",
+        "2026-03-08", "2026-03-09", "2026-03-10",
+    ]
+    for d in dates:
+        rows.append({"date": d, "campaign": "Camp A", "cost": 20.0, "clicks": 100,
+                     "impressions": 2000, "conversions": 2.0, "cpc": 0.2, "ctr": 0.05})
+        rows.append({"date": d, "campaign": "Camp B", "cost": 5.0, "clicks": 50,
+                     "impressions": 500, "conversions": 1.0, "cpc": 0.1, "ctr": 0.1})
+    # Oggi: Camp A normale, Camp B con spike costo +80%
+    rows.append({"date": "2026-03-11", "campaign": "Camp A", "cost": 20.0, "clicks": 100,
+                 "impressions": 2000, "conversions": 2.0, "cpc": 0.2, "ctr": 0.05})
+    rows.append({"date": "2026-03-11", "campaign": "Camp B", "cost": 9.0, "clicks": 50,
+                 "impressions": 500, "conversions": 1.0, "cpc": 0.18, "ctr": 0.1})
+    thresholds = {"cost_increase_pct": 50, "cpc_increase_pct": 30,
+                  "ctr_decrease_pct": 40, "conversions_decrease_pct": 50}
+    result = detect_anomalies(rows, thresholds)
+    campaign_names = [c["campaign"] for c in result["campaigns"]]
+    assert "Camp B" in campaign_names
+    assert "Camp A" not in campaign_names
