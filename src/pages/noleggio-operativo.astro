@@ -25,7 +25,7 @@ import Footer from '../components/Footer.astro';
     <!-- FORM TOP -->
     <section class="no-form" id="form-top">
       <div class="no-form__inner">
-        <form class="no-form__form" action="https://hooks.zapier.com/hooks/catch/26268853/ul50ccv/" method="POST">
+        <form class="no-form__form zapier-form">
           <input type="hidden" name="fonte" value="noleggio-operativo" />
           <div class="no-form__field">
             <label for="no-nome">Nome e Cognome</label>
@@ -181,7 +181,7 @@ import Footer from '../components/Footer.astro';
       <div class="no-form__inner">
         <h2 class="no-form__heading">Richiedi il tuo preventivo gratuito</h2>
         <p class="no-form__sub">Compila il modulo e ti ricontatteremo entro 24 ore lavorative.</p>
-        <form class="no-form__form" action="https://hooks.zapier.com/hooks/catch/26268853/ul50ccv/" method="POST">
+        <form class="no-form__form zapier-form">
           <input type="hidden" name="fonte" value="noleggio-operativo" />
           <div class="no-form__field">
             <label for="no-nome2">Nome e Cognome</label>
@@ -217,6 +217,7 @@ import Footer from '../components/Footer.astro';
 </Layout>
 
 <script>
+  // Tabs
   const btns = document.querySelectorAll('.no-tabs__btn');
   const panels = document.querySelectorAll('.no-tabs__panel');
 
@@ -227,6 +228,27 @@ import Footer from '../components/Footer.astro';
       panels.forEach((p) => p.classList.remove('active'));
       btn.classList.add('active');
       document.querySelector(`[data-panel="${tab}"]`)?.classList.add('active');
+    });
+  });
+
+  // Form submit → Zapier + redirect /grazie
+  const ZAPIER_URL = 'https://hooks.zapier.com/hooks/catch/26268853/ul50ccv/';
+
+  document.querySelectorAll<HTMLFormElement>('.zapier-form').forEach((form) => {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Invio in corso…';
+      }
+      const data = new FormData(form);
+      try {
+        await fetch(ZAPIER_URL, { method: 'POST', body: data, mode: 'no-cors' });
+      } catch (_) {
+        // Zapier risponde opaque con no-cors, ignoriamo errori di rete
+      }
+      window.location.href = '/grazie';
     });
   });
 </script>
