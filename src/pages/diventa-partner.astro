@@ -25,7 +25,7 @@ import Footer from '../components/Footer.astro';
     <!-- FORM TOP -->
     <section class="dp-form" id="form-top">
       <div class="dp-form__inner">
-        <form class="dp-form__form" action="https://hooks.zapier.com/hooks/catch/26268853/ul50ccv/" method="POST">
+        <form class="dp-form__form zapier-form" action="">
           <input type="hidden" name="fonte" value="diventa-partner" />
           <div class="dp-form__field">
             <label for="dp-nome">Nome e Cognome</label>
@@ -179,7 +179,7 @@ import Footer from '../components/Footer.astro';
       <div class="dp-form__inner">
         <h2 class="dp-form__heading">Attiva il tuo canale partner</h2>
         <p class="dp-form__sub">Compila il modulo e ti ricontatteremo entro 24 ore lavorative.</p>
-        <form class="dp-form__form" action="https://hooks.zapier.com/hooks/catch/26268853/ul50ccv/" method="POST">
+        <form class="dp-form__form zapier-form" action="">
           <input type="hidden" name="fonte" value="diventa-partner" />
           <div class="dp-form__field">
             <label for="dp-nome2">Nome e Cognome</label>
@@ -223,6 +223,24 @@ import Footer from '../components/Footer.astro';
       panels.forEach((p) => p.classList.remove('active'));
       btn.classList.add('active');
       document.querySelector(`[data-panel="${tab}"]`)?.classList.add('active');
+    });
+  });
+
+  const ZAPIER_URL = 'https://hooks.zapier.com/hooks/catch/26268853/ul50ccv/';
+
+  document.querySelectorAll<HTMLFormElement>('.zapier-form').forEach((form) => {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Invio in corso…';
+      }
+      const data = new FormData(form);
+      try {
+        await fetch(ZAPIER_URL, { method: 'POST', body: data, mode: 'no-cors' });
+      } catch (_) {}
+      window.location.href = '/grazie';
     });
   });
 </script>
