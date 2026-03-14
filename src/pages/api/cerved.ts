@@ -82,33 +82,38 @@ export async function GET({ request }: { request: Request }) {
     }
 
     const searchData = await searchRes.json();
-    const companies = searchData?.companies ?? [];
-    if (companies.length === 0) {
+    const subjects = searchData?.subjects ?? [];
+    if (subjects.length === 0) {
       return jsonResponse({ found: false });
     }
 
-    const company = companies[0];
-    const idSoggetto = company.subject_id;
-    const codiceFiscale = company.fiscal_code ?? '';
+    const subj = subjects[0];
+    const idSoggetto = subj.subject_id;
+    const codiceFiscale = subj.tax_code ?? '';
 
     // Dati anagrafici dalla ricerca
-    const ragioneSociale = company.company_name ?? '';
-    const formaGiuridica = company.legal_form?.description ?? '';
+    const info = subj.company_info ?? {};
+    const ragioneSociale = info.business_name ?? '';
+    const formaGiuridica = info.legal_form?.description ?? '';
 
     // Indirizzo
-    const addr = company.registered_office ?? {};
+    const addr = subj.address ?? {};
     const indirizzo = [
-      addr.street_name,
-      addr.street_number,
-      addr.zip_code,
-      addr.city,
-      addr.province ? `(${addr.province})` : '',
+      addr.street?.description,
+      addr.postal_code,
+      addr.city?.description,
+      addr.province?.code ? `(${addr.province.code})` : '',
     ].filter(Boolean).join(' ').trim();
 
     // ATECO
-    const atecoObj = company.ateco_code ?? {};
-    const ateco = atecoObj.code
-      ? `${atecoObj.code} - ${atecoObj.description ?? ''}`
+    const atecoObj = info.economic_activity?.ateco ?? {};
+    const atecoCode = atecoObj.code ?? '';
+    // Formatta codice ATECO: "10512" → "10.51.2"
+    const atecoFmt = atecoCode.length >= 4
+      ? atecoCode.slice(0,2) + '.' + atecoCode.slice(2,4) + (atecoCode.length > 4 ? '.' + atecoCode.slice(4) : '')
+      : atecoCode;
+    const ateco = atecoFmt
+      ? `${atecoFmt} - ${atecoObj.description ?? ''}`
       : '';
 
     // --- Step 2: Profilo completo (dati finanziari) ---
