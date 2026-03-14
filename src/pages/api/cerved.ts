@@ -22,7 +22,9 @@ interface CervedResult {
   ragioneSociale?: string;
   formaGiuridica?: string;
   indirizzo?: string;
+  regione?: string;
   ateco?: string;
+  macrosettore?: string;
   cgs?: number | null;
   fatturato?: number | null;
   patrimonioNetto?: number | null;
@@ -30,6 +32,12 @@ interface CervedResult {
   mol?: number | null;
   attivo?: number | null;
   dipendenti?: number | null;
+  capitaleSociale?: number | null;
+  annoUltimoBilancio?: number | null;
+  dataCostituzione?: string | null;
+  telefono?: string | null;
+  pec?: string | null;
+  sitoWeb?: string | null;
 }
 
 function corsHeaders() {
@@ -116,13 +124,21 @@ export async function GET({ request }: { request: Request }) {
       ? `${atecoFmt} - ${atecoObj.description ?? ''}`
       : '';
 
-    // --- Step 2: Profilo completo (dati finanziari) ---
+    // --- Step 2: Profilo completo (dati finanziari + anagrafici extra) ---
     let fatturato: number | null = null;
     let patrimonioNetto: number | null = null;
     let utile: number | null = null;
     let mol: number | null = null;
     let attivo: number | null = null;
     let dipendenti: number | null = null;
+    let capitaleSociale: number | null = null;
+    let annoUltimoBilancio: number | null = null;
+    let dataCostituzione: string | null = null;
+    let telefono: string | null = null;
+    let pec: string | null = null;
+    let sitoWeb: string | null = null;
+    let regione: string | null = null;
+    let macrosettore: string | null = null;
 
     if (idSoggetto) {
       const profileRes = await fetch(
@@ -132,7 +148,8 @@ export async function GET({ request }: { request: Request }) {
 
       if (profileRes.ok) {
         const profile = await profileRes.json();
-        // I dati finanziari sono in migliaia di euro (x1000)
+
+        // Dati finanziari (in migliaia di euro x1000)
         const fin = profile?.dati_economici_dimensionali;
         if (fin) {
           fatturato = fin.fatturato != null ? fin.fatturato * 1000 : null;
@@ -141,6 +158,24 @@ export async function GET({ request }: { request: Request }) {
           mol = fin.mol != null ? fin.mol * 1000 : null;
           attivo = fin.attivo != null ? fin.attivo * 1000 : null;
           dipendenti = fin.numero_dipendenti ?? null;
+          capitaleSociale = fin.capitale_sociale_versato ?? fin.capitale_sociale ?? null;
+          annoUltimoBilancio = fin.anno_ultimo_bilancio ?? null;
+        }
+
+        // Dati anagrafici extra
+        const anag = profile?.dati_anagrafici;
+        if (anag) {
+          telefono = anag.telefono ?? null;
+          pec = anag.pec?.email?.[0] ?? null;
+          sitoWeb = anag.url_sito_web ?? null;
+          regione = anag.indirizzo?.regione ?? null;
+        }
+
+        // Data costituzione e macrosettore
+        const att = profile?.dati_attivita;
+        if (att) {
+          dataCostituzione = att.data_costituzione ?? null;
+          macrosettore = att.ateco_info?.codifica_ateco?.macrosettore ?? null;
         }
       }
     }
@@ -168,7 +203,9 @@ export async function GET({ request }: { request: Request }) {
       ragioneSociale,
       formaGiuridica,
       indirizzo,
+      regione,
       ateco,
+      macrosettore,
       cgs,
       fatturato,
       patrimonioNetto,
@@ -176,6 +213,12 @@ export async function GET({ request }: { request: Request }) {
       mol,
       attivo,
       dipendenti,
+      capitaleSociale,
+      annoUltimoBilancio,
+      dataCostituzione,
+      telefono,
+      pec,
+      sitoWeb,
     };
 
     // Salva in cache
