@@ -1,0 +1,444 @@
+---
+/**
+ * Simulatore Noleggio Operativo — /tools/simulatore-noleggio-operativo
+ * Pagina completa: hero, simulatore interattivo, sezione SEO, form consulenza.
+ */
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import SimulatoreNoleggio from '../../components/tools/SimulatoreNoleggio.tsx';
+---
+
+<ToolLayout
+  title="Simulatore Noleggio Operativo — Calcola il Canone | Mediocredito Facile"
+  description="Calcola subito il canone mensile del noleggio operativo. Inserisci il valore del bene, scegli la durata e scopri quanto paghi al mese. Gratis, senza registrazione."
+  breadcrumbs={[{ name: 'Simulatore Noleggio Operativo', href: '/tools/simulatore-noleggio-operativo' }]}
+>
+  <!-- Hero -->
+  <section class="tool-hero">
+    <div class="tool-hero__inner">
+      <h1 class="tool-hero__title">Simulatore Noleggio Operativo</h1>
+      <p class="tool-hero__sub">
+        Calcola il canone mensile, il valore di riscatto e confronta con l'acquisto diretto.
+        Coefficienti Grenke reali, risultato immediato.
+      </p>
+    </div>
+  </section>
+
+  <!-- Simulatore interattivo (Preact island) -->
+  <section class="tool-simulator">
+    <div class="tool-simulator__inner">
+      <SimulatoreNoleggio client:load />
+    </div>
+  </section>
+
+  <!-- Sezione SEO: Come funziona il noleggio operativo -->
+  <section class="tool-seo">
+    <div class="tool-seo__inner">
+      <h2 class="tool-seo__heading">Come funziona il noleggio operativo</h2>
+
+      <div class="tool-seo__grid">
+        <div class="tool-seo__block">
+          <span class="tool-seo__icon material-icons-outlined" aria-hidden="true">description</span>
+          <h3 class="tool-seo__subtitle">Cos'è il noleggio operativo</h3>
+          <p>
+            Il noleggio operativo è un contratto con cui un'azienda utilizza un bene strumentale
+            pagando un canone mensile fisso per tutta la durata. A fine contratto può riscattare
+            il bene, restituirlo o rinnovare il contratto. Il canone è interamente deducibile
+            dal reddito d'impresa.
+          </p>
+        </div>
+
+        <div class="tool-seo__block">
+          <span class="tool-seo__icon material-icons-outlined" aria-hidden="true">calculate</span>
+          <h3 class="tool-seo__subtitle">Come si calcola il canone</h3>
+          <p>
+            Il canone dipende dal valore del bene, dalla durata del contratto e dal coefficiente
+            applicato dalla società di locazione. I coefficienti variano in base alla fascia di
+            importo: beni di valore maggiore beneficiano di coefficienti più bassi. Il simulatore
+            usa i coefficienti ufficiali Grenke.
+          </p>
+        </div>
+
+        <div class="tool-seo__block">
+          <span class="tool-seo__icon material-icons-outlined" aria-hidden="true">compare_arrows</span>
+          <h3 class="tool-seo__subtitle">Noleggio operativo vs acquisto diretto</h3>
+          <p>
+            Con l'acquisto diretto l'azienda immobilizza capitale. Con il noleggio operativo
+            mantiene liquidità, ottiene la piena deducibilità del canone e trasferisce il rischio
+            di obsolescenza al locatore. Per molte PMI è lo strumento più efficiente per dotarsi
+            di macchinari e tecnologia.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Form richiesta consulenza -->
+  <section class="tool-form" id="contatti">
+    <div class="tool-form__inner">
+      <h2 class="tool-form__heading">Richiedi una Consulenza Gratuita</h2>
+      <p class="tool-form__sub">
+        Vuoi un preventivo personalizzato? Compila il modulo e ti ricontatteremo entro 24 ore lavorative.
+      </p>
+
+      <form class="contact-form" id="tool-contact-form">
+        <!-- Honeypot anti-spam -->
+        <input name="website" type="text" tabindex="-1" autocomplete="off"
+          style="position:absolute;opacity:0;pointer-events:none;height:0;overflow:hidden" aria-hidden="true" />
+
+        <div class="contact-form__field">
+          <label for="nome">Nome e Cognome</label>
+          <input type="text" id="nome" name="nome" placeholder="Mario Rossi" required autocomplete="name" />
+        </div>
+
+        <div class="contact-form__field">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" placeholder="mario@azienda.it" required autocomplete="email" />
+        </div>
+
+        <div class="contact-form__field">
+          <label for="telefono">Cellulare</label>
+          <input type="tel" id="telefono" name="telefono" placeholder="+39 333 123 4567" required autocomplete="tel" />
+        </div>
+
+        <div class="contact-form__field">
+          <label for="valore_bene">Valore del bene da finanziare (€)</label>
+          <input type="text" id="valore_bene" name="valore_bene" placeholder="50.000" autocomplete="off" />
+        </div>
+
+        <div class="contact-form__field">
+          <label for="durata_preferita">Durata preferita</label>
+          <select id="durata_preferita" name="durata_preferita" autocomplete="off">
+            <option value="">Seleziona...</option>
+            <option value="24">24 mesi</option>
+            <option value="30">30 mesi</option>
+            <option value="36" selected>36 mesi</option>
+            <option value="48">48 mesi</option>
+            <option value="60">60 mesi</option>
+            <option value="72">72 mesi</option>
+            <option value="84">84 mesi</option>
+          </select>
+        </div>
+
+        <div class="contact-form__field">
+          <label for="messaggio">Messaggio (opzionale)</label>
+          <textarea id="messaggio" name="messaggio" rows="3" placeholder="Descrivi il bene o la tua esigenza..."></textarea>
+        </div>
+
+        <div class="contact-form__privacy-check">
+          <input type="checkbox" id="privacy" name="privacy" required />
+          <label for="privacy">
+            Ho letto e accetto l'<a href="/privacy" target="_blank">informativa sulla privacy</a>
+          </label>
+        </div>
+
+        <button type="submit" class="contact-form__submit" id="tool-submit">
+          Richiedi Consulenza Gratuita ➤
+        </button>
+      </form>
+    </div>
+  </section>
+</ToolLayout>
+
+<!-- Script: pre-compila form dal simulatore + invio a Zapier -->
+<script>
+  // Pre-compila i campi del form con i valori del simulatore
+  function prefillForm() {
+    const simValore = document.getElementById('valore') as HTMLInputElement | null;
+    const simDurata = document.getElementById('durata') as HTMLSelectElement | null;
+    const formValore = document.getElementById('valore_bene') as HTMLInputElement | null;
+    const formDurata = document.getElementById('durata_preferita') as HTMLSelectElement | null;
+
+    if (simValore && formValore) {
+      formValore.value = parseInt(simValore.value, 10).toLocaleString('it-IT');
+    }
+    if (simDurata && formDurata) {
+      formDurata.value = simDurata.value;
+    }
+  }
+
+  // Osserva cambiamenti nel simulatore per aggiornare il form
+  const simForm = document.querySelector('.sim__form');
+  if (simForm) {
+    simForm.addEventListener('change', () => setTimeout(prefillForm, 100));
+    simForm.addEventListener('input', () => setTimeout(prefillForm, 300));
+  }
+
+  // Invio form a webhook Zapier
+  const form = document.getElementById('tool-contact-form') as HTMLFormElement | null;
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('tool-submit') as HTMLButtonElement | null;
+      if (btn) { btn.disabled = true; btn.textContent = 'Invio in corso…'; }
+
+      // Evento GTM
+      if ((window as any).dataLayer) {
+        (window as any).dataLayer.push({
+          event: 'form_inviato',
+          tool: 'simulatore_noleggio',
+        });
+      }
+
+      try {
+        await fetch('https://hooks.zapier.com/hooks/catch/26268853/ul50ccv/', {
+          method: 'POST',
+          body: new FormData(form),
+        });
+      } catch (_) {}
+      window.location.href = '/grazie';
+    });
+  }
+</script>
+
+<style>
+  /* --- Hero --- */
+  .tool-hero {
+    padding: 3.5rem 1.5rem 2.5rem;
+    text-align: center;
+    background: var(--color-bg);
+  }
+
+  .tool-hero__inner {
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  .tool-hero__title {
+    font-size: clamp(1.75rem, 4.5vw, 2.5rem);
+    font-weight: 800;
+    color: var(--color-primary);
+    letter-spacing: -0.02em;
+    margin-bottom: 0.75rem;
+  }
+
+  .tool-hero__sub {
+    font-size: 1.05rem;
+    color: var(--color-text-light);
+    line-height: 1.65;
+  }
+
+  /* --- Simulatore container --- */
+  .tool-simulator {
+    padding: 0 1.5rem 4rem;
+  }
+
+  .tool-simulator__inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+
+  /* --- Sezione SEO --- */
+  .tool-seo {
+    padding: 4.5rem 1.5rem;
+    background: var(--color-bg-alt);
+  }
+
+  .tool-seo__inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+
+  .tool-seo__heading {
+    text-align: center;
+    font-size: clamp(1.5rem, 3.5vw, 2rem);
+    font-weight: 800;
+    color: var(--color-primary);
+    margin-bottom: 3rem;
+    letter-spacing: -0.02em;
+  }
+
+  .tool-seo__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+
+  .tool-seo__block {
+    background: #ffffff;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 2rem 1.75rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  }
+
+  .tool-seo__icon {
+    font-size: 2rem;
+    color: var(--color-primary);
+    margin-bottom: 1rem;
+    display: block;
+  }
+
+  .tool-seo__subtitle {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    margin-bottom: 0.75rem;
+  }
+
+  .tool-seo__block p {
+    font-size: 0.95rem;
+    line-height: 1.65;
+    color: var(--color-text);
+  }
+
+  /* --- Form consulenza --- */
+  .tool-form {
+    padding: 4.5rem 1.5rem;
+    background: var(--color-bg);
+  }
+
+  .tool-form__inner {
+    max-width: 520px;
+    margin: 0 auto;
+  }
+
+  .tool-form__heading {
+    text-align: center;
+    font-size: clamp(1.5rem, 3.5vw, 2rem);
+    font-weight: 800;
+    color: var(--color-primary);
+    margin-bottom: 0.6rem;
+    letter-spacing: -0.02em;
+  }
+
+  .tool-form__sub {
+    text-align: center;
+    color: var(--color-text-light);
+    margin-bottom: 2.5rem;
+    font-size: 1rem;
+  }
+
+  .contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .contact-form__field label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-primary);
+    margin-bottom: 0.35rem;
+  }
+
+  .contact-form__field input,
+  .contact-form__field select,
+  .contact-form__field textarea {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border: 1.5px solid var(--color-border);
+    border-radius: 8px;
+    font-family: var(--font-family);
+    font-size: 1rem;
+    color: var(--color-text);
+    background: var(--color-bg-alt);
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .contact-form__field select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23293C5B' stroke-width='2' fill='none'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    padding-right: 2.5rem;
+    cursor: pointer;
+  }
+
+  .contact-form__field textarea {
+    resize: vertical;
+    min-height: 80px;
+  }
+
+  .contact-form__field input::placeholder,
+  .contact-form__field textarea::placeholder {
+    color: #94a3b8;
+  }
+
+  .contact-form__field input:focus,
+  .contact-form__field select:focus,
+  .contact-form__field textarea:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(102, 76, 205, 0.15);
+  }
+
+  .contact-form__privacy-check {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .contact-form__privacy-check input[type="checkbox"] {
+    margin-top: 0.2rem;
+    width: 18px;
+    height: 18px;
+    accent-color: var(--color-primary);
+    flex-shrink: 0;
+  }
+
+  .contact-form__privacy-check label {
+    font-size: 0.85rem;
+    color: var(--color-text-light);
+    line-height: 1.5;
+  }
+
+  .contact-form__privacy-check a {
+    color: var(--color-primary);
+    text-decoration: underline;
+  }
+
+  .contact-form__submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background: var(--color-accent);
+    color: #ffffff;
+    font-family: var(--font-family);
+    font-weight: 700;
+    font-size: 1.05rem;
+    padding: 0.9rem 2rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    margin-top: 0.5rem;
+  }
+
+  .contact-form__submit:hover {
+    background: var(--color-accent-hover);
+    transform: translateY(-1px);
+  }
+
+  .contact-form__submit:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* --- Responsive --- */
+  @media (max-width: 768px) {
+    .tool-hero {
+      padding: 2.5rem 1.25rem 2rem;
+    }
+
+    .tool-simulator {
+      padding: 0 1.25rem 3rem;
+    }
+
+    .tool-seo {
+      padding: 3rem 1.25rem;
+    }
+
+    .tool-seo__grid {
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+    }
+
+    .tool-form {
+      padding: 3rem 1.25rem;
+    }
+  }
+</style>

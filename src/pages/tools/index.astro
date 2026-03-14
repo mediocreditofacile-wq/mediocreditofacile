@@ -1,0 +1,77 @@
+---
+/**
+ * Hub strumenti gratuiti — /tools/
+ * Lista dei tool disponibili per le PMI.
+ */
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import ToolCard from '../../components/tools/ToolCard.astro';
+---
+
+<ToolLayout
+  title="Strumenti Gratuiti per PMI — Simulatori e Calcolatori | Mediocredito Facile"
+  description="Simulatori, calcolatori e strumenti pratici per valutare noleggio operativo, leasing e finanziamenti. Gratis, senza registrazione."
+>
+  <section class="tools-hub">
+    <div class="tools-hub__inner">
+      <h1 class="tools-hub__title">Strumenti gratuiti per le PMI</h1>
+      <p class="tools-hub__sub">
+        Simulatori e calcolatori pratici per valutare noleggio operativo, leasing e finanziamenti.
+        Gratis, senza registrazione.
+      </p>
+
+      <div class="tools-hub__grid">
+        <ToolCard
+          title="Simulatore Noleggio Operativo"
+          description="Calcola il canone mensile, il valore di riscatto e confronta con l'acquisto diretto."
+          href="/tools/simulatore-noleggio-operativo"
+          icon="calculate"
+        />
+      </div>
+    </div>
+  </section>
+</ToolLayout>
+
+<style>
+  .tools-hub {
+    padding: 4rem 1.5rem 5rem;
+  }
+
+  .tools-hub__inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+
+  .tools-hub__title {
+    text-align: center;
+    font-size: clamp(1.75rem, 4vw, 2.5rem);
+    font-weight: 800;
+    color: var(--color-primary);
+    margin-bottom: 0.75rem;
+    letter-spacing: -0.02em;
+  }
+
+  .tools-hub__sub {
+    text-align: center;
+    font-size: 1.05rem;
+    color: var(--color-text-light);
+    max-width: 600px;
+    margin: 0 auto 3rem;
+    line-height: 1.65;
+  }
+
+  .tools-hub__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 2rem;
+  }
+
+  @media (max-width: 640px) {
+    .tools-hub {
+      padding: 3rem 1.25rem 4rem;
+    }
+
+    .tools-hub__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

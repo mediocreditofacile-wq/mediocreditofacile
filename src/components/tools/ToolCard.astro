@@ -1,0 +1,76 @@
+---
+/**
+ * Card per la pagina hub /tools/.
+ * Mostra titolo, descrizione e link a uno strumento.
+ */
+interface Props {
+  title: string;
+  description: string;
+  href: string;
+  icon?: string;
+}
+
+const { title, description, href, icon = 'calculate' } = Astro.props;
+---
+
+<a href={href} class="tool-card">
+  <span class="tool-card__icon material-icons-outlined" aria-hidden="true">{icon}</span>
+  <h2 class="tool-card__title">{title}</h2>
+  <p class="tool-card__desc">{description}</p>
+  <span class="tool-card__link">
+    Apri il simulatore
+    <span class="material-icons-outlined" aria-hidden="true">arrow_forward</span>
+  </span>
+</a>
+
+<style>
+  .tool-card {
+    display: flex;
+    flex-direction: column;
+    background: #ffffff;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 2rem 1.75rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .tool-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(102, 76, 205, 0.1);
+  }
+
+  .tool-card__icon {
+    font-size: 2.5rem;
+    color: var(--color-primary);
+    margin-bottom: 1rem;
+  }
+
+  .tool-card__title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    margin-bottom: 0.6rem;
+  }
+
+  .tool-card__desc {
+    font-size: 0.95rem;
+    color: var(--color-text-light);
+    line-height: 1.6;
+    flex: 1;
+  }
+
+  .tool-card__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin-top: 1.25rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--color-accent);
+  }
+
+  .tool-card__link .material-icons-outlined {
+    font-size: 1rem;
+  }
+</style>
