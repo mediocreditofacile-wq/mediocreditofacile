@@ -28,7 +28,7 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
   </div>
 
   <!-- Tool content (nascosto fino ad autenticazione) -->
-  <div id="tool" class="tool" hidden>
+  <div id="tool" class="tool" style="display:none !important;">
     <!-- Header tool con logo Marotta -->
     <div class="tool__header">
       <img src="https://marottaevolution.it/wp-content/uploads/2020/09/logo-marotta-tricolore.png"
@@ -315,13 +315,13 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
 
   // --- Auth ---
   function showTool() {
-    gate.hidden = true;
-    tool.hidden = false;
+    gate.style.display = 'none';
+    tool.style.cssText = '';  // Rimuove display:none, mostra il tool
   }
 
   function showGate() {
-    gate.hidden = false;
-    tool.hidden = true;
+    gate.style.display = '';
+    tool.style.cssText = 'display:none !important;';
   }
 
   if (localStorage.getItem(KEY) === 'ok') {
