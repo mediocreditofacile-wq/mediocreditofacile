@@ -1,0 +1,1066 @@
+---
+/**
+ * Marotta Evolution — Tool Finanziario (uso interno, protetto da password)
+ * P.IVA lookup, classificazione credit policy, simulatore canone Grenke,
+ * funnel burrata, checklist documenti.
+ */
+import ToolLayout from '../../layouts/ToolLayout.astro';
+---
+
+<ToolLayout
+  title="Marotta Tool — MCF Interno"
+  description="Strumento interno MCF — accesso riservato"
+  noindex={true}
+  breadcrumbs={[{ name: 'Marotta Evolution Tool', href: '/tools/marotta' }]}
+>
+  <!-- Gate password -->
+  <div id="gate" class="gate">
+    <div class="gate__card">
+      <img src="https://marottaevolution.it/wp-content/uploads/2020/09/logo-marotta-tricolore.png"
+        alt="Marotta Evolution" class="gate__logo" />
+      <p class="gate__label">Accesso riservato</p>
+      <div class="gate__form">
+        <input type="password" id="gate-pwd" class="gate__input" placeholder="Password" autocomplete="off" />
+        <button id="gate-btn" class="gate__btn">Accedi</button>
+      </div>
+      <p id="gate-error" class="gate__error" hidden>Password non corretta</p>
+    </div>
+  </div>
+
+  <!-- Tool content (nascosto fino ad autenticazione) -->
+  <div id="tool" class="tool" hidden>
+    <!-- Header tool con logo Marotta -->
+    <div class="tool__header">
+      <img src="https://marottaevolution.it/wp-content/uploads/2020/09/logo-marotta-tricolore.png"
+        alt="Marotta Evolution" class="tool__logo" />
+      <div>
+        <h1 class="tool__title">Marotta Evolution — Tool Finanziario</h1>
+        <p class="tool__sub">Lookup P.IVA · Credit policy · Simulatore canone · Funnel burrata</p>
+      </div>
+      <button id="logout-btn" class="tool__logout">Esci</button>
+    </div>
+
+    <!-- Step 1: P.IVA lookup -->
+    <section class="tool__section">
+      <h2 class="tool__section-title">
+        <span class="tool__step">1</span> Inserisci P.IVA del caseificio
+      </h2>
+      <div class="tool__piva-row">
+        <input type="text" id="piva-input" class="tool__input" placeholder="01234567890"
+          maxlength="11" inputmode="numeric" />
+        <button id="piva-btn" class="tool__btn">Cerca</button>
+      </div>
+      <p id="piva-error" class="tool__error" hidden></p>
+      <div class="tool__demo">
+        <span class="tool__demo-label">P.IVA demo per test:</span>
+        <button class="tool__demo-btn" data-piva="01234567890">01234567890</button>
+        <button class="tool__demo-btn" data-piva="12345678903">12345678903</button>
+        <button class="tool__demo-btn" data-piva="98765432109">98765432109</button>
+      </div>
+    </section>
+
+    <!-- Risultato lookup (nascosto) -->
+    <div id="result" hidden>
+      <!-- Step 2: Classificazione -->
+      <section class="tool__section">
+        <h2 class="tool__section-title">
+          <span class="tool__step">2</span> Classificazione credit policy
+        </h2>
+        <div class="tool__info-grid">
+          <div class="tool__info-card">
+            <span class="tool__info-label">Ragione sociale</span>
+            <span id="rs" class="tool__info-value"></span>
+          </div>
+          <div class="tool__info-card">
+            <span class="tool__info-label">Fatturato</span>
+            <span id="fat" class="tool__info-value"></span>
+          </div>
+          <div class="tool__info-card">
+            <span class="tool__info-label">Classificazione</span>
+            <span id="class-label" class="tool__info-value tool__info-value--badge"></span>
+          </div>
+          <div class="tool__info-card">
+            <span class="tool__info-label">Canale finanziario</span>
+            <span id="canale" class="tool__info-value"></span>
+          </div>
+        </div>
+        <div id="incentivi-box" class="tool__incentivi" hidden>
+          <span class="material-icons-outlined" aria-hidden="true">verified</span>
+          <p>Questa azienda può accedere alle agevolazioni <strong>Nuova Sabatini</strong> (contributo in conto interessi fino al 3,575%).</p>
+        </div>
+      </section>
+
+      <!-- Step 3: Simulatore canone -->
+      <section class="tool__section">
+        <h2 class="tool__section-title">
+          <span class="tool__step">3</span> Simulatore canone noleggio
+        </h2>
+        <div class="tool__sim-row">
+          <div class="tool__field">
+            <label class="tool__label" for="macchina-select">Macchina</label>
+            <select id="macchina-select" class="tool__select"></select>
+          </div>
+          <div class="tool__field">
+            <label class="tool__label" for="durata-select">Durata</label>
+            <select id="durata-select" class="tool__select">
+              <option value="24">24 mesi</option>
+              <option value="30" selected>30 mesi</option>
+              <option value="36">36 mesi</option>
+              <option value="48">48 mesi</option>
+              <option value="60">60 mesi</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="sim-results" class="tool__sim-results">
+          <div class="tool__sim-main">
+            <span class="tool__sim-label">Canone mensile</span>
+            <span id="canone-mensile" class="tool__sim-value"></span>
+          </div>
+          <div class="tool__sim-grid">
+            <div class="tool__sim-card">
+              <span class="tool__sim-label">Canone trimestrale anticipato</span>
+              <span id="canone-trim" class="tool__sim-value--small"></span>
+            </div>
+            <div class="tool__sim-card">
+              <span class="tool__sim-label">Prezzo macchina</span>
+              <span id="prezzo-macch" class="tool__sim-value--small"></span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Step 4: Funnel burrata -->
+      <section class="tool__section">
+        <h2 class="tool__section-title">
+          <span class="tool__step">4</span> Funnel burrata — margine vs canone
+        </h2>
+        <div class="tool__slider-group">
+          <div class="tool__slider-row">
+            <label class="tool__label">Margine €/kg</label>
+            <input type="range" id="slider-margine" min="0.5" max="4" step="0.1" value="1.5" class="tool__slider" />
+            <span id="val-margine" class="tool__slider-val">€1.50</span>
+          </div>
+          <div class="tool__slider-row">
+            <label class="tool__label">Ore/giorno</label>
+            <input type="range" id="slider-ore" min="1" max="16" step="1" value="8" class="tool__slider" />
+            <span id="val-ore" class="tool__slider-val">8</span>
+          </div>
+          <div class="tool__slider-row">
+            <label class="tool__label">Giorni/mese</label>
+            <input type="range" id="slider-giorni" min="10" max="30" step="1" value="26" class="tool__slider" />
+            <span id="val-giorni" class="tool__slider-val">26</span>
+          </div>
+        </div>
+
+        <div class="tool__funnel-results">
+          <div class="tool__funnel-card">
+            <span class="tool__sim-label">Produzione kg/giorno</span>
+            <span id="kg-giorno" class="tool__sim-value--small"></span>
+          </div>
+          <div class="tool__funnel-card">
+            <span class="tool__sim-label">Margine mensile lordo</span>
+            <span id="margine-mensile" class="tool__sim-value--small"></span>
+          </div>
+          <div class="tool__funnel-card tool__funnel-card--highlight">
+            <span class="tool__sim-label">Margine residuo dopo canone</span>
+            <span id="margine-residuo" class="tool__sim-value"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Step 5: Checklist documenti -->
+      <section class="tool__section">
+        <h2 class="tool__section-title">
+          <span class="tool__step">5</span> Documenti richiesti
+        </h2>
+        <div id="docs-list" class="tool__docs"></div>
+      </section>
+    </div>
+  </div>
+</ToolLayout>
+
+<!-- Tutto il JS inline -->
+<script>
+  // --- Dati ---
+  const PASSWORD = 'marotta2026';
+  const KEY = 'mcf_marotta_auth';
+
+  const MACCHINE = [
+    { id:1, nome:"Mevo Smart Full Alluminio",   prezzo:140000, pezziOra:400,  fascia:"small" },
+    { id:2, nome:"Mevo Smart Full Inox",        prezzo:150000, pezziOra:400,  fascia:"small" },
+    { id:3, nome:"Mevo Smart Full Elettronico", prezzo:160000, pezziOra:400,  fascia:"small" },
+    { id:9, nome:"Mevo Plus",                   prezzo:145000, pezziOra:400,  fascia:"small" },
+    { id:4, nome:"Mevo Fast Alluminio",         prezzo:260704, pezziOra:1200, fascia:"medium" },
+    { id:5, nome:"Mevo Fast Inox",              prezzo:284704, pezziOra:1200, fascia:"medium" },
+    { id:6, nome:"Mevo Fast Elettronica",       prezzo:321644, pezziOra:1200, fascia:"medium" },
+    { id:7, nome:"Mevo 6 Full Pneumatica",      prezzo:377000, pezziOra:2000, fascia:"large" },
+    { id:8, nome:"Mevo6 Elettronica",           prezzo:425000, pezziOra:2000, fascia:"large" },
+  ];
+
+  const GRENKE = [
+    { mesi:24, bands:[
+      {da:500,a:2500,c:5.014},{da:2501,a:5000,c:5.011},
+      {da:5001,a:12000,c:4.967},{da:12001,a:25000,c:4.959},
+      {da:25001,a:50000,c:4.882},{da:50001,a:500000,c:4.820}
+    ]},
+    { mesi:30, bands:[
+      {da:500,a:2500,c:4.049},{da:2501,a:5000,c:4.030},
+      {da:5001,a:12000,c:3.998},{da:12001,a:25000,c:3.973},
+      {da:25001,a:50000,c:3.955},{da:50001,a:500000,c:3.911}
+    ]},
+    { mesi:36, bands:[
+      {da:500,a:2500,c:3.634},{da:2501,a:5000,c:3.541},
+      {da:5001,a:12000,c:3.472},{da:12001,a:25000,c:3.448},
+      {da:25001,a:50000,c:3.410},{da:50001,a:500000,c:3.406}
+    ]},
+    { mesi:48, bands:[
+      {da:500,a:2500,c:3.069},{da:2501,a:5000,c:2.742},
+      {da:5001,a:12000,c:2.712},{da:12001,a:25000,c:2.679},
+      {da:25001,a:50000,c:2.677},{da:50001,a:500000,c:2.674}
+    ]},
+    { mesi:60, bands:[
+      {da:500,a:2500,c:2.672},{da:2501,a:5000,c:2.315},
+      {da:5001,a:12000,c:2.277},{da:12001,a:25000,c:2.246},
+      {da:25001,a:50000,c:2.212},{da:50001,a:500000,c:2.149}
+    ]},
+  ];
+
+  const DEMO: Record<string, { rs: string; fat: number }> = {
+    "01234567890": { rs: "Caseificio Demo SRL",        fat: 350000 },
+    "12345678903": { rs: "Latteria Cooperativa Sud",    fat: 1200000 },
+    "98765432109": { rs: "Azienda Casearia Grandi SpA", fat: 3500000 },
+  };
+
+  const DOCS: Record<string, string[]> = {
+    grenke: [
+      "Visura camerale aggiornata",
+      "Documento identità titolare / AU",
+      "Preventivo macchina da Marotta Evolution"
+    ],
+    sella: [
+      "Bilancio 2024 (o ultima dichiarazione disponibile)",
+      "Situazione contabile infrannuale",
+      "Centrale Rischi ultimi 12 mesi",
+      "Documento identità AU",
+      "Visura camerale",
+      "Dettaglio partecipate (se presenti)",
+      "Preventivo bene"
+    ],
+    alba: [
+      "Bilancio 2024",
+      "Visura camerale",
+      "Documento identità AU",
+      "Preventivo bene",
+      "Business plan semplificato per Sabatini (MCF lo predispone)"
+    ]
+  };
+
+  // --- Funzioni utilità ---
+  function eur(n: number): string {
+    return n.toLocaleString('it-IT', { style:'currency', currency:'EUR', minimumFractionDigits:0, maximumFractionDigits:0 });
+  }
+
+  function eurDec(n: number): string {
+    return n.toLocaleString('it-IT', { style:'currency', currency:'EUR', minimumFractionDigits:2 });
+  }
+
+  function validaPiva(p: string): boolean {
+    if (!/^\d{11}$/.test(p)) return false;
+    let s = 0;
+    for (let i = 0; i < 10; i++) {
+      const d = parseInt(p[i]);
+      s += (i % 2 === 0) ? d : (d * 2 > 9 ? d * 2 - 9 : d * 2);
+    }
+    return (10 - s % 10) % 10 === parseInt(p[10]);
+  }
+
+  function classifica(fat: number) {
+    if (fat < 500000) return {
+      label: "Piccolo", fascia: "small", canale: "grenke",
+      canaleLabel: "Grenke / Pagarent", incentivi: false
+    };
+    if (fat <= 2000000) return {
+      label: "Medio", fascia: "medium", canale: "grenke_alba",
+      canaleLabel: "Grenke / Pagarent · Alba / Credem", incentivi: true
+    };
+    return {
+      label: "Strutturato", fascia: "large", canale: "sella",
+      canaleLabel: "Sella Leasing", incentivi: true
+    };
+  }
+
+  function getCoeff(prezzo: number, mesi: number): number | null {
+    const dur = GRENKE.find(g => g.mesi === mesi);
+    if (!dur) return null;
+    const band = dur.bands.find(b => prezzo >= b.da && prezzo <= b.a);
+    return band ? band.c : null;
+  }
+
+  // --- DOM refs ---
+  const gate = document.getElementById('gate')!;
+  const tool = document.getElementById('tool')!;
+  const gatePwd = document.getElementById('gate-pwd') as HTMLInputElement;
+  const gateBtn = document.getElementById('gate-btn')!;
+  const gateError = document.getElementById('gate-error')!;
+  const logoutBtn = document.getElementById('logout-btn')!;
+
+  const pivaInput = document.getElementById('piva-input') as HTMLInputElement;
+  const pivaBtn = document.getElementById('piva-btn')!;
+  const pivaError = document.getElementById('piva-error')!;
+  const resultDiv = document.getElementById('result')!;
+
+  const macchinaSelect = document.getElementById('macchina-select') as HTMLSelectElement;
+  const durataSelect = document.getElementById('durata-select') as HTMLSelectElement;
+
+  // --- Auth ---
+  function showTool() {
+    gate.hidden = true;
+    tool.hidden = false;
+  }
+
+  function showGate() {
+    gate.hidden = false;
+    tool.hidden = true;
+  }
+
+  if (localStorage.getItem(KEY) === 'ok') {
+    showTool();
+  }
+
+  gateBtn.addEventListener('click', () => {
+    if (gatePwd.value === PASSWORD) {
+      localStorage.setItem(KEY, 'ok');
+      showTool();
+    } else {
+      gateError.hidden = false;
+      gatePwd.classList.add('gate__input--error');
+    }
+  });
+
+  gatePwd.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') gateBtn.click();
+  });
+
+  logoutBtn.addEventListener('click', () => {
+    localStorage.removeItem(KEY);
+    showGate();
+    gatePwd.value = '';
+    gateError.hidden = true;
+  });
+
+  // --- Popola select macchine ---
+  MACCHINE.forEach(m => {
+    const opt = document.createElement('option');
+    opt.value = String(m.id);
+    opt.textContent = `${m.nome} — ${eur(m.prezzo)}`;
+    macchinaSelect.appendChild(opt);
+  });
+
+  // --- Stato corrente ---
+  let currentFat = 0;
+  let currentCanale = '';
+
+  // --- P.IVA lookup ---
+  function cercaPiva() {
+    const piva = pivaInput.value.trim();
+    pivaError.hidden = true;
+
+    if (!validaPiva(piva)) {
+      pivaError.textContent = 'P.IVA non valida. Deve essere di 11 cifre con check digit corretto.';
+      pivaError.hidden = false;
+      return;
+    }
+
+    const data = DEMO[piva];
+    if (!data) {
+      pivaError.textContent = 'P.IVA non trovata nel database demo. Usa una delle P.IVA di test.';
+      pivaError.hidden = false;
+      return;
+    }
+
+    currentFat = data.fat;
+    const cl = classifica(data.fat);
+    currentCanale = cl.canale;
+
+    // Popola risultati
+    document.getElementById('rs')!.textContent = data.rs;
+    document.getElementById('fat')!.textContent = eur(data.fat);
+    const classLabel = document.getElementById('class-label')!;
+    classLabel.textContent = cl.label;
+    classLabel.className = 'tool__info-value tool__info-value--badge tool__badge--' + cl.fascia;
+    document.getElementById('canale')!.textContent = cl.canaleLabel;
+
+    // Incentivi
+    const incBox = document.getElementById('incentivi-box')!;
+    incBox.hidden = !cl.incentivi;
+
+    // Documenti
+    renderDocs(cl.canale);
+
+    // Mostra risultati
+    resultDiv.hidden = false;
+
+    // Calcola simulatore
+    calcola();
+    calcolaFunnel();
+  }
+
+  pivaBtn.addEventListener('click', cercaPiva);
+  pivaInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') cercaPiva();
+  });
+
+  // Demo buttons
+  document.querySelectorAll('.tool__demo-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      pivaInput.value = (btn as HTMLElement).dataset.piva || '';
+      cercaPiva();
+    });
+  });
+
+  // --- Documenti ---
+  function renderDocs(canale: string) {
+    const container = document.getElementById('docs-list')!;
+    // Determina quali checklist mostrare
+    let lists: { title: string; docs: string[] }[] = [];
+
+    if (canale === 'grenke') {
+      lists = [{ title: 'Grenke / Pagarent', docs: DOCS.grenke }];
+    } else if (canale === 'grenke_alba') {
+      lists = [
+        { title: 'Grenke / Pagarent', docs: DOCS.grenke },
+        { title: 'Alba / Credem (Sabatini)', docs: DOCS.alba }
+      ];
+    } else if (canale === 'sella') {
+      lists = [{ title: 'Sella Leasing', docs: DOCS.sella }];
+    }
+
+    container.innerHTML = lists.map(l => `
+      <div class="tool__docs-group">
+        <h3 class="tool__docs-title">${l.title}</h3>
+        <ul class="tool__docs-list">
+          ${l.docs.map(d => `<li><span class="material-icons-outlined" aria-hidden="true">check_circle</span> ${d}</li>`).join('')}
+        </ul>
+      </div>
+    `).join('');
+  }
+
+  // --- Simulatore canone ---
+  function calcola() {
+    const macchina = MACCHINE.find(m => m.id === parseInt(macchinaSelect.value));
+    const mesi = parseInt(durataSelect.value);
+    if (!macchina) return;
+
+    const coeff = getCoeff(macchina.prezzo, mesi);
+    if (!coeff) return;
+
+    const canoneMensile = (macchina.prezzo * coeff) / 100;
+    const canoneTrim = canoneMensile * 3;
+
+    document.getElementById('canone-mensile')!.textContent = eurDec(canoneMensile);
+    document.getElementById('canone-trim')!.textContent = eurDec(canoneTrim);
+    document.getElementById('prezzo-macch')!.textContent = eur(macchina.prezzo);
+
+    // Ricalcola funnel
+    calcolaFunnel();
+  }
+
+  macchinaSelect.addEventListener('change', calcola);
+  durataSelect.addEventListener('change', calcola);
+
+  // --- Funnel burrata ---
+  const sliderMargine = document.getElementById('slider-margine') as HTMLInputElement;
+  const sliderOre = document.getElementById('slider-ore') as HTMLInputElement;
+  const sliderGiorni = document.getElementById('slider-giorni') as HTMLInputElement;
+  const valMargine = document.getElementById('val-margine')!;
+  const valOre = document.getElementById('val-ore')!;
+  const valGiorni = document.getElementById('val-giorni')!;
+
+  function calcolaFunnel() {
+    const macchina = MACCHINE.find(m => m.id === parseInt(macchinaSelect.value));
+    const mesi = parseInt(durataSelect.value);
+    if (!macchina) return;
+
+    const margineKg = parseFloat(sliderMargine.value);
+    const oreGiorno = parseInt(sliderOre.value);
+    const giorniMese = parseInt(sliderGiorni.value);
+
+    // Aggiorna label slider
+    valMargine.textContent = `€${margineKg.toFixed(2)}`;
+    valOre.textContent = String(oreGiorno);
+    valGiorni.textContent = String(giorniMese);
+
+    // Calcolo
+    const kgGiorno = macchina.pezziOra * oreGiorno * 0.125;
+    const margineMensile = kgGiorno * margineKg * giorniMese;
+
+    const coeff = getCoeff(macchina.prezzo, mesi);
+    const canoneMensile = coeff ? (macchina.prezzo * coeff) / 100 : 0;
+    const margineResiduo = margineMensile - canoneMensile;
+
+    document.getElementById('kg-giorno')!.textContent = `${kgGiorno.toLocaleString('it-IT', { maximumFractionDigits: 0 })} kg`;
+    document.getElementById('margine-mensile')!.textContent = eurDec(margineMensile);
+
+    const residuoEl = document.getElementById('margine-residuo')!;
+    residuoEl.textContent = eurDec(margineResiduo);
+    residuoEl.className = margineResiduo >= 0
+      ? 'tool__sim-value tool__sim-value--positive'
+      : 'tool__sim-value tool__sim-value--negative';
+  }
+
+  sliderMargine.addEventListener('input', calcolaFunnel);
+  sliderOre.addEventListener('input', calcolaFunnel);
+  sliderGiorni.addEventListener('input', calcolaFunnel);
+</script>
+
+<style>
+  /* === Gate password === */
+  .gate {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 60vh;
+    padding: 2rem 1.5rem;
+  }
+
+  .gate__card {
+    text-align: center;
+    background: #ffffff;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 3rem 2.5rem;
+    max-width: 400px;
+    width: 100%;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  }
+
+  .gate__logo {
+    height: 48px;
+    margin: 0 auto 1.5rem;
+  }
+
+  .gate__label {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-text-light);
+    margin-bottom: 1.5rem;
+  }
+
+  .gate__form {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  .gate__input {
+    flex: 1;
+    padding: 0.8rem 1rem;
+    border: 1.5px solid var(--color-border);
+    border-radius: 8px;
+    font-family: var(--font-family);
+    font-size: 1rem;
+    color: var(--color-text);
+    background: var(--color-bg-alt);
+    transition: border-color 0.2s;
+  }
+
+  .gate__input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(102, 76, 205, 0.15);
+  }
+
+  .gate__input--error {
+    border-color: #ef4444;
+  }
+
+  .gate__btn {
+    padding: 0.8rem 1.5rem;
+    background: var(--color-accent);
+    color: #ffffff;
+    font-family: var(--font-family);
+    font-weight: 700;
+    font-size: 0.95rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .gate__btn:hover {
+    background: var(--color-accent-hover);
+  }
+
+  .gate__error {
+    color: #ef4444;
+    font-size: 0.85rem;
+    margin-top: 0.75rem;
+  }
+
+  /* === Tool === */
+  .tool {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+  }
+
+  .tool__header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--color-border);
+    margin-bottom: 2rem;
+  }
+
+  .tool__logo {
+    height: 40px;
+    flex-shrink: 0;
+  }
+
+  .tool__title {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--color-primary);
+  }
+
+  .tool__sub {
+    font-size: 0.85rem;
+    color: var(--color-text-light);
+  }
+
+  .tool__logout {
+    margin-left: auto;
+    background: none;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    padding: 0.4rem 1rem;
+    font-family: var(--font-family);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-text-light);
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+  }
+
+  .tool__logout:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+
+  /* Sezioni */
+  .tool__section {
+    margin-bottom: 2.5rem;
+  }
+
+  .tool__section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    margin-bottom: 1.25rem;
+  }
+
+  .tool__step {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: var(--color-primary);
+    color: #ffffff;
+    font-size: 0.85rem;
+    font-weight: 700;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* P.IVA input */
+  .tool__piva-row {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .tool__input {
+    flex: 1;
+    padding: 0.8rem 1rem;
+    border: 1.5px solid var(--color-border);
+    border-radius: 8px;
+    font-family: var(--font-family);
+    font-size: 1.1rem;
+    letter-spacing: 0.05em;
+    color: var(--color-text);
+    background: var(--color-bg-alt);
+  }
+
+  .tool__input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(102, 76, 205, 0.15);
+  }
+
+  .tool__btn {
+    padding: 0.8rem 1.5rem;
+    background: var(--color-primary);
+    color: #ffffff;
+    font-family: var(--font-family);
+    font-weight: 700;
+    font-size: 0.95rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .tool__btn:hover {
+    background: var(--color-primary-light);
+  }
+
+  .tool__error {
+    color: #ef4444;
+    font-size: 0.85rem;
+  }
+
+  .tool__demo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.5rem;
+  }
+
+  .tool__demo-label {
+    font-size: 0.8rem;
+    color: var(--color-text-light);
+  }
+
+  .tool__demo-btn {
+    background: var(--color-bg-alt-2);
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    padding: 0.3rem 0.6rem;
+    font-family: var(--font-family);
+    font-size: 0.8rem;
+    color: var(--color-primary);
+    cursor: pointer;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    transition: background 0.2s;
+  }
+
+  .tool__demo-btn:hover {
+    background: var(--color-primary-bg);
+  }
+
+  /* Info grid (classificazione) */
+  .tool__info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  .tool__info-card {
+    background: #ffffff;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  }
+
+  .tool__info-label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--color-text-light);
+    margin-bottom: 0.3rem;
+  }
+
+  .tool__info-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--color-text);
+  }
+
+  .tool__info-value--badge {
+    display: inline-block;
+    padding: 0.2rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+  }
+
+  .tool__badge--small {
+    background: #dbeafe;
+    color: #1e40af;
+  }
+
+  .tool__badge--medium {
+    background: #fef3c7;
+    color: #92400e;
+  }
+
+  .tool__badge--large {
+    background: #d1fae5;
+    color: #065f46;
+  }
+
+  .tool__incentivi {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: var(--radius);
+    padding: 1.25rem 1.5rem;
+    margin-top: 1rem;
+  }
+
+  .tool__incentivi .material-icons-outlined {
+    color: #16a34a;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+  }
+
+  .tool__incentivi p {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: #15803d;
+  }
+
+  /* Simulatore canone */
+  .tool__sim-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .tool__field {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .tool__label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-primary);
+    margin-bottom: 0.35rem;
+  }
+
+  .tool__select {
+    padding: 0.8rem 1rem;
+    border: 1.5px solid var(--color-border);
+    border-radius: 8px;
+    font-family: var(--font-family);
+    font-size: 0.95rem;
+    color: var(--color-text);
+    background: var(--color-bg-alt);
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23293C5B' stroke-width='2' fill='none'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    padding-right: 2.5rem;
+    cursor: pointer;
+  }
+
+  .tool__select:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(102, 76, 205, 0.15);
+  }
+
+  .tool__sim-results {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .tool__sim-main {
+    background: var(--color-primary);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    text-align: center;
+  }
+
+  .tool__sim-label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--color-text-light);
+    margin-bottom: 0.25rem;
+  }
+
+  .tool__sim-main .tool__sim-label {
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  .tool__sim-value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #ffffff;
+    display: block;
+  }
+
+  .tool__sim-value--small {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--color-text);
+    display: block;
+  }
+
+  .tool__sim-value--positive {
+    color: #16a34a;
+  }
+
+  .tool__sim-value--negative {
+    color: #ef4444;
+  }
+
+  .tool__sim-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .tool__sim-card {
+    background: #ffffff;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  }
+
+  /* Slider funnel */
+  .tool__slider-group {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .tool__slider-row {
+    display: grid;
+    grid-template-columns: 120px 1fr 60px;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .tool__slider {
+    width: 100%;
+    accent-color: var(--color-primary);
+    cursor: pointer;
+  }
+
+  .tool__slider-val {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    text-align: right;
+  }
+
+  .tool__funnel-results {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .tool__funnel-card {
+    background: #ffffff;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  }
+
+  .tool__funnel-card--highlight {
+    background: var(--color-bg-alt);
+    border-color: var(--color-primary);
+    border-width: 2px;
+  }
+
+  /* Documenti */
+  .tool__docs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .tool__docs-group {
+    background: #ffffff;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  }
+
+  .tool__docs-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .tool__docs-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .tool__docs-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--color-text);
+  }
+
+  .tool__docs-list .material-icons-outlined {
+    color: var(--color-primary);
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    margin-top: 0.15rem;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .tool__header {
+      flex-wrap: wrap;
+    }
+
+    .tool__title {
+      font-size: 1.1rem;
+    }
+
+    .tool__info-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .tool__sim-row {
+      grid-template-columns: 1fr;
+    }
+
+    .tool__sim-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .tool__slider-row {
+      grid-template-columns: 90px 1fr 50px;
+      gap: 0.5rem;
+    }
+
+    .tool__funnel-results {
+      grid-template-columns: 1fr;
+    }
+
+    .gate__form {
+      flex-direction: column;
+    }
+  }
+</style>
