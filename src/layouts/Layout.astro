@@ -2,9 +2,27 @@
 interface Props {
   title: string;
   description: string;
+  ogImage?: string;
 }
 
-const { title, description } = Astro.props;
+const { title, description, ogImage = '/images/hero-homepage.png' } = Astro.props;
+const canonicalURL = new URL(Astro.url.pathname, 'https://www.mediocreditofacile.it');
+
+// Structured data — Organization (appare su tutte le pagine)
+const organizationLD = {
+  '@context': 'https://schema.org',
+  '@type': 'FinancialService',
+  name: 'Mediocredito Facile',
+  description: 'Broker finanziario specializzato in noleggio operativo, leasing strumentale e finanziamenti per PMI italiane.',
+  url: 'https://www.mediocreditofacile.it',
+  logo: 'https://www.mediocreditofacile.it/images/logo-mediocreditofacile.png',
+  telephone: '+393939957840',
+  email: 'mediocreditofacile@gmail.com',
+  areaServed: { '@type': 'Country', name: 'IT' },
+  serviceType: ['Noleggio Operativo', 'Leasing Strumentale', 'Finanziamenti PMI', 'Fotovoltaico Aziendale', 'Agevolazioni Fiscali'],
+  knowsAbout: ['noleggio operativo', 'leasing strumentale', 'finanziamenti PMI', 'fotovoltaico aziendale', 'agevolazioni fiscali', 'Transizione 5.0', 'Nuova Sabatini', 'credito d\'imposta', 'OPEX', 'deducibilità canone'],
+  sameAs: [],
+};
 ---
 
 <!doctype html>
@@ -20,8 +38,28 @@ const { title, description } = Astro.props;
     <!-- End Google Tag Manager -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL.href} />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={`https://www.mediocreditofacile.it${ogImage}`} />
+    <meta property="og:url" content={canonicalURL.href} />
+    <meta property="og:site_name" content="Mediocredito Facile" />
+    <meta property="og:locale" content="it_IT" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={`https://www.mediocreditofacile.it${ogImage}`} />
+
+    <!-- Structured Data -->
+    <script type="application/ld+json" set:html={JSON.stringify(organizationLD)} />
+
     <link
       href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"

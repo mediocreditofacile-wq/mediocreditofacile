@@ -73,12 +73,23 @@ const faq = [
   { q: 'Il canone di noleggio è deducibile fiscalmente?', a: 'Sì, il canone di noleggio operativo è interamente deducibile dal reddito d\'impresa come costo operativo (art. 108 TUIR). È un vantaggio fiscale immediato rispetto all\'ammortamento di un bene acquistato.' },
   { q: 'Cosa succede alla fine del contratto?', a: 'A scadenza hai tre opzioni: riscattare il bene a un valore residuo concordato, rinnovare il contratto con beni aggiornati, oppure restituire il bene senza ulteriori costi.' },
 ];
+// Structured data FAQ per rich snippets Google
+const faqLD = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faq.map((f) => ({
+    '@type': 'Question',
+    name: f.q,
+    acceptedAnswer: { '@type': 'Answer', text: f.a },
+  })),
+};
 ---
 
 <Layout
-  title="Mediocredito Facile — Noleggio, Leasing e Finanziamenti per PMI"
-  description="Mediocredito Facile: il tuo broker specializzato in noleggio operativo, leasing strumentale e finanziamenti per piccole e medie imprese italiane."
+  title="Mediocredito Facile — Noleggio Operativo, Leasing e Finanziamenti per PMI"
+  description="Broker finanziario per PMI: noleggio operativo, leasing strumentale e finanziamenti. Confrontiamo oltre 10 società, zero anticipo, canone deducibile, delibera in 48h."
 >
+  <script type="application/ld+json" set:html={JSON.stringify(faqLD)} />
   <Header />
   <main>
     {/* ═══ HERO ═══ */}
