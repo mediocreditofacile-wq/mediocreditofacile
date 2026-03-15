@@ -2,7 +2,77 @@
 import Layout from '../layouts/Layout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import landingPages from '../data/landing-pages.json';
+
+// Servizi principali da mostrare in homepage (6 card)
+const servizi = [
+  {
+    icon: 'description',
+    slug: 'noleggio-operativo',
+    title: 'Noleggio Operativo',
+    desc: 'Tecnologia, veicoli e attrezzature senza immobilizzare capitale. Canone fisso e 100% deducibile.',
+  },
+  {
+    icon: 'settings',
+    slug: 'leasing-strumentale',
+    title: 'Leasing Strumentale',
+    desc: 'Macchinari e attrezzature con rate flessibili e il vantaggio del riscatto finale a condizioni negoziate.',
+  },
+  {
+    icon: 'account_balance',
+    slug: 'finanziamenti-pmi',
+    title: 'Finanziamenti PMI',
+    desc: 'Liquidità per crescere e investire. Confrontiamo oltre 10 istituti per trovare il tasso migliore.',
+  },
+  {
+    icon: 'solar_power',
+    slug: 'noleggio-fotovoltaico-zero-anticipo',
+    title: 'Fotovoltaico Aziendale',
+    desc: 'Impianto fotovoltaico a canone fisso da 24 a 84 mesi. Il risparmio in bolletta copre il canone.',
+  },
+  {
+    icon: 'restaurant',
+    slug: 'noleggio-operativo-ristorazione',
+    title: 'Ristorazione',
+    desc: 'Forni, frigoriferi e cucine professionali a canone mensile fisso. Zero anticipo, manutenzione inclusa.',
+  },
+  {
+    icon: 'bolt',
+    slug: 'agevolazioni-fiscali',
+    title: 'Agevolazioni Fiscali',
+    desc: 'Transizione 5.0, Sabatini e deducibilità totale. Ti guidiamo tra gli incentivi per massimizzare il risparmio.',
+  },
+];
+
+// Step "Come funziona"
+const steps = [
+  { num: '01', title: 'Parlaci del tuo progetto', desc: 'Raccontaci cosa ti serve: beni, importo, tempistiche. Una chiamata di 15 minuti è sufficiente.' },
+  { num: '02', title: 'Confrontiamo le soluzioni', desc: 'Analizziamo le offerte di oltre 10 società di noleggio e leasing per trovare le condizioni migliori.' },
+  { num: '03', title: 'Delibera in 48 ore', desc: 'Ti presentiamo la proposta migliore. Dalla firma alla delibera bastano 48 ore lavorative.' },
+];
+
+// Numeri
+const stats = [
+  { value: '10+', label: 'Società partner' },
+  { value: '48h', label: 'Tempo di delibera' },
+  { value: '100%', label: 'Canone deducibile' },
+  { value: '€0', label: 'Anticipo richiesto' },
+];
+
+// Testimonial
+const testimonial = [
+  { quote: 'Abbiamo noleggiato un impianto fotovoltaico da 100kW senza toccare le linee di credito bancarie. In 3 giorni avevamo la delibera.', author: 'Marco T.', role: 'Titolare, azienda manifatturiera', avatar: '/images/avatar-marco.png' },
+  { quote: 'Alberto ci ha trovato condizioni migliori di quelle che avevamo negoziato direttamente con la banca. Professionalità e velocità.', author: 'Sara M.', role: 'CFO, studio associato', avatar: '/images/avatar-sara.png' },
+  { quote: 'Con il noleggio operativo abbiamo rinnovato tutta la flotta IT senza appesantire il bilancio. Canone fisso, zero sorprese.', author: 'Luca R.', role: 'IT Manager, PMI settore logistica', avatar: '/images/avatar-luca.png' },
+];
+
+// FAQ
+const faq = [
+  { q: 'Qual è la differenza tra noleggio operativo e leasing?', a: 'Il noleggio operativo è un costo operativo (OPEX) che non appare come debito in bilancio e non viene segnalato in Centrale Rischi. Il leasing è un finanziamento (CAPEX) con riscatto obbligatorio. Il noleggio offre maggiore flessibilità e vantaggi fiscali immediati.' },
+  { q: 'Serve un anticipo per attivare il noleggio?', a: 'No. Il noleggio operativo non richiede alcun anticipo. Si paga solo il canone periodico (mensile o trimestrale) dalla data di attivazione del contratto.' },
+  { q: 'Quanto tempo serve per la delibera?', a: 'Dalla ricezione della documentazione completa, la pre-delibera arriva in 24 ore e la delibera definitiva entro 48 ore lavorative.' },
+  { q: 'Il canone di noleggio è deducibile fiscalmente?', a: 'Sì, il canone di noleggio operativo è interamente deducibile dal reddito d\'impresa come costo operativo (art. 108 TUIR). È un vantaggio fiscale immediato rispetto all\'ammortamento di un bene acquistato.' },
+  { q: 'Cosa succede alla fine del contratto?', a: 'A scadenza hai tre opzioni: riscattare il bene a un valore residuo concordato, rinnovare il contratto con beni aggiornati, oppure restituire il bene senza ulteriori costi.' },
+];
 ---
 
 <Layout
@@ -11,28 +81,45 @@ import landingPages from '../data/landing-pages.json';
 >
   <Header />
   <main>
-    <section class="home-hero" style="background-image: url(/images/hero-homepage.png)">
-      <div class="home-hero__overlay"></div>
-      <div class="home-hero__inner">
-        <h1 class="home-hero__title">
-          Noleggio, Leasing e<br />Finanziamenti per la Tua Impresa
-        </h1>
-        <p class="home-hero__sub">
-          Confrontiamo le migliori soluzioni finanziarie per far crescere la tua PMI.
-          Zero anticipo, massima flessibilità.
-        </p>
+    {/* ═══ HERO ═══ */}
+    <section class="hero">
+      <div class="hero__inner">
+        <div class="hero__content">
+          <span class="hero__badge">Broker finanziario per PMI</span>
+          <h1 class="hero__title">
+            Noleggio, Leasing e Finanziamenti<br />per la Tua Impresa
+          </h1>
+          <p class="hero__sub">
+            Confrontiamo le migliori soluzioni finanziarie da oltre 10 società partner.
+            Zero anticipo, canone fisso, delibera in 48 ore.
+          </p>
+          <div class="hero__actions">
+            <a href="/finanza-veloce" class="hero__btn hero__btn--primary">Richiedi Preventivo</a>
+            <a href="tel:+393939957840" class="hero__btn hero__btn--outline">
+              <span class="material-icons-outlined" aria-hidden="true">phone</span>
+              Chiama Ora
+            </a>
+          </div>
+        </div>
+        <div class="hero__image">
+          {/* Placeholder per foto hero — vedi prompt Midjourney */}
+          <img src="/images/hero-homepage.png" alt="Consulenza finanziaria per imprese" loading="eager" />
+        </div>
       </div>
     </section>
 
-    <section class="home-services">
-      <div class="home-services__inner">
-        <h2 class="home-services__heading">I Nostri Servizi</h2>
-        <div class="home-services__grid">
-          {landingPages.map((lp) => (
-            <a href={`/${lp.slug}`} class="service-card">
-              <h3 class="service-card__title">{lp.heroTitle}</h3>
-              <p class="service-card__desc">{lp.heroSubtitle}</p>
-              <span class="service-card__link">
+    {/* ═══ SERVIZI ═══ */}
+    <section class="servizi">
+      <div class="servizi__inner">
+        <h2 class="section-title">I Nostri Servizi</h2>
+        <p class="section-subtitle">Soluzioni finanziarie su misura per ogni esigenza della tua impresa</p>
+        <div class="servizi__grid">
+          {servizi.map((s) => (
+            <a href={`/${s.slug}`} class="scard">
+              <span class="material-icons-outlined scard__icon" aria-hidden="true">{s.icon}</span>
+              <h3 class="scard__title">{s.title}</h3>
+              <p class="scard__desc">{s.desc}</p>
+              <span class="scard__link">
                 Scopri di più
                 <span class="material-icons-outlined" aria-hidden="true">arrow_forward</span>
               </span>
@@ -42,15 +129,93 @@ import landingPages from '../data/landing-pages.json';
       </div>
     </section>
 
-    <section class="home-cta">
-      <div class="home-cta__inner">
-        <img src="/images/consulenza-business.png" alt="Consulenza aziendale" class="home-cta__img" loading="lazy" />
-        <div class="home-cta__text">
-          <h2 class="home-cta__title">Un unico interlocutore, più soluzioni</h2>
-          <p class="home-cta__desc">
-            Confrontiamo le offerte di oltre 10 società di noleggio e leasing per trovare la soluzione migliore per la tua azienda. Zero burocrazia, risposta in 24 ore.
+    {/* ═══ COME FUNZIONA ═══ */}
+    <section class="steps">
+      <div class="steps__inner">
+        <h2 class="section-title">Come Funziona</h2>
+        <p class="section-subtitle">Dal primo contatto alla delibera in tre semplici passaggi</p>
+        <div class="steps__grid">
+          {steps.map((s) => (
+            <div class="step">
+              <span class="step__num">{s.num}</span>
+              <h3 class="step__title">{s.title}</h3>
+              <p class="step__desc">{s.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    {/* ═══ NUMERI ═══ */}
+    <section class="stats">
+      <div class="stats__inner">
+        {stats.map((s) => (
+          <div class="stat">
+            <span class="stat__value">{s.value}</span>
+            <span class="stat__label">{s.label}</span>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    {/* ═══ TESTIMONIAL ═══ */}
+    <section class="testi">
+      <div class="testi__inner">
+        <h2 class="section-title">Cosa Dicono i Nostri Clienti</h2>
+        <div class="testi__grid">
+          {testimonial.map((t) => (
+            <div class="tcard">
+              <span class="material-icons-outlined tcard__quote" aria-hidden="true">format_quote</span>
+              <p class="tcard__text">{t.quote}</p>
+              <div class="tcard__author">
+                <img src={t.avatar} alt={t.author} class="tcard__avatar" loading="lazy" />
+                <div>
+                  <p class="tcard__name">{t.author}</p>
+                  <p class="tcard__role">{t.role}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    {/* ═══ FAQ ═══ */}
+    <section class="faq">
+      <div class="faq__inner">
+        <h2 class="section-title">Domande Frequenti</h2>
+        <div class="faq__list">
+          {faq.map((f, i) => (
+            <details class="faq__item" open={i === 0}>
+              <summary class="faq__question">
+                {f.q}
+                <span class="material-icons-outlined faq__chevron" aria-hidden="true">expand_more</span>
+              </summary>
+              <p class="faq__answer">{f.a}</p>
+            </details>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    {/* ═══ CTA FINALE ═══ */}
+    <section class="cta-final">
+      <div class="cta-final__inner">
+        <div class="cta-final__image">
+          {/* Placeholder per foto CTA — vedi prompt Midjourney */}
+          <img src="/images/consulenza-business.png" alt="Consulenza aziendale personalizzata" loading="lazy" />
+        </div>
+        <div class="cta-final__content">
+          <h2 class="cta-final__title">Un unico interlocutore,<br />tutte le soluzioni</h2>
+          <p class="cta-final__desc">
+            Non perderti tra banche e società finanziarie. Alberto ti segue dall'inizio alla fine:
+            dalla valutazione alla delibera, dalla documentazione all'attivazione. Una sola persona
+            di riferimento per tutta la pratica.
           </p>
-          <a href="tel:+393939957840" class="home-cta__btn">Parla con un Consulente</a>
+          <div class="cta-final__actions">
+            <a href="/finanza-veloce" class="hero__btn hero__btn--primary">Richiedi Preventivo Gratuito</a>
+            <a href="/diventa-partner" class="hero__btn hero__btn--outline">Diventa Partner</a>
+          </div>
         </div>
       </div>
     </section>
@@ -59,118 +224,34 @@ import landingPages from '../data/landing-pages.json';
 </Layout>
 
 <style>
-  .home-hero {
-    position: relative;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    padding: 6rem 1.5rem 5.5rem;
+  /* ═══ Titoli di sezione riutilizzabili ═══ */
+  .section-title {
     text-align: center;
-  }
-
-  .home-hero__overlay {
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.4);
-  }
-
-  .home-hero__inner {
-    position: relative;
-    z-index: 1;
-    max-width: 720px;
-    margin: 0 auto;
-  }
-
-  .home-hero__title {
-    font-size: clamp(2rem, 5vw, 3rem);
-    font-weight: 800;
-    line-height: 1.15;
-    letter-spacing: -0.03em;
-    margin-bottom: 1.25rem;
-    color: #ffffff;
-  }
-
-  .home-hero__sub {
-    font-size: clamp(1.05rem, 2.5vw, 1.25rem);
-    line-height: 1.65;
-    color: rgba(255, 255, 255, 0.9);
-  }
-
-  .home-services {
-    padding: 4.5rem 1.5rem;
-  }
-
-  .home-services__inner {
-    max-width: var(--max-width);
-    margin: 0 auto;
-  }
-
-  .home-services__heading {
-    text-align: center;
-    font-size: clamp(1.5rem, 3.5vw, 2rem);
+    font-size: clamp(1.6rem, 3.5vw, 2.2rem);
     font-weight: 800;
     color: var(--color-primary);
-    margin-bottom: 3rem;
+    margin-bottom: 0.5rem;
     letter-spacing: -0.02em;
   }
 
-  .home-services__grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 2rem;
-  }
-
-  .service-card {
-    display: flex;
-    flex-direction: column;
-    background: #ffffff;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius);
-    padding: 2rem 1.75rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-    transition: transform 0.2s, box-shadow 0.2s;
-  }
-
-  .service-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(102, 76, 205, 0.1);
-  }
-
-  .service-card__title {
-    font-size: 1.15rem;
-    font-weight: 700;
-    color: var(--color-primary);
-    margin-bottom: 0.6rem;
-  }
-
-  .service-card__desc {
-    font-size: 0.95rem;
+  .section-subtitle {
+    text-align: center;
+    font-size: 1.05rem;
     color: var(--color-text-light);
-    line-height: 1.6;
-    flex: 1;
+    margin-bottom: 3rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
   }
 
-  .service-card__link {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-    margin-top: 1.25rem;
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--color-accent);
+  /* ═══ HERO ═══ */
+  .hero {
+    background: linear-gradient(135deg, #f8f6ff 0%, #eef0ff 50%, #f0f8ff 100%);
+    padding: 3rem 1.5rem 0;
+    overflow: hidden;
   }
 
-  .service-card__link .material-icons-outlined {
-    font-size: 1rem;
-  }
-
-  /* Sezione consulenza */
-  .home-cta {
-    padding: 4.5rem 1.5rem;
-    background: var(--color-bg);
-  }
-
-  .home-cta__inner {
+  .hero__inner {
     max-width: var(--max-width);
     margin: 0 auto;
     display: grid;
@@ -179,65 +260,498 @@ import landingPages from '../data/landing-pages.json';
     align-items: center;
   }
 
-  .home-cta__img {
+  .hero__badge {
+    display: inline-block;
+    background: var(--color-primary-bg);
+    color: var(--color-primary);
+    font-size: 0.85rem;
+    font-weight: 700;
+    padding: 0.4rem 1rem;
+    border-radius: 100px;
+    margin-bottom: 1.5rem;
+  }
+
+  .hero__title {
+    font-size: clamp(2rem, 4.5vw, 2.8rem);
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    color: var(--color-primary-dark);
+    margin-bottom: 1.25rem;
+  }
+
+  .hero__sub {
+    font-size: 1.1rem;
+    line-height: 1.7;
+    color: var(--color-text);
+    margin-bottom: 2rem;
+    max-width: 480px;
+  }
+
+  .hero__actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .hero__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 1rem;
+    font-weight: 700;
+    padding: 0.85rem 1.75rem;
+    border-radius: 8px;
+    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+  }
+
+  .hero__btn:hover {
+    transform: translateY(-2px);
+  }
+
+  .hero__btn--primary {
+    background: var(--color-accent);
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(254, 111, 58, 0.3);
+  }
+
+  .hero__btn--primary:hover {
+    background: var(--color-accent-hover);
+  }
+
+  .hero__btn--outline {
+    background: #ffffff;
+    color: var(--color-primary);
+    border: 2px solid var(--color-primary);
+  }
+
+  .hero__btn--outline:hover {
+    background: var(--color-primary-bg);
+  }
+
+  .hero__btn--outline .material-icons-outlined {
+    font-size: 1.1rem;
+  }
+
+  .hero__image {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+  }
+
+  .hero__image img {
     width: 100%;
-    border-radius: 12px;
+    max-width: 500px;
+    border-radius: 16px 16px 0 0;
     object-fit: cover;
   }
 
-  .home-cta__title {
-    font-size: clamp(1.5rem, 3.5vw, 2rem);
-    font-weight: 800;
-    color: var(--color-primary);
-    margin-bottom: 1rem;
-    letter-spacing: -0.02em;
+  /* ═══ SERVIZI ═══ */
+  .servizi {
+    padding: 5rem 1.5rem;
   }
 
-  .home-cta__desc {
+  .servizi__inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+
+  .servizi__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+
+  .scard {
+    display: flex;
+    flex-direction: column;
+    background: #ffffff;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 2rem 1.75rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  }
+
+  .scard:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(102, 76, 205, 0.12);
+    border-color: var(--color-primary-light);
+  }
+
+  .scard__icon {
+    font-size: 2rem;
+    color: var(--color-accent);
+    margin-bottom: 1rem;
+  }
+
+  .scard__title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    margin-bottom: 0.5rem;
+  }
+
+  .scard__desc {
+    font-size: 0.92rem;
+    color: var(--color-text-light);
+    line-height: 1.6;
+    flex: 1;
+  }
+
+  .scard__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin-top: 1.25rem;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--color-accent);
+    transition: gap 0.2s;
+  }
+
+  .scard:hover .scard__link {
+    gap: 0.6rem;
+  }
+
+  .scard__link .material-icons-outlined {
+    font-size: 1rem;
+  }
+
+  /* ═══ COME FUNZIONA ═══ */
+  .steps {
+    padding: 5rem 1.5rem;
+    background: var(--color-bg-alt);
+  }
+
+  .steps__inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+
+  .steps__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+
+  .step {
+    text-align: center;
+    padding: 2rem 1.5rem;
+  }
+
+  .step__num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    background: var(--color-primary);
+    color: #ffffff;
+    font-size: 1.25rem;
+    font-weight: 800;
+    border-radius: 50%;
+    margin-bottom: 1.25rem;
+  }
+
+  .step__title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--color-primary-dark);
+    margin-bottom: 0.6rem;
+  }
+
+  .step__desc {
+    font-size: 0.95rem;
+    color: var(--color-text-light);
+    line-height: 1.6;
+  }
+
+  /* ═══ NUMERI ═══ */
+  .stats {
+    padding: 3.5rem 1.5rem;
+    background: var(--color-primary);
+  }
+
+  .stats__inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+    text-align: center;
+  }
+
+  .stat__value {
+    display: block;
+    font-size: clamp(2rem, 4vw, 2.8rem);
+    font-weight: 800;
+    color: #ffffff;
+    line-height: 1;
+    margin-bottom: 0.4rem;
+  }
+
+  .stat__label {
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 500;
+  }
+
+  /* ═══ TESTIMONIAL ═══ */
+  .testi {
+    padding: 5rem 1.5rem;
+  }
+
+  .testi__inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+
+  .testi__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-top: 3rem;
+  }
+
+  .tcard {
+    background: #ffffff;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    position: relative;
+  }
+
+  .tcard__quote {
+    font-size: 2.5rem;
+    color: var(--color-primary-bg);
+    position: absolute;
+    top: 1rem;
+    right: 1.5rem;
+  }
+
+  .tcard__text {
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: var(--color-text);
+    margin-bottom: 1.5rem;
+    font-style: italic;
+  }
+
+  .tcard__author {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .tcard__avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+
+  .tcard__name {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--color-primary-dark);
+  }
+
+  .tcard__role {
+    font-size: 0.8rem;
+    color: var(--color-text-light);
+  }
+
+  /* ═══ FAQ ═══ */
+  .faq {
+    padding: 5rem 1.5rem;
+    background: var(--color-bg-alt);
+  }
+
+  .faq__inner {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  .faq__list {
+    margin-top: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .faq__item {
+    background: #ffffff;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: box-shadow 0.2s;
+  }
+
+  .faq__item[open] {
+    box-shadow: 0 4px 12px rgba(102, 76, 205, 0.08);
+  }
+
+  .faq__question {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--color-primary-dark);
+    cursor: pointer;
+    list-style: none;
+    gap: 1rem;
+  }
+
+  .faq__question::-webkit-details-marker {
+    display: none;
+  }
+
+  .faq__chevron {
+    font-size: 1.5rem;
+    color: var(--color-primary);
+    transition: transform 0.2s;
+    flex-shrink: 0;
+  }
+
+  .faq__item[open] .faq__chevron {
+    transform: rotate(180deg);
+  }
+
+  .faq__answer {
+    padding: 0 1.5rem 1.25rem;
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: var(--color-text);
+  }
+
+  /* ═══ CTA FINALE ═══ */
+  .cta-final {
+    padding: 5rem 1.5rem;
+  }
+
+  .cta-final__inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3.5rem;
+    align-items: center;
+  }
+
+  .cta-final__image img {
+    width: 100%;
+    border-radius: 16px;
+    object-fit: cover;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+  }
+
+  .cta-final__title {
+    font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+    font-weight: 800;
+    color: var(--color-primary);
+    margin-bottom: 1.25rem;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+
+  .cta-final__desc {
     font-size: 1.05rem;
-    line-height: 1.65;
+    line-height: 1.7;
     color: var(--color-text);
     margin-bottom: 2rem;
   }
 
-  .home-cta__btn {
-    display: inline-flex;
-    align-items: center;
-    background: var(--color-accent);
-    color: #ffffff;
-    font-weight: 700;
-    font-size: 1.05rem;
-    padding: 0.9rem 2rem;
-    border-radius: 8px;
-    transition: background 0.2s, transform 0.15s;
+  .cta-final__actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
   }
 
-  .home-cta__btn:hover {
-    background: var(--color-accent-hover);
-    transform: translateY(-1px);
+  /* ═══ RESPONSIVE ═══ */
+  @media (max-width: 960px) {
+    .hero__inner {
+      grid-template-columns: 1fr;
+      text-align: center;
+    }
+
+    .hero__sub {
+      max-width: 100%;
+    }
+
+    .hero__actions {
+      justify-content: center;
+    }
+
+    .hero__image {
+      order: -1;
+    }
+
+    .hero__image img {
+      max-width: 360px;
+      border-radius: 16px;
+    }
+
+    .servizi__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .steps__grid {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+
+    .stats__inner {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .testi__grid {
+      grid-template-columns: 1fr;
+    }
+
+    .cta-final__inner {
+      grid-template-columns: 1fr;
+      text-align: center;
+    }
+
+    .cta-final__actions {
+      justify-content: center;
+    }
   }
 
-  @media (max-width: 768px) {
-    .home-services__grid {
+  @media (max-width: 640px) {
+    .hero {
+      padding: 2rem 1.25rem 0;
+    }
+
+    .servizi,
+    .steps,
+    .testi,
+    .faq,
+    .cta-final {
+      padding: 3.5rem 1.25rem;
+    }
+
+    .stats {
+      padding: 2.5rem 1.25rem;
+    }
+
+    .servizi__grid {
       grid-template-columns: 1fr;
-      gap: 1.25rem;
     }
 
-    .home-hero {
-      padding: 4.5rem 1.25rem 4rem;
+    .hero__actions {
+      flex-direction: column;
+      align-items: center;
     }
 
-    .home-services {
-      padding: 3rem 1.25rem;
-    }
-
-    .home-cta {
-      padding: 3rem 1.25rem;
-    }
-
-    .home-cta__inner {
-      grid-template-columns: 1fr;
-      gap: 2rem;
+    .cta-final__actions {
+      flex-direction: column;
+      align-items: center;
     }
   }
 </style>
