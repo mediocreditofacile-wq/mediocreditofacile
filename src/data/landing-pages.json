@@ -142,7 +142,7 @@
       {
         "icon": "event",
         "title": "Durata certa",
-        "description": "Contratto da 24 a 60 mesi. A scadenza scegli tu: riscatto, rinnovo o restituzione dell'impianto."
+        "description": "Contratto da 24 a 84 mesi. A scadenza scegli tu: riscatto, rinnovo o restituzione dell'impianto."
       }
     ]
   },
@@ -173,16 +173,16 @@
   },
   {
     "slug": "noleggio-fotovoltaico-breve-termine",
-    "metaTitle": "Fotovoltaico da 24 a 60 Mesi | Mediocredito Facile",
-    "metaDescription": "PPA e leasing bancario ti vincolano per 10-20 anni. Il noleggio operativo dura da 24 a 60 mesi. A fine contratto scegli tu cosa fare.",
-    "heroTitle": "Fotovoltaico da 24 a 60 Mesi, Non 20 Anni",
-    "heroSubtitle": "PPA e leasing bancario ti vincolano per 10-20 anni. Il noleggio operativo dura da 24 a 60 mesi. A fine contratto scegli tu cosa fare.",
+    "metaTitle": "Fotovoltaico da 24 a 84 Mesi | Mediocredito Facile",
+    "metaDescription": "PPA e leasing bancario ti vincolano per 10-20 anni. Il noleggio operativo dura da 24 a 84 mesi. A fine contratto scegli tu cosa fare.",
+    "heroTitle": "Fotovoltaico da 24 a 84 Mesi, Non 20 Anni",
+    "heroSubtitle": "PPA e leasing bancario ti vincolano per 10-20 anni. Il noleggio operativo dura da 24 a 84 mesi. A fine contratto scegli tu cosa fare.",
     "ctaText": "Richiedi Informazioni",
     "benefits": [
       {
         "icon": "date_range",
         "title": "Durata flessibile",
-        "description": "Scegli la durata più adatta: 24, 36, 48 o 60 mesi. Nessun vincolo ventennale."
+        "description": "Scegli la durata più adatta: da 24 a 84 mesi. Nessun vincolo ventennale."
       },
       {
         "icon": "checklist",
@@ -268,6 +268,31 @@
         "icon": "person",
         "title": "Un unico interlocutore",
         "description": "Alberto ti segue dall'inizio alla fine. Una sola persona di riferimento per tutta la pratica."
+      }
+    ]
+  },
+  {
+    "slug": "noleggio-operativo-ristorazione",
+    "metaTitle": "Attrezzature Ristorazione in Noleggio | Mediocredito Facile",
+    "metaDescription": "Finanzia forni, frigoriferi e cucine professionali a canone fisso mensile. Zero anticipo, 100% deducibile per il tuo locale. Preventivo in 24h.",
+    "heroTitle": "Attrezzature Ristorazione a Canone Fisso",
+    "heroSubtitle": "Forni, frigoriferi e cucine professionali per il tuo locale a canone mensile fisso. Zero anticipo, 100% deducibile, manutenzione inclusa.",
+    "ctaText": "Richiedi Preventivo Gratuito",
+    "benefits": [
+      {
+        "icon": "payments",
+        "title": "Zero Anticipo per il Tuo Locale",
+        "description": "Forni, banconi e cucine professionali subito operativi senza esborso iniziale. Canone mensile fisso dal primo giorno."
+      },
+      {
+        "icon": "receipt",
+        "title": "100% Deducibile Fiscalmente",
+        "description": "Il canone di noleggio è deducibile come costo d'impresa. Vantaggio fiscale immediato per la tua attività."
+      },
+      {
+        "icon": "build",
+        "title": "Manutenzione e Assistenza Incluse",
+        "description": "Assistenza tecnica e manutenzione incluse nel canone. Zero spese impreviste, il tuo locale resta sempre operativo."
       }
     ]
   }

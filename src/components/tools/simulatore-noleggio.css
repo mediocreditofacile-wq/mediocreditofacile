@@ -70,6 +70,34 @@
   margin-top: 0.3rem;
 }
 
+.sim__button {
+  background: var(--color-cta, #FE6F3A);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius, 8px);
+  padding: 0.85rem 2rem;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+  margin-top: 0.5rem;
+}
+
+.sim__button:hover {
+  background: #e55e2e;
+  transform: translateY(-1px);
+}
+
+.sim__button:active {
+  transform: translateY(0);
+}
+
+.sim__button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .sim__readonly {
   padding: 0.8rem 1rem;
   border: 1.5px solid var(--color-border);
