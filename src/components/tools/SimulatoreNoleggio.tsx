@@ -88,9 +88,10 @@ function eur(n: number): string {
 
 export default function SimulatoreNoleggio() {
   const [tipologia, setTipologia] = useState('Altri Beni Strumentali');
-  const [valore, setValore] = useState(50000);
-  const [valoreInput, setValoreInput] = useState('50000');
+  const [valore, setValore] = useState(0);
+  const [valoreInput, setValoreInput] = useState('');
   const [durata, setDurata] = useState(36);
+  const [calcolato, setCalcolato] = useState(false);
 
   // Durate disponibili in base alla tipologia
   const durateDisponibili = useMemo(() => {
@@ -111,9 +112,9 @@ export default function SimulatoreNoleggio() {
   const isSoftware = tipologia === 'Software Gestionali / CAD';
   const isNonDisponibile = riscattoPerc === null;
 
-  // Calcolo risultati
+  // Calcolo risultati (solo dopo click su "Calcola")
   const risultati = useMemo(() => {
-    if (isSoftware || isNonDisponibile || valore < 500 || valore > 500000) return null;
+    if (!calcolato || isSoftware || isNonDisponibile || valore < 500 || valore > 500000) return null;
 
     // Per durate 72 e 84 (solo fotovoltaico) non ci sono coefficienti Grenke standard
     // Usiamo il coefficiente della durata 60 con una riduzione proporzionale
@@ -144,12 +145,13 @@ export default function SimulatoreNoleggio() {
       coeff,
       risparmioLiquidita: valore,
     };
-  }, [valore, durata, tipologia, riscattoPerc, isSoftware, isNonDisponibile]);
+  }, [calcolato, valore, durata, tipologia, riscattoPerc, isSoftware, isNonDisponibile]);
 
   // Gestione input valore con validazione
   const handleValoreChange = (e: Event) => {
     const raw = (e.target as HTMLInputElement).value.replace(/[^\d]/g, '');
     setValoreInput(raw);
+    setCalcolato(false);
     const num = parseInt(raw, 10);
     if (!isNaN(num)) {
       setValore(Math.min(500000, Math.max(0, num)));
@@ -157,9 +159,11 @@ export default function SimulatoreNoleggio() {
   };
 
   const handleValoreBlur = () => {
-    const clamped = Math.min(500000, Math.max(500, valore));
-    setValore(clamped);
-    setValoreInput(clamped.toString());
+    if (valore > 0) {
+      const clamped = Math.min(500000, Math.max(500, valore));
+      setValore(clamped);
+      setValoreInput(clamped.toString());
+    }
   };
 
   // Evento GTM per tracciamento
@@ -176,10 +180,16 @@ export default function SimulatoreNoleggio() {
     }
   };
 
-  // Push evento quando i risultati cambiano
-  useMemo(() => {
-    if (risultati) pushCalcolo();
-  }, [risultati]);
+  // Click su "Calcola"
+  const handleCalcola = () => {
+    if (valore > 0) {
+      const clamped = Math.min(500000, Math.max(500, valore));
+      setValore(clamped);
+      setValoreInput(clamped.toString());
+    }
+    setCalcolato(true);
+    pushCalcolo();
+  };
 
   return (
     <div class="sim">
@@ -192,7 +202,7 @@ export default function SimulatoreNoleggio() {
             id="tipologia"
             class="sim__select"
             value={tipologia}
-            onChange={(e) => setTipologia((e.target as HTMLSelectElement).value)}
+            onChange={(e) => { setTipologia((e.target as HTMLSelectElement).value); setCalcolato(false); }}
           >
             {Object.keys(RISCATTI).map((t) => (
               <option key={t} value={t}>{t}</option>
@@ -223,7 +233,7 @@ export default function SimulatoreNoleggio() {
             id="durata"
             class="sim__select"
             value={durata}
-            onChange={(e) => setDurata(parseInt((e.target as HTMLSelectElement).value, 10))}
+            onChange={(e) => { setDurata(parseInt((e.target as HTMLSelectElement).value, 10)); setCalcolato(false); }}
           >
             {durateDisponibili.map((d) => (
               <option key={d} value={d}>{d} mesi</option>
@@ -242,6 +252,15 @@ export default function SimulatoreNoleggio() {
                 : `${riscattoPerc}%`}
           </div>
         </div>
+        {/* Bottone Calcola */}
+        <button
+          type="button"
+          class="sim__button"
+          onClick={handleCalcola}
+          disabled={isSoftware || valore < 1}
+        >
+          Calcola preventivo
+        </button>
       </div>
 
       {/* --- RISULTATI --- */}
@@ -272,15 +291,9 @@ export default function SimulatoreNoleggio() {
               <span class="sim__result-value">{eur(risultati.canoneTrimestrale)}</span>
             </div>
 
-            <div class="sim__result-grid">
-              <div class="sim__result-card sim__result-card--small">
-                <span class="sim__result-label">Riscatto finale ({risultati.riscattoPerc}%)</span>
-                <span class="sim__result-value">{eur(risultati.valoreRiscatto)}</span>
-              </div>
-              <div class="sim__result-card sim__result-card--small">
-                <span class="sim__result-label">Totale a fine contratto</span>
-                <span class="sim__result-value">{eur(risultati.totaleContratto)}</span>
-              </div>
+            <div class="sim__result-card">
+              <span class="sim__result-label">Riscatto finale ({risultati.riscattoPerc}%)</span>
+              <span class="sim__result-value">{eur(risultati.valoreRiscatto)}</span>
             </div>
 
             <div class="sim__risparmio">
@@ -303,7 +316,7 @@ export default function SimulatoreNoleggio() {
         ) : (
           <div class="sim__message">
             <span class="material-icons-outlined sim__message-icon">edit</span>
-            <p>Inserisci un valore tra €500 e €500.000 per calcolare il canone.</p>
+            <p>Compila i campi e premi <strong>Calcola preventivo</strong> per vedere il risultato.</p>
           </div>
         )}
       </div>
