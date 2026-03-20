@@ -11,7 +11,7 @@ export const prerender = false;
  */
 
 const CERVED_BASE = 'https://api.cerved.com/cervedApi';
-const ALLOWED_ORIGIN = 'https://mcf-marotta.netlify.app';
+const ALLOWED_ORIGIN = '*';
 
 // Cache in-memory (TTL 24h) per risparmiare le 500 chiamate gratuite
 const cache = new Map<string, { data: CervedResult; ts: number }>();
