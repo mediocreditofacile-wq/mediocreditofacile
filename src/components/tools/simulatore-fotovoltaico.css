@@ -590,6 +590,19 @@
   white-space: nowrap;
 }
 
+/* Variante partner: fascia compatta con bottone diretto */
+.simpv__lead-bar--partner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.simpv__lead-bar--partner .simpv__button--cta {
+  margin-top: 0;
+  white-space: nowrap;
+}
+
 /* --- Immagine placeholder (colonna destra, prima del calcolo) --- */
 .simpv__placeholder-img {
   border-radius: var(--radius);
