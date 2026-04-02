@@ -1,0 +1,541 @@
+---
+/**
+ * Simulatore Noleggio Fotovoltaico — /tools/simulatore-noleggio-fotovoltaico
+ * Pagina dedicata: hero con immagine, simulatore interattivo PV, sezioni SEO, contenuto.
+ */
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import SimulatoreFotovoltaico from '../../components/tools/SimulatoreFotovoltaico.tsx';
+---
+
+<ToolLayout
+  title="Simulatore Noleggio Fotovoltaico — Rata e Risparmio | Mediocredito Facile"
+  description="Calcola la rata del noleggio operativo per impianti fotovoltaici e confrontala con il risparmio in bolletta. Risultato immediato, scarica il preventivo PDF."
+  breadcrumbs={[{ name: 'Simulatore Noleggio Fotovoltaico', href: '/tools/simulatore-noleggio-fotovoltaico' }]}
+>
+  <!-- Hero con immagine -->
+  <section class="tool-hero">
+    <div class="tool-hero__inner">
+      <div class="tool-hero__text">
+        <h1 class="tool-hero__title">Simulatore Noleggio<br />Fotovoltaico</h1>
+        <p class="tool-hero__sub">
+          Calcola la rata mensile del noleggio operativo per impianti fotovoltaici.
+          Attiva il confronto con la bolletta per vedere il risparmio reale.
+          Scarica il preventivo PDF da inviare al tuo cliente.
+        </p>
+      </div>
+      <div class="tool-hero__image">
+        <img src="/images/hero-fotovoltaico.png" alt="Impianto fotovoltaico su tetto aziendale" width="480" height="320" loading="eager" />
+      </div>
+    </div>
+  </section>
+
+  <!-- Simulatore interattivo (Preact island) -->
+  <section class="tool-simulator">
+    <div class="tool-simulator__inner">
+      <SimulatoreFotovoltaico client:load />
+    </div>
+  </section>
+
+  <!-- Fascia numeri d'impatto -->
+  <section class="tool-stats">
+    <div class="tool-stats__inner">
+      <div class="tool-stats__item">
+        <span class="tool-stats__number">0 €</span>
+        <span class="tool-stats__label">Anticipo richiesto</span>
+      </div>
+      <div class="tool-stats__divider"></div>
+      <div class="tool-stats__item">
+        <span class="tool-stats__number">100%</span>
+        <span class="tool-stats__label">Canone deducibile</span>
+      </div>
+      <div class="tool-stats__divider"></div>
+      <div class="tool-stats__item">
+        <span class="tool-stats__number">10+</span>
+        <span class="tool-stats__label">Società di locazione</span>
+      </div>
+      <div class="tool-stats__divider"></div>
+      <div class="tool-stats__item">
+        <span class="tool-stats__number">84</span>
+        <span class="tool-stats__label">Mesi di durata max</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sezione SEO: come funziona -->
+  <section class="tool-seo">
+    <div class="tool-seo__inner">
+      <h2 class="tool-seo__heading">Come funziona il noleggio fotovoltaico</h2>
+
+      <div class="tool-seo__grid">
+        <div class="tool-seo__block tool-seo__block--accent" style="--block-accent: #f59e0b;">
+          <span class="tool-seo__icon material-icons-outlined" aria-hidden="true">solar_power</span>
+          <h3 class="tool-seo__subtitle">Installi subito, paghi a rate</h3>
+          <p>
+            L'impianto fotovoltaico viene installato e utilizzato dalla tua azienda fin dal primo giorno.
+            Paghi un canone mensile fisso che include l'assicurazione all-risk. A fine contratto
+            puoi riscattare l'impianto con l'1% del valore iniziale.
+          </p>
+        </div>
+
+        <div class="tool-seo__block tool-seo__block--accent" style="--block-accent: #10b981;">
+          <span class="tool-seo__icon material-icons-outlined" aria-hidden="true">account_balance</span>
+          <h3 class="tool-seo__subtitle">100% deducibile, zero debiti</h3>
+          <p>
+            Il canone è interamente deducibile come costo operativo (OPEX), senza limiti
+            di ammortamento. L'impianto non entra nel bilancio come debito, non appesantisce
+            la centrale rischi e non richiede anticipi significativi.
+          </p>
+        </div>
+
+        <div class="tool-seo__block tool-seo__block--accent" style="--block-accent: #3b82f6;">
+          <span class="tool-seo__icon material-icons-outlined" aria-hidden="true">trending_down</span>
+          <h3 class="tool-seo__subtitle">La rata può costare meno della bolletta</h3>
+          <p>
+            Con il fotovoltaico a noleggio l'energia prodotta abbatte la bolletta fin dal primo mese.
+            Se il risparmio energetico supera la rata, l'impianto si ripaga da solo. Il simulatore
+            qui sopra ti mostra il confronto con i numeri del tuo caso.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sezione SEO: perche noleggio vs acquisto (card con numeri) -->
+  <section class="tool-seo tool-seo--alt">
+    <div class="tool-seo__inner">
+      <h2 class="tool-seo__heading">Perché il noleggio operativo e non l'acquisto diretto</h2>
+
+      <div class="tool-seo__grid">
+        <div class="tool-seo__card-num">
+          <div class="tool-seo__card-num-top">
+            <span class="tool-seo__big-number" id="seo-liquidita">—</span>
+            <span class="tool-seo__big-label">di liquidità che resta in azienda</span>
+          </div>
+          <h3 class="tool-seo__subtitle">Liquidità intatta</h3>
+          <p>
+            Un impianto comprato in contanti toglie liquidità per anni.
+            Con il noleggio operativo quella liquidità resta disponibile per il fatturato,
+            i fornitori, le opportunità. Il canone è un costo fisso e prevedibile, come un affitto.
+          </p>
+        </div>
+
+        <div class="tool-seo__card-num">
+          <div class="tool-seo__card-num-top tool-seo__card-num-top--green">
+            <span class="tool-seo__big-number">All-risk</span>
+            <span class="tool-seo__big-label">copertura inclusa nel canone</span>
+          </div>
+          <h3 class="tool-seo__subtitle">Assicurazione inclusa</h3>
+          <p>
+            Il canone include un'assicurazione che copre danni elettrici, eventi atmosferici,
+            incendio, furto e atti vandalici. Nessun costo imprevisto per tutta la durata del contratto:
+            se l'impianto ha un problema, è coperto.
+          </p>
+        </div>
+
+        <div class="tool-seo__card-num">
+          <div class="tool-seo__card-num-top tool-seo__card-num-top--blue">
+            <span class="tool-seo__big-number">10+</span>
+            <span class="tool-seo__big-label">società di locazione a confronto</span>
+          </div>
+          <h3 class="tool-seo__subtitle">La migliore offerta per il tuo caso</h3>
+          <p>
+            Non ci leghiamo a un singolo finanziatore. Confrontiamo le condizioni
+            di oltre 10 società per trovare il coefficiente migliore per importo, durata
+            e profilo dell'azienda. Il preventivo viene calibrato sulla più competitiva.
+          </p>
+        </div>
+      </div>
+
+      <!-- Card a larghezza piena: Centrale Rischi -->
+      <div class="tool-seo__card-wide">
+        <div class="tool-seo__card-wide-number">
+          <span class="tool-seo__big-number">0 €</span>
+          <span class="tool-seo__big-label">segnalati in Centrale Rischi</span>
+        </div>
+        <div class="tool-seo__card-wide-content">
+          <h3 class="tool-seo__subtitle">Le linee di credito restano libere</h3>
+          <p>
+            Le società di locazione non sono banche e non hanno l'obbligo di segnalare
+            il contratto in Centrale Rischi. Il noleggio operativo non compare tra i debiti
+            dell'azienda: il fido bancario, gli affidamenti e le linee di credito
+            restano intatti e disponibili per l'attività corrente.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+</ToolLayout>
+
+<!-- Script: aggiorna il numero liquidita dalla card SEO in base al costo inserito -->
+<script>
+  function aggiornaLiquidita() {
+    const costoInput = document.getElementById('pv-costo') as HTMLInputElement | null;
+    const target = document.getElementById('seo-liquidita');
+    if (!costoInput || !target) return;
+
+    const num = parseInt(costoInput.value, 10);
+    if (!isNaN(num) && num >= 800) {
+      target.textContent = num.toLocaleString('it-IT') + ' €';
+    } else {
+      target.textContent = '—';
+    }
+  }
+
+  const costoField = document.getElementById('pv-costo');
+  if (costoField) {
+    costoField.addEventListener('input', () => setTimeout(aggiornaLiquidita, 50));
+    costoField.addEventListener('change', () => setTimeout(aggiornaLiquidita, 50));
+    // Inizializza al caricamento
+    setTimeout(aggiornaLiquidita, 500);
+  }
+</script>
+
+<style>
+  /* --- Hero con immagine affiancata --- */
+  .tool-hero {
+    padding: 3rem 1.5rem 2rem;
+    background: var(--color-bg);
+  }
+
+  .tool-hero__inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: center;
+  }
+
+  .tool-hero__title {
+    font-size: clamp(1.75rem, 4.5vw, 2.5rem);
+    font-weight: 800;
+    color: var(--color-primary);
+    letter-spacing: -0.02em;
+    margin-bottom: 0.75rem;
+    line-height: 1.15;
+  }
+
+  .tool-hero__sub {
+    font-size: 1.05rem;
+    color: var(--color-text-light);
+    line-height: 1.65;
+  }
+
+  .tool-hero__image {
+    display: flex;
+    justify-content: center;
+  }
+
+  .tool-hero__image img {
+    width: 100%;
+    max-width: 480px;
+    height: auto;
+    border-radius: var(--radius);
+    object-fit: cover;
+  }
+
+  /* --- Simulatore container --- */
+  .tool-simulator {
+    padding: 0 1.5rem 4rem;
+  }
+
+  .tool-simulator__inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+
+  /* --- Fascia numeri d'impatto --- */
+  .tool-stats {
+    padding: 3rem 1.5rem;
+    background: linear-gradient(135deg, #1e1b3a 0%, #2d2556 50%, #1a1640 100%);
+  }
+
+  .tool-stats__inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0;
+  }
+
+  .tool-stats__item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 0.5rem 1rem;
+  }
+
+  .tool-stats__number {
+    font-size: clamp(1.75rem, 4vw, 2.5rem);
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+
+  .tool-stats__label {
+    font-size: 0.82rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin-top: 0.4rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .tool-stats__divider {
+    width: 1px;
+    height: 48px;
+    background: rgba(255, 255, 255, 0.15);
+    flex-shrink: 0;
+  }
+
+  /* --- Sezione SEO --- */
+  .tool-seo {
+    padding: 4.5rem 1.5rem;
+    background: var(--color-bg-alt);
+  }
+
+  .tool-seo__inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+
+  .tool-seo__heading {
+    text-align: center;
+    font-size: clamp(1.5rem, 3.5vw, 2rem);
+    font-weight: 800;
+    color: var(--color-heading, #212121);
+    margin-bottom: 3rem;
+    letter-spacing: -0.02em;
+  }
+
+  .tool-seo__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+
+  .tool-seo__block {
+    background: #ffffff;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 2rem 1.75rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .tool-seo__block:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.07);
+  }
+
+  /* Blocchi con accento colorato (prima riga) */
+  .tool-seo__block--accent {
+    border-top: 3px solid var(--block-accent, var(--color-primary));
+  }
+
+  .tool-seo__block--accent .tool-seo__icon {
+    color: var(--block-accent, var(--color-primary));
+  }
+
+  .tool-seo__icon {
+    font-size: 2rem;
+    color: var(--color-text-light);
+    margin-bottom: 1rem;
+    display: block;
+  }
+
+  .tool-seo__subtitle {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--color-heading, #212121);
+    margin-bottom: 0.75rem;
+  }
+
+  .tool-seo__block p {
+    font-size: 0.95rem;
+    line-height: 1.65;
+    color: var(--color-text);
+  }
+
+  .tool-seo--alt {
+    background: var(--color-bg);
+  }
+
+  /* Card con numeri grandi (seconda sezione) */
+  .tool-seo__card-num {
+    background: #ffffff;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .tool-seo__card-num:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.07);
+  }
+
+  .tool-seo__card-num-top {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    padding: 1.5rem 1.75rem 1.25rem;
+    border-bottom: 1px solid #fcd34d;
+  }
+
+  .tool-seo__card-num-top--green {
+    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+    border-bottom-color: #6ee7b7;
+  }
+
+  .tool-seo__card-num-top--blue {
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    border-bottom-color: #93c5fd;
+  }
+
+  .tool-seo__big-number {
+    display: block;
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-weight: 800;
+    color: var(--color-heading, #212121);
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+
+  .tool-seo__big-label {
+    display: block;
+    font-size: 0.82rem;
+    color: var(--color-text-light);
+    margin-top: 0.3rem;
+    font-weight: 500;
+  }
+
+  .tool-seo__card-num .tool-seo__subtitle {
+    padding: 1.25rem 1.75rem 0;
+  }
+
+  .tool-seo__card-num p {
+    padding: 0 1.75rem 1.75rem;
+    font-size: 0.95rem;
+    line-height: 1.65;
+    color: var(--color-text);
+  }
+
+  /* Card a larghezza piena — Centrale Rischi */
+  .tool-seo__card-wide {
+    margin-top: 2rem;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0;
+    background: #ffffff;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .tool-seo__card-wide:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.07);
+  }
+
+  .tool-seo__card-wide-number {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 2rem 2.5rem;
+    background: linear-gradient(135deg, #1e1b3a 0%, #2d2556 100%);
+    min-width: 200px;
+  }
+
+  .tool-seo__card-wide-number .tool-seo__big-number {
+    color: #ffffff;
+    font-size: clamp(1.75rem, 3.5vw, 2.25rem);
+  }
+
+  .tool-seo__card-wide-number .tool-seo__big-label {
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  .tool-seo__card-wide-content {
+    padding: 2rem 2.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .tool-seo__card-wide-content p {
+    font-size: 0.95rem;
+    line-height: 1.65;
+    color: var(--color-text);
+  }
+
+  /* --- Responsive --- */
+  @media (max-width: 768px) {
+    .tool-hero {
+      padding: 2.5rem 1.25rem 2rem;
+    }
+
+    .tool-hero__inner {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      text-align: center;
+    }
+
+    .tool-hero__image {
+      order: -1;
+    }
+
+    .tool-hero__image img {
+      max-width: 320px;
+    }
+
+    .tool-simulator {
+      padding: 0 1.25rem 3rem;
+    }
+
+    .tool-stats {
+      padding: 2rem 1rem;
+    }
+
+    .tool-stats__inner {
+      flex-wrap: wrap;
+      gap: 1.25rem 0;
+    }
+
+    .tool-stats__item {
+      flex: 1 1 45%;
+      padding: 0.5rem;
+    }
+
+    .tool-stats__divider {
+      display: none;
+    }
+
+    .tool-seo {
+      padding: 3rem 1.25rem;
+    }
+
+    .tool-seo__grid {
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+    }
+
+    .tool-seo__card-wide {
+      grid-template-columns: 1fr;
+    }
+
+    .tool-seo__card-wide-number {
+      min-width: 0;
+      padding: 1.5rem 1.75rem 1.25rem;
+    }
+
+    .tool-seo__card-wide-content {
+      padding: 1.25rem 1.75rem 1.75rem;
+    }
+  }
+</style>
