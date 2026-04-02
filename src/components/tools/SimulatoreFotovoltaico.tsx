@@ -135,7 +135,11 @@ interface RisultatoDurata {
   differenza?: number;
 }
 
-export default function SimulatoreFotovoltaico() {
+interface Props {
+  modalitaPartner?: boolean;
+}
+
+export default function SimulatoreFotovoltaico({ modalitaPartner = false }: Props) {
   // Modalita base vs business plan
   const [modalitaBP, setModalitaBP] = useState(false);
 
@@ -627,71 +631,92 @@ export default function SimulatoreFotovoltaico() {
 
       </div>
 
-      {/* --- FORM SCARICA PDF — fascia a larghezza piena sotto la griglia --- */}
-      <div class="simpv__lead-bar" id="contatti">
-        <div class="simpv__lead-bar-info">
-          <span class="material-icons-outlined simpv__lead-icon" aria-hidden="true">picture_as_pdf</span>
-          <div>
-            <h4 class="simpv__lead-title">Scarica il Preventivo PDF</h4>
-            <p class="simpv__lead-sub">
-              PDF personalizzato con il nome della tua azienda, pronto da inviare al cliente.
-            </p>
+      {/* --- FORM SCARICA PDF o BOTTONE DIRETTO (partner) --- */}
+      {modalitaPartner ? (
+        <div class="simpv__lead-bar simpv__lead-bar--partner" id="contatti">
+          <div class="simpv__lead-bar-info">
+            <span class="material-icons-outlined simpv__lead-icon" aria-hidden="true">picture_as_pdf</span>
+            <div>
+              <h4 class="simpv__lead-title">Stampa il Preventivo</h4>
+              <p class="simpv__lead-sub">
+                Stampa o salva in PDF direttamente dal browser. Nessuna registrazione richiesta.
+              </p>
+            </div>
           </div>
+          <button
+            type="button"
+            class="simpv__button simpv__button--cta"
+            onClick={() => window.print()}
+          >
+            Stampa / Salva PDF
+          </button>
         </div>
-        <form class="simpv__lead-bar-form" onSubmit={handleFormSubmit}>
-          <div class="simpv__lead-bar-fields">
-            <input
-              type="text"
-              class="simpv__input"
-              placeholder="Nome e Cognome"
-              value={formNome}
-              onInput={(e) => setFormNome((e.target as HTMLInputElement).value)}
-              required
-            />
-            <input
-              type="text"
-              class="simpv__input"
-              placeholder="Nome Azienda"
-              value={formAzienda}
-              onInput={(e) => setFormAzienda((e.target as HTMLInputElement).value)}
-              required
-            />
-            <input
-              type="email"
-              class="simpv__input"
-              placeholder="Email"
-              value={formEmail}
-              onInput={(e) => setFormEmail((e.target as HTMLInputElement).value)}
-              required
-            />
-            <input
-              type="tel"
-              class="simpv__input"
-              placeholder="Cellulare"
-              value={formTelefono}
-              onInput={(e) => setFormTelefono((e.target as HTMLInputElement).value)}
-              required
-            />
+      ) : (
+        <div class="simpv__lead-bar" id="contatti">
+          <div class="simpv__lead-bar-info">
+            <span class="material-icons-outlined simpv__lead-icon" aria-hidden="true">picture_as_pdf</span>
+            <div>
+              <h4 class="simpv__lead-title">Scarica il Preventivo PDF</h4>
+              <p class="simpv__lead-sub">
+                PDF personalizzato con il nome della tua azienda, pronto da inviare al cliente.
+              </p>
+            </div>
           </div>
-          <div class="simpv__lead-bar-actions">
-            <label class="simpv__privacy">
+          <form class="simpv__lead-bar-form" onSubmit={handleFormSubmit}>
+            <div class="simpv__lead-bar-fields">
               <input
-                type="checkbox"
-                checked={formPrivacy}
-                onChange={() => setFormPrivacy(!formPrivacy)}
+                type="text"
+                class="simpv__input"
+                placeholder="Nome e Cognome"
+                value={formNome}
+                onInput={(e) => setFormNome((e.target as HTMLInputElement).value)}
+                required
               />
-              <span>Ho letto e accetto l'<a href="/privacy" target="_blank">informativa privacy</a></span>
-            </label>
-            <button
-              type="submit"
-              class="simpv__button simpv__button--cta"
-              disabled={!formValido || formInvio}
-            >
-              {formInvio ? 'Invio in corso…' : 'Scarica Preventivo PDF'}
-            </button>
-          </div>
-        </form>
-      </div>
+              <input
+                type="text"
+                class="simpv__input"
+                placeholder="Nome Azienda"
+                value={formAzienda}
+                onInput={(e) => setFormAzienda((e.target as HTMLInputElement).value)}
+                required
+              />
+              <input
+                type="email"
+                class="simpv__input"
+                placeholder="Email"
+                value={formEmail}
+                onInput={(e) => setFormEmail((e.target as HTMLInputElement).value)}
+                required
+              />
+              <input
+                type="tel"
+                class="simpv__input"
+                placeholder="Cellulare"
+                value={formTelefono}
+                onInput={(e) => setFormTelefono((e.target as HTMLInputElement).value)}
+                required
+              />
+            </div>
+            <div class="simpv__lead-bar-actions">
+              <label class="simpv__privacy">
+                <input
+                  type="checkbox"
+                  checked={formPrivacy}
+                  onChange={() => setFormPrivacy(!formPrivacy)}
+                />
+                <span>Ho letto e accetto l'<a href="/privacy" target="_blank">informativa privacy</a></span>
+              </label>
+              <button
+                type="submit"
+                class="simpv__button simpv__button--cta"
+                disabled={!formValido || formInvio}
+              >
+                {formInvio ? 'Invio in corso…' : 'Scarica Preventivo PDF'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   );
 }

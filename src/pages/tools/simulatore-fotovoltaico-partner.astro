@@ -1,0 +1,368 @@
+---
+/**
+ * Simulatore Noleggio Fotovoltaico — Accesso Partner
+ * /tools/simulatore-fotovoltaico-partner
+ * Pagina protetta da password. Stessa funzionalità della pubblica,
+ * ma senza form lead: il partner scarica il preventivo direttamente.
+ */
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import SimulatoreFotovoltaico from '../../components/tools/SimulatoreFotovoltaico.tsx';
+---
+
+<ToolLayout
+  title="Simulatore Fotovoltaico — Area Partner | Mediocredito Facile"
+  description="Simulatore riservato ai partner. Calcola la rata del noleggio fotovoltaico e stampa il preventivo."
+  breadcrumbs={[{ name: 'Simulatore Fotovoltaico Partner', href: '/tools/simulatore-fotovoltaico-partner' }]}
+  noindex={true}
+>
+  <!-- Schermata password -->
+  <section class="pw-gate" id="pw-gate">
+    <div class="pw-gate__inner">
+      <span class="material-icons-outlined pw-gate__icon" aria-hidden="true">lock</span>
+      <h1 class="pw-gate__title">Area Partner</h1>
+      <p class="pw-gate__sub">
+        Inserisci la password fornita da Mediocredito Facile per accedere al simulatore.
+      </p>
+      <form class="pw-gate__form" id="pw-form">
+        <input
+          type="password"
+          id="pw-input"
+          class="pw-gate__input"
+          placeholder="Password"
+          autocomplete="off"
+          autofocus
+        />
+        <button type="submit" class="pw-gate__button">Accedi</button>
+      </form>
+      <p class="pw-gate__error" id="pw-error" style="display:none;">Password non corretta.</p>
+    </div>
+  </section>
+
+  <!-- Contenuto protetto (nascosto finché non si inserisce la password) -->
+  <div id="partner-content" style="display:none;">
+    <!-- Hero -->
+    <section class="tool-hero">
+      <div class="tool-hero__inner">
+        <div class="tool-hero__text">
+          <div class="tool-hero__badge">Area Partner</div>
+          <h1 class="tool-hero__title">Simulatore Noleggio<br />Fotovoltaico</h1>
+          <p class="tool-hero__sub">
+            Calcola la rata mensile, confronta con la bolletta e stampa il preventivo
+            direttamente — senza registrazione.
+          </p>
+        </div>
+        <div class="tool-hero__image">
+          <img src="/images/hero-fotovoltaico.png" alt="Impianto fotovoltaico su tetto aziendale" width="480" height="320" loading="eager" />
+        </div>
+      </div>
+    </section>
+
+    <!-- Simulatore (modalità partner: bottone stampa diretto, no form) -->
+    <section class="tool-simulator">
+      <div class="tool-simulator__inner">
+        <SimulatoreFotovoltaico client:load modalitaPartner={true} />
+      </div>
+    </section>
+
+    <!-- Fascia numeri -->
+    <section class="tool-stats">
+      <div class="tool-stats__inner">
+        <div class="tool-stats__item">
+          <span class="tool-stats__number">0 €</span>
+          <span class="tool-stats__label">Anticipo richiesto</span>
+        </div>
+        <div class="tool-stats__divider"></div>
+        <div class="tool-stats__item">
+          <span class="tool-stats__number">100%</span>
+          <span class="tool-stats__label">Canone deducibile</span>
+        </div>
+        <div class="tool-stats__divider"></div>
+        <div class="tool-stats__item">
+          <span class="tool-stats__number">10+</span>
+          <span class="tool-stats__label">Società di locazione</span>
+        </div>
+        <div class="tool-stats__divider"></div>
+        <div class="tool-stats__item">
+          <span class="tool-stats__number">84</span>
+          <span class="tool-stats__label">Mesi di durata max</span>
+        </div>
+      </div>
+    </section>
+  </div>
+</ToolLayout>
+
+<!-- Script: gate password + no-index -->
+<script>
+  // Password partner (lato client, protezione leggera — non sicurezza forte)
+  const PASSWORD = 'mcf2025pv';
+
+  // Controlla se già autenticato
+  if (sessionStorage.getItem('partner_auth') === 'ok') {
+    showContent();
+  }
+
+  const form = document.getElementById('pw-form');
+  form?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const input = document.getElementById('pw-input') as HTMLInputElement;
+    if (input.value === PASSWORD) {
+      sessionStorage.setItem('partner_auth', 'ok');
+      showContent();
+    } else {
+      const error = document.getElementById('pw-error');
+      if (error) error.style.display = 'block';
+      input.value = '';
+      input.focus();
+    }
+  });
+
+  function showContent() {
+    const gate = document.getElementById('pw-gate');
+    const content = document.getElementById('partner-content');
+    if (gate) gate.style.display = 'none';
+    if (content) content.style.display = 'block';
+  }
+</script>
+
+<style>
+  /* --- Password gate --- */
+  .pw-gate {
+    padding: 6rem 1.5rem;
+    text-align: center;
+    background: var(--color-bg);
+    min-height: 60vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .pw-gate__inner {
+    max-width: 400px;
+    margin: 0 auto;
+  }
+
+  .pw-gate__icon {
+    font-size: 3rem;
+    color: var(--color-primary);
+    margin-bottom: 1rem;
+  }
+
+  .pw-gate__title {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--color-primary);
+    margin-bottom: 0.5rem;
+  }
+
+  .pw-gate__sub {
+    font-size: 0.95rem;
+    color: var(--color-text-light);
+    line-height: 1.6;
+    margin-bottom: 2rem;
+  }
+
+  .pw-gate__form {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  .pw-gate__input {
+    flex: 1;
+    padding: 0.8rem 1rem;
+    border: 1.5px solid var(--color-border);
+    border-radius: 8px;
+    font-family: var(--font-family);
+    font-size: 1rem;
+    color: var(--color-text);
+    background: #ffffff;
+  }
+
+  .pw-gate__input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(102, 76, 205, 0.12);
+  }
+
+  .pw-gate__button {
+    background: var(--color-cta, #FE6F3A);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.8rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s;
+    white-space: nowrap;
+  }
+
+  .pw-gate__button:hover {
+    background: #e55e2e;
+  }
+
+  .pw-gate__error {
+    color: #dc2626;
+    font-size: 0.85rem;
+    margin-top: 1rem;
+  }
+
+  /* --- Badge partner nell'hero --- */
+  .tool-hero__badge {
+    display: inline-block;
+    background: var(--color-primary);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 1rem;
+  }
+
+  /* --- Hero (stessi stili della pagina pubblica) --- */
+  .tool-hero {
+    padding: 3rem 1.5rem 2rem;
+    background: var(--color-bg);
+  }
+
+  .tool-hero__inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: center;
+  }
+
+  .tool-hero__title {
+    font-size: clamp(1.75rem, 4.5vw, 2.5rem);
+    font-weight: 800;
+    color: var(--color-primary);
+    letter-spacing: -0.02em;
+    margin-bottom: 0.75rem;
+    line-height: 1.15;
+  }
+
+  .tool-hero__sub {
+    font-size: 1.05rem;
+    color: var(--color-text-light);
+    line-height: 1.65;
+  }
+
+  .tool-hero__image {
+    display: flex;
+    justify-content: center;
+  }
+
+  .tool-hero__image img {
+    width: 100%;
+    max-width: 480px;
+    height: auto;
+    border-radius: var(--radius);
+    object-fit: cover;
+  }
+
+  /* --- Simulatore --- */
+  .tool-simulator {
+    padding: 0 1.5rem 4rem;
+  }
+
+  .tool-simulator__inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+
+  /* --- Fascia stats --- */
+  .tool-stats {
+    padding: 3rem 1.5rem;
+    background: linear-gradient(135deg, #1e1b3a 0%, #2d2556 50%, #1a1640 100%);
+  }
+
+  .tool-stats__inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .tool-stats__item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 0.5rem 1rem;
+  }
+
+  .tool-stats__number {
+    font-size: clamp(1.75rem, 4vw, 2.5rem);
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+
+  .tool-stats__label {
+    font-size: 0.82rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin-top: 0.4rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .tool-stats__divider {
+    width: 1px;
+    height: 48px;
+    background: rgba(255, 255, 255, 0.15);
+    flex-shrink: 0;
+  }
+
+  /* --- Responsive --- */
+  @media (max-width: 768px) {
+    .pw-gate {
+      padding: 4rem 1.25rem;
+    }
+
+    .pw-gate__form {
+      flex-direction: column;
+    }
+
+    .tool-hero__inner {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      text-align: center;
+    }
+
+    .tool-hero__image {
+      order: -1;
+    }
+
+    .tool-hero__image img {
+      max-width: 320px;
+    }
+
+    .tool-simulator {
+      padding: 0 1.25rem 3rem;
+    }
+
+    .tool-stats {
+      padding: 2rem 1rem;
+    }
+
+    .tool-stats__inner {
+      flex-wrap: wrap;
+      gap: 1.25rem 0;
+    }
+
+    .tool-stats__item {
+      flex: 1 1 45%;
+    }
+
+    .tool-stats__divider {
+      display: none;
+    }
+  }
+</style>
