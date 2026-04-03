@@ -4,7 +4,7 @@ description: "Un bar-enoteca con 14 anni di storia non riesce a ottenere 30mila 
 date: "2026-03-15"
 author: "Alberto Amà"
 tags: ["noleggio operativo", "ristorazione", "finanziamento bar", "patrimonio netto negativo", "caso studio", "fintech", "cucina professionale"]
-image: "/images/hero-caso-studio-enoteca.png"
+image: "/images/blog-caso-studio-enoteca.jpg"
 imageAlt: "Bar enoteca in fase di ristrutturazione"
 ---
 
