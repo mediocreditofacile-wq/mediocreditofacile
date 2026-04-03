@@ -11,25 +11,32 @@ import ToolCard from '../../components/tools/ToolCard.astro';
   title="Strumenti Gratuiti per PMI — Simulatori e Calcolatori | Mediocredito Facile"
   description="Simulatori, calcolatori e strumenti pratici per valutare noleggio operativo, leasing e finanziamenti. Gratis, senza registrazione."
 >
+  <!-- HERO -->
+  <section class="tools-hero">
+    <div class="tools-hero__inner">
+      <span class="tools-hero__eyebrow">Strumenti gratuiti</span>
+      <h1 class="tools-hero__title">I numeri giusti, prima di decidere</h1>
+      <p class="tools-hero__sub">
+        Simulatori professionali per calcolare canoni, confrontare scenari e capire quale formula finanziaria
+        conviene davvero alla tua azienda. Nessuna registrazione, nessun dato sensibile richiesto.
+      </p>
+    </div>
+  </section>
+
+  <!-- TOOL CARDS -->
   <section class="tools-hub">
     <div class="tools-hub__inner">
-      <h1 class="tools-hub__title">Strumenti gratuiti per le PMI</h1>
-      <p class="tools-hub__sub">
-        Simulatori e calcolatori pratici per valutare noleggio operativo, leasing e finanziamenti.
-        Gratis, senza registrazione.
-      </p>
-
       <div class="tools-hub__grid">
         <ToolCard
           title="Simulatore Noleggio Operativo"
-          description="Calcola il canone mensile, il valore di riscatto e confronta con l'acquisto diretto."
+          description="Calcola il canone mensile per qualsiasi bene strumentale. Confronta noleggio vs acquisto diretto e scopri il vantaggio fiscale reale."
           href="/tools/simulatore-noleggio-operativo"
           icon="calculate"
         />
 
         <ToolCard
           title="Simulatore Noleggio Fotovoltaico"
-          description="Calcola la rata del noleggio per impianti fotovoltaici e confrontala con il risparmio in bolletta."
+          description="Inserisci la potenza dell'impianto e scopri la rata mensile. Il simulatore calcola anche il risparmio in bolletta e il punto di pareggio."
           href="/tools/simulatore-noleggio-fotovoltaico"
           icon="solar_power"
         />
@@ -38,7 +45,7 @@ import ToolCard from '../../components/tools/ToolCard.astro';
           <span class="tool-card__badge">Riservato</span>
           <span class="tool-card__icon material-icons-outlined" aria-hidden="true">precision_manufacturing</span>
           <h2 class="tool-card__title">Marotta Evolution — Tool Finanziario</h2>
-          <p class="tool-card__desc">Lookup P.IVA caseifici: canale finanziario, simulatore canone, funnel burrata.</p>
+          <p class="tool-card__desc">Lookup P.IVA, simulatore canone e credit policy dedicata per la rete commerciale Marotta.</p>
           <span class="tool-card__link">
             Apri il tool
             <span class="material-icons-outlined" aria-hidden="true">arrow_forward</span>
@@ -47,11 +54,118 @@ import ToolCard from '../../components/tools/ToolCard.astro';
       </div>
     </div>
   </section>
+
+  <!-- PERCHÉ USARE I NOSTRI STRUMENTI -->
+  <section class="tools-why">
+    <div class="tools-why__inner">
+      <div class="tools-why__content">
+        <span class="tools-why__eyebrow">Perché questi strumenti</span>
+        <h2 class="tools-why__title">Fai i conti prima di chiamare la banca</h2>
+        <p class="tools-why__text">
+          Quando un fornitore ti propone un bene da 50.000 euro, la prima domanda è sempre la stessa:
+          quanto mi costa al mese? I nostri simulatori usano i coefficienti reali delle società di noleggio
+          con cui lavoriamo — non stime generiche.
+        </p>
+        <p class="tools-why__text">
+          In 30 secondi hai il canone mensile, il confronto con l'acquisto diretto, il vantaggio fiscale.
+          Se i numeri funzionano, parliamo. Se non funzionano, hai risparmiato una telefonata.
+        </p>
+        <a href="/contatti" class="tools-why__cta">
+          I numeri funzionano? Parliamone
+          <span class="material-icons-outlined" aria-hidden="true">arrow_forward</span>
+        </a>
+      </div>
+      <div class="tools-why__image-wrap">
+        <img src="/images/consulenza-business.png" alt="Consulenza finanziaria" class="tools-why__image" loading="lazy" />
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS BAND -->
+  <section class="tools-stats">
+    <div class="tools-stats__inner">
+      <div class="tools-stats__item">
+        <span class="tools-stats__number">10+</span>
+        <span class="tools-stats__label">Società di noleggio confrontate</span>
+      </div>
+      <div class="tools-stats__divider"></div>
+      <div class="tools-stats__item">
+        <span class="tools-stats__number">30"</span>
+        <span class="tools-stats__label">Per avere il tuo canone mensile</span>
+      </div>
+      <div class="tools-stats__divider"></div>
+      <div class="tools-stats__item">
+        <span class="tools-stats__number">0 €</span>
+        <span class="tools-stats__label">Nessun costo, nessuna registrazione</span>
+      </div>
+      <div class="tools-stats__divider"></div>
+      <div class="tools-stats__item">
+        <span class="tools-stats__number">24h</span>
+        <span class="tools-stats__label">Risposta dopo la richiesta</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA FINALE -->
+  <section class="tools-cta">
+    <div class="tools-cta__inner">
+      <h2 class="tools-cta__title">Non trovi lo strumento che cerchi?</h2>
+      <p class="tools-cta__text">
+        Stiamo costruendo nuovi simulatori per leasing strumentale, finanziamenti PMI e analisi creditizia.
+        Nel frattempo, chiamaci: facciamo i calcoli insieme in tempo reale.
+      </p>
+      <div class="tools-cta__buttons">
+        <a href="/contatti" class="tools-cta__btn tools-cta__btn--accent">Richiedi una Consulenza</a>
+        <a href="tel:+393939957840" class="tools-cta__btn tools-cta__btn--outline">+39 393 995 7840</a>
+      </div>
+    </div>
+  </section>
+
 </ToolLayout>
 
 <style>
+  /* HERO */
+  .tools-hero {
+    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(26, 10, 62, 0.75)), url('/images/hero-tools.png');
+    background-size: cover;
+    background-position: center;
+    color: #fff;
+    padding: 6rem 1.5rem 5.5rem;
+    text-align: center;
+  }
+
+  .tools-hero__inner {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  .tools-hero__eyebrow {
+    display: inline-block;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--color-accent);
+    margin-bottom: 1rem;
+  }
+
+  .tools-hero__title {
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    margin-bottom: 1.25rem;
+  }
+
+  .tools-hero__sub {
+    font-size: clamp(1rem, 2.5vw, 1.15rem);
+    line-height: 1.65;
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  /* TOOL CARDS */
   .tools-hub {
-    padding: 4rem 1.5rem 5rem;
+    padding: 4.5rem 1.5rem 4rem;
   }
 
   .tools-hub__inner {
@@ -59,31 +173,13 @@ import ToolCard from '../../components/tools/ToolCard.astro';
     margin: 0 auto;
   }
 
-  .tools-hub__title {
-    text-align: center;
-    font-size: clamp(1.75rem, 4vw, 2.5rem);
-    font-weight: 800;
-    color: var(--color-primary);
-    margin-bottom: 0.75rem;
-    letter-spacing: -0.02em;
-  }
-
-  .tools-hub__sub {
-    text-align: center;
-    font-size: 1.05rem;
-    color: var(--color-text-light);
-    max-width: 600px;
-    margin: 0 auto 3rem;
-    line-height: 1.65;
-  }
-
   .tools-hub__grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
     gap: 2rem;
   }
 
-  /* Card inline per Marotta (con badge) */
+  /* Card Marotta (inline) */
   .tool-card {
     display: flex;
     flex-direction: column;
@@ -149,13 +245,220 @@ import ToolCard from '../../components/tools/ToolCard.astro';
     font-size: 1rem;
   }
 
-  @media (max-width: 640px) {
-    .tools-hub {
-      padding: 3rem 1.25rem 4rem;
+  /* PERCHÉ USARE */
+  .tools-why {
+    padding: 4.5rem 1.5rem;
+    background: var(--color-bg-alt);
+  }
+
+  .tools-why__inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3.5rem;
+    align-items: center;
+  }
+
+  .tools-why__eyebrow {
+    display: inline-block;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--color-accent);
+    margin-bottom: 0.75rem;
+  }
+
+  .tools-why__title {
+    font-size: clamp(1.5rem, 3.5vw, 2rem);
+    font-weight: 800;
+    color: var(--color-primary);
+    margin-bottom: 1.25rem;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+
+  .tools-why__text {
+    font-size: 1rem;
+    color: var(--color-text);
+    line-height: 1.7;
+    margin-bottom: 1rem;
+  }
+
+  .tools-why__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--color-accent);
+    transition: gap 0.2s;
+  }
+
+  .tools-why__cta:hover {
+    gap: 0.75rem;
+  }
+
+  .tools-why__cta .material-icons-outlined {
+    font-size: 1.1rem;
+  }
+
+  .tools-why__image {
+    width: 100%;
+    border-radius: 16px;
+    object-fit: cover;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+  }
+
+  /* STATS BAND */
+  .tools-stats {
+    padding: 3.5rem 1.5rem;
+    background: linear-gradient(135deg, #1e1b3a 0%, #2d2556 50%, #1a1640 100%);
+    color: #ffffff;
+  }
+
+  .tools-stats__inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+  }
+
+  .tools-stats__item {
+    text-align: center;
+    flex: 1;
+  }
+
+  .tools-stats__number {
+    display: block;
+    font-size: clamp(2rem, 4vw, 2.75rem);
+    font-weight: 800;
+    color: var(--color-accent);
+    letter-spacing: -0.02em;
+    margin-bottom: 0.4rem;
+  }
+
+  .tools-stats__label {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.75);
+    line-height: 1.4;
+  }
+
+  .tools-stats__divider {
+    width: 1px;
+    height: 48px;
+    background: rgba(255, 255, 255, 0.15);
+    flex-shrink: 0;
+  }
+
+  /* CTA FINALE */
+  .tools-cta {
+    padding: 4.5rem 1.5rem;
+    text-align: center;
+  }
+
+  .tools-cta__inner {
+    max-width: 640px;
+    margin: 0 auto;
+  }
+
+  .tools-cta__title {
+    font-size: clamp(1.5rem, 3.5vw, 2rem);
+    font-weight: 800;
+    color: var(--color-primary);
+    margin-bottom: 1rem;
+    letter-spacing: -0.02em;
+  }
+
+  .tools-cta__text {
+    font-size: 1.05rem;
+    color: var(--color-text);
+    line-height: 1.65;
+    margin-bottom: 2rem;
+  }
+
+  .tools-cta__buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .tools-cta__btn {
+    display: inline-flex;
+    align-items: center;
+    font-weight: 700;
+    font-size: 1rem;
+    padding: 0.9rem 2rem;
+    border-radius: 8px;
+    transition: background 0.2s, transform 0.15s;
+  }
+
+  .tools-cta__btn--accent {
+    background: var(--color-accent);
+    color: #ffffff;
+  }
+
+  .tools-cta__btn--accent:hover {
+    background: var(--color-accent-hover);
+    transform: translateY(-1px);
+  }
+
+  .tools-cta__btn--outline {
+    border: 2px solid var(--color-primary);
+    color: var(--color-primary);
+    background: transparent;
+  }
+
+  .tools-cta__btn--outline:hover {
+    background: var(--color-primary-bg);
+    transform: translateY(-1px);
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    .tools-hero {
+      padding: 4rem 1.25rem 3.5rem;
     }
 
     .tools-hub__grid {
       grid-template-columns: 1fr;
+    }
+
+    .tools-hub {
+      padding: 3rem 1.25rem;
+    }
+
+    .tools-why__inner {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+
+    .tools-why__image-wrap {
+      order: -1;
+    }
+
+    .tools-stats__inner {
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .tools-stats__divider {
+      width: 60px;
+      height: 1px;
+    }
+
+    .tools-cta {
+      padding: 3rem 1.25rem;
+    }
+
+    .tools-cta__buttons {
+      flex-direction: column;
+      align-items: center;
     }
   }
 </style>
