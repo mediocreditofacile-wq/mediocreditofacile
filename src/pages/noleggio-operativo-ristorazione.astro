@@ -1,0 +1,429 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Hero from '../components/Hero.astro';
+import HowItWorks from '../components/HowItWorks.astro';
+import Footer from '../components/Footer.astro';
+
+const page = {
+  metaTitle: "Attrezzature Ristorazione in Noleggio | Mediocredito Facile",
+  metaDescription: "Finanzia forni, frigoriferi e cucine professionali a canone fisso mensile. Zero anticipo, 100% deducibile per il tuo locale. Preventivo in 24h.",
+  heroTitle: "Attrezzature Ristorazione a Canone Fisso",
+  heroSubtitle: "Forni, frigoriferi e cucine professionali per il tuo locale a canone mensile fisso. Zero anticipo, 100% deducibile, manutenzione inclusa.",
+  ctaText: "Richiedi Preventivo Gratuito",
+};
+
+const equipmentItems = [
+  { icon: "outdoor_grill", label: "Forni Professionali", desc: "Forni combinati, pizza, pasticceria" },
+  { icon: "ac_unit", label: "Frigoriferi Industriali", desc: "Banchi frigo, celle, vetrine" },
+  { icon: "local_cafe", label: "Macchine Caffè", desc: "Espresso, macinacaffè, attrezzatura bar" },
+  { icon: "soup_kitchen", label: "Cucine Professionali", desc: "Piani cottura, frittrici, salamandre" },
+  { icon: "cleaning_services", label: "Lavastoviglie", desc: "Industriali, a tunnel, a capote" },
+  { icon: "countertops", label: "Banconi e Arredi", desc: "Banchi lavoro, scaffalature, arredo" },
+];
+
+const faqs = [
+  {
+    q: "Chi può richiedere il noleggio operativo?",
+    a: "Qualsiasi attività di ristorazione con partita IVA: ristoranti, pizzerie, bar, hotel, catering, mense, pasticcerie, gelaterie e dark kitchen. Se la tua attività è aperta da meno di 24 mesi, possiamo comunque valutarla — purché tu abbia esperienza dimostrabile nel settore. Un cuoco che apre il suo primo locale o un ristoratore che rileva una nuova insegna non partono da zero: lo facciamo presente alle società di noleggio con la documentazione giusta."
+  },
+  {
+    q: "Quali attrezzature posso noleggiare?",
+    a: "Forni, abbattitori, celle frigorifere, lavastoviglie industriali, macchine per il caffè, impastatrici, friggitrici, banconi refrigerati, arredi per sala e cucina. In generale, qualsiasi bene strumentale nuovo legato all'attività. Il canone mensile è interamente deducibile come costo operativo."
+  },
+  {
+    q: "Quanto tempo ci vuole per avere una risposta?",
+    a: "Dalla ricezione della documentazione completa, i tempi di delibera vanno dalle 24 alle 48 ore lavorative. Per importi fino a €15.000 la risposta arriva spesso in giornata. Lavoriamo con oltre 10 società di noleggio: se una rifiuta, sottoponiamo la pratica ad altre — questo aumenta sensibilmente le probabilità di approvazione."
+  },
+  {
+    q: "Cosa succede alla fine del contratto?",
+    a: "Tre opzioni: riscattare l'attrezzatura a un valore residuo simbolico (in genere l'1% del valore iniziale), rinnovare il contratto con attrezzature di ultima generazione, oppure restituire tutto senza costi aggiuntivi. La scelta è tua, e la comunichi a fine contratto."
+  },
+  {
+    q: "Il noleggio operativo compare in Centrale Rischi?",
+    a: "No. Il noleggio operativo è classificato come costo operativo (OPEX), non come finanziamento. Non incide sul merito creditizio della tua attività, non consuma i fidi bancari e non appesantisce il bilancio. Per la banca è come se pagassi un affitto."
+  },
+  {
+    q: "Posso noleggiare attrezzature usate o ricondizionate?",
+    a: "Dipende dalla società di noleggio. Alcune accettano attrezzature ricondizionate certificate, purché il fornitore offra garanzia completa. Lo verifichiamo caso per caso senza impegno — basta una richiesta."
+  },
+];
+---
+
+<Layout title={page.metaTitle} description={page.metaDescription}>
+  <Header minimal={false} />
+  <main>
+
+    <!-- HERO -->
+    <Hero title={page.heroTitle} subtitle={page.heroSubtitle} ctaText={page.ctaText} backgroundImage="/images/hero-ristorazione.png" />
+
+    <!-- BENEFITS -->
+    <section class="benefits">
+      <div class="benefits__inner">
+        <h2 class="benefits__heading">Perché scegliere Mediocredito Facile</h2>
+        <div class="benefits__grid">
+          <div class="benefit-card">
+            <div class="benefit-card__icon"><span class="material-icons-outlined">payments</span></div>
+            <h3 class="benefit-card__title">Zero Anticipo per il Tuo Locale</h3>
+            <p class="benefit-card__desc">Forni, banconi e cucine professionali subito operativi senza esborso iniziale. Canone mensile fisso dal primo giorno.</p>
+          </div>
+          <div class="benefit-card">
+            <div class="benefit-card__icon"><span class="material-icons-outlined">receipt</span></div>
+            <h3 class="benefit-card__title">100% Deducibile Fiscalmente</h3>
+            <p class="benefit-card__desc">Il canone di noleggio è deducibile come costo d'impresa. Vantaggio fiscale immediato per la tua attività.</p>
+          </div>
+          <div class="benefit-card">
+            <div class="benefit-card__icon"><span class="material-icons-outlined">build</span></div>
+            <h3 class="benefit-card__title">Manutenzione e Assistenza Incluse</h3>
+            <p class="benefit-card__desc">Assistenza tecnica e manutenzione incluse nel canone. Zero spese impreviste, il tuo locale resta sempre operativo.</p>
+          </div>
+        </div>
+        <p class="benefits__compare">Confrontiamo le offerte di oltre 10 società di noleggio per trovare la soluzione migliore per la tua attività.</p>
+      </div>
+    </section>
+
+    <!-- COSA PUOI FINANZIARE -->
+    <section class="equipment">
+      <div class="equipment__inner">
+        <h2 class="equipment__heading">Cosa Puoi Finanziare</h2>
+        <p class="equipment__sub">Dal forno alla lavastoviglie industriale: tutto ciò che serve per la tua cucina professionale, a canone fisso mensile.</p>
+
+        <!-- FOTO SUGGERITA: cucina professionale completa vista dall'alto, attrezzature in acciaio inox su sfondo bianco -->
+        <img
+          src="/images/attrezzature-ristorazione.png"
+          alt="Attrezzature professionali per ristorazione"
+          class="equipment__image"
+          loading="lazy"
+        />
+
+        <div class="equipment__grid">
+          {equipmentItems.map((item) => (
+            <div class="equipment-card">
+              <span class="material-icons-outlined equipment-card__icon">{item.icon}</span>
+              <h3 class="equipment-card__label">{item.label}</h3>
+              <p class="equipment-card__desc">{item.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- COME FUNZIONA -->
+    <HowItWorks />
+
+    <!-- FORM INTERMEDIO -->
+    <section class="mid-form" id="preventivo-rapido">
+      <div class="mid-form__inner">
+        <div class="mid-form__text">
+          <h2 class="mid-form__heading">Hai già in mente cosa ti serve?</h2>
+          <p class="mid-form__desc">Dimmi di che attrezzatura hai bisogno e ti preparo un preventivo personalizzato entro 24 ore. Senza impegno.</p>
+          <ul class="mid-form__list">
+            <li><span class="material-icons-outlined">check_circle</span> Risposta in 24 ore lavorative</li>
+            <li><span class="material-icons-outlined">check_circle</span> Nessun costo di consulenza</li>
+            <li><span class="material-icons-outlined">check_circle</span> Confronto tra 10+ società</li>
+          </ul>
+          <img
+            src="/images/ristoratore-cucina.png"
+            alt="Ristoratore in cucina professionale"
+            class="mid-form__photo"
+            loading="lazy"
+          />
+        </div>
+        <div class="mid-form__form">
+          <form
+            action="/api/submit"
+            method="POST"
+            class="quick-form"
+          >
+            <input name="website" type="text" tabindex="-1" autocomplete="off" style="position:absolute;opacity:0;pointer-events:none;height:0;overflow:hidden" aria-hidden="true" />
+            <input type="hidden" name="source" value="noleggio-operativo-ristorazione-mid" />
+            <div class="quick-form__field">
+              <label for="qf-nome">Nome e Cognome</label>
+              <input type="text" id="qf-nome" name="nome" placeholder="Mario Rossi" required autocomplete="name" />
+            </div>
+            <div class="quick-form__field">
+              <label for="qf-tel">Cellulare</label>
+              <input type="tel" id="qf-tel" name="telefono" placeholder="+39 333 123 4567" required autocomplete="tel" />
+            </div>
+            <div class="quick-form__field">
+              <label for="qf-attrezzatura">Che attrezzatura ti serve?</label>
+              <select id="qf-attrezzatura" name="attrezzatura" required>
+                <option value="" disabled selected>Seleziona tipo</option>
+                <option value="forno">Forno professionale</option>
+                <option value="frigo">Frigorifero / cella frigorifera</option>
+                <option value="cucina">Piano cottura / cucina</option>
+                <option value="caffe">Macchina caffè</option>
+                <option value="lavastoviglie">Lavastoviglie industriale</option>
+                <option value="arredo">Banconi e arredamento</option>
+                <option value="altro">Altro / kit completo</option>
+              </select>
+            </div>
+            <button type="submit" class="quick-form__submit">Ricevi Preventivo ➤</button>
+            <p class="quick-form__privacy">
+              Inviando il modulo accetti la nostra <a href="/privacy-policy">informativa sulla privacy</a>.
+            </p>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="faq">
+      <div class="faq__inner">
+        <h2 class="faq__heading">Domande Frequenti</h2>
+        <div class="faq__list">
+          {faqs.map((item, i) => (
+            <details class="faq-item" open={i === 0}>
+              <summary class="faq-item__question">
+                <span>{item.q}</span>
+                <span class="material-icons-outlined faq-item__chevron">expand_more</span>
+              </summary>
+              <p class="faq-item__answer">{item.a}</p>
+            </details>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- FORM FINALE -->
+    <section class="form-section" id="contatti">
+      <div class="form-section__inner">
+        <h2 class="form-section__heading">Richiedi Preventivo Gratuito</h2>
+        <p class="form-section__sub">
+          Compila il modulo e ti ricontatteremo entro 24 ore lavorative. Nessun impegno.
+        </p>
+        <form
+          class="contact-form"
+          action="/api/submit"
+          method="POST"
+        >
+          <input name="website" type="text" tabindex="-1" autocomplete="off" style="position:absolute;opacity:0;pointer-events:none;height:0;overflow:hidden" aria-hidden="true" />
+          <input type="hidden" name="source" value="noleggio-operativo-ristorazione-bottom" />
+          <div class="contact-form__field">
+            <label for="nome">Nome e Cognome</label>
+            <input type="text" id="nome" name="nome" placeholder="Mario Rossi" required autocomplete="name" />
+          </div>
+          <div class="contact-form__field">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" placeholder="mario@azienda.it" required autocomplete="email" />
+          </div>
+          <div class="contact-form__field">
+            <label for="telefono">Cellulare</label>
+            <input type="tel" id="telefono" name="telefono" placeholder="+39 333 123 4567" required autocomplete="tel" />
+          </div>
+          <button type="submit" class="contact-form__submit">Richiedi Preventivo Gratuito ➤</button>
+          <p class="contact-form__privacy">
+            Inviando il modulo accetti la nostra <a href="/privacy-policy">informativa sulla privacy</a>.
+          </p>
+        </form>
+      </div>
+    </section>
+
+  </main>
+  <Footer />
+</Layout>
+
+<script>
+  document.querySelectorAll<HTMLFormElement>('form').forEach((form) => {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+      if (btn) { btn.disabled = true; btn.textContent = 'Invio in corso…'; }
+      try {
+        await fetch('/api/submit', { method: 'POST', body: new FormData(form) });
+      } catch (_) {}
+      window.location.href = '/grazie';
+    });
+  });
+</script>
+
+<style>
+  /* ── BENEFITS ─────────────────────────────────────────────── */
+  .benefits { padding: 4.5rem 1.5rem; background: var(--color-bg-alt); }
+  .benefits__inner { max-width: var(--max-width); margin: 0 auto; }
+  .benefits__heading {
+    text-align: center; font-size: clamp(1.5rem, 3.5vw, 2rem);
+    font-weight: 800; color: var(--color-primary);
+    margin-bottom: 3rem; letter-spacing: -0.02em;
+  }
+  .benefits__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; }
+  .benefit-card {
+    background: #fff; border: 1px solid var(--color-border);
+    border-radius: var(--radius); padding: 2rem 1.75rem; text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,.04);
+    transition: transform .2s, box-shadow .2s;
+  }
+  .benefit-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(102,76,205,.1); }
+  .benefit-card__icon {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 56px; height: 56px; border-radius: 50%;
+    background: var(--color-primary-bg); color: var(--color-primary); margin-bottom: 1.25rem;
+  }
+  .benefit-card__icon .material-icons-outlined { font-size: 1.6rem; }
+  .benefit-card__title { font-size: 1.1rem; font-weight: 700; color: var(--color-primary); margin-bottom: .6rem; }
+  .benefit-card__desc { font-size: .95rem; color: var(--color-text-light); line-height: 1.6; }
+  .benefits__compare { text-align: center; color: #293C5B; font-size: 1.05rem; margin-top: 2.5rem; font-style: italic; }
+
+  /* ── EQUIPMENT ────────────────────────────────────────────── */
+  .equipment { padding: 4.5rem 1.5rem; background: var(--color-bg); }
+  .equipment__inner { max-width: var(--max-width); margin: 0 auto; }
+  .equipment__heading {
+    text-align: center; font-size: clamp(1.5rem, 3.5vw, 2rem);
+    font-weight: 800; color: var(--color-primary); margin-bottom: .75rem; letter-spacing: -0.02em;
+  }
+  .equipment__sub {
+    text-align: center; color: var(--color-text-light);
+    font-size: 1.05rem; max-width: 600px; margin: 0 auto 2.5rem;
+  }
+  .equipment__image {
+    width: 100%; height: auto; object-fit: contain;
+    border-radius: 16px; margin-bottom: 3rem;
+    box-shadow: 0 4px 24px rgba(0,0,0,.08);
+  }
+  .equipment__grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;
+  }
+  .equipment-card {
+    display: flex; flex-direction: column; align-items: center; text-align: center;
+    background: var(--color-bg-alt); border-radius: var(--radius);
+    padding: 1.75rem 1.25rem; border: 1px solid var(--color-border);
+    transition: box-shadow .2s;
+  }
+  .equipment-card:hover { box-shadow: 0 6px 20px rgba(102,76,205,.08); }
+  .equipment-card__icon {
+    font-size: 2rem; color: var(--color-accent);
+    margin-bottom: .85rem;
+  }
+  .equipment-card__label { font-size: 1rem; font-weight: 700; color: var(--color-primary); margin-bottom: .35rem; }
+  .equipment-card__desc { font-size: .85rem; color: var(--color-text-light); line-height: 1.5; }
+
+  /* ── MID FORM ─────────────────────────────────────────────── */
+  .mid-form { padding: 4.5rem 1.5rem; background: var(--color-primary); }
+  .mid-form__inner {
+    max-width: var(--max-width); margin: 0 auto;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center;
+  }
+  .mid-form__image {
+    width: 100%; border-radius: 16px; margin-bottom: 1.75rem;
+    box-shadow: 0 8px 32px rgba(0,0,0,.2); object-fit: cover; max-height: 260px;
+  }
+  .mid-form__heading {
+    font-size: clamp(1.4rem, 3vw, 1.9rem); font-weight: 800;
+    color: #fff; margin-bottom: .85rem; letter-spacing: -0.02em;
+  }
+  .mid-form__desc { font-size: 1rem; color: rgba(255,255,255,.8); line-height: 1.7; margin-bottom: 1.5rem; }
+  .mid-form__list { list-style: none; display: flex; flex-direction: column; gap: .6rem; }
+  .mid-form__list li {
+    display: flex; align-items: center; gap: .5rem;
+    font-size: .95rem; color: rgba(255,255,255,.9); font-weight: 500;
+  }
+  .mid-form__list .material-icons-outlined { font-size: 1.1rem; color: var(--color-accent); }
+  .mid-form__photo {
+    width: 100%; max-width: 420px; border-radius: 12px; margin-top: 2rem;
+    object-fit: cover; display: block;
+  }
+
+  .quick-form {
+    background: #fff; border-radius: 16px; padding: 2rem 2rem 1.75rem;
+    box-shadow: 0 8px 32px rgba(0,0,0,.15);
+    display: flex; flex-direction: column; gap: 1.25rem;
+  }
+  .quick-form__field label {
+    display: block; font-size: .875rem; font-weight: 600;
+    color: var(--color-primary); margin-bottom: .35rem;
+  }
+  .quick-form__field input,
+  .quick-form__field select {
+    width: 100%; padding: .8rem 1rem; border: 1.5px solid var(--color-border);
+    border-radius: 8px; font-family: var(--font-family); font-size: 1rem;
+    color: var(--color-text); background: var(--color-bg-alt);
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .quick-form__field input:focus,
+  .quick-form__field select:focus {
+    outline: none; border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(102,76,205,.15);
+  }
+  .quick-form__submit {
+    background: var(--color-accent); color: #fff; font-family: var(--font-family);
+    font-weight: 700; font-size: 1.05rem; padding: .9rem 2rem;
+    border: none; border-radius: 8px; cursor: pointer;
+    transition: background .2s, transform .15s; margin-top: .25rem;
+  }
+  .quick-form__submit:hover { background: var(--color-accent-hover); transform: translateY(-1px); }
+  .quick-form__privacy { text-align: center; font-size: .8rem; color: var(--color-text-light); margin-top: .1rem; }
+  .quick-form__privacy a { color: var(--color-primary); text-decoration: underline; }
+
+  /* ── FAQ ──────────────────────────────────────────────────── */
+  .faq { padding: 4.5rem 1.5rem; background: var(--color-bg-alt-2); }
+  .faq__inner { max-width: 720px; margin: 0 auto; }
+  .faq__heading {
+    text-align: center; font-size: clamp(1.5rem, 3.5vw, 2rem);
+    font-weight: 800; color: var(--color-primary);
+    margin-bottom: 2.5rem; letter-spacing: -0.02em;
+  }
+  .faq__list { display: flex; flex-direction: column; gap: .75rem; }
+  .faq-item {
+    background: #fff; border: 1px solid var(--color-border);
+    border-radius: var(--radius); overflow: hidden;
+  }
+  .faq-item__question {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.1rem 1.5rem; cursor: pointer; font-weight: 700;
+    font-size: 1rem; color: var(--color-primary); list-style: none;
+    gap: 1rem;
+  }
+  .faq-item__question::-webkit-details-marker { display: none; }
+  .faq-item__chevron { transition: transform .25s; flex-shrink: 0; }
+  details[open] .faq-item__chevron { transform: rotate(180deg); }
+  .faq-item__answer {
+    padding: 0 1.5rem 1.25rem; font-size: .95rem;
+    color: var(--color-text-light); line-height: 1.7;
+  }
+
+  /* ── FORM FINALE ──────────────────────────────────────────── */
+  .form-section { padding: 4.5rem 1.5rem; background: var(--color-bg); }
+  .form-section__inner { max-width: 520px; margin: 0 auto; }
+  .form-section__heading {
+    text-align: center; font-size: clamp(1.5rem, 3.5vw, 2rem);
+    font-weight: 800; color: var(--color-primary);
+    margin-bottom: .6rem; letter-spacing: -0.02em;
+  }
+  .form-section__sub { text-align: center; color: var(--color-text-light); margin-bottom: 2.5rem; font-size: 1rem; }
+  .contact-form { display: flex; flex-direction: column; gap: 1.25rem; }
+  .contact-form__field label {
+    display: block; font-size: .875rem; font-weight: 600;
+    color: var(--color-primary); margin-bottom: .35rem;
+  }
+  .contact-form__field input {
+    width: 100%; padding: .8rem 1rem; border: 1.5px solid var(--color-border);
+    border-radius: 8px; font-family: var(--font-family); font-size: 1rem;
+    color: var(--color-text); background: var(--color-bg-alt);
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .contact-form__field input:focus {
+    outline: none; border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(102,76,205,.15);
+  }
+  .contact-form__submit {
+    background: var(--color-accent); color: #fff; font-family: var(--font-family);
+    font-weight: 700; font-size: 1.05rem; padding: .9rem 2rem;
+    border: none; border-radius: 8px; cursor: pointer;
+    transition: background .2s, transform .15s; margin-top: .5rem;
+  }
+  .contact-form__submit:hover { background: var(--color-accent-hover); transform: translateY(-1px); }
+  .contact-form__privacy { text-align: center; font-size: .8rem; color: var(--color-text-light); margin-top: .25rem; }
+  .contact-form__privacy a { color: var(--color-primary); text-decoration: underline; }
+
+  /* ── RESPONSIVE ───────────────────────────────────────────── */
+  @media (max-width: 768px) {
+    .benefits__grid { grid-template-columns: 1fr; gap: 1.25rem; }
+    .equipment__grid { grid-template-columns: repeat(2, 1fr); }
+    .mid-form__inner { grid-template-columns: 1fr; gap: 2rem; }
+    .mid-form { padding: 3rem 1.25rem; }
+    .benefits, .equipment, .faq, .form-section { padding: 3rem 1.25rem; }
+  }
+  @media (max-width: 480px) {
+    .equipment__grid { grid-template-columns: 1fr; }
+  }
+</style>
