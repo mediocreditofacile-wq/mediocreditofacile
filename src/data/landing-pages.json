@@ -28,7 +28,7 @@
     "metaTitle": "Leasing Strumentale per PMI | Mediocredito Facile",
     "metaDescription": "Leasing strumentale su misura per PMI: macchinari, attrezzature e veicoli con condizioni vantaggiose. Confronta le migliori offerte.",
     "heroTitle": "Leasing Strumentale su Misura per la Tua PMI",
-    "heroSubtitle": "Acquisisci macchinari, attrezzature e veicoli con rate flessibili e il vantaggio del riscatto finale.",
+    "heroSubtitle": "Acquisisci macchinari, attrezzature e veicoli con soluzioni flessibili e il vantaggio del riscatto finale.",
     "heroImage": "/images/hero-leasing-strumentale.png",
     "benefitsImage": "/images/section-leasing-strumentale.png",
     "benefits": [
@@ -61,7 +61,7 @@
       {
         "icon": "account_balance",
         "title": "Multi-Istituto",
-        "description": "Accedi alle offerte di oltre 30 istituti finanziari: confrontiamo tassi e condizioni per trovare il meglio per te."
+        "description": "Accedi alle offerte di oltre 30 istituti finanziari: confrontiamo le condizioni per trovare il meglio per te."
       },
       {
         "icon": "schedule",
@@ -261,7 +261,7 @@
       {
         "icon": "compare_arrows",
         "title": "Confronto multi-società",
-        "description": "Non ti affidi a un solo istituto. Confrontiamo le offerte di oltre 10 società per trovare condizioni e tassi migliori."
+        "description": "Non ti affidi a un solo istituto. Confrontiamo le offerte di oltre 10 società per trovare le condizioni migliori."
       },
       {
         "icon": "schedule",

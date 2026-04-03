@@ -1,0 +1,97 @@
+---
+// Fascione loghi partner — scorrimento continuo
+// Per aggiungere/rimuovere un partner: modificare l'array qui sotto
+// I file logo vanno in public/images/partners/ (PNG o SVG, sfondo trasparente)
+const partners = [
+  { name: 'Affida', logo: '/images/partners/affida.png' },
+  { name: 'Grenke', logo: '/images/partners/grenke.png' },
+  { name: 'Pagarent', logo: '/images/partners/pagarent.png' },
+  { name: 'BCC', logo: '/images/partners/bcc.png' },
+  { name: 'Compass', logo: '/images/partners/compass.png' },
+  { name: 'Agos', logo: '/images/partners/agos.svg' },
+  { name: 'Compara Semplice', logo: '/images/partners/compara-semplice.svg' },
+];
+---
+
+<section class="partners">
+  <p class="partners__label">Le nostre società partner</p>
+  <div class="partners__track">
+    <div class="partners__slide">
+      {partners.map((p) => (
+        <img src={p.logo} alt={p.name} class="partners__logo" loading="lazy" />
+      ))}
+      {/* Duplicato per loop continuo */}
+      {partners.map((p) => (
+        <img src={p.logo} alt={p.name} class="partners__logo" loading="lazy" />
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .partners {
+    padding: 2rem 1.5rem;
+    background: var(--color-bg-alt, #f5fbff);
+    text-align: center;
+    overflow: hidden;
+  }
+  .partners__label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-text-light, #64748b);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 1.5rem;
+  }
+  .partners__track {
+    max-width: var(--max-width, 1120px);
+    margin: 0 auto;
+    overflow: hidden;
+    mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+  }
+  .partners__slide {
+    display: flex;
+    align-items: center;
+    gap: 3rem;
+    animation: scroll-logos 30s linear infinite;
+    width: max-content;
+  }
+  .partners__logo {
+    height: 40px;
+    width: auto;
+    max-width: 140px;
+    object-fit: contain;
+    filter: grayscale(100%);
+    opacity: 0.6;
+    transition: filter 0.3s, opacity 0.3s;
+    flex-shrink: 0;
+  }
+  .partners__logo:hover {
+    filter: grayscale(0%);
+    opacity: 1;
+  }
+  @keyframes scroll-logos {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+  .partners__track:hover .partners__slide {
+    animation-play-state: paused;
+  }
+  @media (max-width: 640px) {
+    .partners {
+      padding: 1.5rem 1rem;
+    }
+    .partners__logo {
+      height: 32px;
+      max-width: 110px;
+    }
+    .partners__slide {
+      gap: 2rem;
+    }
+  }
+</style>
