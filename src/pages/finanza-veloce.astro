@@ -26,6 +26,7 @@ import Footer from '../components/Footer.astro';
     <section class="fv-form" id="form-top">
       <div class="fv-form__inner">
         <form class="fv-form__form zapier-form" action="">
+          <input name="website" type="text" tabindex="-1" autocomplete="off" style="position:absolute;opacity:0;pointer-events:none;height:0;overflow:hidden" aria-hidden="true" />
           <input type="hidden" name="fonte" value="finanza-veloce" />
           <div class="fv-form__field">
             <label for="fv-nome">Nome e Cognome</label>
@@ -86,6 +87,7 @@ import Footer from '../components/Footer.astro';
     <!-- VALUE PROPOSITION -->
     <section class="fv-value">
       <div class="fv-value__inner">
+        <img src="/images/section-finanza-veloce.png" alt="Confronto offerte finanziarie" class="fv-value__image" loading="lazy" />
         <p class="fv-value__eyebrow">Un broker al tuo fianco, non una banca</p>
         <h2 class="fv-value__title">Perché affidarti a Mediocredito Facile?</h2>
         <p class="fv-value__text">Quando hai bisogno di un bene per la tua azienda — un macchinario, un veicolo, un impianto fotovoltaico, della tecnologia — non hai tempo di girare tra banche e finanziarie. Mediocredito Facile lo fa per te: confrontiamo noleggio operativo, leasing strumentale e finanziamenti per trovarti la formula più conveniente.</p>
@@ -182,6 +184,7 @@ import Footer from '../components/Footer.astro';
         <h2 class="fv-form__heading">Trova la soluzione giusta per la tua azienda</h2>
         <p class="fv-form__sub">Compila il modulo e ti ricontatteremo entro 24 ore lavorative.</p>
         <form class="fv-form__form zapier-form" action="">
+          <input name="website" type="text" tabindex="-1" autocomplete="off" style="position:absolute;opacity:0;pointer-events:none;height:0;overflow:hidden" aria-hidden="true" />
           <input type="hidden" name="fonte" value="finanza-veloce" />
           <div class="fv-form__field">
             <label for="fv-nome2">Nome e Cognome</label>
@@ -230,8 +233,6 @@ import Footer from '../components/Footer.astro';
     });
   });
 
-  const ZAPIER_URL = 'https://hooks.zapier.com/hooks/catch/26268853/ul50ccv/';
-
   document.querySelectorAll<HTMLFormElement>('.zapier-form').forEach((form) => {
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -242,7 +243,7 @@ import Footer from '../components/Footer.astro';
       }
       const data = new FormData(form);
       try {
-        await fetch(ZAPIER_URL, { method: 'POST', body: data, mode: 'no-cors' });
+        await fetch('/api/submit', { method: 'POST', body: data });
       } catch (_) {}
       window.location.href = '/grazie';
     });
@@ -252,9 +253,11 @@ import Footer from '../components/Footer.astro';
 <style>
   /* HERO */
   .fv-hero {
-    background: linear-gradient(135deg, #1a0a3e 0%, #2d1b69 50%, #664CCD 100%);
+    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(26, 10, 62, 0.75)), url('/images/hero-finanza-veloce.png');
+    background-size: cover;
+    background-position: center;
     color: #fff;
-    padding: 5rem 1.5rem 4rem;
+    padding: 6rem 1.5rem 5.5rem;
     text-align: center;
   }
 
@@ -474,6 +477,14 @@ import Footer from '../components/Footer.astro';
   .fv-value {
     padding: 4.5rem 1.5rem;
     background: var(--color-bg-alt);
+  }
+
+  .fv-value__image {
+    width: 100%;
+    max-height: 300px;
+    object-fit: cover;
+    border-radius: 12px;
+    margin-bottom: 2.5rem;
   }
 
   .fv-value__inner {
@@ -717,7 +728,7 @@ import Footer from '../components/Footer.astro';
 
   @media (max-width: 640px) {
     .fv-hero {
-      padding: 3.5rem 1.25rem 3rem;
+      padding: 4rem 1.25rem 3.5rem;
     }
 
     .fv-benefits__grid {

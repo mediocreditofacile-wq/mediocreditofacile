@@ -26,6 +26,7 @@ import Footer from '../components/Footer.astro';
     <section class="dp-form" id="form-top">
       <div class="dp-form__inner">
         <form class="dp-form__form zapier-form" action="">
+          <input name="website" type="text" tabindex="-1" autocomplete="off" style="position:absolute;opacity:0;pointer-events:none;height:0;overflow:hidden" aria-hidden="true" />
           <input type="hidden" name="fonte" value="diventa-partner" />
           <div class="dp-form__field">
             <label for="dp-nome">Nome e Cognome</label>
@@ -84,6 +85,7 @@ import Footer from '../components/Footer.astro';
     <!-- VALUE PROPOSITION -->
     <section class="dp-value">
       <div class="dp-value__inner">
+        <img src="/images/section-diventa-partner.png" alt="Partnership con Mediocredito Facile" class="dp-value__image" loading="lazy" />
         <p class="dp-value__eyebrow">Soluzioni smart per vendere di più: incassi subito, il cliente paga a canone.</p>
         <h2 class="dp-value__title">Perché 3 rate quando puoi arrivare a 60?</h2>
         <p class="dp-value__text">MediocreditoFacile trasforma ogni vendita in locazione operativa smart: tu incassi subito, i tuoi clienti privati o aziende pagano canoni 100% deducibili fino a 60 mesi, con assicurazione All-Risk inclusa. È semplice, sostenibile e pensato per far crescere il tuo business.</p>
@@ -180,6 +182,7 @@ import Footer from '../components/Footer.astro';
         <h2 class="dp-form__heading">Attiva il tuo canale partner</h2>
         <p class="dp-form__sub">Compila il modulo e ti ricontatteremo entro 24 ore lavorative.</p>
         <form class="dp-form__form zapier-form" action="">
+          <input name="website" type="text" tabindex="-1" autocomplete="off" style="position:absolute;opacity:0;pointer-events:none;height:0;overflow:hidden" aria-hidden="true" />
           <input type="hidden" name="fonte" value="diventa-partner" />
           <div class="dp-form__field">
             <label for="dp-nome2">Nome e Cognome</label>
@@ -226,8 +229,6 @@ import Footer from '../components/Footer.astro';
     });
   });
 
-  const ZAPIER_URL = 'https://hooks.zapier.com/hooks/catch/26268853/ul50ccv/';
-
   document.querySelectorAll<HTMLFormElement>('.zapier-form').forEach((form) => {
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -238,7 +239,7 @@ import Footer from '../components/Footer.astro';
       }
       const data = new FormData(form);
       try {
-        await fetch(ZAPIER_URL, { method: 'POST', body: data, mode: 'no-cors' });
+        await fetch('/api/submit', { method: 'POST', body: data });
       } catch (_) {}
       window.location.href = '/grazie';
     });
@@ -248,9 +249,11 @@ import Footer from '../components/Footer.astro';
 <style>
   /* HERO */
   .dp-hero {
-    background: linear-gradient(135deg, #1a0a3e 0%, #2d1b69 50%, #664CCD 100%);
+    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(26, 10, 62, 0.75)), url('/images/hero-diventa-partner.png');
+    background-size: cover;
+    background-position: center;
     color: #fff;
-    padding: 5rem 1.5rem 4rem;
+    padding: 6rem 1.5rem 5.5rem;
     text-align: center;
   }
 
@@ -470,6 +473,14 @@ import Footer from '../components/Footer.astro';
   .dp-value {
     padding: 4.5rem 1.5rem;
     background: var(--color-bg-alt);
+  }
+
+  .dp-value__image {
+    width: 100%;
+    max-height: 300px;
+    object-fit: cover;
+    border-radius: 12px;
+    margin-bottom: 2.5rem;
   }
 
   .dp-value__inner {
@@ -713,7 +724,7 @@ import Footer from '../components/Footer.astro';
 
   @media (max-width: 640px) {
     .dp-hero {
-      padding: 3.5rem 1.25rem 3rem;
+      padding: 4rem 1.25rem 3.5rem;
     }
 
     .dp-benefits__grid {

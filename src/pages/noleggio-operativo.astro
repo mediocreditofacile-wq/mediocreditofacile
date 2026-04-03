@@ -87,6 +87,7 @@ import Footer from '../components/Footer.astro';
     <!-- VALUE PROPOSITION -->
     <section class="no-value">
       <div class="no-value__inner">
+        <img src="/images/section-noleggio-operativo.png" alt="Noleggio operativo in azione" class="no-value__image" loading="lazy" />
         <p class="no-value__eyebrow">La soluzione intelligente per la tua azienda</p>
         <h2 class="no-value__title">Perché pagare tutto subito quando puoi noleggiare?</h2>
         <p class="no-value__text">Con il noleggio operativo usi ciò che ti serve senza comprarlo. Paghi un canone mensile fisso e prevedibile che include tutto: assicurazione, manutenzione e assistenza. Il bene non entra nel tuo bilancio come debito, le tue linee di credito bancarie restano libere e il canone è 100% deducibile.</p>
@@ -477,6 +478,14 @@ import Footer from '../components/Footer.astro';
   .no-value {
     padding: 4.5rem 1.5rem;
     background: var(--color-bg-alt);
+  }
+
+  .no-value__image {
+    width: 100%;
+    max-height: 300px;
+    object-fit: cover;
+    border-radius: 12px;
+    margin-bottom: 2.5rem;
   }
 
   .no-value__inner {
