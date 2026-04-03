@@ -66,6 +66,22 @@ function formatDate(dateStr: string): string {
         ))}
       </div>
     </section>
+
+    <script>
+      /* Rileva l'aspect ratio di ogni immagine blog e applica la classe corrispondente */
+      document.querySelectorAll('.post-card__image img').forEach((img) => {
+        const el = img as HTMLImageElement;
+        const apply = () => {
+          const ratio = el.naturalWidth / el.naturalHeight;
+          const card = el.closest('.post-card');
+          if (!card) return;
+          if (ratio < 0.9) card.classList.add('post-card--vertical');
+          else if (ratio > 1.5) card.classList.add('post-card--wide');
+        };
+        if (el.complete) apply();
+        else el.addEventListener('load', apply);
+      });
+    </script>
   </main>
   <Footer />
 </Layout>
@@ -105,15 +121,16 @@ function formatDate(dateStr: string): string {
   }
 
   .blog-list__inner {
-    max-width: 800px;
+    max-width: var(--max-width);
     margin: 0 auto;
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
     gap: 2rem;
   }
 
   .post-card {
     display: flex;
+    flex-direction: column;
     background: #ffffff;
     border: 1px solid var(--color-border);
     border-radius: var(--radius);
@@ -128,15 +145,41 @@ function formatDate(dateStr: string): string {
     border-color: var(--color-primary-light);
   }
 
+  /* Immagine verticale (3:4): card occupa due righe */
+  .post-card--vertical {
+    grid-row: span 2;
+  }
+
+  /* Immagine wide (16:9): card occupa due colonne */
+  .post-card--wide {
+    grid-column: span 2;
+    flex-direction: row;
+  }
+
   .post-card__image {
     flex-shrink: 0;
-    width: 280px;
   }
 
   .post-card__image img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    display: block;
+  }
+
+  /* Default (4:3 e senza immagine): immagine sopra, testo sotto */
+  .post-card:not(.post-card--wide) .post-card__image {
+    height: 220px;
+  }
+
+  /* Verticale: immagine più alta */
+  .post-card--vertical .post-card__image {
+    height: 320px;
+  }
+
+  /* Wide: immagine a sinistra, testo a destra */
+  .post-card--wide .post-card__image {
+    width: 45%;
   }
 
   .post-card__body {
@@ -209,6 +252,25 @@ function formatDate(dateStr: string): string {
   }
 
   /* ═══ Responsive ═══ */
+  @media (max-width: 768px) {
+    .blog-list__inner {
+      grid-template-columns: 1fr;
+    }
+
+    .post-card--wide {
+      grid-column: span 1;
+      flex-direction: column;
+    }
+
+    .post-card--vertical {
+      grid-row: span 1;
+    }
+
+    .post-card--wide .post-card__image {
+      width: 100%;
+    }
+  }
+
   @media (max-width: 640px) {
     .blog-hero {
       padding: 3rem 1.25rem 2rem;
@@ -218,12 +280,8 @@ function formatDate(dateStr: string): string {
       padding: 2rem 1.25rem 3.5rem;
     }
 
-    .post-card {
-      flex-direction: column;
-    }
-
-    .post-card__image {
-      width: 100%;
+    .post-card__image,
+    .post-card--vertical .post-card__image {
       height: 200px;
     }
   }

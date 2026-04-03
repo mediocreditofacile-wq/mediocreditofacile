@@ -4,6 +4,8 @@ description: "Un'azienda di lavorazione pesce nel Delta del Po noleggia un impia
 date: "2025-03-25"
 author: "Alberto Amà"
 tags: ["noleggio operativo fotovoltaico", "fotovoltaico industriale noleggio", "noleggio operativo capannone", "fotovoltaico PMI manifatturiere", "fotovoltaico lavorazione pesce", "noleggio operativo Veneto", "Ritiro Dedicato GSE", "fotovoltaico con accumulo aziende"]
+image: "/images/blog-caso-studio-porto-tolle.jpg"
+imageAlt: "Lavorazione del pesce a mano in un capannone con pannelli fotovoltaici sul tetto"
 ---
 
 *Come si presenta una pratica di noleggio operativo fotovoltaico quando il broker, il fornitore e l'imprenditore si siedono allo stesso tavolo. Un caso reale nel Delta del Po.*
