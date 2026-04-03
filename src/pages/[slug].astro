@@ -18,7 +18,7 @@ export function getStaticPaths() {
 const { page } = Astro.props;
 const p = page as Record<string, any>;
 const isFotovoltaico = page.slug.includes('fotovoltaico');
-const heroImage = p.heroImage || (isFotovoltaico ? '/images/hero-fotovoltaico.png' : undefined);
+const heroImage = p.heroImage || (isFotovoltaico ? '/images/hero-fotovoltaico.png?v=2' : undefined);
 const benefitsImage = p.benefitsImage || (isFotovoltaico ? '/images/pannelli-tetto.png' : undefined);
 const valueImage = p.valueImage || '/images/consulenza-business.png';
 const valueTitle = p.valueTitle || 'Un unico interlocutore, tutte le opzioni';
