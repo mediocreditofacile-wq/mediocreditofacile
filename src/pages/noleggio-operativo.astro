@@ -26,6 +26,7 @@ import Footer from '../components/Footer.astro';
     <section class="no-form" id="form-top">
       <div class="no-form__inner">
         <form class="no-form__form zapier-form">
+          <input name="website" type="text" tabindex="-1" autocomplete="off" style="position:absolute;opacity:0;pointer-events:none;height:0;overflow:hidden" aria-hidden="true" />
           <input type="hidden" name="fonte" value="noleggio-operativo" />
           <div class="no-form__field">
             <label for="no-nome">Nome e Cognome</label>
@@ -182,6 +183,7 @@ import Footer from '../components/Footer.astro';
         <h2 class="no-form__heading">Richiedi il tuo preventivo gratuito</h2>
         <p class="no-form__sub">Compila il modulo e ti ricontatteremo entro 24 ore lavorative.</p>
         <form class="no-form__form zapier-form">
+          <input name="website" type="text" tabindex="-1" autocomplete="off" style="position:absolute;opacity:0;pointer-events:none;height:0;overflow:hidden" aria-hidden="true" />
           <input type="hidden" name="fonte" value="noleggio-operativo" />
           <div class="no-form__field">
             <label for="no-nome2">Nome e Cognome</label>
@@ -231,9 +233,6 @@ import Footer from '../components/Footer.astro';
     });
   });
 
-  // Form submit → Zapier + redirect /grazie
-  const ZAPIER_URL = 'https://hooks.zapier.com/hooks/catch/26268853/ul50ccv/';
-
   document.querySelectorAll<HTMLFormElement>('.zapier-form').forEach((form) => {
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -244,10 +243,8 @@ import Footer from '../components/Footer.astro';
       }
       const data = new FormData(form);
       try {
-        await fetch(ZAPIER_URL, { method: 'POST', body: data, mode: 'no-cors' });
-      } catch (_) {
-        // Zapier risponde opaque con no-cors, ignoriamo errori di rete
-      }
+        await fetch('/api/submit', { method: 'POST', body: data });
+      } catch (_) {}
       window.location.href = '/grazie';
     });
   });
@@ -256,9 +253,11 @@ import Footer from '../components/Footer.astro';
 <style>
   /* HERO */
   .no-hero {
-    background: linear-gradient(135deg, #1a0a3e 0%, #2d1b69 50%, #664CCD 100%);
+    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(26, 10, 62, 0.75)), url('/images/hero-noleggio-operativo.png');
+    background-size: cover;
+    background-position: center;
     color: #fff;
-    padding: 5rem 1.5rem 4rem;
+    padding: 6rem 1.5rem 5.5rem;
     text-align: center;
   }
 
@@ -721,7 +720,7 @@ import Footer from '../components/Footer.astro';
 
   @media (max-width: 640px) {
     .no-hero {
-      padding: 3.5rem 1.25rem 3rem;
+      padding: 4rem 1.25rem 3.5rem;
     }
 
     .no-benefits__grid {
