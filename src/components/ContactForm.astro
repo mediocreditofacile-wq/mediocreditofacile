@@ -10,9 +10,10 @@
     </p>
     <form
       class="contact-form"
-      action="https://hooks.zapier.com/hooks/catch/26268853/ul50ccv/"
+      action="/api/submit"
       method="POST"
     >
+      <input name="website" type="text" tabindex="-1" autocomplete="off" style="position:absolute;opacity:0;pointer-events:none;height:0;overflow:hidden" aria-hidden="true" />
       <div class="contact-form__field">
         <label for="nome">Nome e Cognome</label>
         <input
@@ -46,12 +47,12 @@
           autocomplete="tel"
         />
       </div>
-      <button type="submit" class="contact-form__submit">
+      <button type="submit" class="contact-form__submit" id="cf-submit">
         Richiedi Preventivo Gratuito ➤
       </button>
       <p class="contact-form__privacy">
         Inviando il modulo accetti la nostra
-        <a href="/privacy-policy">informativa sulla privacy</a>.
+        <a href="/privacy">informativa sulla privacy</a>.
       </p>
     </form>
   </div>
@@ -165,3 +166,18 @@
     }
   }
 </style>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('.contact-form');
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('cf-submit') as HTMLButtonElement | null;
+      if (btn) { btn.disabled = true; btn.textContent = 'Invio in corso…'; }
+      try {
+        await fetch('/api/submit', { method: 'POST', body: new FormData(form) });
+      } catch (_) {}
+      window.location.href = '/grazie';
+    });
+  }
+</script>
