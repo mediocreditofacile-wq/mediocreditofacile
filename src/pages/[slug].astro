@@ -16,9 +16,14 @@ export function getStaticPaths() {
 }
 
 const { page } = Astro.props;
+const p = page as Record<string, any>;
 const isFotovoltaico = page.slug.includes('fotovoltaico');
-const heroImage = page.heroImage || (isFotovoltaico ? '/images/hero-fotovoltaico.png' : undefined);
-const benefitsImage = page.benefitsImage || (isFotovoltaico ? '/images/pannelli-tetto.png' : undefined);
+const heroImage = p.heroImage || (isFotovoltaico ? '/images/hero-fotovoltaico.png' : undefined);
+const benefitsImage = p.benefitsImage || (isFotovoltaico ? '/images/pannelli-tetto.png' : undefined);
+const valueImage = p.valueImage || '/images/consulenza-business.png';
+const valueTitle = p.valueTitle || 'Un unico interlocutore, tutte le opzioni';
+const valueText = p.valueText || 'Mediocredito Facile confronta le offerte di oltre 10 società per trovare la soluzione più vantaggiosa. Non sei vincolato a un solo istituto: noi lavoriamo per te, non per la banca.';
+const valueText2 = p.valueText2 || 'Dalla prima telefonata alla firma del contratto, hai sempre la stessa persona di riferimento. Niente rimbalzi, niente call center. Un consulente che conosce il tuo caso e risponde in 24 ore.';
 ---
 
 <Layout title={page.metaTitle} description={page.metaDescription}>
@@ -26,8 +31,196 @@ const benefitsImage = page.benefitsImage || (isFotovoltaico ? '/images/pannelli-
   <main>
     <Hero title={page.heroTitle} subtitle={page.heroSubtitle} ctaText={page.ctaText} backgroundImage={heroImage} />
     <Benefits benefits={page.benefits} image={benefitsImage} />
+
+    <!-- VALUE PROPOSITION -->
+    <section class="lp-value">
+      <div class="lp-value__inner">
+        <div class="lp-value__content">
+          <span class="lp-value__eyebrow">Perché Mediocredito Facile</span>
+          <h2 class="lp-value__title">{valueTitle}</h2>
+          <p class="lp-value__text">{valueText}</p>
+          <p class="lp-value__text">{valueText2}</p>
+          <a href="#contatti" class="lp-value__cta">
+            Parliamone
+            <span class="material-icons-outlined" aria-hidden="true">arrow_forward</span>
+          </a>
+        </div>
+        <div class="lp-value__image-wrap">
+          <img src={valueImage} alt="" class="lp-value__image" loading="lazy" />
+        </div>
+      </div>
+    </section>
+
+    <!-- STATS BAND -->
+    <section class="lp-stats">
+      <div class="lp-stats__inner">
+        <div class="lp-stats__item">
+          <span class="lp-stats__number">10+</span>
+          <span class="lp-stats__label">Società confrontate</span>
+        </div>
+        <div class="lp-stats__divider"></div>
+        <div class="lp-stats__item">
+          <span class="lp-stats__number">24h</span>
+          <span class="lp-stats__label">Risposta garantita</span>
+        </div>
+        <div class="lp-stats__divider"></div>
+        <div class="lp-stats__item">
+          <span class="lp-stats__number">100%</span>
+          <span class="lp-stats__label">Canone deducibile</span>
+        </div>
+        <div class="lp-stats__divider"></div>
+        <div class="lp-stats__item">
+          <span class="lp-stats__number">0 €</span>
+          <span class="lp-stats__label">Anticipo richiesto</span>
+        </div>
+      </div>
+    </section>
+
     <HowItWorks />
     <ContactForm />
   </main>
   <Footer />
 </Layout>
+
+<style>
+  /* VALUE PROPOSITION */
+  .lp-value {
+    padding: 4.5rem 1.5rem;
+    background: var(--color-bg);
+  }
+
+  .lp-value__inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3.5rem;
+    align-items: center;
+  }
+
+  .lp-value__eyebrow {
+    display: inline-block;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--color-accent);
+    margin-bottom: 0.75rem;
+  }
+
+  .lp-value__title {
+    font-size: clamp(1.5rem, 3.5vw, 2rem);
+    font-weight: 800;
+    color: var(--color-primary);
+    margin-bottom: 1.25rem;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+
+  .lp-value__text {
+    font-size: 1rem;
+    color: var(--color-text);
+    line-height: 1.7;
+    margin-bottom: 1rem;
+  }
+
+  .lp-value__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--color-accent);
+    transition: gap 0.2s;
+  }
+
+  .lp-value__cta:hover {
+    gap: 0.75rem;
+  }
+
+  .lp-value__cta .material-icons-outlined {
+    font-size: 1.1rem;
+  }
+
+  .lp-value__image {
+    width: 100%;
+    border-radius: 16px;
+    object-fit: cover;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+  }
+
+  /* STATS BAND */
+  .lp-stats {
+    padding: 3rem 1.5rem;
+    background: var(--color-bg-alt);
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .lp-stats__inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+  }
+
+  .lp-stats__item {
+    text-align: center;
+    flex: 1;
+  }
+
+  .lp-stats__number {
+    display: block;
+    font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+    font-weight: 800;
+    color: var(--color-primary);
+    letter-spacing: -0.02em;
+    margin-bottom: 0.3rem;
+  }
+
+  .lp-stats__label {
+    font-size: 0.85rem;
+    color: var(--color-text-light);
+    line-height: 1.4;
+  }
+
+  .lp-stats__divider {
+    width: 1px;
+    height: 40px;
+    background: var(--color-border);
+    flex-shrink: 0;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    .lp-value__inner {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+
+    .lp-value__image-wrap {
+      order: -1;
+    }
+
+    .lp-value {
+      padding: 3rem 1.25rem;
+    }
+
+    .lp-stats__inner {
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .lp-stats__divider {
+      width: 60px;
+      height: 1px;
+    }
+
+    .lp-stats {
+      padding: 2.5rem 1.25rem;
+    }
+  }
+</style>

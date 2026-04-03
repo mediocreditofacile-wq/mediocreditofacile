@@ -5,32 +5,39 @@
 <section class="steps">
   <div class="steps__inner">
     <h2 class="steps__heading">Come Funziona</h2>
+    <p class="steps__sub">Tre passaggi dalla richiesta all'attivazione. Nessuna burocrazia inutile.</p>
     <div class="steps__grid">
       <div class="step">
-        <div class="step__number">1</div>
+        <div class="step__icon-wrap">
+          <span class="material-icons-outlined" aria-hidden="true">chat_bubble_outline</span>
+        </div>
+        <span class="step__label">Passo 1</span>
         <h3 class="step__title">Parlaci del tuo progetto</h3>
         <p class="step__desc">
-          Raccontaci di cosa ha bisogno la tua azienda: compiliamo insieme una richiesta chiara e completa.
+          Raccontaci di cosa ha bisogno la tua azienda. Compiliamo insieme una richiesta chiara
+          e la inviamo ai nostri partner finanziari.
         </p>
       </div>
-      <div class="step__arrow">
-        <span class="material-icons-outlined" aria-hidden="true">arrow_forward</span>
-      </div>
       <div class="step">
-        <div class="step__number">2</div>
-        <h3 class="step__title">Ti presentiamo le migliori opzioni</h3>
+        <div class="step__icon-wrap">
+          <span class="material-icons-outlined" aria-hidden="true">compare_arrows</span>
+        </div>
+        <span class="step__label">Passo 2</span>
+        <h3 class="step__title">Confrontiamo le offerte</h3>
         <p class="step__desc">
-          Confrontiamo le offerte dei nostri partner finanziari e ti proponiamo la soluzione pi&ugrave; vantaggiosa.
+          Analizziamo le proposte di oltre 10 società di noleggio e leasing.
+          Ti presentiamo solo la soluzione più vantaggiosa per la tua situazione.
         </p>
       </div>
-      <div class="step__arrow">
-        <span class="material-icons-outlined" aria-hidden="true">arrow_forward</span>
-      </div>
       <div class="step">
-        <div class="step__number">3</div>
-        <h3 class="step__title">Attivi il noleggio e risparmi subito</h3>
+        <div class="step__icon-wrap">
+          <span class="material-icons-outlined" aria-hidden="true">rocket_launch</span>
+        </div>
+        <span class="step__label">Passo 3</span>
+        <h3 class="step__title">Attivi e risparmi subito</h3>
         <p class="step__desc">
-          Firmi il contratto, ricevi il bene e inizi a beneficiare dei vantaggi fiscali dal primo giorno.
+          Firmi il contratto, ricevi il bene e inizi a beneficiare dei vantaggi fiscali
+          dal primo giorno. Tutto incluso nel canone.
         </p>
       </div>
     </div>
@@ -40,7 +47,8 @@
 <style>
   .steps {
     padding: 4.5rem 1.5rem;
-    background: var(--color-bg-alt-2);
+    background: linear-gradient(135deg, #1e1b3a 0%, #2d2556 50%, #1a1640 100%);
+    color: #ffffff;
   }
 
   .steps__inner {
@@ -52,73 +60,84 @@
     text-align: center;
     font-size: clamp(1.5rem, 3.5vw, 2rem);
     font-weight: 800;
-    color: var(--color-primary);
-    margin-bottom: 3rem;
+    color: #ffffff;
+    margin-bottom: 0.5rem;
     letter-spacing: -0.02em;
   }
 
+  .steps__sub {
+    text-align: center;
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 3rem;
+    max-width: 520px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
   .steps__grid {
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    gap: 1rem;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
   }
 
   .step {
-    flex: 1;
-    max-width: 300px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius);
+    padding: 2rem 1.75rem;
     text-align: center;
-    padding: 1.5rem 1rem;
+    transition: transform 0.2s, background 0.2s;
   }
 
-  .step__number {
+  .step:hover {
+    transform: translateY(-4px);
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .step__icon-wrap {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 48px;
-    height: 48px;
+    width: 56px;
+    height: 56px;
     border-radius: 50%;
     background: var(--color-accent);
     color: #ffffff;
-    font-size: 1.25rem;
-    font-weight: 800;
     margin-bottom: 1.25rem;
   }
 
-  .step__title {
-    font-size: 1.05rem;
+  .step__icon-wrap .material-icons-outlined {
+    font-size: 1.6rem;
+  }
+
+  .step__label {
+    display: block;
+    font-size: 0.75rem;
     font-weight: 700;
-    color: var(--color-primary);
-    margin-bottom: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-accent);
+    margin-bottom: 0.5rem;
+  }
+
+  .step__title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 0.75rem;
   }
 
   .step__desc {
     font-size: 0.9rem;
-    color: var(--color-text-light);
-    line-height: 1.6;
-  }
-
-  .step__arrow {
-    display: flex;
-    align-items: center;
-    padding-top: 2rem;
-    color: var(--color-primary);
-    opacity: 0.35;
-  }
-
-  .step__arrow .material-icons-outlined {
-    font-size: 1.5rem;
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.65;
   }
 
   @media (max-width: 768px) {
     .steps__grid {
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .step__arrow {
-      transform: rotate(90deg);
-      padding-top: 0;
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
     }
 
     .steps {
