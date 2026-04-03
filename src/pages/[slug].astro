@@ -22,7 +22,7 @@ const benefitsImage = page.benefitsImage || (isFotovoltaico ? '/images/pannelli-
 ---
 
 <Layout title={page.metaTitle} description={page.metaDescription}>
-  <Header minimal={true} />
+  <Header minimal={false} />
   <main>
     <Hero title={page.heroTitle} subtitle={page.heroSubtitle} ctaText={page.ctaText} backgroundImage={heroImage} />
     <Benefits benefits={page.benefits} image={benefitsImage} />
