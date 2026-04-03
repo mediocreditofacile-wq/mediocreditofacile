@@ -36,6 +36,7 @@ import Footer from '../components/Footer.astro';
 
         <!-- Colonna destra: info di contatto -->
         <aside class="contatti-body__info">
+          <img src="/images/section-contatti.png" alt="Il nostro ufficio" class="contatti-info__image" loading="lazy" />
           <h2 class="contatti-info__title">Come raggiungerci</h2>
 
           <div class="contatti-info__item">
@@ -138,6 +139,14 @@ import Footer from '../components/Footer.astro';
   }
 
   /* COLONNA INFO */
+  .contatti-info__image {
+    width: 100%;
+    border-radius: 12px;
+    object-fit: cover;
+    max-height: 220px;
+    margin-bottom: 1.5rem;
+  }
+
   .contatti-body__info {
     padding-top: 0.5rem;
   }
