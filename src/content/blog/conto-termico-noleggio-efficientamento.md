@@ -4,7 +4,7 @@ description: "Il Conto Termico 3.0 copre fino al 65% degli interventi di efficie
 date: "2026-04-05"
 author: "Alberto Amà"
 tags: ["conto termico", "efficientamento energetico", "noleggio operativo", "agevolazioni", "PMI", "guida"]
-image: "/images/blog-transizione-5.jpg"
+image: "/images/blog-conto-termico.jpg"
 imageAlt: "Documenti di incentivi fiscali per efficientamento energetico"
 ---
 

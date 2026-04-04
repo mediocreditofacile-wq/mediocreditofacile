@@ -4,7 +4,7 @@ description: "L'agriturismo ha bisogno di tutto: fotovoltaico, cucina profession
 date: "2026-04-05"
 author: "Alberto Amà"
 tags: ["agriturismo", "noleggio operativo", "fotovoltaico", "arredi", "attrezzature", "agricoltura"]
-image: "/images/blog-fotovoltaico-affitto.jpg"
+image: "/images/blog-agriturismo.jpg"
 imageAlt: "Agriturismo italiano con pannelli solari sul tetto"
 ---
 
