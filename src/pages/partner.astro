@@ -1,0 +1,393 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+
+const partners = [
+  {
+    name: 'Grenke',
+    description: 'Specializzata in tecnologia e beni strumentali. Presente in 33 paesi, processi di delibera rapidi e digitali.',
+    type: 'Noleggio Operativo',
+  },
+  {
+    name: 'PagaRent',
+    description: 'Flessibilità su importi piccoli e medi, ideale per PMI che noleggiano beni sotto i 50.000 €.',
+    type: 'Noleggio Operativo',
+  },
+  {
+    name: 'Grant',
+    description: 'Forte su fotovoltaico e impianti industriali. Struttura contrattuale adatta a beni con valore residuo elevato.',
+    type: 'Noleggio Operativo',
+  },
+  {
+    name: 'Restart',
+    description: 'Specializzata in veicoli commerciali e flotte aziendali. Contratti flessibili con servizi inclusi.',
+    type: 'Noleggio Operativo',
+  },
+  {
+    name: 'DLL',
+    description: 'Gruppo Rabobank, leader nel leasing per agricoltura, healthcare e food processing a livello globale.',
+    type: 'Leasing',
+  },
+  {
+    name: 'BCC Leasing',
+    description: 'Legata al sistema cooperativo bancario. Condizioni competitive per clienti con relazione BCC consolidata.',
+    type: 'Leasing',
+  },
+  {
+    name: 'Sella Leasing',
+    description: 'Gruppo Banca Sella. Focus sulle PMI del nord Italia, processi snelli e interlocutori dedicati.',
+    type: 'Leasing',
+  },
+  {
+    name: 'Credem',
+    description: 'Banca commerciale con divisione leasing strutturata. Buone condizioni su operazioni di importo medio-alto.',
+    type: 'Leasing',
+  },
+  {
+    name: 'Affida',
+    description: 'Mediatore creditizio per finanziamenti chirografari e cessione del quinto. Accesso a più istituti bancari.',
+    type: 'Finanziamenti',
+  },
+  {
+    name: 'IFIS',
+    description: 'Factoring e finanziamenti per PMI in crescita. Valutazione basata sui flussi commerciali, non solo sul bilancio.',
+    type: 'Factoring',
+  },
+  {
+    name: 'AIDEXA',
+    description: 'Fintech specializzata in finanziamenti rapidi. Analisi automatica dei flussi di cassa, delibera in 48 ore.',
+    type: 'Finanziamenti',
+  },
+  {
+    name: 'Ambico',
+    description: 'Consulenza su agevolazioni fiscali: Transizione 5.0, Nuova Sabatini, crediti d\'imposta. Massimizza il risparmio complessivo.',
+    type: 'Agevolazioni',
+  },
+];
+
+const typeColors: Record<string, { bg: string; color: string }> = {
+  'Noleggio Operativo': { bg: '#E0DBF7', color: '#664CCD' },
+  'Leasing': { bg: '#FFF3ED', color: '#FE6F3A' },
+  'Finanziamenti': { bg: '#E8F5E9', color: '#2E7D32' },
+  'Factoring': { bg: '#E3F2FD', color: '#1565C0' },
+  'Agevolazioni': { bg: '#FFF8E1', color: '#F57F17' },
+};
+---
+
+<Layout
+  title="Le Società con cui Lavoriamo | Mediocredito Facile"
+  description="Oltre 12 società di noleggio operativo, leasing e finanziamento. Un unico interlocutore, tutte le opzioni: Grenke, DLL, Sella Leasing, IFIS e molte altre."
+>
+  <Header minimal={false} />
+
+  <main>
+    <!-- Hero -->
+    <section class="hero">
+      <div class="hero-content">
+        <h1>Le Società con cui Lavoriamo</h1>
+        <p class="hero-subtitle">
+          Un unico interlocutore, accesso diretto a oltre 12 società di noleggio, leasing e finanziamento.
+          Ogni azienda ha esigenze diverse — e ogni società ha criteri diversi. Il nostro lavoro è trovare l'abbinamento giusto.
+        </p>
+      </div>
+    </section>
+
+    <!-- Partner Grid -->
+    <section class="partner-section">
+      <div class="container">
+        <div class="partner-grid">
+          {partners.map((partner) => (
+            <div class="partner-card">
+              <div class="partner-header">
+                <h3>{partner.name}</h3>
+                <span
+                  class="type-badge"
+                  style={`background: ${typeColors[partner.type].bg}; color: ${typeColors[partner.type].color};`}
+                >
+                  {partner.type}
+                </span>
+              </div>
+              <p>{partner.description}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- Value Section -->
+    <section class="value-section">
+      <div class="container">
+        <div class="value-content">
+          <h2>Perché il multi-partner fa la differenza</h2>
+          <div class="value-grid">
+            <div class="value-item">
+              <span class="material-icons-outlined value-icon">compare_arrows</span>
+              <h3>Criteri diversi, stessa richiesta</h3>
+              <p>
+                Una società può rifiutare un'operazione che un'altra approva senza problemi.
+                Non perché l'azienda sia debole, ma perché ogni istituto ha parametri propri:
+                settore, anzianità, importo, tipo di bene.
+              </p>
+            </div>
+            <div class="value-item">
+              <span class="material-icons-outlined value-icon">savings</span>
+              <h3>Condizioni su misura</h3>
+              <p>
+                I tassi e le condizioni variano in modo significativo tra una società e l'altra.
+                Confrontare le offerte su uno stesso bene può significare risparmiare
+                centinaia di euro al mese sul canone.
+              </p>
+            </div>
+            <div class="value-item">
+              <span class="material-icons-outlined value-icon">speed</span>
+              <h3>Tempi di delibera reali</h3>
+              <p>
+                Alcune società deliberano in 24 ore, altre in due settimane.
+                Quando il fornitore ha fretta di consegnare, sapere a chi rivolgersi
+                fa la differenza tra chiudere l'operazione e perderla.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section">
+      <div class="container">
+        <div class="cta-box">
+          <h2>Confronta le offerte per il tuo caso</h2>
+          <p>
+            Raccontaci cosa devi finanziare. Confrontiamo le proposte di più società
+            e ti presentiamo quella più adatta alla tua azienda.
+          </p>
+          <a href="/contatti" class="cta-button">
+            Richiedi un confronto gratuito
+            <span class="material-icons-outlined">arrow_forward</span>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <Footer />
+</Layout>
+
+<style>
+  /* Hero */
+  .hero {
+    background: linear-gradient(to bottom, rgba(41, 60, 91, 0.75), rgba(41, 60, 91, 0.85)),
+      url('/images/hero-partner-societa.jpg') center / cover no-repeat;
+    color: #fff;
+    text-align: center;
+    padding: 6rem 1.5rem 5.5rem;
+  }
+
+  .hero-content {
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+
+  .hero h1 {
+    font-size: 2.75rem;
+    font-weight: 800;
+    margin: 0 0 1.25rem;
+    line-height: 1.15;
+  }
+
+  .hero-subtitle {
+    font-size: 1.15rem;
+    line-height: 1.7;
+    max-width: 680px;
+    margin: 0 auto;
+    opacity: 0.92;
+  }
+
+  /* Partner Section */
+  .partner-section {
+    padding: 4.5rem 1.5rem;
+  }
+
+  .container {
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+
+  .partner-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+  }
+
+  .partner-card {
+    background: #fff;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 1.75rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .partner-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  }
+
+  .partner-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .partner-card h3 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    margin: 0;
+  }
+
+  .type-badge {
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 0.25rem 0.6rem;
+    border-radius: 6px;
+    white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    flex-shrink: 0;
+  }
+
+  .partner-card p {
+    font-size: 0.92rem;
+    line-height: 1.6;
+    color: var(--color-text-light);
+    margin: 0;
+  }
+
+  /* Value Section */
+  .value-section {
+    background: var(--color-bg-alt);
+    padding: 4.5rem 1.5rem;
+  }
+
+  .value-content h2 {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--color-text);
+    text-align: center;
+    margin: 0 0 3rem;
+  }
+
+  .value-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+
+  .value-item {
+    text-align: center;
+  }
+
+  .value-icon {
+    font-size: 2.5rem;
+    color: var(--color-primary);
+    margin-bottom: 1rem;
+    display: block;
+  }
+
+  .value-item h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--color-text);
+    margin: 0 0 0.75rem;
+  }
+
+  .value-item p {
+    font-size: 0.95rem;
+    line-height: 1.65;
+    color: var(--color-text-light);
+    margin: 0;
+  }
+
+  /* CTA */
+  .cta-section {
+    padding: 4.5rem 1.5rem;
+  }
+
+  .cta-box {
+    background: linear-gradient(135deg, var(--color-primary), #7c5ce0);
+    border-radius: var(--radius);
+    padding: 3.5rem 2.5rem;
+    text-align: center;
+    color: #fff;
+  }
+
+  .cta-box h2 {
+    font-size: 1.75rem;
+    font-weight: 800;
+    margin: 0 0 1rem;
+  }
+
+  .cta-box p {
+    font-size: 1.05rem;
+    line-height: 1.65;
+    max-width: 560px;
+    margin: 0 auto 2rem;
+    opacity: 0.92;
+  }
+
+  .cta-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--color-accent);
+    color: #fff;
+    padding: 0.9rem 2rem;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 1rem;
+    text-decoration: none;
+    transition: background 0.2s ease, transform 0.15s ease;
+  }
+
+  .cta-button:hover {
+    background: #e5602e;
+    transform: translateY(-2px);
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .hero {
+      padding: 4rem 1.25rem 3.5rem;
+    }
+
+    .hero h1 {
+      font-size: 1.85rem;
+    }
+
+    .hero-subtitle {
+      font-size: 1rem;
+    }
+
+    .partner-grid {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+
+    .value-grid {
+      grid-template-columns: 1fr;
+      gap: 2.5rem;
+    }
+
+    .cta-box {
+      padding: 2.5rem 1.5rem;
+    }
+
+    .cta-box h2 {
+      font-size: 1.4rem;
+    }
+  }
+</style>

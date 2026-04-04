@@ -1,0 +1,416 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+
+// Struttura FAQ per generare sia l'HTML che il JSON-LD
+const faqCategories = [
+  {
+    title: 'Noleggio Operativo',
+    icon: 'description',
+    items: [
+      {
+        question: "Cos'è il noleggio operativo?",
+        answer: "Il noleggio operativo è un contratto con cui l'azienda utilizza un bene — tecnologia, attrezzatura, veicolo, impianto — pagando un canone mensile fisso per tutta la durata. Il bene resta di proprietà della società di noleggio: l'azienda lo usa senza acquistarlo, senza indebitarsi e con la manutenzione spesso inclusa. Approfondisci nella nostra <a href='/noleggio-operativo'>guida completa al noleggio operativo</a>.",
+      },
+      {
+        question: 'Quanto costa il noleggio operativo?',
+        answer: "Dipende da tre variabili: il valore del bene, la durata del contratto e il profilo creditizio dell'azienda. Per dare un ordine di grandezza, un bene da 10.000 € su 60 mesi genera un canone indicativo di 200-250 € al mese. Ogni caso va quotato: <a href='/contatti'>richiedi un preventivo</a> senza impegno.",
+      },
+      {
+        question: 'Il noleggio operativo appare in Centrale Rischi?',
+        answer: "No. Il noleggio operativo non viene segnalato in Centrale Rischi perché non è un finanziamento ma un contratto di servizio. Questo significa che non erode le linee di credito bancarie dell'azienda, un vantaggio significativo rispetto al leasing e al prestito.",
+      },
+      {
+        question: 'Posso riscattare il bene a fine contratto?',
+        answer: "Nella maggior parte dei contratti di noleggio operativo non è previsto il riscatto, a differenza del leasing. Alcune società offrono la possibilità di acquisto a fine contratto a condizioni di mercato, ma non è la regola. Se il riscatto è una priorità, il leasing strumentale potrebbe essere la formula più adatta.",
+      },
+      {
+        question: 'Quali beni si possono noleggiare?',
+        answer: "Praticamente tutti i beni strumentali: tecnologia (PC, server, stampanti), attrezzature di produzione, impianti fotovoltaici, veicoli commerciali, arredamento professionale, apparecchiature medicali. L'unico requisito è che il bene sia nuovo e fornito da un rivenditore identificato. Consulta le nostre <a href='/noleggio-operativo'>pagine dedicate</a> per ogni categoria.",
+      },
+      {
+        question: 'Quanto tempo ci vuole per la delibera?',
+        answer: "Varia in base alla società e all'importo. Per operazioni sotto i 30.000 € con documentazione completa, alcune società deliberano in 24-48 ore. Operazioni più complesse possono richiedere 7-10 giorni lavorativi. Il nostro ruolo è indirizzare la richiesta verso la società con i tempi più compatibili con le esigenze del cliente.",
+      },
+    ],
+  },
+  {
+    title: 'Fiscalità',
+    icon: 'receipt_long',
+    items: [
+      {
+        question: 'Il canone di noleggio è deducibile?',
+        answer: "Sì, il canone di noleggio operativo è deducibile al 100% dal reddito d'impresa come costo operativo. Non ci sono limiti di deducibilità legati alla durata minima del contratto, a differenza del leasing. Questo vale per tutti i beni strumentali; per i veicoli si applicano i limiti previsti dal TUIR.",
+      },
+      {
+        question: "Come funziona l'IVA sul noleggio operativo?",
+        answer: "L'IVA si applica su ogni canone mensile ed è detraibile secondo le regole ordinarie. Per l'azienda questo significa un esborso iniziale molto più basso rispetto all'acquisto, dove l'IVA va anticipata sull'intero importo del bene.",
+      },
+      {
+        question: 'Il noleggio è compatibile con Transizione 5.0?',
+        answer: "Sì, i beni acquisiti in noleggio operativo possono beneficiare del credito d'imposta Transizione 5.0 se rispettano i requisiti tecnici previsti (interconnessione, efficientamento energetico). Il nostro partner <a href='/partner'>Ambico</a> si occupa della consulenza specifica sulle agevolazioni.",
+      },
+      {
+        question: 'Meglio noleggio o leasing per la deducibilità?',
+        answer: "Dipende dal bene e dalla situazione dell'azienda. Il noleggio deduce il 100% del canone senza vincoli di durata minima. Il leasing ha regole più rigide (durata minima pari a 2/3 dell'ammortamento ordinario) ma consente il riscatto. Per i veicoli, entrambi sono soggetti ai limiti del TUIR. Ogni caso va valutato: <a href='/contatti'>parliamone</a>.",
+      },
+    ],
+  },
+  {
+    title: 'Fotovoltaico',
+    icon: 'solar_power',
+    items: [
+      {
+        question: 'Come funziona il noleggio fotovoltaico per aziende?',
+        answer: "L'azienda installa un impianto fotovoltaico tramite noleggio operativo: paga un canone mensile fisso che copre impianto, installazione e spesso manutenzione. Il risparmio sulla bolletta elettrica, nella maggior parte dei casi, supera il canone dal primo mese. Nessun esborso iniziale, nessun debito in bilancio.",
+      },
+      {
+        question: 'Posso installare il fotovoltaico su un capannone in affitto?',
+        answer: "Sì, è uno dei vantaggi del noleggio rispetto all'acquisto. Poiché il bene non diventa proprietà dell'azienda, non serve essere proprietari dell'immobile. Serve l'autorizzazione del proprietario del capannone, ma non c'è il problema di investire su un bene immobiliare altrui.",
+      },
+      {
+        question: 'Il risparmio in bolletta copre il canone?',
+        answer: "Nella maggior parte delle installazioni per PMI, sì. Un impianto dimensionato correttamente sull'autoconsumo genera un risparmio mensile superiore al canone di noleggio. Il cash flow è positivo dal primo mese. Ogni caso va simulato sui consumi reali dell'azienda: <a href='/contatti'>richiedi una simulazione</a>.",
+      },
+      {
+        question: 'Serve il GSE per il fotovoltaico a noleggio?',
+        answer: "Se l'impianto è dimensionato per l'autoconsumo, la convenzione con il GSE non è strettamente necessaria. Se invece si vuole immettere energia in rete e accedere allo Scambio sul Posto o al Ritiro Dedicato, la pratica GSE va presentata normalmente. Il noleggio operativo non cambia gli obblighi verso il GSE.",
+      },
+    ],
+  },
+  {
+    title: 'Processo',
+    icon: 'route',
+    items: [
+      {
+        question: 'Quanto costa il servizio di Mediocredito Facile?',
+        answer: "Il nostro compenso è incluso nel canone di noleggio o leasing — non ci sono costi aggiuntivi per il cliente. La nostra provvigione viene dalla società finanziaria, non dall'azienda. Il servizio di confronto, consulenza e gestione della pratica è gratuito per il cliente finale.",
+      },
+      {
+        question: 'Cosa succede se la prima società rifiuta?',
+        answer: "Lavoriamo con <a href='/partner'>oltre 12 società</a>, ognuna con criteri propri. Un rifiuto da una società non significa che l'operazione sia impossibile: spesso basta cambiare interlocutore. Il nostro lavoro è proprio questo — trovare la società che accetta il profilo specifico dell'azienda.",
+      },
+      {
+        question: 'Quali documenti servono?',
+        answer: "Per una prima valutazione bastano visura camerale, ultimo bilancio depositato e preventivo del fornitore. Per la delibera formale serviranno anche i documenti d'identità del legale rappresentante e l'ultimo modello Unico. Per le ditte individuali, i documenti cambiano leggermente. Li chiediamo noi, passo per passo.",
+      },
+      {
+        question: 'Come funziona il grace period?',
+        answer: "Il grace period è il periodo tra la consegna del bene e l'inizio del pagamento dei canoni. Alcune società lo offrono da 30 a 90 giorni, altre non lo prevedono. È utile quando l'azienda ha bisogno di tempo per avviare il bene prima di iniziare a pagare. Va negoziato in fase di offerta.",
+      },
+    ],
+  },
+];
+
+// Genera l'array piatto per il JSON-LD
+const allFaqs = faqCategories.flatMap((cat) => cat.items);
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: allFaqs.map((faq) => ({
+    '@type': 'Question',
+    name: faq.question,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      // Rimuovi i tag HTML per il JSON-LD
+      text: faq.answer.replace(/<[^>]*>/g, ''),
+    },
+  })),
+};
+---
+
+<Layout
+  title="Domande Frequenti su Noleggio Operativo e Leasing | Mediocredito Facile"
+  description="Risposte alle domande più comuni su noleggio operativo, leasing, fiscalità, fotovoltaico e processo di delibera. Tutto quello che serve sapere prima di scegliere."
+>
+  <Header minimal={false} />
+
+  <!-- JSON-LD FAQPage -->
+  <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
+
+  <main>
+    <!-- Hero -->
+    <section class="hero">
+      <div class="hero-content">
+        <h1>Domande Frequenti</h1>
+        <p class="hero-subtitle">
+          Noleggio operativo, leasing, fiscalità, fotovoltaico: le risposte concrete
+          alle domande che ci fanno più spesso imprenditori e responsabili acquisti.
+        </p>
+      </div>
+    </section>
+
+    <!-- FAQ Categories -->
+    <section class="faq-section">
+      <div class="container">
+        {faqCategories.map((category) => (
+          <div class="faq-category">
+            <div class="category-header">
+              <span class="material-icons-outlined category-icon">{category.icon}</span>
+              <h2>{category.title}</h2>
+            </div>
+            <div class="faq-list">
+              {category.items.map((faq) => (
+                <details class="faq-item">
+                  <summary>
+                    <span class="faq-question">{faq.question}</span>
+                    <span class="material-icons-outlined faq-chevron">expand_more</span>
+                  </summary>
+                  <div class="faq-answer">
+                    <Fragment set:html={faq.answer} />
+                  </div>
+                </details>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section">
+      <div class="container">
+        <div class="cta-box">
+          <h2>Non trovi la risposta che cerchi?</h2>
+          <p>
+            Ogni situazione aziendale è diversa. Scrivici o chiamaci:
+            rispondiamo noi direttamente, non un chatbot.
+          </p>
+          <a href="/contatti" class="cta-button">
+            Parliamone
+            <span class="material-icons-outlined">arrow_forward</span>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <Footer />
+</Layout>
+
+<style>
+  /* Hero */
+  .hero {
+    background: linear-gradient(to bottom, rgba(41, 60, 91, 0.75), rgba(41, 60, 91, 0.85)),
+      url('/images/hero-faq.jpg') center / cover no-repeat;
+    color: #fff;
+    text-align: center;
+    padding: 6rem 1.5rem 5.5rem;
+  }
+
+  .hero-content {
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+
+  .hero h1 {
+    font-size: 2.75rem;
+    font-weight: 800;
+    margin: 0 0 1.25rem;
+    line-height: 1.15;
+  }
+
+  .hero-subtitle {
+    font-size: 1.15rem;
+    line-height: 1.7;
+    max-width: 660px;
+    margin: 0 auto;
+    opacity: 0.92;
+  }
+
+  /* FAQ Section */
+  .faq-section {
+    padding: 4.5rem 1.5rem;
+  }
+
+  .container {
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+
+  .faq-category {
+    margin-bottom: 3.5rem;
+  }
+
+  .faq-category:last-child {
+    margin-bottom: 0;
+  }
+
+  .category-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .category-icon {
+    font-size: 1.75rem;
+    color: var(--color-primary);
+  }
+
+  .category-header h2 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--color-text);
+    margin: 0;
+  }
+
+  .faq-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  /* Details / Summary */
+  .faq-item {
+    background: #fff;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+    transition: box-shadow 0.2s ease;
+  }
+
+  .faq-item:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
+  }
+
+  .faq-item summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+  }
+
+  .faq-item summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .faq-item summary::marker {
+    display: none;
+    content: '';
+  }
+
+  .faq-question {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--color-text);
+    line-height: 1.4;
+    flex: 1;
+    padding-right: 1rem;
+  }
+
+  .faq-chevron {
+    font-size: 1.5rem;
+    color: var(--color-text-light);
+    transition: transform 0.25s ease;
+    flex-shrink: 0;
+  }
+
+  .faq-item[open] .faq-chevron {
+    transform: rotate(180deg);
+  }
+
+  .faq-answer {
+    padding: 0 1.5rem 1.5rem;
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: var(--color-text-light);
+  }
+
+  .faq-answer :global(a) {
+    color: var(--color-primary);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .faq-answer :global(a:hover) {
+    color: var(--color-accent);
+  }
+
+  /* CTA */
+  .cta-section {
+    padding: 0 1.5rem 4.5rem;
+  }
+
+  .cta-box {
+    background: linear-gradient(135deg, var(--color-primary), #7c5ce0);
+    border-radius: var(--radius);
+    padding: 3.5rem 2.5rem;
+    text-align: center;
+    color: #fff;
+  }
+
+  .cta-box h2 {
+    font-size: 1.75rem;
+    font-weight: 800;
+    margin: 0 0 1rem;
+  }
+
+  .cta-box p {
+    font-size: 1.05rem;
+    line-height: 1.65;
+    max-width: 520px;
+    margin: 0 auto 2rem;
+    opacity: 0.92;
+  }
+
+  .cta-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--color-accent);
+    color: #fff;
+    padding: 0.9rem 2rem;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 1rem;
+    text-decoration: none;
+    transition: background 0.2s ease, transform 0.15s ease;
+  }
+
+  .cta-button:hover {
+    background: #e5602e;
+    transform: translateY(-2px);
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .hero {
+      padding: 4rem 1.25rem 3.5rem;
+    }
+
+    .hero h1 {
+      font-size: 1.85rem;
+    }
+
+    .hero-subtitle {
+      font-size: 1rem;
+    }
+
+    .faq-item summary {
+      padding: 1rem 1.25rem;
+    }
+
+    .faq-question {
+      font-size: 0.95rem;
+    }
+
+    .faq-answer {
+      padding: 0 1.25rem 1.25rem;
+      font-size: 0.9rem;
+    }
+
+    .cta-box {
+      padding: 2.5rem 1.5rem;
+    }
+
+    .cta-box h2 {
+      font-size: 1.4rem;
+    }
+  }
+</style>

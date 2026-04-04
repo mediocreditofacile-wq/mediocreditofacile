@@ -1,0 +1,212 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<Layout
+  title="Chi Siamo — Alberto Amà | Mediocredito Facile"
+  description="Mediocredito Facile: broker finanziario indipendente per PMI italiane. Accesso a 12+ società di noleggio operativo e leasing, un unico interlocutore. Chi è Alberto Amà."
+  ogImage="/images/hero-chi-siamo.jpg"
+>
+  <Header minimal={false} />
+  <main>
+
+    <!-- HERO -->
+    <section class="about-hero">
+      <div class="about-hero__inner">
+        <span class="about-hero__eyebrow">Chi siamo</span>
+        <h1 class="about-hero__title">Un broker, dodici società, una sola persona di riferimento</h1>
+        <p class="about-hero__sub">
+          Mediocredito Facile non è una banca, non è una finanziaria, non è una società di noleggio.
+          È il punto di accesso a tutte quante.
+        </p>
+      </div>
+    </section>
+
+    <!-- STORIA -->
+    <section class="about-story">
+      <div class="about-story__inner">
+        <div class="about-story__content">
+          <h2 class="about-story__title">Come nasce Mediocredito Facile</h2>
+          <p>
+            Il problema che risolvo è semplice da descrivere e complicato da gestire: un imprenditore ha bisogno
+            di un bene strumentale — un macchinario, un impianto fotovoltaico, delle attrezzature per il ristorante,
+            dei computer per l'ufficio — e non sa a chi rivolgersi. La banca è lenta. La singola società di noleggio
+            gli propone il proprio prodotto, che può non essere il migliore per lui. Nessuno gli fa il confronto.
+          </p>
+          <p>
+            Mediocredito Facile fa il confronto. Lavoro con oltre 12 società tra noleggio operativo e leasing strumentale.
+            Quando un cliente mi chiama, analizzo la sua situazione — bilancio, settore, tipo di bene, urgenza — e invio
+            la pratica alla società che ha le condizioni migliori per quel caso specifico. Se la prima rifiuta, passo alla seconda.
+            Se la seconda ha un tasso più alto, confronto con la terza.
+          </p>
+          <p>
+            Il mio guadagno è una commissione riconosciuta dalla società di noleggio, non dal cliente. Il canone che
+            il cliente paga è lo stesso — spesso migliore — di quello che otterrebbe andando diretto. La differenza è
+            che io conosco i criteri di ciascuna società, so dove mandare ogni pratica e riduco i tempi da settimane a giorni.
+          </p>
+        </div>
+        <div class="about-story__image-wrap">
+          <img src="/images/hero-chi-siamo.jpg" alt="Alberto Amà, broker finanziario Mediocredito Facile" class="about-story__image" loading="lazy" />
+        </div>
+      </div>
+    </section>
+
+    <!-- NUMERI -->
+    <section class="about-stats">
+      <div class="about-stats__inner">
+        <div class="about-stats__item">
+          <span class="about-stats__number">12+</span>
+          <span class="about-stats__label">Società di noleggio e leasing</span>
+        </div>
+        <div class="about-stats__divider"></div>
+        <div class="about-stats__item">
+          <span class="about-stats__number">24h</span>
+          <span class="about-stats__label">Risposta garantita</span>
+        </div>
+        <div class="about-stats__divider"></div>
+        <div class="about-stats__item">
+          <span class="about-stats__number">15+</span>
+          <span class="about-stats__label">Settori serviti</span>
+        </div>
+        <div class="about-stats__divider"></div>
+        <div class="about-stats__item">
+          <span class="about-stats__number">0 €</span>
+          <span class="about-stats__label">Costo per il cliente</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- COME LAVORO -->
+    <section class="about-method">
+      <div class="about-method__inner">
+        <h2 class="about-method__title">Come lavoro</h2>
+        <div class="about-method__grid">
+          <div class="about-method__card">
+            <div class="about-method__icon"><span class="material-icons-outlined">hearing</span></div>
+            <h3>Ascolto</h3>
+            <p>Mi racconti di cosa hai bisogno, quanto vale, per quanto tempo ti serve. Non ti chiedo di compilare un form da 30 campi.</p>
+          </div>
+          <div class="about-method__card">
+            <div class="about-method__icon"><span class="material-icons-outlined">analytics</span></div>
+            <h3>Analizzo</h3>
+            <p>Guardo il tuo bilancio, il settore, il tipo di bene. So già quali società accetteranno e a quali condizioni.</p>
+          </div>
+          <div class="about-method__card">
+            <div class="about-method__icon"><span class="material-icons-outlined">compare_arrows</span></div>
+            <h3>Confronto</h3>
+            <p>Invio la pratica alla società con il miglior rapporto condizioni-probabilità di approvazione. Se rifiuta, passo alla seconda.</p>
+          </div>
+          <div class="about-method__card">
+            <div class="about-method__icon"><span class="material-icons-outlined">handshake</span></div>
+            <h3>Chiudo</h3>
+            <p>Ti presento la soluzione, gestiamo la firma, il fornitore consegna. Hai un interlocutore solo, dall'inizio alla fine.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VALORI -->
+    <section class="about-values">
+      <div class="about-values__inner">
+        <h2 class="about-values__title">Cosa ci distingue</h2>
+        <div class="about-values__grid">
+          <div class="about-values__item">
+            <h3>Indipendenza</h3>
+            <p>Non sono legato a una singola società. Guadagno la stessa commissione qualunque partner scelga. L'unico incentivo è trovare la soluzione migliore per te.</p>
+          </div>
+          <div class="about-values__item">
+            <h3>Trasparenza</h3>
+            <p>Ti dico i numeri prima. Il canone, la durata, il costo totale, il confronto con l'acquisto. Se il noleggio non conviene, te lo dico — e ti suggerisco l'alternativa.</p>
+          </div>
+          <div class="about-values__item">
+            <h3>Velocità</h3>
+            <p>Rispondo in 24 ore. La delibera arriva in 24-72 ore. Non perché sia un supereroe, ma perché so a chi mandare la pratica e con quale documentazione.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="about-cta">
+      <div class="about-cta__inner">
+        <h2 class="about-cta__title">Parliamo del tuo progetto</h2>
+        <p class="about-cta__text">
+          La prima consulenza è gratuita e senza impegno. Mi racconti cosa ti serve,
+          io ti dico se e come posso aiutarti. Niente pressioni, niente call center.
+        </p>
+        <a href="/contatti" class="about-cta__btn">Contattami</a>
+      </div>
+    </section>
+
+  </main>
+  <Footer />
+</Layout>
+
+<style>
+  .about-hero {
+    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(26, 10, 62, 0.75)), url('/images/hero-chi-siamo.jpg');
+    background-size: cover;
+    background-position: center;
+    color: #fff;
+    padding: 6rem 1.5rem 5.5rem;
+    text-align: center;
+  }
+  .about-hero__inner { max-width: 720px; margin: 0 auto; }
+  .about-hero__eyebrow { display: inline-block; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: var(--color-accent); margin-bottom: 1rem; }
+  .about-hero__title { font-size: clamp(2rem, 5vw, 3rem); font-weight: 800; line-height: 1.15; letter-spacing: -0.03em; margin-bottom: 1.25rem; }
+  .about-hero__sub { font-size: clamp(1rem, 2.5vw, 1.15rem); line-height: 1.65; color: rgba(255,255,255,0.9); }
+
+  .about-story { padding: 4.5rem 1.5rem; }
+  .about-story__inner { max-width: var(--max-width); margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 3.5rem; align-items: center; }
+  .about-story__title { font-size: clamp(1.5rem, 3.5vw, 2rem); font-weight: 800; color: var(--color-primary); margin-bottom: 1.25rem; letter-spacing: -0.02em; }
+  .about-story__content p { font-size: 1rem; line-height: 1.7; margin-bottom: 1rem; }
+  .about-story__image { width: 100%; border-radius: 16px; object-fit: cover; box-shadow: 0 8px 30px rgba(0,0,0,0.1); }
+
+  .about-stats { padding: 3rem 1.5rem; background: linear-gradient(135deg, #1e1b3a, #2d2556, #1a1640); color: #fff; }
+  .about-stats__inner { max-width: var(--max-width); margin: 0 auto; display: flex; justify-content: space-between; align-items: center; gap: 2rem; }
+  .about-stats__item { text-align: center; flex: 1; }
+  .about-stats__number { display: block; font-size: clamp(2rem, 4vw, 2.75rem); font-weight: 800; color: var(--color-accent); margin-bottom: 0.3rem; }
+  .about-stats__label { font-size: 0.85rem; color: rgba(255,255,255,0.75); }
+  .about-stats__divider { width: 1px; height: 48px; background: rgba(255,255,255,0.15); flex-shrink: 0; }
+
+  .about-method { padding: 4.5rem 1.5rem; background: var(--color-bg-alt); }
+  .about-method__inner { max-width: var(--max-width); margin: 0 auto; }
+  .about-method__title { text-align: center; font-size: clamp(1.5rem, 3.5vw, 2rem); font-weight: 800; color: var(--color-primary); margin-bottom: 2.5rem; }
+  .about-method__grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; }
+  .about-method__card { background: #fff; border: 1px solid var(--color-border); border-radius: var(--radius); padding: 1.75rem 1.5rem; text-align: center; transition: transform 0.2s, box-shadow 0.2s; }
+  .about-method__card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(102,76,205,0.1); }
+  .about-method__icon { display: inline-flex; align-items: center; justify-content: center; width: 52px; height: 52px; border-radius: 50%; background: var(--color-primary-bg); color: var(--color-primary); margin-bottom: 1rem; }
+  .about-method__icon .material-icons-outlined { font-size: 1.5rem; }
+  .about-method__card h3 { font-size: 1.05rem; font-weight: 700; color: var(--color-primary); margin-bottom: 0.5rem; }
+  .about-method__card p { font-size: 0.9rem; color: var(--color-text-light); line-height: 1.6; }
+
+  .about-values { padding: 4.5rem 1.5rem; }
+  .about-values__inner { max-width: var(--max-width); margin: 0 auto; }
+  .about-values__title { text-align: center; font-size: clamp(1.5rem, 3.5vw, 2rem); font-weight: 800; color: var(--color-primary); margin-bottom: 2.5rem; }
+  .about-values__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; }
+  .about-values__item { text-align: center; padding: 1.5rem; }
+  .about-values__item h3 { font-size: 1.15rem; font-weight: 700; color: var(--color-primary); margin-bottom: 0.75rem; }
+  .about-values__item p { font-size: 0.95rem; color: var(--color-text); line-height: 1.65; }
+
+  .about-cta { padding: 4.5rem 1.5rem; background: var(--color-bg-alt); text-align: center; }
+  .about-cta__inner { max-width: 600px; margin: 0 auto; }
+  .about-cta__title { font-size: clamp(1.5rem, 3.5vw, 2rem); font-weight: 800; color: var(--color-primary); margin-bottom: 1rem; }
+  .about-cta__text { font-size: 1.05rem; color: var(--color-text); line-height: 1.65; margin-bottom: 2rem; }
+  .about-cta__btn { display: inline-flex; align-items: center; background: var(--color-accent); color: #fff; font-weight: 700; font-size: 1.05rem; padding: 0.9rem 2rem; border-radius: 8px; transition: background 0.2s, transform 0.15s; }
+  .about-cta__btn:hover { background: var(--color-accent-hover); transform: translateY(-1px); }
+
+  @media (max-width: 768px) {
+    .about-hero { padding: 4rem 1.25rem 3.5rem; }
+    .about-story__inner { grid-template-columns: 1fr; gap: 2rem; }
+    .about-story__image-wrap { order: -1; }
+    .about-method__grid { grid-template-columns: 1fr 1fr; }
+    .about-values__grid { grid-template-columns: 1fr; }
+    .about-stats__inner { flex-direction: column; gap: 1.5rem; }
+    .about-stats__divider { width: 60px; height: 1px; }
+  }
+  @media (max-width: 480px) {
+    .about-method__grid { grid-template-columns: 1fr; }
+  }
+</style>

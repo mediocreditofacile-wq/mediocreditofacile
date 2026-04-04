@@ -7,6 +7,20 @@ import PartnerLogos from './PartnerLogos.astro';
   <div class="footer__inner">
     <p class="footer__brand">MEDIOCREDITO<strong>FACILE</strong></p>
 
+    <div class="footer__nav">
+      <a href="/chi-siamo">Chi Siamo</a>
+      <span class="footer__sep">|</span>
+      <a href="/partner">Le Nostre Società</a>
+      <span class="footer__sep">|</span>
+      <a href="/casi-studio">Casi Studio</a>
+      <span class="footer__sep">|</span>
+      <a href="/blog">Blog</a>
+      <span class="footer__sep">|</span>
+      <a href="/faq">FAQ</a>
+      <span class="footer__sep">|</span>
+      <a href="/contatti">Contatti</a>
+    </div>
+
     <div class="footer__links">
       <a href="/privacy">Privacy Policy</a>
       <span class="footer__sep">|</span>
@@ -54,6 +68,25 @@ import PartnerLogos from './PartnerLogos.astro';
   .footer__brand strong {
     color: var(--color-accent);
     font-weight: 800;
+  }
+
+  .footer__nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+  }
+
+  .footer__nav a {
+    color: rgba(255, 255, 255, 0.85);
+    font-weight: 500;
+    transition: color 0.2s;
+  }
+
+  .footer__nav a:hover {
+    color: var(--color-accent);
   }
 
   .footer__links {
