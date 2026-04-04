@@ -9,6 +9,10 @@ import Footer from '../components/Footer.astro';
   description="Abbiamo ricevuto la tua richiesta. Ti ricontatteremo entro 24 ore lavorative."
 >
   <Header minimal={true} />
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({ event: 'generate_lead' });
+  </script>
   <main class="grazie">
     <div class="grazie__inner">
       <div class="grazie__icon">✓</div>
