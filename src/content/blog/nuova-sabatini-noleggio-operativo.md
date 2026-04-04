@@ -4,7 +4,7 @@ description: "La Nuova Sabatini prevede un contributo in conto interessi per inv
 date: "2026-04-05"
 author: "Alberto Amà"
 tags: ["Nuova Sabatini", "noleggio operativo", "agevolazioni", "PMI", "contributo", "guida"]
-image: "/images/blog-transizione-5.jpg"
+image: "/images/blog-sabatini-confronto.jpg"
 imageAlt: "Documenti di agevolazioni fiscali per PMI con calcoli"
 ---
 

@@ -4,7 +4,7 @@ description: "Azienda in perdita, patrimonio netto negativo, banca chiusa: il no
 date: "2026-04-05"
 author: "Alberto Amà"
 tags: ["patrimonio netto negativo", "noleggio operativo", "azienda in perdita", "caso studio", "PMI", "crisi"]
-image: "/images/blog-banca-dice-no.jpg"
+image: "/images/blog-patrimonio-negativo.jpg"
 imageAlt: "Broker che mostra alternative di finanziamento a un imprenditore"
 ---
 
