@@ -11,7 +11,17 @@ import Footer from '../components/Footer.astro';
   <Header minimal={true} />
   <script>
     window.dataLayer = window.dataLayer || [];
+    // Estrai lo slug della landing dal referrer per tracciare la provenienza del lead
+    const referrer = document.referrer || '';
+    let fonte = 'diretto';
+    try {
+      const url = new URL(referrer);
+      const path = url.pathname.replace(/^\/|\/$/g, '');
+      if (path) fonte = path;
+      else fonte = 'homepage';
+    } catch (_) {}
     window.dataLayer.push({ event: 'generate_lead' });
+    window.dataLayer.push({ event: 'form_submission', fonte: fonte });
   </script>
   <main class="grazie">
     <div class="grazie__inner">
