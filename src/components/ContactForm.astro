@@ -1,5 +1,8 @@
 ---
-
+interface Props {
+  fonte?: string;
+}
+const { fonte } = Astro.props;
 ---
 
 <section class="form-section" id="contatti">
@@ -14,6 +17,7 @@
       method="POST"
     >
       <input name="website" type="text" tabindex="-1" autocomplete="off" style="position:absolute;opacity:0;pointer-events:none;height:0;overflow:hidden" aria-hidden="true" />
+      {fonte && <input type="hidden" name="fonte" value={fonte} />}
       <div class="contact-form__field">
         <label for="nome">Nome e Cognome</label>
         <input

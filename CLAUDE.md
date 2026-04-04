@@ -38,10 +38,27 @@ Le landing si generano da landing-pages.json. Per creare una nuova landing basta
 - Email: mediocreditofacile@gmail.com
 - Privacy: link a /privacy su tutti i form
 - Immagini: sempre in public/images/, nomi kebab-case
+- Form — campo "fonte" OBBLIGATORIO: ogni form del sito deve avere un campo nascosto `fonte` con lo slug della pagina. Per le landing dinamiche (da landing-pages.json), il componente ContactForm accetta la prop `fonte` e lo slug viene passato automaticamente in [slug].astro. Per i form inline nelle pagine statiche, usare `<input type="hidden" name="fonte" value="[slug]" />`. Il campo arriva a Zapier e da lì nella mail di notifica e in Pipedrive, così ogni lead porta con sé l'informazione della pagina di provenienza.
+
+## API Routes (Vercel serverless)
+- `src/pages/api/submit.ts` → webhook form contatti (POST → Zapier)
+- `src/pages/api/cerved.ts` → proxy Cerved API per lookup P.IVA (GET, cache in-memory 24h, CORS per mcf-marotta.netlify.app)
+- `src/pages/api/credit-ai.ts` → layer AI credit policy via Claude Haiku (POST, CORS per mcf-marotta.netlify.app)
+- Tutte usano `export const prerender = false` per funzionare come serverless functions
+- IMPORTANTE: il dominio fa redirect da `mediocreditofacile.it` a `www.mediocreditofacile.it` — usare sempre `www` nelle chiamate fetch dal frontend
+
+## Environment Variables (Vercel)
+- `ZAPIER_WEBHOOK_URL` → webhook form contatti
+- `CERVED_CONSUMER_KEY` → API key Cerved (header: `apikey`)
+- `ANTHROPIC_API_KEY` → API key Anthropic per layer AI credit policy
 
 ## Deploy
 - Git push su main → Vercel auto-deploy
 - Dev locale: npm run dev → http://localhost:4321
+
+## Nota
+Il Marotta Tool vive in ~/dev/marotta-tool/ con il suo CLAUDE.md dedicato.
+Le API Cerved e credit-ai in src/pages/api/ servono anche il Marotta Tool (CORS abilitato per mcf-marotta.netlify.app).
 
 ---
 
@@ -74,6 +91,7 @@ cd /Users/alberto/mediocreditofacile/mcf-ads-engine
 3. **Google Refresh Token** → generato da `python setup_auth.py` (una volta sola)
 4. **Anthropic API Key** → va in `.env` come `ANTHROPIC_API_KEY`
 5. **Resend API Key** → va in `.env` come `RESEND_API_KEY`
+6. **Email notifiche:** mediocreditofacile@gmail.com → va in `.env` come `NOTIFICATION_EMAIL`
 
 ## Account Google Ads
 - Account ID: AW-16800748626
