@@ -1,0 +1,307 @@
+<!-- mcf-ads-engine/dashboard/templates/audit.html -->
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>MCF Ads — Audit Campagne</title>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #f5f5f5; color: #222; }
+    header { background: #1a73e8; color: white; padding: 14px 24px; display: flex; align-items: center; gap: 16px; }
+    header h1 { font-size: 1.1rem; flex: 1; }
+    header a { color: white; font-size: .85rem; opacity: .8; text-decoration: none; }
+    header a:hover { opacity: 1; }
+    .content { max-width: 1200px; margin: 24px auto; padding: 0 16px; }
+    .meta { color: #666; font-size: .85rem; margin-bottom: 16px; display: flex; align-items: center; gap: 12px; }
+    .btn { padding: 7px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: .85rem; }
+    .btn-primary { background: #1a73e8; color: white; }
+    .btn-primary:disabled { opacity: .5; }
+    .campaign-card { background: white; border-radius: 8px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.1); overflow: hidden; }
+    .campaign-header { padding: 16px 20px; cursor: pointer; display: flex; align-items: center; gap: 12px; }
+    .campaign-header:hover { background: #f8f9fa; }
+    .campaign-name { font-weight: 600; font-size: 1rem; flex: 1; }
+    .campaign-stats { display: flex; gap: 20px; font-size: .85rem; color: #555; }
+    .stat { text-align: center; }
+    .stat-val { font-weight: 600; font-size: .95rem; color: #222; }
+    .stat-lbl { font-size: .75rem; color: #888; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: .75rem; font-weight: 600; }
+    .badge-green { background: #e6f4ea; color: #137333; }
+    .badge-red { background: #fce8e6; color: #c5221f; }
+    .badge-yellow { background: #fef7e0; color: #b06000; }
+    .badge-grey { background: #f1f3f4; color: #444; }
+    .campaign-body { padding: 0 20px 20px; border-top: 1px solid #f0f0f0; }
+    .section-title { font-size: .8rem; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: .05em; margin: 16px 0 8px; }
+    .ag-card { border: 1px solid #e8e8e8; border-radius: 6px; margin-bottom: 10px; overflow: hidden; }
+    .ag-header { padding: 10px 14px; display: flex; align-items: center; gap: 10px; cursor: pointer; background: #fafafa; }
+    .ag-header:hover { background: #f0f4ff; }
+    .ag-name { font-weight: 600; flex: 1; font-size: .9rem; }
+    .ag-body { padding: 10px 14px; }
+    table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+    th { text-align: left; padding: 6px 10px; border-bottom: 2px solid #e0e0e0; color: #555; font-size: .8rem; }
+    td { padding: 7px 10px; border-bottom: 1px solid #f0f0f0; }
+    tr:last-child td { border-bottom: none; }
+    .paused { color: #999; text-decoration: line-through; }
+    .neg-list { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+    .neg-tag { background: #fce8e6; color: #c5221f; border-radius: 4px; padding: 2px 7px; font-size: .75rem; }
+    .ext-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+    .sitelink-tag { background: #e8f0fe; color: #1a73e8; border-radius: 4px; padding: 4px 10px; font-size: .8rem; }
+    .callout-tag { background: #f1f3f4; color: #444; border-radius: 4px; padding: 4px 10px; font-size: .8rem; }
+    .loading { color: #1a73e8; padding: 32px; text-align: center; }
+    .error { color: #c5221f; padding: 16px; background: #fce8e6; border-radius: 6px; }
+    .ad-card { border: 1px solid #e8e8e8; border-radius: 4px; padding: 10px 12px; margin-bottom: 8px; font-size: .85rem; }
+    .ad-url { color: #188038; font-size: .8rem; margin-top: 4px; }
+    .issue { color: #c5221f; font-size: .8rem; margin-top: 4px; }
+    .chevron { transition: transform .2s; }
+    .chevron.open { transform: rotate(90deg); }
+    .neg-campaign { margin-top: 8px; }
+  </style>
+</head>
+<body x-data="auditApp()" x-init="load()">
+
+<header>
+  <h1>Audit Campagne</h1>
+  <a href="/">← Dashboard</a>
+  <button class="btn btn-primary" @click="refresh()" :disabled="loading">
+    <span x-show="!refreshing">↻ Aggiorna live</span>
+    <span x-show="refreshing">Caricamento...</span>
+  </button>
+</header>
+
+<div class="content">
+  <div x-show="loading" class="loading">Caricamento audit...</div>
+  <div x-show="error" class="error" x-text="error"></div>
+
+  <div x-show="!loading && !error && audit">
+    <div class="meta">
+      <span>Audit del <strong x-text="audit.date"></strong></span>
+      <span>•</span>
+      <span x-text="audit.campaigns.length + ' campagne'"></span>
+    </div>
+
+    <!-- Campagna -->
+    <template x-for="camp in audit.campaigns" :key="camp.id">
+      <div class="campaign-card">
+        <div class="campaign-header" @click="camp._open = !camp._open">
+          <span class="chevron" :class="{ open: camp._open }">▶</span>
+          <span class="campaign-name" x-text="camp.name"></span>
+          <div class="campaign-stats">
+            <div class="stat">
+              <div class="stat-val" x-text="'€' + camp.budget + '/gg'"></div>
+              <div class="stat-lbl">Budget</div>
+            </div>
+            <div class="stat">
+              <div class="stat-val" x-text="camp.impressions.toLocaleString('it')"></div>
+              <div class="stat-lbl">Impr</div>
+            </div>
+            <div class="stat">
+              <div class="stat-val" x-text="camp.clicks.toLocaleString('it')"></div>
+              <div class="stat-lbl">Click</div>
+            </div>
+            <div class="stat">
+              <div class="stat-val" x-text="'€' + camp.cost"></div>
+              <div class="stat-lbl">Costo</div>
+            </div>
+            <div class="stat">
+              <div class="stat-val" x-text="camp.conversions.toFixed(0)"></div>
+              <div class="stat-lbl">Conv</div>
+            </div>
+            <div class="stat">
+              <div class="stat-val" x-text="camp.ctr + '%'"></div>
+              <div class="stat-lbl">CTR</div>
+            </div>
+            <div class="stat">
+              <div class="stat-val" x-text="camp.cpa > 0 ? '€' + camp.cpa : '—'"></div>
+              <div class="stat-lbl">CPA</div>
+            </div>
+            <div class="stat">
+              <span class="badge" :class="camp.bidding === 'MANUAL_CPC' ? 'badge-green' : 'badge-yellow'" x-text="camp.bidding.replace('_',' ')"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="campaign-body" x-show="camp._open">
+
+          <!-- Negative campagna -->
+          <template x-if="camp.negative_keywords.length > 0">
+            <div class="neg-campaign">
+              <div class="section-title">Negative Campagna (<span x-text="camp.negative_keywords.length"></span>)</div>
+              <div class="neg-list">
+                <template x-for="n in camp.negative_keywords" :key="n.text">
+                  <span class="neg-tag" x-text="'[' + n.match.substring(0,1) + '] ' + n.text"></span>
+                </template>
+              </div>
+            </div>
+          </template>
+
+          <!-- Ad group -->
+          <div class="section-title">Ad Group (<span x-text="camp.ad_groups.length"></span>)</div>
+          <template x-for="ag in camp.ad_groups" :key="ag.id">
+            <div class="ag-card">
+              <div class="ag-header" @click="ag._open = !ag._open">
+                <span class="chevron" :class="{ open: ag._open }">▶</span>
+                <span class="ag-name" x-text="ag.name"></span>
+                <span class="badge" :class="ag.status === 'ENABLED' ? 'badge-green' : 'badge-grey'" x-text="ag.status"></span>
+                <span style="margin-left:8px;font-size:.8rem;color:#888" x-text="ag.keywords.length + ' kw • ' + ag.ads.length + ' ads'"></span>
+                <!-- Segnala disapprovati -->
+                <template x-if="ag.ads.some(a => a.approval === 'DISAPPROVED')">
+                  <span class="badge badge-red" style="margin-left:8px">⚠️ DISAPPROVED</span>
+                </template>
+              </div>
+
+              <div class="ag-body" x-show="ag._open">
+                <!-- Keyword -->
+                <div class="section-title">Keyword (<span x-text="ag.keywords.length"></span>)</div>
+                <table>
+                  <tr>
+                    <th>Keyword</th><th>Match</th><th>Status</th>
+                    <th>Impr</th><th>Click</th><th>CTR</th><th>Costo</th><th>Conv</th><th>CPC</th>
+                  </tr>
+                  <template x-for="kw in ag.keywords" :key="kw.resource_name">
+                    <tr :class="{ paused: kw.status === 'PAUSED' }">
+                      <td x-text="kw.text"></td>
+                      <td x-text="kw.match_type"></td>
+                      <td>
+                        <span class="badge" :class="kw.status === 'ENABLED' ? 'badge-green' : 'badge-grey'" x-text="kw.status"></span>
+                      </td>
+                      <td x-text="kw.impressions.toLocaleString('it')"></td>
+                      <td x-text="kw.clicks"></td>
+                      <td x-text="kw.ctr + '%'"></td>
+                      <td x-text="'€' + kw.cost"></td>
+                      <td x-text="kw.conversions > 0 ? kw.conversions : '—'"></td>
+                      <td x-text="kw.cpc > 0 ? '€' + kw.cpc : '—'"></td>
+                    </tr>
+                  </template>
+                </table>
+
+                <!-- Negative ad group -->
+                <template x-if="ag.negative_keywords.length > 0">
+                  <div>
+                    <div class="section-title">Negative Ad Group (<span x-text="ag.negative_keywords.length"></span>)</div>
+                    <div class="neg-list">
+                      <template x-for="n in ag.negative_keywords" :key="n.text">
+                        <span class="neg-tag" x-text="n.text"></span>
+                      </template>
+                    </div>
+                  </div>
+                </template>
+
+                <!-- Annunci -->
+                <div class="section-title">Annunci (<span x-text="ag.ads.length"></span>)</div>
+                <template x-for="ad in ag.ads" :key="ad.id">
+                  <div class="ad-card">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+                      <span style="font-size:.8rem;color:#888">ID:<span x-text="ad.id"></span></span>
+                      <span class="badge" :class="ad.approval === 'APPROVED' ? 'badge-green' : 'badge-red'" x-text="ad.approval"></span>
+                      <span class="badge badge-grey" x-text="'Strength: ' + ad.ad_strength"></span>
+                      <span style="margin-left:auto;font-size:.85rem">
+                        <b x-text="ad.impressions.toLocaleString('it')"></b> impr &nbsp;
+                        <b x-text="ad.clicks"></b> click &nbsp;
+                        <b x-text="'€' + ad.cost"></b>
+                        <template x-if="ad.conversions > 0">
+                          <span> &nbsp; <b x-text="ad.conversions.toFixed(0) + ' conv'"></b></span>
+                        </template>
+                      </span>
+                    </div>
+                    <template x-if="ad.final_urls.length > 0">
+                      <div class="ad-url" x-text="ad.final_urls[0]"></div>
+                    </template>
+                    <template x-if="ad.policy_topics.length > 0">
+                      <div class="issue">⚠️ <span x-text="ad.policy_topics.join(', ')"></span></div>
+                    </template>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </template>
+
+          <!-- Sitelinks -->
+          <template x-if="camp.sitelinks.length > 0">
+            <div>
+              <div class="section-title">Sitelink (<span x-text="camp.sitelinks.length"></span>)</div>
+              <div class="ext-row">
+                <template x-for="sl in camp.sitelinks" :key="sl.text">
+                  <span class="sitelink-tag">
+                    <span x-text="sl.text"></span>
+                    <template x-if="sl.desc1">
+                      <span style="color:#666;margin-left:4px" x-text="'— ' + sl.desc1"></span>
+                    </template>
+                  </span>
+                </template>
+              </div>
+            </div>
+          </template>
+
+          <!-- Callout -->
+          <template x-if="camp.callouts.length > 0">
+            <div>
+              <div class="section-title">Callout</div>
+              <div class="ext-row">
+                <template x-for="c in camp.callouts" :key="c">
+                  <span class="callout-tag" x-text="c"></span>
+                </template>
+              </div>
+            </div>
+          </template>
+
+        </div>
+      </div>
+    </template>
+  </div>
+</div>
+
+<script>
+function auditApp() {
+  return {
+    loading: true,
+    refreshing: false,
+    error: null,
+    audit: null,
+
+    async load() {
+      this.loading = true;
+      this.error = null;
+      try {
+        const r = await fetch('/api/audit/latest');
+        if (!r.ok) {
+          const e = await r.json();
+          throw new Error(e.detail || r.statusText);
+        }
+        this.audit = await r.json();
+        // init _open = false per ogni campagna/ag
+        this.audit.campaigns.forEach(c => {
+          c._open = false;
+          c.ad_groups.forEach(ag => { ag._open = false; });
+        });
+      } catch (e) {
+        this.error = e.message;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async refresh() {
+      this.refreshing = true;
+      this.error = null;
+      try {
+        const r = await fetch('/api/audit/refresh', { method: 'POST' });
+        if (!r.ok) {
+          const e = await r.json();
+          throw new Error(e.detail || r.statusText);
+        }
+        this.audit = await r.json();
+        this.audit.campaigns.forEach(c => {
+          c._open = false;
+          c.ad_groups.forEach(ag => { ag._open = false; });
+        });
+      } catch (e) {
+        this.error = 'Refresh fallito: ' + e.message;
+      } finally {
+        this.refreshing = false;
+      }
+    }
+  };
+}
+</script>
+</body>
+</html>

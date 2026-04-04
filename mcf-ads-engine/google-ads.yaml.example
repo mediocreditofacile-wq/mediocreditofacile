@@ -1,0 +1,6 @@
+developer_token: "SOSTITUISCI_CON_IL_TUO_DEVELOPER_TOKEN"
+client_id: "SOSTITUISCI.apps.googleusercontent.com"
+client_secret: "SOSTITUISCI"
+refresh_token: "GENERATO_DA_setup_auth.py"
+login_customer_id: "SOSTITUISCI_ID_MANAGER"
+use_proto_plus: true

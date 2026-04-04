@@ -7,11 +7,14 @@ from datetime import date
 from pathlib import Path
 from dotenv import load_dotenv
 
-from collector.google_ads import fetch_keyword_performance, fetch_daily_metrics
+from collector.google_ads import fetch_keyword_performance, fetch_daily_metrics, fetch_search_terms
 from analyzer.scorer import score_keywords, load_exclusions
 from analyzer.suggester import suggest_kw_variants
 from analyzer.anomaly import detect_anomalies
-from notifier.email import send_daily_report, send_anomaly_alert
+from analyzer.search_terms import classify_search_terms, identify_negatives
+from analyzer.negatives import build_negative_proposals
+from analyzer.campaign_audit import run_audit
+from notifier.email import send_daily_report, send_anomaly_alert, send_weekly_search_terms_report, send_weekly_audit
 
 load_dotenv()
 
@@ -103,5 +106,78 @@ def run_daily():
     print(f"[{today}] Daily report sent. Done.")
 
 
+def run_weekly():
+    """Eseguito ogni lunedì: analizza i search term degli ultimi 30 giorni e propone negative keyword."""
+    config = load_config()
+    today = date.today().isoformat()
+    api_key = os.environ["ANTHROPIC_API_KEY"]
+
+    print(f"[{today}] [WEEKLY] Fetching search terms from Google Ads...")
+    try:
+        terms = fetch_search_terms(
+            customer_id=config["google_ads"]["customer_id"],
+            yaml_path="google-ads.yaml",
+            days=30,
+        )
+    except Exception as e:
+        print(f"[ERROR] Search terms fetch failed: {e}")
+        sys.exit(1)
+
+    print(f"[{today}] [WEEKLY] {len(terms)} search terms fetched. Classifying via Claude...")
+    exclusions = load_exclusions(config["exclusions"]["file"])
+    try:
+        classified = classify_search_terms(terms, api_key)
+    except Exception as e:
+        print(f"[ERROR] Classification failed: {e}")
+        sys.exit(1)
+
+    negative_terms = identify_negatives(classified, exclusions)
+    print(f"[{today}] [WEEKLY] {len(negative_terms)} negative keyword candidate trovate.")
+
+    proposals = build_negative_proposals(negative_terms)
+    negatives_data = {
+        "date": today,
+        "negatives": proposals,
+        "total_terms_analyzed": len(terms),
+    }
+    save_json(negatives_data, Path(f"data/negatives/{today}.json"))
+    print(f"[{today}] [WEEKLY] Negatives saved.")
+
+    send_weekly_search_terms_report(
+        negatives_data=negatives_data,
+        api_key=os.environ["RESEND_API_KEY"],
+        to_email=os.environ["NOTIFICATION_EMAIL"],
+        date_str=today,
+    )
+    print(f"[{today}] [WEEKLY] Report settimanale search terms inviato.")
+
+    # Campaign audit
+    print(f"[{today}] [WEEKLY] Esecuzione campaign audit...")
+    try:
+        audit_data = run_audit(
+            customer_id=config["google_ads"]["customer_id"],
+            yaml_path="google-ads.yaml",
+        )
+        audit_data["date"] = today
+        save_json(audit_data, Path(f"data/audits/{today}.json"))
+        print(f"[{today}] [WEEKLY] Audit salvato ({len(audit_data['campaigns'])} campagne).")
+        send_weekly_audit(
+            audit_data=audit_data,
+            api_key=os.environ["RESEND_API_KEY"],
+            to_email=os.environ["NOTIFICATION_EMAIL"],
+            date_str=today,
+        )
+        print(f"[{today}] [WEEKLY] Audit email inviata. Done.")
+    except Exception as e:
+        print(f"[WARN] Campaign audit fallito (skipping): {e}")
+
+
 if __name__ == "__main__":
-    run_daily()
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--weekly", action="store_true", help="Esegui il run settimanale (search terms)")
+    args = parser.parse_args()
+    if args.weekly:
+        run_weekly()
+    else:
+        run_daily()

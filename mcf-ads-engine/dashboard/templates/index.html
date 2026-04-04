@@ -1,0 +1,247 @@
+<!-- mcf-ads-engine/dashboard/templates/index.html -->
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>MCF Ads Engine</title>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #f5f5f5; color: #222; }
+    header { background: #1a73e8; color: white; padding: 16px 24px; }
+    header h1 { font-size: 1.2rem; }
+    .tabs { display: flex; gap: 0; background: white; border-bottom: 2px solid #e0e0e0; }
+    .tab { padding: 12px 24px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; }
+    .tab.active { border-color: #1a73e8; color: #1a73e8; font-weight: 600; }
+    .content { max-width: 1100px; margin: 24px auto; padding: 0 16px; }
+    .card { background: white; border-radius: 8px; padding: 20px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; padding: 8px 12px; border-bottom: 2px solid #e0e0e0; font-size: .85rem; color: #555; }
+    td { padding: 10px 12px; border-bottom: 1px solid #f0f0f0; font-size: .9rem; }
+    .btn { padding: 6px 14px; border: none; border-radius: 4px; cursor: pointer; font-size: .85rem; }
+    .btn-pause { background: #fce8e6; color: #c5221f; }
+    .btn-reward { background: #e6f4ea; color: #137333; }
+    .btn-approve { background: #1a73e8; color: white; }
+    .btn-reject { background: #f1f3f4; color: #444; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: .75rem; }
+    .badge-pending { background: #fef7e0; color: #b06000; }
+    .badge-approved { background: #e6f4ea; color: #137333; }
+    .badge-rejected { background: #fce8e6; color: #c5221f; }
+    textarea { width: 100%; border: 1px solid #ddd; border-radius: 4px; padding: 8px; font-size: .9rem; resize: vertical; }
+    input[type=text] { width: 100%; border: 1px solid #ddd; border-radius: 4px; padding: 10px; font-size: .95rem; }
+    .empty { color: #999; font-style: italic; padding: 16px 0; }
+    .loading { color: #1a73e8; }
+  </style>
+</head>
+<body x-data="dashboard()" x-init="loadProposals()">
+
+<header>
+  <h1>MCF Ads Engine Dashboard</h1>
+</header>
+
+<div class="tabs">
+  <div class="tab" :class="{ active: tab === 'kw' }" @click="tab = 'kw'">
+    KW Review <span x-text="countPending('to_pause')"></span>
+  </div>
+  <div class="tab" :class="{ active: tab === 'landing' }" @click="tab = 'landing'">
+    Landing <span x-text="countPending('landing_proposals')"></span>
+  </div>
+  <div class="tab" :class="{ active: tab === 'campaign' }" @click="tab = 'campaign'">
+    Campagne <span x-text="countPending('campaign_drafts')"></span>
+  </div>
+</div>
+
+<div class="content">
+  <div x-show="loading" class="loading">Caricamento...</div>
+  <div x-show="error" style="color:red" x-text="error"></div>
+
+  <!-- TAB 1: KW Review -->
+  <div x-show="tab === 'kw' && !loading">
+
+    <!-- to_pause -->
+    <div class="card">
+      <h3 style="margin-bottom:12px">KW da gestire</h3>
+      <div x-show="proposals.to_pause?.length === 0" class="empty">Nessuna KW da gestire</div>
+      <table x-show="proposals.to_pause?.length > 0">
+        <tr><th>Keyword</th><th>Campagna</th><th>Costo</th><th>Conv.</th><th>Motivo</th><th>Stato</th><th>Azioni</th></tr>
+        <template x-for="(kw, i) in proposals.to_pause" :key="i">
+          <tr>
+            <td x-text="kw.keyword"></td>
+            <td x-text="kw.campaign" style="color:#666;font-size:.85rem"></td>
+            <td x-text="'€' + kw.cost.toFixed(2)"></td>
+            <td x-text="kw.conversions"></td>
+            <td x-text="kw.reason"></td>
+            <td><span class="badge" :class="'badge-' + kw.status" x-text="kw.status"></span></td>
+            <td>
+              <button class="btn btn-pause" x-show="kw.status === 'pending'"
+                @click="approve('to_pause', i, 'approved')">Pausa</button>
+              <button class="btn btn-reject" x-show="kw.status === 'pending'"
+                @click="approve('to_pause', i, 'rejected')">Salta</button>
+            </td>
+          </tr>
+        </template>
+      </table>
+    </div>
+
+    <!-- to_review -->
+    <div class="card">
+      <h3 style="margin-bottom:12px">KW con conversioni — Feedback qualità</h3>
+      <div x-show="proposals.to_review?.length === 0" class="empty">Nessuna KW con conversioni</div>
+      <template x-for="(kw, i) in proposals.to_review" :key="i">
+        <div style="border-bottom:1px solid #f0f0f0; padding: 12px 0">
+          <strong x-text="kw.keyword"></strong>
+          <span style="color:#666;margin-left:12px" x-text="kw.conversions + ' conv. · €' + kw.cost_per_conversion + '/conv.'"></span>
+          <div style="margin-top:8px">
+            <textarea rows="2" :placeholder="'Note su questa KW... (es. qualità lead, settore cliente)'"
+              x-model="kw.alberto_feedback"></textarea>
+            <button class="btn btn-approve" style="margin-top:6px"
+              @click="saveFeedback(i)">Salva feedback</button>
+          </div>
+        </div>
+      </template>
+    </div>
+  </div>
+
+  <!-- TAB 2: Landing -->
+  <div x-show="tab === 'landing' && !loading">
+
+    <!-- Generate new landing -->
+    <div class="card">
+      <h3 style="margin-bottom:12px">Genera nuova landing da angolo</h3>
+      <input type="text" x-model="newAngle" placeholder="Es: PMI che hanno avuto rifiuti bancari e cercano alternative..." />
+      <button class="btn btn-approve" style="margin-top:10px" @click="generateLanding()" :disabled="generating">
+        <span x-show="!generating">Genera Landing →</span>
+        <span x-show="generating">Generazione in corso...</span>
+      </button>
+    </div>
+
+    <!-- Landing proposals -->
+    <template x-for="(lp, i) in proposals.landing_proposals" :key="i">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:start">
+          <div>
+            <strong x-text="lp.landing_json?.heroTitle"></strong>
+            <div style="color:#666;font-size:.85rem;margin-top:4px" x-text="'/' + lp.landing_json?.slug"></div>
+            <div style="color:#888;font-size:.8rem;margin-top:2px" x-text="lp.angle_input || lp.trigger_keyword"></div>
+          </div>
+          <span class="badge" :class="'badge-' + lp.status" x-text="lp.status"></span>
+        </div>
+        <div style="margin-top:12px;color:#555;font-size:.9rem" x-text="lp.landing_json?.heroSubtitle"></div>
+        <div style="display:flex;gap:8px;margin-top:12px" x-show="lp.status === 'pending'">
+          <button class="btn btn-approve" @click="approveLanding(i)">Approva e Pubblica</button>
+          <button class="btn btn-reject" @click="approve('landing_proposals', i, 'rejected')">Rifiuta</button>
+        </div>
+      </div>
+    </template>
+    <div x-show="proposals.landing_proposals?.length === 0" class="empty card">Nessuna landing proposta</div>
+  </div>
+
+  <!-- TAB 3: Campagne -->
+  <div x-show="tab === 'campaign' && !loading">
+    <template x-for="(cd, i) in proposals.campaign_drafts" :key="i">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between">
+          <div>
+            <strong x-text="cd.ad_group_name"></strong>
+            <div style="color:#666;font-size:.85rem" x-text="cd.campaign_name"></div>
+            <div style="color:#888;font-size:.8rem;margin-top:4px" x-text="cd.keywords.length + ' keyword · ' + cd.landing_slug"></div>
+          </div>
+          <span class="badge" :class="'badge-' + cd.status" x-text="cd.status"></span>
+        </div>
+        <div style="margin-top:12px">
+          <strong style="font-size:.85rem">Headline RSA:</strong>
+          <div style="font-size:.85rem;color:#444;margin-top:4px" x-text="cd.headlines?.slice(0,3).join(' | ')"></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:12px" x-show="cd.status === 'pending'">
+          <button class="btn btn-approve" @click="approve('campaign_drafts', i, 'approved')">Approva Campagna</button>
+          <button class="btn btn-reject" @click="approve('campaign_drafts', i, 'rejected')">Rifiuta</button>
+        </div>
+      </div>
+    </template>
+    <div x-show="proposals.campaign_drafts?.length === 0" class="empty card">Nessuna bozza campagna</div>
+  </div>
+</div>
+
+<script>
+function dashboard() {
+  return {
+    tab: 'kw',
+    loading: true,
+    error: null,
+    proposals: {},
+    newAngle: '',
+    generating: false,
+
+    async loadProposals() {
+      try {
+        const r = await fetch('/api/proposals/latest');
+        if (!r.ok) throw new Error(await r.text());
+        this.proposals = await r.json();
+      } catch (e) {
+        this.error = 'Errore caricamento: ' + e.message;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    countPending(list) {
+      const items = this.proposals[list] || [];
+      const n = items.filter(x => x.status === 'pending').length;
+      return n > 0 ? `(${n})` : '';
+    },
+
+    async approve(list, index, action) {
+      await fetch('/api/actions/approve', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ date: this.proposals.date, list, index, action })
+      });
+      this.proposals[list][index].status = action;
+    },
+
+    async saveFeedback(index) {
+      const kw = this.proposals.to_review[index];
+      await fetch('/api/review/feedback', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ date: this.proposals.date, index, feedback: kw.alberto_feedback })
+      });
+      kw.status = 'reviewed';
+    },
+
+    async generateLanding() {
+      if (!this.newAngle.trim()) return;
+      this.generating = true;
+      try {
+        const r = await fetch('/api/landings/generate', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ angle: this.newAngle, date: this.proposals.date })
+        });
+        if (!r.ok) throw new Error(await r.text());
+        await this.loadProposals();
+        this.newAngle = '';
+        this.tab = 'landing';
+      } catch (e) {
+        alert('Errore generazione: ' + e.message);
+      } finally {
+        this.generating = false;
+      }
+    },
+
+    async approveLanding(index) {
+      if (!confirm('Pubblica questa landing su Vercel e crea bozza campagna?')) return;
+      const r = await fetch('/api/landings/approve', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ date: this.proposals.date, index })
+      });
+      if (!r.ok) { alert('Errore approvazione: ' + await r.text()); return; }
+      await this.loadProposals();
+    },
+  }
+}
+</script>
+</body>
+</html>
