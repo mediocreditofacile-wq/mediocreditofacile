@@ -1,7 +1,26 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm run build 2>&1)"
+      "Bash(npm run build 2>&1)",
+      "Bash(lsof -i -P -n)",
+      "Bash(npm run dev)",
+      "WebSearch",
+      "WebFetch(domain:www.tuttofantacalcio.it)",
+      "WebFetch(domain:t.me)",
+      "WebFetch(domain:www.tuttomercatoweb.com)",
+      "WebFetch(domain:www.fantacalcio.it)",
+      "WebFetch(domain:sport.sky.it)",
+      "WebFetch(domain:www.threads.com)",
+      "WebFetch(domain:www.sosfanta.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:www.youtube.com)",
+      "Bash(pip3 install:*)",
+      "Bash(python3 -c \":*)",
+      "Bash(mkdir -p ~/.claude/skills/recosta)",
+      "Bash(cp /Users/alberto/mediocreditofacile/.claude/skills/recosta/SKILL.md ~/.claude/skills/recosta/SKILL.md)",
+      "Bash(rm /Users/alberto/mediocreditofacile/.claude/skills/recosta/SKILL.md)",
+      "Bash(rmdir /Users/alberto/mediocreditofacile/.claude/skills/recosta)",
+      "Bash(rmdir /Users/alberto/mediocreditofacile/.claude/skills)"
     ]
   }
 }

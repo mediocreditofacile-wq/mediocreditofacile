@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>it.mediocreditofacile.adsengine</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/alberto/mediocreditofacile/mcf-ads-engine/.venv/bin/python</string>
+    <string>/Users/alberto/mediocreditofacile/mcf-ads-engine/main.py</string>
+  </array>
+  <key>WorkingDirectory</key>
+  <string>/Users/alberto/mediocreditofacile/mcf-ads-engine</string>
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Hour</key>
+    <integer>8</integer>
+    <key>Minute</key>
+    <integer>0</integer>
+  </dict>
+  <key>StandardOutPath</key>
+  <string>/Users/alberto/mediocreditofacile/mcf-ads-engine/logs/daily.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/alberto/mediocreditofacile/mcf-ads-engine/logs/daily.err</string>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>ANTHROPIC_API_KEY</key>
+    <string>SOSTITUISCI</string>
+    <key>RESEND_API_KEY</key>
+    <string>SOSTITUISCI</string>
+    <key>NOTIFICATION_EMAIL</key>
+    <string>mediocreditofacile@gmail.com</string>
+  </dict>
+</dict>
+</plist>

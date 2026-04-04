@@ -1,0 +1,10 @@
+.env
+google-ads.yaml
+client_secrets.json
+data/raw/
+data/proposals/
+logs/
+__pycache__/
+*.pyc
+.venv/
+*.egg-info/

@@ -15,7 +15,7 @@ def build_daily_html(proposals: dict, date_str: str) -> str:
   <li>🚀 {n_landing} landing page proposte</li>
   <li>📢 {n_campaigns} bozze campagna</li>
 </ul>
-<p><a href="http://127.0.0.1:5000">→ Apri Dashboard</a></p>
+<p><a href="http://127.0.0.1:5001">→ Apri Dashboard</a></p>
 """
 
 
@@ -32,7 +32,7 @@ def build_weekly_html(data: dict, date_str: str) -> str:
 </ul>
 <h3>KW in miglioramento</h3><ul>{improving}</ul>
 <h3>KW da monitorare</h3><ul>{grey}</ul>
-<p><a href="http://127.0.0.1:5000">→ Apri Dashboard</a></p>
+<p><a href="http://127.0.0.1:5001">→ Apri Dashboard</a></p>
 """
 
 
@@ -99,8 +99,94 @@ def build_anomaly_html(result: dict, date_str: str) -> str:
   {account_rows}
 </table>
 {campaigns_html}
-<p><a href="http://127.0.0.1:5000">&#8594; Apri Dashboard</a></p>
+<p><a href="http://127.0.0.1:5001">&#8594; Apri Dashboard</a></p>
 """
+
+
+def build_weekly_search_terms_html(negatives_data: dict, date_str: str) -> str:
+    n_total = negatives_data.get("total_terms_analyzed", 0)
+    n_neg = len(negatives_data.get("negatives", []))
+    rows = "".join(
+        f"<tr><td>{n['search_term']}</td><td>{n['campaign']}</td>"
+        f"<td>{n.get('category', '-')}</td><td>{n['impressions']}</td>"
+        f"<td>€{n['cost']}</td></tr>"
+        for n in negatives_data.get("negatives", [])
+    )
+    return f"""
+<h2>MCF Ads Engine — Search Terms {date_str}</h2>
+<p>Analizzati <strong>{n_total}</strong> search term degli ultimi 30 giorni.</p>
+<p><strong>{n_neg} keyword negative candidate</strong> da approvare in dashboard.</p>
+<table border="1" cellpadding="4" cellspacing="0">
+  <tr><th>Search Term</th><th>Campagna</th><th>Categoria</th><th>Impressioni</th><th>Costo</th></tr>
+  {rows}
+</table>
+<p><a href="http://127.0.0.1:5001">→ Apri Dashboard per approvare</a></p>
+"""
+
+
+def send_weekly_search_terms_report(negatives_data: dict, api_key: str, to_email: str, date_str: str) -> None:
+    resend.api_key = api_key
+    n_neg = len(negatives_data.get("negatives", []))
+    resend.Emails.send({
+        "from": "MCF Ads Engine <noreply@mediocreditofacile.it>",
+        "to": [to_email],
+        "subject": f"MCF Ads Engine — {n_neg} negative KW candidate — {date_str}",
+        "html": build_weekly_search_terms_html(negatives_data, date_str),
+    })
+
+
+def build_audit_html(audit_data: dict, date_str: str) -> str:
+    rows = ""
+    issues_html = ""
+    for c in audit_data.get("campaigns", []):
+        cpa_str = f"€{c['cpa']}" if c["cpa"] > 0 else "—"
+        rows += (
+            f"<tr>"
+            f"<td><b>{c['name']}</b></td>"
+            f"<td>€{c['budget']}/gg</td>"
+            f"<td>{c['bidding']}</td>"
+            f"<td>{c['impressions']:,}</td>"
+            f"<td>{c['clicks']:,}</td>"
+            f"<td>€{c['cost']}</td>"
+            f"<td>{c['conversions']:.0f}</td>"
+            f"<td>{c['ctr']}%</td>"
+            f"<td>{cpa_str}</td>"
+            f"</tr>"
+        )
+        # Segnala annunci disapprovati
+        for ag in c.get("ad_groups", []):
+            for ad in ag.get("ads", []):
+                if ad["approval"] == "DISAPPROVED":
+                    topics = ", ".join(ad["policy_topics"])
+                    issues_html += (
+                        f"<li>⚠️ <b>{c['name']}</b> › {ag['name']}: "
+                        f"Ad disapprovato — {topics}</li>"
+                    )
+
+    return f"""
+<h2>MCF Ads Engine — Audit Campagne {date_str}</h2>
+<table border="1" cellpadding="5" cellspacing="0" style="border-collapse:collapse">
+  <tr style="background:#f5f5f5">
+    <th>Campagna</th><th>Budget</th><th>Bidding</th>
+    <th>Impr</th><th>Click</th><th>Costo</th>
+    <th>Conv</th><th>CTR</th><th>CPA</th>
+  </tr>
+  {rows}
+</table>
+{"<h3>⚠️ Problemi rilevati</h3><ul>" + issues_html + "</ul>" if issues_html else "<p>✅ Nessun problema rilevato.</p>"}
+<p><a href="http://127.0.0.1:5001/audit">→ Vedi audit completo in Dashboard</a></p>
+"""
+
+
+def send_weekly_audit(audit_data: dict, api_key: str, to_email: str, date_str: str) -> None:
+    resend.api_key = api_key
+    n_campaigns = len(audit_data.get("campaigns", []))
+    resend.Emails.send({
+        "from": "MCF Ads Engine <noreply@mediocreditofacile.it>",
+        "to": [to_email],
+        "subject": f"MCF Ads Engine — Audit {n_campaigns} campagne — {date_str}",
+        "html": build_audit_html(audit_data, date_str),
+    })
 
 
 def send_anomaly_alert(result: dict, api_key: str, to_email: str, date_str: str) -> None:
