@@ -8,16 +8,17 @@ interface Benefit {
 interface Props {
   benefits: Benefit[];
   image?: string;
+  imageAlt?: string;
 }
 
-const { benefits, image } = Astro.props;
+const { benefits, image, imageAlt = 'Mediocredito Facile — noleggio operativo e leasing per PMI' } = Astro.props;
 ---
 
 <section class="benefits">
   <div class="benefits__inner">
     <h2 class="benefits__heading">Perché scegliere Mediocredito Facile</h2>
     {image && (
-      <img src={image} alt="" class="benefits__image" loading="lazy" />
+      <img src={image} alt={imageAlt} class="benefits__image" loading="lazy" />
     )}
     <div class="benefits__grid">
       {benefits.map((b) => (
