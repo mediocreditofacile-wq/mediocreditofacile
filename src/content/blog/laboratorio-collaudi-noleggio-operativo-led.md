@@ -1,7 +1,7 @@
 ---
 title: "Il laboratorio di collaudi che ha perso 68mila euro in un anno e ha noleggiato le luci: perché è la mossa giusta"
 description: "Un laboratorio di collaudi torinese perde 68mila euro per la crisi automotive ma noleggia le luci LED invece di comprarle. Perché il noleggio operativo è strategia finanziaria, anche su 8mila euro."
-date: "2025-03-25"
+date: "2026-01-05"
 author: "Alberto Amà"
 tags: ["noleggio operativo piccoli importi", "noleggio operativo LED aziende", "crisi automotive PMI", "patrimonio netto negativo noleggio", "noleggio operativo Torino", "collaudi industriali", "deducibilità canone noleggio", "alternativa acquisto beni strumentali"]
 image: "/images/blog-caso-studio-laboratorio.jpg"

@@ -1,7 +1,7 @@
 ---
 title: "Noleggio operativo e centrale rischi: cosa cambia rispetto al leasing"
 description: "Il noleggio operativo non appare in Centrale Rischi. Il leasing sì. Cosa significa per il rating bancario della tua PMI e come proteggere le linee di credito."
-date: "2026-04-05"
+date: "2026-02-03"
 author: "Alberto Amà"
 tags: ["noleggio operativo", "centrale rischi", "rating bancario", "leasing", "PMI", "bilancio", "guida"]
 image: "/images/blog-centrale-rischi.jpg"

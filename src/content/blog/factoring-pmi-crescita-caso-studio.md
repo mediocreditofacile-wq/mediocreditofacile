@@ -1,7 +1,7 @@
 ---
 title: "Factoring per PMI in crescita: il caso di un trader di pellet da 2 milioni"
 description: "Come un trader di pellet ha ottenuto un plafond factoring da 2,1 milioni per sostenere una crescita del 50% annuo. Il percorso dal rifiuto bancario alla soluzione."
-date: "2026-04-05"
+date: "2026-03-24"
 author: "Alberto Amà"
 tags: ["factoring", "PMI", "crescita", "trading", "pellet", "caso studio", "plafond"]
 image: "/images/blog-factoring-pellet.jpg"

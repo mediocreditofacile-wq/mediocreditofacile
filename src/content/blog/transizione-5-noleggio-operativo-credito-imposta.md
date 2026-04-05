@@ -1,7 +1,7 @@
 ---
 title: "Transizione 5.0: credito d'imposta o noleggio operativo? Due strade diverse per lo stesso investimento"
 description: "Il credito d'imposta Transizione 5.0 richiede la proprietà del bene: leasing o acquisto diretto. Il noleggio operativo offre deducibilità piena e bilancio pulito, ma senza credito d'imposta. Confronto con i numeri su un fotovoltaico da 120.000 euro."
-date: "2026-04-05"
+date: "2026-03-27"
 author: "Alberto Amà"
 tags: ["Transizione 5.0", "credito d'imposta", "noleggio operativo", "leasing", "agevolazioni", "PMI", "fotovoltaico", "efficientamento"]
 image: "/images/blog-transizione-5.jpg"

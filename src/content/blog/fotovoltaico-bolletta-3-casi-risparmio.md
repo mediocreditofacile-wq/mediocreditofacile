@@ -1,7 +1,7 @@
 ---
 title: "Fotovoltaico e bolletta: 3 casi reali dove il canone si ripaga con il risparmio energetico"
 description: "Tre aziende italiane dove il canone di noleggio del fotovoltaico si ripaga interamente con il risparmio in bolletta. Numeri reali, confronto canone vs bolletta."
-date: "2026-04-05"
+date: "2026-02-20"
 author: "Alberto Amà"
 tags: ["fotovoltaico", "risparmio bolletta", "noleggio operativo", "caso studio", "energia", "ROI"]
 image: "/images/blog-fotovoltaico-bolletta.jpg"

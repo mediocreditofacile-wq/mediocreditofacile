@@ -1,7 +1,7 @@
 ---
 title: "Lease-back: vendere quello che hai già comprato per recuperare liquidità"
 description: "Cos'è il lease-back, come funziona, quando conviene. Il caso di una tappezzeria veneta che ha recuperato 80.000 euro di liquidità vendendo i macchinari e riaffittandoli."
-date: "2026-04-05"
+date: "2026-03-20"
 author: "Alberto Amà"
 tags: ["lease-back", "liquidità", "PMI", "guida", "caso studio", "cash flow"]
 image: "/images/blog-lease-back-guida.jpg"

@@ -1,7 +1,7 @@
 ---
 title: "Noleggio attrezzature ristorazione: forni, frigoriferi e cucine a canone fisso"
 description: "Guida al noleggio operativo di attrezzature per ristorazione: forni professionali, abbattitori, celle frigorifere a canone mensile deducibile. Caso studio e tabella costi."
-date: "2026-04-05"
+date: "2026-02-27"
 author: "Alberto Amà"
 tags: ["noleggio operativo", "ristorazione", "forni professionali", "cucina", "HORECA", "attrezzature", "caso studio"]
 image: "/images/blog-ristorazione-canone.jpg"

@@ -1,7 +1,7 @@
 ---
 title: "Quanto costa il noleggio operativo: tabella canoni per importo e durata"
 description: "Tabella canoni noleggio operativo aggiornata 2026: quanto costa noleggiare da 5.000 a 200.000 euro, su durate da 24 a 60 mesi. Coefficienti reali delle principali società."
-date: "2026-04-05"
+date: "2026-01-27"
 author: "Alberto Amà"
 tags: ["noleggio operativo", "canoni", "tabella", "costi", "coefficienti", "preventivo", "PMI"]
 image: "/images/blog-tabella-canoni.jpg"

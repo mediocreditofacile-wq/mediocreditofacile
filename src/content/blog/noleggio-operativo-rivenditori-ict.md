@@ -1,7 +1,7 @@
 ---
 title: "Noleggio operativo per rivenditori ICT: come vendere a canone e incassare subito"
 description: "Il noleggio operativo trasforma ogni vendita IT in un servizio a canone: il rivenditore incassa subito, il cliente paga mensilmente. Modello, numeri e caso reale."
-date: "2026-04-05"
+date: "2026-03-10"
 author: "Alberto Amà"
 tags: ["noleggio operativo", "ICT", "rivenditore informatica", "tecnologia", "vendita a canone", "partner", "caso studio"]
 image: "/images/blog-rivenditore-ict.jpg"

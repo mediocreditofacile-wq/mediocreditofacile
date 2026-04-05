@@ -1,7 +1,7 @@
 ---
 title: "Conto Termico 3.0: quando il leasing batte il noleggio operativo per l'efficientamento energetico"
 description: "Il Conto Termico 3.0 richiede la proprietà del bene: serve leasing o acquisto diretto, non il noleggio operativo. Quando conviene il leasing con incentivo e quando il noleggio senza. Numeri reali su una pompa di calore da 45.000 euro."
-date: "2026-04-05"
+date: "2026-04-02"
 author: "Alberto Amà"
 tags: ["conto termico", "efficientamento energetico", "noleggio operativo", "leasing", "agevolazioni", "PMI", "guida"]
 image: "/images/blog-conto-termico.jpg"

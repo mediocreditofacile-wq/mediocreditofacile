@@ -1,7 +1,7 @@
 ---
 title: "La banca ti ha detto no? 3 alternative concrete per finanziare la tua PMI"
 description: "Finanziamento rifiutato dalla banca? Noleggio operativo, lease-back e fintech: tre strade alternative per PMI con patrimonio netto basso o scoring negativo. Casi reali."
-date: "2026-04-05"
+date: "2026-02-10"
 author: "Alberto Amà"
 tags: ["finanziamento rifiutato", "alternativa banca", "noleggio operativo", "lease-back", "fintech", "PMI", "patrimonio netto negativo"]
 image: "/images/blog-banca-dice-no.jpg"

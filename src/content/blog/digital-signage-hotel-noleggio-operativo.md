@@ -1,7 +1,7 @@
 ---
 title: "Digital signage per hotel a noleggio: monitor, totem e contenuti senza investimento"
 description: "Il digital signage per hotel e strutture ricettive a noleggio operativo: totem Samsung, gestione contenuti, canone da 70 euro al mese. Come funziona il modello."
-date: "2026-04-05"
+date: "2026-04-03"
 author: "Alberto Amà"
 tags: ["digital signage", "noleggio operativo", "hotel", "HORECA", "totem", "caso studio"]
 image: "/images/blog-digital-signage.jpg"

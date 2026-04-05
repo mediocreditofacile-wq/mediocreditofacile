@@ -1,7 +1,7 @@
 ---
 title: "Noleggio operativo attrezzature medicali: come una rete di farmacie ha equipaggiato 300 punti vendita"
 description: "Noleggio operativo di attrezzature medicali per farmacie, parafarmacie e poliambulatori: Holter, telemedicina, diagnostica a canone mensile. Caso studio di una rete nazionale."
-date: "2026-04-05"
+date: "2026-03-06"
 author: "Alberto Amà"
 tags: ["noleggio operativo", "attrezzature medicali", "farmacie", "telemedicina", "healthcare", "caso studio"]
 image: "/images/blog-farmacie-noleggio.jpg"

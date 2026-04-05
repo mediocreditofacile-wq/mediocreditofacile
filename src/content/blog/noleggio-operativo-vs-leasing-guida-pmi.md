@@ -1,7 +1,7 @@
 ---
 title: "Noleggio operativo vs leasing: guida completa per PMI che devono scegliere"
 description: "Noleggio operativo o leasing strumentale? Confronto onesto da broker indipendente: differenze fiscali, impatto in bilancio, centrale rischi, flessibilità. Con esempi reali e tabella comparativa."
-date: "2026-04-05"
+date: "2026-01-23"
 author: "Alberto Amà"
 tags: ["noleggio operativo", "leasing", "confronto", "PMI", "guida", "deducibilità", "centrale rischi"]
 image: "/images/blog-noleggio-vs-leasing.jpg"

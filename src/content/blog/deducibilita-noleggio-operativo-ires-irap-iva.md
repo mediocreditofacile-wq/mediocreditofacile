@@ -1,7 +1,7 @@
 ---
 title: "Deducibilità noleggio operativo: IRES, IRAP, IVA spiegate con i numeri"
 description: "Guida fiscale al noleggio operativo per PMI: deducibilità IRES 100%, deducibilità IRAP del canone, IVA detraibile. Calcoli reali su un bene da 50.000 euro."
-date: "2026-04-05"
+date: "2026-01-30"
 author: "Alberto Amà"
 tags: ["noleggio operativo", "deducibilità", "IRES", "IRAP", "IVA", "fiscalità", "PMI", "guida"]
 image: "/images/blog-deducibilita-noleggio.jpg"

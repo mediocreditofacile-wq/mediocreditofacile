@@ -1,7 +1,7 @@
 ---
 title: "Fotovoltaico a Lampedusa: quando la pescheria paga 24mila euro l'anno di bolletta e la soluzione arriva dall'installatore"
 description: "Una pescheria siciliana spende 24mila euro l'anno di elettricità per le celle frigorifere. Il noleggio operativo di un impianto fotovoltaico da 70 kW con accumulo risolve il problema: il canone si ripaga col risparmio energetico."
-date: "2026-03-15"
+date: "2026-01-14"
 author: "Alberto Amà"
 tags: ["noleggio operativo", "fotovoltaico", "risparmio energetico", "caso studio", "Sicilia", "ristorazione", "accumulo"]
 image: "/images/blog-caso-studio-lampedusa.jpg"

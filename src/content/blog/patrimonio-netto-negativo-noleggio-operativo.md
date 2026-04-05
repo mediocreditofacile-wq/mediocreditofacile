@@ -1,7 +1,7 @@
 ---
 title: "Patrimonio netto negativo? Ecco perché il noleggio operativo funziona lo stesso"
 description: "Azienda in perdita, patrimonio netto negativo, banca chiusa: il noleggio operativo è spesso l'unica porta aperta. Due casi reali con i numeri."
-date: "2026-04-05"
+date: "2026-02-13"
 author: "Alberto Amà"
 tags: ["patrimonio netto negativo", "noleggio operativo", "azienda in perdita", "caso studio", "PMI", "crisi"]
 image: "/images/blog-patrimonio-negativo.jpg"
