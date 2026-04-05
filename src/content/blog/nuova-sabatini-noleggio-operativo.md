@@ -84,7 +84,7 @@ In molti casi, la differenza di costo netto è inferiore a quanto si pensa. E il
 
 ### La Nuova Sabatini è cumulabile con altre agevolazioni?
 
-Sì, la Sabatini è cumulabile con il credito d'imposta per beni strumentali (ex Industria 4.0) e con altre agevolazioni, a condizione che il cumulo non superi il costo del bene. Questo significa che un'azienda può ottenere sia il contributo Sabatini sia il credito d'imposta sullo stesso investimento, ma solo se utilizza leasing o finanziamento bancario.
+Sì, la Sabatini è cumulabile con il credito d'imposta per beni strumentali e con altre agevolazioni, a condizione che il cumulo non superi il costo del bene. Questo significa che un'azienda può ottenere sia il contributo Sabatini sia il credito d'imposta sullo stesso investimento, ma solo se utilizza leasing o finanziamento bancario. Il credito d'imposta Transizione 5.0 richiede la proprietà del bene, quindi si applica solo con acquisto diretto o leasing, non con il noleggio operativo.
 
 ### Il noleggio operativo è adatto a beni Industria 4.0?
 

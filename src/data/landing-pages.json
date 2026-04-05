@@ -165,8 +165,8 @@
       },
       {
         "icon": "eco",
-        "title": "Transizione 5.0 compatibile",
-        "description": "Vuoi combinare noleggio e credito d'imposta? Il nostro team agevolazioni ti segue in ogni passaggio."
+        "title": "Agevolazioni fiscali? Ti orientiamo",
+        "description": "Transizione 5.0 e Conto Termico richiedono leasing o acquisto. Il noleggio offre deducibilità piena del canone. Ti aiutiamo a scegliere il percorso giusto per la tua azienda."
       },
       {
         "icon": "support_agent",
@@ -280,7 +280,7 @@
     "metaTitle": "Agevolazioni Fiscali per Imprese | Mediocredito Facile",
     "metaDescription": "Agevolazioni fiscali per noleggio operativo e leasing: deducibilità IRES/IRAP, IVA detraibile, Transizione 5.0, Nuova Sabatini. Guida completa per PMI.",
     "heroTitle": "Agevolazioni Fiscali per la Tua Impresa",
-    "heroSubtitle": "Credito d'imposta, Transizione 5.0, Nuova Sabatini e deducibilità del noleggio operativo. Ti guidiamo tra gli incentivi disponibili per massimizzare il risparmio fiscale.",
+    "heroSubtitle": "Leasing con Transizione 5.0 e Sabatini, oppure noleggio operativo con deducibilità piena: ti guidiamo verso il percorso fiscale migliore per la tua impresa.",
     "ctaText": "Scopri le Agevolazioni",
     "heroImage": "/images/hero-agevolazioni.png?v=2",
     "benefitsImage": "/images/section-agevolazioni.png",
@@ -293,7 +293,7 @@
       {
         "icon": "bolt",
         "title": "Transizione 5.0",
-        "description": "Credito d'imposta fino al 45% per investimenti in beni strumentali e digitali che riducono i consumi energetici. Cumulabile con il noleggio operativo."
+        "description": "Credito d'imposta fino al 45% per investimenti in beni strumentali che riducono i consumi energetici. Si applica con acquisto diretto o leasing. Il noleggio operativo offre un percorso alternativo con deducibilità piena del canone."
       },
       {
         "icon": "account_balance",

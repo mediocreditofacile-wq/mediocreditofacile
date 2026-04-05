@@ -68,18 +68,21 @@ In questo caso il risparmio non copre interamente il canone, ma la differenza (2
 - Accordo proprietario: documento standard, nessun costo
 - A fine contratto: riscatto, rinnovo o restituzione
 
-## Caso 5: l'agroalimentare con Transizione 5.0
+## Caso 5: l'agroalimentare con Transizione 5.0 (leasing)
 
-**Il problema:** un'azienda agroalimentare vuole il fotovoltaico ma vuole anche il credito d'imposta Transizione 5.0 (fino al 45% per investimenti che riducono i consumi energetici).
+**Il problema:** un'azienda agroalimentare vuole il fotovoltaico e vuole accedere al credito d'imposta Transizione 5.0 (fino al 45% per investimenti che riducono i consumi energetici). Il credito d'imposta richiede la proprietà del bene: il noleggio operativo non dà accesso all'incentivo.
 
-**La soluzione:** il noleggio operativo è compatibile con Transizione 5.0. L'azienda noleggia l'impianto, deduce il canone, e ottiene anche il credito d'imposta sull'investimento.
+**La soluzione:** l'azienda sceglie il leasing finanziario, che prevede il riscatto del bene e quindi la proprietà. In questo caso l'incentivo conta più della flessibilità di bilancio, e il leasing è la strada giusta.
 
 **I numeri:**
-- Impianto: 100 kWp, valore 120.000 €
-- Credito d'imposta 5.0: fino a 54.000 € (45%)
-- Canone mensile: ~2.100 €
-- Risparmio bolletta: ~1.800 €/mese
-- Costo netto dopo credito + risparmio: praticamente zero
+- Impianto: 100 kWp, valore 120.000 euro
+- Anticipo leasing (10%): 12.000 euro
+- Canone mensile leasing 60 mesi: circa 2.050 euro
+- Credito d'imposta 5.0 (45%): 54.000 euro in 5 anni
+- Risparmio bolletta: circa 1.800 euro/mese
+- Costo netto dopo credito + risparmio: ampiamente positivo
+
+**Lezione:** quando l'incentivo fiscale è il fattore determinante, il leasing è la scelta corretta. Il noleggio operativo offre vantaggi diversi (bilancio pulito, zero anticipo, deducibilità piena), ma non dà accesso ai crediti d'imposta.
 
 ---
 
@@ -100,6 +103,6 @@ In genere, sopra i 20 kWp il noleggio diventa conveniente. Sotto, i costi fissi 
 La società di noleggio, direttamente o tramite l'installatore convenzionato. È inclusa nel canone.
 
 **Posso combinare il noleggio con gli incentivi GSE?**
-Sì. Il ritiro dedicato e lo scambio sul posto sono compatibili con il noleggio operativo. Il ricavo dell'energia immessa in rete va all'azienda, non alla società di noleggio.
+Dipende dal tipo di incentivo. Il ritiro dedicato e lo scambio sul posto (valorizzazione dell'energia immessa in rete) sono compatibili con il noleggio operativo: il ricavo va all'azienda, non alla società di noleggio. Gli incentivi fiscali come Transizione 5.0 e Conto Termico, invece, richiedono la proprietà del bene e si applicano solo con acquisto diretto o leasing finanziario. Per quelli, il noleggio operativo non è la strada.
 
 [Calcola il tuo canone fotovoltaico](/tools/simulatore-noleggio-fotovoltaico) oppure [parla con un consulente](/contatti).
