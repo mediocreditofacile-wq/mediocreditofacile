@@ -1,7 +1,7 @@
 ---
 title: "A Sottomarina il pesce si lavora a mano e l'energia si produce dal tetto: quando il broker va in capannone col fornitore"
 description: "Un'azienda di lavorazione pesce nel Delta del Po noleggia un impianto fotovoltaico da 50 kWp con accumulo. Costo netto mensile: 460 euro. Dopo 5 anni, risparmio pieno. Ecco come funziona il noleggio operativo fotovoltaico per le PMI."
-date: "2025-03-25"
+date: "2026-01-02"
 author: "Alberto Amà"
 tags: ["noleggio operativo fotovoltaico", "fotovoltaico industriale noleggio", "noleggio operativo capannone", "fotovoltaico PMI manifatturiere", "fotovoltaico lavorazione pesce", "noleggio operativo Veneto", "Ritiro Dedicato GSE", "fotovoltaico con accumulo aziende"]
 image: "/images/blog-caso-studio-porto-tolle.jpg"

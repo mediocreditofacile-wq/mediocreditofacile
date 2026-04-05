@@ -1,7 +1,7 @@
 ---
 title: "Noleggio operativo: come funziona, quanto costa e perché conviene (guida 2026)"
 description: "Guida completa al noleggio operativo per aziende italiane: cos'è, come funziona, quanto costa, vantaggi fiscali, differenze con il leasing. Aggiornata 2026."
-date: "2026-04-05"
+date: "2026-01-20"
 author: "Alberto Amà"
 tags: ["noleggio operativo", "come funziona", "guida", "PMI", "2026", "canone", "deducibilità"]
 image: "/images/blog-come-funziona.jpg"

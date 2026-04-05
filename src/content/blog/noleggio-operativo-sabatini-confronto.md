@@ -1,7 +1,7 @@
 ---
 title: "Noleggio operativo vs acquisto con Sabatini: quale conviene alla tua PMI?"
 description: "Confronto diretto tra noleggio operativo (canone deducibile, zero bilancio) e acquisto con Nuova Sabatini (contributo in conto interessi). Tabella comparativa con numeri reali."
-date: "2026-04-05"
+date: "2026-04-01"
 author: "Alberto Amà"
 tags: ["noleggio operativo", "Nuova Sabatini", "confronto", "PMI", "acquisto", "leasing", "guida"]
 image: "/images/blog-sabatini-vs-noleggio.jpg"

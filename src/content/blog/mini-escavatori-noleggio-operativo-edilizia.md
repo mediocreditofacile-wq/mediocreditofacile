@@ -1,7 +1,7 @@
 ---
 title: "Mini-escavatori a noleggio operativo: il modello stagionale per l'edilizia"
 description: "Noleggio operativo di mini-escavatori e mezzi edili: grace period, stagionalità, caso studio di un concessionario Sunward. Come funziona per i dealer e per le imprese edili."
-date: "2026-04-05"
+date: "2026-03-17"
 author: "Alberto Amà"
 tags: ["noleggio operativo", "mini-escavatori", "edilizia", "mezzi edili", "grace period", "stagionalità", "caso studio"]
 image: "/images/blog-mezzi-edili.jpg"

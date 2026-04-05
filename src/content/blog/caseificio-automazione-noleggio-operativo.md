@@ -1,7 +1,7 @@
 ---
 title: "Come un caseificio ha automatizzato la produzione di burrata con il noleggio operativo"
 description: "Un produttore di macchine per caseifici ha iniziato a vendere a canone invece che a contanti. Risultato: più vendite, incasso immediato, clienti soddisfatti. Il modello Marotta Evolution."
-date: "2026-04-05"
+date: "2026-03-03"
 author: "Alberto Amà"
 tags: ["noleggio operativo", "caseificio", "burrata", "automazione", "food machinery", "caso studio", "vendita a canone"]
 image: "/images/blog-caseificio-burrata.jpg"

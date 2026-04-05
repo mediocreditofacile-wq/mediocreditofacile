@@ -1,7 +1,7 @@
 ---
 title: "Il supermercato da 3 milioni che ha noleggiato i distributori automatici invece di comprarli: ecco perché"
 description: "Un supermercato del Lazio da 3 milioni di fatturato noleggia distributori automatici caffè e snack invece di comprarli. Perché il noleggio operativo è la scelta giusta per la GDO di prossimità con margini sottili."
-date: "2025-03-25"
+date: "2026-01-08"
 author: "Alberto Amà"
 tags: ["noleggio operativo distributori automatici", "vending supermercato", "noleggio operativo GDO", "distributori automatici noleggio", "noleggio operativo Lazio", "diversificazione ricavi supermercato", "vending machine noleggio PMI"]
 image: "/images/blog-caso-studio-supermercato.jpg"

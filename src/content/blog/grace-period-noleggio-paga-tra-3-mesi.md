@@ -1,7 +1,7 @@
 ---
 title: "Grace period: quando il noleggio parte oggi e paghi tra 3 mesi"
 description: "Il grace period nel noleggio operativo: ricevi il bene subito, inizi a pagare dopo 60-90 giorni. Come funziona, quando conviene, caso reale di un dealer di mezzi edili."
-date: "2026-04-05"
+date: "2026-03-13"
 author: "Alberto Amà"
 tags: ["noleggio operativo", "grace period", "pagamento differito", "mezzi edili", "stagionalità", "caso studio"]
 image: "/images/blog-grace-period.jpg"

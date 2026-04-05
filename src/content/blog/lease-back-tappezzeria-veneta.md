@@ -1,7 +1,7 @@
 ---
 title: "Quando paghi il fotovoltaico cash e ti ritrovi a regalare il 5% delle fatture: storia vera di una tappezzeria veneta"
 description: "Un'azienda artigiana veneta da un milione di fatturato paga il fotovoltaico cash e si ritrova a regalare il 5% delle fatture. Come il lease back sui macchinari ha risolto il problema di liquidità senza passare dalla banca."
-date: "2026-03-15"
+date: "2026-01-17"
 author: "Alberto Amà"
 tags: ["lease back", "noleggio operativo", "liquidità PMI", "fotovoltaico aziende", "caso studio"]
 image: "/images/blog-caso-studio-tappezzeria.jpg"

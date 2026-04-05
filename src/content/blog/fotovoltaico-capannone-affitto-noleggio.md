@@ -1,7 +1,7 @@
 ---
 title: "Fotovoltaico su capannone in affitto: come funziona il noleggio quando il tetto non è tuo"
 description: "Il tetto non è tuo ma vuoi il fotovoltaico? Con il noleggio operativo l'impianto resta della società di noleggio. Serve solo un accordo col proprietario. Ecco come."
-date: "2026-04-05"
+date: "2026-02-24"
 author: "Alberto Amà"
 tags: ["fotovoltaico", "capannone affitto", "noleggio operativo", "diritto di superficie", "PMI", "guida"]
 image: "/images/blog-fotovoltaico-affitto.jpg"

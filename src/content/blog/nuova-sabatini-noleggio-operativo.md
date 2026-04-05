@@ -1,7 +1,7 @@
 ---
 title: "Nuova Sabatini e noleggio operativo: si possono combinare?"
 description: "La Nuova Sabatini prevede un contributo in conto interessi per investimenti in beni strumentali. È compatibile con il noleggio operativo? Guida pratica con i numeri."
-date: "2026-04-05"
+date: "2026-03-31"
 author: "Alberto Amà"
 tags: ["Nuova Sabatini", "noleggio operativo", "agevolazioni", "PMI", "contributo", "guida"]
 image: "/images/blog-sabatini-confronto.jpg"

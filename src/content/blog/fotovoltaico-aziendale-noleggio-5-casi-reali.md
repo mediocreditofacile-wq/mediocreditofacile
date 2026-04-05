@@ -1,7 +1,7 @@
 ---
 title: "Fotovoltaico aziendale a noleggio: 5 casi reali con i numeri"
 description: "Cinque aziende italiane che hanno installato il fotovoltaico con il noleggio operativo: pescheria a Lampedusa, lavorazione pesce a Porto Tolle, tappezzeria veneta. Numeri veri, canoni reali, risparmi misurati."
-date: "2026-04-05"
+date: "2026-02-17"
 author: "Alberto Amà"
 tags: ["fotovoltaico", "noleggio operativo", "caso studio", "risparmio energetico", "ESG", "PMI", "bolletta"]
 image: "/images/blog-fotovoltaico-5-casi.jpg"

@@ -1,7 +1,7 @@
 ---
 title: "L'algoritmo dice no, il buon senso dice sì: storia di un bar-enoteca che stava per riaprire senza finanziamento"
 description: "Un bar-enoteca con 14 anni di storia non riesce a ottenere 30mila euro di finanziamento perché l'algoritmo legge 'attività sospesa'. Come il noleggio operativo sulle attrezzature ha aperto una strada alternativa."
-date: "2026-03-15"
+date: "2026-01-11"
 author: "Alberto Amà"
 tags: ["noleggio operativo", "ristorazione", "finanziamento bar", "patrimonio netto negativo", "caso studio", "fintech", "cucina professionale"]
 image: "/images/blog-caso-studio-enoteca.jpg"
