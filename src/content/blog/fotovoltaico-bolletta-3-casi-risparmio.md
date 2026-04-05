@@ -42,21 +42,19 @@ In questo caso il canone non si ripaga completamente con il risparmio in bollett
 
 Dopo il riscatto a fine noleggio, il risparmio diventa pieno: 14.200 euro all'anno, per almeno altri 15-18 anni di vita utile dell'impianto.
 
-## Caso 3: Agroalimentare nel Veneto, 100 kWp con Transizione 5.0
+## Caso 3: Agroalimentare nel Veneto, 100 kWp con leasing e Transizione 5.0
 
-Un'azienda agroalimentare con stabilimento produttivo nel Veneto. Consumi annui di circa 180.000 kWh, bolletta intorno ai 52.000 euro. Qui il fotovoltaico da solo non basta a coprire il canone. Ma entra in gioco la Transizione 5.0.
+Un'azienda agroalimentare con stabilimento produttivo nel Veneto. Consumi annui di circa 180.000 kWh, bolletta intorno ai 52.000 euro. Qui il fotovoltaico da solo non basta a coprire il canone di un eventuale noleggio. Ma il credito d'imposta Transizione 5.0 cambia i conti, e per accedervi serve la proprietà del bene.
 
-L'impianto proposto: 100 kWp su copertura industriale, senza accumulo (i consumi diurni sono più che sufficienti ad assorbire la produzione). Valore: 130.000 euro.
+L'azienda sceglie il leasing finanziario. Impianto da 100 kWp su copertura industriale, senza accumulo (i consumi diurni assorbono tutta la produzione). Valore: 130.000 euro. Anticipo leasing (10%): 13.000 euro. Canone mensile leasing 60 mesi: circa 2.220 euro. Riscatto finale (1%): 1.300 euro.
 
-Con il credito d'imposta Transizione 5.0, l'azienda recupera il 35% dell'investimento complessivo (per investimenti fino a 2,5 milioni di euro con una riduzione dei consumi certificata di almeno il 3%). Il credito d'imposta è di 45.500 euro, utilizzabile in compensazione in 5 quote annuali da 9.100 euro.
-
-A noleggio operativo su 60 mesi: canone mensile di 2.480 euro più IVA. Annuo: 29.760 euro.
+Con il credito d'imposta Transizione 5.0, l'azienda recupera il 35% dell'investimento (per investimenti fino a 2,5 milioni di euro con una riduzione dei consumi certificata di almeno il 3%). Il credito d'imposta è di 45.500 euro, utilizzabile in compensazione in 5 quote annuali da 9.100 euro.
 
 Produzione stimata (irraggiamento Veneto, circa 1.250 kWh/kWp): 125.000 kWh annui. Con autoconsumo del 90%, il risparmio in bolletta è di circa 28.100 euro all'anno.
 
-Risparmio bolletta: 28.100 euro. Credito d'imposta Transizione 5.0: 9.100 euro annui (per 5 anni). Totale beneficio annuo: 37.200 euro. Canone annuo: 29.760 euro. Delta positivo: 7.440 euro all'anno.
+Risparmio bolletta: 28.100 euro. Credito d'imposta Transizione 5.0: 9.100 euro annui (per 5 anni). Totale beneficio annuo: 37.200 euro. Rata leasing annua: 26.640 euro. Delta positivo: 10.560 euro all'anno.
 
-Con la Transizione 5.0, l'impianto non solo si ripaga interamente, genera un surplus di oltre 600 euro al mese. L'investimento è a costo zero negativo: l'azienda guadagna installandolo.
+Perché il leasing e non il noleggio? Il credito d'imposta Transizione 5.0 richiede la proprietà del bene. Il noleggio operativo, dove il bene resta della società di noleggio, non dà accesso all'incentivo. In questo caso il credito da 45.500 euro fa la differenza tra un impianto che si ripaga a fatica e uno che genera surplus dal primo anno. Dopo il riscatto, il bene diventa di proprietà dell'azienda e produce energia per altri 20 anni.
 
 ## La variabile chiave: il tasso di autoconsumo
 
@@ -70,7 +68,7 @@ La regola pratica: se il consumo diurno dell'azienda supera la produzione dell'i
 
 Prendi la bolletta elettrica degli ultimi 12 mesi. Guarda il consumo annuo in kWh e il costo medio per kWh (totale bolletta diviso kWh consumati). Chiedi al tuo installatore quanti kWp servono per coprire il tuo consumo diurno. Chiedi a noi il canone di noleggio per quella taglia di impianto.
 
-Se il canone annuo è inferiore al risparmio stimato in bolletta, l'impianto si ripaga da solo. Se è superiore ma di poco, valuta l'effetto della deducibilità fiscale del canone e l'eventuale accesso a incentivi come la Transizione 5.0 o il Conto Termico.
+Se il canone annuo è inferiore al risparmio stimato in bolletta, l'impianto si ripaga da solo. Se è superiore ma di poco, valuta l'effetto della deducibilità fiscale del canone. Se vuoi accedere a incentivi come la Transizione 5.0 o il Conto Termico, sappi che richiedono la proprietà del bene: in quel caso serve leasing finanziario o acquisto diretto, non il noleggio operativo.
 
 Per una prima stima, [contattaci](/contatti) con la bolletta e la visura catastale del tetto. In 48 ore ti restituiamo il confronto canone vs risparmio personalizzato.
 
@@ -86,4 +84,4 @@ La produzione di un impianto fotovoltaico è prevedibile con un margine di error
 
 ### Posso combinare il noleggio operativo con la Transizione 5.0?
 
-Sì, il credito d'imposta Transizione 5.0 è compatibile con il noleggio operativo. Il credito viene calcolato sul valore dell'investimento (il costo dell'impianto, non la somma dei canoni) e va in compensazione con le imposte dovute dall'azienda. È un beneficio fiscale che si aggiunge al risparmio in bolletta, come mostrato nel terzo caso di questo articolo.
+No. Il credito d'imposta Transizione 5.0 richiede la proprietà del bene, che si ottiene con acquisto diretto o leasing finanziario. Nel noleggio operativo il bene resta della società di noleggio, quindi l'azienda non ha titolo per il credito d'imposta. Il terzo caso di questo articolo usa il leasing proprio per questo motivo. Il noleggio operativo offre un percorso alternativo: niente credito d'imposta, ma deducibilità piena del canone, zero anticipo e bilancio pulito.
