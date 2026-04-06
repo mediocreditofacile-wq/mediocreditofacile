@@ -56,6 +56,7 @@ const navLinks = [
 
         <div class="header__actions">
           <a href="/diventa-partner" class="header__cta header__cta--accent">Diventa Partner</a>
+          <a href="/finanza-veloce" class="header__cta header__cta--outline">Finanzia il tuo Investimento</a>
         </div>
 
         <button class="header__hamburger" id="hamburger-btn" aria-label="Apri menu" aria-expanded="false" aria-controls="mobile-menu">
@@ -86,6 +87,7 @@ const navLinks = [
         ))}
         <div class="header__mobile-actions">
           <a href="/diventa-partner" class="header__cta header__cta--accent">Diventa Partner</a>
+          <a href="/finanza-veloce" class="header__cta header__cta--outline">Finanzia il tuo Investimento</a>
         </div>
       </nav>
     </div>
@@ -273,6 +275,13 @@ const navLinks = [
     color: #ffffff;
   }
   .header__cta--accent:hover { background: var(--mcf-primary-dark); }
+
+  .header__cta--outline {
+    background: transparent;
+    color: var(--mcf-accent);
+    border: 2px solid var(--mcf-accent);
+  }
+  .header__cta--outline:hover { background: #E0DBF7; }
 
   /* Hamburger */
   .header__hamburger {
