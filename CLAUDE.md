@@ -28,10 +28,13 @@ Le landing si generano da landing-pages.json. Per creare una nuova landing basta
 
 ## Brand (aggiornato aprile 2026)
 
-Logo wordmark tipografico "medio credito facile" — tre parole lowercase:
-- "medio" — #664CCD (viola), weight 700
-- "credito" — #293C5B (charcoal scuro) / bianco su sfondo scuro, weight 300
-- "facile" — #FE6F3A (arancio), weight 800
+Logo wordmark tipografico "Mediocredito Facile" — DUE parole (non tre):
+- "Mediocredito" è UNA PAROLA UNICA. Il cambio colore/peso avviene senza spazi:
+  - "Medio" (prima parte) — #664CCD (viola), weight 700
+  - "credito" (seconda parte, attaccata) — #293C5B (charcoal) / bianco su sfondo scuro, weight 300
+  - In SVG: usare <tspan> nidificati dentro un unico <text>, SENZA whitespace tra i tspan
+  - In HTML: <span> nidificati con display: inline, nessun gap
+- "Facile" — #FE6F3A (arancio), weight 800 — parola separata da uno spazio
 - Claim: "L'OFFICINA DEL CREDITO" — weight 400, letter-spacing 3.5px, #664CCD
 - Componente: src/components/Logo.astro (varianti: principale, compatto, inline, dark)
 - Monogramma MCF: M e F bianche weight 800, C arancio #FE6F3A weight 700, sfondo viola #664CCD
