@@ -1,0 +1,49 @@
+---
+/**
+ * Logo MCF — wordmark tipografico "medio credito facile"
+ * Varianti: principale (2 righe + claim), compatto (2 righe), inline (1 riga)
+ * Props dark per sfondo scuro
+ */
+interface Props {
+  variant?: 'principale' | 'compatto' | 'inline';
+  dark?: boolean;
+  height?: number;
+}
+
+const { variant = 'compatto', dark = false, height = 36 } = Astro.props;
+const creditoFill = dark ? '#FFFFFF' : '#293C5B';
+const claimFill = dark ? '#E1DEE3' : '#664CCD';
+---
+
+{variant === 'principale' && (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 160" height={height * 2.5} class="logo logo--principale" aria-label="mediocredito facile — L'officina del credito">
+    <text x="0" y="56" font-family="Manrope, sans-serif" font-weight="700" font-size="50" fill="#664CCD" letter-spacing="-2">medio</text>
+    <text x="186" y="56" font-family="Manrope, sans-serif" font-weight="300" font-size="50" fill={creditoFill} letter-spacing="-2">credito</text>
+    <text x="244" y="110" font-family="Manrope, sans-serif" font-weight="800" font-size="50" fill="#FE6F3A" letter-spacing="-1.5">facile</text>
+    <rect x="0" y="128" width="3" height="22" rx="1.5" fill="#FE6F3A"/>
+    <text x="14" y="144" font-family="Manrope, sans-serif" font-weight="400" font-size="12.5" fill={claimFill} letter-spacing="3.5">L'OFFICINA DEL CREDITO</text>
+  </svg>
+)}
+
+{variant === 'compatto' && (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 100" height={height * 1.8} class="logo logo--compatto" aria-label="mediocredito facile">
+    <text x="0" y="44" font-family="Manrope, sans-serif" font-weight="700" font-size="42" fill="#664CCD" letter-spacing="-1.5">medio</text>
+    <text x="156" y="44" font-family="Manrope, sans-serif" font-weight="300" font-size="42" fill={creditoFill} letter-spacing="-1.5">credito</text>
+    <text x="204" y="90" font-family="Manrope, sans-serif" font-weight="800" font-size="42" fill="#FE6F3A" letter-spacing="-1.5">facile</text>
+  </svg>
+)}
+
+{variant === 'inline' && (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 32" height={height} class="logo logo--inline" aria-label="mediocredito facile">
+    <text x="0" y="26" font-family="Manrope, sans-serif" font-weight="700" font-size="28" fill="#664CCD" letter-spacing="-1">medio</text>
+    <text x="104" y="26" font-family="Manrope, sans-serif" font-weight="300" font-size="28" fill={creditoFill} letter-spacing="-1">credito</text>
+    <text x="242" y="26" font-family="Manrope, sans-serif" font-weight="800" font-size="28" fill="#FE6F3A" letter-spacing="-1">facile</text>
+  </svg>
+)}
+
+<style>
+  .logo {
+    display: block;
+    width: auto;
+  }
+</style>

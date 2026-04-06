@@ -1,33 +1,31 @@
 ---
-import { existsSync } from 'node:fs';
-import { resolve } from 'node:path';
+import Logo from './Logo.astro';
 
 interface Props {
   minimal?: boolean;
 }
 
 const { minimal = false } = Astro.props;
-const logoExists = existsSync(resolve('public/images/logo.png'));
+
+const serviceLinks = [
+  { label: 'Noleggio Operativo', href: '/noleggio-operativo' },
+  { label: 'Leasing Strumentale', href: '/leasing-strumentale' },
+  { label: 'Finanziamenti PMI', href: '/finanziamenti-pmi' },
+  { label: 'Agevolazioni Fiscali', href: '/agevolazioni-fiscali' },
+];
 
 const navLinks = [
-  { label: 'Noleggio Operativo', href: '/noleggio-operativo' },
-  { label: 'Leasing', href: '/leasing-strumentale' },
-  { label: 'Agevolazioni', href: '/agevolazioni-fiscali' },
-  { label: 'Casi Studio', href: '/casi-studio' },
-  { label: 'Blog', href: '/blog' },
   { label: 'Strumenti', href: '/tools' },
+  { label: 'Blog', href: '/blog' },
   { label: 'Chi Siamo', href: '/chi-siamo' },
+  { label: 'Contatti', href: '/contatti' },
 ];
 ---
 
 <header class="header">
   <div class="header__inner">
-    <a href="/" class="header__logo" aria-label="Mediocredito Facile — Home">
-      {logoExists ? (
-        <img src="/images/logo.png" alt="Mediocredito Facile" class="header__logo-img" />
-      ) : (
-        <span class="header__logo-text">MEDIOCREDITO<strong>FACILE</strong></span>
-      )}
+    <a href="/" class="header__logo" aria-label="mediocredito facile — Home">
+      <Logo variant="inline" height={28} />
     </a>
 
     {minimal ? (
@@ -38,6 +36,19 @@ const navLinks = [
     ) : (
       <>
         <nav class="header__nav" id="main-nav" aria-label="Navigazione principale">
+          <!-- Dropdown Servizi -->
+          <div class="header__dropdown" id="services-dropdown">
+            <button class="header__nav-link header__dropdown-trigger" aria-expanded="false" aria-haspopup="true">
+              Servizi
+              <span class="material-icons-outlined header__dropdown-arrow">expand_more</span>
+            </button>
+            <div class="header__dropdown-menu">
+              {serviceLinks.map((link) => (
+                <a href={link.href} class="header__dropdown-item">{link.label}</a>
+              ))}
+            </div>
+          </div>
+
           {navLinks.map((link) => (
             <a href={link.href} class="header__nav-link">{link.label}</a>
           ))}
@@ -45,7 +56,6 @@ const navLinks = [
 
         <div class="header__actions">
           <a href="/diventa-partner" class="header__cta header__cta--accent">Diventa Partner</a>
-          <a href="/finanza-veloce" class="header__cta header__cta--outline">Finanzia il tuo Investimento</a>
         </div>
 
         <button class="header__hamburger" id="hamburger-btn" aria-label="Apri menu" aria-expanded="false" aria-controls="mobile-menu">
@@ -60,12 +70,22 @@ const navLinks = [
   {!minimal && (
     <div class="header__mobile-menu" id="mobile-menu" aria-hidden="true">
       <nav class="header__mobile-nav">
+        <!-- Servizi espandibili -->
+        <button class="header__mobile-section" id="mobile-services-btn">
+          Servizi
+          <span class="material-icons-outlined">expand_more</span>
+        </button>
+        <div class="header__mobile-sub" id="mobile-services-sub">
+          {serviceLinks.map((link) => (
+            <a href={link.href} class="header__mobile-sublink">{link.label}</a>
+          ))}
+        </div>
+
         {navLinks.map((link) => (
           <a href={link.href} class="header__mobile-link">{link.label}</a>
         ))}
         <div class="header__mobile-actions">
           <a href="/diventa-partner" class="header__cta header__cta--accent">Diventa Partner</a>
-          <a href="/finanza-veloce" class="header__cta header__cta--outline">Finanzia il tuo Investimento</a>
         </div>
       </nav>
     </div>
@@ -73,6 +93,7 @@ const navLinks = [
 </header>
 
 <script>
+  // Hamburger menu
   const btn = document.getElementById('hamburger-btn');
   const menu = document.getElementById('mobile-menu');
 
@@ -84,7 +105,6 @@ const navLinks = [
     menu?.setAttribute('aria-hidden', String(expanded));
   });
 
-  // Close menu when clicking a link
   menu?.querySelectorAll('a').forEach((link) => {
     link.addEventListener('click', () => {
       btn?.setAttribute('aria-expanded', 'false');
@@ -93,6 +113,33 @@ const navLinks = [
       menu.setAttribute('aria-hidden', 'true');
     });
   });
+
+  // Desktop dropdown Servizi
+  const dropdown = document.getElementById('services-dropdown');
+  const trigger = dropdown?.querySelector('.header__dropdown-trigger');
+
+  trigger?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const expanded = trigger.getAttribute('aria-expanded') === 'true';
+    trigger.setAttribute('aria-expanded', String(!expanded));
+    dropdown?.classList.toggle('open');
+  });
+
+  document.addEventListener('click', () => {
+    trigger?.setAttribute('aria-expanded', 'false');
+    dropdown?.classList.remove('open');
+  });
+
+  dropdown?.addEventListener('click', (e) => e.stopPropagation());
+
+  // Mobile servizi espandibili
+  const mobileBtn = document.getElementById('mobile-services-btn');
+  const mobileSub = document.getElementById('mobile-services-sub');
+
+  mobileBtn?.addEventListener('click', () => {
+    mobileBtn.classList.toggle('open');
+    mobileSub?.classList.toggle('open');
+  });
 </script>
 
 <style>
@@ -100,9 +147,9 @@ const navLinks = [
     position: sticky;
     top: 0;
     z-index: 100;
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(255, 255, 255, 0.97);
     border-bottom: 1px solid var(--color-border);
-    backdrop-filter: blur(8px);
+    backdrop-filter: blur(10px);
   }
 
   .header__inner {
@@ -111,34 +158,12 @@ const navLinks = [
     padding: 0.75rem 1.5rem;
     display: flex;
     align-items: center;
-    gap: 1.5rem;
+    gap: 2rem;
   }
 
-  /* Logo */
-  .header__logo {
-    flex-shrink: 0;
-  }
+  .header__logo { flex-shrink: 0; }
 
-  .header__logo-img {
-    height: 36px;
-    width: auto;
-    display: block;
-  }
-
-  .header__logo-text {
-    font-size: 1.15rem;
-    color: var(--color-primary);
-    letter-spacing: 0.04em;
-    font-weight: 700;
-    white-space: nowrap;
-  }
-
-  .header__logo-text strong {
-    color: var(--color-accent);
-    font-weight: 800;
-  }
-
-  /* Phone (minimal mode) */
+  /* Phone (minimal) */
   .header__phone {
     display: inline-flex;
     align-items: center;
@@ -149,37 +174,81 @@ const navLinks = [
     color: var(--color-primary);
     transition: color 0.2s;
   }
+  .header__phone:hover { color: var(--color-accent); }
+  .header__phone .material-icons-outlined { font-size: 1.2rem; }
 
-  .header__phone:hover {
-    color: var(--color-accent);
-  }
-
-  .header__phone .material-icons-outlined {
-    font-size: 1.2rem;
-  }
-
-  /* Nav links */
+  /* Nav */
   .header__nav {
     display: flex;
     align-items: center;
-    gap: 1.25rem;
+    gap: 1.5rem;
     flex: 1;
     justify-content: center;
   }
 
   .header__nav-link {
-    font-size: 0.9rem;
+    font-size: 0.88rem;
     font-weight: 600;
-    color: var(--color-text);
+    color: var(--mcf-charcoal);
     white-space: nowrap;
     transition: color 0.2s;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: var(--font-family);
+    padding: 0;
+  }
+  .header__nav-link:hover { color: var(--mcf-primary); }
+
+  /* Dropdown */
+  .header__dropdown { position: relative; }
+
+  .header__dropdown-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.15rem;
   }
 
-  .header__nav-link:hover {
-    color: var(--color-primary);
+  .header__dropdown-arrow {
+    font-size: 1.1rem;
+    transition: transform 0.2s;
   }
 
-  /* CTA buttons */
+  .header__dropdown.open .header__dropdown-arrow {
+    transform: rotate(180deg);
+  }
+
+  .header__dropdown-menu {
+    display: none;
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #ffffff;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    min-width: 220px;
+    padding: 0.5rem 0;
+    z-index: 200;
+  }
+
+  .header__dropdown.open .header__dropdown-menu { display: block; }
+
+  .header__dropdown-item {
+    display: block;
+    padding: 0.6rem 1.25rem;
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--mcf-charcoal);
+    transition: background 0.15s, color 0.15s;
+  }
+  .header__dropdown-item:hover {
+    background: var(--mcf-ghost);
+    color: var(--mcf-primary);
+  }
+
+  /* CTA */
   .header__actions {
     display: flex;
     align-items: center;
@@ -192,34 +261,18 @@ const navLinks = [
     align-items: center;
     font-size: 0.85rem;
     font-weight: 700;
-    padding: 0.55rem 1.1rem;
+    padding: 0.55rem 1.25rem;
     border-radius: 8px;
     white-space: nowrap;
-    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+    transition: background 0.2s, transform 0.15s;
   }
-
-  .header__cta:hover {
-    transform: translateY(-1px);
-  }
+  .header__cta:hover { transform: translateY(-1px); }
 
   .header__cta--accent {
-    background: var(--color-accent);
+    background: var(--mcf-primary);
     color: #ffffff;
   }
-
-  .header__cta--accent:hover {
-    background: var(--color-accent-hover);
-  }
-
-  .header__cta--outline {
-    background: transparent;
-    color: var(--color-primary);
-    border: 2px solid var(--color-primary);
-  }
-
-  .header__cta--outline:hover {
-    background: var(--color-primary-bg);
-  }
+  .header__cta--accent:hover { background: var(--mcf-primary-dark); }
 
   /* Hamburger */
   .header__hamburger {
@@ -240,7 +293,7 @@ const navLinks = [
     display: block;
     width: 100%;
     height: 2.5px;
-    background: var(--color-primary);
+    background: var(--mcf-charcoal);
     border-radius: 2px;
     transition: transform 0.3s, opacity 0.3s;
   }
@@ -248,11 +301,7 @@ const navLinks = [
   .header__hamburger.open .header__hamburger-line:nth-child(1) {
     transform: translateY(7.5px) rotate(45deg);
   }
-
-  .header__hamburger.open .header__hamburger-line:nth-child(2) {
-    opacity: 0;
-  }
-
+  .header__hamburger.open .header__hamburger-line:nth-child(2) { opacity: 0; }
   .header__hamburger.open .header__hamburger-line:nth-child(3) {
     transform: translateY(-7.5px) rotate(-45deg);
   }
@@ -268,22 +317,61 @@ const navLinks = [
     display: flex;
     flex-direction: column;
     padding: 1rem 1.5rem 1.5rem;
-    gap: 0.25rem;
+    gap: 0;
   }
 
   .header__mobile-link {
     display: block;
-    padding: 0.7rem 0;
+    padding: 0.75rem 0;
     font-size: 1rem;
     font-weight: 600;
-    color: var(--color-text);
+    color: var(--mcf-charcoal);
     border-bottom: 1px solid var(--color-border);
     transition: color 0.2s;
   }
+  .header__mobile-link:hover { color: var(--mcf-primary); }
 
-  .header__mobile-link:hover {
-    color: var(--color-primary);
+  /* Mobile servizi espandibili */
+  .header__mobile-section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0.75rem 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--mcf-accent);
+    background: none;
+    border: none;
+    border-bottom: 1px solid var(--color-border);
+    cursor: pointer;
+    font-family: var(--font-family);
   }
+  .header__mobile-section .material-icons-outlined {
+    font-size: 1.2rem;
+    transition: transform 0.2s;
+  }
+  .header__mobile-section.open .material-icons-outlined {
+    transform: rotate(180deg);
+  }
+
+  .header__mobile-sub {
+    display: none;
+    flex-direction: column;
+    padding-left: 1rem;
+  }
+  .header__mobile-sub.open { display: flex; }
+
+  .header__mobile-sublink {
+    display: block;
+    padding: 0.6rem 0;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--mcf-charcoal);
+    border-bottom: 1px solid var(--color-border);
+    transition: color 0.2s;
+  }
+  .header__mobile-sublink:hover { color: var(--mcf-primary); }
 
   .header__mobile-actions {
     display: flex;
@@ -291,27 +379,15 @@ const navLinks = [
     gap: 0.75rem;
     margin-top: 1rem;
   }
-
   .header__mobile-actions .header__cta {
     justify-content: center;
     font-size: 0.95rem;
     padding: 0.75rem 1.25rem;
   }
 
-  /* Responsive */
   @media (max-width: 960px) {
-    .header__nav,
-    .header__actions {
-      display: none;
-    }
-
-    .header__hamburger {
-      display: flex;
-      margin-left: auto;
-    }
-
-    .header__mobile-menu.open {
-      display: block;
-    }
+    .header__nav, .header__actions { display: none; }
+    .header__hamburger { display: flex; margin-left: auto; }
+    .header__mobile-menu.open { display: block; }
   }
 </style>

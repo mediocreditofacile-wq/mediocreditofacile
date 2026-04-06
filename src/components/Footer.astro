@@ -1,11 +1,14 @@
 ---
 import PartnerLogos from './PartnerLogos.astro';
+import Logo from './Logo.astro';
 ---
 
 <PartnerLogos />
 <footer class="footer">
   <div class="footer__inner">
-    <p class="footer__brand">MEDIOCREDITO<strong>FACILE</strong></p>
+    <div class="footer__brand">
+      <Logo variant="inline" dark={true} height={24} />
+    </div>
 
     <div class="footer__nav">
       <a href="/chi-siamo">Chi Siamo</a>
@@ -45,7 +48,7 @@ import PartnerLogos from './PartnerLogos.astro';
 
 <style>
   .footer {
-    background: #061237;
+    background: #0F1020;
     color: rgba(255, 255, 255, 0.7);
     padding: 3rem 1.5rem 2rem;
     text-align: center;
@@ -59,15 +62,9 @@ import PartnerLogos from './PartnerLogos.astro';
   }
 
   .footer__brand {
-    font-size: 1.2rem;
-    color: #fff;
     margin-bottom: 1.25rem;
-    letter-spacing: 0.04em;
-  }
-
-  .footer__brand strong {
-    color: var(--color-accent);
-    font-weight: 800;
+    display: flex;
+    justify-content: center;
   }
 
   .footer__nav {
