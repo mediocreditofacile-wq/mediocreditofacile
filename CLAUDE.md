@@ -26,12 +26,30 @@ Le landing si generano da landing-pages.json. Per creare una nuova landing basta
 - Le landing con slug che contiene "fotovoltaico" mostrano le foto hero-fotovoltaico.png e pannelli-tetto.png.
 - Form invia a webhook Zapier. Thank you page: /grazie (vendor), /grazie-fv (end-user).
 
-## Brand
-- Viola primario: #664CCD
-- Arancione CTA: #FE6F3A
-- Testo body: #293C5B
-- Font: Manrope (Google Fonts)
-- Logo testo: MEDIOCREDITO (viola) FACILE (arancione), uppercase
+## Brand (aggiornato aprile 2026)
+
+Logo wordmark tipografico "medio credito facile" — tre parole lowercase:
+- "medio" — #664CCD (viola), weight 700
+- "credito" — #293C5B (charcoal scuro) / bianco su sfondo scuro, weight 300
+- "facile" — #FE6F3A (arancio), weight 800
+- Claim: "L'OFFICINA DEL CREDITO" — weight 400, letter-spacing 3.5px, #664CCD
+- Componente: src/components/Logo.astro (varianti: principale, compatto, inline, dark)
+- Monogramma MCF: M e F bianche weight 800, C arancio #FE6F3A weight 700, sfondo viola #664CCD
+
+Palette:
+- Arancio primario (CTA): #FE6F3A (--mcf-primary)
+- Viola accento (titoli, link): #664CCD (--mcf-accent)
+- Arancio accessibile (testo piccolo su bianco): #D45A2E (--mcf-primary-dark)
+- Charcoal (corpo testo): #444451 (--mcf-charcoal)
+- Rich Black (titoli forti): #0F1020 (--mcf-black)
+- Taupe (note, footer): #787782 (--mcf-taupe)
+- Ghost White (sfondo sezioni): #F8F7FA (--mcf-ghost)
+- Platinum (bordi, separatori): #E1DEE3 (--mcf-platinum)
+- Melon (sfondi caldi): #F0A78F (--mcf-melon)
+- Gradient: linear-gradient(135deg, #FE6F3A, #664CCD)
+
+Font: Manrope (Google Fonts, weights 300-400-500-600-700-800)
+Mai nero puro #000000 — usare sempre #0F1020 o #444451
 
 ## Convenzioni
 - Telefono: +39 393 995 7840 (link tel:+393939957840)
@@ -97,3 +115,28 @@ cd /Users/alberto/mediocreditofacile/mcf-ads-engine
 - Account ID: AW-16800748626
 - Manager Account: configurato
 - Developer Token: già ottenuto (non scrivere il valore qui)
+
+## Regola di auto-aggiornamento (OBBLIGATORIA)
+
+Alla fine di ogni sessione di lavoro, prima di chiudere:
+
+### 1. Aggiorna QUESTO CLAUDE.md
+
+Se la sessione ha modificato qualcosa di strutturale, aggiorna la sezione pertinente di questo file. Esempi:
+- Nuovo componente o pagina → aggiorna "Struttura progetto"
+- Nuova API route → aggiorna "API Routes"
+- Cambio brand (colori, logo, font) → aggiorna "Brand"
+- Nuova landing page → aggiorna la lista delle landing e il meccanismo di generazione
+- Nuova variabile d'ambiente → aggiorna "Environment Variables"
+- Nuovo comportamento dei form → aggiorna le sezioni form
+
+Il CLAUDE.md e' la fonte di verita' per chiunque (umano o AI) lavori sul codice dopo di te. Se resta vecchio, il prossimo reimplementa cose sbagliate.
+
+### 2. Aggiorna le reference Cowork
+
+Se la sessione ha modificato campagne, landing page, o brand:
+- Aggiorna `~/Desktop/_AI/knowledge/reference/mediocredito-facile/campagne/context-marketing.md` con le modifiche fatte
+- Aggiorna la data "Ultimo aggiornamento" in testa al file
+- Se le modifiche riguardano il brand, aggiorna anche `~/Desktop/_AI/knowledge/reference/mediocredito-facile/brand/brand-guidelines.md`
+
+Questo mantiene sincronizzate le reference che Cowork usa per skill, triage e copywriting.

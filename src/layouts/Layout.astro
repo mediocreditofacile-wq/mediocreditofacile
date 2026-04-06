@@ -61,7 +61,7 @@ const organizationLD = {
     <script type="application/ld+json" set:html={JSON.stringify(organizationLD)} />
 
     <link
-      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
     <link
@@ -76,6 +76,57 @@ const organizationLD = {
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- End Google Tag Manager (noscript) -->
     <slot />
+
+    <!-- GSAP ScrollTrigger animations -->
+    <script>
+      import gsap from 'gsap';
+      import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+      gsap.registerPlugin(ScrollTrigger);
+
+      // Fade-in + slide-up per le sezioni
+      document.querySelectorAll('section').forEach((section) => {
+        gsap.fromTo(section,
+          { opacity: 0, y: 40 },
+          {
+            opacity: 1, y: 0, duration: 0.7, ease: 'power2.out',
+            scrollTrigger: { trigger: section, start: 'top 85%', once: true }
+          }
+        );
+      });
+
+      // Stagger sulle card grid
+      document.querySelectorAll('[class*="__grid"]').forEach((grid) => {
+        const cards = grid.children;
+        if (cards.length > 1) {
+          gsap.fromTo(cards,
+            { opacity: 0, y: 30 },
+            {
+              opacity: 1, y: 0, duration: 0.5, ease: 'power2.out', stagger: 0.1,
+              scrollTrigger: { trigger: grid, start: 'top 85%', once: true }
+            }
+          );
+        }
+      });
+
+      // Counter animato per stats
+      document.querySelectorAll('[class*="stats__number"]').forEach((el) => {
+        const text = el.textContent?.trim() || '';
+        const match = text.match(/^([\d.,]+)/);
+        if (match) {
+          const target = parseFloat(match[1].replace(',', '.'));
+          const suffix = text.replace(match[1], '');
+          const obj = { val: 0 };
+          gsap.to(obj, {
+            val: target, duration: 1.5, ease: 'power2.out',
+            scrollTrigger: { trigger: el, start: 'top 90%', once: true },
+            onUpdate: () => {
+              el.textContent = (target % 1 === 0 ? Math.round(obj.val) : obj.val.toFixed(1)) + suffix;
+            }
+          });
+        }
+      });
+    </script>
   </body>
 </html>
 
@@ -89,22 +140,40 @@ const organizationLD = {
   }
 
   :root {
+    /* Legacy (mantenute per compatibilità con pagine non ancora aggiornate) */
     --color-primary: #664CCD;
     --color-primary-light: #8570D7;
     --color-primary-bg: #E0DBF7;
     --color-primary-dark: #061237;
     --color-accent: #FE6F3A;
     --color-accent-hover: #e55a2a;
-    --color-heading: #212121;
+    --color-heading: #0F1020;
     --color-bg: #ffffff;
-    --color-bg-alt: #F5FBFF;
-    --color-bg-alt-2: #F4F4F4;
-    --color-text: #293C5B;
-    --color-text-light: #64748b;
-    --color-border: #e2e8f0;
-    --font-family: 'Manrope', Inter, system-ui, sans-serif;
+    --color-bg-alt: #F8F7FA;
+    --color-bg-alt-2: #E9C3B9;
+    --color-text: #444451;
+    --color-text-light: #787782;
+    --color-border: #E1DEE3;
+    --font-family: 'Manrope', system-ui, sans-serif;
     --max-width: 1120px;
     --radius: 12px;
+
+    /* Brand MCF aprile 2026 */
+    --mcf-primary: #FE6F3A;
+    --mcf-accent: #664CCD;
+    --mcf-melon: #F0A78F;
+    --mcf-pale: #E9C3B9;
+    --mcf-platinum: #E1DEE3;
+    --mcf-ghost: #F8F7FA;
+    --mcf-charcoal: #444451;
+    --mcf-black: #0F1020;
+    --mcf-taupe: #787782;
+    --mcf-primary-dark: #D45A2E;
+    --mcf-gradient: linear-gradient(135deg, #FE6F3A, #664CCD);
+    --mcf-success: #2D8F4E;
+    --mcf-warning: #E6A817;
+    --mcf-error: #CC3333;
+    --mcf-info: #3B82F6;
   }
 
   html {
