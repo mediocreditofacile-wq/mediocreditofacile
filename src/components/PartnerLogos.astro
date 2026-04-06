@@ -2,8 +2,9 @@
 // Fascione loghi partner — scorrimento continuo
 // Per aggiungere/rimuovere un partner: modificare l'array qui sotto
 // I file logo vanno in public/images/partners/ (PNG o SVG, sfondo trasparente)
-const partners = [
-  { name: 'Affida', logo: '/images/partners/affida.png' },
+// Affida sempre visibile, inserito ogni 2 partner
+const affida = { name: 'Affida', logo: '/images/partners/affida.png', highlight: true };
+const otherPartners = [
   { name: 'Grenke', logo: '/images/partners/grenke.png' },
   { name: 'Pagarent', logo: '/images/partners/pagarent.png' },
   { name: 'PEAC Solutions', logo: '/images/partners/peac.png' },
@@ -15,6 +16,19 @@ const partners = [
   { name: 'Agos', logo: '/images/partners/agos.svg' },
   { name: 'Compara Semplice', logo: '/images/partners/compara-semplice.svg' },
 ];
+
+// Inserisce Affida ogni 2 partner
+const partners: Array<{name: string; logo: string; highlight?: boolean}> = [];
+for (let i = 0; i < otherPartners.length; i++) {
+  partners.push(otherPartners[i]);
+  if ((i + 1) % 2 === 0) {
+    partners.push(affida);
+  }
+}
+// Se restano partner dispari, aggiungi Affida alla fine
+if (otherPartners.length % 2 !== 0) {
+  partners.push(affida);
+}
 ---
 
 <section class="partners">
@@ -22,11 +36,10 @@ const partners = [
   <div class="partners__track">
     <div class="partners__slide">
       {partners.map((p) => (
-        <img src={p.logo} alt={p.name} class="partners__logo" loading="lazy" />
+        <img src={p.logo} alt={p.name} class:list={['partners__logo', { 'partners__logo--highlight': p.highlight }]} loading="lazy" />
       ))}
-      {/* Duplicato per loop continuo */}
       {partners.map((p) => (
-        <img src={p.logo} alt={p.name} class="partners__logo" loading="lazy" />
+        <img src={p.logo} alt={p.name} class:list={['partners__logo', { 'partners__logo--highlight': p.highlight }]} loading="lazy" />
       ))}
     </div>
   </div>
@@ -74,6 +87,11 @@ const partners = [
   .partners__logo:hover {
     filter: grayscale(0%);
     opacity: 1;
+  }
+  .partners__logo--highlight {
+    filter: grayscale(0%) !important;
+    opacity: 1 !important;
+    height: 46px;
   }
   @keyframes scroll-logos {
     0% {
