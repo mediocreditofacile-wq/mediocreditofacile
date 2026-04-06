@@ -290,11 +290,14 @@ export default function SimulatoreFotovoltaico({ modalitaPartner = false }: Prop
 
   // State per il form contatti
   const [formNome, setFormNome] = useState('');
+  const [formCognome, setFormCognome] = useState('');
   const [formAzienda, setFormAzienda] = useState('');
   const [formEmail, setFormEmail] = useState('');
   const [formTelefono, setFormTelefono] = useState('');
+  const [formPiva, setFormPiva] = useState('');
   const [formPrivacy, setFormPrivacy] = useState(false);
   const [formInvio, setFormInvio] = useState(false);
+  const [partnerSbloccato, setPartnerSbloccato] = useState(false);
 
   // Invio form a Zapier
   const handleFormSubmit = async (e: Event) => {
@@ -345,8 +348,46 @@ export default function SimulatoreFotovoltaico({ modalitaPartner = false }: Prop
     window.location.href = '/grazie';
   };
 
+  // Submit form partner (nome, cognome, cellulare, P.IVA → Zapier, poi sblocca stampa)
+  const handlePartnerSubmit = async (e: Event) => {
+    e.preventDefault();
+    setFormInvio(true);
+
+    if (typeof window !== 'undefined' && (window as any).dataLayer) {
+      (window as any).dataLayer.push({
+        event: 'form_inviato',
+        tool: 'preventivatore_fotovoltaico_partner',
+      });
+    }
+
+    const body = new FormData();
+    body.append('tool', 'preventivatore_fotovoltaico_partner');
+    body.append('nome', formNome);
+    body.append('cognome', formCognome);
+    body.append('telefono', formTelefono);
+    body.append('partita_iva', formPiva);
+    body.append('valore_bene', costo.toString());
+    body.append('durata', durata.toString());
+    if (risultato) {
+      body.append('rata_calcolata', risultato.rataTotale.toFixed(2));
+      if (risultato.risparmioMensile !== undefined) {
+        body.append('risparmio_stimato', risultato.risparmioMensile.toFixed(2));
+      }
+    }
+
+    try {
+      await fetch('https://hooks.zapier.com/hooks/catch/26268853/ul50ccv/', {
+        method: 'POST',
+        body,
+      });
+    } catch (_) {}
+    setFormInvio(false);
+    setPartnerSbloccato(true);
+  };
+
   const costoValido = costo >= 800 && costo <= 240000;
   const formValido = formNome.trim() && formAzienda.trim() && formEmail.trim() && formTelefono.trim() && formPrivacy;
+  const formPartnerValido = formNome.trim() && formCognome.trim() && formTelefono.trim() && formPiva.trim().length >= 11 && formPrivacy;
 
   return (
     <div class="simpv">
@@ -634,22 +675,93 @@ export default function SimulatoreFotovoltaico({ modalitaPartner = false }: Prop
       {/* --- FORM SCARICA PDF o BOTTONE DIRETTO (partner) --- */}
       {modalitaPartner ? (
         <div class="simpv__lead-bar simpv__lead-bar--partner" id="contatti">
-          <div class="simpv__lead-bar-info">
-            <span class="material-icons-outlined simpv__lead-icon" aria-hidden="true">picture_as_pdf</span>
-            <div>
-              <h4 class="simpv__lead-title">Stampa il Preventivo</h4>
-              <p class="simpv__lead-sub">
-                Stampa o salva in PDF direttamente dal browser. Nessuna registrazione richiesta.
-              </p>
-            </div>
-          </div>
-          <button
-            type="button"
-            class="simpv__button simpv__button--cta"
-            onClick={() => window.print()}
-          >
-            Stampa / Salva PDF
-          </button>
+          {partnerSbloccato ? (
+            <>
+              <div class="simpv__lead-bar-info">
+                <span class="material-icons-outlined simpv__lead-icon" aria-hidden="true">check_circle</span>
+                <div>
+                  <h4 class="simpv__lead-title">Preventivo pronto</h4>
+                  <p class="simpv__lead-sub">
+                    Clicca per stampare o salvare in PDF. Ti ricontattiamo entro 24 ore.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                class="simpv__button simpv__button--cta"
+                onClick={() => window.print()}
+              >
+                Stampa / Salva PDF
+              </button>
+            </>
+          ) : (
+            <>
+              <div class="simpv__lead-bar-info">
+                <span class="material-icons-outlined simpv__lead-icon" aria-hidden="true">picture_as_pdf</span>
+                <div>
+                  <h4 class="simpv__lead-title">Scarica il Preventivo</h4>
+                  <p class="simpv__lead-sub">
+                    Compila i dati per sbloccare la stampa del preventivo PDF.
+                  </p>
+                </div>
+              </div>
+              <form class="simpv__lead-bar-form" onSubmit={handlePartnerSubmit}>
+                <div class="simpv__lead-bar-fields">
+                  <input
+                    type="text"
+                    class="simpv__input"
+                    placeholder="Nome"
+                    value={formNome}
+                    onInput={(e) => setFormNome((e.target as HTMLInputElement).value)}
+                    required
+                  />
+                  <input
+                    type="text"
+                    class="simpv__input"
+                    placeholder="Cognome"
+                    value={formCognome}
+                    onInput={(e) => setFormCognome((e.target as HTMLInputElement).value)}
+                    required
+                  />
+                  <input
+                    type="tel"
+                    class="simpv__input"
+                    placeholder="Cellulare"
+                    value={formTelefono}
+                    onInput={(e) => setFormTelefono((e.target as HTMLInputElement).value)}
+                    required
+                  />
+                  <input
+                    type="text"
+                    class="simpv__input"
+                    placeholder="Partita IVA"
+                    value={formPiva}
+                    onInput={(e) => setFormPiva((e.target as HTMLInputElement).value.replace(/\D/g, '').slice(0, 11))}
+                    pattern="[0-9]{11}"
+                    maxLength={11}
+                    required
+                  />
+                </div>
+                <div class="simpv__lead-bar-actions">
+                  <label class="simpv__privacy">
+                    <input
+                      type="checkbox"
+                      checked={formPrivacy}
+                      onChange={() => setFormPrivacy(!formPrivacy)}
+                    />
+                    <span>Ho letto e accetto l'<a href="/privacy" target="_blank">informativa privacy</a></span>
+                  </label>
+                  <button
+                    type="submit"
+                    class="simpv__button simpv__button--cta"
+                    disabled={!formPartnerValido || formInvio}
+                  >
+                    {formInvio ? 'Invio in corso…' : 'Sblocca Preventivo PDF'}
+                  </button>
+                </div>
+              </form>
+            </>
+          )}
         </div>
       ) : (
         <div class="simpv__lead-bar" id="contatti">
