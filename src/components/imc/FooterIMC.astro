@@ -1,0 +1,133 @@
+---
+const basePath = '/bozza-imc';
+---
+
+<footer class="imc-footer">
+  <div class="imc-footer__inner">
+    <div class="imc-footer__brand">
+      <span class="imc-footer__logo-imc">IMC</span><span class="imc-footer__logo-fin">FINANZIAMENTI</span>
+    </div>
+
+    <div class="imc-footer__links">
+      <a href={`${basePath}/privacy`}>Privacy Policy</a>
+      <span class="imc-footer__sep">|</span>
+      <a href="mailto:info@imc-credit.it">info@imc-credit.it</a>
+    </div>
+
+    <div class="imc-footer__legal">
+      <p>IMC S.r.l. &mdash; Societ&agrave; di intermediazione creditizia iscritta all'OAM n. M573</p>
+      <p>Sede legale: Via Larga, 19 | 20122 &mdash; Milano (MI)</p>
+      <p class="imc-footer__disclaimer">Messaggio pubblicitario con finalit&agrave; promozionale.</p>
+    </div>
+
+    <p class="imc-footer__copy">
+      &copy; {new Date().getFullYear()} IMC Finanziamenti &mdash; Tutti i diritti riservati.
+    </p>
+
+    <p class="imc-footer__draft">Bozza di anteprima &mdash; Sito non ancora pubblicato</p>
+  </div>
+</footer>
+
+<style>
+  .imc-footer {
+    background: var(--color-heading);
+    color: rgba(255, 255, 255, 0.65);
+    padding: 3.5rem 1.5rem 2.5rem;
+    text-align: center;
+    font-size: 0.85rem;
+    line-height: 1.7;
+  }
+
+  .imc-footer__inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+
+  .imc-footer__brand {
+    font-size: 1.3rem;
+    margin-bottom: 1.5rem;
+    letter-spacing: 0.04em;
+  }
+
+  .imc-footer__logo-imc {
+    font-weight: 800;
+    color: #fff;
+  }
+
+  .imc-footer__logo-fin {
+    font-weight: 800;
+    color: var(--color-accent);
+  }
+
+  .imc-footer__links {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .imc-footer__links a {
+    color: rgba(255, 255, 255, 0.8);
+    transition: color 0.2s;
+  }
+
+  .imc-footer__links a:hover {
+    color: var(--color-accent);
+  }
+
+  .imc-footer__sep {
+    color: rgba(255, 255, 255, 0.25);
+  }
+
+  .imc-footer__legal {
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding-top: 1.5rem;
+    margin-bottom: 1.5rem;
+    color: rgba(255, 255, 255, 0.45);
+    font-size: 0.8rem;
+  }
+
+  .imc-footer__legal p {
+    margin-bottom: 0.3rem;
+  }
+
+  .imc-footer__disclaimer {
+    margin-top: 0.75rem;
+    font-style: italic;
+  }
+
+  .imc-footer__copy {
+    color: rgba(255, 255, 255, 0.3);
+    font-size: 0.78rem;
+  }
+
+  .imc-footer__draft {
+    margin-top: 1.25rem;
+    padding: 0.5rem 1rem;
+    background: rgba(255, 86, 19, 0.15);
+    color: var(--color-accent);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border-radius: 6px;
+    display: inline-block;
+  }
+
+  @media (max-width: 640px) {
+    .imc-footer {
+      padding: 2.5rem 1.25rem 1.5rem;
+    }
+
+    .imc-footer__links {
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .imc-footer__sep {
+      display: none;
+    }
+  }
+</style>

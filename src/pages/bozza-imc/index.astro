@@ -1,0 +1,530 @@
+---
+import LayoutIMC from '../../layouts/LayoutIMC.astro';
+import HeaderIMC from '../../components/imc/HeaderIMC.astro';
+import ContactFormIMC from '../../components/imc/ContactFormIMC.astro';
+import FooterIMC from '../../components/imc/FooterIMC.astro';
+---
+
+<LayoutIMC
+  title="IMC Finanziamenti — Finanza su Misura per la Tua Impresa"
+  description="IMC S.r.l. è una società di intermediazione creditizia iscritta all'OAM n. M573. Finanziamenti, bandi e agevolazioni per far crescere la tua azienda."
+>
+  <HeaderIMC />
+  <main>
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero__inner">
+        <h1 class="hero__title">
+          <span class="hero__line hero__line--1">Finanza su misura</span>
+          <span class="hero__line hero__line--2">per il tuo progetto</span>
+        </h1>
+        <p class="hero__sub">IMC è una società di intermediazione creditizia iscritta all'OAM. Confrontiamo il mercato per trovare finanziamenti, bandi e agevolazioni adatti alla tua impresa.</p>
+        <div class="hero__ctas">
+          <a href="#contatti" class="hero__btn hero__btn--accent">Richiedi Valutazione Gratuita</a>
+          <a href="#servizi" class="hero__btn hero__btn--outline">Scopri i Servizi</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- SERVIZI NUMERATI -->
+    <section class="ns" id="servizi" data-reveal>
+      <div class="ns__inner">
+        <h2 class="ns__heading">Cosa facciamo</h2>
+        <p class="ns__sub">Supportiamo le imprese nella ricerca delle migliori soluzioni finanziarie. Non siamo una banca: confrontiamo il mercato per trovare l'offerta giusta per te.</p>
+        <div class="ns__grid">
+          <div class="ns__item">
+            <span class="ns__number">01</span>
+            <div class="ns__content">
+              <h3 class="ns__title">Finanziamenti PMI</h3>
+              <p class="ns__desc">Ricerca finanziamenti bancari, linee di credito e soluzioni su misura per liquidità e investimenti aziendali.</p>
+            </div>
+          </div>
+          <div class="ns__item">
+            <span class="ns__number">02</span>
+            <div class="ns__content">
+              <h3 class="ns__title">Bandi e Agevolazioni</h3>
+              <p class="ns__desc">Accesso a contributi pubblici, bandi nazionali ed europei, crediti d'imposta e fondi a fondo perduto.</p>
+            </div>
+          </div>
+          <div class="ns__item">
+            <span class="ns__number">03</span>
+            <div class="ns__content">
+              <h3 class="ns__title">Anticipo Fatture</h3>
+              <p class="ns__desc">Soluzioni di factoring e anticipo crediti commerciali per migliorare il cash flow della tua azienda.</p>
+            </div>
+          </div>
+          <div class="ns__item">
+            <span class="ns__number">04</span>
+            <div class="ns__content">
+              <h3 class="ns__title">Gestione Pratiche</h3>
+              <p class="ns__desc">Documentazione tecnica e amministrativa, assistenza completa dall'analisi all'erogazione.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PERCHE' SCEGLIERE IMC -->
+    <section class="vp" id="chi-siamo" data-reveal>
+      <div class="vp__inner">
+        <span class="vp__eyebrow">Chi siamo</span>
+        <h2 class="vp__title">Perché scegliere IMC</h2>
+        <div class="vp__grid">
+          <div class="vp__card">
+            <span class="material-icons-outlined vp__icon" aria-hidden="true">verified</span>
+            <h3 class="vp__card-title">Iscritti OAM</h3>
+            <p class="vp__card-text">Società di intermediazione creditizia regolarmente iscritta all'Organismo Agenti e Mediatori (n. M573). Trasparenza garantita.</p>
+          </div>
+          <div class="vp__card">
+            <span class="material-icons-outlined vp__icon" aria-hidden="true">handshake</span>
+            <h3 class="vp__card-title">Nessun compenso iniziale</h3>
+            <p class="vp__card-text">Paghi solo a risultato ottenuto. Nessun costo anticipato, nessun rischio per te.</p>
+          </div>
+          <div class="vp__card">
+            <span class="material-icons-outlined vp__icon" aria-hidden="true">groups</span>
+            <h3 class="vp__card-title">Team specializzato</h3>
+            <p class="vp__card-text">Professionisti con esperienza in finanza d'impresa, bandi pubblici e agevolazioni fiscali.</p>
+          </div>
+          <div class="vp__card">
+            <span class="material-icons-outlined vp__icon" aria-hidden="true">speed</span>
+            <h3 class="vp__card-title">Tempi rapidi</h3>
+            <p class="vp__card-text">Pre-valutazione in 24 ore. Ti diciamo subito se e come possiamo aiutarti.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- COME LAVORIAMO -->
+    <section class="hiw" data-reveal>
+      <div class="hiw__inner">
+        <h2 class="hiw__heading">Come lavoriamo</h2>
+        <div class="hiw__grid">
+          <div class="hiw__step">
+            <span class="hiw__number">01</span>
+            <h3 class="hiw__title">Analisi</h3>
+            <p class="hiw__desc">Valutiamo la tua situazione aziendale, le esigenze finanziarie e gli obiettivi di crescita.</p>
+          </div>
+          <div class="hiw__step">
+            <span class="hiw__number">02</span>
+            <h3 class="hiw__title">Ricerca</h3>
+            <p class="hiw__desc">Identifichiamo le soluzioni migliori: finanziamenti, bandi, agevolazioni e contributi.</p>
+          </div>
+          <div class="hiw__step">
+            <span class="hiw__number">03</span>
+            <h3 class="hiw__title">Presentazione</h3>
+            <p class="hiw__desc">Confronto chiaro tra le opzioni disponibili, con condizioni, costi e tempistiche.</p>
+          </div>
+          <div class="hiw__step">
+            <span class="hiw__number">04</span>
+            <h3 class="hiw__title">Gestione completa</h3>
+            <p class="hiw__desc">Seguiamo la pratica dalla documentazione all'erogazione. Tu ti concentri sull'impresa.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA BAND -->
+    <section class="cta-band" data-reveal>
+      <div class="cta-band__inner">
+        <h2 class="cta-band__title">Parliamo del tuo progetto</h2>
+        <p class="cta-band__sub">Raccontaci di cosa ha bisogno la tua impresa. La pre-valutazione è gratuita e senza impegno.</p>
+        <a href="#contatti" class="cta-band__btn">Richiedi Valutazione</a>
+      </div>
+    </section>
+
+    <!-- FORM -->
+    <ContactFormIMC fonte="bozza-imc-homepage" />
+
+  </main>
+  <FooterIMC />
+</LayoutIMC>
+
+<style>
+  /* ═══ HERO ═══ */
+  .hero {
+    background: var(--color-heading);
+    color: #fff;
+    padding: 7rem 1.5rem 6rem;
+    text-align: center;
+    overflow: hidden;
+  }
+
+  .hero__inner {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .hero__title {
+    font-size: clamp(3rem, 8vw, 5.5rem);
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -0.04em;
+    margin-bottom: 1.75rem;
+  }
+
+  .hero__line {
+    display: block;
+  }
+
+  .hero__line--1 {
+    color: #fff;
+    animation: fadeSlideIn 0.6s ease-out both;
+  }
+
+  .hero__line--2 {
+    color: var(--color-accent);
+    animation: fadeSlideIn 0.6s ease-out 0.15s both;
+  }
+
+  @keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .hero__sub {
+    font-size: clamp(1rem, 2.5vw, 1.2rem);
+    line-height: 1.65;
+    color: rgba(255, 255, 255, 0.7);
+    max-width: 640px;
+    margin: 0 auto 2.5rem;
+    animation: fadeSlideIn 0.6s ease-out 0.3s both;
+  }
+
+  .hero__ctas {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    animation: fadeSlideIn 0.6s ease-out 0.45s both;
+  }
+
+  .hero__btn {
+    display: inline-flex;
+    align-items: center;
+    font-weight: 700;
+    font-size: 1.05rem;
+    padding: 0.95rem 2.25rem;
+    border-radius: 10px;
+    transition: background 0.2s, transform 0.15s, border-color 0.2s;
+  }
+
+  .hero__btn:hover { transform: translateY(-2px); }
+
+  .hero__btn--accent {
+    background: var(--color-accent);
+    color: #fff;
+  }
+
+  .hero__btn--accent:hover { background: var(--color-accent-hover); }
+
+  .hero__btn--outline {
+    background: transparent;
+    color: #fff;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+  }
+
+  .hero__btn--outline:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.7);
+  }
+
+  /* ═══ SERVIZI NUMERATI ═══ */
+  .ns { padding: 6rem 1.5rem; }
+
+  .ns__inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+
+  .ns__heading {
+    font-size: clamp(1.75rem, 4vw, 2.5rem);
+    font-weight: 800;
+    color: var(--color-heading);
+    letter-spacing: -0.03em;
+    margin-bottom: 0.75rem;
+  }
+
+  .ns__sub {
+    max-width: 600px;
+    color: var(--color-text-light);
+    font-size: 1.05rem;
+    line-height: 1.65;
+    margin-bottom: 3.5rem;
+  }
+
+  .ns__grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+  }
+
+  .ns__item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    padding: 2rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--color-border);
+    background: #fff;
+    transition: transform 0.25s, box-shadow 0.25s;
+  }
+
+  .ns__item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(52, 21, 255, 0.08);
+  }
+
+  .ns__number {
+    flex-shrink: 0;
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 800;
+    color: var(--color-primary);
+    line-height: 1;
+    opacity: 0.25;
+  }
+
+  .ns__content { flex: 1; }
+
+  .ns__title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--color-heading);
+    margin-bottom: 0.5rem;
+  }
+
+  .ns__desc {
+    font-size: 0.95rem;
+    color: var(--color-text-light);
+    line-height: 1.6;
+  }
+
+  /* ═══ VALUE PROPOSITION ═══ */
+  .vp {
+    padding: 6rem 1.5rem;
+    background: var(--color-bg-alt);
+  }
+
+  .vp__inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+
+  .vp__eyebrow {
+    display: block;
+    text-align: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--color-accent);
+    margin-bottom: 0.75rem;
+  }
+
+  .vp__title {
+    text-align: center;
+    font-size: clamp(1.75rem, 4vw, 2.5rem);
+    font-weight: 800;
+    color: var(--color-heading);
+    margin-bottom: 3.5rem;
+    letter-spacing: -0.03em;
+  }
+
+  .vp__grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+  }
+
+  .vp__card {
+    padding: 2rem 1.5rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--color-border);
+    background: #fff;
+    transition: transform 0.25s, box-shadow 0.25s;
+  }
+
+  .vp__card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(52, 21, 255, 0.06);
+  }
+
+  .vp__icon {
+    font-size: 1.75rem;
+    color: var(--color-primary);
+    margin-bottom: 1rem;
+    display: block;
+  }
+
+  .vp__card-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--color-heading);
+    margin-bottom: 0.5rem;
+  }
+
+  .vp__card-text {
+    font-size: 0.9rem;
+    color: var(--color-text-light);
+    line-height: 1.6;
+  }
+
+  /* ═══ HOW IT WORKS ═══ */
+  .hiw {
+    padding: 6rem 1.5rem;
+    background: var(--color-heading);
+    color: #fff;
+  }
+
+  .hiw__inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+
+  .hiw__heading {
+    font-size: clamp(1.75rem, 4vw, 2.5rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    margin-bottom: 3.5rem;
+    text-align: center;
+  }
+
+  .hiw__grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+  }
+
+  .hiw__step {
+    text-align: center;
+    padding: 1.5rem 1rem;
+  }
+
+  .hiw__number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    border: 2px solid var(--color-accent);
+    color: var(--color-accent);
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 1.25rem;
+  }
+
+  .hiw__title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.6rem;
+  }
+
+  .hiw__desc {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.6);
+    line-height: 1.65;
+  }
+
+  /* ═══ CTA BAND ═══ */
+  .cta-band {
+    padding: 5rem 1.5rem;
+    background: var(--color-primary);
+    text-align: center;
+  }
+
+  .cta-band__inner {
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  .cta-band__title {
+    font-size: clamp(1.75rem, 4vw, 2.5rem);
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.03em;
+    margin-bottom: 1rem;
+  }
+
+  .cta-band__sub {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.75);
+    line-height: 1.6;
+    margin-bottom: 2rem;
+  }
+
+  .cta-band__btn {
+    display: inline-flex;
+    align-items: center;
+    font-weight: 700;
+    font-size: 1.1rem;
+    padding: 1rem 2.5rem;
+    border-radius: 10px;
+    background: var(--color-accent);
+    color: #fff;
+    transition: background 0.2s, transform 0.15s;
+  }
+
+  .cta-band__btn:hover {
+    background: var(--color-accent-hover);
+    transform: translateY(-2px);
+  }
+
+  /* ═══ RESPONSIVE ═══ */
+  @media (max-width: 960px) {
+    .vp__grid { grid-template-columns: repeat(2, 1fr); }
+    .hiw__grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 768px) {
+    .ns__grid { grid-template-columns: 1fr; gap: 1.25rem; }
+  }
+
+  @media (max-width: 640px) {
+    .hero { padding: 5rem 1.25rem 4rem; }
+
+    .hero__ctas {
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .hero__btn {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .ns { padding: 4rem 1.25rem; }
+    .vp { padding: 4rem 1.25rem; }
+
+    .vp__grid { grid-template-columns: 1fr; }
+
+    .hiw { padding: 4rem 1.25rem; }
+
+    .hiw__grid {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+
+    .hiw__step {
+      display: flex;
+      align-items: flex-start;
+      text-align: left;
+      gap: 1.25rem;
+    }
+
+    .hiw__number {
+      flex-shrink: 0;
+      width: 52px;
+      height: 52px;
+      font-size: 1.2rem;
+      margin-bottom: 0;
+    }
+
+    .cta-band { padding: 3.5rem 1.25rem; }
+
+    .cta-band__btn {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>
