@@ -1,0 +1,126 @@
+---
+import LayoutIMC from '../../layouts/LayoutIMC.astro';
+import HeaderIMC from '../../components/imc/HeaderIMC.astro';
+import FooterIMC from '../../components/imc/FooterIMC.astro';
+---
+
+<LayoutIMC
+  title="Privacy Policy — IMC Finanziamenti"
+  description="Informativa sulla privacy di IMC S.r.l. — Trattamento dei dati personali."
+>
+  <HeaderIMC />
+  <main class="privacy">
+    <div class="privacy__inner">
+      <h1 class="privacy__title">Informativa sulla Privacy</h1>
+      <p class="privacy__update">Ultimo aggiornamento: aprile 2026</p>
+
+      <section class="privacy__section">
+        <h2>Titolare del trattamento</h2>
+        <p>IMC S.r.l. &mdash; Societ&agrave; di intermediazione creditizia iscritta all'OAM n. M573</p>
+        <p>Sede legale: Via Larga, 19 &mdash; 20122 Milano (MI)</p>
+        <p>Email: <a href="mailto:info@imc-credit.it">info@imc-credit.it</a></p>
+      </section>
+
+      <section class="privacy__section">
+        <h2>Finalit&agrave; del trattamento</h2>
+        <p>I dati personali raccolti tramite i moduli di contatto del sito (nome, email, telefono) sono trattati per:</p>
+        <ul>
+          <li>Rispondere alle richieste di informazioni e valutazione</li>
+          <li>Gestire il rapporto commerciale e la pratica di mediazione creditizia</li>
+          <li>Adempiere agli obblighi normativi previsti dalla regolamentazione OAM</li>
+        </ul>
+      </section>
+
+      <section class="privacy__section">
+        <h2>Base giuridica</h2>
+        <p>Il trattamento si fonda sul consenso dell'interessato (art. 6, par. 1, lett. a del GDPR) e sull'esecuzione di misure precontrattuali (art. 6, par. 1, lett. b).</p>
+      </section>
+
+      <section class="privacy__section">
+        <h2>Destinatari dei dati</h2>
+        <p>I dati possono essere trasmessi a:</p>
+        <ul>
+          <li>Piattaforme di automazione (Zapier) per la gestione delle richieste</li>
+          <li>Software CRM (Pipedrive) per la gestione dei contatti commerciali</li>
+          <li>Istituti di credito e societ&agrave; finanziarie coinvolti nella pratica di mediazione</li>
+        </ul>
+      </section>
+
+      <section class="privacy__section">
+        <h2>Conservazione</h2>
+        <p>I dati sono conservati per il tempo necessario al completamento delle finalit&agrave; indicate e, successivamente, per l'adempimento degli obblighi di legge (fino a 10 anni per gli obblighi OAM).</p>
+      </section>
+
+      <section class="privacy__section">
+        <h2>Diritti dell'interessato</h2>
+        <p>L'interessato ha diritto di accesso, rettifica, cancellazione, limitazione del trattamento, portabilit&agrave; e opposizione. Per esercitare tali diritti, scrivere a <a href="mailto:info@imc-credit.it">info@imc-credit.it</a>.</p>
+      </section>
+
+      <section class="privacy__section">
+        <h2>Cookie</h2>
+        <p>Il sito utilizza esclusivamente cookie tecnici necessari al funzionamento. Non sono utilizzati cookie di profilazione propri.</p>
+      </section>
+    </div>
+  </main>
+  <FooterIMC />
+</LayoutIMC>
+
+<style>
+  .privacy { padding: 4rem 1.5rem; }
+
+  .privacy__inner {
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  .privacy__title {
+    font-size: clamp(1.75rem, 4vw, 2.5rem);
+    font-weight: 800;
+    color: var(--color-heading);
+    letter-spacing: -0.03em;
+    margin-bottom: 0.5rem;
+  }
+
+  .privacy__update {
+    font-size: 0.9rem;
+    color: var(--color-text-light);
+    margin-bottom: 3rem;
+  }
+
+  .privacy__section { margin-bottom: 2.5rem; }
+
+  .privacy__section h2 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--color-heading);
+    margin-bottom: 0.75rem;
+  }
+
+  .privacy__section p {
+    font-size: 1rem;
+    color: var(--color-text);
+    line-height: 1.7;
+    margin-bottom: 0.5rem;
+  }
+
+  .privacy__section ul {
+    padding-left: 1.25rem;
+    margin: 0.5rem 0;
+  }
+
+  .privacy__section li {
+    font-size: 1rem;
+    color: var(--color-text);
+    line-height: 1.7;
+    margin-bottom: 0.35rem;
+  }
+
+  .privacy__section a {
+    color: var(--color-primary);
+    text-decoration: underline;
+  }
+
+  @media (max-width: 640px) {
+    .privacy { padding: 3rem 1.25rem; }
+  }
+</style>

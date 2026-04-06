@@ -1,0 +1,145 @@
+---
+interface Props {
+  ctaText?: string;
+  fonte?: string;
+  compact?: boolean;
+}
+
+const { ctaText = 'Richiedi Valutazione Gratuita', fonte = 'bozza-imc', compact = false } = Astro.props;
+---
+
+<section class:list={['imc-contact', { 'imc-contact--compact': compact }]} id="contatti">
+  <div class="imc-contact__inner">
+    {!compact && (
+      <>
+        <h2 class="imc-contact__title">Richiedi una Valutazione Gratuita</h2>
+        <p class="imc-contact__sub">Compila il modulo e ti ricontatteremo entro 24 ore lavorative.</p>
+      </>
+    )}
+    <form class="imc-contact__form" onsubmit="event.preventDefault(); alert('Form di anteprima — non ancora attivo');">
+      <input type="hidden" name="fonte" value={fonte} />
+      <div class="imc-contact__field">
+        <label for={`imc-nome-${fonte}`}>Nome e Cognome</label>
+        <input type="text" id={`imc-nome-${fonte}`} name="nome" placeholder="Mario Rossi" required autocomplete="name" />
+      </div>
+      <div class="imc-contact__field">
+        <label for={`imc-email-${fonte}`}>Email</label>
+        <input type="email" id={`imc-email-${fonte}`} name="email" placeholder="mario@azienda.it" required autocomplete="email" />
+      </div>
+      <div class="imc-contact__field">
+        <label for={`imc-cell-${fonte}`}>Cellulare</label>
+        <input type="tel" id={`imc-cell-${fonte}`} name="telefono" placeholder="+39 333 123 4567" required autocomplete="tel" />
+      </div>
+      <button type="submit" class="imc-contact__submit">{ctaText}</button>
+      <p class="imc-contact__privacy">Inviando il modulo accetti la nostra <a href="/bozza-imc/privacy">informativa sulla privacy</a>.</p>
+    </form>
+  </div>
+</section>
+
+<style>
+  .imc-contact {
+    padding: 5rem 1.5rem;
+    background: var(--color-bg-alt);
+  }
+
+  .imc-contact--compact {
+    padding: 2.5rem 1.5rem;
+    background: transparent;
+  }
+
+  .imc-contact__inner {
+    max-width: 520px;
+    margin: 0 auto;
+  }
+
+  .imc-contact__title {
+    text-align: center;
+    font-size: clamp(1.5rem, 3.5vw, 2rem);
+    font-weight: 800;
+    color: var(--color-primary);
+    margin-bottom: 0.5rem;
+  }
+
+  .imc-contact__sub {
+    text-align: center;
+    color: var(--color-text-light);
+    margin-bottom: 2rem;
+    font-size: 1rem;
+  }
+
+  .imc-contact__form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+  }
+
+  .imc-contact__field label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-heading);
+    margin-bottom: 0.35rem;
+  }
+
+  .imc-contact__field input {
+    width: 100%;
+    padding: 0.85rem 1rem;
+    border: 1.5px solid var(--color-border);
+    border-radius: 10px;
+    font-family: var(--font-family);
+    font-size: 1rem;
+    color: var(--color-text);
+    background: #fff;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .imc-contact__field input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(52, 21, 255, 0.12);
+  }
+
+  .imc-contact__submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-accent);
+    color: #fff;
+    font-family: var(--font-family);
+    font-weight: 700;
+    font-size: 1.05rem;
+    padding: 0.95rem 2rem;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    margin-top: 0.5rem;
+  }
+
+  .imc-contact__submit:hover {
+    background: var(--color-accent-hover);
+    transform: translateY(-2px);
+  }
+
+  .imc-contact__privacy {
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--color-text-light);
+    margin-top: 0.25rem;
+  }
+
+  .imc-contact__privacy a {
+    color: var(--color-primary);
+    text-decoration: underline;
+  }
+
+  @media (max-width: 640px) {
+    .imc-contact {
+      padding: 3.5rem 1.25rem;
+    }
+
+    .imc-contact__submit {
+      width: 100%;
+    }
+  }
+</style>

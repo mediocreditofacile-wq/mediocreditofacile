@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /bozza-imc/
 
 Sitemap: https://www.mediocreditofacile.it/sitemap-index.xml
