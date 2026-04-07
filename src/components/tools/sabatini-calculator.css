@@ -1,0 +1,418 @@
+/* === Calcolatore Nuova Sabatini === */
+.sab-calc {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+/* --- FORM INPUT --- */
+.sab-calc__form {
+  background: #ffffff;
+  border: 1px solid var(--mcf-platinum);
+  border-radius: var(--radius);
+  padding: 2rem;
+  box-shadow: 0 4px 16px rgba(15, 16, 32, 0.05);
+}
+
+.sab-calc__form-title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--mcf-black);
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.02em;
+}
+
+.sab-calc__form-sub {
+  font-size: 0.95rem;
+  color: var(--mcf-charcoal);
+  line-height: 1.6;
+  margin-bottom: 1.75rem;
+}
+
+.sab-calc__field {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.5rem;
+}
+
+.sab-calc__label {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--mcf-black);
+  margin-bottom: 0.5rem;
+}
+
+.sab-calc__input {
+  width: 100%;
+  padding: 0.95rem 1rem;
+  border: 1.5px solid var(--mcf-platinum);
+  border-radius: 10px;
+  font-family: var(--font-family);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--mcf-black);
+  background: #ffffff;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.sab-calc__input:focus {
+  outline: none;
+  border-color: var(--mcf-accent);
+  box-shadow: 0 0 0 4px rgba(102, 76, 205, 0.12);
+}
+
+.sab-calc__input::placeholder {
+  color: var(--mcf-taupe);
+  font-weight: 400;
+}
+
+.sab-calc__hint {
+  font-size: 0.78rem;
+  color: var(--mcf-taupe);
+  margin-top: 0.4rem;
+}
+
+/* --- Toggle tipologia bene --- */
+.sab-calc__toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.sab-calc__toggle-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 0.75rem;
+  border: 1.5px solid var(--mcf-platinum);
+  border-radius: 10px;
+  background: #ffffff;
+  font-family: var(--font-family);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--mcf-charcoal);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.sab-calc__toggle-btn:hover {
+  border-color: var(--mcf-accent);
+  color: var(--mcf-accent);
+}
+
+.sab-calc__toggle-btn.is-active {
+  border-color: var(--mcf-accent);
+  background: rgba(102, 76, 205, 0.06);
+  color: var(--mcf-accent);
+}
+
+.sab-calc__toggle-hint {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--mcf-taupe);
+  margin-top: 0.25rem;
+}
+
+.sab-calc__toggle-btn.is-active .sab-calc__toggle-hint {
+  color: var(--mcf-accent);
+}
+
+/* --- CTA calcola --- */
+.sab-calc__cta {
+  display: block;
+  width: 100%;
+  padding: 1rem 1.5rem;
+  border: none;
+  border-radius: 10px;
+  background: var(--mcf-primary);
+  color: #ffffff;
+  font-family: var(--font-family);
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.sab-calc__cta:hover:not(:disabled) {
+  background: var(--mcf-primary-dark);
+  transform: translateY(-2px);
+}
+
+.sab-calc__cta:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.sab-calc__error {
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
+  color: var(--mcf-error);
+}
+
+/* --- RISULTATO --- */
+.sab-calc__result {
+  background: linear-gradient(135deg, #664CCD 0%, #4A36A0 100%);
+  color: #ffffff;
+  border-radius: var(--radius);
+  padding: 2rem;
+  box-shadow: 0 8px 32px rgba(102, 76, 205, 0.25);
+  animation: sabFadeIn 0.4s ease-out;
+}
+
+@keyframes sabFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.sab-calc__result-header {
+  text-align: center;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  margin-bottom: 1.5rem;
+}
+
+.sab-calc__result-eyebrow {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 0.5rem;
+}
+
+.sab-calc__result-value {
+  display: block;
+  font-size: clamp(2.5rem, 6vw, 3.5rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: #ffffff;
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+
+.sab-calc__result-perc {
+  display: block;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.sab-calc__result-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.sab-calc__result-item {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 1rem;
+  text-align: center;
+}
+
+.sab-calc__result-label {
+  display: block;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 0.4rem;
+}
+
+.sab-calc__result-item strong {
+  display: block;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+}
+
+.sab-calc__result-item small {
+  display: block;
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: 0.25rem;
+}
+
+/* --- Confronto con/senza --- */
+.sab-calc__compare {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 10px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.sab-calc__compare-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  font-size: 0.95rem;
+}
+
+.sab-calc__compare-row + .sab-calc__compare-row {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sab-calc__compare-row span {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.sab-calc__compare-row strong {
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.sab-calc__compare-row--win strong {
+  color: var(--mcf-primary);
+  font-size: 1.15rem;
+}
+
+.sab-calc__disclaimer {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.5;
+  margin-top: 1rem;
+}
+
+/* --- FORM CONTATTI --- */
+.sab-calc__contact {
+  background: var(--mcf-ghost);
+  border: 1px solid var(--mcf-platinum);
+  border-radius: var(--radius);
+  padding: 2rem;
+  animation: sabFadeIn 0.4s ease-out 0.1s both;
+}
+
+.sab-calc__contact-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--mcf-black);
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.02em;
+}
+
+.sab-calc__contact-sub {
+  font-size: 0.9rem;
+  color: var(--mcf-charcoal);
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+
+.sab-calc__contact-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.sab-calc__contact-fields input {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border: 1.5px solid var(--mcf-platinum);
+  border-radius: 10px;
+  font-family: var(--font-family);
+  font-size: 1rem;
+  color: var(--mcf-black);
+  background: #ffffff;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.sab-calc__contact-fields input:focus {
+  outline: none;
+  border-color: var(--mcf-accent);
+  box-shadow: 0 0 0 3px rgba(102, 76, 205, 0.12);
+}
+
+.sab-calc__contact-submit {
+  display: block;
+  width: 100%;
+  padding: 1rem;
+  border: none;
+  border-radius: 10px;
+  background: var(--mcf-primary);
+  color: #ffffff;
+  font-family: var(--font-family);
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.sab-calc__contact-submit:hover:not(:disabled) {
+  background: var(--mcf-primary-dark);
+  transform: translateY(-2px);
+}
+
+.sab-calc__contact-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.sab-calc__privacy {
+  text-align: center;
+  font-size: 0.78rem;
+  color: var(--mcf-taupe);
+  margin-top: 0.75rem;
+}
+
+.sab-calc__privacy a {
+  color: var(--mcf-accent);
+  text-decoration: underline;
+}
+
+/* --- Success --- */
+.sab-calc__success {
+  background: var(--mcf-ghost);
+  border: 1px solid var(--mcf-success);
+  border-radius: var(--radius);
+  padding: 2rem;
+  text-align: center;
+  animation: sabFadeIn 0.4s ease-out;
+}
+
+.sab-calc__success .material-icons-outlined {
+  font-size: 3rem;
+  color: var(--mcf-success);
+  margin-bottom: 1rem;
+}
+
+.sab-calc__success h3 {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--mcf-black);
+  margin-bottom: 0.5rem;
+}
+
+.sab-calc__success p {
+  font-size: 0.95rem;
+  color: var(--mcf-charcoal);
+}
+
+/* --- Responsive --- */
+@media (max-width: 640px) {
+  .sab-calc__form,
+  .sab-calc__result,
+  .sab-calc__contact {
+    padding: 1.5rem;
+  }
+
+  .sab-calc__result-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sab-calc__toggle {
+    grid-template-columns: 1fr;
+  }
+}
