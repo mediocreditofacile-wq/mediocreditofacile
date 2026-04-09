@@ -1,0 +1,302 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import Header from '../../../components/Header.astro';
+import Footer from '../../../components/Footer.astro';
+---
+
+<Layout
+  title="Agevolazioni PMI: Sabatini, Fondo Garanzia, Bando ISI | Mediocredito Facile"
+  description="Sabatini, Fondo di Garanzia MCC, Bando ISI Inail: le agevolazioni statali per finanziare beni strumentali. Guida pratica e supporto completo."
+>
+  <Header minimal={false} />
+
+  <main>
+
+    <!-- HERO -->
+    <section class="agev-hero">
+      <div class="agev-hero__inner">
+        <span class="agev-hero__eyebrow">Agevolazioni 2026</span>
+        <h1 class="agev-hero__title">Agevolazioni per PMI: Sabatini, Fondo di Garanzia, Bando ISI Inail</h1>
+        <p class="agev-hero__sub">
+          Se stai per investire in macchinari, attrezzature o sicurezza, lo Stato mette a disposizione
+          strumenti che riducono il costo dell'operazione. Tutte richiedono (o funzionano meglio con)
+          un finanziamento bancario. MCF e' il punto di accesso per entrambi.
+        </p>
+      </div>
+    </section>
+
+    <!-- INTRO -->
+    <section class="agev-intro">
+      <div class="agev-intro__inner">
+        <p>
+          Le agevolazioni per le PMI non sono un bonus a pioggia: sono strumenti tecnici che si attivano
+          in combinazione con un finanziamento o un leasing. La Sabatini copre gli interessi, il Fondo
+          di Garanzia copre il rischio, il Bando ISI copre fino al 65% dell'investimento a fondo perduto.
+          Ognuna ha regole, requisiti e iter diversi.
+        </p>
+        <p>
+          MCF ti aiuta a capire a quale hai diritto, come combinarle tra loro, e gestisce la pratica
+          di finanziamento insieme a quella di agevolazione. Un unico interlocutore, un unico percorso.
+        </p>
+      </div>
+    </section>
+
+    <!-- TRE CARD -->
+    <section class="agev-cards">
+      <div class="agev-cards__inner">
+        <a href="/finanziamenti/agevolazioni/nuova-sabatini-2026" class="agev-card">
+          <div class="agev-card__icon">
+            <span class="material-icons-outlined" aria-hidden="true">savings</span>
+          </div>
+          <h2 class="agev-card__title">Nuova Sabatini 2026</h2>
+          <p class="agev-card__benefit">Contributo MISE sugli interessi del finanziamento</p>
+          <p class="agev-card__desc">
+            Copre una parte degli interessi sul finanziamento o leasing per acquisto di beni strumentali.
+            Investimenti ammessi: da 20.000 a 4.000.000 di euro. Contributo maggiorato per beni 4.0.
+            Con calcolatore online per stimare il tuo contributo.
+          </p>
+          <span class="agev-card__cta">Scopri come funziona</span>
+        </a>
+
+        <a href="/finanziamenti/agevolazioni/fondo-garanzia-mcc" class="agev-card">
+          <div class="agev-card__icon">
+            <span class="material-icons-outlined" aria-hidden="true">shield</span>
+          </div>
+          <h2 class="agev-card__title">Fondo di Garanzia MCC</h2>
+          <p class="agev-card__benefit">Garanzia statale gratuita fino all'80%</p>
+          <p class="agev-card__desc">
+            Il Fondo copre il rischio per la banca, migliorando le condizioni del finanziamento.
+            Garanzia gratuita per le PMI, gestita da Mediocredito Centrale. Micro e piccole imprese
+            accedono a coperture fino all'80%. Con tool di verifica della copertura.
+          </p>
+          <span class="agev-card__cta">Scopri come funziona</span>
+        </a>
+
+        <a href="/finanziamenti/agevolazioni/bando-isi-inail" class="agev-card">
+          <div class="agev-card__icon">
+            <span class="material-icons-outlined" aria-hidden="true">health_and_safety</span>
+          </div>
+          <h2 class="agev-card__title">Bando ISI Inail</h2>
+          <p class="agev-card__benefit">Fino al 65% a fondo perduto per investimenti in sicurezza</p>
+          <p class="agev-card__desc">
+            Contributo a fondo perduto per imprese che investono in sicurezza sul lavoro.
+            Periodicita' annuale, click day competitivo. MCF finanzia l'anticipo del 100%
+            e la quota residua del 35%.
+          </p>
+          <span class="agev-card__cta">Scopri come funziona</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- CTA FINANZIAMENTI -->
+    <section class="agev-cta">
+      <div class="agev-cta__inner">
+        <h2>Hai bisogno del finanziamento oltre all'agevolazione?</h2>
+        <p>Tutte le agevolazioni funzionano meglio con il finanziamento giusto. MCF te li trova entrambi.</p>
+        <a href="/finanziamenti/" class="agev-cta__btn">Scopri i finanziamenti MCF</a>
+      </div>
+    </section>
+
+  </main>
+  <Footer />
+</Layout>
+
+<style>
+  /* HERO */
+  .agev-hero {
+    background: linear-gradient(135deg, #1A0A3E 0%, #664CCD 60%, #FE6F3A 100%);
+    color: #fff;
+    padding: 5.5rem 1.5rem 5rem;
+    text-align: center;
+  }
+
+  .agev-hero__inner {
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  .agev-hero__eyebrow {
+    display: inline-block;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.12);
+    padding: 0.4rem 1rem;
+    border-radius: 999px;
+    margin-bottom: 1.5rem;
+  }
+
+  .agev-hero__title {
+    font-size: clamp(1.85rem, 5vw, 2.75rem);
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    margin-bottom: 1.25rem;
+  }
+
+  .agev-hero__sub {
+    font-size: clamp(1rem, 2vw, 1.12rem);
+    line-height: 1.65;
+    color: rgba(255, 255, 255, 0.85);
+    max-width: 660px;
+    margin: 0 auto;
+  }
+
+  /* INTRO */
+  .agev-intro {
+    padding: 4rem 1.5rem;
+    background: #fff;
+  }
+
+  .agev-intro__inner {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  .agev-intro__inner p {
+    font-size: 1.05rem;
+    line-height: 1.75;
+    color: var(--mcf-charcoal);
+    margin-bottom: 1rem;
+  }
+
+  /* CARD */
+  .agev-cards {
+    padding: 4.5rem 1.5rem;
+    background: var(--mcf-ghost);
+  }
+
+  .agev-cards__inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+
+  .agev-card {
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    border: 1px solid var(--mcf-platinum);
+    border-radius: var(--radius);
+    padding: 2.25rem 1.75rem;
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .agev-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(102, 76, 205, 0.1);
+  }
+
+  .agev-card__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(254, 111, 58, 0.12), rgba(102, 76, 205, 0.12));
+    color: var(--mcf-accent);
+    margin-bottom: 1.25rem;
+  }
+
+  .agev-card__icon .material-icons-outlined {
+    font-size: 1.6rem;
+  }
+
+  .agev-card__title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--mcf-black);
+    margin-bottom: 0.5rem;
+  }
+
+  .agev-card__benefit {
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--mcf-primary);
+    margin-bottom: 1rem;
+  }
+
+  .agev-card__desc {
+    font-size: 0.92rem;
+    color: var(--mcf-charcoal);
+    line-height: 1.65;
+    margin-bottom: 1.25rem;
+    flex: 1;
+  }
+
+  .agev-card__cta {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--mcf-primary);
+  }
+
+  /* CTA FINANZIAMENTI */
+  .agev-cta {
+    padding: 4rem 1.5rem;
+    background: var(--mcf-black);
+    color: #fff;
+    text-align: center;
+  }
+
+  .agev-cta__inner {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .agev-cta__inner h2 {
+    font-size: clamp(1.4rem, 3.5vw, 1.85rem);
+    font-weight: 800;
+    margin-bottom: 0.75rem;
+    letter-spacing: -0.02em;
+  }
+
+  .agev-cta__inner p {
+    font-size: 1.05rem;
+    color: rgba(255, 255, 255, 0.75);
+    line-height: 1.65;
+    margin-bottom: 2rem;
+  }
+
+  .agev-cta__btn {
+    display: inline-flex;
+    align-items: center;
+    background: var(--mcf-primary);
+    color: #fff;
+    font-weight: 700;
+    font-size: 1.05rem;
+    padding: 1rem 2rem;
+    border-radius: 10px;
+    transition: background 0.2s, transform 0.15s;
+  }
+
+  .agev-cta__btn:hover {
+    background: var(--mcf-primary-dark);
+    transform: translateY(-2px);
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 960px) {
+    .agev-cards__inner {
+      grid-template-columns: 1fr;
+      max-width: 520px;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .agev-hero {
+      padding: 4rem 1.25rem 3.5rem;
+    }
+
+    .agev-intro,
+    .agev-cards,
+    .agev-cta {
+      padding: 3rem 1.25rem;
+    }
+  }
+</style>

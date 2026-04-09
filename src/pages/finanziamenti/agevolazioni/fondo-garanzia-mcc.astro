@@ -1,0 +1,950 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import Header from '../../../components/Header.astro';
+import Footer from '../../../components/Footer.astro';
+import FondoGaranziaChecker from '../../../components/tools/FondoGaranziaChecker.tsx';
+
+const faqs = [
+  {
+    q: 'Qual e\' la differenza tra Fondo di Garanzia e Mediocredito Centrale?',
+    a: 'Sono di fatto la stessa cosa. Il Fondo di Garanzia per le PMI e\' uno strumento pubblico istituito presso il Ministero delle Imprese e del Made in Italy, ma la sua gestione operativa e\' affidata a Mediocredito Centrale (MCC) Banca del Mezzogiorno. Quando si parla di "garanzia MCC" o "Fondo di Garanzia PMI" ci si riferisce sempre allo stesso strumento.',
+  },
+  {
+    q: 'Il Fondo di Garanzia e\' gratuito?',
+    a: 'Per la PMI la garanzia e\' gratuita o ha un costo molto contenuto, gestito dalla banca/intermediario in fase di pratica. Non comporta esborsi anticipati per l\'impresa. Il vero vantaggio e\' indiretto: riducendo il rischio del finanziamento, la banca puo\' concedere il credito a condizioni migliori (tasso piu\' basso, importi maggiori, valutazione piu\' favorevole).',
+  },
+  {
+    q: 'Quanto copre il Fondo di Garanzia?',
+    a: 'La copertura varia da 30% a 80% del finanziamento, in base alla dimensione dell\'impresa, alla tipologia di operazione (investimento, liquidita\', capitalizzazione) e al rating del richiedente. Le microimprese e gli investimenti produttivi hanno generalmente coperture piu\' alte. Il massimale cumulativo per impresa e\' di 5 milioni di euro.',
+  },
+  {
+    q: 'Quali operazioni sono garantibili?',
+    a: 'Sono ammessi finanziamenti per investimenti produttivi (macchinari, impianti, immobili strumentali), operazioni di liquidita\' e capitale circolante, finanziamenti per la capitalizzazione, leasing finanziario, anticipo crediti commerciali. Sono escluse le operazioni di mero consolidamento del debito esistente.',
+  },
+  {
+    q: 'La PMI deve fare domanda direttamente al Fondo?',
+    a: 'No. La domanda al Fondo di Garanzia viene presentata dalla banca o dall\'intermediario finanziario per conto dell\'impresa, contestualmente alla richiesta di finanziamento. La PMI fornisce la documentazione, l\'intermediario gestisce l\'istruttoria. MCF si occupa proprio di selezionare l\'intermediario giusto e seguire la pratica fino all\'erogazione.',
+  },
+  {
+    q: 'Posso combinare il Fondo di Garanzia con la Nuova Sabatini?',
+    a: 'Si\', le due agevolazioni si combinano perfettamente. Sono lo strumento piu\' efficace per finanziare investimenti strategici delle PMI: la Sabatini riduce il costo degli interessi, il Fondo di Garanzia abbatte il rischio per la banca migliorando le condizioni applicate. Insieme rendono possibili investimenti che da soli sarebbero stati respinti o resi onerosi.',
+  },
+  {
+    q: 'Quanto tempo serve per ottenere la garanzia?',
+    a: 'Il Fondo di Garanzia istruisce la pratica in 5-15 giorni lavorativi dalla richiesta dell\'intermediario. Il tempo complessivo dipende quindi soprattutto dalla velocita\' della banca o dell\'intermediario nel preparare la documentazione. Lavorando con operatori convenzionati abituati alla pratica MCC, i tempi totali sono solitamente di 3-4 settimane.',
+  },
+];
+
+const faqJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqs.map((f) => ({
+    '@type': 'Question',
+    name: f.q,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: f.a,
+    },
+  })),
+};
+
+const webAppJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: 'Verifica Fondo di Garanzia MCC',
+  applicationCategory: 'BusinessApplication',
+  description: 'Verifica in tempo reale la copertura del Fondo di Garanzia MCC sul tuo finanziamento PMI.',
+  url: 'https://www.mediocreditofacile.it/agevolazioni/fondo-garanzia-mcc',
+  offers: {
+    '@type': 'Offer',
+    price: '0',
+    priceCurrency: 'EUR',
+  },
+  operatingSystem: 'Web',
+};
+---
+
+<Layout
+  title="Fondo di Garanzia MCC: Come Accedere alla Garanzia Statale per le PMI"
+  description="Verifica in tempo reale la copertura del Fondo di Garanzia Mediocredito Centrale sul tuo finanziamento. Requisiti, percentuali, FAQ. Mediocredito Facile gestisce la pratica."
+>
+  <Header minimal={false} />
+
+  <script type="application/ld+json" set:html={JSON.stringify(faqJsonLd)} />
+  <script type="application/ld+json" set:html={JSON.stringify(webAppJsonLd)} />
+
+  <main>
+
+    <!-- HERO -->
+    <section class="lp-hero">
+      <div class="lp-hero__inner">
+        <span class="lp-hero__eyebrow">Garanzia Statale 2026</span>
+        <h1 class="lp-hero__title">
+          Fondo di Garanzia PMI: come accedere alla garanzia statale per il tuo finanziamento
+        </h1>
+        <p class="lp-hero__sub">
+          Lo Stato garantisce fino all'80% del tuo finanziamento attraverso Mediocredito Centrale.
+          Verifica subito quanto puoi ottenere e parla con un consulente Mediocredito Facile.
+        </p>
+        <a href="#checker" class="lp-hero__cta">
+          Verifica la copertura
+          <span class="material-icons-outlined">arrow_downward</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- COS'E' -->
+    <section class="lp-intro">
+      <div class="lp-intro__inner">
+        <h2 class="lp-intro__title">Cos'e' il Fondo di Garanzia MCC</h2>
+        <div class="lp-intro__grid">
+          <div class="lp-intro__col">
+            <p>
+              Il Fondo di Garanzia per le PMI e' uno strumento pubblico gestito da
+              Mediocredito Centrale per conto del Ministero delle Imprese. Lo Stato
+              fa da garante quando una PMI chiede un finanziamento, riducendo
+              significativamente il rischio per la banca o l'intermediario.
+            </p>
+            <p>
+              Il meccanismo e' semplice: l'impresa richiede il finanziamento all'operatore
+              convenzionato, l'operatore presenta la pratica al Fondo, MCC delibera la
+              percentuale di copertura. Se la banca subisce una perdita sul finanziamento,
+              il Fondo rimborsa la quota garantita. Per la banca significa rischio piu' basso,
+              per l'impresa significa accesso al credito facilitato e condizioni migliori.
+            </p>
+          </div>
+          <div class="lp-intro__col">
+            <ul class="lp-intro__list">
+              <li>
+                <span class="material-icons-outlined">check_circle</span>
+                <div>
+                  <strong>Copertura garantita</strong>
+                  <span>Fino all'80% del finanziamento</span>
+                </div>
+              </li>
+              <li>
+                <span class="material-icons-outlined">check_circle</span>
+                <div>
+                  <strong>Massimale per impresa</strong>
+                  <span>5 milioni di euro cumulativi</span>
+                </div>
+              </li>
+              <li>
+                <span class="material-icons-outlined">check_circle</span>
+                <div>
+                  <strong>Operazioni ammesse</strong>
+                  <span>Investimenti, liquidita', capitalizzazione</span>
+                </div>
+              </li>
+              <li>
+                <span class="material-icons-outlined">check_circle</span>
+                <div>
+                  <strong>Costo per la PMI</strong>
+                  <span>Gratuito o di importo simbolico</span>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CHECKER -->
+    <section class="lp-calc" id="checker">
+      <div class="lp-calc__inner">
+        <span class="lp-calc__eyebrow">Strumento gratuito</span>
+        <h2 class="lp-calc__title">Verifica la copertura per la tua impresa</h2>
+        <p class="lp-calc__sub">
+          Tre informazioni sulla tua azienda e ti diciamo subito quanto puo' garantire
+          lo Stato sul tuo finanziamento. Stima indicativa basata sulle percentuali
+          tipiche del Fondo MCC.
+        </p>
+
+        <FondoGaranziaChecker client:load />
+      </div>
+    </section>
+
+    <!-- CHI PUO' ACCEDERE -->
+    <section class="lp-esempi">
+      <div class="lp-esempi__inner">
+        <h2 class="lp-esempi__title">Chi puo' accedere</h2>
+        <p class="lp-esempi__sub">
+          I requisiti dimensionali sono quelli della definizione europea di PMI.
+          Sono ammesse imprese di tutti i settori produttivi.
+        </p>
+        <div class="lp-esempi__grid">
+          <div class="lp-esempi__card">
+            <span class="lp-esempi__icon material-icons-outlined">looks_one</span>
+            <h3>Microimpresa</h3>
+            <ul>
+              <li><span>Dipendenti</span><strong>&lt; 10</strong></li>
+              <li><span>Fatturato</span><strong>&lt; 2M €</strong></li>
+              <li class="lp-esempi__highlight">
+                <span>Copertura tipica</span><strong>fino all'80%</strong>
+              </li>
+            </ul>
+          </div>
+          <div class="lp-esempi__card">
+            <span class="lp-esempi__icon material-icons-outlined">looks_two</span>
+            <h3>Piccola impresa</h3>
+            <ul>
+              <li><span>Dipendenti</span><strong>&lt; 50</strong></li>
+              <li><span>Fatturato</span><strong>&lt; 10M €</strong></li>
+              <li class="lp-esempi__highlight">
+                <span>Copertura tipica</span><strong>55-70%</strong>
+              </li>
+            </ul>
+          </div>
+          <div class="lp-esempi__card">
+            <span class="lp-esempi__icon material-icons-outlined">looks_3</span>
+            <h3>Media impresa</h3>
+            <ul>
+              <li><span>Dipendenti</span><strong>&lt; 250</strong></li>
+              <li><span>Fatturato</span><strong>&lt; 50M €</strong></li>
+              <li class="lp-esempi__highlight">
+                <span>Copertura tipica</span><strong>50-60%</strong>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <p class="lp-esempi__disclaimer">
+          Le percentuali sono indicative e dipendono anche da tipologia di operazione,
+          rating dell'impresa e valutazione del Fondo.
+        </p>
+      </div>
+    </section>
+
+    <!-- COME SI ATTIVA -->
+    <section class="lp-steps">
+      <div class="lp-steps__inner">
+        <h2 class="lp-steps__title">Come si attiva il Fondo di Garanzia</h2>
+        <p class="lp-steps__sub">
+          Quattro passaggi. La PMI non interagisce direttamente con MCC:
+          ci pensa l'intermediario, MCF coordina tutto.
+        </p>
+        <div class="lp-steps__grid">
+          <div class="lp-steps__step">
+            <span class="lp-steps__num">01</span>
+            <h3>Analisi</h3>
+            <p>Valutiamo la tua situazione, l'esigenza di finanziamento e l'idoneita' al Fondo.</p>
+          </div>
+          <div class="lp-steps__step">
+            <span class="lp-steps__num">02</span>
+            <h3>Selezione</h3>
+            <p>Scegliamo l'operatore convenzionato piu' adatto al tuo caso tra i 10+ partner.</p>
+          </div>
+          <div class="lp-steps__step">
+            <span class="lp-steps__num">03</span>
+            <h3>Pratica</h3>
+            <p>L'operatore presenta domanda al Fondo, gestiamo la documentazione necessaria.</p>
+          </div>
+          <div class="lp-steps__step">
+            <span class="lp-steps__num">04</span>
+            <h3>Erogazione</h3>
+            <p>Delibera in 5-15 giorni lavorativi, finanziamento erogato con garanzia attiva.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- COMBINA CON SABATINI -->
+    <section class="lp-combo">
+      <div class="lp-combo__inner">
+        <span class="lp-combo__eyebrow">Bonus combo</span>
+        <h2 class="lp-combo__title">Fondo Garanzia + Nuova Sabatini</h2>
+        <p class="lp-combo__sub">
+          Le due agevolazioni si combinano perfettamente per finanziare investimenti strategici.
+          Il Fondo abbatte il rischio per la banca, la Sabatini riduce gli interessi:
+          insieme sono lo strumento piu' efficace per investire in beni strumentali.
+        </p>
+        <div class="lp-combo__table">
+          <div class="lp-combo__row lp-combo__row--head">
+            <div></div>
+            <div>Cosa fa</div>
+            <div>Vantaggio</div>
+          </div>
+          <div class="lp-combo__row">
+            <div><strong>Fondo Garanzia MCC</strong></div>
+            <div>Copre fino all'80% del rischio del finanziamento</div>
+            <div>Migliora le condizioni e l'accesso al credito</div>
+          </div>
+          <div class="lp-combo__row">
+            <div><strong>Nuova Sabatini</strong></div>
+            <div>Eroga un contributo in conto interessi del MISE</div>
+            <div>Riduce il costo netto del bene</div>
+          </div>
+        </div>
+        <a href="/finanziamenti/agevolazioni/nuova-sabatini-2026" class="lp-combo__link">
+          Scopri come funziona la Nuova Sabatini 2026
+          <span class="material-icons-outlined">arrow_forward</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="lp-faq">
+      <div class="lp-faq__inner">
+        <h2 class="lp-faq__title">Domande frequenti</h2>
+        <div class="lp-faq__list">
+          {faqs.map((faq) => (
+            <details class="lp-faq__item">
+              <summary>
+                {faq.q}
+                <span class="material-icons-outlined">expand_more</span>
+              </summary>
+              <p>{faq.a}</p>
+            </details>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- COME FINANZIARLO -->
+    <section class="lp-mcf">
+      <div class="lp-mcf__inner">
+        <h2 class="lp-mcf__title">Come finanziare l'investimento con la garanzia MCC</h2>
+        <p class="lp-mcf__text">
+          Il Fondo di Garanzia abbatte il rischio per la banca, e quindi migliora
+          le condizioni del tuo finanziamento. MCF ti aiuta a ottenere la garanzia
+          e il finanziamento in un'unica pratica: un solo interlocutore per tutto il percorso.
+        </p>
+        <p class="lp-mcf__text">
+          Lavoriamo con piu' operatori bancari convenzionati con il Fondo.
+          Ti diciamo subito quale percentuale di copertura aspettarti e quale canale
+          velocizza la pratica nel tuo caso. Valutazione gratuita in 24 ore.
+        </p>
+        <div class="lp-mcf__cta-row">
+          <a href="/finanziamenti/" class="lp-mcf__cta lp-mcf__cta--solid">
+            Richiedi il finanziamento con garanzia MCC
+          </a>
+          <a href="tel:+393939957840" class="lp-mcf__cta lp-mcf__cta--outline">
+            <span class="material-icons-outlined">phone</span>
+            Chiama Alberto
+          </a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <Footer />
+</Layout>
+
+<style>
+  /* === HERO === */
+  .lp-hero {
+    background: linear-gradient(135deg, #1A0A3E 0%, #664CCD 60%, #FE6F3A 100%);
+    color: #ffffff;
+    padding: 6rem 1.5rem 5rem;
+    text-align: center;
+  }
+
+  .lp-hero__inner {
+    max-width: 880px;
+    margin: 0 auto;
+  }
+
+  .lp-hero__eyebrow {
+    display: inline-block;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.12);
+    padding: 0.4rem 1rem;
+    border-radius: 999px;
+    margin-bottom: 1.5rem;
+  }
+
+  .lp-hero__title {
+    font-size: clamp(2rem, 5vw, 3.25rem);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    margin-bottom: 1.25rem;
+  }
+
+  .lp-hero__sub {
+    font-size: clamp(1rem, 2vw, 1.15rem);
+    line-height: 1.65;
+    color: rgba(255, 255, 255, 0.85);
+    max-width: 720px;
+    margin: 0 auto 2rem;
+  }
+
+  .lp-hero__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--mcf-primary);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 1.05rem;
+    padding: 1rem 2rem;
+    border-radius: 10px;
+    transition: background 0.2s, transform 0.15s;
+  }
+
+  .lp-hero__cta:hover {
+    background: var(--mcf-primary-dark);
+    transform: translateY(-2px);
+  }
+
+  /* === INTRO === */
+  .lp-intro {
+    padding: 5rem 1.5rem;
+    background: #ffffff;
+  }
+
+  .lp-intro__inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+
+  .lp-intro__title {
+    font-size: clamp(1.75rem, 4vw, 2.25rem);
+    font-weight: 800;
+    color: var(--mcf-black);
+    letter-spacing: -0.03em;
+    margin-bottom: 2.5rem;
+    text-align: center;
+  }
+
+  .lp-intro__grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 3rem;
+    align-items: start;
+  }
+
+  .lp-intro__col p {
+    font-size: 1.05rem;
+    line-height: 1.75;
+    color: var(--mcf-charcoal);
+    margin-bottom: 1.25rem;
+  }
+
+  .lp-intro__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .lp-intro__list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.85rem;
+    padding: 1rem;
+    background: var(--mcf-ghost);
+    border-radius: 12px;
+    border-left: 3px solid var(--mcf-primary);
+  }
+
+  .lp-intro__list .material-icons-outlined {
+    color: var(--mcf-primary);
+    font-size: 1.4rem;
+    flex-shrink: 0;
+  }
+
+  .lp-intro__list strong {
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--mcf-black);
+    margin-bottom: 0.15rem;
+  }
+
+  .lp-intro__list span {
+    font-size: 0.85rem;
+    color: var(--mcf-taupe);
+  }
+
+  /* === CALCOLATORE / CHECKER === */
+  .lp-calc {
+    padding: 5rem 1.5rem;
+    background: var(--mcf-ghost);
+  }
+
+  .lp-calc__inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .lp-calc__eyebrow {
+    display: inline-block;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--mcf-primary);
+    margin-bottom: 0.75rem;
+  }
+
+  .lp-calc__title {
+    font-size: clamp(1.75rem, 4vw, 2.25rem);
+    font-weight: 800;
+    color: var(--mcf-black);
+    letter-spacing: -0.03em;
+    margin-bottom: 0.75rem;
+  }
+
+  .lp-calc__sub {
+    font-size: 1rem;
+    color: var(--mcf-charcoal);
+    line-height: 1.65;
+    max-width: 640px;
+    margin: 0 auto 2.5rem;
+  }
+
+  /* === ESEMPI / CHI PUO' ACCEDERE === */
+  .lp-esempi {
+    padding: 5rem 1.5rem;
+    background: #ffffff;
+  }
+
+  .lp-esempi__inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+
+  .lp-esempi__title {
+    font-size: clamp(1.75rem, 4vw, 2.25rem);
+    font-weight: 800;
+    color: var(--mcf-black);
+    text-align: center;
+    letter-spacing: -0.03em;
+    margin-bottom: 0.75rem;
+  }
+
+  .lp-esempi__sub {
+    text-align: center;
+    color: var(--mcf-charcoal);
+    max-width: 600px;
+    margin: 0 auto 3rem;
+    line-height: 1.65;
+  }
+
+  .lp-esempi__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+
+  .lp-esempi__card {
+    background: var(--mcf-ghost);
+    border: 1px solid var(--mcf-platinum);
+    border-radius: var(--radius);
+    padding: 2rem;
+    transition: transform 0.25s, box-shadow 0.25s;
+  }
+
+  .lp-esempi__card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(102, 76, 205, 0.08);
+  }
+
+  .lp-esempi__icon {
+    font-size: 2.25rem !important;
+    color: var(--mcf-accent);
+    margin-bottom: 0.75rem;
+  }
+
+  .lp-esempi__card h3 {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--mcf-black);
+    margin-bottom: 1.25rem;
+  }
+
+  .lp-esempi__card ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .lp-esempi__card li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--mcf-platinum);
+    font-size: 0.92rem;
+  }
+
+  .lp-esempi__card li:last-child {
+    border-bottom: none;
+  }
+
+  .lp-esempi__card li span {
+    color: var(--mcf-charcoal);
+  }
+
+  .lp-esempi__card li strong {
+    color: var(--mcf-black);
+    font-weight: 700;
+  }
+
+  .lp-esempi__highlight {
+    background: rgba(254, 111, 58, 0.1);
+    margin: 0.4rem -0.5rem !important;
+    padding: 0.7rem 0.5rem !important;
+    border-radius: 8px;
+    border-bottom: none !important;
+  }
+
+  .lp-esempi__highlight strong {
+    color: var(--mcf-primary) !important;
+    font-size: 1rem;
+  }
+
+  .lp-esempi__disclaimer {
+    font-size: 0.78rem;
+    color: var(--mcf-taupe);
+    text-align: center;
+    margin-top: 2rem;
+    line-height: 1.5;
+  }
+
+  /* === STEPS === */
+  .lp-steps {
+    padding: 5rem 1.5rem;
+    background: var(--mcf-ghost);
+  }
+
+  .lp-steps__inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+
+  .lp-steps__title {
+    font-size: clamp(1.75rem, 4vw, 2.25rem);
+    font-weight: 800;
+    color: var(--mcf-black);
+    text-align: center;
+    letter-spacing: -0.03em;
+    margin-bottom: 0.75rem;
+  }
+
+  .lp-steps__sub {
+    text-align: center;
+    color: var(--mcf-charcoal);
+    max-width: 600px;
+    margin: 0 auto 3rem;
+    line-height: 1.65;
+  }
+
+  .lp-steps__grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+  }
+
+  .lp-steps__step {
+    background: #ffffff;
+    border: 1px solid var(--mcf-platinum);
+    border-radius: var(--radius);
+    padding: 1.75rem;
+    text-align: left;
+  }
+
+  .lp-steps__num {
+    display: block;
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--mcf-primary);
+    line-height: 1;
+    margin-bottom: 1rem;
+  }
+
+  .lp-steps__step h3 {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--mcf-black);
+    margin-bottom: 0.5rem;
+  }
+
+  .lp-steps__step p {
+    font-size: 0.9rem;
+    color: var(--mcf-charcoal);
+    line-height: 1.6;
+  }
+
+  /* === COMBO === */
+  .lp-combo {
+    padding: 5rem 1.5rem;
+    background: #ffffff;
+  }
+
+  .lp-combo__inner {
+    max-width: 880px;
+    margin: 0 auto;
+  }
+
+  .lp-combo__eyebrow {
+    display: inline-block;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--mcf-primary);
+    margin-bottom: 0.75rem;
+  }
+
+  .lp-combo__title {
+    font-size: clamp(1.75rem, 4vw, 2.25rem);
+    font-weight: 800;
+    color: var(--mcf-black);
+    letter-spacing: -0.03em;
+    margin-bottom: 1rem;
+  }
+
+  .lp-combo__sub {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: var(--mcf-charcoal);
+    margin-bottom: 2rem;
+  }
+
+  .lp-combo__table {
+    background: var(--mcf-ghost);
+    border: 1px solid var(--mcf-platinum);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 2rem;
+  }
+
+  .lp-combo__row {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1.5fr;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--mcf-platinum);
+    font-size: 0.95rem;
+    color: var(--mcf-charcoal);
+    align-items: center;
+  }
+
+  .lp-combo__row:last-child {
+    border-bottom: none;
+  }
+
+  .lp-combo__row--head {
+    background: #ffffff;
+    font-weight: 700;
+    color: var(--mcf-black);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .lp-combo__row strong {
+    color: var(--mcf-accent);
+  }
+
+  .lp-combo__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: 700;
+    color: var(--mcf-accent);
+    transition: gap 0.2s;
+  }
+
+  .lp-combo__link:hover {
+    gap: 0.7rem;
+  }
+
+  /* === FAQ === */
+  .lp-faq {
+    padding: 5rem 1.5rem;
+    background: var(--mcf-ghost);
+  }
+
+  .lp-faq__inner {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .lp-faq__title {
+    font-size: clamp(1.75rem, 4vw, 2.25rem);
+    font-weight: 800;
+    color: var(--mcf-black);
+    text-align: center;
+    letter-spacing: -0.03em;
+    margin-bottom: 2.5rem;
+  }
+
+  .lp-faq__list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .lp-faq__item {
+    background: #ffffff;
+    border: 1px solid var(--mcf-platinum);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+
+  .lp-faq__item[open] {
+    border-color: var(--mcf-accent);
+  }
+
+  .lp-faq__item summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--mcf-black);
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .lp-faq__item summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .lp-faq__item summary .material-icons-outlined {
+    transition: transform 0.25s;
+    color: var(--mcf-accent);
+  }
+
+  .lp-faq__item[open] summary .material-icons-outlined {
+    transform: rotate(180deg);
+  }
+
+  .lp-faq__item p {
+    padding: 0 1.5rem 1.5rem;
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: var(--mcf-charcoal);
+  }
+
+  /* === MCF === */
+  .lp-mcf {
+    padding: 5rem 1.5rem;
+    background: var(--mcf-black);
+    color: #ffffff;
+    text-align: center;
+  }
+
+  .lp-mcf__inner {
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  .lp-mcf__title {
+    font-size: clamp(1.75rem, 4vw, 2.25rem);
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: -0.03em;
+    margin-bottom: 1.5rem;
+  }
+
+  .lp-mcf__text {
+    font-size: 1.05rem;
+    line-height: 1.75;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 1.25rem;
+  }
+
+  .lp-mcf__cta-row {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 2rem;
+  }
+
+  .lp-mcf__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.95rem 1.75rem;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 1rem;
+    transition: all 0.2s;
+  }
+
+  .lp-mcf__cta--solid {
+    background: var(--mcf-primary);
+    color: #ffffff;
+  }
+
+  .lp-mcf__cta--solid:hover {
+    background: var(--mcf-primary-dark);
+    transform: translateY(-2px);
+  }
+
+  .lp-mcf__cta--outline {
+    background: transparent;
+    color: #ffffff;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+  }
+
+  .lp-mcf__cta--outline:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.6);
+  }
+
+  /* === RESPONSIVE === */
+  @media (max-width: 960px) {
+    .lp-intro__grid {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+
+    .lp-esempi__grid {
+      grid-template-columns: 1fr;
+    }
+
+    .lp-steps__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .lp-combo__row {
+      grid-template-columns: 1fr;
+      gap: 0.4rem;
+    }
+
+    .lp-combo__row--head {
+      display: none;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .lp-hero {
+      padding: 4rem 1.25rem 3.5rem;
+    }
+
+    .lp-intro,
+    .lp-calc,
+    .lp-esempi,
+    .lp-steps,
+    .lp-combo,
+    .lp-faq,
+    .lp-mcf {
+      padding: 3.5rem 1.25rem;
+    }
+
+    .lp-steps__grid {
+      grid-template-columns: 1fr;
+    }
+
+    .lp-mcf__cta {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>

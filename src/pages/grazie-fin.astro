@@ -1,0 +1,124 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<Layout
+  title="Grazie per la tua richiesta | Mediocredito Facile"
+  description="Abbiamo ricevuto la tua richiesta di finanziamento. Ti ricontatteremo entro 24 ore."
+>
+  <Header minimal={true} />
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    // Traccia la provenienza del lead dal referrer
+    const referrer = document.referrer || '';
+    let fonte = 'diretto';
+    try {
+      const url = new URL(referrer);
+      const path = url.pathname.replace(/^\/|\/$/g, '');
+      if (path) fonte = path;
+      else fonte = 'homepage';
+    } catch (_) {}
+    window.dataLayer.push({ event: 'form_finanziamenti', fonte: fonte });
+    window.dataLayer.push({ event: 'generate_lead', fonte: fonte });
+  </script>
+  <main class="grazie-fin">
+    <div class="grazie-fin__inner">
+      <div class="grazie-fin__icon">
+        <span class="material-icons-outlined" aria-hidden="true">check_circle</span>
+      </div>
+      <h1 class="grazie-fin__title">Richiesta ricevuta</h1>
+      <p class="grazie-fin__sub">
+        Ti richiamo entro 24 ore per una valutazione gratuita del tuo profilo
+        e dell'investimento che hai in programma.
+      </p>
+      <div class="grazie-fin__actions">
+        <a href="/finanziamenti/" class="grazie-fin__cta">Torna ai Finanziamenti</a>
+        <a href="tel:+393939957840" class="grazie-fin__phone">
+          <span class="material-icons-outlined" aria-hidden="true">phone</span>
+          Preferisci chiamare? +39 393 995 7840
+        </a>
+      </div>
+    </div>
+  </main>
+  <Footer />
+</Layout>
+
+<style>
+  .grazie-fin {
+    min-height: 70vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 1.5rem;
+  }
+
+  .grazie-fin__inner {
+    text-align: center;
+    max-width: 520px;
+  }
+
+  .grazie-fin__icon {
+    margin-bottom: 1.5rem;
+  }
+
+  .grazie-fin__icon .material-icons-outlined {
+    font-size: 4rem;
+    color: var(--mcf-success, #2D8F4E);
+  }
+
+  .grazie-fin__title {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--mcf-black);
+    margin-bottom: 1rem;
+  }
+
+  .grazie-fin__sub {
+    font-size: 1.1rem;
+    color: var(--mcf-charcoal);
+    margin-bottom: 2rem;
+    line-height: 1.65;
+  }
+
+  .grazie-fin__actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .grazie-fin__cta {
+    display: inline-block;
+    background: var(--mcf-accent);
+    color: #fff;
+    padding: 0.875rem 2rem;
+    border-radius: var(--radius);
+    font-weight: 700;
+    font-size: 1rem;
+    transition: background 0.2s;
+  }
+
+  .grazie-fin__cta:hover {
+    background: #5a3fbf;
+  }
+
+  .grazie-fin__phone {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--mcf-primary);
+    transition: color 0.2s;
+  }
+
+  .grazie-fin__phone:hover {
+    color: var(--mcf-primary-dark);
+  }
+
+  .grazie-fin__phone .material-icons-outlined {
+    font-size: 1.1rem;
+  }
+</style>
