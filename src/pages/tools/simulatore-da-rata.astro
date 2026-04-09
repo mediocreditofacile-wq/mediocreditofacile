@@ -1,24 +1,24 @@
 ---
 /**
- * Simulatore Noleggio Operativo — /tools/simulatore-noleggio-operativo
- * Pagina completa: hero, simulatore interattivo, sezione SEO, form consulenza.
+ * Simulatore da Rata — /tools/simulatore-da-rata
+ * Pagina completa: hero, simulatore inverso, sezione SEO, cross-link, form consulenza.
  */
 import ToolLayout from '../../layouts/ToolLayout.astro';
-import SimulatoreNoleggio from '../../components/tools/SimulatoreNoleggio.tsx';
+import SimulatoreInverso from '../../components/tools/SimulatoreInverso.tsx';
 ---
 
 <ToolLayout
-  title="Simulatore Noleggio Operativo — Calcola il Canone | Mediocredito Facile"
-  description="Calcola subito il canone mensile del noleggio operativo. Inserisci il valore del bene, scegli la durata e scopri quanto paghi al mese. Gratis, senza registrazione."
-  breadcrumbs={[{ name: 'Simulatore Noleggio Operativo', href: '/tools/simulatore-noleggio-operativo' }]}
+  title="Simulatore da Rata — Calcola l'Importo Massimo Noleggiabile | Mediocredito Facile"
+  description="Parti dalla rata che vuoi pagare e scopri il valore massimo del bene che puoi noleggiare. Coefficienti Grenke reali, risultato immediato. Gratis, senza registrazione."
+  breadcrumbs={[{ name: 'Simulatore da Rata', href: '/tools/simulatore-da-rata' }]}
 >
   <!-- Hero -->
   <section class="tool-hero">
     <div class="tool-hero__inner">
-      <h1 class="tool-hero__title">Simulatore Noleggio Operativo</h1>
+      <h1 class="tool-hero__title">Simulatore da Rata: dalla Rata al Valore del Bene</h1>
       <p class="tool-hero__sub">
-        Calcola il canone mensile, il valore di riscatto e confronta con l'acquisto diretto.
-        Coefficienti Grenke reali, risultato immediato.
+        Sai quanto vuoi spendere al mese? Inserisci il canone desiderato, scegli la durata
+        e scopri il valore massimo del bene che puoi noleggiare. Coefficienti Grenke reali.
       </p>
     </div>
   </section>
@@ -26,59 +26,58 @@ import SimulatoreNoleggio from '../../components/tools/SimulatoreNoleggio.tsx';
   <!-- Simulatore interattivo (Preact island) -->
   <section class="tool-simulator">
     <div class="tool-simulator__inner">
-      <SimulatoreNoleggio client:load />
+      <SimulatoreInverso client:load />
     </div>
   </section>
 
-  <!-- Sezione SEO: Come funziona il noleggio operativo -->
+  <!-- Sezione SEO -->
   <section class="tool-seo">
     <div class="tool-seo__inner">
-      <h2 class="tool-seo__heading">Come funziona il noleggio operativo</h2>
+      <h2 class="tool-seo__heading">Come funziona il simulatore inverso</h2>
 
       <div class="tool-seo__grid">
         <div class="tool-seo__block">
-          <span class="tool-seo__icon material-icons-outlined" aria-hidden="true">description</span>
-          <h3 class="tool-seo__subtitle">Cos'è il noleggio operativo</h3>
+          <span class="tool-seo__icon material-icons-outlined" aria-hidden="true">groups</span>
+          <h3 class="tool-seo__subtitle">A chi serve questo strumento</h3>
           <p>
-            Il noleggio operativo è un contratto con cui un'azienda utilizza un bene strumentale
-            pagando un canone mensile fisso per tutta la durata. A fine contratto può riscattare
-            il bene, restituirlo o rinnovare il contratto. Il canone è interamente deducibile
-            dal reddito d'impresa.
+            I fornitori che propongono il noleggio operativo ai clienti ragionano a rata:
+            il cliente dice quanto spende oggi (o quanto vuole spendere al mese) e il fornitore
+            deve capire quale configurazione rientra in quel budget. Questo simulatore fa
+            esattamente quel calcolo.
           </p>
         </div>
 
         <div class="tool-seo__block">
-          <span class="tool-seo__icon material-icons-outlined" aria-hidden="true">calculate</span>
-          <h3 class="tool-seo__subtitle">Come si calcola il canone</h3>
+          <span class="tool-seo__icon material-icons-outlined" aria-hidden="true">swap_vert</span>
+          <h3 class="tool-seo__subtitle">Come funziona il calcolo</h3>
           <p>
-            Il canone dipende dal valore del bene, dalla durata del contratto e dal coefficiente
-            applicato dalla società di locazione. I coefficienti variano in base alla fascia di
-            importo: beni di valore maggiore beneficiano di coefficienti più bassi. Il simulatore
-            usa i coefficienti ufficiali Grenke.
+            Il canone del noleggio operativo dipende dal valore del bene, dalla durata e dai
+            coefficienti della società di locazione. Il simulatore inverso applica la formula
+            al contrario: dal canone mensile risale al valore massimo finanziabile, tenendo
+            conto della fascia di importo corretta.
           </p>
         </div>
 
         <div class="tool-seo__block">
-          <span class="tool-seo__icon material-icons-outlined" aria-hidden="true">compare_arrows</span>
-          <h3 class="tool-seo__subtitle">Noleggio operativo vs acquisto diretto</h3>
+          <span class="tool-seo__icon material-icons-outlined" aria-hidden="true">arrow_forward</span>
+          <h3 class="tool-seo__subtitle">Il passo successivo</h3>
           <p>
-            Con l'acquisto diretto l'azienda immobilizza capitale. Con il noleggio operativo
-            mantiene liquidità, ottiene la piena deducibilità del canone e trasferisce il rischio
-            di obsolescenza al locatore. Per molte PMI è lo strumento più efficiente per dotarsi
-            di macchinari e tecnologia.
+            Il risultato è indicativo e basato sui coefficienti standard. Per un preventivo
+            personalizzato con le condizioni effettive, compila il form qui sotto o chiama
+            direttamente. Analizzeremo la tua situazione e troveremo la soluzione migliore.
           </p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Cross-link verso il simulatore inverso -->
+  <!-- Cross-link verso il simulatore classico -->
   <section class="tool-crosslink">
     <div class="tool-crosslink__inner">
-      <span class="material-icons-outlined tool-crosslink__icon" aria-hidden="true">swap_vert</span>
+      <span class="material-icons-outlined tool-crosslink__icon" aria-hidden="true">calculate</span>
       <div>
-        <p><strong>Conosci il budget mensile ma non il valore del bene?</strong></p>
-        <p>Usa il <a href="/tools/simulatore-da-rata">Simulatore da Rata</a> per scoprire l'importo massimo finanziabile.</p>
+        <p><strong>Conosci già il valore del bene?</strong></p>
+        <p>Usa il <a href="/tools/simulatore-noleggio-operativo">Simulatore Noleggio Operativo</a> per calcolare il canone mensile.</p>
       </div>
     </div>
   </section>
@@ -96,6 +95,9 @@ import SimulatoreNoleggio from '../../components/tools/SimulatoreNoleggio.tsx';
         <input name="website" type="text" tabindex="-1" autocomplete="off"
           style="position:absolute;opacity:0;pointer-events:none;height:0;overflow:hidden" aria-hidden="true" />
 
+        <!-- Fonte per tracciamento in Zapier/Pipedrive -->
+        <input type="hidden" name="fonte" value="simulatore-da-rata" />
+
         <div class="contact-form__field">
           <label for="nome">Nome e Cognome</label>
           <input type="text" id="nome" name="nome" placeholder="Mario Rossi" required autocomplete="name" />
@@ -112,8 +114,13 @@ import SimulatoreNoleggio from '../../components/tools/SimulatoreNoleggio.tsx';
         </div>
 
         <div class="contact-form__field">
-          <label for="valore_bene">Valore del bene da finanziare (€)</label>
-          <input type="text" id="valore_bene" name="valore_bene" placeholder="50.000" autocomplete="off" />
+          <label for="canone_desiderato">Canone mensile desiderato (€)</label>
+          <input type="text" id="canone_desiderato" name="canone_desiderato" placeholder="500" autocomplete="off" />
+        </div>
+
+        <div class="contact-form__field">
+          <label for="valore_bene">Valore bene risultante (€)</label>
+          <input type="text" id="valore_bene" name="valore_bene" placeholder="14.000" autocomplete="off" />
         </div>
 
         <div class="contact-form__field">
@@ -152,26 +159,42 @@ import SimulatoreNoleggio from '../../components/tools/SimulatoreNoleggio.tsx';
 
 <!-- Script: pre-compila form dal simulatore + invio a Zapier -->
 <script>
-  // Pre-compila i campi del form con i valori del simulatore
+  // Pre-compila i campi del form con i valori dal simulatore inverso
   function prefillForm() {
-    const simValore = document.getElementById('valore') as HTMLInputElement | null;
-    const simDurata = document.getElementById('durata') as HTMLSelectElement | null;
-    const formValore = document.getElementById('valore_bene') as HTMLInputElement | null;
+    const simCanone = document.getElementById('inv-canone') as HTMLInputElement | null;
+    const simDurata = document.getElementById('inv-durata') as HTMLSelectElement | null;
+    const formCanone = document.getElementById('canone_desiderato') as HTMLInputElement | null;
     const formDurata = document.getElementById('durata_preferita') as HTMLSelectElement | null;
 
-    if (simValore && formValore) {
-      formValore.value = parseInt(simValore.value, 10).toLocaleString('it-IT');
+    if (simCanone && formCanone) {
+      const val = parseInt(simCanone.value, 10);
+      if (!isNaN(val) && val > 0) {
+        formCanone.value = val.toLocaleString('it-IT');
+      }
     }
     if (simDurata && formDurata) {
       formDurata.value = simDurata.value;
     }
+
+    // Pre-compila il valore bene dal risultato calcolato (card principale)
+    const risultatoCard = document.querySelector('.sim-inv__result-card--main .sim-inv__result-value');
+    const formValore = document.getElementById('valore_bene') as HTMLInputElement | null;
+    if (risultatoCard && formValore) {
+      formValore.value = risultatoCard.textContent?.trim() ?? '';
+    }
   }
 
   // Osserva cambiamenti nel simulatore per aggiornare il form
-  const simForm = document.querySelector('.sim__form');
+  const simForm = document.querySelector('.sim-inv__form');
   if (simForm) {
     simForm.addEventListener('change', () => setTimeout(prefillForm, 100));
     simForm.addEventListener('input', () => setTimeout(prefillForm, 300));
+  }
+
+  // Osserva anche il click sul bottone calcola (i risultati appaiono dopo)
+  const simButton = document.querySelector('.sim-inv__button');
+  if (simButton) {
+    simButton.addEventListener('click', () => setTimeout(prefillForm, 200));
   }
 
   // Invio form a webhook Zapier
@@ -186,7 +209,7 @@ import SimulatoreNoleggio from '../../components/tools/SimulatoreNoleggio.tsx';
       if ((window as any).dataLayer) {
         (window as any).dataLayer.push({
           event: 'form_inviato',
-          tool: 'simulatore_noleggio',
+          tool: 'simulatore_inverso',
         });
       }
 
@@ -290,6 +313,47 @@ import SimulatoreNoleggio from '../../components/tools/SimulatoreNoleggio.tsx';
     font-size: 0.95rem;
     line-height: 1.65;
     color: var(--color-text);
+  }
+
+  /* --- Cross-link banner --- */
+  .tool-crosslink {
+    padding: 2rem 1.5rem;
+    background: var(--color-bg);
+  }
+
+  .tool-crosslink__inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: var(--color-bg-alt);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 1.5rem 2rem;
+  }
+
+  .tool-crosslink__icon {
+    font-size: 2rem;
+    color: var(--color-primary);
+    flex-shrink: 0;
+  }
+
+  .tool-crosslink__inner p {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--color-text);
+    margin: 0;
+  }
+
+  .tool-crosslink__inner a {
+    color: var(--color-accent);
+    font-weight: 600;
+    text-decoration: underline;
+  }
+
+  .tool-crosslink__inner a:hover {
+    color: var(--color-primary);
   }
 
   /* --- Form consulenza --- */
@@ -427,47 +491,6 @@ import SimulatoreNoleggio from '../../components/tools/SimulatoreNoleggio.tsx';
     opacity: 0.7;
     cursor: not-allowed;
     transform: none;
-  }
-
-  /* --- Cross-link banner --- */
-  .tool-crosslink {
-    padding: 2rem 1.5rem;
-    background: var(--color-bg);
-  }
-
-  .tool-crosslink__inner {
-    max-width: var(--max-width);
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    background: var(--color-bg-alt);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius);
-    padding: 1.5rem 2rem;
-  }
-
-  .tool-crosslink__icon {
-    font-size: 2rem;
-    color: var(--color-primary);
-    flex-shrink: 0;
-  }
-
-  .tool-crosslink__inner p {
-    font-size: 0.95rem;
-    line-height: 1.5;
-    color: var(--color-text);
-    margin: 0;
-  }
-
-  .tool-crosslink__inner a {
-    color: var(--color-accent);
-    font-weight: 600;
-    text-decoration: underline;
-  }
-
-  .tool-crosslink__inner a:hover {
-    color: var(--color-primary);
   }
 
   /* --- Responsive --- */
