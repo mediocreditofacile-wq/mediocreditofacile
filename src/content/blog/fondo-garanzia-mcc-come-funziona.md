@@ -1,9 +1,11 @@
 ---
 title: "Fondo di Garanzia MCC: come funziona davvero"
 description: "Il Fondo di Garanzia del Mediocredito Centrale spiegato per imprenditori: cos'è, chi accede, quanto copre, come si attiva. Guida pratica 2026."
-date: "2026-04-09"
+date: "2026-04-05"
 author: "Alberto Amà"
 tags: ["fondo garanzia", "mcc", "mediocredito centrale", "garanzia statale", "pmi"]
+image: "/images/blog-fondo-garanzia-mcc.jpg"
+imageAlt: "Documenti finanziari e calcolatrice su scrivania, concetto di garanzia"
 ---
 
 *Cos'è il Fondo di Garanzia, quanto copre nel 2026, come si attiva e perché conviene combinarlo con la Nuova Sabatini. Guida pratica per imprenditori che vogliono capire lo strumento, non solo usarlo.*

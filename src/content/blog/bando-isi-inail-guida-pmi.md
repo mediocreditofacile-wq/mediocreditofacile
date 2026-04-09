@@ -1,9 +1,11 @@
 ---
 title: "Bando ISI Inail: guida per PMI che investono in sicurezza"
 description: "Bando ISI Inail 2026: cos'è, come funziona il click day, quanto copre, come finanziare anticipo e quota residua. Guida pratica per PMI."
-date: "2026-04-09"
+date: "2026-04-07"
 author: "Alberto Amà"
 tags: ["bando isi", "inail", "sicurezza lavoro", "fondo perduto", "pmi"]
+image: "/images/blog-bando-isi-inail.jpg"
+imageAlt: "Cantiere con attrezzature di sicurezza e dispositivi di protezione"
 ---
 
 *Il Bando ISI Inail è il principale strumento con cui lo Stato finanzia a fondo perduto gli investimenti in sicurezza sul lavoro. Ogni anno mette a disposizione centinaia di milioni di euro, eppure la maggior parte delle PMI non lo conosce o non sa come accedervi. Questa guida spiega come funziona, quanto copre, e soprattutto come gestire il nodo finanziario che blocca molte imprese: l'anticipo del 100% dell'investimento.*

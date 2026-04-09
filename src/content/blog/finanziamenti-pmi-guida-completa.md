@@ -1,11 +1,11 @@
 ---
 title: "Finanziamenti per PMI: la guida completa 2026"
 description: "Chirografario, finanziamento strutturato, factoring: come funzionano, quanto costano, quando servono. Guida pratica ai finanziamenti per piccole e medie imprese con focus su agevolazioni combinabili."
-date: "2026-04-09"
+date: "2026-04-01"
 author: "Alberto Amà"
 tags: ["finanziamenti", "pmi", "guida", "chirografario", "factoring", "finanziamento imprese"]
 image: "/images/blog-finanziamenti-pmi-guida.jpg"
-imageAlt: "Imprenditore PMI che valuta opzioni di finanziamento con un broker"
+imageAlt: "Imprenditore che valuta documenti finanziari alla scrivania"
 ---
 
 Ogni imprenditore che gestisce una PMI prima o poi si trova davanti alla stessa domanda: come finanziare la crescita senza dipendere esclusivamente dalla banca sotto casa?
