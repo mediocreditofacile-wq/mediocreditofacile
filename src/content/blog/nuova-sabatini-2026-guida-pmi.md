@@ -1,9 +1,11 @@
 ---
 title: "Nuova Sabatini 2026: guida pratica per PMI"
 description: "Cos'è la Nuova Sabatini, chi può accedere, come calcolare il contributo MISE e come combinarlo con il finanziamento bancario. Guida aggiornata 2026."
-date: "2026-04-09"
+date: "2026-04-03"
 author: "Alberto Amà"
 tags: ["sabatini", "agevolazioni", "beni strumentali", "contributo mise"]
+image: "/images/blog-nuova-sabatini-2026.jpg"
+imageAlt: "Macchinario CNC in officina moderna acquistato con contributo Sabatini"
 ---
 
 *Contributo a fondo perduto, finanziamento bancario agevolato, iter burocratico gestibile. La Nuova Sabatini resta la misura piu concreta per le PMI che investono in beni strumentali. Ecco come funziona nel 2026, con numeri e formule.*

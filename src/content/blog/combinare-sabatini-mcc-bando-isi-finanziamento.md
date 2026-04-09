@@ -4,6 +4,8 @@ description: "Guida pratica per PMI: come combinare Nuova Sabatini, Fondo di Gar
 date: "2026-04-09"
 author: "Alberto Amà"
 tags: ["sabatini", "fondo garanzia", "bando isi", "agevolazioni", "finanziamenti", "combinare"]
+image: "/images/blog-combinare-agevolazioni.jpg"
+imageAlt: "Vista dall'alto di scrivania con documenti di agevolazioni a confronto"
 ---
 
 Le agevolazioni pubbliche per le PMI non si escludono a vicenda. Eppure la maggior parte delle aziende ne usa una sola, quando potrebbe combinarne due o tre sullo stesso investimento. Il motivo è semplice: ogni misura agisce su un livello diverso del costo, e capire dove si incastrano richiede qualcuno che le conosca tutte.
