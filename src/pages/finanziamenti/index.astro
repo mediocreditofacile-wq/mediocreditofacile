@@ -1,0 +1,1054 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+
+// FAQ data per Schema markup + render
+const faqs = [
+  {
+    q: 'Quanto posso ottenere come finanziamento?',
+    a: 'I finanziamenti bancari dedicati partono da 50.000 euro in su e sono riservati a societa\' di capitali (SRL, SPA, SAPA). Non c\'e\' un tetto massimo predefinito: l\'importo dipende dal profilo dell\'azienda, dal tipo di investimento e dalle garanzie disponibili.',
+  },
+  {
+    q: 'Che documenti servono?',
+    a: 'Per una prima valutazione bastano visura camerale, ultimi due bilanci depositati e una descrizione dell\'investimento. Se la pratica va avanti, servono anche il modello Unico, la centrale rischi e i preventivi dei beni. MCF ti guida su tutta la documentazione.',
+  },
+  {
+    q: 'La mia ditta individuale puo\' accedere?',
+    a: 'I finanziamenti da 50.000 euro in su sono riservati a societa\' di capitali. Per ditte individuali e professionisti abbiamo soluzioni alternative con gli altri operatori della nostra rete: noleggio operativo, leasing, microcredito. Contattaci e troviamo quella giusta per la tua situazione.',
+  },
+  {
+    q: 'Posso accedere se la banca mi ha rifiutato?',
+    a: 'Si\'. MCF lavora con piu\' operatori bancari e finanziari. Un rifiuto da parte della banca di riferimento non significa che non esistano soluzioni. Valutiamo il profilo con criteri diversi e su canali diversi. In molti casi troviamo l\'operatore giusto.',
+  },
+  {
+    q: 'Quanto tempo ci vuole per avere i soldi?',
+    a: 'La pre-valutazione avviene in 24 ore. Se il profilo e\' in linea, la proposta formale arriva in 48 ore. Dall\'approvazione all\'erogazione passano in genere 5-10 giorni lavorativi, a seconda dell\'operatore e della complessita\' della pratica.',
+  },
+  {
+    q: 'Posso combinare il finanziamento con la Sabatini?',
+    a: 'Si\', e conviene farlo. La Nuova Sabatini copre una parte degli interessi sul finanziamento destinato all\'acquisto di beni strumentali. MCF gestisce sia la pratica di finanziamento sia la domanda Sabatini, in un unico processo.',
+  },
+  {
+    q: 'Il factoring e\' adatto alla mia azienda?',
+    a: 'Il factoring funziona bene per aziende che hanno crediti commerciali verso clienti affidabili e tempi di incasso lunghi. Non e\' un debito aggiuntivo: monetizzi fatture gia\' emesse. Valutiamo il tuo portafoglio clienti per dirti se conviene.',
+  },
+  {
+    q: 'Ci sono costi nascosti?',
+    a: 'No. La consulenza MCF e\' gratuita. Non ci sono costi di istruttoria a carico del cliente. Il nostro compenso arriva dall\'operatore che eroga il finanziamento. Le condizioni economiche del finanziamento (tasso, spese, commissioni) sono tutte esplicitate nella proposta formale prima della firma.',
+  },
+];
+
+const faqJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqs.map((f) => ({
+    '@type': 'Question',
+    name: f.q,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: f.a,
+    },
+  })),
+};
+
+const serviceJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FinancialService',
+  name: 'Mediocredito Facile',
+  description: 'Accesso a finanziamenti bancari dedicati per PMI: chirografario, strutturato, anticipo fatture.',
+  url: 'https://www.mediocreditofacile.it/finanziamenti/',
+  telephone: '+393939957840',
+  email: 'mediocreditofacile@gmail.com',
+  areaServed: 'IT',
+  serviceType: ['Finanziamento chirografario', 'Finanziamento strutturato', 'Factoring', 'Anticipo fatture'],
+};
+---
+
+<Layout
+  title="Finanziamento PMI | Chirografario, Strutturato, Factoring | Mediocredito Facile"
+  description="Accesso rapido a finanziamenti bancari per PMI. Chirografario, strutturato, anticipo fatture. Valutazione gratuita in 24 ore. Oltre 10 operatori."
+>
+  <Header minimal={false} />
+
+  <script type="application/ld+json" set:html={JSON.stringify(faqJsonLd)} />
+  <script type="application/ld+json" set:html={JSON.stringify(serviceJsonLd)} />
+
+  <main>
+
+    <!-- HERO -->
+    <section class="fin-hero">
+      <div class="fin-hero__inner">
+        <span class="fin-hero__eyebrow">Finanziamenti per PMI</span>
+        <h1 class="fin-hero__title">
+          Finanziamento per PMI: accesso rapido al credito per la tua impresa
+        </h1>
+        <p class="fin-hero__sub">
+          Un unico interlocutore, accesso a finanziamenti bancari dedicati.
+          Chirografario, strutturato, anticipo fatture. Risposta in 48 ore.
+        </p>
+        <a href="#form-finanziamenti" class="fin-hero__cta">
+          Richiedi una valutazione gratuita
+        </a>
+      </div>
+    </section>
+
+    <!-- IL PROBLEMA -->
+    <section class="fin-problem">
+      <div class="fin-problem__inner">
+        <h2 class="fin-section-title">Hai bisogno di liquidita' per investire, e la banca non ti da' risposte</h2>
+        <div class="fin-problem__content">
+          <p>
+            Il macchinario serve adesso. L'attrezzatura e' in consegna tra due settimane.
+            Il capannone ha bisogno di un intervento che non puo' aspettare. Intanto la banca
+            chiede documentazione, richiama tra dieci giorni, passa la pratica a un altro ufficio.
+          </p>
+          <p>
+            Oppure ha gia' detto no. E il no della tua banca non significa che non esistano
+            soluzioni: significa che quell'istituto, con quei criteri, in quel momento, non
+            ha trovato il modo di finanziarti. Altri operatori ragionano diversamente.
+          </p>
+          <p>
+            MCF esiste per questo. Lavoriamo con piu' operatori bancari e finanziari per
+            trovare il canale giusto per la tua azienda, con tempi che rispettano i tuoi.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- TRE PRODOTTI -->
+    <section class="fin-products">
+      <div class="fin-products__inner">
+        <h2 class="fin-section-title">Tre soluzioni, un unico punto di accesso</h2>
+        <div class="fin-products__grid">
+
+          <div class="fin-product-card">
+            <div class="fin-product-card__icon">
+              <span class="material-icons-outlined" aria-hidden="true">account_balance</span>
+            </div>
+            <h3 class="fin-product-card__title">Chirografario</h3>
+            <p class="fin-product-card__desc">
+              Finanziamento senza garanzia reale. Da 50.000 euro in su, per societa' di capitali.
+              Erogazione rapida, documentazione snella. Ideale per attrezzature, arredi, tecnologia,
+              interventi di ammodernamento.
+            </p>
+            <a href="#faq-section" class="fin-product-card__link">Approfondisci nelle FAQ</a>
+          </div>
+
+          <div class="fin-product-card">
+            <div class="fin-product-card__icon">
+              <span class="material-icons-outlined" aria-hidden="true">trending_up</span>
+            </div>
+            <h3 class="fin-product-card__title">Strutturato</h3>
+            <p class="fin-product-card__desc">
+              Piano personalizzato su misura. Da 50.000 euro, durate e condizioni costruite
+              sull'investimento. Per progetti produttivi importanti: linee di produzione,
+              ristrutturazione, espansione aziendale.
+            </p>
+            <a href="#faq-section" class="fin-product-card__link">Approfondisci nelle FAQ</a>
+          </div>
+
+          <div class="fin-product-card">
+            <div class="fin-product-card__icon">
+              <span class="material-icons-outlined" aria-hidden="true">receipt_long</span>
+            </div>
+            <h3 class="fin-product-card__title">Anticipo fatture / Factoring</h3>
+            <p class="fin-product-card__desc">
+              Liquidita' immediata sulle fatture emesse. Non e' un debito aggiuntivo:
+              monetizzi il credito che hai gia' verso i tuoi clienti. Ideale per gestire
+              il cash flow nei periodi di crescita.
+            </p>
+            <a href="#faq-section" class="fin-product-card__link">Approfondisci nelle FAQ</a>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- IL PROCESSO -->
+    <section class="fin-process">
+      <div class="fin-process__inner">
+        <h2 class="fin-section-title fin-section-title--light">Dalla richiesta all'erogazione: come funziona</h2>
+        <div class="fin-process__steps">
+          <div class="fin-step">
+            <div class="fin-step__number">1</div>
+            <h3 class="fin-step__title">Contattaci</h3>
+            <p class="fin-step__desc">
+              Compila il form o chiamaci con i dati della tua azienda e l'investimento previsto.
+            </p>
+          </div>
+          <div class="fin-step">
+            <div class="fin-step__number">2</div>
+            <h3 class="fin-step__title">Analisi gratuita</h3>
+            <p class="fin-step__desc">
+              In 24 ore valutiamo il profilo, identifichiamo il prodotto giusto e l'operatore piu' adatto.
+            </p>
+          </div>
+          <div class="fin-step">
+            <div class="fin-step__number">3</div>
+            <h3 class="fin-step__title">Proposta formalizzata</h3>
+            <p class="fin-step__desc">
+              Condizioni, importi, durata, rate. Tutto nero su bianco, senza sorprese.
+            </p>
+          </div>
+          <div class="fin-step">
+            <div class="fin-step__number">4</div>
+            <h3 class="fin-step__title">Erogazione</h3>
+            <p class="fin-step__desc">
+              Tempi tipici: 5-10 giorni lavorativi dall'approvazione. Ti seguiamo fino all'accredito.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- AGEVOLAZIONI COMBINABILI -->
+    <section class="fin-agevolazioni">
+      <div class="fin-agevolazioni__inner">
+        <h2 class="fin-section-title">Stai comprando un bene strumentale? Probabilmente hai diritto a un'agevolazione</h2>
+        <div class="fin-agevolazioni__intro">
+          <p>
+            Se l'investimento riguarda macchinari, attrezzature, tecnologia o sicurezza sul lavoro,
+            esistono agevolazioni statali che riducono il costo dell'operazione. Sabatini abbatte gli interessi.
+            Il Fondo di Garanzia copre il rischio per la banca, migliorando le condizioni. Il Bando ISI
+            arriva a coprire il 65% a fondo perduto.
+          </p>
+          <p>
+            MCF ti aiuta a combinare il finanziamento con l'agevolazione giusta, in un'unica pratica.
+          </p>
+        </div>
+        <div class="fin-agevolazioni__grid">
+          <a href="/finanziamenti/agevolazioni/nuova-sabatini-2026" class="fin-agev-card">
+            <div class="fin-agev-card__icon">
+              <span class="material-icons-outlined" aria-hidden="true">savings</span>
+            </div>
+            <h3 class="fin-agev-card__title">Nuova Sabatini</h3>
+            <p class="fin-agev-card__desc">
+              Il contributo statale sugli interessi del tuo finanziamento. Per beni ordinari e 4.0.
+            </p>
+            <span class="fin-agev-card__cta">Scopri come funziona</span>
+          </a>
+          <a href="/finanziamenti/agevolazioni/fondo-garanzia-mcc" class="fin-agev-card">
+            <div class="fin-agev-card__icon">
+              <span class="material-icons-outlined" aria-hidden="true">shield</span>
+            </div>
+            <h3 class="fin-agev-card__title">Fondo di Garanzia MCC</h3>
+            <p class="fin-agev-card__desc">
+              La garanzia gratuita che lo Stato offre alle PMI. Migliora le condizioni del finanziamento.
+            </p>
+            <span class="fin-agev-card__cta">Scopri come funziona</span>
+          </a>
+          <a href="/finanziamenti/agevolazioni/bando-isi-inail" class="fin-agev-card">
+            <div class="fin-agev-card__icon">
+              <span class="material-icons-outlined" aria-hidden="true">health_and_safety</span>
+            </div>
+            <h3 class="fin-agev-card__title">Bando ISI Inail</h3>
+            <p class="fin-agev-card__desc">
+              Fino al 65% a fondo perduto per investimenti in sicurezza sul lavoro.
+            </p>
+            <span class="fin-agev-card__cta">Scopri come funziona</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- PERCHE' MCF -->
+    <section class="fin-why">
+      <div class="fin-why__inner">
+        <h2 class="fin-section-title">Perche' passare da Mediocredito Facile</h2>
+        <div class="fin-why__grid">
+          <div class="fin-why__block">
+            <span class="material-icons-outlined fin-why__icon" aria-hidden="true">compare_arrows</span>
+            <h3>Piu' operatori, piu' possibilita'</h3>
+            <p>
+              Non dipendi da un solo istituto. Lavoriamo con piu' operatori bancari e finanziari:
+              maggiore probabilita' di approvazione, condizioni migliori.
+            </p>
+          </div>
+          <div class="fin-why__block">
+            <span class="material-icons-outlined fin-why__icon" aria-hidden="true">money_off</span>
+            <h3>Valutazione gratuita, zero istruttoria</h3>
+            <p>
+              La consulenza e' gratuita. Non ci sono costi di istruttoria a carico tuo.
+              Il nostro compenso arriva dall'operatore che eroga il finanziamento.
+            </p>
+          </div>
+          <div class="fin-why__block">
+            <span class="material-icons-outlined fin-why__icon" aria-hidden="true">speed</span>
+            <h3>Risposta in 48 ore, non in settimane</h3>
+            <p>
+              Pre-valutazione in 24 ore, proposta formale in 48. Niente rimbalzi tra uffici,
+              niente "richiami la prossima settimana".
+            </p>
+          </div>
+          <div class="fin-why__block">
+            <span class="material-icons-outlined fin-why__icon" aria-hidden="true">integration_instructions</span>
+            <h3>Agevolazioni integrate</h3>
+            <p>
+              Sabatini, Fondo di Garanzia, Bando ISI: se la tua operazione rientra in un'agevolazione,
+              la gestiamo noi insieme al finanziamento. Una pratica, un interlocutore.
+            </p>
+          </div>
+          <div class="fin-why__block">
+            <span class="material-icons-outlined fin-why__icon" aria-hidden="true">person</span>
+            <h3>Un unico interlocutore</h3>
+            <p>
+              Dal primo contatto all'erogazione, parli con Alberto. Niente call center,
+              niente ticket. Una persona che conosce la tua pratica.
+            </p>
+          </div>
+        </div>
+
+        <!-- Logo IFIS trust banner -->
+        <div class="fin-trust">
+          <p class="fin-trust__label">In partnership con</p>
+          <img src="/images/partners/ifis.svg" alt="IFIS" class="fin-trust__logo" loading="lazy" width="120" height="40" />
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="fin-faq" id="faq-section">
+      <div class="fin-faq__inner">
+        <h2 class="fin-section-title">Domande frequenti</h2>
+        <div class="fin-faq__list">
+          {faqs.map((faq, i) => (
+            <details class="fin-faq__item" id={`faq-${i}`}>
+              <summary class="fin-faq__question">{faq.q}</summary>
+              <p class="fin-faq__answer">{faq.a}</p>
+            </details>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- FORM -->
+    <section class="fin-form" id="form-finanziamenti">
+      <div class="fin-form__inner">
+        <h2 class="fin-form__heading">Lascia i tuoi dati, ti richiamo io per una valutazione gratuita</h2>
+        <p class="fin-form__sub">Compilazione in 30 secondi. Nessun impegno.</p>
+        <form class="fin-form__form" id="form-fin" action="">
+          <input name="website" type="text" tabindex="-1" autocomplete="off" style="position:absolute;opacity:0;pointer-events:none;height:0;overflow:hidden" aria-hidden="true" />
+          <input type="hidden" name="fonte" value="finanziamenti-ifis" />
+
+          <div class="fin-form__field">
+            <label for="fin-nome">Nome e Cognome</label>
+            <input type="text" id="fin-nome" name="nome" placeholder="Mario Rossi" required autocomplete="name" />
+          </div>
+
+          <div class="fin-form__field">
+            <label for="fin-tel">Telefono</label>
+            <input type="tel" id="fin-tel" name="telefono" placeholder="+39 333 123 4567" required autocomplete="tel" />
+          </div>
+
+          <div class="fin-form__field">
+            <label for="fin-forma">Forma giuridica</label>
+            <select id="fin-forma" name="forma_giuridica" required>
+              <option value="" disabled selected>Seleziona...</option>
+              <option value="SRL">SRL</option>
+              <option value="SPA">SPA</option>
+              <option value="SAPA">SAPA</option>
+              <option value="Ditta individuale">Ditta individuale</option>
+              <option value="Professionista">Professionista</option>
+              <option value="Altro">Altro</option>
+            </select>
+          </div>
+
+          <!-- Nota per ditte individuali / professionisti -->
+          <div class="fin-form__note" id="fin-note-alternativo" style="display:none;">
+            <span class="material-icons-outlined" aria-hidden="true">info</span>
+            Per ditte individuali e professionisti valutiamo soluzioni alternative con gli altri
+            operatori della nostra rete. Ti ricontatto comunque per trovare la soluzione giusta.
+          </div>
+
+          <div class="fin-form__field">
+            <label for="fin-importo">Importo stimato dell'investimento</label>
+            <select id="fin-importo" name="importo_investimento" required>
+              <option value="" disabled selected>Seleziona...</option>
+              <option value="50-100k">50.000 - 100.000 euro</option>
+              <option value="100-250k">100.000 - 250.000 euro</option>
+              <option value="250-500k">250.000 - 500.000 euro</option>
+              <option value="oltre-500k">Oltre 500.000 euro</option>
+            </select>
+          </div>
+
+          <button type="submit" class="fin-form__submit" id="fin-submit">Richiedi Valutazione Gratuita</button>
+          <p class="fin-form__privacy">
+            Inviando il modulo accetti la nostra <a href="/privacy">informativa sulla privacy</a>.
+          </p>
+        </form>
+      </div>
+    </section>
+
+  </main>
+  <Footer />
+</Layout>
+
+<script>
+  // Mostra nota per ditte individuali / professionisti
+  const formaSelect = document.getElementById('fin-forma') as HTMLSelectElement | null;
+  const noteDiv = document.getElementById('fin-note-alternativo');
+  formaSelect?.addEventListener('change', () => {
+    const val = formaSelect.value;
+    if (noteDiv) {
+      noteDiv.style.display = (val === 'Ditta individuale' || val === 'Professionista') ? 'flex' : 'none';
+    }
+  });
+
+  // Form submit
+  const form = document.getElementById('form-fin') as HTMLFormElement | null;
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('fin-submit') as HTMLButtonElement | null;
+    if (btn) { btn.disabled = true; btn.textContent = 'Invio in corso...'; }
+    const data = new FormData(form);
+    try {
+      await fetch('/api/submit', { method: 'POST', body: data });
+    } catch (_) {}
+    window.location.href = '/grazie-fin';
+  });
+</script>
+
+<style>
+  /* HERO */
+  .fin-hero {
+    background: linear-gradient(135deg, #1A0A3E 0%, #664CCD 60%, #FE6F3A 100%);
+    color: #fff;
+    padding: 6rem 1.5rem 5.5rem;
+    text-align: center;
+  }
+
+  .fin-hero__inner {
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  .fin-hero__eyebrow {
+    display: inline-block;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--mcf-melon);
+    margin-bottom: 1.25rem;
+  }
+
+  .fin-hero__title {
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    margin-bottom: 1.25rem;
+  }
+
+  .fin-hero__sub {
+    font-size: clamp(1rem, 2.5vw, 1.15rem);
+    line-height: 1.65;
+    color: rgba(255, 255, 255, 0.85);
+    margin-bottom: 2rem;
+    max-width: 620px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .fin-hero__cta {
+    display: inline-flex;
+    align-items: center;
+    background: var(--mcf-primary);
+    color: #fff;
+    font-weight: 700;
+    font-size: 1.1rem;
+    padding: 1rem 2.5rem;
+    border-radius: 8px;
+    transition: background 0.2s, transform 0.15s;
+  }
+
+  .fin-hero__cta:hover {
+    background: var(--mcf-primary-dark);
+    transform: translateY(-1px);
+  }
+
+  /* SEZIONI COMUNI */
+  .fin-section-title {
+    text-align: center;
+    font-size: clamp(1.5rem, 3.5vw, 2.1rem);
+    font-weight: 800;
+    color: var(--mcf-accent);
+    margin-bottom: 2rem;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .fin-section-title--light {
+    color: #fff;
+  }
+
+  /* IL PROBLEMA */
+  .fin-problem {
+    padding: 4.5rem 1.5rem;
+    background: var(--mcf-ghost);
+  }
+
+  .fin-problem__inner {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  .fin-problem__content p {
+    font-size: 1.05rem;
+    line-height: 1.75;
+    color: var(--mcf-charcoal);
+    margin-bottom: 1rem;
+  }
+
+  .fin-problem__content p:last-child {
+    margin-bottom: 0;
+  }
+
+  /* TRE PRODOTTI */
+  .fin-products {
+    padding: 4.5rem 1.5rem;
+    background: var(--color-bg);
+  }
+
+  .fin-products__inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+
+  .fin-products__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+
+  .fin-product-card {
+    background: #fff;
+    border: 1px solid var(--mcf-platinum);
+    border-radius: var(--radius);
+    padding: 2.25rem 1.75rem;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .fin-product-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(102, 76, 205, 0.1);
+  }
+
+  .fin-product-card__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(254, 111, 58, 0.12), rgba(102, 76, 205, 0.12));
+    color: var(--mcf-accent);
+    margin-bottom: 1.25rem;
+  }
+
+  .fin-product-card__icon .material-icons-outlined {
+    font-size: 1.7rem;
+  }
+
+  .fin-product-card__title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--mcf-accent);
+    margin-bottom: 0.75rem;
+  }
+
+  .fin-product-card__desc {
+    font-size: 0.95rem;
+    color: var(--mcf-charcoal);
+    line-height: 1.65;
+    margin-bottom: 1rem;
+  }
+
+  .fin-product-card__link {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--mcf-primary);
+    transition: color 0.2s;
+  }
+
+  .fin-product-card__link:hover {
+    color: var(--mcf-primary-dark);
+  }
+
+  /* IL PROCESSO */
+  .fin-process {
+    padding: 4.5rem 1.5rem;
+    background: linear-gradient(135deg, #1e1b3a 0%, #1a1640 100%);
+    color: #fff;
+  }
+
+  .fin-process__inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+
+  .fin-process__steps {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+    margin-top: 2.5rem;
+  }
+
+  .fin-step {
+    text-align: center;
+  }
+
+  .fin-step__number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--mcf-primary);
+    color: #fff;
+    font-size: 1.25rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+  }
+
+  .fin-step__title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: #fff;
+  }
+
+  .fin-step__desc {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.75);
+  }
+
+  /* AGEVOLAZIONI COMBINABILI */
+  .fin-agevolazioni {
+    padding: 4.5rem 1.5rem;
+    background: var(--mcf-ghost);
+  }
+
+  .fin-agevolazioni__inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+
+  .fin-agevolazioni__intro {
+    max-width: 720px;
+    margin: 0 auto 2.5rem;
+  }
+
+  .fin-agevolazioni__intro p {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: var(--mcf-charcoal);
+    margin-bottom: 0.75rem;
+    text-align: center;
+  }
+
+  .fin-agevolazioni__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+
+  .fin-agev-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    background: #fff;
+    border: 1px solid var(--mcf-platinum);
+    border-radius: var(--radius);
+    padding: 2rem 1.5rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+    text-decoration: none;
+  }
+
+  .fin-agev-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(102, 76, 205, 0.1);
+  }
+
+  .fin-agev-card__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: var(--mcf-ghost);
+    color: var(--mcf-accent);
+    margin-bottom: 1rem;
+  }
+
+  .fin-agev-card__icon .material-icons-outlined {
+    font-size: 1.5rem;
+  }
+
+  .fin-agev-card__title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--mcf-accent);
+    margin-bottom: 0.5rem;
+  }
+
+  .fin-agev-card__desc {
+    font-size: 0.9rem;
+    color: var(--mcf-charcoal);
+    line-height: 1.6;
+    margin-bottom: 1rem;
+    flex: 1;
+  }
+
+  .fin-agev-card__cta {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--mcf-primary);
+  }
+
+  /* PERCHE' MCF */
+  .fin-why {
+    padding: 4.5rem 1.5rem;
+    background: var(--color-bg);
+  }
+
+  .fin-why__inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+
+  .fin-why__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    margin-bottom: 3rem;
+  }
+
+  .fin-why__block {
+    padding: 1.5rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--mcf-platinum);
+    background: #fff;
+  }
+
+  .fin-why__icon {
+    font-size: 1.5rem;
+    color: var(--mcf-primary);
+    margin-bottom: 0.75rem;
+    display: block;
+  }
+
+  .fin-why__block h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--mcf-accent);
+    margin-bottom: 0.5rem;
+  }
+
+  .fin-why__block p {
+    font-size: 0.9rem;
+    color: var(--mcf-charcoal);
+    line-height: 1.65;
+  }
+
+  /* Trust banner IFIS */
+  .fin-trust {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: var(--mcf-ghost);
+    border-radius: var(--radius);
+    border: 1px solid var(--mcf-platinum);
+  }
+
+  .fin-trust__label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--mcf-taupe);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .fin-trust__logo {
+    height: 32px;
+    width: auto;
+    opacity: 0.85;
+  }
+
+  /* FAQ */
+  .fin-faq {
+    padding: 4.5rem 1.5rem;
+    background: var(--mcf-ghost);
+  }
+
+  .fin-faq__inner {
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  .fin-faq__list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .fin-faq__item {
+    border-bottom: 1px solid var(--mcf-platinum);
+  }
+
+  .fin-faq__question {
+    padding: 1.25rem 0;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--mcf-accent);
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .fin-faq__question::after {
+    content: '+';
+    font-size: 1.4rem;
+    font-weight: 300;
+    color: var(--mcf-primary);
+    transition: transform 0.2s;
+    flex-shrink: 0;
+    margin-left: 1rem;
+  }
+
+  .fin-faq__item[open] .fin-faq__question::after {
+    content: '-';
+  }
+
+  .fin-faq__question::-webkit-details-marker {
+    display: none;
+  }
+
+  .fin-faq__answer {
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: var(--mcf-charcoal);
+    padding-bottom: 1.25rem;
+    padding-right: 2rem;
+  }
+
+  /* FORM */
+  .fin-form {
+    padding: 4.5rem 1.5rem;
+    background: var(--color-bg);
+  }
+
+  .fin-form__inner {
+    max-width: 520px;
+    margin: 0 auto;
+  }
+
+  .fin-form__heading {
+    text-align: center;
+    font-size: clamp(1.35rem, 3.5vw, 1.75rem);
+    font-weight: 800;
+    color: var(--mcf-accent);
+    margin-bottom: 0.5rem;
+    line-height: 1.3;
+  }
+
+  .fin-form__sub {
+    text-align: center;
+    color: var(--mcf-taupe);
+    margin-bottom: 2rem;
+    font-size: 1rem;
+  }
+
+  .fin-form__form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+  }
+
+  .fin-form__field label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--mcf-accent);
+    margin-bottom: 0.35rem;
+  }
+
+  .fin-form__field input,
+  .fin-form__field select {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border: 1.5px solid var(--mcf-platinum);
+    border-radius: 8px;
+    font-family: var(--font-family);
+    font-size: 1rem;
+    color: var(--mcf-charcoal);
+    background: #fff;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .fin-form__field input:focus,
+  .fin-form__field select:focus {
+    outline: none;
+    border-color: var(--mcf-accent);
+    box-shadow: 0 0 0 3px rgba(102, 76, 205, 0.15);
+  }
+
+  .fin-form__note {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 0.85rem 1rem;
+    background: rgba(254, 111, 58, 0.08);
+    border: 1px solid rgba(254, 111, 58, 0.2);
+    border-radius: 8px;
+    font-size: 0.88rem;
+    line-height: 1.55;
+    color: var(--mcf-charcoal);
+  }
+
+  .fin-form__note .material-icons-outlined {
+    font-size: 1.1rem;
+    color: var(--mcf-primary);
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .fin-form__submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--mcf-primary);
+    color: #fff;
+    font-family: var(--font-family);
+    font-weight: 700;
+    font-size: 1.05rem;
+    padding: 0.9rem 2rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    margin-top: 0.5rem;
+  }
+
+  .fin-form__submit:hover {
+    background: var(--mcf-primary-dark);
+    transform: translateY(-1px);
+  }
+
+  .fin-form__privacy {
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--mcf-taupe);
+    margin-top: 0.25rem;
+  }
+
+  .fin-form__privacy a {
+    color: var(--mcf-accent);
+    text-decoration: underline;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 960px) {
+    .fin-products__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .fin-products__grid .fin-product-card:last-child {
+      grid-column: 1 / -1;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    .fin-process__steps {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .fin-agevolazioni__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .fin-agevolazioni__grid .fin-agev-card:last-child {
+      grid-column: 1 / -1;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    .fin-why__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .fin-why__grid .fin-why__block:last-child {
+      grid-column: 1 / -1;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .fin-hero {
+      padding: 4rem 1.25rem 3.5rem;
+    }
+
+    .fin-products__grid {
+      grid-template-columns: 1fr;
+    }
+
+    .fin-products__grid .fin-product-card:last-child {
+      max-width: none;
+    }
+
+    .fin-process__steps {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+
+    .fin-agevolazioni__grid {
+      grid-template-columns: 1fr;
+    }
+
+    .fin-agevolazioni__grid .fin-agev-card:last-child {
+      max-width: none;
+    }
+
+    .fin-why__grid {
+      grid-template-columns: 1fr;
+    }
+
+    .fin-why__grid .fin-why__block:last-child {
+      max-width: none;
+    }
+
+    .fin-problem,
+    .fin-products,
+    .fin-process,
+    .fin-agevolazioni,
+    .fin-why,
+    .fin-faq,
+    .fin-form {
+      padding: 3rem 1.25rem;
+    }
+
+    .fin-form__submit {
+      width: 100%;
+    }
+
+    .fin-trust {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+  }
+</style>

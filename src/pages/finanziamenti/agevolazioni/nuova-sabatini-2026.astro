@@ -1,0 +1,860 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import Header from '../../../components/Header.astro';
+import Footer from '../../../components/Footer.astro';
+import SabatiniCalculator from '../../../components/tools/SabatiniCalculator.tsx';
+
+// FAQ data per Schema markup + render
+const faqs = [
+  {
+    q: 'Come funziona la Nuova Sabatini in pratica?',
+    a: 'La Nuova Sabatini e\' un contributo del Ministero delle Imprese e del Made in Italy (ex MISE) che copre una parte degli interessi su un finanziamento o leasing destinato all\'acquisto di beni strumentali. La PMI ottiene il finanziamento dall\'operatore convenzionato, lo Stato eroga il contributo in 5 quote annuali. L\'agevolazione vale su investimenti tra 20.000 e 4.000.000 di euro.',
+  },
+  {
+    q: 'Quali beni rientrano nell\'agevolazione?',
+    a: 'Sono ammessi macchinari, impianti, attrezzature, hardware, software e tecnologie digitali ad uso produttivo. I beni devono essere nuovi di fabbrica e correlati all\'attivita\' dell\'impresa. Non sono ammessi terreni, fabbricati, beni gia\' utilizzati e mezzi di trasporto a uso non strumentale.',
+  },
+  {
+    q: 'Qual e\' la differenza tra beni ordinari e beni 4.0?',
+    a: 'I beni "ordinari" sono macchinari e attrezzature standard. I beni "4.0" sono quelli che rientrano nei criteri Industria 4.0 (interconnessione, integrazione automatizzata con i sistemi aziendali, monitoraggio in tempo reale). Per i beni 4.0 il contributo Sabatini e\' maggiorato del 30% rispetto agli ordinari.',
+  },
+  {
+    q: 'Posso combinare la Nuova Sabatini con il leasing?',
+    a: 'Si\'. Il leasing finanziario e\' una delle forme tecniche piu\' utilizzate per accedere alla Sabatini. L\'operatore di leasing eroga il bene, la PMI paga i canoni, lo Stato versa il contributo direttamente all\'impresa. Il noleggio operativo invece non rientra nell\'agevolazione perche\' non comporta acquisto del bene.',
+  },
+  {
+    q: 'Posso combinare Sabatini e Fondo di Garanzia MCC?',
+    a: 'Si\', le due agevolazioni si combinano perfettamente. La Sabatini copre gli interessi, il Fondo di Garanzia copre il rischio per la banca o l\'intermediario fino all\'80%. Combinarle significa ridurre sia il costo del finanziamento (Sabatini) sia il rischio percepito dall\'istituto erogatore (Fondo Garanzia), spesso ottenendo condizioni migliori.',
+  },
+  {
+    q: 'Quanto tempo ci vuole per ottenere il contributo?',
+    a: 'La pratica MISE viene istruita in genere in 30-60 giorni dalla presentazione completa della domanda. L\'erogazione del contributo avviene in 5 quote annuali a partire dal completamento dell\'investimento. La rapidita\' dipende molto dalla qualita\' della documentazione: un operatore convenzionato esperto velocizza il processo significativamente.',
+  },
+  {
+    q: 'Cosa serve per fare domanda?',
+    a: 'Serve avere identificato l\'operatore convenzionato (banca, leasing, intermediario), il bene da acquistare con preventivo, i requisiti dimensionali da PMI (max 250 dipendenti, fatturato max 50M o totale di bilancio max 43M), regolarita\' contributiva (DURC). MCF gestisce tutta la documentazione e l\'interlocuzione con il MISE per conto del cliente.',
+  },
+];
+
+const faqJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqs.map((f) => ({
+    '@type': 'Question',
+    name: f.q,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: f.a,
+    },
+  })),
+};
+
+const webAppJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: 'Calcolatore Nuova Sabatini 2026',
+  applicationCategory: 'BusinessApplication',
+  description: 'Calcola in tempo reale il contributo MISE della Nuova Sabatini sull\'acquisto di beni strumentali per la tua impresa.',
+  url: 'https://www.mediocreditofacile.it/finanziamenti/agevolazioni/nuova-sabatini-2026',
+  offers: {
+    '@type': 'Offer',
+    price: '0',
+    priceCurrency: 'EUR',
+  },
+  operatingSystem: 'Web',
+};
+---
+
+<Layout
+  title="Nuova Sabatini 2026: Calcola il Contributo per Beni Strumentali"
+  description="Calcolatore Nuova Sabatini 2026: scopri in tempo reale il contributo MISE sull'acquisto di macchinari e attrezzature. Beni ordinari e 4.0, esempi numerici, FAQ. Mediocredito Facile."
+>
+  <Header minimal={false} />
+
+  <script type="application/ld+json" set:html={JSON.stringify(faqJsonLd)} />
+  <script type="application/ld+json" set:html={JSON.stringify(webAppJsonLd)} />
+
+  <main>
+
+    <!-- HERO -->
+    <section class="lp-hero">
+      <div class="lp-hero__inner">
+        <span class="lp-hero__eyebrow">Agevolazioni 2026</span>
+        <h1 class="lp-hero__title">
+          Nuova Sabatini 2026: come ottenere il contributo per beni strumentali
+        </h1>
+        <p class="lp-hero__sub">
+          La Nuova Sabatini e' il contributo statale per chi investe in macchinari,
+          attrezzature e tecnologie 4.0. Calcola subito quanto ti spetta e parlane
+          con un consulente Mediocredito Facile.
+        </p>
+        <a href="#calcolatore" class="lp-hero__cta">
+          Calcola il tuo contributo
+          <span class="material-icons-outlined">arrow_downward</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- COS'E' IN 60 SECONDI -->
+    <section class="lp-intro">
+      <div class="lp-intro__inner">
+        <h2 class="lp-intro__title">Cos'e' la Nuova Sabatini in 60 secondi</h2>
+        <div class="lp-intro__grid">
+          <div class="lp-intro__col">
+            <p>
+              La Nuova Sabatini e' una delle agevolazioni piu' utilizzate dalle PMI italiane
+              per acquistare beni strumentali. Funziona cosi': l'impresa stipula un finanziamento
+              o un leasing per acquistare macchinari, attrezzature o tecnologie 4.0.
+              Lo Stato, attraverso il Ministero delle Imprese e del Made in Italy,
+              eroga un contributo in conto interessi calcolato su un finanziamento di pari importo
+              al tasso convenzionale.
+            </p>
+            <p>
+              Il contributo viene versato direttamente all'impresa in 5 quote annuali,
+              riducendo di fatto il costo netto del bene acquistato. Possono accedere
+              tutte le PMI italiane con max 250 dipendenti, fatturato fino a 50 milioni
+              e regolarita' contributiva.
+            </p>
+          </div>
+          <div class="lp-intro__col">
+            <ul class="lp-intro__list">
+              <li>
+                <span class="material-icons-outlined">check_circle</span>
+                <div>
+                  <strong>Investimento ammesso</strong>
+                  <span>Da 20.000 a 4.000.000 di euro</span>
+                </div>
+              </li>
+              <li>
+                <span class="material-icons-outlined">check_circle</span>
+                <div>
+                  <strong>Beni 4.0</strong>
+                  <span>Contributo maggiorato del 30%</span>
+                </div>
+              </li>
+              <li>
+                <span class="material-icons-outlined">check_circle</span>
+                <div>
+                  <strong>Erogazione</strong>
+                  <span>5 quote annuali direttamente all'impresa</span>
+                </div>
+              </li>
+              <li>
+                <span class="material-icons-outlined">check_circle</span>
+                <div>
+                  <strong>Combinabile</strong>
+                  <span>Con Fondo di Garanzia MCC e altri incentivi</span>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CALCOLATORE -->
+    <section class="lp-calc" id="calcolatore">
+      <div class="lp-calc__inner">
+        <span class="lp-calc__eyebrow">Strumento gratuito</span>
+        <h2 class="lp-calc__title">Calcola il tuo contributo MISE</h2>
+        <p class="lp-calc__sub">
+          Inserisci l'importo dell'investimento e scegli la tipologia di bene.
+          Ti mostriamo subito il contributo statale stimato e il costo netto del bene.
+        </p>
+
+        <SabatiniCalculator client:load />
+      </div>
+    </section>
+
+    <!-- ESEMPI NUMERICI -->
+    <section class="lp-esempi">
+      <div class="lp-esempi__inner">
+        <h2 class="lp-esempi__title">Esempi reali</h2>
+        <p class="lp-esempi__sub">
+          Tre casi tipo per capire concretamente quanto vale la Nuova Sabatini
+          per imprese di dimensioni e settori diversi.
+        </p>
+        <div class="lp-esempi__grid">
+          <div class="lp-esempi__card">
+            <span class="lp-esempi__icon material-icons-outlined">precision_manufacturing</span>
+            <h3>Officina meccanica</h3>
+            <p class="lp-esempi__product">Tornio CNC 4.0</p>
+            <ul>
+              <li><span>Investimento</span><strong>80.000 €</strong></li>
+              <li><span>Tipologia</span><strong>Bene 4.0</strong></li>
+              <li class="lp-esempi__highlight">
+                <span>Contributo MISE</span><strong>~9.500 €</strong>
+              </li>
+              <li><span>Costo netto bene</span><strong>~70.500 €</strong></li>
+            </ul>
+          </div>
+          <div class="lp-esempi__card">
+            <span class="lp-esempi__icon material-icons-outlined">restaurant</span>
+            <h3>Ristorante</h3>
+            <p class="lp-esempi__product">Forno e attrezzature cucina</p>
+            <ul>
+              <li><span>Investimento</span><strong>40.000 €</strong></li>
+              <li><span>Tipologia</span><strong>Bene ordinario</strong></li>
+              <li class="lp-esempi__highlight">
+                <span>Contributo MISE</span><strong>~3.600 €</strong>
+              </li>
+              <li><span>Costo netto bene</span><strong>~36.400 €</strong></li>
+            </ul>
+          </div>
+          <div class="lp-esempi__card">
+            <span class="lp-esempi__icon material-icons-outlined">medical_services</span>
+            <h3>Studio medico</h3>
+            <p class="lp-esempi__product">Ecografo digitale</p>
+            <ul>
+              <li><span>Investimento</span><strong>60.000 €</strong></li>
+              <li><span>Tipologia</span><strong>Bene 4.0</strong></li>
+              <li class="lp-esempi__highlight">
+                <span>Contributo MISE</span><strong>~7.100 €</strong>
+              </li>
+              <li><span>Costo netto bene</span><strong>~52.900 €</strong></li>
+            </ul>
+          </div>
+        </div>
+        <p class="lp-esempi__disclaimer">
+          Stime indicative basate sui parametri normativi vigenti.
+          I valori reali possono variare in funzione della pratica istruita.
+        </p>
+      </div>
+    </section>
+
+    <!-- COMBINA CON FONDO GARANZIA -->
+    <section class="lp-combo">
+      <div class="lp-combo__inner">
+        <span class="lp-combo__eyebrow">Bonus combo</span>
+        <h2 class="lp-combo__title">Sabatini + Fondo di Garanzia MCC</h2>
+        <p class="lp-combo__sub">
+          Le due agevolazioni si combinano perfettamente. La Sabatini riduce gli interessi,
+          il Fondo di Garanzia copre fino all'80% del rischio per la banca, abbattendo
+          il tasso applicato. Insieme, sono lo strumento piu' efficace per finanziare
+          investimenti strategici delle PMI.
+        </p>
+        <div class="lp-combo__table">
+          <div class="lp-combo__row lp-combo__row--head">
+            <div></div>
+            <div>Cosa fa</div>
+            <div>Vantaggio</div>
+          </div>
+          <div class="lp-combo__row">
+            <div><strong>Nuova Sabatini</strong></div>
+            <div>Eroga un contributo in conto interessi del MISE</div>
+            <div>Riduce il costo netto del bene</div>
+          </div>
+          <div class="lp-combo__row">
+            <div><strong>Fondo Garanzia MCC</strong></div>
+            <div>Copre fino all'80% del rischio del finanziamento</div>
+            <div>Migliora le condizioni e l'accesso al credito</div>
+          </div>
+        </div>
+        <a href="/finanziamenti/agevolazioni/fondo-garanzia-mcc" class="lp-combo__link">
+          Scopri come funziona il Fondo di Garanzia MCC
+          <span class="material-icons-outlined">arrow_forward</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="lp-faq">
+      <div class="lp-faq__inner">
+        <h2 class="lp-faq__title">Domande frequenti</h2>
+        <div class="lp-faq__list">
+          {faqs.map((faq) => (
+            <details class="lp-faq__item">
+              <summary>
+                {faq.q}
+                <span class="material-icons-outlined">expand_more</span>
+              </summary>
+              <p>{faq.a}</p>
+            </details>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- COME FINANZIARLO -->
+    <section class="lp-mcf">
+      <div class="lp-mcf__inner">
+        <h2 class="lp-mcf__title">Come finanziare l'investimento con la Sabatini</h2>
+        <p class="lp-mcf__text">
+          Il contributo Sabatini si sblocca solo con un finanziamento bancario o un leasing.
+          Senza il finanziamento, l'agevolazione resta sulla carta. MCF ti da' accesso al
+          finanziamento giusto e gestisce la pratica Sabatini insieme: un unico percorso,
+          un unico interlocutore.
+        </p>
+        <p class="lp-mcf__text">
+          Lavoriamo con piu' operatori bancari e finanziari convenzionati.
+          Confrontiamo le condizioni per trovare il canale migliore per il tuo investimento,
+          e ci occupiamo di tutta la documentazione MISE. Valutazione gratuita in 24 ore.
+        </p>
+        <div class="lp-mcf__cta-row">
+          <a href="/finanziamenti/" class="lp-mcf__cta lp-mcf__cta--solid">
+            Richiedi il finanziamento con Sabatini integrata
+          </a>
+          <a href="tel:+393939957840" class="lp-mcf__cta lp-mcf__cta--outline">
+            <span class="material-icons-outlined">phone</span>
+            Chiama Alberto
+          </a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <Footer />
+</Layout>
+
+<style>
+  /* === HERO === */
+  .lp-hero {
+    background: linear-gradient(135deg, #1A0A3E 0%, #664CCD 60%, #FE6F3A 100%);
+    color: #ffffff;
+    padding: 6rem 1.5rem 5rem;
+    text-align: center;
+  }
+
+  .lp-hero__inner {
+    max-width: 880px;
+    margin: 0 auto;
+  }
+
+  .lp-hero__eyebrow {
+    display: inline-block;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.12);
+    padding: 0.4rem 1rem;
+    border-radius: 999px;
+    margin-bottom: 1.5rem;
+  }
+
+  .lp-hero__title {
+    font-size: clamp(2rem, 5vw, 3.25rem);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    margin-bottom: 1.25rem;
+  }
+
+  .lp-hero__sub {
+    font-size: clamp(1rem, 2vw, 1.15rem);
+    line-height: 1.65;
+    color: rgba(255, 255, 255, 0.85);
+    max-width: 720px;
+    margin: 0 auto 2rem;
+  }
+
+  .lp-hero__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--mcf-primary);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 1.05rem;
+    padding: 1rem 2rem;
+    border-radius: 10px;
+    transition: background 0.2s, transform 0.15s;
+  }
+
+  .lp-hero__cta:hover {
+    background: var(--mcf-primary-dark);
+    transform: translateY(-2px);
+  }
+
+  /* === INTRO === */
+  .lp-intro {
+    padding: 5rem 1.5rem;
+    background: #ffffff;
+  }
+
+  .lp-intro__inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+
+  .lp-intro__title {
+    font-size: clamp(1.75rem, 4vw, 2.25rem);
+    font-weight: 800;
+    color: var(--mcf-black);
+    letter-spacing: -0.03em;
+    margin-bottom: 2.5rem;
+    text-align: center;
+  }
+
+  .lp-intro__grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 3rem;
+    align-items: start;
+  }
+
+  .lp-intro__col p {
+    font-size: 1.05rem;
+    line-height: 1.75;
+    color: var(--mcf-charcoal);
+    margin-bottom: 1.25rem;
+  }
+
+  .lp-intro__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .lp-intro__list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.85rem;
+    padding: 1rem;
+    background: var(--mcf-ghost);
+    border-radius: 12px;
+    border-left: 3px solid var(--mcf-primary);
+  }
+
+  .lp-intro__list .material-icons-outlined {
+    color: var(--mcf-primary);
+    font-size: 1.4rem;
+    flex-shrink: 0;
+  }
+
+  .lp-intro__list strong {
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--mcf-black);
+    margin-bottom: 0.15rem;
+  }
+
+  .lp-intro__list span {
+    font-size: 0.85rem;
+    color: var(--mcf-taupe);
+  }
+
+  /* === CALCOLATORE === */
+  .lp-calc {
+    padding: 5rem 1.5rem;
+    background: var(--mcf-ghost);
+  }
+
+  .lp-calc__inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .lp-calc__eyebrow {
+    display: inline-block;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--mcf-primary);
+    margin-bottom: 0.75rem;
+  }
+
+  .lp-calc__title {
+    font-size: clamp(1.75rem, 4vw, 2.25rem);
+    font-weight: 800;
+    color: var(--mcf-black);
+    letter-spacing: -0.03em;
+    margin-bottom: 0.75rem;
+  }
+
+  .lp-calc__sub {
+    font-size: 1rem;
+    color: var(--mcf-charcoal);
+    line-height: 1.65;
+    max-width: 640px;
+    margin: 0 auto 2.5rem;
+  }
+
+  /* === ESEMPI === */
+  .lp-esempi {
+    padding: 5rem 1.5rem;
+    background: #ffffff;
+  }
+
+  .lp-esempi__inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+
+  .lp-esempi__title {
+    font-size: clamp(1.75rem, 4vw, 2.25rem);
+    font-weight: 800;
+    color: var(--mcf-black);
+    text-align: center;
+    letter-spacing: -0.03em;
+    margin-bottom: 0.75rem;
+  }
+
+  .lp-esempi__sub {
+    text-align: center;
+    color: var(--mcf-charcoal);
+    max-width: 600px;
+    margin: 0 auto 3rem;
+    line-height: 1.65;
+  }
+
+  .lp-esempi__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+
+  .lp-esempi__card {
+    background: var(--mcf-ghost);
+    border: 1px solid var(--mcf-platinum);
+    border-radius: var(--radius);
+    padding: 2rem;
+    transition: transform 0.25s, box-shadow 0.25s;
+  }
+
+  .lp-esempi__card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(102, 76, 205, 0.08);
+  }
+
+  .lp-esempi__icon {
+    font-size: 2.25rem !important;
+    color: var(--mcf-accent);
+    margin-bottom: 0.75rem;
+  }
+
+  .lp-esempi__card h3 {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--mcf-black);
+    margin-bottom: 0.25rem;
+  }
+
+  .lp-esempi__product {
+    font-size: 0.9rem;
+    color: var(--mcf-taupe);
+    margin-bottom: 1.25rem;
+  }
+
+  .lp-esempi__card ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .lp-esempi__card li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--mcf-platinum);
+    font-size: 0.92rem;
+  }
+
+  .lp-esempi__card li:last-child {
+    border-bottom: none;
+  }
+
+  .lp-esempi__card li span {
+    color: var(--mcf-charcoal);
+  }
+
+  .lp-esempi__card li strong {
+    color: var(--mcf-black);
+    font-weight: 700;
+  }
+
+  .lp-esempi__highlight {
+    background: rgba(254, 111, 58, 0.1);
+    margin: 0.4rem -0.5rem !important;
+    padding: 0.7rem 0.5rem !important;
+    border-radius: 8px;
+    border-bottom: none !important;
+  }
+
+  .lp-esempi__highlight strong {
+    color: var(--mcf-primary) !important;
+    font-size: 1.05rem;
+  }
+
+  .lp-esempi__disclaimer {
+    font-size: 0.78rem;
+    color: var(--mcf-taupe);
+    text-align: center;
+    margin-top: 2rem;
+    line-height: 1.5;
+  }
+
+  /* === COMBO === */
+  .lp-combo {
+    padding: 5rem 1.5rem;
+    background: var(--mcf-ghost);
+  }
+
+  .lp-combo__inner {
+    max-width: 880px;
+    margin: 0 auto;
+  }
+
+  .lp-combo__eyebrow {
+    display: inline-block;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--mcf-primary);
+    margin-bottom: 0.75rem;
+  }
+
+  .lp-combo__title {
+    font-size: clamp(1.75rem, 4vw, 2.25rem);
+    font-weight: 800;
+    color: var(--mcf-black);
+    letter-spacing: -0.03em;
+    margin-bottom: 1rem;
+  }
+
+  .lp-combo__sub {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: var(--mcf-charcoal);
+    margin-bottom: 2rem;
+  }
+
+  .lp-combo__table {
+    background: #ffffff;
+    border: 1px solid var(--mcf-platinum);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 2rem;
+  }
+
+  .lp-combo__row {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1.5fr;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--mcf-platinum);
+    font-size: 0.95rem;
+    color: var(--mcf-charcoal);
+    align-items: center;
+  }
+
+  .lp-combo__row:last-child {
+    border-bottom: none;
+  }
+
+  .lp-combo__row--head {
+    background: var(--mcf-ghost);
+    font-weight: 700;
+    color: var(--mcf-black);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .lp-combo__row strong {
+    color: var(--mcf-accent);
+  }
+
+  .lp-combo__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: 700;
+    color: var(--mcf-accent);
+    transition: gap 0.2s;
+  }
+
+  .lp-combo__link:hover {
+    gap: 0.7rem;
+  }
+
+  /* === FAQ === */
+  .lp-faq {
+    padding: 5rem 1.5rem;
+    background: #ffffff;
+  }
+
+  .lp-faq__inner {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .lp-faq__title {
+    font-size: clamp(1.75rem, 4vw, 2.25rem);
+    font-weight: 800;
+    color: var(--mcf-black);
+    text-align: center;
+    letter-spacing: -0.03em;
+    margin-bottom: 2.5rem;
+  }
+
+  .lp-faq__list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .lp-faq__item {
+    background: var(--mcf-ghost);
+    border: 1px solid var(--mcf-platinum);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+
+  .lp-faq__item[open] {
+    border-color: var(--mcf-accent);
+  }
+
+  .lp-faq__item summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--mcf-black);
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .lp-faq__item summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .lp-faq__item summary .material-icons-outlined {
+    transition: transform 0.25s;
+    color: var(--mcf-accent);
+  }
+
+  .lp-faq__item[open] summary .material-icons-outlined {
+    transform: rotate(180deg);
+  }
+
+  .lp-faq__item p {
+    padding: 0 1.5rem 1.5rem;
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: var(--mcf-charcoal);
+  }
+
+  /* === MCF === */
+  .lp-mcf {
+    padding: 5rem 1.5rem;
+    background: var(--mcf-black);
+    color: #ffffff;
+    text-align: center;
+  }
+
+  .lp-mcf__inner {
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  .lp-mcf__title {
+    font-size: clamp(1.75rem, 4vw, 2.25rem);
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: -0.03em;
+    margin-bottom: 1.5rem;
+  }
+
+  .lp-mcf__text {
+    font-size: 1.05rem;
+    line-height: 1.75;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 1.25rem;
+  }
+
+  .lp-mcf__cta-row {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 2rem;
+  }
+
+  .lp-mcf__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.95rem 1.75rem;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 1rem;
+    transition: all 0.2s;
+  }
+
+  .lp-mcf__cta--solid {
+    background: var(--mcf-primary);
+    color: #ffffff;
+  }
+
+  .lp-mcf__cta--solid:hover {
+    background: var(--mcf-primary-dark);
+    transform: translateY(-2px);
+  }
+
+  .lp-mcf__cta--outline {
+    background: transparent;
+    color: #ffffff;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+  }
+
+  .lp-mcf__cta--outline:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.6);
+  }
+
+  /* === RESPONSIVE === */
+  @media (max-width: 960px) {
+    .lp-intro__grid {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+
+    .lp-esempi__grid {
+      grid-template-columns: 1fr;
+    }
+
+    .lp-combo__row {
+      grid-template-columns: 1fr;
+      gap: 0.4rem;
+    }
+
+    .lp-combo__row--head {
+      display: none;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .lp-hero {
+      padding: 4rem 1.25rem 3.5rem;
+    }
+
+    .lp-intro,
+    .lp-calc,
+    .lp-esempi,
+    .lp-combo,
+    .lp-faq,
+    .lp-mcf {
+      padding: 3.5rem 1.25rem;
+    }
+
+    .lp-mcf__cta {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>

@@ -17,14 +17,20 @@
 - src/pages/[slug].astro → generatore dinamico landing da JSON
 - src/pages/index.astro → homepage (navbar completa)
 - public/images/ → foto (hero-fotovoltaico.png, pannelli-tetto.png, hero-homepage.png, consulenza-business.png)
+- src/pages/finanziamenti/ → landing page core finanziamenti IFIS (chirografario, strutturato, factoring)
+- src/pages/finanziamenti/agevolazioni/ → hub agevolazioni + 3 landing (Sabatini, MCC, Bando ISI)
+- src/pages/grazie-fin.astro → thank you page finanziamenti (conversion tag form_finanziamenti)
 
 ## Architettura landing page
-Le landing si generano da landing-pages.json. Per creare una nuova landing basta aggiungere un oggetto al JSON con: slug, title, subtitle, benefits (array 3 oggetti), ctaText. Il template [slug].astro fa il resto.
+Le landing dinamiche si generano da landing-pages.json. Per creare una nuova landing basta aggiungere un oggetto al JSON con: slug, title, subtitle, benefits (array 3 oggetti), ctaText. Il template [slug].astro fa il resto.
+
+Le landing finanziamenti e agevolazioni sono pagine Astro dedicate (non da JSON) con CSS scoped e form custom.
 
 ## Regole componenti
 - Header.astro ha prop "minimal" (boolean). minimal=true → solo logo + telefono (per landing ads). minimal=false → navbar completa (per homepage e pagine sito).
 - Le landing con slug che contiene "fotovoltaico" mostrano le foto hero-fotovoltaico.png e pannelli-tetto.png.
-- Form invia a webhook Zapier. Thank you page: /grazie (vendor), /grazie-fv (end-user).
+- Form invia a webhook Zapier. Thank you pages: /grazie (vendor), /grazie-fin (finanziamenti IFIS).
+- Il campo `fonte` nei form identifica la provenienza: "finanziamenti-ifis", "sabatini", "fondo-garanzia-mcc", "bando-isi-inail".
 
 ## Brand (aggiornato aprile 2026)
 
@@ -72,6 +78,25 @@ Mai nero puro #000000 — usare sempre #0F1020 o #444451
 - `ZAPIER_WEBHOOK_URL` → webhook form contatti
 - `CERVED_CONSUMER_KEY` → API key Cerved (header: `apikey`)
 - `ANTHROPIC_API_KEY` → API key Anthropic per layer AI credit policy
+
+## Redirect (vercel.json)
+- `/agevolazioni/nuova-sabatini-2026` → 301 → `/finanziamenti/agevolazioni/nuova-sabatini-2026`
+- `/agevolazioni/fondo-garanzia-mcc` → 301 → `/finanziamenti/agevolazioni/fondo-garanzia-mcc`
+
+## Finanziamenti IFIS (aprile 2026)
+Campagna acquisizione lead per finanziamenti bancari IFIS. Struttura:
+- `/finanziamenti/` → landing core (chirografario, strutturato, factoring). Form 4 campi: nome, telefono, forma giuridica, importo. Fonte: "finanziamenti-ifis".
+- `/finanziamenti/agevolazioni/` → hub indice delle 3 agevolazioni
+- `/finanziamenti/agevolazioni/nuova-sabatini-2026` → landing Sabatini con calcolatore (SabatiniCalculator.tsx)
+- `/finanziamenti/agevolazioni/fondo-garanzia-mcc` → landing MCC con checker (FondoGaranziaChecker.tsx)
+- `/finanziamenti/agevolazioni/bando-isi-inail` → landing Bando ISI Inail (nuova)
+- `/grazie-fin` → thank you page finanziamenti (GTM event: form_finanziamenti)
+- 5 blog articles: pillar (finanziamenti-pmi-guida-completa), Sabatini, MCC, ISI, cross-tema (combinare)
+- Vincoli prodotto IFIS: minimo 50.000 euro, solo societa' di capitali (SRL, SPA, SAPA)
+- Logo IFIS autorizzato: public/images/partners/ifis.svg
+- Mai nominare IFIS nelle pagine (si dice "finanziamento bancario dedicato")
+- Budget Ads: 15 euro/giorno, 4 Ad Group (Finanziamenti, Sabatini, MCC, ISI)
+- Navbar: "Finanziamenti PMI" nel dropdown Servizi punta a /finanziamenti/
 
 ## Deploy
 - Git push su main → Vercel auto-deploy

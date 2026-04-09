@@ -1,0 +1,800 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import Header from '../../../components/Header.astro';
+import Footer from '../../../components/Footer.astro';
+
+const faqs = [
+  {
+    q: 'Posso fare domanda anche se non ho i soldi per anticipare l\'investimento?',
+    a: 'Si\'. Il Bando ISI richiede che l\'azienda anticipi il 100% dell\'investimento prima di ricevere il contributo a fondo perduto. Il finanziamento bancario serve esattamente a questo: MCF ti finanzia l\'intero importo, tu compri il bene, e quando arriva il contributo Inail lo usi per abbattere l\'esposizione residua.',
+  },
+  {
+    q: 'Cosa succede se non vinco il click day?',
+    a: 'Il click day e\' competitivo: le domande vengono ordinate per orario di invio, e i fondi si esauriscono. Se non rientri, puoi ripresentare la domanda all\'edizione successiva (il bando e\' annuale). Il finanziamento non viene attivato finche\' non c\'e\' conferma dell\'ammissione al contributo.',
+  },
+  {
+    q: 'Posso combinare il Bando ISI con la Nuova Sabatini?',
+    a: 'Dipende dal tipo di bene. Se l\'investimento include beni strumentali che rientrano anche nella Sabatini (macchinari, attrezzature), la quota non coperta dal Bando ISI (tipicamente il 35%) puo\' essere finanziata con un prodotto compatibile con la Sabatini. MCF valuta caso per caso la combinazione ottimale.',
+  },
+  {
+    q: 'Quanto tempo passa tra il click day e l\'erogazione del contributo?',
+    a: 'Dopo il click day, l\'Inail pubblica la graduatoria in poche settimane. L\'azienda ammessa ha poi un termine per completare il progetto e rendicontare (tipicamente 12-24 mesi). L\'erogazione del contributo avviene dopo la verifica della rendicontazione. Tempi reali: dai 6 ai 18 mesi dopo l\'ammissione.',
+  },
+  {
+    q: 'Che documenti servono per partecipare?',
+    a: 'Serve il progetto dettagliato dell\'investimento, i preventivi dei beni, la documentazione aziendale (visura, DURC, bilanci), e la compilazione della domanda sul portale Inail. Il progetto deve dimostrare un miglioramento delle condizioni di salute e sicurezza nei luoghi di lavoro. MCF ti affianca nella parte finanziaria.',
+  },
+];
+
+const faqJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqs.map((f) => ({
+    '@type': 'Question',
+    name: f.q,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: f.a,
+    },
+  })),
+};
+---
+
+<Layout
+  title="Bando ISI Inail 2026: Guida e Finanziamento | Mediocredito Facile"
+  description="Bando ISI Inail: fino al 65% a fondo perduto per investimenti in sicurezza. Come finanziare anticipo e quota residua."
+>
+  <Header minimal={false} />
+
+  <script type="application/ld+json" set:html={JSON.stringify(faqJsonLd)} />
+
+  <main>
+
+    <!-- HERO -->
+    <section class="isi-hero">
+      <div class="isi-hero__inner">
+        <span class="isi-hero__eyebrow">Bando ISI Inail 2026</span>
+        <h1 class="isi-hero__title">
+          Bando ISI Inail: come finanziare l'investimento in sicurezza e ottenere fino al 65% a fondo perduto
+        </h1>
+        <p class="isi-hero__sub">
+          Il Bando ISI copre fino al 65% dell'investimento in beni per la sicurezza sul lavoro.
+          L'azienda anticipa il 100%, poi l'Inail rimborsa. MCF finanzia l'anticipo e copre la quota residua.
+        </p>
+        <a href="#form-isi" class="isi-hero__cta">
+          Richiedi una valutazione gratuita
+        </a>
+      </div>
+    </section>
+
+    <!-- COS'E' IL BANDO ISI -->
+    <section class="isi-intro">
+      <div class="isi-intro__inner">
+        <h2 class="isi-section-title">Cos'e' il Bando ISI Inail</h2>
+        <div class="isi-intro__content">
+          <p>
+            Il Bando ISI e' lo strumento con cui l'Inail finanzia a fondo perduto gli investimenti
+            delle imprese per migliorare la sicurezza nei luoghi di lavoro. Il bando ha periodicita'
+            annuale: l'Inail pubblica le risorse disponibili, le imprese presentano il progetto,
+            e l'assegnazione avviene tramite click day competitivo.
+          </p>
+          <p>
+            Il contributo copre una quota dell'investimento (fino al 65%, a seconda dell'Asse di finanziamento)
+            e viene erogato dopo la realizzazione e rendicontazione del progetto. Il bando si articola
+            in 5 Assi, ognuno dedicato a tipologie diverse di intervento: dalla sostituzione di macchinari
+            pericolosi alla bonifica dell'amianto, fino all'adozione di modelli organizzativi per la sicurezza.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- QUANTO VALE -->
+    <section class="isi-valore">
+      <div class="isi-valore__inner">
+        <h2 class="isi-section-title">Quanto vale il contributo</h2>
+        <div class="isi-valore__grid">
+          <div class="isi-valore__card">
+            <div class="isi-valore__pct">65%</div>
+            <p>Copertura tipica per investimenti in sicurezza (Assi 1-4)</p>
+          </div>
+          <div class="isi-valore__card">
+            <div class="isi-valore__range">5.000 - 130.000 €</div>
+            <p>Contributo per singolo progetto, a seconda dell'Asse</p>
+          </div>
+          <div class="isi-valore__card">
+            <div class="isi-valore__pct">35%</div>
+            <p>Quota residua a carico dell'azienda dopo il contributo</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- IL PROBLEMA DELL'ANTICIPO -->
+    <section class="isi-problem">
+      <div class="isi-problem__inner">
+        <h2 class="isi-section-title isi-section-title--light">Il problema: servono i soldi prima del contributo</h2>
+        <div class="isi-problem__content">
+          <p>
+            Il meccanismo del Bando ISI prevede che l'azienda acquisti il bene, completi il progetto
+            e rendiconti tutto all'Inail. Solo dopo la verifica, il contributo viene erogato.
+            Tradotto: servono i soldi subito, e il fondo perduto arriva dopo mesi.
+          </p>
+          <p>
+            Il finanziamento bancario risolve entrambi i problemi. Anticipa il 100% dell'investimento
+            per comprare subito il bene, e copre il 35% residuo che resta a carico dell'azienda.
+            Quando arriva il contributo Inail (il 65%), lo si usa per abbattere l'esposizione.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- TRE SCENARI -->
+    <section class="isi-scenari">
+      <div class="isi-scenari__inner">
+        <h2 class="isi-section-title">Tre scenari concreti</h2>
+        <p class="isi-scenari__sub">
+          Numeri reali per capire come funziona la combinazione Bando ISI + finanziamento.
+        </p>
+        <div class="isi-scenari__grid">
+
+          <div class="isi-scenario">
+            <span class="material-icons-outlined isi-scenario__icon" aria-hidden="true">precision_manufacturing</span>
+            <h3>PMI manifatturiera</h3>
+            <p class="isi-scenario__desc">Macchinario piu' sicuro per la produzione</p>
+            <ul>
+              <li><span>Investimento</span><strong>100.000 €</strong></li>
+              <li class="isi-scenario__highlight"><span>Contributo ISI (65%)</span><strong>65.000 €</strong></li>
+              <li><span>Finanziamento MCF</span><strong>100.000 €</strong></li>
+              <li><span>Rientro dopo erogazione ISI</span><strong>35.000 €</strong></li>
+            </ul>
+          </div>
+
+          <div class="isi-scenario">
+            <span class="material-icons-outlined isi-scenario__icon" aria-hidden="true">construction</span>
+            <h3>Impresa edile</h3>
+            <p class="isi-scenario__desc">Attrezzature anti-caduta e ponteggi</p>
+            <ul>
+              <li><span>Investimento</span><strong>50.000 €</strong></li>
+              <li class="isi-scenario__highlight"><span>Contributo ISI (65%)</span><strong>32.500 €</strong></li>
+              <li><span>Finanziamento MCF</span><strong>50.000 €</strong></li>
+              <li><span>Rientro dopo erogazione ISI</span><strong>17.500 €</strong></li>
+            </ul>
+          </div>
+
+          <div class="isi-scenario">
+            <span class="material-icons-outlined isi-scenario__icon" aria-hidden="true">science</span>
+            <h3>Laboratorio</h3>
+            <p class="isi-scenario__desc">Bonifica amianto e messa in sicurezza</p>
+            <ul>
+              <li><span>Investimento</span><strong>80.000 €</strong></li>
+              <li class="isi-scenario__highlight"><span>Contributo ISI (65%)</span><strong>52.000 €</strong></li>
+              <li><span>Finanziamento MCF</span><strong>80.000 €</strong></li>
+              <li><span>Rientro dopo erogazione ISI</span><strong>28.000 €</strong></li>
+            </ul>
+          </div>
+
+        </div>
+        <p class="isi-scenari__disclaimer">
+          Stime indicative basate su copertura standard del 65%. Importi e percentuali variano in base all'Asse e alle specifiche del progetto.
+        </p>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="isi-faq">
+      <div class="isi-faq__inner">
+        <h2 class="isi-section-title">Domande frequenti</h2>
+        <div class="isi-faq__list">
+          {faqs.map((faq, i) => (
+            <details class="isi-faq__item" id={`faq-${i}`}>
+              <summary class="isi-faq__question">{faq.q}</summary>
+              <p class="isi-faq__answer">{faq.a}</p>
+            </details>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- COME FINANZIARLO -->
+    <section class="isi-mcf">
+      <div class="isi-mcf__inner">
+        <h2 class="isi-mcf__title">Come finanziare il tuo progetto ISI</h2>
+        <p class="isi-mcf__text">
+          MCF ti finanzia il 100% dell'investimento in attesa del contributo Inail
+          e copre il 35% residuo che resta a carico dell'azienda. Un unico interlocutore
+          per il finanziamento e l'orientamento sulla domanda di contributo.
+        </p>
+        <p class="isi-mcf__text">
+          Lavoriamo con piu' operatori bancari. Ti diciamo subito se il progetto
+          e' finanziabile e con quali condizioni. Valutazione gratuita in 24 ore.
+        </p>
+        <div class="isi-mcf__cta-row">
+          <a href="/finanziamenti/" class="isi-mcf__cta isi-mcf__cta--solid">
+            Scopri i finanziamenti MCF
+          </a>
+          <a href="tel:+393939957840" class="isi-mcf__cta isi-mcf__cta--outline">
+            <span class="material-icons-outlined">phone</span>
+            Chiama Alberto
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- FORM -->
+    <section class="isi-form" id="form-isi">
+      <div class="isi-form__inner">
+        <h2 class="isi-form__heading">Vuoi finanziare il tuo progetto ISI? Lascia i tuoi dati.</h2>
+        <p class="isi-form__sub">Ti spiego come funziona e valutiamo insieme la fattibilita'.</p>
+        <form class="isi-form__form" id="form-bando-isi" action="">
+          <input name="website" type="text" tabindex="-1" autocomplete="off" style="position:absolute;opacity:0;pointer-events:none;height:0;overflow:hidden" aria-hidden="true" />
+          <input type="hidden" name="fonte" value="bando-isi-inail" />
+
+          <div class="isi-form__field">
+            <label for="isi-nome">Nome e Cognome</label>
+            <input type="text" id="isi-nome" name="nome" placeholder="Mario Rossi" required autocomplete="name" />
+          </div>
+
+          <div class="isi-form__field">
+            <label for="isi-tel">Telefono</label>
+            <input type="tel" id="isi-tel" name="telefono" placeholder="+39 333 123 4567" required autocomplete="tel" />
+          </div>
+
+          <div class="isi-form__field">
+            <label for="isi-importo">Importo investimento previsto</label>
+            <select id="isi-importo" name="importo_investimento">
+              <option value="" disabled selected>Seleziona...</option>
+              <option value="sotto-50k">Sotto 50.000 euro</option>
+              <option value="50-100k">50.000 - 100.000 euro</option>
+              <option value="100-200k">100.000 - 200.000 euro</option>
+              <option value="non-so">Non so ancora</option>
+            </select>
+          </div>
+
+          <button type="submit" class="isi-form__submit" id="isi-submit">Richiedi Valutazione Gratuita</button>
+          <p class="isi-form__privacy">
+            Inviando il modulo accetti la nostra <a href="/privacy">informativa sulla privacy</a>.
+          </p>
+        </form>
+      </div>
+    </section>
+
+  </main>
+  <Footer />
+</Layout>
+
+<script>
+  const form = document.getElementById('form-bando-isi') as HTMLFormElement | null;
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('isi-submit') as HTMLButtonElement | null;
+    if (btn) { btn.disabled = true; btn.textContent = 'Invio in corso...'; }
+    const data = new FormData(form);
+    try {
+      await fetch('/api/submit', { method: 'POST', body: data });
+    } catch (_) {}
+    window.location.href = '/grazie-fin';
+  });
+</script>
+
+<style>
+  /* HERO */
+  .isi-hero {
+    background: linear-gradient(135deg, #1A0A3E 0%, #664CCD 60%, #FE6F3A 100%);
+    color: #fff;
+    padding: 6rem 1.5rem 5rem;
+    text-align: center;
+  }
+
+  .isi-hero__inner {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .isi-hero__eyebrow {
+    display: inline-block;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.12);
+    padding: 0.4rem 1rem;
+    border-radius: 999px;
+    margin-bottom: 1.5rem;
+  }
+
+  .isi-hero__title {
+    font-size: clamp(1.85rem, 5vw, 2.75rem);
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    margin-bottom: 1.25rem;
+  }
+
+  .isi-hero__sub {
+    font-size: clamp(1rem, 2vw, 1.12rem);
+    line-height: 1.65;
+    color: rgba(255, 255, 255, 0.85);
+    max-width: 680px;
+    margin: 0 auto 2rem;
+  }
+
+  .isi-hero__cta {
+    display: inline-flex;
+    align-items: center;
+    background: var(--mcf-primary);
+    color: #fff;
+    font-weight: 700;
+    font-size: 1.05rem;
+    padding: 1rem 2rem;
+    border-radius: 10px;
+    transition: background 0.2s, transform 0.15s;
+  }
+
+  .isi-hero__cta:hover {
+    background: var(--mcf-primary-dark);
+    transform: translateY(-2px);
+  }
+
+  /* SEZIONI COMUNI */
+  .isi-section-title {
+    text-align: center;
+    font-size: clamp(1.5rem, 3.5vw, 2.1rem);
+    font-weight: 800;
+    color: var(--mcf-black);
+    margin-bottom: 2rem;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+  }
+
+  .isi-section-title--light {
+    color: #fff;
+  }
+
+  /* INTRO */
+  .isi-intro {
+    padding: 4.5rem 1.5rem;
+    background: #fff;
+  }
+
+  .isi-intro__inner {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  .isi-intro__content p {
+    font-size: 1.05rem;
+    line-height: 1.75;
+    color: var(--mcf-charcoal);
+    margin-bottom: 1rem;
+  }
+
+  /* QUANTO VALE */
+  .isi-valore {
+    padding: 4.5rem 1.5rem;
+    background: var(--mcf-ghost);
+  }
+
+  .isi-valore__inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+
+  .isi-valore__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+
+  .isi-valore__card {
+    background: #fff;
+    border: 1px solid var(--mcf-platinum);
+    border-radius: var(--radius);
+    padding: 2rem 1.5rem;
+    text-align: center;
+  }
+
+  .isi-valore__pct {
+    font-size: 3rem;
+    font-weight: 800;
+    color: var(--mcf-primary);
+    line-height: 1;
+    margin-bottom: 0.75rem;
+  }
+
+  .isi-valore__range {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--mcf-accent);
+    margin-bottom: 0.75rem;
+  }
+
+  .isi-valore__card p {
+    font-size: 0.92rem;
+    color: var(--mcf-charcoal);
+    line-height: 1.55;
+  }
+
+  /* PROBLEMA ANTICIPO */
+  .isi-problem {
+    padding: 4.5rem 1.5rem;
+    background: linear-gradient(135deg, #1e1b3a 0%, #1a1640 100%);
+    color: #fff;
+  }
+
+  .isi-problem__inner {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  .isi-problem__content p {
+    font-size: 1.05rem;
+    line-height: 1.75;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 1rem;
+  }
+
+  /* SCENARI */
+  .isi-scenari {
+    padding: 4.5rem 1.5rem;
+    background: #fff;
+  }
+
+  .isi-scenari__inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+
+  .isi-scenari__sub {
+    text-align: center;
+    color: var(--mcf-charcoal);
+    max-width: 600px;
+    margin: 0 auto 2.5rem;
+    font-size: 1.05rem;
+    line-height: 1.65;
+  }
+
+  .isi-scenari__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+
+  .isi-scenario {
+    background: var(--mcf-ghost);
+    border: 1px solid var(--mcf-platinum);
+    border-radius: var(--radius);
+    padding: 2rem;
+    transition: transform 0.25s, box-shadow 0.25s;
+  }
+
+  .isi-scenario:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(102, 76, 205, 0.08);
+  }
+
+  .isi-scenario__icon {
+    font-size: 2.25rem !important;
+    color: var(--mcf-accent);
+    margin-bottom: 0.75rem;
+  }
+
+  .isi-scenario h3 {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--mcf-black);
+    margin-bottom: 0.25rem;
+  }
+
+  .isi-scenario__desc {
+    font-size: 0.88rem;
+    color: var(--mcf-taupe);
+    margin-bottom: 1.25rem;
+  }
+
+  .isi-scenario ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .isi-scenario li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--mcf-platinum);
+    font-size: 0.9rem;
+  }
+
+  .isi-scenario li:last-child {
+    border-bottom: none;
+  }
+
+  .isi-scenario li span {
+    color: var(--mcf-charcoal);
+  }
+
+  .isi-scenario li strong {
+    color: var(--mcf-black);
+    font-weight: 700;
+  }
+
+  .isi-scenario__highlight {
+    background: rgba(254, 111, 58, 0.1);
+    margin: 0.3rem -0.5rem !important;
+    padding: 0.65rem 0.5rem !important;
+    border-radius: 8px;
+    border-bottom: none !important;
+  }
+
+  .isi-scenario__highlight strong {
+    color: var(--mcf-primary) !important;
+    font-size: 1.02rem;
+  }
+
+  .isi-scenari__disclaimer {
+    font-size: 0.78rem;
+    color: var(--mcf-taupe);
+    text-align: center;
+    margin-top: 2rem;
+  }
+
+  /* FAQ */
+  .isi-faq {
+    padding: 4.5rem 1.5rem;
+    background: var(--mcf-ghost);
+  }
+
+  .isi-faq__inner {
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  .isi-faq__list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .isi-faq__item {
+    border-bottom: 1px solid var(--mcf-platinum);
+  }
+
+  .isi-faq__question {
+    padding: 1.25rem 0;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--mcf-accent);
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .isi-faq__question::after {
+    content: '+';
+    font-size: 1.4rem;
+    font-weight: 300;
+    color: var(--mcf-primary);
+    transition: transform 0.2s;
+    flex-shrink: 0;
+    margin-left: 1rem;
+  }
+
+  .isi-faq__item[open] .isi-faq__question::after {
+    content: '-';
+  }
+
+  .isi-faq__question::-webkit-details-marker {
+    display: none;
+  }
+
+  .isi-faq__answer {
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: var(--mcf-charcoal);
+    padding-bottom: 1.25rem;
+    padding-right: 2rem;
+  }
+
+  /* COME FINANZIARLO */
+  .isi-mcf {
+    padding: 4.5rem 1.5rem;
+    background: var(--mcf-black);
+    color: #fff;
+    text-align: center;
+  }
+
+  .isi-mcf__inner {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  .isi-mcf__title {
+    font-size: clamp(1.5rem, 3.5vw, 2.1rem);
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 1.5rem;
+    letter-spacing: -0.02em;
+  }
+
+  .isi-mcf__text {
+    font-size: 1.05rem;
+    line-height: 1.75;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 1rem;
+  }
+
+  .isi-mcf__cta-row {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 2rem;
+  }
+
+  .isi-mcf__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.95rem 1.75rem;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 1rem;
+    transition: all 0.2s;
+  }
+
+  .isi-mcf__cta--solid {
+    background: var(--mcf-primary);
+    color: #fff;
+  }
+
+  .isi-mcf__cta--solid:hover {
+    background: var(--mcf-primary-dark);
+    transform: translateY(-2px);
+  }
+
+  .isi-mcf__cta--outline {
+    background: transparent;
+    color: #fff;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+  }
+
+  .isi-mcf__cta--outline:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.6);
+  }
+
+  /* FORM */
+  .isi-form {
+    padding: 4.5rem 1.5rem;
+    background: var(--color-bg);
+  }
+
+  .isi-form__inner {
+    max-width: 520px;
+    margin: 0 auto;
+  }
+
+  .isi-form__heading {
+    text-align: center;
+    font-size: clamp(1.35rem, 3.5vw, 1.75rem);
+    font-weight: 800;
+    color: var(--mcf-accent);
+    margin-bottom: 0.5rem;
+    line-height: 1.3;
+  }
+
+  .isi-form__sub {
+    text-align: center;
+    color: var(--mcf-taupe);
+    margin-bottom: 2rem;
+    font-size: 1rem;
+  }
+
+  .isi-form__form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+  }
+
+  .isi-form__field label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--mcf-accent);
+    margin-bottom: 0.35rem;
+  }
+
+  .isi-form__field input,
+  .isi-form__field select {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border: 1.5px solid var(--mcf-platinum);
+    border-radius: 8px;
+    font-family: var(--font-family);
+    font-size: 1rem;
+    color: var(--mcf-charcoal);
+    background: #fff;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .isi-form__field input:focus,
+  .isi-form__field select:focus {
+    outline: none;
+    border-color: var(--mcf-accent);
+    box-shadow: 0 0 0 3px rgba(102, 76, 205, 0.15);
+  }
+
+  .isi-form__submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--mcf-primary);
+    color: #fff;
+    font-family: var(--font-family);
+    font-weight: 700;
+    font-size: 1.05rem;
+    padding: 0.9rem 2rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    margin-top: 0.5rem;
+  }
+
+  .isi-form__submit:hover {
+    background: var(--mcf-primary-dark);
+    transform: translateY(-1px);
+  }
+
+  .isi-form__privacy {
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--mcf-taupe);
+    margin-top: 0.25rem;
+  }
+
+  .isi-form__privacy a {
+    color: var(--mcf-accent);
+    text-decoration: underline;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 960px) {
+    .isi-valore__grid,
+    .isi-scenari__grid {
+      grid-template-columns: 1fr;
+      max-width: 480px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .isi-hero {
+      padding: 4rem 1.25rem 3.5rem;
+    }
+
+    .isi-intro,
+    .isi-valore,
+    .isi-problem,
+    .isi-scenari,
+    .isi-faq,
+    .isi-mcf,
+    .isi-form {
+      padding: 3rem 1.25rem;
+    }
+
+    .isi-form__submit {
+      width: 100%;
+    }
+
+    .isi-mcf__cta {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>

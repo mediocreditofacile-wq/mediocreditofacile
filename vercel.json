@@ -1,0 +1,14 @@
+{
+  "redirects": [
+    {
+      "source": "/agevolazioni/nuova-sabatini-2026",
+      "destination": "/finanziamenti/agevolazioni/nuova-sabatini-2026",
+      "permanent": true
+    },
+    {
+      "source": "/agevolazioni/fondo-garanzia-mcc",
+      "destination": "/finanziamenti/agevolazioni/fondo-garanzia-mcc",
+      "permanent": true
+    }
+  ]
+}
