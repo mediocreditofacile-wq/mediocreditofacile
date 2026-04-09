@@ -1,0 +1,239 @@
+/* === Simulatore Inverso (dalla Rata al Bene) === */
+.sim-inv {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2.5rem;
+  align-items: start;
+}
+
+/* --- Form input --- */
+.sim-inv__form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  background: #ffffff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.sim-inv__field {
+  display: flex;
+  flex-direction: column;
+}
+
+.sim-inv__label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  margin-bottom: 0.4rem;
+}
+
+.sim-inv__select,
+.sim-inv__input {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border: 1.5px solid var(--color-border);
+  border-radius: 8px;
+  font-family: var(--font-family);
+  font-size: 1rem;
+  color: var(--color-text);
+  background: var(--color-bg-alt);
+  transition: border-color 0.2s, box-shadow 0.2s;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.sim-inv__select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23293C5B' stroke-width='2' fill='none'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  padding-right: 2.5rem;
+  cursor: pointer;
+}
+
+.sim-inv__select:focus,
+.sim-inv__input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(102, 76, 205, 0.15);
+}
+
+.sim-inv__input::placeholder {
+  color: #94a3b8;
+}
+
+.sim-inv__hint {
+  font-size: 0.78rem;
+  color: var(--color-text-light);
+  margin-top: 0.3rem;
+}
+
+.sim-inv__button {
+  background: var(--color-cta, #FE6F3A);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius, 8px);
+  padding: 0.85rem 2rem;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+  margin-top: 0.5rem;
+}
+
+.sim-inv__button:hover {
+  background: #e55e2e;
+  transform: translateY(-1px);
+}
+
+.sim-inv__button:active {
+  transform: translateY(0);
+}
+
+.sim-inv__button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.sim-inv__readonly {
+  padding: 0.8rem 1rem;
+  border: 1.5px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-bg-alt-2);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+/* --- Risultati --- */
+.sim-inv__results {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.sim-inv__results-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--color-primary);
+  margin-bottom: 0.25rem;
+}
+
+.sim-inv__result-card {
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.sim-inv__result-card--main {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.sim-inv__result-card--main .sim-inv__result-label {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.sim-inv__result-card--main .sim-inv__result-value {
+  color: #ffffff;
+  font-size: 2rem;
+}
+
+.sim-inv__result-label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--color-text-light);
+  margin-bottom: 0.25rem;
+}
+
+.sim-inv__result-value {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--color-text);
+}
+
+/* Box informativo verde */
+.sim-inv__risparmio {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: var(--radius);
+  padding: 1.25rem 1.5rem;
+}
+
+.sim-inv__risparmio-icon {
+  color: #16a34a;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.sim-inv__risparmio p {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #15803d;
+}
+
+.sim-inv__risparmio strong {
+  font-weight: 700;
+}
+
+/* Messaggi informativi */
+.sim-inv__message {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  background: var(--color-bg-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 2rem 1.5rem;
+}
+
+.sim-inv__message-icon {
+  color: var(--color-primary);
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.sim-inv__message p {
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+/* Note a pie di pagina */
+.sim-inv__note {
+  padding-top: 0.5rem;
+}
+
+.sim-inv__note p {
+  font-size: 0.78rem;
+  color: var(--color-text-light);
+  line-height: 1.5;
+  margin-bottom: 0.2rem;
+}
+
+/* --- Responsive --- */
+@media (max-width: 768px) {
+  .sim-inv {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .sim-inv__form {
+    padding: 1.5rem;
+  }
+
+  .sim-inv__result-card--main .sim-inv__result-value {
+    font-size: 1.6rem;
+  }
+}
