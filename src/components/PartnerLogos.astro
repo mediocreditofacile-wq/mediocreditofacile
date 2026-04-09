@@ -2,8 +2,11 @@
 // Fascione loghi partner — scorrimento continuo
 // Per aggiungere/rimuovere un partner: modificare l'array qui sotto
 // I file logo vanno in public/images/partners/ (PNG o SVG, sfondo trasparente)
-// Affida sempre visibile, inserito ogni 2 partner
+// Affida sempre visibile, inserita ogni 2 partner.
+// Gift Solutions appare a fianco di Affida una volta sì e una volta no
+// (1a Affida da sola, 2a Affida + Gift Solutions, 3a sola, 4a con Gift, ecc.)
 const affida = { name: 'Affida', logo: '/images/partners/affida.png', highlight: true };
+const giftSolutions = { name: 'Gift Solutions', logo: '/images/partners/gift-solutions.svg', highlight: true };
 const otherPartners = [
   { name: 'Grenke', logo: '/images/partners/grenke.png' },
   { name: 'Pagarent', logo: '/images/partners/pagarent.png' },
@@ -17,17 +20,27 @@ const otherPartners = [
   { name: 'Compara Semplice', logo: '/images/partners/compara-semplice.svg' },
 ];
 
-// Inserisce Affida ogni 2 partner
+// Inserisce Affida ogni 2 partner, alternando con Gift Solutions a fianco
 const partners: Array<{name: string; logo: string; highlight?: boolean}> = [];
+let affidaCount = 0;
 for (let i = 0; i < otherPartners.length; i++) {
   partners.push(otherPartners[i]);
   if ((i + 1) % 2 === 0) {
     partners.push(affida);
+    affidaCount++;
+    // Ogni seconda Affida si porta dietro Gift Solutions
+    if (affidaCount % 2 === 0) {
+      partners.push(giftSolutions);
+    }
   }
 }
-// Se restano partner dispari, aggiungi Affida alla fine
+// Se restano partner dispari, aggiungi Affida alla fine (con eventuale Gift)
 if (otherPartners.length % 2 !== 0) {
   partners.push(affida);
+  affidaCount++;
+  if (affidaCount % 2 === 0) {
+    partners.push(giftSolutions);
+  }
 }
 ---
 
