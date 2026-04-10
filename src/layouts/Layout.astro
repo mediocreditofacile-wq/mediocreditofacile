@@ -5,7 +5,7 @@ interface Props {
   ogImage?: string;
 }
 
-const { title, description, ogImage = '/images/hero-homepage.png' } = Astro.props;
+const { title, description, ogImage = '/images/hero-homepage.webp' } = Astro.props;
 const canonicalURL = new URL(Astro.url.pathname, 'https://www.mediocreditofacile.it');
 
 // Structured data — Organization (appare su tutte le pagine)
@@ -15,7 +15,7 @@ const organizationLD = {
   name: 'Mediocredito Facile',
   description: 'Servizi finanziari per PMI: noleggio operativo, leasing strumentale e finanziamenti. Accesso a 12+ società partner.',
   url: 'https://www.mediocreditofacile.it',
-  logo: 'https://www.mediocreditofacile.it/images/logo-mediocreditofacile.png',
+  logo: 'https://www.mediocreditofacile.it/images/logo-mediocreditofacile.webp',
   telephone: '+393939957840',
   email: 'mediocreditofacile@gmail.com',
   areaServed: { '@type': 'Country', name: 'IT' },
@@ -144,7 +144,7 @@ const organizationLD = {
     --color-primary: #664CCD;
     --color-primary-light: #8570D7;
     --color-primary-bg: #E0DBF7;
-    --color-primary-dark: #061237;
+    --color-primary-dark: #0F1020;
     --color-accent: #FE6F3A;
     --color-accent-hover: #e55a2a;
     --color-heading: #0F1020;

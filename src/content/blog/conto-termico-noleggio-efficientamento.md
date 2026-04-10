@@ -4,7 +4,7 @@ description: "Il Conto Termico 3.0 richiede la proprietà del bene: serve leasin
 date: "2026-04-02"
 author: "Alberto Amà"
 tags: ["conto termico", "efficientamento energetico", "noleggio operativo", "leasing", "agevolazioni", "PMI", "guida"]
-image: "/images/blog-conto-termico.jpg"
+image: "/images/blog-conto-termico.webp"
 imageAlt: "Documenti di incentivi fiscali per efficientamento energetico"
 ---
 

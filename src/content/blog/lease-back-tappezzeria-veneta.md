@@ -4,7 +4,7 @@ description: "Un'azienda artigiana veneta da un milione di fatturato paga il fot
 date: "2026-01-17"
 author: "Alberto Amà"
 tags: ["lease back", "noleggio operativo", "liquidità PMI", "fotovoltaico aziende", "caso studio"]
-image: "/images/blog-caso-studio-tappezzeria.jpg"
+image: "/images/blog-caso-studio-tappezzeria.webp"
 imageAlt: "Laboratorio di tappezzeria industriale in Veneto"
 ---
 

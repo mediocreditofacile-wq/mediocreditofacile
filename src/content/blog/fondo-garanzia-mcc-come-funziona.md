@@ -4,7 +4,7 @@ description: "Il Fondo di Garanzia del Mediocredito Centrale spiegato per impren
 date: "2026-04-05"
 author: "Alberto Amà"
 tags: ["fondo garanzia", "mcc", "mediocredito centrale", "garanzia statale", "pmi"]
-image: "/images/blog-fondo-garanzia-mcc.jpg"
+image: "/images/blog-fondo-garanzia-mcc.webp"
 imageAlt: "Documenti finanziari e calcolatrice su scrivania, concetto di garanzia"
 ---
 

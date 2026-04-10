@@ -58,13 +58,6 @@ const stats = [
   { value: '€0', label: 'Anticipo richiesto' },
 ];
 
-// Testimonial
-const testimonial = [
-  { quote: 'Abbiamo noleggiato un impianto fotovoltaico da 100kW senza toccare le linee di credito bancarie. In 3 giorni avevamo la delibera.', author: 'Marco T.', role: 'Titolare, azienda manifatturiera', avatar: '/images/avatar-marco.png' },
-  { quote: 'Alberto ci ha trovato condizioni migliori di quelle che avevamo negoziato direttamente con la banca. Professionalità e velocità.', author: 'Sara M.', role: 'CFO, studio associato', avatar: '/images/avatar-sara.png' },
-  { quote: 'Con il noleggio operativo abbiamo rinnovato tutta la flotta IT senza appesantire il bilancio. Canone fisso, zero sorprese.', author: 'Luca R.', role: 'IT Manager, PMI settore logistica', avatar: '/images/avatar-luca.png' },
-];
-
 // FAQ
 const faq = [
   { q: 'Qual è la differenza tra noleggio operativo e leasing?', a: 'Il noleggio operativo è un costo operativo (OPEX) che non appare come debito in bilancio e non viene segnalato in Centrale Rischi. Il leasing è un finanziamento (CAPEX) con riscatto obbligatorio. Il noleggio offre maggiore flessibilità e vantaggi fiscali immediati.' },
@@ -96,7 +89,7 @@ const faqLD = {
     <section class="hero">
       <div class="hero__inner">
         <div class="hero__content">
-          <span class="hero__badge">Servizi finanziari per PMI</span>
+          <span class="hero__badge">L'Officina del Credito</span>
           <h1 class="hero__title">
             Noleggio, Leasing e Finanziamenti<br />per la Tua Impresa
           </h1>
@@ -114,7 +107,7 @@ const faqLD = {
         </div>
         <div class="hero__image">
           {/* Placeholder per foto hero — vedi prompt Midjourney */}
-          <img src="/images/hero-homepage.png?v=3" alt="Servizi finanziari per PMI — Mediocredito Facile" loading="eager" />
+          <img src="/images/hero-homepage.webp" alt="Servizi finanziari per PMI — Mediocredito Facile" loading="eager" />
         </div>
       </div>
     </section>
@@ -122,11 +115,28 @@ const faqLD = {
     {/* ═══ SERVIZI ═══ */}
     <section class="servizi">
       <div class="servizi__inner">
-        <h2 class="section-title">I Nostri Servizi</h2>
-        <p class="section-subtitle">Soluzioni finanziarie su misura per ogni esigenza della tua impresa</p>
-        <div class="servizi__grid">
-          {servizi.map((s) => (
-            <a href={`/${s.slug}`} class="scard">
+        <h2 class="section-title">Gli strumenti dell'Officina</h2>
+        <p class="section-subtitle">Un punto di accesso a più soluzioni di credito</p>
+        {/* Card principali: Noleggio, Leasing, Finanziamenti */}
+        <div class="servizi__grid servizi__grid--main">
+          {servizi.slice(0, 3).map((s) => (
+            <a href={`/${s.slug}`} class="scard scard--main">
+              <span class="material-icons-outlined scard__icon" aria-hidden="true">{s.icon}</span>
+              <div>
+                <h3 class="scard__title">{s.title}</h3>
+                <p class="scard__desc">{s.desc}</p>
+                <span class="scard__link">
+                  Scopri di più
+                  <span class="material-icons-outlined" aria-hidden="true">arrow_forward</span>
+                </span>
+              </div>
+            </a>
+          ))}
+        </div>
+        {/* Card secondarie: Fotovoltaico, Ristorazione, Agevolazioni */}
+        <div class="servizi__grid servizi__grid--secondary">
+          {servizi.slice(3).map((s) => (
+            <a href={`/${s.slug}`} class="scard scard--compact">
               <span class="material-icons-outlined scard__icon" aria-hidden="true">{s.icon}</span>
               <h3 class="scard__title">{s.title}</h3>
               <p class="scard__desc">{s.desc}</p>
@@ -169,28 +179,6 @@ const faqLD = {
       </div>
     </section>
 
-    {/* ═══ TESTIMONIAL ═══ */}
-    <section class="testi">
-      <div class="testi__inner">
-        <h2 class="section-title">Cosa Dicono i Nostri Clienti</h2>
-        <div class="testi__grid">
-          {testimonial.map((t) => (
-            <div class="tcard">
-              <span class="material-icons-outlined tcard__quote" aria-hidden="true">format_quote</span>
-              <p class="tcard__text">{t.quote}</p>
-              <div class="tcard__author">
-                <img src={t.avatar} alt={t.author} class="tcard__avatar" loading="lazy" />
-                <div>
-                  <p class="tcard__name">{t.author}</p>
-                  <p class="tcard__role">{t.role}</p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-
     {/* ═══ FAQ ═══ */}
     <section class="faq">
       <div class="faq__inner">
@@ -214,7 +202,7 @@ const faqLD = {
       <div class="cta-final__inner">
         <div class="cta-final__image">
           {/* Placeholder per foto CTA — vedi prompt Midjourney */}
-          <img src="/images/consulenza-business.png" alt="Consulenza aziendale personalizzata" loading="lazy" />
+          <img src="/images/consulenza-business.webp" alt="Consulenza aziendale personalizzata" loading="lazy" />
         </div>
         <div class="cta-final__content">
           <h2 class="cta-final__title">Un unico interlocutore,<br />tutte le soluzioni</h2>
@@ -369,8 +357,16 @@ const faqLD = {
 
   .servizi__grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
     gap: 1.5rem;
+  }
+
+  .servizi__grid--main {
+    grid-template-columns: repeat(3, 1fr);
+    margin-bottom: 1.5rem;
+  }
+
+  .servizi__grid--secondary {
+    grid-template-columns: repeat(3, 1fr);
   }
 
   .scard {
@@ -388,6 +384,42 @@ const faqLD = {
     transform: translateY(-4px);
     box-shadow: 0 8px 24px rgba(102, 76, 205, 0.12);
     border-color: var(--color-primary-light);
+  }
+
+  /* Card principali: layout orizzontale con icona grande */
+  .scard--main {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 1.25rem;
+    padding: 2.25rem 2rem;
+    border-left: 3px solid var(--color-accent);
+  }
+
+  .scard--main .scard__icon {
+    font-size: 2.5rem;
+    flex-shrink: 0;
+  }
+
+  .scard--main .scard__title {
+    font-size: 1.2rem;
+  }
+
+  /* Card secondarie: più compatte */
+  .scard--compact {
+    padding: 1.5rem;
+  }
+
+  .scard--compact .scard__icon {
+    font-size: 1.5rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .scard--compact .scard__title {
+    font-size: 0.95rem;
+  }
+
+  .scard--compact .scard__desc {
+    font-size: 0.85rem;
   }
 
   .scard__icon {
@@ -432,7 +464,7 @@ const faqLD = {
   /* ═══ COME FUNZIONA ═══ */
   .steps {
     padding: 5rem 1.5rem;
-    background: var(--color-bg-alt);
+    background: var(--color-primary-bg);
   }
 
   .steps__inner {
@@ -508,73 +540,6 @@ const faqLD = {
     font-weight: 500;
   }
 
-  /* ═══ TESTIMONIAL ═══ */
-  .testi {
-    padding: 5rem 1.5rem;
-  }
-
-  .testi__inner {
-    max-width: var(--max-width);
-    margin: 0 auto;
-  }
-
-  .testi__grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
-    margin-top: 3rem;
-  }
-
-  .tcard {
-    background: #ffffff;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius);
-    padding: 2rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-    position: relative;
-  }
-
-  .tcard__quote {
-    font-size: 2.5rem;
-    color: var(--color-primary-bg);
-    position: absolute;
-    top: 1rem;
-    right: 1.5rem;
-  }
-
-  .tcard__text {
-    font-size: 0.95rem;
-    line-height: 1.7;
-    color: var(--color-text);
-    margin-bottom: 1.5rem;
-    font-style: italic;
-  }
-
-  .tcard__author {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-  }
-
-  .tcard__avatar {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    object-fit: cover;
-    flex-shrink: 0;
-  }
-
-  .tcard__name {
-    font-size: 0.9rem;
-    font-weight: 700;
-    color: var(--color-primary-dark);
-  }
-
-  .tcard__role {
-    font-size: 0.8rem;
-    color: var(--color-text-light);
-  }
-
   /* ═══ FAQ ═══ */
   .faq {
     padding: 5rem 1.5rem;
@@ -643,6 +608,7 @@ const faqLD = {
   /* ═══ CTA FINALE ═══ */
   .cta-final {
     padding: 5rem 1.5rem;
+    background: linear-gradient(135deg, rgba(254, 111, 58, 0.06) 0%, rgba(102, 76, 205, 0.08) 100%);
   }
 
   .cta-final__inner {
@@ -707,8 +673,16 @@ const faqLD = {
       border-radius: 16px;
     }
 
-    .servizi__grid {
+    .servizi__grid--main {
       grid-template-columns: repeat(2, 1fr);
+    }
+
+    .servizi__grid--secondary {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .scard--main {
+      flex-direction: column;
     }
 
     .steps__grid {
@@ -718,10 +692,6 @@ const faqLD = {
 
     .stats__inner {
       grid-template-columns: repeat(2, 1fr);
-    }
-
-    .testi__grid {
-      grid-template-columns: 1fr;
     }
 
     .cta-final__inner {
@@ -741,7 +711,6 @@ const faqLD = {
 
     .servizi,
     .steps,
-    .testi,
     .faq,
     .cta-final {
       padding: 3.5rem 1.25rem;
@@ -751,7 +720,8 @@ const faqLD = {
       padding: 2.5rem 1.25rem;
     }
 
-    .servizi__grid {
+    .servizi__grid--main,
+    .servizi__grid--secondary {
       grid-template-columns: 1fr;
     }
 

@@ -4,7 +4,7 @@ description: "Come funziona il nuovo iperammortamento 2026: le tre fasce di magg
 date: "2026-04-10"
 author: "Alberto Amà"
 tags: ["iperammortamento", "beni strumentali", "agevolazioni fiscali", "4.0", "legge bilancio 2026"]
-image: "/images/blog-nuova-sabatini-2026.jpg"
+image: "/images/blog-nuova-sabatini-2026.webp"
 imageAlt: "Macchinario 4.0 in stabilimento industriale moderno"
 ---
 

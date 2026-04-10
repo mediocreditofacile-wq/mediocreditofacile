@@ -4,7 +4,7 @@ description: "Cos'è il lease-back, come funziona, quando conviene. Il caso di u
 date: "2026-03-20"
 author: "Alberto Amà"
 tags: ["lease-back", "liquidità", "PMI", "guida", "caso studio", "cash flow"]
-image: "/images/blog-lease-back-guida.jpg"
+image: "/images/blog-lease-back-guida.webp"
 imageAlt: "Imprenditore che esamina documenti di lease-back per recuperare liquidità"
 ---
 

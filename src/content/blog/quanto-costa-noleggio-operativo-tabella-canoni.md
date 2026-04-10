@@ -4,7 +4,7 @@ description: "Tabella canoni noleggio operativo aggiornata 2026: quanto costa no
 date: "2026-01-27"
 author: "Alberto Amà"
 tags: ["noleggio operativo", "canoni", "tabella", "costi", "coefficienti", "preventivo", "PMI"]
-image: "/images/blog-tabella-canoni.jpg"
+image: "/images/blog-tabella-canoni.webp"
 imageAlt: "Tabella con calcoli dei canoni mensili di noleggio operativo per diverse durate"
 ---
 

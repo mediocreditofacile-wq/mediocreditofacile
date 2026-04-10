@@ -4,7 +4,7 @@ description: "Una pescheria siciliana spende 24mila euro l'anno di elettricità 
 date: "2026-01-14"
 author: "Alberto Amà"
 tags: ["noleggio operativo", "fotovoltaico", "risparmio energetico", "caso studio", "Sicilia", "ristorazione", "accumulo"]
-image: "/images/blog-caso-studio-lampedusa.jpg"
+image: "/images/blog-caso-studio-lampedusa.webp"
 imageAlt: "Pescheria con celle frigorifere a Lampedusa"
 ---
 

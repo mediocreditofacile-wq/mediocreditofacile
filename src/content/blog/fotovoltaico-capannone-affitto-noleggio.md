@@ -4,7 +4,7 @@ description: "Il tetto non è tuo ma vuoi il fotovoltaico? Con il noleggio opera
 date: "2026-02-24"
 author: "Alberto Amà"
 tags: ["fotovoltaico", "capannone affitto", "noleggio operativo", "diritto di superficie", "PMI", "guida"]
-image: "/images/blog-fotovoltaico-affitto.jpg"
+image: "/images/blog-fotovoltaico-affitto.webp"
 imageAlt: "Pannelli solari installati su un capannone industriale in affitto"
 ---
 

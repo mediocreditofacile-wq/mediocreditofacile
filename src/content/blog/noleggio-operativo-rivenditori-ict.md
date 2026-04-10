@@ -4,7 +4,7 @@ description: "Il noleggio operativo trasforma ogni vendita IT in un servizio a c
 date: "2026-03-10"
 author: "Alberto Amà"
 tags: ["noleggio operativo", "ICT", "rivenditore informatica", "tecnologia", "vendita a canone", "partner", "caso studio"]
-image: "/images/blog-rivenditore-ict.jpg"
+image: "/images/blog-rivenditore-ict.webp"
 imageAlt: "Rivenditore IT che configura laptop nuovi con contratto di noleggio"
 ---
 

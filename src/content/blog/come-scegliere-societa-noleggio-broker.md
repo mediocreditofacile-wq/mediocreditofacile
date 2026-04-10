@@ -4,7 +4,7 @@ description: "Grenke, PagaRent, Grant, DLL, BCC Leasing: ogni società ha criter
 date: "2026-02-06"
 author: "Alberto Amà"
 tags: ["broker noleggio", "confronto società noleggio", "Grenke", "PagaRent", "Grant", "DLL", "scelta noleggio"]
-image: "/images/blog-broker-indipendente.jpg"
+image: "/images/blog-broker-indipendente.webp"
 imageAlt: "Broker finanziario che media tra diversi clienti e settori industriali"
 ---
 

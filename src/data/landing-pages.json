@@ -29,8 +29,8 @@
     "metaDescription": "Leasing strumentale per PMI: acquista attrezzature, veicoli e macchinari con rate personalizzate. Confronta le offerte di più istituti con Mediocredito Facile.",
     "heroTitle": "Leasing Strumentale su Misura per la Tua PMI",
     "heroSubtitle": "Acquisisci macchinari, attrezzature e veicoli con soluzioni flessibili e il vantaggio del riscatto finale.",
-    "heroImage": "/images/hero-leasing-strumentale.png",
-    "benefitsImage": "/images/section-leasing-strumentale.png",
+    "heroImage": "/images/hero-leasing-strumentale.webp",
+    "benefitsImage": "/images/section-leasing-strumentale.webp",
     "benefits": [
       {
         "icon": "settings",
@@ -55,8 +55,8 @@
     "metaDescription": "Finanziamenti per PMI fino a 500.000 euro: prestiti, cessione del quinto, finanziamenti agevolati. Un unico interlocutore per più soluzioni con Mediocredito Facile.",
     "heroTitle": "Finanziamenti su Misura per la Tua Impresa",
     "heroSubtitle": "Liquidità per crescere, investire e cogliere nuove opportunità. Ti guidiamo verso la soluzione finanziaria ideale.",
-    "heroImage": "/images/hero-finanziamenti-pmi.png?v=2",
-    "benefitsImage": "/images/section-finanziamenti-pmi.png",
+    "heroImage": "/images/hero-finanziamenti-pmi.webp",
+    "benefitsImage": "/images/section-finanziamenti-pmi.webp",
     "benefits": [
       {
         "icon": "account_balance",

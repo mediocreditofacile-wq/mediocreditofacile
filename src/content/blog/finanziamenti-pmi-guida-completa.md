@@ -4,7 +4,7 @@ description: "Chirografario, finanziamento strutturato, factoring: come funziona
 date: "2026-04-01"
 author: "Alberto Amà"
 tags: ["finanziamenti", "pmi", "guida", "chirografario", "factoring", "finanziamento imprese"]
-image: "/images/blog-finanziamenti-pmi-guida.jpg"
+image: "/images/blog-finanziamenti-pmi-guida.webp"
 imageAlt: "Imprenditore che valuta documenti finanziari alla scrivania"
 ---
 

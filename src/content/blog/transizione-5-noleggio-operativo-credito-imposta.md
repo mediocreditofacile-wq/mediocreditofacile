@@ -4,7 +4,7 @@ description: "Il credito d'imposta Transizione 5.0 richiede la proprietà del be
 date: "2026-03-27"
 author: "Alberto Amà"
 tags: ["Transizione 5.0", "credito d'imposta", "noleggio operativo", "leasing", "agevolazioni", "PMI", "fotovoltaico", "efficientamento"]
-image: "/images/blog-transizione-5.jpg"
+image: "/images/blog-transizione-5.webp"
 imageAlt: "Documenti ufficiali Transizione 5.0 con calcoli di credito d'imposta"
 ---
 

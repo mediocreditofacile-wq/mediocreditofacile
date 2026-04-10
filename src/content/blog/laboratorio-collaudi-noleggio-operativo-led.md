@@ -4,7 +4,7 @@ description: "Un laboratorio di collaudi torinese perde 68mila euro per la crisi
 date: "2026-01-05"
 author: "Alberto Amà"
 tags: ["noleggio operativo piccoli importi", "noleggio operativo LED aziende", "crisi automotive PMI", "patrimonio netto negativo noleggio", "noleggio operativo Torino", "collaudi industriali", "deducibilità canone noleggio", "alternativa acquisto beni strumentali"]
-image: "/images/blog-caso-studio-laboratorio.jpg"
+image: "/images/blog-caso-studio-laboratorio.webp"
 imageAlt: "Laboratorio di collaudi industriali con illuminazione LED"
 ---
 

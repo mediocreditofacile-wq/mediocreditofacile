@@ -4,7 +4,7 @@ description: "Guida pratica per PMI: come combinare iperammortamento, Nuova Saba
 date: "2026-04-09"
 author: "Alberto Amà"
 tags: ["iperammortamento", "sabatini", "fondo garanzia", "bando isi", "agevolazioni", "finanziamenti", "combinare"]
-image: "/images/blog-combinare-agevolazioni.jpg"
+image: "/images/blog-combinare-agevolazioni.webp"
 imageAlt: "Vista dall'alto di scrivania con documenti di agevolazioni a confronto"
 ---
 
