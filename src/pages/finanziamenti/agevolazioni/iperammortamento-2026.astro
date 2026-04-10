@@ -17,8 +17,8 @@ const faqs = [
     a: 'Si\'. Per investimenti sopra una certa soglia (tipicamente 300.000 euro) serve una perizia asseverata o un attestato di conformita\' rilasciato da un ente accreditato. Sotto soglia basta un\'autocertificazione del legale rappresentante. La perizia deve attestare che il bene possiede le caratteristiche 4.0 e l\'interconnessione al sistema aziendale.',
   },
   {
-    q: 'Il noleggio operativo accede all\'iperammortamento?',
-    a: 'No. L\'iperammortamento si applica solo quando c\'e\' acquisto del bene: proprieta\' diretta o leasing finanziario. Il noleggio operativo non trasferisce la proprieta\' al locatario, quindi il bene non entra nelle immobilizzazioni e non genera ammortamento fiscale maggiorato. Per chi vuole l\'iperammortamento, la strada e\' il leasing o l\'acquisto.',
+    q: 'Come si finanzia un investimento con iperammortamento?',
+    a: 'Per attivare l\'iperammortamento il bene deve entrare nel patrimonio dell\'impresa, tramite acquisto diretto o leasing finanziario. Il finanziamento bancario e\' lo strumento piu\' comune: MCF ti mette in contatto con piu\' operatori convenzionati per trovare le condizioni migliori e gestisce la pratica insieme alle agevolazioni (Sabatini, Fondo Garanzia).',
   },
   {
     q: 'Posso combinare iperammortamento e Nuova Sabatini?',
@@ -152,33 +152,27 @@ const faqJsonLd = {
       </div>
     </section>
 
-    <!-- LEASING VS NOLEGGIO -->
-    <section class="ipa-confronto">
-      <div class="ipa-confronto__inner">
-        <h2 class="ipa-section-title">Leasing o noleggio: chi accede all'iperammortamento</h2>
-        <div class="ipa-confronto__grid">
-          <div class="ipa-confronto__card ipa-confronto__card--yes">
-            <div class="ipa-confronto__badge ipa-confronto__badge--yes">
-              <span class="material-icons-outlined" aria-hidden="true">check_circle</span> Ammesso
-            </div>
-            <h3>Leasing finanziario</h3>
-            <p>
-              Il locatario fruisce della maggiorazione sull'ammortamento. Il bene entra nelle immobilizzazioni.
-              Il leasing e' la forma tecnica piu' utilizzata per accedere all'iperammortamento perche' consente
-              di finanziare l'investimento e ottenere il beneficio fiscale contemporaneamente.
-            </p>
-          </div>
-          <div class="ipa-confronto__card ipa-confronto__card--no">
-            <div class="ipa-confronto__badge ipa-confronto__badge--no">
-              <span class="material-icons-outlined" aria-hidden="true">cancel</span> Escluso
-            </div>
-            <h3>Noleggio operativo</h3>
-            <p>
-              La proprieta' resta al locatore. Il bene non entra nelle immobilizzazioni del locatario,
-              quindi non genera ammortamento fiscale. Il noleggio operativo ha altri vantaggi (deducibilita'
-              piena del canone, nessun debito in bilancio), ma non accede all'iperammortamento.
-            </p>
-          </div>
+    <!-- COME ACCEDERE -->
+    <section class="ipa-accesso">
+      <div class="ipa-accesso__inner">
+        <h2 class="ipa-section-title">Per accedere all'iperammortamento serve un finanziamento</h2>
+        <div class="ipa-accesso__content">
+          <p>
+            L'iperammortamento scatta quando il bene entra nel patrimonio dell'impresa. Serve un finanziamento
+            bancario o un leasing finanziario per acquisirlo. MCF ti da' accesso a piu' operatori convenzionati
+            e ti trova la soluzione con le condizioni migliori, in modo che tu possa sfruttare la maggiorazione
+            fin dal primo esercizio.
+          </p>
+          <p>
+            Con il finanziamento giusto, l'iperammortamento si attiva automaticamente. E se combini
+            anche Sabatini e Fondo di Garanzia MCC, ottieni tre agevolazioni su un'unica operazione:
+            minori tasse, interessi ridotti, condizioni bancarie migliori.
+          </p>
+        </div>
+        <div class="ipa-accesso__cta">
+          <a href="/finanziamenti/" class="ipa-accesso__btn">
+            Scopri come finanziare l'investimento
+          </a>
         </div>
       </div>
     </section>
@@ -352,19 +346,13 @@ const faqJsonLd = {
   .ipa-req__item h3 { font-size: 1rem; font-weight: 700; color: var(--mcf-accent); margin-bottom: 0.5rem; }
   .ipa-req__item p { font-size: 0.88rem; color: var(--mcf-charcoal); line-height: 1.6; }
 
-  /* CONFRONTO LEASING VS NOLEGGIO */
-  .ipa-confronto { padding: 4.5rem 1.5rem; background: #fff; }
-  .ipa-confronto__inner { max-width: 900px; margin: 0 auto; }
-  .ipa-confronto__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
-  .ipa-confronto__card { border-radius: var(--radius); padding: 2rem 1.75rem; }
-  .ipa-confronto__card--yes { background: rgba(45,143,78,0.06); border: 2px solid rgba(45,143,78,0.25); }
-  .ipa-confronto__card--no { background: rgba(204,51,51,0.04); border: 2px solid rgba(204,51,51,0.15); }
-  .ipa-confronto__badge { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.82rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; }
-  .ipa-confronto__badge--yes { color: var(--mcf-success); }
-  .ipa-confronto__badge--no { color: var(--mcf-error); }
-  .ipa-confronto__badge .material-icons-outlined { font-size: 1.1rem; }
-  .ipa-confronto__card h3 { font-size: 1.15rem; font-weight: 700; color: var(--mcf-black); margin-bottom: 0.75rem; }
-  .ipa-confronto__card p { font-size: 0.92rem; color: var(--mcf-charcoal); line-height: 1.65; }
+  /* COME ACCEDERE */
+  .ipa-accesso { padding: 4.5rem 1.5rem; background: #fff; }
+  .ipa-accesso__inner { max-width: 720px; margin: 0 auto; }
+  .ipa-accesso__content p { font-size: 1.05rem; line-height: 1.75; color: var(--mcf-charcoal); margin-bottom: 1rem; }
+  .ipa-accesso__cta { text-align: center; margin-top: 2rem; }
+  .ipa-accesso__btn { display: inline-flex; align-items: center; background: var(--mcf-primary); color: #fff; font-weight: 700; font-size: 1.05rem; padding: 1rem 2rem; border-radius: 10px; transition: background 0.2s, transform 0.15s; }
+  .ipa-accesso__btn:hover { background: var(--mcf-primary-dark); transform: translateY(-2px); }
 
   /* CUMULABILITA' */
   .ipa-combo { padding: 4.5rem 1.5rem; background: var(--mcf-ghost); }
@@ -421,7 +409,7 @@ const faqJsonLd = {
   @media (max-width: 960px) {
     .ipa-fasce__grid { grid-template-columns: 1fr; max-width: 400px; margin-left: auto; margin-right: auto; }
     .ipa-req__grid { grid-template-columns: repeat(2,1fr); }
-    .ipa-confronto__grid { grid-template-columns: 1fr; }
+    .ipa-accesso__btn { width: 100%; justify-content: center; }
     .ipa-combo__grid { grid-template-columns: 1fr; max-width: 400px; margin-left: auto; margin-right: auto; }
   }
   @media (max-width: 640px) {
