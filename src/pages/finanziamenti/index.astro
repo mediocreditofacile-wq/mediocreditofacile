@@ -93,6 +93,24 @@ const serviceJsonLd = {
       </div>
     </section>
 
+    <!-- SOCIAL PROOF STRIP (placeholder — Alberto inserira' i numeri reali) -->
+    <section class="fin-stats">
+      <div class="fin-stats__inner">
+        <div class="fin-stat">
+          <span class="fin-stat__number">180+</span>
+          <span class="fin-stat__label">Pratiche gestite</span>
+        </div>
+        <div class="fin-stat">
+          <span class="fin-stat__number">48h</span>
+          <span class="fin-stat__label">Tempo medio di risposta</span>
+        </div>
+        <div class="fin-stat">
+          <span class="fin-stat__number">10+</span>
+          <span class="fin-stat__label">Operatori bancari</span>
+        </div>
+      </div>
+    </section>
+
     <!-- IL PROBLEMA -->
     <section class="fin-problem">
       <div class="fin-problem__inner">
@@ -132,7 +150,12 @@ const serviceJsonLd = {
               Erogazione rapida, documentazione snella. Ideale per attrezzature, arredi, tecnologia,
               interventi di ammodernamento.
             </p>
-            <a href="#faq-section" class="fin-product-card__link">Approfondisci nelle FAQ</a>
+            <details class="fin-product-card__details">
+              <summary>Approfondisci</summary>
+              <div class="fin-product-card__expand">
+                <p>Il chirografario e' il prodotto piu' veloce. Non richiede ipoteche ne' pegni: la banca valuta il merito creditizio dell'azienda. Documenti necessari: visura camerale, ultimi due bilanci, descrizione dell'investimento. Durate tipiche: 12-60 mesi. Tempi di erogazione: 5-10 giorni dall'approvazione.</p>
+              </div>
+            </details>
           </div>
 
           <div class="fin-product-card">
@@ -145,7 +168,12 @@ const serviceJsonLd = {
               sull'investimento. Per progetti produttivi importanti: linee di produzione,
               ristrutturazione, espansione aziendale.
             </p>
-            <a href="#faq-section" class="fin-product-card__link">Approfondisci nelle FAQ</a>
+            <details class="fin-product-card__details">
+              <summary>Approfondisci</summary>
+              <div class="fin-product-card__expand">
+                <p>Il finanziamento strutturato prevede un piano di rientro costruito sull'investimento: preammortamento, rate crescenti o decrescenti, durate fino a 84 mesi. Puo' prevedere garanzie reali (ipoteca, pegno su macchinari). Indicato per investimenti sopra i 100.000 euro con flussi di cassa prevedibili.</p>
+              </div>
+            </details>
           </div>
 
           <div class="fin-product-card">
@@ -158,7 +186,12 @@ const serviceJsonLd = {
               monetizzi il credito che hai gia' verso i tuoi clienti. Ideale per gestire
               il cash flow nei periodi di crescita.
             </p>
-            <a href="#faq-section" class="fin-product-card__link">Approfondisci nelle FAQ</a>
+            <details class="fin-product-card__details">
+              <summary>Approfondisci</summary>
+              <div class="fin-product-card__expand">
+                <p>Due modalita': pro-soluto (il rischio di insolvenza passa al factor) e pro-solvendo (resta in capo a te). La valutazione si basa sulla qualita' dei tuoi debitori, non solo sul tuo bilancio. Anticipo tipico: 80-90% del valore della fattura. Incasso in 24-48 ore dalla cessione.</p>
+              </div>
+            </details>
           </div>
 
         </div>
@@ -198,6 +231,13 @@ const serviceJsonLd = {
               Tempi tipici: 5-10 giorni lavorativi dall'approvazione. Ti seguiamo fino all'accredito.
             </p>
           </div>
+        </div>
+
+        <!-- CTA intermedia -->
+        <div class="fin-process__cta">
+          <a href="#form-finanziamenti" class="fin-process__btn">
+            Hai gia' capito? Compila il form, ci mettiamo 10 minuti
+          </a>
         </div>
       </div>
     </section>
@@ -255,14 +295,31 @@ const serviceJsonLd = {
     <!-- PERCHE' MCF -->
     <section class="fin-why">
       <div class="fin-why__inner">
-        <h2 class="fin-section-title">Perche' passare da Mediocredito Facile</h2>
+        <h2 class="fin-section-title">Cosa cambia rispetto alla tua banca</h2>
         <div class="fin-why__grid">
+          <div class="fin-why__block">
+            <span class="material-icons-outlined fin-why__icon" aria-hidden="true">person</span>
+            <h3>Un unico interlocutore, dal primo giorno</h3>
+            <p>
+              Dal primo contatto all'erogazione, parli con Alberto. Niente call center,
+              niente ticket, niente "richiami la prossima settimana". Una persona che conosce
+              la tua pratica e ti richiama quando dice che ti richiama.
+            </p>
+          </div>
           <div class="fin-why__block">
             <span class="material-icons-outlined fin-why__icon" aria-hidden="true">compare_arrows</span>
             <h3>Piu' operatori, piu' possibilita'</h3>
             <p>
               Non dipendi da un solo istituto. Lavoriamo con piu' operatori bancari e finanziari:
               maggiore probabilita' di approvazione, condizioni migliori.
+            </p>
+          </div>
+          <div class="fin-why__block">
+            <span class="material-icons-outlined fin-why__icon" aria-hidden="true">speed</span>
+            <h3>Risposta in 48 ore, non in settimane</h3>
+            <p>
+              Pre-valutazione in 24 ore, proposta formale in 48. Niente rimbalzi tra uffici,
+              niente pratiche che spariscono in un cassetto.
             </p>
           </div>
           <div class="fin-why__block">
@@ -274,27 +331,11 @@ const serviceJsonLd = {
             </p>
           </div>
           <div class="fin-why__block">
-            <span class="material-icons-outlined fin-why__icon" aria-hidden="true">speed</span>
-            <h3>Risposta in 48 ore, non in settimane</h3>
-            <p>
-              Pre-valutazione in 24 ore, proposta formale in 48. Niente rimbalzi tra uffici,
-              niente "richiami la prossima settimana".
-            </p>
-          </div>
-          <div class="fin-why__block">
             <span class="material-icons-outlined fin-why__icon" aria-hidden="true">integration_instructions</span>
             <h3>Agevolazioni integrate</h3>
             <p>
               Sabatini, Fondo di Garanzia, Bando ISI: se la tua operazione rientra in un'agevolazione,
               la gestiamo noi insieme al finanziamento. Una pratica, un interlocutore.
-            </p>
-          </div>
-          <div class="fin-why__block">
-            <span class="material-icons-outlined fin-why__icon" aria-hidden="true">person</span>
-            <h3>Un unico interlocutore</h3>
-            <p>
-              Dal primo contatto all'erogazione, parli con Alberto. Niente call center,
-              niente ticket. Una persona che conosce la tua pratica.
             </p>
           </div>
         </div>
@@ -412,10 +453,48 @@ const serviceJsonLd = {
 <style>
   /* HERO */
   .fin-hero {
-    background: linear-gradient(135deg, #1A0A3E 0%, #664CCD 60%, #FE6F3A 100%);
+    background: linear-gradient(rgba(26, 10, 62, 0.7), rgba(102, 76, 205, 0.75)), url('/images/hero-finanziamenti.jpg');
+    background-size: cover;
+    background-position: center;
     color: #fff;
     padding: 6rem 1.5rem 5.5rem;
     text-align: center;
+  }
+
+  /* SOCIAL PROOF STRIP */
+  .fin-stats {
+    background: var(--mcf-black);
+    padding: 1.5rem 1.5rem;
+  }
+
+  .fin-stats__inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    gap: 4rem;
+  }
+
+  .fin-stat {
+    text-align: center;
+  }
+
+  .fin-stat__number {
+    display: block;
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--mcf-primary);
+    line-height: 1.1;
+  }
+
+  .fin-stat__label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.65);
+    margin-top: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
   }
 
   .fin-hero__inner {
@@ -581,6 +660,54 @@ const serviceJsonLd = {
     color: var(--mcf-primary-dark);
   }
 
+  /* ACCORDION INLINE CARD */
+  .fin-product-card__details {
+    margin-top: 0.5rem;
+    border-top: 1px solid var(--mcf-platinum);
+  }
+
+  .fin-product-card__details summary {
+    padding: 0.65rem 0;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--mcf-primary);
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: color 0.2s;
+  }
+
+  .fin-product-card__details summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .fin-product-card__details summary::after {
+    content: '+';
+    font-size: 1.2rem;
+    font-weight: 300;
+    color: var(--mcf-primary);
+  }
+
+  .fin-product-card__details[open] summary::after {
+    content: '-';
+  }
+
+  .fin-product-card__details summary:hover {
+    color: var(--mcf-primary-dark);
+  }
+
+  .fin-product-card__expand {
+    padding-bottom: 0.5rem;
+  }
+
+  .fin-product-card__expand p {
+    font-size: 0.88rem;
+    line-height: 1.65;
+    color: var(--mcf-charcoal);
+  }
+
   /* IL PROCESSO */
   .fin-process {
     padding: 4.5rem 1.5rem;
@@ -629,6 +756,29 @@ const serviceJsonLd = {
     font-size: 0.9rem;
     line-height: 1.6;
     color: rgba(255, 255, 255, 0.75);
+  }
+
+  /* CTA INTERMEDIA PROCESSO */
+  .fin-process__cta {
+    text-align: center;
+    margin-top: 2.5rem;
+  }
+
+  .fin-process__btn {
+    display: inline-flex;
+    align-items: center;
+    background: var(--mcf-primary);
+    color: #fff;
+    font-weight: 700;
+    font-size: 1rem;
+    padding: 0.9rem 2rem;
+    border-radius: 8px;
+    transition: background 0.2s, transform 0.15s;
+  }
+
+  .fin-process__btn:hover {
+    background: var(--mcf-primary-dark);
+    transform: translateY(-1px);
   }
 
   /* AGEVOLAZIONI COMBINABILI */
@@ -1001,6 +1151,24 @@ const serviceJsonLd = {
   @media (max-width: 640px) {
     .fin-hero {
       padding: 4rem 1.25rem 3.5rem;
+    }
+
+    .fin-stats__inner {
+      gap: 1.5rem;
+    }
+
+    .fin-stat__number {
+      font-size: 1.5rem;
+    }
+
+    .fin-stat__label {
+      font-size: 0.72rem;
+    }
+
+    .fin-process__btn {
+      width: 100%;
+      justify-content: center;
+      font-size: 0.95rem;
     }
 
     .fin-products__grid {
