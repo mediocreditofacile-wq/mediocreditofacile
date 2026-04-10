@@ -161,6 +161,13 @@ const webAppJsonLd = {
         </p>
 
         <FondoGaranziaChecker client:load />
+
+        <!-- CTA intermedia -->
+        <div class="lp-mid-cta">
+          <a href="/finanziamenti/" class="lp-mid-cta__btn">
+            Vuoi il finanziamento con garanzia MCC? Parlane con noi
+          </a>
+        </div>
       </div>
     </section>
 
@@ -499,6 +506,29 @@ const webAppJsonLd = {
     line-height: 1.65;
     max-width: 640px;
     margin: 0 auto 2.5rem;
+  }
+
+  /* === CTA INTERMEDIA === */
+  .lp-mid-cta {
+    text-align: center;
+    margin-top: 2.5rem;
+  }
+
+  .lp-mid-cta__btn {
+    display: inline-flex;
+    align-items: center;
+    background: var(--mcf-primary);
+    color: #fff;
+    font-weight: 700;
+    font-size: 1rem;
+    padding: 0.9rem 2rem;
+    border-radius: 8px;
+    transition: background 0.2s, transform 0.15s;
+  }
+
+  .lp-mid-cta__btn:hover {
+    background: var(--mcf-primary-dark);
+    transform: translateY(-1px);
   }
 
   /* === ESEMPI / CHI PUO' ACCEDERE === */
