@@ -18,7 +18,7 @@ L'iperammortamento 2026 consente di dedurre ai fini IRES (o IRPEF per le ditte i
 
 La misura sostituisce il meccanismo dei crediti d'imposta di Transizione 4.0 e 5.0. Il legislatore ha scelto di tornare al formato che le imprese conoscevano gia dal 2017: maggiorazione percentuale del costo di acquisto ai fini delle quote di ammortamento.
 
-Il vantaggio e proporzionale all'aliquota fiscale dell'impresa. Per una societa di capitali che paga il 24% di IRES, ogni 100 euro di maggiorazione si traducono in 24 euro di risparmio effettivo. Per chi paga anche l'IRAP al 3,9%, il beneficio complessivo sale ulteriormente.
+Il vantaggio e' proporzionale all'aliquota fiscale dell'impresa. Per una societa' di capitali che paga il 24% di IRES, ogni 100 euro di maggiorazione si traducono in 24 euro di risparmio effettivo. Attenzione: l'iperammortamento non produce effetti sulla base IRAP, che continua a essere calcolata sugli ammortamenti civilistici. Il beneficio reale e' quindi solo ai fini IRES/IRPEF.
 
 ## Le tre fasce di maggiorazione
 
@@ -52,9 +52,9 @@ In termini piu immediati: per ogni euro speso in beni 4.0 sotto i 2,5 milioni, l
 
 L'iperammortamento 2026 si applica agli investimenti effettuati dal 1 gennaio 2026 al 30 settembre 2028. Il bene deve essere consegnato e interconnesso entro questa finestra.
 
-C'e una coda per gli ordini con acconto: se l'ordine viene confermato e l'acconto versato (almeno il 20% del costo) entro il 30 settembre 2028, la consegna puo avvenire fino al 30 giugno 2029.
+A differenza dei vecchi crediti d'imposta 4.0, non sono previsti meccanismi di "prenotazione" tramite ordine confermato e acconto del 20%. Quello che conta e' la data di effettuazione dell'investimento secondo l'art. 109 TUIR: per i beni mobili, la data di consegna o spedizione; per gli appalti, la data di ultimazione o i SAL. Ordini e acconti anteriori non spostano il termine.
 
-In pratica, per chi ordina oggi un macchinario con tempi di consegna lunghi, la cosa importante e formalizzare l'ordine con il 20% di anticipo entro i termini. Il completamento dell'investimento (consegna, installazione, collaudo, interconnessione) puo slittare di nove mesi.
+In pratica, per chi ordina oggi un macchinario con tempi di consegna lunghi, la cosa importante e' che la consegna avvenga entro il 30 settembre 2028. Non basta aver versato un acconto: il bene deve arrivare.
 
 ## Requisiti: cosa serve per accedere
 
@@ -132,7 +132,9 @@ L'iperammortamento e una misura potente ma tecnica. Gli errori piu frequenti rig
 
 **Dimenticare il vincolo di possesso.** Il bene deve restare nel patrimonio dell'impresa per tutto il periodo di ammortamento maggiorato. Se lo si vende prima, la maggiorazione residua va restituita. Non e un problema per chi investe per produrre, ma va saputo.
 
-**Non combinare le agevolazioni.** Molte imprese si fermano all'iperammortamento senza considerare che Sabatini e Fondo Garanzia si aggiungono senza conflitto. E come andare al ristorante e pagare il menu completo quando potresti avere il primo gratis. L'articolo su [come combinare Sabatini, MCC e altre agevolazioni](/blog/combinare-sabatini-mcc-bando-isi-finanziamento) spiega la logica.
+**Non combinare le agevolazioni.** Molte imprese si fermano all'iperammortamento senza considerare che Sabatini e Fondo Garanzia si aggiungono senza conflitto. E' come andare al ristorante e pagare il menu completo quando potresti avere il primo gratis. L'articolo su [come combinare Sabatini, MCC e altre agevolazioni](/blog/combinare-sabatini-mcc-bando-isi-finanziamento) spiega la logica.
+
+**Vincolo Made in EU (risolto).** La versione originale della L. 199/2025 limitava l'agevolazione ai beni prodotti in UE/SEE. Il D.L. 38/2026 (art. 7, in vigore dal 27 marzo 2026) ha eliminato questo vincolo con effetto retroattivo dal 1 gennaio 2026. Oggi i beni possono provenire da qualsiasi Paese, purche' destinati a strutture produttive in Italia.
 
 ## Come strutturare il finanziamento
 
