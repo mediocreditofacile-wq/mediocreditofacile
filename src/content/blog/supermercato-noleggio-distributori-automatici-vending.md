@@ -4,7 +4,7 @@ description: "Un supermercato del Lazio da 3 milioni di fatturato noleggia distr
 date: "2026-01-08"
 author: "Alberto Amà"
 tags: ["noleggio operativo distributori automatici", "vending supermercato", "noleggio operativo GDO", "distributori automatici noleggio", "noleggio operativo Lazio", "diversificazione ricavi supermercato", "vending machine noleggio PMI"]
-image: "/images/blog-caso-studio-supermercato.jpg"
+image: "/images/blog-caso-studio-supermercato.webp"
 imageAlt: "Distributori automatici in un supermercato italiano"
 ---
 

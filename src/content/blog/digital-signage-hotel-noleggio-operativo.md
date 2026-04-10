@@ -4,7 +4,7 @@ description: "Il digital signage per hotel e strutture ricettive a noleggio oper
 date: "2026-04-03"
 author: "Alberto Amà"
 tags: ["digital signage", "noleggio operativo", "hotel", "HORECA", "totem", "caso studio"]
-image: "/images/blog-digital-signage.jpg"
+image: "/images/blog-digital-signage.webp"
 imageAlt: "Totem digital signage in una lobby di hotel con contenuti dinamici"
 ---
 

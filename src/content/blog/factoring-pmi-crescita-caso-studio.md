@@ -4,7 +4,7 @@ description: "Come un trader di pellet ha ottenuto un plafond factoring da 2,1 m
 date: "2026-03-24"
 author: "Alberto Amà"
 tags: ["factoring", "PMI", "crescita", "trading", "pellet", "caso studio", "plafond"]
-image: "/images/blog-factoring-pellet.jpg"
+image: "/images/blog-factoring-pellet.webp"
 imageAlt: "Magazzino di pellet con trader che analizza documenti di crescita"
 ---
 

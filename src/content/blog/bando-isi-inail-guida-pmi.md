@@ -4,7 +4,7 @@ description: "Bando ISI Inail 2026: cos'è, come funziona il click day, quanto c
 date: "2026-04-07"
 author: "Alberto Amà"
 tags: ["bando isi", "inail", "sicurezza lavoro", "fondo perduto", "pmi"]
-image: "/images/blog-bando-isi-inail.jpg"
+image: "/images/blog-bando-isi-inail.webp"
 imageAlt: "Cantiere con attrezzature di sicurezza e dispositivi di protezione"
 ---
 

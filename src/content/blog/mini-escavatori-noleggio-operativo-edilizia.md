@@ -4,7 +4,7 @@ description: "Noleggio operativo di mini-escavatori e mezzi edili: grace period,
 date: "2026-03-17"
 author: "Alberto Amà"
 tags: ["noleggio operativo", "mini-escavatori", "edilizia", "mezzi edili", "grace period", "stagionalità", "caso studio"]
-image: "/images/blog-mezzi-edili.jpg"
+image: "/images/blog-mezzi-edili.webp"
 imageAlt: "Mini escavatore nuovo consegnato a una fiera di mezzi edili"
 ---
 

@@ -4,7 +4,7 @@ description: "Guida al noleggio operativo di attrezzature per ristorazione: forn
 date: "2026-02-27"
 author: "Alberto Amà"
 tags: ["noleggio operativo", "ristorazione", "forni professionali", "cucina", "HORECA", "attrezzature", "caso studio"]
-image: "/images/blog-ristorazione-canone.jpg"
+image: "/images/blog-ristorazione-canone.webp"
 imageAlt: "Cucina professionale con nuove attrezzature in fase di installazione"
 ---
 

@@ -18,9 +18,9 @@ export function getStaticPaths() {
 const { page } = Astro.props;
 const p = page as Record<string, any>;
 const isFotovoltaico = page.slug.includes('fotovoltaico');
-const heroImage = p.heroImage || (isFotovoltaico ? '/images/hero-fotovoltaico.png?v=2' : undefined);
-const benefitsImage = p.benefitsImage || (isFotovoltaico ? '/images/pannelli-tetto.png' : undefined);
-const valueImage = p.valueImage || '/images/consulenza-business.png';
+const heroImage = p.heroImage || (isFotovoltaico ? '/images/hero-fotovoltaico.webp' : undefined);
+const benefitsImage = p.benefitsImage || (isFotovoltaico ? '/images/pannelli-tetto.webp' : undefined);
+const valueImage = p.valueImage || '/images/consulenza-business.webp';
 const valueTitle = p.valueTitle || 'Un unico interlocutore, tutte le opzioni';
 const valueText = p.valueText || 'Mediocredito Facile confronta le offerte di oltre 10 società per trovare la soluzione più vantaggiosa. Non sei vincolato a un solo istituto: noi lavoriamo per te, non per la banca.';
 const valueText2 = p.valueText2 || 'Dalla prima telefonata alla firma del contratto, hai sempre la stessa persona di riferimento. Niente rimbalzi, niente call center. Un consulente che conosce il tuo caso e risponde in 24 ore.';

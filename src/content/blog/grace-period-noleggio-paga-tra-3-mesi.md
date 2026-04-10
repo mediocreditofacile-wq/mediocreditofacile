@@ -4,7 +4,7 @@ description: "Il grace period nel noleggio operativo: ricevi il bene subito, ini
 date: "2026-03-13"
 author: "Alberto Amà"
 tags: ["noleggio operativo", "grace period", "pagamento differito", "mezzi edili", "stagionalità", "caso studio"]
-image: "/images/blog-grace-period.jpg"
+image: "/images/blog-grace-period.webp"
 imageAlt: "Mini escavatore nuovo consegnato in un cantiere edile"
 ---
 

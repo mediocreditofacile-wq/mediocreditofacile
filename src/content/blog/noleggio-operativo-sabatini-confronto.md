@@ -4,7 +4,7 @@ description: "Confronto diretto tra noleggio operativo (canone deducibile, zero 
 date: "2026-04-01"
 author: "Alberto Amà"
 tags: ["noleggio operativo", "Nuova Sabatini", "confronto", "PMI", "acquisto", "leasing", "guida"]
-image: "/images/blog-sabatini-vs-noleggio.jpg"
+image: "/images/blog-sabatini-vs-noleggio.webp"
 imageAlt: "Confronto tra opzioni di finanziamento per PMI su una scrivania"
 ---
 

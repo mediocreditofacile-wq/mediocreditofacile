@@ -4,7 +4,7 @@ description: "Cinque aziende italiane che hanno installato il fotovoltaico con i
 date: "2026-02-17"
 author: "Alberto Amà"
 tags: ["fotovoltaico", "noleggio operativo", "caso studio", "risparmio energetico", "ESG", "PMI", "bolletta"]
-image: "/images/blog-fotovoltaico-5-casi.jpg"
+image: "/images/blog-fotovoltaico-5-casi.webp"
 imageAlt: "Pannelli solari su tetti industriali italiani visti dall'alto al tramonto"
 ---
 

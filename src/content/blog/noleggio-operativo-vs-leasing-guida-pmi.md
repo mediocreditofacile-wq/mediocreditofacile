@@ -4,7 +4,7 @@ description: "Noleggio operativo o leasing strumentale? Confronto onesto da brok
 date: "2026-01-23"
 author: "Alberto Amà"
 tags: ["noleggio operativo", "leasing", "confronto", "PMI", "guida", "deducibilità", "centrale rischi"]
-image: "/images/blog-noleggio-vs-leasing.jpg"
+image: "/images/blog-noleggio-vs-leasing.webp"
 imageAlt: "Confronto tra noleggio operativo e leasing su una scrivania con documenti finanziari"
 ---
 

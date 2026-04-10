@@ -4,7 +4,7 @@ description: "Noleggio operativo di attrezzature medicali per farmacie, parafarm
 date: "2026-03-06"
 author: "Alberto Amà"
 tags: ["noleggio operativo", "attrezzature medicali", "farmacie", "telemedicina", "healthcare", "caso studio"]
-image: "/images/blog-farmacie-noleggio.jpg"
+image: "/images/blog-farmacie-noleggio.webp"
 imageAlt: "Farmacia moderna con attrezzature medicali in noleggio operativo"
 ---
 

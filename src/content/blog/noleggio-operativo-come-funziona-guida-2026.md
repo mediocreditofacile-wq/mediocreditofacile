@@ -4,7 +4,7 @@ description: "Guida completa al noleggio operativo per aziende italiane: cos'è,
 date: "2026-01-20"
 author: "Alberto Amà"
 tags: ["noleggio operativo", "come funziona", "guida", "PMI", "2026", "canone", "deducibilità"]
-image: "/images/blog-come-funziona.jpg"
+image: "/images/blog-come-funziona.webp"
 imageAlt: "Consegna di attrezzature in noleggio operativo a un'azienda italiana"
 ---
 

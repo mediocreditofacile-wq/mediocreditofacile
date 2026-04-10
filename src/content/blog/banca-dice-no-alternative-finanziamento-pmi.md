@@ -4,7 +4,7 @@ description: "Finanziamento rifiutato dalla banca? Noleggio operativo, lease-bac
 date: "2026-02-10"
 author: "Alberto Amà"
 tags: ["finanziamento rifiutato", "alternativa banca", "noleggio operativo", "lease-back", "fintech", "PMI", "patrimonio netto negativo"]
-image: "/images/blog-banca-dice-no.jpg"
+image: "/images/blog-banca-dice-no.webp"
 imageAlt: "Broker che mostra alternative di finanziamento a un imprenditore dopo un rifiuto bancario"
 ---
 

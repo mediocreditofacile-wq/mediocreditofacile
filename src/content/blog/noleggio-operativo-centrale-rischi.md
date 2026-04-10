@@ -4,7 +4,7 @@ description: "Il noleggio operativo non appare in Centrale Rischi. Il leasing s√
 date: "2026-02-03"
 author: "Alberto Am√†"
 tags: ["noleggio operativo", "centrale rischi", "rating bancario", "leasing", "PMI", "bilancio", "guida"]
-image: "/images/blog-centrale-rischi.jpg"
+image: "/images/blog-centrale-rischi.webp"
 imageAlt: "Imprenditore che esce dalla banca verso un ufficio broker con luce calda"
 ---
 

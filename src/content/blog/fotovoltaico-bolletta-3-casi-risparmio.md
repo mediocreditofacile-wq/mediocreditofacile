@@ -4,7 +4,7 @@ description: "Tre aziende italiane dove il canone di noleggio del fotovoltaico s
 date: "2026-02-20"
 author: "Alberto Amà"
 tags: ["fotovoltaico", "risparmio bolletta", "noleggio operativo", "caso studio", "energia", "ROI"]
-image: "/images/blog-fotovoltaico-bolletta.jpg"
+image: "/images/blog-fotovoltaico-bolletta.webp"
 imageAlt: "Pannelli solari su tetti industriali italiani al tramonto"
 ---
 

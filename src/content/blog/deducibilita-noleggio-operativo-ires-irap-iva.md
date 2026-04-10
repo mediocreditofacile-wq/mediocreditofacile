@@ -4,7 +4,7 @@ description: "Guida fiscale al noleggio operativo per PMI: deducibilità IRES 10
 date: "2026-01-30"
 author: "Alberto Amà"
 tags: ["noleggio operativo", "deducibilità", "IRES", "IRAP", "IVA", "fiscalità", "PMI", "guida"]
-image: "/images/blog-deducibilita-noleggio.jpg"
+image: "/images/blog-deducibilita-noleggio.webp"
 imageAlt: "Documenti fiscali con calcoli di deducibilità IRES e IRAP per noleggio operativo"
 ---
 

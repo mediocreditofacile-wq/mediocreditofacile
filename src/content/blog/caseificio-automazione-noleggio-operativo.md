@@ -4,7 +4,7 @@ description: "Un produttore di macchine per caseifici ha iniziato a vendere a ca
 date: "2026-03-03"
 author: "Alberto Amà"
 tags: ["noleggio operativo", "caseificio", "burrata", "automazione", "food machinery", "caso studio", "vendita a canone"]
-image: "/images/blog-caseificio-burrata.jpg"
+image: "/images/blog-caseificio-burrata.webp"
 imageAlt: "Macchinario automatico per produzione burrata in un caseificio italiano"
 ---
 

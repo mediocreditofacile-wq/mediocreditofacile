@@ -4,7 +4,7 @@ description: "Cos'è la Nuova Sabatini, chi può accedere, come calcolare il con
 date: "2026-04-03"
 author: "Alberto Amà"
 tags: ["sabatini", "agevolazioni", "beni strumentali", "contributo mise"]
-image: "/images/blog-nuova-sabatini-2026.jpg"
+image: "/images/blog-nuova-sabatini-2026.webp"
 imageAlt: "Macchinario CNC in officina moderna acquistato con contributo Sabatini"
 ---
 

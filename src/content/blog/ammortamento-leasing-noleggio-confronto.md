@@ -4,7 +4,7 @@ description: "Confronto pratico tra acquisto diretto, leasing finanziario e nole
 date: "2026-04-08"
 author: "Alberto Amà"
 tags: ["ammortamento", "leasing", "noleggio operativo", "confronto fiscale", "beni strumentali"]
-image: "/images/blog-combinare-agevolazioni.jpg"
+image: "/images/blog-combinare-agevolazioni.webp"
 imageAlt: "Documenti finanziari a confronto su scrivania"
 ---
 
