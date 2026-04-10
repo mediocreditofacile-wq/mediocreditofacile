@@ -282,6 +282,30 @@ const webAppJsonLd = {
       </div>
     </section>
 
+    <!-- ARTICOLI CORRELATI -->
+    <section class="lp-blog">
+      <div class="lp-blog__inner">
+        <h2 class="lp-blog__title">Approfondimenti sulla Nuova Sabatini</h2>
+        <div class="lp-blog__grid">
+          <a href="/blog/nuova-sabatini-2026-guida-pmi" class="lp-blog__card">
+            <span class="lp-blog__tag">Guida</span>
+            <h3>Nuova Sabatini 2026: guida pratica per PMI</h3>
+            <p>Cos'e', chi accede, come si calcola il contributo MISE, l'iter dalla domanda all'erogazione. Con formule ed esempi numerici.</p>
+          </a>
+          <a href="/blog/combinare-sabatini-mcc-bando-isi-finanziamento" class="lp-blog__card">
+            <span class="lp-blog__tag">Strategia</span>
+            <h3>Sabatini, MCC e Bando ISI: come combinarli</h3>
+            <p>Come una PMI puo' combinare piu' agevolazioni sullo stesso investimento. Tre scenari concreti con numeri.</p>
+          </a>
+          <a href="/blog/nuova-sabatini-noleggio-operativo" class="lp-blog__card">
+            <span class="lp-blog__tag">Confronto</span>
+            <h3>Nuova Sabatini e noleggio operativo: si possono combinare?</h3>
+            <p>La Sabatini prevede un contributo sugli interessi del finanziamento. Come si integra con il noleggio operativo?</p>
+          </a>
+        </div>
+      </div>
+    </section>
+
     <!-- COME FINANZIARLO -->
     <section class="lp-mcf">
       <div class="lp-mcf__inner">
@@ -785,6 +809,86 @@ const webAppJsonLd = {
     font-size: 0.95rem;
     line-height: 1.7;
     color: var(--mcf-charcoal);
+  }
+
+  /* === BLOG CORRELATI === */
+  .lp-blog {
+    padding: 5rem 1.5rem;
+    background: var(--mcf-ghost);
+  }
+
+  .lp-blog__inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+
+  .lp-blog__title {
+    font-size: clamp(1.5rem, 3.5vw, 2rem);
+    font-weight: 800;
+    color: var(--mcf-black);
+    text-align: center;
+    letter-spacing: -0.03em;
+    margin-bottom: 2.5rem;
+  }
+
+  .lp-blog__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+
+  .lp-blog__card {
+    display: flex;
+    flex-direction: column;
+    background: #ffffff;
+    border: 1px solid var(--mcf-platinum);
+    border-radius: var(--radius);
+    padding: 1.75rem 1.5rem;
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .lp-blog__card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(102, 76, 205, 0.1);
+  }
+
+  .lp-blog__tag {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--mcf-primary);
+    background: rgba(254, 111, 58, 0.1);
+    padding: 0.25rem 0.6rem;
+    border-radius: 4px;
+    margin-bottom: 0.75rem;
+    align-self: flex-start;
+  }
+
+  .lp-blog__card h3 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--mcf-black);
+    margin-bottom: 0.5rem;
+    line-height: 1.35;
+  }
+
+  .lp-blog__card p {
+    font-size: 0.88rem;
+    color: var(--mcf-charcoal);
+    line-height: 1.6;
+    flex: 1;
+  }
+
+  @media (max-width: 960px) {
+    .lp-blog__grid {
+      grid-template-columns: 1fr;
+      max-width: 480px;
+      margin-left: auto;
+      margin-right: auto;
+    }
   }
 
   /* === MCF === */
