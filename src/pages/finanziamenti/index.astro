@@ -93,21 +93,11 @@ const serviceJsonLd = {
       </div>
     </section>
 
-    <!-- SOCIAL PROOF STRIP (placeholder — Alberto inserira' i numeri reali) -->
-    <section class="fin-stats">
-      <div class="fin-stats__inner">
-        <div class="fin-stat">
-          <span class="fin-stat__number">180+</span>
-          <span class="fin-stat__label">Pratiche gestite</span>
-        </div>
-        <div class="fin-stat">
-          <span class="fin-stat__number">48h</span>
-          <span class="fin-stat__label">Tempo medio di risposta</span>
-        </div>
-        <div class="fin-stat">
-          <span class="fin-stat__number">10+</span>
-          <span class="fin-stat__label">Operatori bancari</span>
-        </div>
+    <!-- IFIS TRUST BANNER — subito sotto l'hero -->
+    <section class="fin-ifis-banner">
+      <div class="fin-ifis-banner__inner">
+        <p class="fin-ifis-banner__label">In partnership con</p>
+        <img src="/images/partners/ifis.svg" alt="IFIS" class="fin-ifis-banner__logo" loading="lazy" width="140" height="48" />
       </div>
     </section>
 
@@ -340,10 +330,23 @@ const serviceJsonLd = {
           </div>
         </div>
 
-        <!-- Logo IFIS trust banner -->
-        <div class="fin-trust">
-          <p class="fin-trust__label">In partnership con</p>
-          <img src="/images/partners/ifis.svg" alt="IFIS" class="fin-trust__logo" loading="lazy" width="120" height="40" />
+      </div>
+    </section>
+
+    <!-- SOCIAL PROOF STRIP — prima delle FAQ -->
+    <section class="fin-stats">
+      <div class="fin-stats__inner">
+        <div class="fin-stat">
+          <span class="fin-stat__number">180+</span>
+          <span class="fin-stat__label">Pratiche gestite</span>
+        </div>
+        <div class="fin-stat">
+          <span class="fin-stat__number">48h</span>
+          <span class="fin-stat__label">Tempo medio di risposta</span>
+        </div>
+        <div class="fin-stat">
+          <span class="fin-stat__number">10+</span>
+          <span class="fin-stat__label">Operatori bancari</span>
         </div>
       </div>
     </section>
@@ -911,30 +914,35 @@ const serviceJsonLd = {
     line-height: 1.65;
   }
 
-  /* Trust banner IFIS */
-  .fin-trust {
+  /* IFIS BANNER — prominente sotto hero */
+  .fin-ifis-banner {
+    background: var(--mcf-black);
+    padding: 1.25rem 1.5rem;
+    text-align: center;
+  }
+
+  .fin-ifis-banner__inner {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 1rem;
-    padding: 1.5rem;
-    background: var(--mcf-ghost);
-    border-radius: var(--radius);
-    border: 1px solid var(--mcf-platinum);
+    gap: 1.25rem;
+    max-width: var(--max-width);
+    margin: 0 auto;
   }
 
-  .fin-trust__label {
-    font-size: 0.85rem;
+  .fin-ifis-banner__label {
+    font-size: 0.9rem;
     font-weight: 600;
-    color: var(--mcf-taupe);
+    color: rgba(255, 255, 255, 0.6);
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.1em;
   }
 
-  .fin-trust__logo {
-    height: 32px;
+  .fin-ifis-banner__logo {
+    height: 40px;
     width: auto;
-    opacity: 0.85;
+    filter: brightness(0) invert(1);
+    opacity: 0.9;
   }
 
   /* FAQ */
@@ -1214,9 +1222,16 @@ const serviceJsonLd = {
       width: 100%;
     }
 
-    .fin-trust {
-      flex-direction: column;
-      gap: 0.5rem;
+    .fin-ifis-banner__inner {
+      gap: 0.75rem;
+    }
+
+    .fin-ifis-banner__label {
+      font-size: 0.78rem;
+    }
+
+    .fin-ifis-banner__logo {
+      height: 32px;
     }
   }
 </style>

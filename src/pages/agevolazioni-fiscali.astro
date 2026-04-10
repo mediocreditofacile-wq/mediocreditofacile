@@ -41,6 +41,19 @@ import Footer from '../components/Footer.astro';
       </div>
     </section>
 
+    <!-- CTA FINANZIAMENTI — fascia visiva sopra le card -->
+    <section class="af-cta-fin">
+      <div class="af-cta-fin__inner">
+        <h2 class="af-cta-fin__title">Ogni agevolazione funziona meglio con il finanziamento giusto</h2>
+        <p class="af-cta-fin__text">
+          La Sabatini si attiva con un finanziamento bancario. Il Fondo di Garanzia migliora
+          le condizioni di quel finanziamento. Il Bando ISI richiede di anticipare il 100%.
+          MCF gestisce entrambi i percorsi: agevolazione e finanziamento, in un'unica pratica.
+        </p>
+        <a href="/finanziamenti/" class="af-cta-fin__btn">Scopri i finanziamenti MCF</a>
+      </div>
+    </section>
+
     <!-- LISTA AGEVOLAZIONI -->
     <section class="af-cards" id="agevolazioni-lista">
       <div class="af-cards__inner">
@@ -122,19 +135,6 @@ import Footer from '../components/Footer.astro';
           <a href="#form-agevolazioni" class="af-card__cta">Chiedi se rientri</a>
         </div>
 
-      </div>
-    </section>
-
-    <!-- CTA FINANZIAMENTI -->
-    <section class="af-cta-fin">
-      <div class="af-cta-fin__inner">
-        <h2>Ogni agevolazione funziona meglio con il finanziamento giusto</h2>
-        <p>
-          La Sabatini si attiva con un finanziamento bancario. Il Fondo di Garanzia migliora
-          le condizioni di quel finanziamento. Il Bando ISI richiede di anticipare il 100%.
-          MCF gestisce entrambi i percorsi: agevolazione e finanziamento, in un'unica pratica.
-        </p>
-        <a href="/finanziamenti/" class="af-cta-fin__btn">Scopri i finanziamenti MCF</a>
       </div>
     </section>
 
@@ -349,31 +349,36 @@ import Footer from '../components/Footer.astro';
     box-shadow: none;
   }
 
-  /* CTA FINANZIAMENTI */
+  /* CTA FINANZIAMENTI — fascia con foto */
   .af-cta-fin {
-    padding: 4rem 1.5rem;
-    background: var(--mcf-black);
+    padding: 4.5rem 1.5rem;
+    background: linear-gradient(rgba(15, 16, 32, 0.75), rgba(26, 10, 62, 0.8)), url('/images/hero-agevolazioni-cta.jpg');
+    background-size: cover;
+    background-position: center;
     color: #fff;
     text-align: center;
   }
 
   .af-cta-fin__inner {
-    max-width: 640px;
+    max-width: 700px;
     margin: 0 auto;
   }
 
-  .af-cta-fin__inner h2 {
-    font-size: clamp(1.4rem, 3.5vw, 1.85rem);
+  .af-cta-fin__title {
+    font-size: clamp(1.6rem, 4vw, 2.25rem);
     font-weight: 800;
-    margin-bottom: 1rem;
-    letter-spacing: -0.02em;
+    margin-bottom: 1.25rem;
+    letter-spacing: -0.03em;
+    line-height: 1.2;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
   }
 
-  .af-cta-fin__inner p {
-    font-size: 1.05rem;
-    color: rgba(255, 255, 255, 0.75);
-    line-height: 1.65;
+  .af-cta-fin__text {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.7;
     margin-bottom: 2rem;
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.2);
   }
 
   .af-cta-fin__btn {
@@ -382,10 +387,11 @@ import Footer from '../components/Footer.astro';
     background: var(--mcf-primary);
     color: #fff;
     font-weight: 700;
-    font-size: 1.05rem;
-    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    padding: 1.1rem 2.5rem;
     border-radius: 10px;
     transition: background 0.2s, transform 0.15s;
+    box-shadow: 0 4px 16px rgba(254, 111, 58, 0.3);
   }
 
   .af-cta-fin__btn:hover {
