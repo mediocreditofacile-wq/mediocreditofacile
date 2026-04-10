@@ -1,16 +1,16 @@
 ---
-title: "Sabatini, MCC e Bando ISI: come combinarli per massimizzare l'investimento"
-description: "Guida pratica per PMI: come combinare Nuova Sabatini, Fondo di Garanzia e Bando ISI sullo stesso investimento. Tre scenari concreti con numeri."
+title: "Iperammortamento, Sabatini, MCC e Bando ISI: come combinarli sullo stesso investimento"
+description: "Guida pratica per PMI: come combinare iperammortamento, Nuova Sabatini, Fondo di Garanzia e Bando ISI sullo stesso investimento. Scenari concreti con numeri."
 date: "2026-04-09"
 author: "Alberto Amà"
-tags: ["sabatini", "fondo garanzia", "bando isi", "agevolazioni", "finanziamenti", "combinare"]
+tags: ["iperammortamento", "sabatini", "fondo garanzia", "bando isi", "agevolazioni", "finanziamenti", "combinare"]
 image: "/images/blog-combinare-agevolazioni.jpg"
 imageAlt: "Vista dall'alto di scrivania con documenti di agevolazioni a confronto"
 ---
 
-Le agevolazioni pubbliche per le PMI non si escludono a vicenda. Eppure la maggior parte delle aziende ne usa una sola, quando potrebbe combinarne due o tre sullo stesso investimento. Il motivo è semplice: ogni misura agisce su un livello diverso del costo, e capire dove si incastrano richiede qualcuno che le conosca tutte.
+Le agevolazioni pubbliche per le PMI non si escludono a vicenda. Eppure la maggior parte delle aziende ne usa una sola, quando potrebbe combinarne tre o quattro sullo stesso investimento. Il motivo e' semplice: ogni misura agisce su un livello diverso del costo, e capire dove si incastrano richiede qualcuno che le conosca tutte.
 
-La [Nuova Sabatini](/finanziamenti/agevolazioni/nuova-sabatini-2026) abbatte il costo degli interessi. Il [Fondo di Garanzia MCC](/finanziamenti/agevolazioni/fondo-garanzia-mcc) elimina il rischio per la banca. Il [Bando ISI INAIL](/finanziamenti/agevolazioni/bando-isi-inail) è un contributo a fondo perduto per la sicurezza. Tre strumenti, tre funzioni diverse, combinabili sullo stesso investimento. Vediamo come, con tre scenari reali e i numeri in chiaro.
+L'[iperammortamento 2026](/finanziamenti/agevolazioni/iperammortamento-2026) taglia le tasse: scarichi fino al 280% del costo del bene 4.0. La [Nuova Sabatini](/finanziamenti/agevolazioni/nuova-sabatini-2026) abbatte il costo degli interessi. Il [Fondo di Garanzia MCC](/finanziamenti/agevolazioni/fondo-garanzia-mcc) elimina il rischio per la banca. Il [Bando ISI INAIL](/finanziamenti/agevolazioni/bando-isi-inail) e' un contributo a fondo perduto per la sicurezza. Quattro strumenti, quattro funzioni diverse, combinabili sullo stesso investimento. Vediamo come, con scenari reali e numeri in chiaro.
 
 ## Le tre agevolazioni in sintesi
 
