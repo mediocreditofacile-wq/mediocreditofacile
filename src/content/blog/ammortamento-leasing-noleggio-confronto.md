@@ -36,7 +36,7 @@ La deducibilita' funziona cosi': i canoni di leasing sono deducibili ai fini IRE
 
 In numeri concreti: un bene da 100.000 euro in leasing a 48 mesi con canone di 2.300 euro al mese. In quattro anni deduci circa 110.000 euro tra canoni e maxicanone iniziale. Con l'acquisto diretto, nello stesso periodo avresti dedotto circa 52.500 euro di ammortamento. Il leasing concentra la deduzione in un periodo piu' breve.
 
-L'aspetto cruciale: il leasing accede alle agevolazioni come l'acquisto. Per l'[iperammortamento](/finanziamenti/agevolazioni/iperammortamento-2026), e' il locatario (cioe' tu, che usi il bene) a beneficiare del credito d'imposta, non la societa' di leasing. La [Nuova Sabatini](/finanziamenti/agevolazioni/nuova-sabatini-2026) e' accessibile: il contributo copre gli interessi impliciti nel canone di leasing. Il Fondo di Garanzia MCC puo' garantire l'operazione.
+L'aspetto cruciale: il leasing accede alle agevolazioni come l'acquisto. Per l'[iperammortamento](/finanziamenti/agevolazioni/iperammortamento-2026), e' il locatario (cioe' tu, che usi il bene) a beneficiare della maggiorazione del costo ammortizzabile, non la societa' di leasing. La [Nuova Sabatini](/finanziamenti/agevolazioni/nuova-sabatini-2026) e' accessibile: il contributo copre gli interessi impliciti nel canone di leasing. Il Fondo di Garanzia MCC puo' garantire l'operazione.
 
 Sul bilancio, dal 2024 le regole sono cambiate. Con l'OIC 73 (per chi applica i principi contabili italiani) e l'IFRS 16 (per chi usa i principi internazionali), il bene in leasing va iscritto come "diritto d'uso" nell'attivo e la passivita' corrispondente nel passivo. Il leasing, quindi, non e' piu' "fuori bilancio" come lo era una volta. Compare, e influisce sui tuoi indici patrimoniali.
 
