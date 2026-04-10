@@ -1,0 +1,429 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import Header from '../../../components/Header.astro';
+import Footer from '../../../components/Footer.astro';
+
+const faqs = [
+  {
+    q: 'L\'iperammortamento e\' un credito d\'imposta?',
+    a: 'No. L\'iperammortamento e\' una maggiorazione del costo ammortizzabile del bene: non ricevi un credito diretto, ma scarichi un importo fiscale piu\' alto negli anni di ammortamento, riducendo l\'imponibile IRES e di conseguenza le tasse. L\'effetto economico e\' simile, ma il meccanismo e\' diverso.',
+  },
+  {
+    q: 'Quali beni rientrano nell\'iperammortamento 2026?',
+    a: 'Beni strumentali nuovi che rientrano nelle Tabelle IV e V della Legge di Bilancio 2026: macchinari, impianti, attrezzature e software con caratteristiche 4.0 (interconnessione, integrazione con i sistemi aziendali, monitoraggio in tempo reale). Sono esclusi beni usati, fabbricati, veicoli non strumentali.',
+  },
+  {
+    q: 'Serve una perizia?',
+    a: 'Si\'. Per investimenti sopra una certa soglia (tipicamente 300.000 euro) serve una perizia asseverata o un attestato di conformita\' rilasciato da un ente accreditato. Sotto soglia basta un\'autocertificazione del legale rappresentante. La perizia deve attestare che il bene possiede le caratteristiche 4.0 e l\'interconnessione al sistema aziendale.',
+  },
+  {
+    q: 'Il noleggio operativo accede all\'iperammortamento?',
+    a: 'No. L\'iperammortamento si applica solo quando c\'e\' acquisto del bene: proprieta\' diretta o leasing finanziario. Il noleggio operativo non trasferisce la proprieta\' al locatario, quindi il bene non entra nelle immobilizzazioni e non genera ammortamento fiscale maggiorato. Per chi vuole l\'iperammortamento, la strada e\' il leasing o l\'acquisto.',
+  },
+  {
+    q: 'Posso combinare iperammortamento e Nuova Sabatini?',
+    a: 'Si\'. L\'iperammortamento riduce l\'imponibile, la Sabatini eroga un contributo in conto interessi: agiscono su livelli diversi. Combinarli significa ridurre sia le tasse sia il costo finanziario dell\'investimento. Se si aggiunge anche il Fondo di Garanzia MCC, si ottengono tre agevolazioni su un\'unica operazione.',
+  },
+  {
+    q: 'Fino a quando e\' valido?',
+    a: 'L\'iperammortamento 2026 si applica agli investimenti effettuati dal 1 gennaio 2026 al 30 settembre 2028. Per gli investimenti prenotati (ordine confermato con acconto di almeno il 20%) entro il 30 settembre 2028, la consegna puo\' avvenire entro il 30 giugno 2029.',
+  },
+];
+
+const faqJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqs.map((f) => ({
+    '@type': 'Question',
+    name: f.q,
+    acceptedAnswer: { '@type': 'Answer', text: f.a },
+  })),
+};
+---
+
+<Layout
+  title="Iperammortamento 2026: scarica fino al 280% del bene strumentale | Mediocredito Facile"
+  description="La Legge di Bilancio 2026 ha reintrodotto l'iperammortamento per beni 4.0. Maggiorazione fino a 180%. Scopri come funziona e come finanziarlo."
+>
+  <Header minimal={false} />
+  <script type="application/ld+json" set:html={JSON.stringify(faqJsonLd)} />
+
+  <main>
+
+    <!-- HERO -->
+    <section class="ipa-hero">
+      <div class="ipa-hero__inner">
+        <span class="ipa-hero__eyebrow">Legge di Bilancio 2026</span>
+        <h1 class="ipa-hero__title">
+          Iperammortamento 2026: scarica fino al 280% del costo del bene strumentale
+        </h1>
+        <p class="ipa-hero__sub">
+          La Legge di Bilancio 2026 ha reintrodotto l'iperammortamento. Se investi in macchinari 4.0,
+          il risparmio fiscale e' concreto: maggiorazione del costo ammortizzabile fino al 180%.
+        </p>
+        <a href="#form-ipa" class="ipa-hero__cta">Richiedi una valutazione gratuita</a>
+      </div>
+    </section>
+
+    <!-- COS'E' -->
+    <section class="ipa-intro">
+      <div class="ipa-intro__inner">
+        <h2 class="ipa-section-title">Cos'e' l'iperammortamento 2026</h2>
+        <div class="ipa-intro__content">
+          <p>
+            L'iperammortamento non e' un credito d'imposta. E' una maggiorazione del costo fiscalmente
+            ammortizzabile: il bene costa 100, ma ai fini fiscali puoi scaricare fino a 280. La differenza
+            riduce l'imponibile IRES, con un risparmio concreto sulle tasse per tutta la durata dell'ammortamento.
+          </p>
+          <p>
+            La Legge di Bilancio 2026 ha reintrodotto questo meccanismo dopo la chiusura di Transizione 4.0/5.0.
+            Si applica ai beni strumentali nuovi con caratteristiche 4.0, acquistati o in leasing finanziario
+            dal 1 gennaio 2026 al 30 settembre 2028.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- LE TRE FASCE -->
+    <section class="ipa-fasce">
+      <div class="ipa-fasce__inner">
+        <h2 class="ipa-section-title ipa-section-title--light">Le tre fasce di maggiorazione</h2>
+        <div class="ipa-fasce__grid">
+          <div class="ipa-fascia">
+            <div class="ipa-fascia__pct">280%</div>
+            <p class="ipa-fascia__range">Investimenti fino a 2,5 milioni</p>
+            <p class="ipa-fascia__detail">Maggiorazione +180% sul costo del bene</p>
+          </div>
+          <div class="ipa-fascia">
+            <div class="ipa-fascia__pct">200%</div>
+            <p class="ipa-fascia__range">Da 2,5 a 10 milioni</p>
+            <p class="ipa-fascia__detail">Maggiorazione +100% sul costo del bene</p>
+          </div>
+          <div class="ipa-fascia">
+            <div class="ipa-fascia__pct">150%</div>
+            <p class="ipa-fascia__range">Da 10 a 20 milioni</p>
+            <p class="ipa-fascia__detail">Maggiorazione +50% sul costo del bene</p>
+          </div>
+        </div>
+
+        <!-- Esempio numerico -->
+        <div class="ipa-esempio">
+          <h3>Esempio concreto</h3>
+          <p>
+            Investimento: 500.000 euro in un macchinario 4.0. Maggiorazione: +180% = costo ammortizzabile 1.400.000 euro.
+            Maggiorazione netta: 900.000 euro. Risparmio IRES (24%): circa 216.000 euro distribuiti negli anni di ammortamento.
+            In pratica, lo Stato ti restituisce oltre il 43% dell'investimento sotto forma di minori tasse.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- REQUISITI -->
+    <section class="ipa-req">
+      <div class="ipa-req__inner">
+        <h2 class="ipa-section-title">Requisiti</h2>
+        <div class="ipa-req__grid">
+          <div class="ipa-req__item">
+            <span class="material-icons-outlined" aria-hidden="true">new_releases</span>
+            <h3>Beni nuovi</h3>
+            <p>Solo beni strumentali nuovi di fabbrica. Niente usato, niente rigenerato.</p>
+          </div>
+          <div class="ipa-req__item">
+            <span class="material-icons-outlined" aria-hidden="true">settings_input_component</span>
+            <h3>Caratteristiche 4.0</h3>
+            <p>Il bene deve rientrare nelle Tabelle IV/V della Legge di Bilancio 2026: interconnessione, integrazione con sistemi aziendali, monitoraggio.</p>
+          </div>
+          <div class="ipa-req__item">
+            <span class="material-icons-outlined" aria-hidden="true">verified</span>
+            <h3>Perizia asseverata</h3>
+            <p>Sopra soglia serve una perizia asseverata o attestato di conformita'. Sotto soglia, autocertificazione.</p>
+          </div>
+          <div class="ipa-req__item">
+            <span class="material-icons-outlined" aria-hidden="true">event</span>
+            <h3>Validita'</h3>
+            <p>Investimenti dal 1 gennaio 2026 al 30 settembre 2028. Consegna entro 30 giugno 2029 se prenotato con acconto 20%.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LEASING VS NOLEGGIO -->
+    <section class="ipa-confronto">
+      <div class="ipa-confronto__inner">
+        <h2 class="ipa-section-title">Leasing o noleggio: chi accede all'iperammortamento</h2>
+        <div class="ipa-confronto__grid">
+          <div class="ipa-confronto__card ipa-confronto__card--yes">
+            <div class="ipa-confronto__badge ipa-confronto__badge--yes">
+              <span class="material-icons-outlined" aria-hidden="true">check_circle</span> Ammesso
+            </div>
+            <h3>Leasing finanziario</h3>
+            <p>
+              Il locatario fruisce della maggiorazione sull'ammortamento. Il bene entra nelle immobilizzazioni.
+              Il leasing e' la forma tecnica piu' utilizzata per accedere all'iperammortamento perche' consente
+              di finanziare l'investimento e ottenere il beneficio fiscale contemporaneamente.
+            </p>
+          </div>
+          <div class="ipa-confronto__card ipa-confronto__card--no">
+            <div class="ipa-confronto__badge ipa-confronto__badge--no">
+              <span class="material-icons-outlined" aria-hidden="true">cancel</span> Escluso
+            </div>
+            <h3>Noleggio operativo</h3>
+            <p>
+              La proprieta' resta al locatore. Il bene non entra nelle immobilizzazioni del locatario,
+              quindi non genera ammortamento fiscale. Il noleggio operativo ha altri vantaggi (deducibilita'
+              piena del canone, nessun debito in bilancio), ma non accede all'iperammortamento.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CUMULABILITA' -->
+    <section class="ipa-combo">
+      <div class="ipa-combo__inner">
+        <h2 class="ipa-section-title">Tre agevolazioni su un'unica operazione</h2>
+        <p class="ipa-combo__sub">
+          L'iperammortamento si combina con la Nuova Sabatini e il Fondo di Garanzia MCC sullo stesso investimento.
+          Ognuna agisce su un livello diverso: l'iperammortamento riduce le tasse, la Sabatini riduce gli interessi,
+          il Fondo Garanzia migliora le condizioni del finanziamento.
+        </p>
+        <div class="ipa-combo__grid">
+          <a href="/finanziamenti/agevolazioni/nuova-sabatini-2026" class="ipa-combo__card">
+            <span class="material-icons-outlined" aria-hidden="true">savings</span>
+            <h3>Nuova Sabatini</h3>
+            <p>Contributo in conto interessi sul finanziamento</p>
+          </a>
+          <a href="/finanziamenti/agevolazioni/fondo-garanzia-mcc" class="ipa-combo__card">
+            <span class="material-icons-outlined" aria-hidden="true">shield</span>
+            <h3>Fondo di Garanzia MCC</h3>
+            <p>Garanzia statale gratuita fino all'80%</p>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="ipa-faq">
+      <div class="ipa-faq__inner">
+        <h2 class="ipa-section-title">Domande frequenti</h2>
+        <div class="ipa-faq__list">
+          {faqs.map((faq, i) => (
+            <details class="ipa-faq__item" id={`faq-${i}`}>
+              <summary class="ipa-faq__question">{faq.q}</summary>
+              <p class="ipa-faq__answer">{faq.a}</p>
+            </details>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- COME FINANZIARLO -->
+    <section class="ipa-mcf">
+      <div class="ipa-mcf__inner">
+        <h2 class="ipa-mcf__title">Il finanziamento e' il veicolo. L'iperammortamento e' il turbo fiscale.</h2>
+        <p class="ipa-mcf__text">
+          Per attivare l'iperammortamento serve un finanziamento bancario o un leasing. MCF ti da' accesso
+          a piu' operatori convenzionati e gestisce la pratica di finanziamento insieme alle agevolazioni.
+          Valutazione gratuita in 24 ore.
+        </p>
+        <div class="ipa-mcf__cta-row">
+          <a href="/finanziamenti/" class="ipa-mcf__cta ipa-mcf__cta--solid">
+            Richiedi il finanziamento con iperammortamento
+          </a>
+          <a href="tel:+393939957840" class="ipa-mcf__cta ipa-mcf__cta--outline">
+            <span class="material-icons-outlined">phone</span>
+            Chiama Alberto
+          </a>
+        </div>
+        <div class="ipa-mcf__trust">
+          <p>In partnership con</p>
+          <img src="/images/partners/ifis.svg" alt="IFIS" loading="lazy" width="100" height="34" />
+        </div>
+      </div>
+    </section>
+
+    <!-- FORM -->
+    <section class="ipa-form" id="form-ipa">
+      <div class="ipa-form__inner">
+        <h2 class="ipa-form__heading">Vuoi sapere se il tuo investimento rientra nell'iperammortamento?</h2>
+        <p class="ipa-form__sub">Lascia i tuoi dati, ti richiamo per una valutazione gratuita.</p>
+        <form class="ipa-form__form" id="form-iperammortamento" action="">
+          <input name="website" type="text" tabindex="-1" autocomplete="off" style="position:absolute;opacity:0;pointer-events:none;height:0;overflow:hidden" aria-hidden="true" />
+          <input type="hidden" name="fonte" value="iperammortamento" />
+
+          <div class="ipa-form__field">
+            <label for="ipa-nome">Nome e Cognome</label>
+            <input type="text" id="ipa-nome" name="nome" placeholder="Mario Rossi" required autocomplete="name" />
+          </div>
+          <div class="ipa-form__field">
+            <label for="ipa-tel">Telefono</label>
+            <input type="tel" id="ipa-tel" name="telefono" placeholder="+39 333 123 4567" required autocomplete="tel" />
+          </div>
+          <div class="ipa-form__field">
+            <label for="ipa-importo">Importo investimento previsto</label>
+            <select id="ipa-importo" name="importo_investimento">
+              <option value="" disabled selected>Seleziona...</option>
+              <option value="sotto-100k">Sotto 100.000 euro</option>
+              <option value="100-500k">100.000 - 500.000 euro</option>
+              <option value="500k-2.5m">500.000 - 2.500.000 euro</option>
+              <option value="oltre-2.5m">Oltre 2.500.000 euro</option>
+            </select>
+          </div>
+          <button type="submit" class="ipa-form__submit" id="ipa-submit">Richiedi Valutazione Gratuita</button>
+          <p class="ipa-form__privacy">
+            Inviando il modulo accetti la nostra <a href="/privacy">informativa sulla privacy</a>.
+          </p>
+        </form>
+      </div>
+    </section>
+
+  </main>
+  <Footer />
+</Layout>
+
+<script>
+  const form = document.getElementById('form-iperammortamento') as HTMLFormElement | null;
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('ipa-submit') as HTMLButtonElement | null;
+    if (btn) { btn.disabled = true; btn.textContent = 'Invio in corso...'; }
+    const data = new FormData(form);
+    try {
+      await fetch('/api/submit', { method: 'POST', body: data });
+    } catch (_) {}
+    window.location.href = '/grazie-fin';
+  });
+</script>
+
+<style>
+  /* HERO */
+  .ipa-hero {
+    background: linear-gradient(135deg, #1A0A3E 0%, #664CCD 60%, #FE6F3A 100%);
+    color: #fff;
+    padding: 6rem 1.5rem 5rem;
+    text-align: center;
+  }
+  .ipa-hero__inner { max-width: 800px; margin: 0 auto; }
+  .ipa-hero__eyebrow {
+    display: inline-block; font-size: 0.78rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.14em;
+    color: rgba(255,255,255,0.85); background: rgba(255,255,255,0.12);
+    padding: 0.4rem 1rem; border-radius: 999px; margin-bottom: 1.5rem;
+  }
+  .ipa-hero__title { font-size: clamp(1.85rem,5vw,2.75rem); font-weight: 800; line-height: 1.15; letter-spacing: -0.03em; margin-bottom: 1.25rem; }
+  .ipa-hero__sub { font-size: clamp(1rem,2vw,1.12rem); line-height: 1.65; color: rgba(255,255,255,0.85); max-width: 680px; margin: 0 auto 2rem; }
+  .ipa-hero__cta { display: inline-flex; align-items: center; background: var(--mcf-primary); color: #fff; font-weight: 700; font-size: 1.05rem; padding: 1rem 2rem; border-radius: 10px; transition: background 0.2s, transform 0.15s; }
+  .ipa-hero__cta:hover { background: var(--mcf-primary-dark); transform: translateY(-2px); }
+
+  /* SECTION TITLES */
+  .ipa-section-title { text-align: center; font-size: clamp(1.5rem,3.5vw,2.1rem); font-weight: 800; color: var(--mcf-black); margin-bottom: 2rem; letter-spacing: -0.02em; line-height: 1.25; }
+  .ipa-section-title--light { color: #fff; }
+
+  /* INTRO */
+  .ipa-intro { padding: 4.5rem 1.5rem; background: #fff; }
+  .ipa-intro__inner { max-width: 720px; margin: 0 auto; }
+  .ipa-intro__content p { font-size: 1.05rem; line-height: 1.75; color: var(--mcf-charcoal); margin-bottom: 1rem; }
+
+  /* FASCE */
+  .ipa-fasce { padding: 4.5rem 1.5rem; background: linear-gradient(135deg, #1e1b3a 0%, #1a1640 100%); color: #fff; }
+  .ipa-fasce__inner { max-width: var(--max-width); margin: 0 auto; }
+  .ipa-fasce__grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.5rem; margin-top: 1rem; }
+  .ipa-fascia { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: var(--radius); padding: 2rem 1.5rem; text-align: center; }
+  .ipa-fascia__pct { font-size: 3rem; font-weight: 800; color: var(--mcf-primary); line-height: 1; margin-bottom: 0.75rem; }
+  .ipa-fascia__range { font-size: 0.95rem; font-weight: 600; color: #fff; margin-bottom: 0.35rem; }
+  .ipa-fascia__detail { font-size: 0.85rem; color: rgba(255,255,255,0.65); }
+
+  /* ESEMPIO */
+  .ipa-esempio { max-width: 720px; margin: 2.5rem auto 0; background: rgba(254,111,58,0.1); border: 1px solid rgba(254,111,58,0.25); border-radius: var(--radius); padding: 1.5rem 2rem; }
+  .ipa-esempio h3 { font-size: 1rem; font-weight: 700; color: var(--mcf-primary); margin-bottom: 0.5rem; }
+  .ipa-esempio p { font-size: 0.95rem; line-height: 1.7; color: rgba(255,255,255,0.85); }
+
+  /* REQUISITI */
+  .ipa-req { padding: 4.5rem 1.5rem; background: var(--mcf-ghost); }
+  .ipa-req__inner { max-width: var(--max-width); margin: 0 auto; }
+  .ipa-req__grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 1.5rem; }
+  .ipa-req__item { background: #fff; border: 1px solid var(--mcf-platinum); border-radius: var(--radius); padding: 1.5rem; }
+  .ipa-req__item .material-icons-outlined { font-size: 1.5rem; color: var(--mcf-primary); margin-bottom: 0.75rem; display: block; }
+  .ipa-req__item h3 { font-size: 1rem; font-weight: 700; color: var(--mcf-accent); margin-bottom: 0.5rem; }
+  .ipa-req__item p { font-size: 0.88rem; color: var(--mcf-charcoal); line-height: 1.6; }
+
+  /* CONFRONTO LEASING VS NOLEGGIO */
+  .ipa-confronto { padding: 4.5rem 1.5rem; background: #fff; }
+  .ipa-confronto__inner { max-width: 900px; margin: 0 auto; }
+  .ipa-confronto__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  .ipa-confronto__card { border-radius: var(--radius); padding: 2rem 1.75rem; }
+  .ipa-confronto__card--yes { background: rgba(45,143,78,0.06); border: 2px solid rgba(45,143,78,0.25); }
+  .ipa-confronto__card--no { background: rgba(204,51,51,0.04); border: 2px solid rgba(204,51,51,0.15); }
+  .ipa-confronto__badge { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.82rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; }
+  .ipa-confronto__badge--yes { color: var(--mcf-success); }
+  .ipa-confronto__badge--no { color: var(--mcf-error); }
+  .ipa-confronto__badge .material-icons-outlined { font-size: 1.1rem; }
+  .ipa-confronto__card h3 { font-size: 1.15rem; font-weight: 700; color: var(--mcf-black); margin-bottom: 0.75rem; }
+  .ipa-confronto__card p { font-size: 0.92rem; color: var(--mcf-charcoal); line-height: 1.65; }
+
+  /* CUMULABILITA' */
+  .ipa-combo { padding: 4.5rem 1.5rem; background: var(--mcf-ghost); }
+  .ipa-combo__inner { max-width: 800px; margin: 0 auto; text-align: center; }
+  .ipa-combo__sub { font-size: 1.05rem; line-height: 1.7; color: var(--mcf-charcoal); margin-bottom: 2.5rem; max-width: 680px; margin-left: auto; margin-right: auto; }
+  .ipa-combo__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  .ipa-combo__card { display: flex; flex-direction: column; align-items: center; text-align: center; background: #fff; border: 1px solid var(--mcf-platinum); border-radius: var(--radius); padding: 2rem 1.5rem; text-decoration: none; transition: transform 0.2s, box-shadow 0.2s; }
+  .ipa-combo__card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(102,76,205,0.1); }
+  .ipa-combo__card .material-icons-outlined { font-size: 2rem; color: var(--mcf-accent); margin-bottom: 0.75rem; }
+  .ipa-combo__card h3 { font-size: 1.05rem; font-weight: 700; color: var(--mcf-accent); margin-bottom: 0.35rem; }
+  .ipa-combo__card p { font-size: 0.88rem; color: var(--mcf-charcoal); }
+
+  /* FAQ */
+  .ipa-faq { padding: 4.5rem 1.5rem; background: #fff; }
+  .ipa-faq__inner { max-width: 760px; margin: 0 auto; }
+  .ipa-faq__list { display: flex; flex-direction: column; gap: 0; }
+  .ipa-faq__item { border-bottom: 1px solid var(--mcf-platinum); }
+  .ipa-faq__question { padding: 1.25rem 0; font-size: 1.05rem; font-weight: 600; color: var(--mcf-accent); cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; }
+  .ipa-faq__question::after { content: '+'; font-size: 1.4rem; font-weight: 300; color: var(--mcf-primary); flex-shrink: 0; margin-left: 1rem; }
+  .ipa-faq__item[open] .ipa-faq__question::after { content: '-'; }
+  .ipa-faq__question::-webkit-details-marker { display: none; }
+  .ipa-faq__answer { font-size: 0.95rem; line-height: 1.7; color: var(--mcf-charcoal); padding-bottom: 1.25rem; padding-right: 2rem; }
+
+  /* COME FINANZIARLO */
+  .ipa-mcf { padding: 4.5rem 1.5rem; background: var(--mcf-black); color: #fff; text-align: center; }
+  .ipa-mcf__inner { max-width: 720px; margin: 0 auto; }
+  .ipa-mcf__title { font-size: clamp(1.4rem,3.5vw,1.85rem); font-weight: 800; margin-bottom: 1.25rem; letter-spacing: -0.02em; line-height: 1.25; }
+  .ipa-mcf__text { font-size: 1.05rem; line-height: 1.75; color: rgba(255,255,255,0.8); margin-bottom: 1.5rem; }
+  .ipa-mcf__cta-row { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-bottom: 2rem; }
+  .ipa-mcf__cta { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.95rem 1.75rem; border-radius: 10px; font-weight: 700; font-size: 1rem; transition: all 0.2s; }
+  .ipa-mcf__cta--solid { background: var(--mcf-primary); color: #fff; }
+  .ipa-mcf__cta--solid:hover { background: var(--mcf-primary-dark); transform: translateY(-2px); }
+  .ipa-mcf__cta--outline { background: transparent; color: #fff; border: 2px solid rgba(255,255,255,0.3); }
+  .ipa-mcf__cta--outline:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.6); }
+  .ipa-mcf__trust { display: flex; align-items: center; justify-content: center; gap: 0.75rem; }
+  .ipa-mcf__trust p { font-size: 0.8rem; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.08em; }
+  .ipa-mcf__trust img { height: 28px; width: auto; filter: brightness(0) invert(1); opacity: 0.7; }
+
+  /* FORM */
+  .ipa-form { padding: 4.5rem 1.5rem; background: var(--color-bg); }
+  .ipa-form__inner { max-width: 520px; margin: 0 auto; }
+  .ipa-form__heading { text-align: center; font-size: clamp(1.3rem,3.5vw,1.65rem); font-weight: 800; color: var(--mcf-accent); margin-bottom: 0.5rem; line-height: 1.3; }
+  .ipa-form__sub { text-align: center; color: var(--mcf-taupe); margin-bottom: 2rem; font-size: 1rem; }
+  .ipa-form__form { display: flex; flex-direction: column; gap: 1.1rem; }
+  .ipa-form__field label { display: block; font-size: 0.875rem; font-weight: 600; color: var(--mcf-accent); margin-bottom: 0.35rem; }
+  .ipa-form__field input, .ipa-form__field select { width: 100%; padding: 0.8rem 1rem; border: 1.5px solid var(--mcf-platinum); border-radius: 8px; font-family: var(--font-family); font-size: 1rem; color: var(--mcf-charcoal); background: #fff; transition: border-color 0.2s, box-shadow 0.2s; }
+  .ipa-form__field input:focus, .ipa-form__field select:focus { outline: none; border-color: var(--mcf-accent); box-shadow: 0 0 0 3px rgba(102,76,205,0.15); }
+  .ipa-form__submit { display: inline-flex; align-items: center; justify-content: center; background: var(--mcf-primary); color: #fff; font-family: var(--font-family); font-weight: 700; font-size: 1.05rem; padding: 0.9rem 2rem; border: none; border-radius: 8px; cursor: pointer; transition: background 0.2s, transform 0.15s; margin-top: 0.5rem; }
+  .ipa-form__submit:hover { background: var(--mcf-primary-dark); transform: translateY(-1px); }
+  .ipa-form__privacy { text-align: center; font-size: 0.8rem; color: var(--mcf-taupe); margin-top: 0.25rem; }
+  .ipa-form__privacy a { color: var(--mcf-accent); text-decoration: underline; }
+
+  /* RESPONSIVE */
+  @media (max-width: 960px) {
+    .ipa-fasce__grid { grid-template-columns: 1fr; max-width: 400px; margin-left: auto; margin-right: auto; }
+    .ipa-req__grid { grid-template-columns: repeat(2,1fr); }
+    .ipa-confronto__grid { grid-template-columns: 1fr; }
+    .ipa-combo__grid { grid-template-columns: 1fr; max-width: 400px; margin-left: auto; margin-right: auto; }
+  }
+  @media (max-width: 640px) {
+    .ipa-hero { padding: 4rem 1.25rem 3.5rem; }
+    .ipa-intro, .ipa-fasce, .ipa-req, .ipa-confronto, .ipa-combo, .ipa-faq, .ipa-mcf, .ipa-form { padding: 3rem 1.25rem; }
+    .ipa-req__grid { grid-template-columns: 1fr; }
+    .ipa-form__submit { width: 100%; }
+    .ipa-mcf__cta { width: 100%; justify-content: center; }
+  }
+</style>
