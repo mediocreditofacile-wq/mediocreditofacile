@@ -177,6 +177,12 @@ const faqJsonLd = {
         <p class="isi-scenari__disclaimer">
           Stime indicative basate su copertura standard del 65%. Importi e percentuali variano in base all'Asse e alle specifiche del progetto.
         </p>
+        <!-- CTA intermedia -->
+        <div class="isi-mid-cta">
+          <a href="/finanziamenti/" class="isi-mid-cta__btn">
+            Vuoi finanziare il tuo progetto ISI? Parlane con noi
+          </a>
+        </div>
       </div>
     </section>
 
@@ -538,6 +544,29 @@ const faqJsonLd = {
     color: var(--mcf-taupe);
     text-align: center;
     margin-top: 2rem;
+  }
+
+  /* CTA INTERMEDIA */
+  .isi-mid-cta {
+    text-align: center;
+    margin-top: 2.5rem;
+  }
+
+  .isi-mid-cta__btn {
+    display: inline-flex;
+    align-items: center;
+    background: var(--mcf-primary);
+    color: #fff;
+    font-weight: 700;
+    font-size: 1rem;
+    padding: 0.9rem 2rem;
+    border-radius: 8px;
+    transition: background 0.2s, transform 0.15s;
+  }
+
+  .isi-mid-cta__btn:hover {
+    background: var(--mcf-primary-dark);
+    transform: translateY(-1px);
   }
 
   /* FAQ */

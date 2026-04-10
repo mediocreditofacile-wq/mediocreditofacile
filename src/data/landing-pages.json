@@ -276,33 +276,6 @@
     ]
   },
   {
-    "slug": "agevolazioni-fiscali",
-    "metaTitle": "Agevolazioni Fiscali per Imprese | Mediocredito Facile",
-    "metaDescription": "Agevolazioni fiscali per noleggio operativo e leasing: deducibilità IRES/IRAP, IVA detraibile, Transizione 5.0, Nuova Sabatini. Guida completa per PMI.",
-    "heroTitle": "Agevolazioni Fiscali per la Tua Impresa",
-    "heroSubtitle": "Leasing con Transizione 5.0 e Sabatini, oppure noleggio operativo con deducibilità piena: ti guidiamo verso il percorso fiscale migliore per la tua impresa.",
-    "ctaText": "Scopri le Agevolazioni",
-    "heroImage": "/images/hero-agevolazioni.png?v=2",
-    "benefitsImage": "/images/section-agevolazioni.png",
-    "benefits": [
-      {
-        "icon": "savings",
-        "title": "Noleggio 100% Deducibile",
-        "description": "Il canone di noleggio operativo è interamente deducibile dal reddito d'impresa come costo operativo. Nessun ammortamento, vantaggio fiscale immediato."
-      },
-      {
-        "icon": "bolt",
-        "title": "Transizione 5.0",
-        "description": "Credito d'imposta fino al 45% per investimenti in beni strumentali che riducono i consumi energetici. Si applica con acquisto diretto o leasing. Il noleggio operativo offre un percorso alternativo con deducibilità piena del canone."
-      },
-      {
-        "icon": "account_balance",
-        "title": "Nuova Sabatini",
-        "description": "Contributo in conto interessi per PMI che investono in macchinari, attrezzature e tecnologie. Ti aiutiamo con la pratica dall'inizio alla fine."
-      }
-    ]
-  },
-  {
     "slug": "noleggio-operativo-ristorazione",
     "metaTitle": "Attrezzature Ristorazione in Noleggio | Mediocredito Facile",
     "metaDescription": "Finanzia forni, frigoriferi e cucine professionali a canone fisso mensile. Zero anticipo, 100% deducibile per il tuo locale. Preventivo in 24h.",
