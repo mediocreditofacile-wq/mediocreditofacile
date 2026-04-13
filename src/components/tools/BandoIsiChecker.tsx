@@ -605,12 +605,13 @@ export default function BandoIsiChecker() {
       {calcolato && risultato && risultato.eleggibile && !formInviato && (
         <form class="isi-check__contact" onSubmit={handleFormSubmit}>
           <h3 class="isi-check__contact-title">
-            Vuoi finanziare il tuo progetto ISI?
+            Vuoi che ti segua la pratica ISI Inail?
           </h3>
           <p class="isi-check__contact-sub">
-            Lascia i tuoi contatti, ti chiamo io entro 24 ore lavorative.
-            Verifichiamo i requisiti del tuo progetto e ti propongo la soluzione
-            di finanziamento piu' adatta.
+            Ti accompagno dalla domanda all'erogazione del contributo:
+            finanziamento dell'anticipo, copertura della quota residua
+            e orientamento sulla compilazione. Lascia i tuoi contatti,
+            ti richiamo entro 24 ore.
           </p>
 
           <div class="isi-check__contact-fields">
