@@ -36,13 +36,14 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
   <div id="tool" class="tool" style="display:none !important;">
   <div class="tool__container">
 
-    <!-- Header -->
-    <div class="tool__header">
-      <div class="tool__header-logos">
-        <img src="/images/partners/gruppo-barone.jpeg" alt="Gruppo Barone" class="tool__logo" />
-        <img src="/images/partners/fiera-san-giorgio.jpg" alt="Fiera di San Giorgio" class="tool__logo tool__logo--sagra" />
-      </div>
-      <div class="tool__header-text">
+    <!-- Hero banner -->
+    <div class="tool__hero">
+      <img src="/images/partners/barone-escavatore-hero.jpg" alt="Escavatore Sunward in cantiere agricolo in Puglia" class="tool__hero-img" />
+      <div class="tool__hero-overlay">
+        <div class="tool__hero-logos">
+          <img src="/images/partners/gruppo-barone.jpeg" alt="Gruppo Barone" class="tool__logo" />
+          <img src="/images/partners/fiera-san-giorgio.jpg" alt="Fiera di San Giorgio" class="tool__logo tool__logo--sagra" />
+        </div>
         <h1 class="tool__title">Gruppo Barone — Strumenti Finanziari</h1>
         <p class="tool__sub">ISI Inail · Noleggio Operativo · Finanziamento · BCC Tasso Zero</p>
       </div>
@@ -928,73 +929,75 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
     padding: 0 1rem;
   }
 
-  /* === TOOL HEADER === */
-  .tool__header {
-    display: flex;
-    align-items: center;
-    gap: 1.25rem;
-    padding: 1.75rem 2.25rem;
-    background: linear-gradient(135deg, #0F1020 0%, #1e1b3a 50%, #2d2556 100%);
-    border-radius: 16px;
-    margin-bottom: 2rem;
-    color: #fff;
-    box-shadow: 0 8px 32px rgba(15,16,32,0.3);
+  /* === TOOL HERO === */
+  .tool__hero {
     position: relative;
+    border-radius: 16px;
     overflow: hidden;
+    margin-bottom: 2rem;
+    box-shadow: 0 8px 32px rgba(15,16,32,0.3);
   }
-  .tool__header::before {
-    content: '';
+  .tool__hero-img {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    object-position: center 40%;
+    display: block;
+  }
+  .tool__hero-overlay {
     position: absolute;
-    top: -50%;
-    right: -20%;
-    width: 300px;
-    height: 300px;
-    background: radial-gradient(circle, rgba(254,111,58,0.15) 0%, transparent 70%);
-    pointer-events: none;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(15,16,32,0.2) 0%, rgba(15,16,32,0.75) 60%, rgba(15,16,32,0.92) 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 1.75rem 2rem;
+    color: #fff;
   }
-  .tool__header-logos {
+  .tool__hero-logos {
     display: flex;
     gap: 0.75rem;
     align-items: center;
-    position: relative;
-    z-index: 1;
+    margin-bottom: 0.75rem;
   }
   .tool__logo {
-    height: 56px;
-    width: 56px;
+    height: 52px;
+    width: 52px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid rgba(255,255,255,0.25);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    border: 2px solid rgba(255,255,255,0.3);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
   }
-  .tool__logo--sagra { height: 50px; width: 50px; }
-  .tool__header-text { flex: 1; position: relative; z-index: 1; }
+  .tool__logo--sagra { height: 46px; width: 46px; }
   .tool__title {
-    font-size: 1.3rem;
+    font-size: 1.35rem;
     font-weight: 800;
     letter-spacing: -0.02em;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.3);
   }
   .tool__sub {
     font-size: 0.85rem;
-    color: rgba(255,255,255,0.6);
-    margin-top: 0.25rem;
-    letter-spacing: 0.01em;
+    color: rgba(255,255,255,0.7);
+    margin-top: 0.2rem;
   }
   .tool__logout {
-    background: rgba(255,255,255,0.08);
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: rgba(0,0,0,0.35);
+    backdrop-filter: blur(8px);
     border: 1px solid rgba(255,255,255,0.15);
-    color: rgba(255,255,255,0.7);
-    padding: 0.55rem 1.1rem;
+    color: rgba(255,255,255,0.85);
+    padding: 0.5rem 1rem;
     border-radius: 8px;
     font-family: var(--font-family);
-    font-size: 0.82rem;
+    font-size: 0.8rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
-    position: relative;
-    z-index: 1;
+    z-index: 2;
   }
-  .tool__logout:hover { background: rgba(255,255,255,0.15); color: #fff; }
+  .tool__logout:hover { background: rgba(0,0,0,0.5); color: #fff; }
 
   /* === TABS === */
   .tabs {
@@ -1382,18 +1385,13 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
 
     .tool__container { padding: 0 0.75rem; }
 
-    .tool__header {
-      flex-direction: column;
-      text-align: center;
-      gap: 0.75rem;
-      padding: 1.25rem 1rem;
-    }
-    .tool__header::before { display: none; }
-    .tool__header-logos { justify-content: center; }
-    .tool__logo { height: 44px; width: 44px; }
-    .tool__logo--sagra { height: 40px; width: 40px; }
+    .tool__hero-img { height: 170px; }
+    .tool__hero-overlay { padding: 1.15rem; }
+    .tool__hero-logos { margin-bottom: 0.5rem; }
+    .tool__logo { height: 42px; width: 42px; }
+    .tool__logo--sagra { height: 38px; width: 38px; }
     .tool__title { font-size: 1.05rem; }
-    .tool__logout { font-size: 0.75rem; padding: 0.45rem 0.85rem; }
+    .tool__logout { font-size: 0.72rem; padding: 0.4rem 0.75rem; top: 0.6rem; right: 0.6rem; }
 
     .tabs {
       gap: 0.2rem;
