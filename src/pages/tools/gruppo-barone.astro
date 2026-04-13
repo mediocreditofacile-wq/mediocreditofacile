@@ -65,8 +65,8 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
         <span class="tool__step">1</span> ISI Inail — Contributo a fondo perduto + Tasso Zero
       </h2>
       <p class="tool__intro">
-        Seleziona il mezzo, verifica il contributo ISI Inail al 65% e calcola le rate a tasso zero
-        sulla quota residua con BCC Rent&amp;Lease.
+        Seleziona il mezzo, inserisci i dati dell'impresa e scopri subito il contributo a fondo perduto.
+        Il residuo puo' essere frazionato in 10 rate a tasso zero con BCC Rent&amp;Lease.
       </p>
 
       <div class="sim-card">
@@ -77,13 +77,31 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
           </select>
         </div>
 
+        <div class="sim-card__field">
+          <label class="sim-card__label">Dimensione impresa</label>
+          <div class="sim-card__radio-row">
+            <button class="sim-card__radio is-active" data-dim="micro">Microimpresa</button>
+            <button class="sim-card__radio" data-dim="piccola">Piccola impresa</button>
+          </div>
+          <span class="sim-card__hint">Il Bando ISI per macchine agricole e' riservato a micro e piccole imprese.</span>
+        </div>
+
+        <div class="sim-card__field">
+          <label class="sim-card__label">Eta' del titolare</label>
+          <div class="sim-card__radio-row" id="inail-eta-row">
+            <button class="sim-card__radio" data-eta="under40">Under 40 — contributo 80%</button>
+            <button class="sim-card__radio is-active" data-eta="over40">40 anni o piu' — contributo 65%</button>
+          </div>
+          <span class="sim-card__hint">I giovani agricoltori under 40 accedono all'Asse 5.2 con contributo maggiorato.</span>
+        </div>
+
         <div class="sim-card__result" id="inail-result">
           <div class="sim-card__row">
             <span>Prezzo del mezzo (IVA esclusa)</span>
             <strong id="inail-prezzo">17.000 €</strong>
           </div>
           <div class="sim-card__row sim-card__row--highlight">
-            <span>Contributo ISI Inail (65%)</span>
+            <span id="inail-contributo-label">Contributo ISI Inail (65%)</span>
             <strong id="inail-contributo">- 11.050 €</strong>
           </div>
           <div class="sim-card__row sim-card__row--total">
@@ -493,31 +511,62 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
   }
 
   // === ISI INAIL ===
+  var inailEtaUnder40 = false; // default: over 40 (65%)
+  var inailDimensione = 'micro';
+
   function initEasyInail() {
-    // Calcolo iniziale
     calcInail();
     $('inail-prodotto').addEventListener('change', calcInail);
+
+    // Radio dimensione impresa
+    document.querySelectorAll('#tab-easy-inail [data-dim]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        document.querySelectorAll('#tab-easy-inail [data-dim]').forEach(function (b) { b.classList.remove('is-active'); });
+        btn.classList.add('is-active');
+        inailDimensione = btn.dataset.dim;
+        calcInail();
+      });
+    });
+
+    // Radio eta' titolare
+    document.querySelectorAll('#inail-eta-row .sim-card__radio').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        document.querySelectorAll('#inail-eta-row .sim-card__radio').forEach(function (b) { b.classList.remove('is-active'); });
+        btn.classList.add('is-active');
+        inailEtaUnder40 = btn.dataset.eta === 'under40';
+        calcInail();
+      });
+    });
+
     $('inail-preventivo').addEventListener('click', function () {
+      var perc = inailEtaUnder40 ? 80 : 65;
+      var asse = inailEtaUnder40 ? '5.2' : '5.1';
       var prezzo = parseNum($('inail-prodotto').value);
-      var contributo = Math.round(prezzo * 0.65);
+      var contributo = Math.round(prezzo * perc / 100);
       var residuo = prezzo - contributo;
       var rata = Math.round(residuo / 10);
       var nome = $('inail-prodotto').selectedOptions[0].dataset.nome;
-      generaPreventivo('ISI Inail', {
-        'Mezzo': nome,
-        'Prezzo (IVA esclusa)': eur(prezzo),
-        'Contributo ISI Inail (65%)': '- ' + eur(contributo),
-        'Residuo a carico cliente': eur(residuo),
-        'BCC Tasso Zero — 10 rate di': eur(rata) + ' / mese',
-      }, $('inail-cliente').value, $('inail-referente').value, $('inail-telefono').value);
+      var righe = {};
+      righe['Mezzo'] = nome;
+      righe['Dimensione impresa'] = inailDimensione === 'micro' ? 'Microimpresa' : 'Piccola impresa';
+      righe['Eta titolare'] = inailEtaUnder40 ? 'Under 40' : '40 anni o piu';
+      righe['Prezzo (IVA esclusa)'] = eur(prezzo);
+      righe['Contributo ISI Inail (' + perc + '%)'] = '- ' + eur(contributo);
+      righe['Residuo a carico cliente'] = eur(residuo);
+      righe['BCC Tasso Zero - 10 rate di'] = eur(rata) + ' / mese';
+      generaPreventivo('ISI Inail (Asse ' + asse + ')', righe,
+        $('inail-cliente').value, $('inail-referente').value, $('inail-telefono').value);
     });
   }
+
   function calcInail() {
+    var perc = inailEtaUnder40 ? 80 : 65;
     var prezzo = parseNum($('inail-prodotto').value);
-    var contributo = Math.round(prezzo * 0.65);
+    var contributo = Math.round(prezzo * perc / 100);
     var residuo = prezzo - contributo;
     var rata = Math.round(residuo / 10);
     $('inail-prezzo').textContent = eur(prezzo);
+    $('inail-contributo-label').textContent = 'Contributo ISI Inail (' + perc + '%)';
     $('inail-contributo').textContent = '- ' + eur(contributo);
     $('inail-residuo').textContent = eur(residuo);
     $('inail-rata').textContent = eur(rata) + ' / mese';
