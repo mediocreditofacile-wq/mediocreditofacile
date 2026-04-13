@@ -1,0 +1,580 @@
+/* === Simulatore Bando ISI INAIL === */
+.isi-check {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+/* --- FORM INPUT --- */
+.isi-check__form {
+  background: #ffffff;
+  border: 1px solid var(--mcf-platinum);
+  border-radius: var(--radius);
+  padding: 2rem;
+  box-shadow: 0 4px 16px rgba(15, 16, 32, 0.05);
+}
+
+.isi-check__form-title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--mcf-black);
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.02em;
+}
+
+.isi-check__form-sub {
+  font-size: 0.95rem;
+  color: var(--mcf-charcoal);
+  line-height: 1.6;
+  margin-bottom: 1.75rem;
+}
+
+.isi-check__field {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.5rem;
+}
+
+.isi-check__label {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--mcf-black);
+  margin-bottom: 0.6rem;
+}
+
+/* --- Griglia card assi --- */
+.isi-check__axis-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.isi-check__axis-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  padding: 0.85rem;
+  border: 1.5px solid var(--mcf-platinum);
+  border-radius: 10px;
+  background: #ffffff;
+  font-family: var(--font-family);
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.isi-check__axis-card:hover {
+  border-color: var(--mcf-accent);
+}
+
+.isi-check__axis-card.is-active {
+  border-color: var(--mcf-accent);
+  background: rgba(102, 76, 205, 0.06);
+}
+
+.isi-check__axis-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  margin-bottom: 0.3rem;
+}
+
+.isi-check__axis-card .material-icons-outlined {
+  font-size: 1.25rem;
+  color: var(--mcf-taupe);
+  flex-shrink: 0;
+}
+
+.isi-check__axis-card.is-active .material-icons-outlined {
+  color: var(--mcf-accent);
+}
+
+.isi-check__axis-name {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--mcf-black);
+  line-height: 1.25;
+}
+
+.isi-check__axis-card.is-active .isi-check__axis-name {
+  color: var(--mcf-accent);
+}
+
+.isi-check__axis-desc {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--mcf-taupe);
+  line-height: 1.35;
+}
+
+.isi-check__axis-badge {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: var(--mcf-primary);
+  background: rgba(254, 111, 58, 0.12);
+  padding: 0.15rem 0.45rem;
+  border-radius: 6px;
+  line-height: 1;
+}
+
+/* --- Radio buttons (qualificazione) --- */
+.isi-check__radio {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.isi-check__radio-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  padding: 0.85rem;
+  border: 1.5px solid var(--mcf-platinum);
+  border-radius: 10px;
+  background: #ffffff;
+  font-family: var(--font-family);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.isi-check__radio-btn:hover {
+  border-color: var(--mcf-accent);
+}
+
+.isi-check__radio-btn.is-active {
+  border-color: var(--mcf-accent);
+  background: rgba(102, 76, 205, 0.06);
+}
+
+.isi-check__radio-btn strong {
+  display: block;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--mcf-black);
+  margin-bottom: 0.2rem;
+}
+
+.isi-check__radio-btn.is-active strong {
+  color: var(--mcf-accent);
+}
+
+.isi-check__radio-btn span {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--mcf-taupe);
+  line-height: 1.35;
+}
+
+/* --- Input e hint --- */
+.isi-check__input {
+  width: 100%;
+  padding: 0.95rem 1rem;
+  border: 1.5px solid var(--mcf-platinum);
+  border-radius: 10px;
+  font-family: var(--font-family);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--mcf-black);
+  background: #ffffff;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.isi-check__input:focus {
+  outline: none;
+  border-color: var(--mcf-accent);
+  box-shadow: 0 0 0 3px rgba(102, 76, 205, 0.12);
+}
+
+.isi-check__input::placeholder {
+  color: var(--mcf-taupe);
+  font-weight: 400;
+}
+
+.isi-check__hint {
+  font-size: 0.78rem;
+  color: var(--mcf-taupe);
+  margin-top: 0.4rem;
+}
+
+/* --- Sezione qualificazione --- */
+.isi-check__qualify {
+  border-top: 1px solid var(--mcf-platinum);
+  padding-top: 1.5rem;
+  margin-top: 0.5rem;
+}
+
+.isi-check__qualify-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--mcf-accent);
+  margin-bottom: 1.25rem;
+}
+
+/* --- Nota settori ATECO --- */
+.isi-check__ateco-note {
+  font-size: 0.78rem;
+  color: var(--mcf-taupe);
+  line-height: 1.5;
+  margin-top: 0.4rem;
+}
+
+/* --- CTA verifica --- */
+.isi-check__cta {
+  display: block;
+  width: 100%;
+  padding: 1rem 1.5rem;
+  border: none;
+  border-radius: 10px;
+  background: var(--mcf-primary);
+  color: #ffffff;
+  font-family: var(--font-family);
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+  margin-top: 0.5rem;
+}
+
+.isi-check__cta:hover:not(:disabled) {
+  background: var(--mcf-primary-dark);
+  transform: translateY(-2px);
+}
+
+.isi-check__cta:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* --- RISULTATO (eleggibile) --- */
+.isi-check__result {
+  background: linear-gradient(135deg, #664CCD 0%, #4A36A0 100%);
+  color: #ffffff;
+  border-radius: var(--radius);
+  padding: 2rem;
+  box-shadow: 0 8px 32px rgba(102, 76, 205, 0.25);
+  animation: isiFadeIn 0.4s ease-out;
+}
+
+@keyframes isiFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.isi-check__result-header {
+  text-align: center;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  margin-bottom: 1.5rem;
+}
+
+.isi-check__result-eyebrow {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 0.5rem;
+}
+
+.isi-check__result-value {
+  display: block;
+  font-size: clamp(2.5rem, 7vw, 3.5rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--mcf-primary);
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+
+.isi-check__result-perc {
+  display: block;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.isi-check__result-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.isi-check__result-item {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 1rem;
+  text-align: center;
+}
+
+.isi-check__result-label {
+  display: block;
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 0.4rem;
+}
+
+.isi-check__result-item strong {
+  display: block;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+}
+
+.isi-check__result-item small {
+  display: block;
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: 0.25rem;
+}
+
+/* --- Box intervento aggiuntivo --- */
+.isi-check__extra-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  background: rgba(255, 255, 255, 0.08);
+  border-left: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.isi-check__extra-box .material-icons-outlined {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.isi-check__extra-box p {
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0;
+}
+
+/* --- Hint box (finanziamento) --- */
+.isi-check__hint-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  background: rgba(254, 111, 58, 0.15);
+  border-left: 3px solid var(--mcf-primary);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.isi-check__hint-box .material-icons-outlined {
+  color: var(--mcf-primary);
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+
+.isi-check__hint-box p {
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+}
+
+.isi-check__hint-box strong {
+  color: var(--mcf-primary);
+}
+
+.isi-check__disclaimer {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.5;
+  margin-top: 1rem;
+}
+
+/* --- RISULTATO NON ELEGGIBILE --- */
+.isi-check__ineligible {
+  background: linear-gradient(135deg, #8B2020 0%, #6B1515 100%);
+  color: #ffffff;
+  border-radius: var(--radius);
+  padding: 2rem;
+  text-align: center;
+  animation: isiFadeIn 0.4s ease-out;
+}
+
+.isi-check__ineligible .material-icons-outlined {
+  font-size: 2.5rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 0.75rem;
+}
+
+.isi-check__ineligible h3 {
+  font-size: 1.15rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+}
+
+.isi-check__ineligible p {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.85);
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.isi-check__ineligible-hint {
+  margin-top: 1rem;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* --- FORM CONTATTI --- */
+.isi-check__contact {
+  background: var(--mcf-ghost);
+  border: 1px solid var(--mcf-platinum);
+  border-radius: var(--radius);
+  padding: 2rem;
+  animation: isiFadeIn 0.4s ease-out 0.1s both;
+}
+
+.isi-check__contact-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--mcf-black);
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.02em;
+}
+
+.isi-check__contact-sub {
+  font-size: 0.9rem;
+  color: var(--mcf-charcoal);
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+
+.isi-check__contact-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.isi-check__contact-fields input {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border: 1.5px solid var(--mcf-platinum);
+  border-radius: 10px;
+  font-family: var(--font-family);
+  font-size: 1rem;
+  color: var(--mcf-black);
+  background: #ffffff;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.isi-check__contact-fields input:focus {
+  outline: none;
+  border-color: var(--mcf-accent);
+  box-shadow: 0 0 0 3px rgba(102, 76, 205, 0.12);
+}
+
+.isi-check__contact-submit {
+  display: block;
+  width: 100%;
+  padding: 1rem;
+  border: none;
+  border-radius: 10px;
+  background: var(--mcf-primary);
+  color: #ffffff;
+  font-family: var(--font-family);
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.isi-check__contact-submit:hover:not(:disabled) {
+  background: var(--mcf-primary-dark);
+  transform: translateY(-2px);
+}
+
+.isi-check__contact-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.isi-check__privacy {
+  text-align: center;
+  font-size: 0.78rem;
+  color: var(--mcf-taupe);
+  margin-top: 0.75rem;
+}
+
+.isi-check__privacy a {
+  color: var(--mcf-accent);
+  text-decoration: underline;
+}
+
+/* --- Success --- */
+.isi-check__success {
+  background: var(--mcf-ghost);
+  border: 1px solid #2d9f4f;
+  border-radius: var(--radius);
+  padding: 2rem;
+  text-align: center;
+  animation: isiFadeIn 0.4s ease-out;
+}
+
+.isi-check__success .material-icons-outlined {
+  font-size: 3rem;
+  color: #2d9f4f;
+  margin-bottom: 1rem;
+}
+
+.isi-check__success h3 {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--mcf-black);
+  margin-bottom: 0.5rem;
+}
+
+.isi-check__success p {
+  font-size: 0.95rem;
+  color: var(--mcf-charcoal);
+}
+
+/* --- Responsive --- */
+@media (max-width: 720px) {
+  .isi-check__axis-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .isi-check__radio {
+    grid-template-columns: 1fr;
+  }
+
+  .isi-check__result-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .isi-check__form,
+  .isi-check__result,
+  .isi-check__ineligible,
+  .isi-check__contact {
+    padding: 1.5rem;
+  }
+}
