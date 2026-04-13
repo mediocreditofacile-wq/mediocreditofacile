@@ -71,8 +71,8 @@ const faqJsonLd = {
     <!-- COS'E' IL BANDO ISI -->
     <section class="isi-intro">
       <div class="isi-intro__inner">
-        <h2 class="isi-section-title">Cos'e' il Bando ISI Inail</h2>
         <div class="isi-intro__content">
+          <h2 class="isi-section-title" style="text-align:left">Cos'e' il Bando ISI Inail</h2>
           <p>
             Il Bando ISI e' lo strumento con cui l'Inail finanzia a fondo perduto gli investimenti
             delle imprese per migliorare la sicurezza nei luoghi di lavoro. Il bando ha periodicita'
@@ -85,6 +85,9 @@ const faqJsonLd = {
             in 5 Assi, ognuno dedicato a tipologie diverse di intervento: dalla sostituzione di macchinari
             pericolosi alla bonifica dell'amianto, fino all'adozione di modelli organizzativi per la sicurezza.
           </p>
+        </div>
+        <div class="isi-intro__image-wrap">
+          <img src="/images/bando-isi-fabbrica.jpg" alt="Operaio controlla macchinario CNC in capannone con poster sicurezza INAIL" class="isi-intro__image" loading="lazy" />
         </div>
       </div>
     </section>
@@ -113,18 +116,23 @@ const faqJsonLd = {
     <!-- IL PROBLEMA DELL'ANTICIPO -->
     <section class="isi-problem">
       <div class="isi-problem__inner">
-        <h2 class="isi-section-title isi-section-title--light">Il problema: servono i soldi prima del contributo</h2>
-        <div class="isi-problem__content">
-          <p>
-            Il meccanismo del Bando ISI prevede che l'azienda acquisti il bene, completi il progetto
-            e rendiconti tutto all'Inail. Solo dopo la verifica, il contributo viene erogato.
-            Tradotto: servono i soldi subito, e il fondo perduto arriva dopo mesi.
-          </p>
-          <p>
-            Il finanziamento bancario risolve entrambi i problemi. Anticipa il 100% dell'investimento
-            per comprare subito il bene, e copre il 35% residuo che resta a carico dell'azienda.
-            Quando arriva il contributo Inail (il 65%), lo si usa per abbattere l'esposizione.
-          </p>
+        <div class="isi-problem__image-wrap">
+          <img src="/images/bando-isi-documenti.jpg" alt="Imprenditore revisiona documenti Bando ISI INAIL con grafici investimenti sicurezza" class="isi-problem__image" loading="lazy" />
+        </div>
+        <div class="isi-problem__text">
+          <h2 class="isi-section-title isi-section-title--light" style="text-align:left">Il problema: servono i soldi prima del contributo</h2>
+          <div class="isi-problem__content">
+            <p>
+              Il meccanismo del Bando ISI prevede che l'azienda acquisti il bene, completi il progetto
+              e rendiconti tutto all'Inail. Solo dopo la verifica, il contributo viene erogato.
+              Tradotto: servono i soldi subito, e il fondo perduto arriva dopo mesi.
+            </p>
+            <p>
+              Il finanziamento bancario risolve entrambi i problemi. Anticipa il 100% dell'investimento
+              per comprare subito il bene, e copre il 35% residuo che resta a carico dell'azienda.
+              Quando arriva il contributo Inail (il 65%), lo si usa per abbattere l'esposizione.
+            </p>
+          </div>
         </div>
       </div>
     </section>
@@ -321,8 +329,12 @@ const faqJsonLd = {
   }
 
   .isi-intro__inner {
-    max-width: 720px;
+    max-width: var(--max-width);
     margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: center;
   }
 
   .isi-intro__content p {
@@ -330,6 +342,13 @@ const faqJsonLd = {
     line-height: 1.75;
     color: var(--mcf-charcoal);
     margin-bottom: 1rem;
+  }
+
+  .isi-intro__image {
+    width: 100%;
+    border-radius: 16px;
+    object-fit: cover;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
   }
 
   /* QUANTO VALE */
@@ -386,8 +405,19 @@ const faqJsonLd = {
   }
 
   .isi-problem__inner {
-    max-width: 720px;
+    max-width: var(--max-width);
     margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: center;
+  }
+
+  .isi-problem__image {
+    width: 100%;
+    border-radius: 16px;
+    object-fit: cover;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
   }
 
   .isi-problem__content p {
@@ -666,6 +696,25 @@ const faqJsonLd = {
 
   /* RESPONSIVE */
   @media (max-width: 960px) {
+    .isi-intro__inner,
+    .isi-problem__inner {
+      grid-template-columns: 1fr;
+      max-width: 720px;
+    }
+
+    .isi-intro__image-wrap {
+      order: -1;
+    }
+
+    .isi-problem__image-wrap {
+      order: -1;
+    }
+
+    .isi-intro__content .isi-section-title,
+    .isi-problem__text .isi-section-title {
+      text-align: center !important;
+    }
+
     .isi-valore__grid,
     .isi-scenari__grid {
       grid-template-columns: 1fr;
