@@ -1,7 +1,7 @@
 ---
 /**
  * Gruppo Barone — Area Riservata
- * Simulatore Easy ISI, Noleggio Grenke Sputnik++++,
+ * Simulatore ISI Inail, Noleggio Grenke Sputnik++++,
  * Finanziamento, BCC Rent&Lease Tasso Zero.
  * Protetta da password, uso riservato al partner.
  */
@@ -44,25 +44,25 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
       </div>
       <div class="tool__header-text">
         <h1 class="tool__title">Gruppo Barone — Strumenti Finanziari</h1>
-        <p class="tool__sub">Easy ISI · Noleggio Operativo · Finanziamento · BCC Tasso Zero</p>
+        <p class="tool__sub">ISI Inail · Noleggio Operativo · Finanziamento · BCC Tasso Zero</p>
       </div>
       <button id="logout-btn" class="tool__logout">Esci</button>
     </div>
 
     <!-- Tabs -->
     <div class="tabs">
-      <button class="tabs__btn is-active" data-tab="easy-inail">Easy ISI</button>
+      <button class="tabs__btn is-active" data-tab="easy-inail">ISI Inail</button>
       <button class="tabs__btn" data-tab="noleggio">Noleggio Grenke</button>
       <button class="tabs__btn" data-tab="finanziamento">Finanziamento</button>
       <button class="tabs__btn" data-tab="bcc">BCC Tasso Zero</button>
     </div>
 
     <!-- ============================================ -->
-    <!-- TAB 1: EASY ISI                            -->
+    <!-- TAB 1: ISI INAIL                            -->
     <!-- ============================================ -->
     <section id="tab-easy-inail" class="tab-panel is-active">
       <h2 class="tool__section-title">
-        <span class="tool__step">1</span> Easy ISI — Contributo a fondo perduto + Tasso Zero
+        <span class="tool__step">1</span> ISI Inail — Contributo a fondo perduto + Tasso Zero
       </h2>
       <p class="tool__intro">
         Seleziona il mezzo, verifica il contributo ISI Inail al 65% e calcola le rate a tasso zero
@@ -356,7 +356,7 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
         <div class="sim-card__field">
           <label class="sim-card__label">Tipo richiesta</label>
           <select id="up-tipo" class="sim-card__select">
-            <option value="easy-inail">Easy ISI + BCC Tasso Zero</option>
+            <option value="easy-inail">ISI Inail + BCC Tasso Zero</option>
             <option value="noleggio-grenke">Noleggio Operativo Grenke</option>
             <option value="finanziamento">Finanziamento</option>
             <option value="bcc-tasso-zero">BCC Rent&amp;Lease Tasso Zero</option>
@@ -496,7 +496,7 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
     });
   }
 
-  // === EASY ISI ===
+  // === ISI INAIL ===
   function initEasyInail() {
     // Calcolo iniziale
     calcInail();
@@ -507,7 +507,7 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
       var residuo = prezzo - contributo;
       var rata = Math.round(residuo / 10);
       var nome = $('inail-prodotto').selectedOptions[0].dataset.nome;
-      generaPreventivo('Easy ISI', {
+      generaPreventivo('ISI Inail', {
         'Mezzo': nome,
         'Prezzo (IVA esclusa)': eur(prezzo),
         'Contributo ISI Inail (65%)': '- ' + eur(contributo),
