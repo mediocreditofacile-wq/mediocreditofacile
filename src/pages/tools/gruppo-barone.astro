@@ -109,9 +109,9 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
         <!-- Dati cliente -->
         <div class="sim-card__customer">
           <h3>Dati cliente per il preventivo</h3>
-          <input type="text" id="inail-cliente" class="sim-card__input" placeholder="Ragione sociale cliente" />
-          <input type="text" id="inail-referente" class="sim-card__input" placeholder="Nome referente" />
-          <input type="tel" id="inail-telefono" class="sim-card__input" placeholder="Telefono" />
+          <input type="text" id="inail-cliente" class="sim-card__input" placeholder="Ragione sociale cliente" autocomplete="organization" />
+          <input type="text" id="inail-referente" class="sim-card__input" placeholder="Nome referente" autocomplete="name" />
+          <input type="tel" id="inail-telefono" class="sim-card__input" placeholder="Telefono" autocomplete="tel" />
         </div>
 
         <div class="sim-card__actions">
@@ -189,9 +189,9 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
         <!-- Dati cliente -->
         <div class="sim-card__customer" id="nol-customer" style="display:none">
           <h3>Dati cliente per il preventivo</h3>
-          <input type="text" id="nol-cliente" class="sim-card__input" placeholder="Ragione sociale cliente" />
-          <input type="text" id="nol-referente" class="sim-card__input" placeholder="Nome referente" />
-          <input type="tel" id="nol-telefono" class="sim-card__input" placeholder="Telefono" />
+          <input type="text" id="nol-cliente" class="sim-card__input" placeholder="Ragione sociale cliente" autocomplete="organization" />
+          <input type="text" id="nol-referente" class="sim-card__input" placeholder="Nome referente" autocomplete="name" />
+          <input type="tel" id="nol-telefono" class="sim-card__input" placeholder="Telefono" autocomplete="tel" />
           <div class="sim-card__actions">
             <button class="sim-card__cta" id="nol-preventivo">
               <span class="material-icons-outlined">description</span> Genera Preventivo
@@ -263,9 +263,9 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
         <!-- Dati cliente -->
         <div class="sim-card__customer" id="fin-customer" style="display:none">
           <h3>Dati cliente per il preventivo</h3>
-          <input type="text" id="fin-cliente" class="sim-card__input" placeholder="Ragione sociale cliente" />
-          <input type="text" id="fin-referente" class="sim-card__input" placeholder="Nome referente" />
-          <input type="tel" id="fin-telefono" class="sim-card__input" placeholder="Telefono" />
+          <input type="text" id="fin-cliente" class="sim-card__input" placeholder="Ragione sociale cliente" autocomplete="organization" />
+          <input type="text" id="fin-referente" class="sim-card__input" placeholder="Nome referente" autocomplete="name" />
+          <input type="tel" id="fin-telefono" class="sim-card__input" placeholder="Telefono" autocomplete="tel" />
           <div class="sim-card__actions">
             <button class="sim-card__cta" id="fin-preventivo">
               <span class="material-icons-outlined">description</span> Genera Preventivo
@@ -322,9 +322,9 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
         <!-- Dati cliente -->
         <div class="sim-card__customer" id="bcc-customer" style="display:none">
           <h3>Dati cliente per il preventivo</h3>
-          <input type="text" id="bcc-cliente" class="sim-card__input" placeholder="Ragione sociale cliente" />
-          <input type="text" id="bcc-referente" class="sim-card__input" placeholder="Nome referente" />
-          <input type="tel" id="bcc-telefono" class="sim-card__input" placeholder="Telefono" />
+          <input type="text" id="bcc-cliente" class="sim-card__input" placeholder="Ragione sociale cliente" autocomplete="organization" />
+          <input type="text" id="bcc-referente" class="sim-card__input" placeholder="Nome referente" autocomplete="name" />
+          <input type="tel" id="bcc-telefono" class="sim-card__input" placeholder="Telefono" autocomplete="tel" />
           <div class="sim-card__actions">
             <button class="sim-card__cta" id="bcc-preventivo">
               <span class="material-icons-outlined">description</span> Genera Preventivo
@@ -714,7 +714,7 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
       waText += k + ': ' + righe[k] + '\n';
     }
     waText += '\nMediocredito Facile — Alberto Ama\'\n+39 393 995 7840';
-    var waUrl = 'https://wa.me/?text=' + encodeURIComponent(waText);
+    var waUrl = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(waText);
 
     // Dopo la stampa, offri WhatsApp
     setTimeout(function () {
@@ -1324,37 +1324,101 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
   }
 
   /* === RESPONSIVE === */
+  /* --- Mobile: tablet e sotto --- */
   @media (max-width: 768px) {
     .gate { padding: 1.25rem; }
-    .gate__card { padding: 2.5rem 1.75rem; }
-    .gate__form { flex-direction: column; }
+    .gate__card { padding: 2rem 1.5rem; }
+    .gate__logo { height: 56px; width: 56px; }
+    .gate__form { flex-direction: column; gap: 0.4rem; }
+    .gate__btn { padding: 0.9rem; font-size: 0.95rem; }
+
+    .tool__container { padding: 0 0.75rem; }
+
     .tool__header {
       flex-direction: column;
       text-align: center;
-      gap: 1rem;
-      padding: 1.5rem;
+      gap: 0.75rem;
+      padding: 1.25rem 1rem;
     }
+    .tool__header::before { display: none; }
     .tool__header-logos { justify-content: center; }
+    .tool__logo { height: 44px; width: 44px; }
+    .tool__logo--sagra { height: 40px; width: 40px; }
+    .tool__title { font-size: 1.05rem; }
+    .tool__logout { font-size: 0.75rem; padding: 0.45rem 0.85rem; }
+
     .tabs {
-      flex-direction: row;
-      gap: 0.25rem;
-      padding: 0.25rem;
+      gap: 0.2rem;
+      padding: 0.2rem;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
     }
     .tabs__btn {
-      padding: 0.65rem 0.5rem;
-      font-size: 0.72rem;
+      padding: 0.75rem 0.5rem;
+      font-size: 0.75rem;
       flex: 1;
       min-width: 0;
+      min-height: 44px;
     }
-    .sim-card { padding: 1.5rem; border-radius: 14px; }
-    .sim-card__radio-row { gap: 0.35rem; }
-    .sim-card__radio { min-width: 60px; padding: 0.65rem 0.5rem; font-size: 0.82rem; }
+
+    .sim-card { padding: 1.25rem; border-radius: 14px; }
+
+    /* Input 16px per evitare auto-zoom iOS */
+    .sim-card__input,
+    .sim-card__select,
+    .sim-card__textarea { font-size: 16px; padding: 0.8rem 1rem; }
+    .sim-card__input--big { font-size: 1.15rem; padding: 0.85rem 1rem; }
+    .sim-card__label { font-size: 0.78rem; }
+
+    /* Radio buttons: 2 colonne + terza riga per il quinto */
+    .sim-card__radio-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.35rem;
+    }
+    .sim-card__radio {
+      min-width: 0;
+      padding: 0.7rem 0.5rem;
+      font-size: 0.82rem;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .sim-card__result { padding: 1rem; }
     .sim-card__row {
       flex-direction: column;
       align-items: flex-start;
-      gap: 0.2rem;
-      padding: 0.6rem 0;
+      gap: 0.15rem;
+      padding: 0.55rem 0;
     }
-    .tool__section--upload { padding: 1.5rem; }
+    .sim-card__row strong { font-size: 0.95rem; }
+    .sim-card__row--highlight { margin: 0.2rem -0.5rem; padding: 0.6rem 0.5rem; }
+    .sim-card__row--total strong { font-size: 1.05rem; }
+
+    .sim-card__note { padding: 0.75rem 0.85rem; gap: 0.5rem; }
+    .sim-card__note .material-icons-outlined { font-size: 1.1rem; }
+    .sim-card__note p { font-size: 0.82rem; }
+
+    .sim-card__cta { padding: 0.9rem 1.25rem; font-size: 0.95rem; }
+    .sim-card__cta--calc { padding: 0.95rem; }
+
+    .sim-card__customer { padding: 1.15rem; margin-top: 1.25rem; }
+
+    .tool__section--upload { padding: 1.25rem; }
+    .tool__section-title { font-size: 1.1rem; }
+    .tool__step { width: 30px; height: 30px; font-size: 0.8rem; }
+    .tool__intro { font-size: 0.88rem; }
+  }
+
+  /* --- Mobile: schermi piccoli (iPhone SE, ecc.) --- */
+  @media (max-width: 380px) {
+    .gate__card { padding: 1.75rem 1.15rem; }
+    .gate__logos { gap: 0.75rem; }
+    .gate__logo { height: 48px; width: 48px; }
+    .tool__container { padding: 0 0.5rem; }
+    .sim-card { padding: 1rem; }
+    .tabs__btn { font-size: 0.7rem; padding: 0.65rem 0.35rem; }
   }
 </style>
