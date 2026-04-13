@@ -94,7 +94,7 @@ const faqJsonLd = {
           </p>
         </div>
         <div class="isi-intro__image-wrap">
-          <img src="/images/bando-isi-fabbrica.jpg" alt="Operaio controlla macchinario CNC in capannone con poster sicurezza INAIL" class="isi-intro__image" loading="lazy" />
+          <img src="/images/bando-isi-fabbrica.webp" alt="Operaio controlla macchinario CNC in capannone con poster sicurezza INAIL" class="isi-intro__image" loading="lazy" />
         </div>
       </div>
     </section>
@@ -124,7 +124,7 @@ const faqJsonLd = {
     <section class="isi-problem">
       <div class="isi-problem__inner">
         <div class="isi-problem__image-wrap">
-          <img src="/images/bando-isi-documenti.jpg" alt="Imprenditore revisiona documenti Bando ISI INAIL con grafici investimenti sicurezza" class="isi-problem__image" loading="lazy" />
+          <img src="/images/bando-isi-documenti.webp" alt="Imprenditore revisiona documenti Bando ISI INAIL con grafici investimenti sicurezza" class="isi-problem__image" loading="lazy" />
         </div>
         <div class="isi-problem__text">
           <h2 class="isi-section-title isi-section-title--light" style="text-align:left">Il problema: servono i soldi prima del contributo</h2>
@@ -147,6 +147,9 @@ const faqJsonLd = {
     <!-- TRE SCENARI -->
     <section class="isi-scenari">
       <div class="isi-scenari__inner">
+        <div class="isi-scenari__hero-img">
+          <img src="/images/bando-isi-sicurezza.webp" alt="Operai installano barriere di sicurezza in capannone industriale" class="isi-scenari__image" loading="lazy" />
+        </div>
         <h2 class="isi-section-title">Tre scenari concreti</h2>
         <p class="isi-scenari__sub">
           Numeri reali per capire come funziona la combinazione Bando ISI + finanziamento.
@@ -220,16 +223,23 @@ const faqJsonLd = {
     <!-- COME FINANZIARLO -->
     <section class="isi-mcf">
       <div class="isi-mcf__inner">
-        <h2 class="isi-mcf__title">Come finanziare il tuo progetto ISI</h2>
-        <p class="isi-mcf__text">
-          MCF ti finanzia il 100% dell'investimento in attesa del contributo Inail
-          e copre il 35% residuo che resta a carico dell'azienda. Un unico interlocutore
-          per il finanziamento e l'orientamento sulla domanda di contributo.
-        </p>
-        <p class="isi-mcf__text">
-          Lavoriamo con piu' operatori bancari. Ti diciamo subito se il progetto
-          e' finanziabile e con quali condizioni. Valutazione gratuita in 24 ore.
-        </p>
+        <div class="isi-mcf__layout">
+          <div class="isi-mcf__content">
+            <h2 class="isi-mcf__title">Come finanziare il tuo progetto ISI</h2>
+            <p class="isi-mcf__text">
+              MCF ti finanzia il 100% dell'investimento in attesa del contributo Inail
+              e copre il 35% residuo che resta a carico dell'azienda. Un unico interlocutore
+              per il finanziamento e l'orientamento sulla domanda di contributo.
+            </p>
+            <p class="isi-mcf__text">
+              Lavoriamo con piu' operatori bancari. Ti diciamo subito se il progetto
+              e' finanziabile e con quali condizioni. Valutazione gratuita in 24 ore.
+            </p>
+          </div>
+          <div class="isi-mcf__image-wrap">
+            <img src="/images/bando-isi-consulenza.webp" alt="Consulente finanziario revisiona pratica ISI con imprenditore" class="isi-mcf__image" loading="lazy" />
+          </div>
+        </div>
         <div class="isi-mcf__cta-row">
           <a href="/finanziamenti/" class="isi-mcf__cta isi-mcf__cta--solid">
             Scopri i finanziamenti MCF
@@ -447,6 +457,18 @@ const faqJsonLd = {
     line-height: 1.65;
   }
 
+  .isi-scenari__hero-img {
+    margin-bottom: 2.5rem;
+  }
+
+  .isi-scenari__image {
+    width: 100%;
+    border-radius: 16px;
+    object-fit: cover;
+    max-height: 320px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+  }
+
   .isi-scenari__grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -620,12 +642,25 @@ const faqJsonLd = {
     padding: 4.5rem 1.5rem;
     background: var(--mcf-black);
     color: #fff;
-    text-align: center;
   }
 
   .isi-mcf__inner {
-    max-width: 720px;
+    max-width: var(--max-width);
     margin: 0 auto;
+  }
+
+  .isi-mcf__layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: center;
+  }
+
+  .isi-mcf__image {
+    width: 100%;
+    border-radius: 16px;
+    object-fit: cover;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
   }
 
   .isi-mcf__title {
@@ -697,7 +732,8 @@ const faqJsonLd = {
   /* RESPONSIVE */
   @media (max-width: 960px) {
     .isi-intro__inner,
-    .isi-problem__inner {
+    .isi-problem__inner,
+    .isi-mcf__layout {
       grid-template-columns: 1fr;
       max-width: 720px;
     }
@@ -708,6 +744,14 @@ const faqJsonLd = {
 
     .isi-problem__image-wrap {
       order: -1;
+    }
+
+    .isi-mcf__image-wrap {
+      order: -1;
+    }
+
+    .isi-mcf__content {
+      text-align: center;
     }
 
     .isi-intro__content .isi-section-title,
