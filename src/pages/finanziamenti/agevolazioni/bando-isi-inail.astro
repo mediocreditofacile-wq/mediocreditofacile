@@ -2,6 +2,7 @@
 import Layout from '../../../layouts/Layout.astro';
 import Header from '../../../components/Header.astro';
 import Footer from '../../../components/Footer.astro';
+import BandoIsiChecker from '../../../components/tools/BandoIsiChecker.tsx';
 
 const faqs = [
   {
@@ -62,7 +63,7 @@ const faqJsonLd = {
           L'azienda anticipa il 100%, poi l'Inail rimborsa. MCF finanzia l'anticipo e copre la quota residua.
         </p>
         <a href="#form-isi" class="isi-hero__cta">
-          Richiedi una valutazione gratuita
+          Verifica il tuo progetto
         </a>
       </div>
     </section>
@@ -226,41 +227,10 @@ const faqJsonLd = {
       </div>
     </section>
 
-    <!-- FORM -->
+    <!-- SIMULATORE BANDO ISI -->
     <section class="isi-form" id="form-isi">
-      <div class="isi-form__inner">
-        <h2 class="isi-form__heading">Vuoi finanziare il tuo progetto ISI? Lascia i tuoi dati.</h2>
-        <p class="isi-form__sub">Ti spiego come funziona e valutiamo insieme la fattibilita'.</p>
-        <form class="isi-form__form" id="form-bando-isi" action="">
-          <input name="website" type="text" tabindex="-1" autocomplete="off" style="position:absolute;opacity:0;pointer-events:none;height:0;overflow:hidden" aria-hidden="true" />
-          <input type="hidden" name="fonte" value="bando-isi-inail" />
-
-          <div class="isi-form__field">
-            <label for="isi-nome">Nome e Cognome</label>
-            <input type="text" id="isi-nome" name="nome" placeholder="Mario Rossi" required autocomplete="name" />
-          </div>
-
-          <div class="isi-form__field">
-            <label for="isi-tel">Telefono</label>
-            <input type="tel" id="isi-tel" name="telefono" placeholder="+39 333 123 4567" required autocomplete="tel" />
-          </div>
-
-          <div class="isi-form__field">
-            <label for="isi-importo">Importo investimento previsto</label>
-            <select id="isi-importo" name="importo_investimento">
-              <option value="" disabled selected>Seleziona...</option>
-              <option value="sotto-50k">Sotto 50.000 euro</option>
-              <option value="50-100k">50.000 - 100.000 euro</option>
-              <option value="100-200k">100.000 - 200.000 euro</option>
-              <option value="non-so">Non so ancora</option>
-            </select>
-          </div>
-
-          <button type="submit" class="isi-form__submit" id="isi-submit">Richiedi Valutazione Gratuita</button>
-          <p class="isi-form__privacy">
-            Inviando il modulo accetti la nostra <a href="/privacy">informativa sulla privacy</a>.
-          </p>
-        </form>
+      <div class="isi-form__inner" style="max-width:720px">
+        <BandoIsiChecker client:load />
       </div>
     </section>
 
@@ -268,19 +238,6 @@ const faqJsonLd = {
   <Footer />
 </Layout>
 
-<script>
-  const form = document.getElementById('form-bando-isi') as HTMLFormElement | null;
-  form?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const btn = document.getElementById('isi-submit') as HTMLButtonElement | null;
-    if (btn) { btn.disabled = true; btn.textContent = 'Invio in corso...'; }
-    const data = new FormData(form);
-    try {
-      await fetch('/api/submit', { method: 'POST', body: data });
-    } catch (_) {}
-    window.location.href = '/grazie-fin';
-  });
-</script>
 
 <style>
   /* HERO */
@@ -696,99 +653,15 @@ const faqJsonLd = {
     border-color: rgba(255, 255, 255, 0.6);
   }
 
-  /* FORM */
+  /* SIMULATORE */
   .isi-form {
     padding: 4.5rem 1.5rem;
-    background: var(--color-bg);
+    background: var(--mcf-ghost);
   }
 
   .isi-form__inner {
-    max-width: 520px;
+    max-width: 720px;
     margin: 0 auto;
-  }
-
-  .isi-form__heading {
-    text-align: center;
-    font-size: clamp(1.35rem, 3.5vw, 1.75rem);
-    font-weight: 800;
-    color: var(--mcf-accent);
-    margin-bottom: 0.5rem;
-    line-height: 1.3;
-  }
-
-  .isi-form__sub {
-    text-align: center;
-    color: var(--mcf-taupe);
-    margin-bottom: 2rem;
-    font-size: 1rem;
-  }
-
-  .isi-form__form {
-    display: flex;
-    flex-direction: column;
-    gap: 1.1rem;
-  }
-
-  .isi-form__field label {
-    display: block;
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--mcf-accent);
-    margin-bottom: 0.35rem;
-  }
-
-  .isi-form__field input,
-  .isi-form__field select {
-    width: 100%;
-    padding: 0.8rem 1rem;
-    border: 1.5px solid var(--mcf-platinum);
-    border-radius: 8px;
-    font-family: var(--font-family);
-    font-size: 1rem;
-    color: var(--mcf-charcoal);
-    background: #fff;
-    transition: border-color 0.2s, box-shadow 0.2s;
-  }
-
-  .isi-form__field input:focus,
-  .isi-form__field select:focus {
-    outline: none;
-    border-color: var(--mcf-accent);
-    box-shadow: 0 0 0 3px rgba(102, 76, 205, 0.15);
-  }
-
-  .isi-form__submit {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--mcf-primary);
-    color: #fff;
-    font-family: var(--font-family);
-    font-weight: 700;
-    font-size: 1.05rem;
-    padding: 0.9rem 2rem;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background 0.2s, transform 0.15s;
-    margin-top: 0.5rem;
-  }
-
-  .isi-form__submit:hover {
-    background: var(--mcf-primary-dark);
-    transform: translateY(-1px);
-  }
-
-  .isi-form__privacy {
-    text-align: center;
-    font-size: 0.8rem;
-    color: var(--mcf-taupe);
-    margin-top: 0.25rem;
-  }
-
-  .isi-form__privacy a {
-    color: var(--mcf-accent);
-    text-decoration: underline;
   }
 
   /* RESPONSIVE */
@@ -815,10 +688,6 @@ const faqJsonLd = {
     .isi-mcf,
     .isi-form {
       padding: 3rem 1.25rem;
-    }
-
-    .isi-form__submit {
-      width: 100%;
     }
 
     .isi-mcf__cta {
