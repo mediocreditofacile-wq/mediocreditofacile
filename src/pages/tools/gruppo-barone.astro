@@ -34,6 +34,7 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
 
   <!-- === TOOL CONTENT === -->
   <div id="tool" class="tool" style="display:none !important;">
+  <div class="tool__container">
 
     <!-- Header -->
     <div class="tool__header">
@@ -372,7 +373,8 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
       </div>
     </section>
 
-  </div>
+  </div><!-- /.tool__container -->
+  </div><!-- /.tool -->
 
   <!-- === PREVENTIVO PRINT VIEW (nascosto, visibile solo in stampa) === -->
   <div id="preventivo-print" class="prev-print">
@@ -408,7 +410,6 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
         info@gruppobarone.it
       </div>
     </div>
-  </div>
 
 </ToolLayout>
 
@@ -876,6 +877,13 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
   }
   .gate__btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(254,111,58,0.4); }
   .gate__error { color: #c0392b; font-size: 0.85rem; margin-top: 0.75rem; font-weight: 600; }
+
+  /* === TOOL CONTAINER === */
+  .tool__container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
 
   /* === TOOL HEADER === */
   .tool__header {
