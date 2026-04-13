@@ -1,7 +1,7 @@
 ---
 /**
  * Gruppo Barone — Area Riservata
- * Simulatore ISI Inail, Noleggio Grenke Sputnik++++,
+ * Simulatore ISI Inail, Noleggio Grenke,
  * Finanziamento, BCC Rent&Lease Tasso Zero.
  * Protetta da password, uso riservato al partner.
  */
@@ -127,10 +127,10 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
     <!-- ============================================ -->
     <section id="tab-noleggio" class="tab-panel">
       <h2 class="tool__section-title">
-        <span class="tool__step">2</span> Noleggio Operativo — Grenke Sputnik++++
+        <span class="tool__step">2</span> Noleggio Operativo Grenke
       </h2>
       <p class="tool__intro">
-        Calcola il canone di noleggio operativo con i coefficienti Grenke Sputnik++++.
+        Calcola il canone di noleggio operativo Grenke.
         Pagamento trimestrale anticipato (mensile solo sopra 12.000 € con maggiorazione del 5%).
       </p>
 
@@ -162,10 +162,6 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
           <div class="sim-card__row">
             <span>Canone mensile equivalente</span>
             <strong id="nol-mens"></strong>
-          </div>
-          <div class="sim-card__row">
-            <span>Coefficiente applicato</span>
-            <strong id="nol-coeff"></strong>
           </div>
           <div class="sim-card__row">
             <span>Durata</span>
@@ -419,7 +415,7 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
   const AUTH_KEY = 'mcf_barone_auth';
   const PREV_KEY = 'mcf_barone_prev_count';
 
-  // Coefficienti Grenke Sputnik++++ (tabella ufficiale)
+  // Coefficienti Grenke (tabella ufficiale)
   const SPUTNIK_DURATE = [24, 30, 36, 48, 60];
   const SPUTNIK_BANDS = [
     { da: 500, a: 2500 },
@@ -558,7 +554,6 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
 
       $('nol-trim').textContent = eurDec(canoneTrim);
       $('nol-mens').textContent = eurDec(canoneMensile);
-      $('nol-coeff').textContent = coeff.toFixed(3);
       $('nol-durata-out').textContent = durata + ' mesi';
       $('nol-result').style.display = '';
       $('nol-customer').style.display = '';
@@ -579,7 +574,6 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
         'Durata': $('nol-durata-out').textContent,
         'Canone trimestrale anticipato': $('nol-trim').textContent,
         'Canone mensile equivalente': $('nol-mens').textContent,
-        'Coefficiente Sputnik++++': $('nol-coeff').textContent,
       }, $('nol-cliente').value, $('nol-referente').value, $('nol-telefono').value);
     });
   }
@@ -1281,8 +1275,13 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
   .prev-print { display: none; }
 
   @media print {
-    body > *, header, nav, footer, .tool, .gate,
-    [data-pagefind-body] { display: none !important; }
+    /* Nascondi tutto */
+    body * { visibility: hidden !important; }
+    /* Mostra solo il preventivo e i suoi figli */
+    .prev-print,
+    .prev-print * {
+      visibility: visible !important;
+    }
     .prev-print {
       display: block !important;
       position: fixed;
