@@ -1,0 +1,1289 @@
+---
+/**
+ * Gruppo Barone — Area Riservata
+ * Simulatore Easy INAIL, Noleggio Grenke Sputnik++++,
+ * Finanziamento, BCC Rent&Lease Tasso Zero.
+ * Protetta da password, uso riservato al partner.
+ */
+import ToolLayout from '../../layouts/ToolLayout.astro';
+---
+
+<ToolLayout
+  title="Area Riservata Gruppo Barone — Mediocredito Facile"
+  description="Strumenti riservati Gruppo Barone — accesso riservato"
+  noindex={true}
+  breadcrumbs={[{ name: 'Gruppo Barone', href: '/tools/gruppo-barone' }]}
+>
+
+  <!-- === GATE PASSWORD === -->
+  <div id="gate" class="gate">
+    <div class="gate__card">
+      <div class="gate__logos">
+        <img src="/images/partners/gruppo-barone.jpeg" alt="Gruppo Barone" class="gate__logo" />
+        <span class="gate__x">&times;</span>
+        <img src="/images/logo-mediocreditofacile.webp" alt="Mediocredito Facile" class="gate__logo gate__logo--mcf" />
+      </div>
+      <p class="gate__label">Area riservata Gruppo Barone</p>
+      <div class="gate__form">
+        <input type="password" id="gate-pwd" class="gate__input" placeholder="Password" autocomplete="off" />
+        <button id="gate-btn" class="gate__btn">Accedi</button>
+      </div>
+      <p id="gate-error" class="gate__error" hidden>Password non corretta</p>
+    </div>
+  </div>
+
+  <!-- === TOOL CONTENT === -->
+  <div id="tool" class="tool" style="display:none !important;">
+
+    <!-- Header -->
+    <div class="tool__header">
+      <div class="tool__header-logos">
+        <img src="/images/partners/gruppo-barone.jpeg" alt="Gruppo Barone" class="tool__logo" />
+        <img src="/images/partners/fiera-san-giorgio.jpg" alt="Fiera di San Giorgio" class="tool__logo tool__logo--sagra" />
+      </div>
+      <div class="tool__header-text">
+        <h1 class="tool__title">Gruppo Barone — Strumenti Finanziari</h1>
+        <p class="tool__sub">Easy INAIL · Noleggio Operativo · Finanziamento · BCC Tasso Zero</p>
+      </div>
+      <button id="logout-btn" class="tool__logout">Esci</button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tabs__btn is-active" data-tab="easy-inail">Easy INAIL</button>
+      <button class="tabs__btn" data-tab="noleggio">Noleggio Grenke</button>
+      <button class="tabs__btn" data-tab="finanziamento">Finanziamento</button>
+      <button class="tabs__btn" data-tab="bcc">BCC Tasso Zero</button>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- TAB 1: EASY INAIL                            -->
+    <!-- ============================================ -->
+    <section id="tab-easy-inail" class="tab-panel is-active">
+      <h2 class="tool__section-title">
+        <span class="tool__step">1</span> Easy INAIL — Contributo a fondo perduto + Tasso Zero
+      </h2>
+      <p class="tool__intro">
+        Seleziona il mezzo, verifica il contributo ISI Inail al 65% e calcola le rate a tasso zero
+        sulla quota residua con BCC Rent&amp;Lease.
+      </p>
+
+      <div class="sim-card">
+        <div class="sim-card__field">
+          <label class="sim-card__label">Seleziona il mezzo</label>
+          <select id="inail-prodotto" class="sim-card__select">
+            <option value="17000" data-nome="Escavatore Sunward SW00">Escavatore Sunward SW00 — 17.000 €</option>
+          </select>
+        </div>
+
+        <div class="sim-card__result" id="inail-result">
+          <div class="sim-card__row">
+            <span>Prezzo del mezzo (IVA esclusa)</span>
+            <strong id="inail-prezzo">17.000 €</strong>
+          </div>
+          <div class="sim-card__row sim-card__row--highlight">
+            <span>Contributo ISI Inail (65%)</span>
+            <strong id="inail-contributo">- 11.050 €</strong>
+          </div>
+          <div class="sim-card__row sim-card__row--total">
+            <span>Resta a carico del cliente</span>
+            <strong id="inail-residuo">5.950 €</strong>
+          </div>
+          <hr class="sim-card__divider" />
+          <div class="sim-card__row">
+            <span>BCC Tasso Zero — 10 rate mensili</span>
+            <strong id="inail-rata">595 € / mese</strong>
+          </div>
+        </div>
+
+        <div class="sim-card__note">
+          <span class="material-icons-outlined">info</span>
+          <p>
+            Il contributo ISI Inail viene erogato dopo la realizzazione e rendicontazione del progetto (12-24 mesi).
+            MCF finanzia l'anticipo del 100%. Il residuo puo' essere frazionato in 10 rate a tasso zero con BCC Rent&amp;Lease
+            (importo massimo 50.000 €).
+          </p>
+        </div>
+
+        <!-- Dati cliente -->
+        <div class="sim-card__customer">
+          <h3>Dati cliente per il preventivo</h3>
+          <input type="text" id="inail-cliente" class="sim-card__input" placeholder="Ragione sociale cliente" />
+          <input type="text" id="inail-referente" class="sim-card__input" placeholder="Nome referente" />
+          <input type="tel" id="inail-telefono" class="sim-card__input" placeholder="Telefono" />
+        </div>
+
+        <div class="sim-card__actions">
+          <button class="sim-card__cta" id="inail-preventivo">
+            <span class="material-icons-outlined">description</span> Genera Preventivo
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================ -->
+    <!-- TAB 2: NOLEGGIO OPERATIVO GRENKE             -->
+    <!-- ============================================ -->
+    <section id="tab-noleggio" class="tab-panel">
+      <h2 class="tool__section-title">
+        <span class="tool__step">2</span> Noleggio Operativo — Grenke Sputnik++++
+      </h2>
+      <p class="tool__intro">
+        Calcola il canone di noleggio operativo con i coefficienti Grenke Sputnik++++.
+        Pagamento trimestrale anticipato (mensile solo sopra 12.000 € con maggiorazione del 5%).
+      </p>
+
+      <div class="sim-card">
+        <div class="sim-card__field">
+          <label class="sim-card__label">Valore del bene (IVA esclusa)</label>
+          <input type="text" id="nol-importo" class="sim-card__input sim-card__input--big" inputmode="numeric" placeholder="Es. 17000" />
+          <span class="sim-card__hint">Min 500 € — Max 100.000 €</span>
+        </div>
+
+        <div class="sim-card__field">
+          <label class="sim-card__label">Durata</label>
+          <div class="sim-card__radio-row">
+            <button class="sim-card__radio" data-mesi="24">24 mesi</button>
+            <button class="sim-card__radio" data-mesi="30">30 mesi</button>
+            <button class="sim-card__radio is-active" data-mesi="36">36 mesi</button>
+            <button class="sim-card__radio" data-mesi="48">48 mesi</button>
+            <button class="sim-card__radio" data-mesi="60">60 mesi</button>
+          </div>
+        </div>
+
+        <button class="sim-card__cta sim-card__cta--calc" id="nol-calcola">Calcola canone</button>
+
+        <div class="sim-card__result" id="nol-result" style="display:none">
+          <div class="sim-card__row sim-card__row--total">
+            <span>Canone trimestrale anticipato</span>
+            <strong id="nol-trim"></strong>
+          </div>
+          <div class="sim-card__row">
+            <span>Canone mensile equivalente</span>
+            <strong id="nol-mens"></strong>
+          </div>
+          <div class="sim-card__row">
+            <span>Coefficiente applicato</span>
+            <strong id="nol-coeff"></strong>
+          </div>
+          <div class="sim-card__row">
+            <span>Durata</span>
+            <strong id="nol-durata-out"></strong>
+          </div>
+        </div>
+
+        <div class="sim-card__note" id="nol-note-mensile" style="display:none">
+          <span class="material-icons-outlined">info</span>
+          <p>
+            Per importi sopra 12.000 €, e' disponibile il pagamento mensile anticipato con maggiorazione del 5% sul canone.
+            Canone mensile anticipato: <strong id="nol-mens-magg"></strong>
+          </p>
+        </div>
+
+        <div class="sim-card__note">
+          <span class="material-icons-outlined">warning</span>
+          <p>Assicurazione obbligatoria NON inclusa nel canone. L'utilizzatore puo' assicurarsi in proprio o tramite Grenke.</p>
+        </div>
+
+        <!-- Dati cliente -->
+        <div class="sim-card__customer" id="nol-customer" style="display:none">
+          <h3>Dati cliente per il preventivo</h3>
+          <input type="text" id="nol-cliente" class="sim-card__input" placeholder="Ragione sociale cliente" />
+          <input type="text" id="nol-referente" class="sim-card__input" placeholder="Nome referente" />
+          <input type="tel" id="nol-telefono" class="sim-card__input" placeholder="Telefono" />
+          <div class="sim-card__actions">
+            <button class="sim-card__cta" id="nol-preventivo">
+              <span class="material-icons-outlined">description</span> Genera Preventivo
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================ -->
+    <!-- TAB 3: FINANZIAMENTO                         -->
+    <!-- ============================================ -->
+    <section id="tab-finanziamento" class="tab-panel">
+      <h2 class="tool__section-title">
+        <span class="tool__step">3</span> Finanziamento — Ammortamento Francese
+      </h2>
+      <p class="tool__intro">
+        Simulazione della rata mensile con ammortamento alla francese. TAN indicativo 6,00%.
+      </p>
+
+      <div class="sim-card">
+        <div class="sim-card__field">
+          <label class="sim-card__label">Importo da finanziare (€)</label>
+          <input type="text" id="fin-importo" class="sim-card__input sim-card__input--big" inputmode="numeric" placeholder="Es. 50000" />
+        </div>
+
+        <div class="sim-card__field">
+          <label class="sim-card__label">Durata</label>
+          <div class="sim-card__radio-row">
+            <button class="sim-card__radio" data-durata="36">36 mesi</button>
+            <button class="sim-card__radio is-active" data-durata="48">48 mesi</button>
+            <button class="sim-card__radio" data-durata="60">60 mesi</button>
+          </div>
+        </div>
+
+        <button class="sim-card__cta sim-card__cta--calc" id="fin-calcola">Calcola rata</button>
+
+        <div class="sim-card__result" id="fin-result" style="display:none">
+          <div class="sim-card__row sim-card__row--total">
+            <span>Rata mensile</span>
+            <strong id="fin-rata"></strong>
+          </div>
+          <div class="sim-card__row">
+            <span>Importo finanziato</span>
+            <strong id="fin-importo-out"></strong>
+          </div>
+          <div class="sim-card__row">
+            <span>Durata</span>
+            <strong id="fin-durata-out"></strong>
+          </div>
+          <div class="sim-card__row">
+            <span>Totale restituito</span>
+            <strong id="fin-totale"></strong>
+          </div>
+          <div class="sim-card__row">
+            <span>Totale interessi</span>
+            <strong id="fin-interessi"></strong>
+          </div>
+        </div>
+
+        <div class="sim-card__note">
+          <span class="material-icons-outlined">gavel</span>
+          <p>
+            TAN indicativo 6,00%. Il tasso effettivo sara' determinato al momento della valutazione
+            di merito creditizio del potenziale cliente.
+          </p>
+        </div>
+
+        <!-- Dati cliente -->
+        <div class="sim-card__customer" id="fin-customer" style="display:none">
+          <h3>Dati cliente per il preventivo</h3>
+          <input type="text" id="fin-cliente" class="sim-card__input" placeholder="Ragione sociale cliente" />
+          <input type="text" id="fin-referente" class="sim-card__input" placeholder="Nome referente" />
+          <input type="tel" id="fin-telefono" class="sim-card__input" placeholder="Telefono" />
+          <div class="sim-card__actions">
+            <button class="sim-card__cta" id="fin-preventivo">
+              <span class="material-icons-outlined">description</span> Genera Preventivo
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================ -->
+    <!-- TAB 4: BCC RENT & LEASE TASSO ZERO           -->
+    <!-- ============================================ -->
+    <section id="tab-bcc" class="tab-panel">
+      <h2 class="tool__section-title">
+        <span class="tool__step">4</span> BCC Rent&amp;Lease — 10 Rate a Tasso Zero
+      </h2>
+      <p class="tool__intro">
+        Suddividi l'importo in 10 rate mensili senza interessi. Importo da 2.000 a 50.000 €.
+        Ideale per la quota residua dopo il contributo ISI Inail.
+      </p>
+
+      <div class="sim-card">
+        <div class="sim-card__field">
+          <label class="sim-card__label">Importo da frazionare (€)</label>
+          <input type="text" id="bcc-importo" class="sim-card__input sim-card__input--big" inputmode="numeric" placeholder="Es. 5950" />
+          <span class="sim-card__hint">Min 2.000 € — Max 50.000 €</span>
+        </div>
+
+        <button class="sim-card__cta sim-card__cta--calc" id="bcc-calcola">Calcola rate</button>
+
+        <div class="sim-card__result" id="bcc-result" style="display:none">
+          <div class="sim-card__row sim-card__row--total">
+            <span>Rata mensile (10 rate)</span>
+            <strong id="bcc-rata"></strong>
+          </div>
+          <div class="sim-card__row">
+            <span>Importo totale</span>
+            <strong id="bcc-importo-out"></strong>
+          </div>
+          <div class="sim-card__row">
+            <span>Interessi</span>
+            <strong>0 €</strong>
+          </div>
+        </div>
+
+        <div class="sim-card__note">
+          <span class="material-icons-outlined">download</span>
+          <p>
+            Per attivare BCC Rent&amp;Lease, il cliente deve firmare l'informativa privacy BCC.
+            <a href="/docs/privacy-bcc.pdf" download class="sim-card__link">Scarica modulo Privacy BCC (PDF)</a>
+          </p>
+        </div>
+
+        <!-- Dati cliente -->
+        <div class="sim-card__customer" id="bcc-customer" style="display:none">
+          <h3>Dati cliente per il preventivo</h3>
+          <input type="text" id="bcc-cliente" class="sim-card__input" placeholder="Ragione sociale cliente" />
+          <input type="text" id="bcc-referente" class="sim-card__input" placeholder="Nome referente" />
+          <input type="tel" id="bcc-telefono" class="sim-card__input" placeholder="Telefono" />
+          <div class="sim-card__actions">
+            <button class="sim-card__cta" id="bcc-preventivo">
+              <span class="material-icons-outlined">description</span> Genera Preventivo
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================ -->
+    <!-- UPLOAD PRATICHE                               -->
+    <!-- ============================================ -->
+    <section class="tool__section tool__section--upload">
+      <h2 class="tool__section-title">
+        <span class="tool__step">+</span> Invia Pratica
+      </h2>
+      <p class="tool__intro">
+        Carica i documenti del cliente e il preventivo fornitore. La richiesta arriva direttamente ad Alberto.
+      </p>
+      <div class="sim-card">
+        <div class="sim-card__field">
+          <label class="sim-card__label">Ragione sociale</label>
+          <input type="text" id="up-ragione" class="sim-card__input" placeholder="Es. Impresa Edile Rossi SRL" />
+        </div>
+        <div class="sim-card__field">
+          <label class="sim-card__label">P.IVA</label>
+          <input type="text" id="up-piva" class="sim-card__input" placeholder="01234567890" maxlength="11" inputmode="numeric" />
+        </div>
+        <div class="sim-card__field">
+          <label class="sim-card__label">Tipo richiesta</label>
+          <select id="up-tipo" class="sim-card__select">
+            <option value="easy-inail">Easy INAIL + BCC Tasso Zero</option>
+            <option value="noleggio-grenke">Noleggio Operativo Grenke</option>
+            <option value="finanziamento">Finanziamento</option>
+            <option value="bcc-tasso-zero">BCC Rent&amp;Lease Tasso Zero</option>
+          </select>
+        </div>
+        <div class="sim-card__field">
+          <label class="sim-card__label">Note</label>
+          <textarea id="up-note" class="sim-card__textarea" rows="3" placeholder="Eventuali note sulla richiesta..."></textarea>
+        </div>
+        <button class="sim-card__cta" id="up-invia">
+          <span class="material-icons-outlined">send</span> Invia richiesta ad Alberto
+        </button>
+        <p id="up-feedback" class="sim-card__feedback" hidden></p>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- === PREVENTIVO PRINT VIEW (nascosto, visibile solo in stampa) === -->
+  <div id="preventivo-print" class="prev-print">
+    <div class="prev-print__header">
+      <img src="/images/partners/gruppo-barone.jpeg" alt="Gruppo Barone" class="prev-print__logo" />
+      <div class="prev-print__title-block">
+        <h1 class="prev-print__title">PREVENTIVO</h1>
+        <p class="prev-print__num" id="prev-num"></p>
+      </div>
+    </div>
+    <div class="prev-print__meta">
+      <p><strong>Cliente:</strong> <span id="prev-cliente"></span></p>
+      <p><strong>Referente:</strong> <span id="prev-referente"></span></p>
+      <p><strong>Telefono:</strong> <span id="prev-telefono"></span></p>
+      <p><strong>Data:</strong> <span id="prev-data"></span></p>
+    </div>
+    <div class="prev-print__body" id="prev-body">
+      <!-- Popolato dinamicamente -->
+    </div>
+    <div class="prev-print__disclaimer">
+      <p>Il presente preventivo ha valore indicativo e non costituisce proposta contrattuale.
+        Le condizioni definitive saranno determinate al momento della valutazione di merito creditizio del cliente.</p>
+    </div>
+    <div class="prev-print__footer">
+      <div>
+        <strong>Mediocredito Facile</strong><br />
+        Alberto Ama' — +39 393 995 7840<br />
+        mediocreditofacile@gmail.com
+      </div>
+      <div>
+        <strong>Gruppo Barone SRL</strong><br />
+        +39 080 325 8290<br />
+        info@gruppobarone.it
+      </div>
+    </div>
+  </div>
+
+</ToolLayout>
+
+<script is:inline>
+  // === COSTANTI ===
+  const PASSWORD = 'gruppobarone';
+  const AUTH_KEY = 'mcf_barone_auth';
+  const PREV_KEY = 'mcf_barone_prev_count';
+
+  // Coefficienti Grenke Sputnik++++ (tabella ufficiale)
+  const SPUTNIK_DURATE = [24, 30, 36, 48, 60];
+  const SPUTNIK_BANDS = [
+    { da: 500, a: 2500 },
+    { da: 2501, a: 5000 },
+    { da: 5001, a: 12000 },
+    { da: 12001, a: 25000 },
+    { da: 25001, a: 50000 },
+    { da: 50001, a: 100000 },
+  ];
+  const SPUTNIK_COEFFS = {
+    24: [5.014, 5.011, 4.967, 4.959, 4.882, 4.820],
+    30: [4.049, 4.030, 3.998, 3.973, 3.955, 3.911],
+    36: [3.634, 3.541, 3.472, 3.448, 3.410, 3.406],
+    48: [3.069, 2.742, 2.712, 2.679, 2.677, 2.674],
+    60: [2.672, 2.315, 2.277, 2.246, 2.212, 2.149],
+  };
+
+  // Prodotti Barone (catalogo)
+  const PRODOTTI = [
+    { id: 'sw00', nome: 'Escavatore Sunward SW00', prezzo: 17000 },
+  ];
+
+  // Utility
+  function eur(n) {
+    return n.toLocaleString('it-IT', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
+  }
+  function eurDec(n) {
+    return n.toLocaleString('it-IT', { style: 'currency', currency: 'EUR', maximumFractionDigits: 2 });
+  }
+  function parseNum(s) {
+    const n = parseInt(String(s).replace(/[^\d]/g, ''), 10);
+    return isNaN(n) ? 0 : n;
+  }
+  function $(id) { return document.getElementById(id); }
+  function today() {
+    return new Date().toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  }
+
+  // === PASSWORD GATE ===
+  function initGate() {
+    if (localStorage.getItem(AUTH_KEY) === 'ok') {
+      $('gate').style.display = 'none';
+      $('tool').style.display = '';
+      $('tool').style.removeProperty('display');
+      return;
+    }
+    $('gate-btn').addEventListener('click', tryLogin);
+    $('gate-pwd').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') tryLogin();
+    });
+  }
+  function tryLogin() {
+    if ($('gate-pwd').value === PASSWORD) {
+      localStorage.setItem(AUTH_KEY, 'ok');
+      $('gate').style.display = 'none';
+      $('tool').style.display = '';
+      $('tool').style.removeProperty('display');
+    } else {
+      $('gate-error').hidden = false;
+      $('gate-pwd').classList.add('gate__input--error');
+    }
+  }
+
+  // === TABS ===
+  function initTabs() {
+    document.querySelectorAll('.tabs__btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        document.querySelectorAll('.tabs__btn').forEach(function (b) { b.classList.remove('is-active'); });
+        document.querySelectorAll('.tab-panel').forEach(function (p) { p.classList.remove('is-active'); });
+        btn.classList.add('is-active');
+        var panel = $('tab-' + btn.dataset.tab);
+        if (panel) panel.classList.add('is-active');
+      });
+    });
+  }
+
+  // === EASY INAIL ===
+  function initEasyInail() {
+    // Calcolo iniziale
+    calcInail();
+    $('inail-prodotto').addEventListener('change', calcInail);
+    $('inail-preventivo').addEventListener('click', function () {
+      var prezzo = parseNum($('inail-prodotto').value);
+      var contributo = Math.round(prezzo * 0.65);
+      var residuo = prezzo - contributo;
+      var rata = Math.round(residuo / 10);
+      var nome = $('inail-prodotto').selectedOptions[0].dataset.nome;
+      generaPreventivo('Easy INAIL', {
+        'Mezzo': nome,
+        'Prezzo (IVA esclusa)': eur(prezzo),
+        'Contributo ISI Inail (65%)': '- ' + eur(contributo),
+        'Residuo a carico cliente': eur(residuo),
+        'BCC Tasso Zero — 10 rate di': eur(rata) + ' / mese',
+      }, $('inail-cliente').value, $('inail-referente').value, $('inail-telefono').value);
+    });
+  }
+  function calcInail() {
+    var prezzo = parseNum($('inail-prodotto').value);
+    var contributo = Math.round(prezzo * 0.65);
+    var residuo = prezzo - contributo;
+    var rata = Math.round(residuo / 10);
+    $('inail-prezzo').textContent = eur(prezzo);
+    $('inail-contributo').textContent = '- ' + eur(contributo);
+    $('inail-residuo').textContent = eur(residuo);
+    $('inail-rata').textContent = eur(rata) + ' / mese';
+  }
+
+  // === NOLEGGIO GRENKE ===
+  function initNoleggio() {
+    var durata = 36;
+    // Radio buttons durata
+    document.querySelectorAll('#tab-noleggio .sim-card__radio').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        document.querySelectorAll('#tab-noleggio .sim-card__radio').forEach(function (b) { b.classList.remove('is-active'); });
+        btn.classList.add('is-active');
+        durata = parseInt(btn.dataset.mesi, 10);
+      });
+    });
+
+    $('nol-importo').addEventListener('input', function (e) {
+      e.target.value = e.target.value.replace(/[^\d]/g, '');
+    });
+
+    $('nol-calcola').addEventListener('click', function () {
+      var importo = parseNum($('nol-importo').value);
+      if (importo < 500 || importo > 100000) {
+        alert('Importo deve essere tra 500 € e 100.000 €');
+        return;
+      }
+      // Trova la banda
+      var bandIdx = SPUTNIK_BANDS.findIndex(function (b) { return importo >= b.da && importo <= b.a; });
+      if (bandIdx === -1) return;
+      var coeff = SPUTNIK_COEFFS[durata][bandIdx];
+      var canoneMensile = (importo * coeff) / 100;
+      var canoneTrim = canoneMensile * 3;
+
+      $('nol-trim').textContent = eurDec(canoneTrim);
+      $('nol-mens').textContent = eurDec(canoneMensile);
+      $('nol-coeff').textContent = coeff.toFixed(3);
+      $('nol-durata-out').textContent = durata + ' mesi';
+      $('nol-result').style.display = '';
+      $('nol-customer').style.display = '';
+
+      // Nota pagamento mensile sopra 12k
+      if (importo > 12000) {
+        var mensConMagg = canoneMensile * 1.05;
+        $('nol-mens-magg').textContent = eurDec(mensConMagg);
+        $('nol-note-mensile').style.display = '';
+      } else {
+        $('nol-note-mensile').style.display = 'none';
+      }
+    });
+
+    $('nol-preventivo').addEventListener('click', function () {
+      generaPreventivo('Noleggio Operativo Grenke', {
+        'Valore del bene': eur(parseNum($('nol-importo').value)),
+        'Durata': $('nol-durata-out').textContent,
+        'Canone trimestrale anticipato': $('nol-trim').textContent,
+        'Canone mensile equivalente': $('nol-mens').textContent,
+        'Coefficiente Sputnik++++': $('nol-coeff').textContent,
+      }, $('nol-cliente').value, $('nol-referente').value, $('nol-telefono').value);
+    });
+  }
+
+  // === FINANZIAMENTO ===
+  function initFinanziamento() {
+    var durata = 48;
+    var TAN = 0.06;
+
+    document.querySelectorAll('#tab-finanziamento .sim-card__radio').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        document.querySelectorAll('#tab-finanziamento .sim-card__radio').forEach(function (b) { b.classList.remove('is-active'); });
+        btn.classList.add('is-active');
+        durata = parseInt(btn.dataset.durata, 10);
+      });
+    });
+
+    $('fin-importo').addEventListener('input', function (e) {
+      e.target.value = e.target.value.replace(/[^\d]/g, '');
+    });
+
+    $('fin-calcola').addEventListener('click', function () {
+      var importo = parseNum($('fin-importo').value);
+      if (importo < 1000) {
+        alert('Importo minimo: 1.000 €');
+        return;
+      }
+      var r = TAN / 12; // tasso mensile
+      var n = durata;
+      var rata = importo * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1);
+      var totale = rata * n;
+      var interessi = totale - importo;
+
+      $('fin-rata').textContent = eurDec(rata);
+      $('fin-importo-out').textContent = eur(importo);
+      $('fin-durata-out').textContent = durata + ' mesi';
+      $('fin-totale').textContent = eurDec(totale);
+      $('fin-interessi').textContent = eurDec(interessi);
+      $('fin-result').style.display = '';
+      $('fin-customer').style.display = '';
+    });
+
+    $('fin-preventivo').addEventListener('click', function () {
+      generaPreventivo('Finanziamento', {
+        'Importo finanziato': $('fin-importo-out').textContent,
+        'Durata': $('fin-durata-out').textContent,
+        'TAN indicativo': '6,00%',
+        'Rata mensile': $('fin-rata').textContent,
+        'Totale restituito': $('fin-totale').textContent,
+        'Totale interessi': $('fin-interessi').textContent,
+      }, $('fin-cliente').value, $('fin-referente').value, $('fin-telefono').value);
+    });
+  }
+
+  // === BCC TASSO ZERO ===
+  function initBcc() {
+    $('bcc-importo').addEventListener('input', function (e) {
+      e.target.value = e.target.value.replace(/[^\d]/g, '');
+    });
+
+    $('bcc-calcola').addEventListener('click', function () {
+      var importo = parseNum($('bcc-importo').value);
+      if (importo < 2000 || importo > 50000) {
+        alert('Importo deve essere tra 2.000 € e 50.000 €');
+        return;
+      }
+      var rata = importo / 10;
+      $('bcc-rata').textContent = eurDec(rata) + ' / mese';
+      $('bcc-importo-out').textContent = eur(importo);
+      $('bcc-result').style.display = '';
+      $('bcc-customer').style.display = '';
+    });
+
+    $('bcc-preventivo').addEventListener('click', function () {
+      generaPreventivo('BCC Rent&Lease Tasso Zero', {
+        'Importo': $('bcc-importo-out').textContent,
+        '10 rate mensili di': $('bcc-rata').textContent,
+        'Interessi': '0 €',
+      }, $('bcc-cliente').value, $('bcc-referente').value, $('bcc-telefono').value);
+    });
+  }
+
+  // === PREVENTIVO ===
+  function getNextPrevNum() {
+    var count = parseInt(localStorage.getItem(PREV_KEY) || '0', 10);
+    count++;
+    localStorage.setItem(PREV_KEY, count.toString());
+    return 'BARONE-' + String(count).padStart(3, '0');
+  }
+
+  function generaPreventivo(tipo, righe, cliente, referente, telefono) {
+    if (!cliente) { alert('Inserisci la ragione sociale del cliente'); return; }
+    var numPrev = getNextPrevNum();
+
+    // Popola la vista stampa
+    $('prev-num').textContent = numPrev;
+    $('prev-cliente').textContent = cliente;
+    $('prev-referente').textContent = referente || '-';
+    $('prev-telefono').textContent = telefono || '-';
+    $('prev-data').textContent = today();
+
+    var html = '<h2 class="prev-print__tipo">' + tipo + '</h2><table class="prev-print__table">';
+    for (var key in righe) {
+      html += '<tr><td>' + key + '</td><td><strong>' + righe[key] + '</strong></td></tr>';
+    }
+    html += '</table>';
+    $('prev-body').innerHTML = html;
+
+    // Invia notifica via webhook
+    var body = new FormData();
+    body.append('tool', 'barone_preventivo');
+    body.append('landing', 'gruppo-barone');
+    body.append('fonte', 'gruppo-barone');
+    body.append('numero_preventivo', numPrev);
+    body.append('tipo_simulazione', tipo);
+    body.append('cliente', cliente);
+    body.append('referente', referente || '');
+    body.append('telefono', telefono || '');
+    for (var key in righe) {
+      body.append('prev_' + key.toLowerCase().replace(/[^a-z0-9]/g, '_'), righe[key]);
+    }
+    fetch('/api/submit', { method: 'POST', body: body }).catch(function () {});
+
+    // Stampa (PDF)
+    window.print();
+
+    // WhatsApp
+    var waText = '*Preventivo ' + numPrev + '*\n' +
+      tipo + '\n\n' +
+      'Cliente: ' + cliente + '\n';
+    for (var k in righe) {
+      waText += k + ': ' + righe[k] + '\n';
+    }
+    waText += '\nMediocredito Facile — Alberto Ama\'\n+39 393 995 7840';
+    var waUrl = 'https://wa.me/?text=' + encodeURIComponent(waText);
+
+    // Dopo la stampa, offri WhatsApp
+    setTimeout(function () {
+      if (confirm('Preventivo ' + numPrev + ' generato e inviato.\n\nVuoi condividerlo anche su WhatsApp?')) {
+        window.open(waUrl, '_blank');
+      }
+    }, 500);
+  }
+
+  // === UPLOAD PRATICHE ===
+  function initUpload() {
+    $('up-invia').addEventListener('click', function () {
+      var ragione = $('up-ragione').value;
+      var piva = $('up-piva').value;
+      var tipo = $('up-tipo').value;
+      var note = $('up-note').value;
+      if (!ragione || !piva) {
+        alert('Inserisci ragione sociale e P.IVA');
+        return;
+      }
+      $('up-invia').disabled = true;
+      $('up-invia').textContent = 'Invio in corso...';
+      var body = new FormData();
+      body.append('tool', 'barone_pratica');
+      body.append('landing', 'gruppo-barone');
+      body.append('fonte', 'gruppo-barone');
+      body.append('ragione_sociale', ragione);
+      body.append('piva', piva);
+      body.append('tipo_richiesta', tipo);
+      body.append('note', note);
+      fetch('/api/submit', { method: 'POST', body: body })
+        .then(function () {
+          $('up-feedback').textContent = 'Richiesta inviata ad Alberto. Ti ricontattera\' a breve.';
+          $('up-feedback').hidden = false;
+          $('up-feedback').style.color = '#2d9f4f';
+        })
+        .catch(function () {
+          $('up-feedback').textContent = 'Errore nell\'invio. Riprova o chiama Alberto direttamente.';
+          $('up-feedback').hidden = false;
+          $('up-feedback').style.color = '#c0392b';
+        })
+        .finally(function () {
+          $('up-invia').disabled = false;
+          $('up-invia').innerHTML = '<span class="material-icons-outlined">send</span> Invia richiesta ad Alberto';
+        });
+    });
+  }
+
+  // === LOGOUT ===
+  function initLogout() {
+    $('logout-btn').addEventListener('click', function () {
+      localStorage.removeItem(AUTH_KEY);
+      location.reload();
+    });
+  }
+
+  // === INIT ===
+  document.addEventListener('DOMContentLoaded', function () {
+    initGate();
+    initTabs();
+    initEasyInail();
+    initNoleggio();
+    initFinanziamento();
+    initBcc();
+    initUpload();
+    initLogout();
+  });
+</script>
+
+<style>
+  /* === GATE === */
+  .gate {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+  .gate__card {
+    background: #fff;
+    border: 1px solid var(--mcf-platinum);
+    border-radius: var(--radius);
+    padding: 3rem 2.5rem;
+    text-align: center;
+    max-width: 400px;
+    width: 100%;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+  }
+  .gate__logos {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .gate__logo {
+    height: 60px;
+    width: auto;
+    border-radius: 50%;
+  }
+  .gate__logo--mcf {
+    border-radius: 0;
+    height: 32px;
+  }
+  .gate__x {
+    font-size: 1.5rem;
+    color: var(--mcf-taupe);
+    font-weight: 300;
+  }
+  .gate__label {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--mcf-charcoal);
+    margin-bottom: 1.5rem;
+  }
+  .gate__form {
+    display: flex;
+    gap: 0.5rem;
+  }
+  .gate__input {
+    flex: 1;
+    padding: 0.8rem 1rem;
+    border: 1.5px solid var(--mcf-platinum);
+    border-radius: 8px;
+    font-family: var(--font-family);
+    font-size: 1rem;
+  }
+  .gate__input:focus {
+    outline: none;
+    border-color: var(--mcf-accent);
+  }
+  .gate__input--error {
+    border-color: #c0392b;
+  }
+  .gate__btn {
+    padding: 0.8rem 1.5rem;
+    background: var(--mcf-primary);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-family: var(--font-family);
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .gate__btn:hover { background: var(--mcf-primary-dark); }
+  .gate__error {
+    color: #c0392b;
+    font-size: 0.85rem;
+    margin-top: 0.75rem;
+  }
+
+  /* === TOOL HEADER === */
+  .tool__header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem 2rem;
+    background: linear-gradient(135deg, #1e1b3a 0%, #2d2556 100%);
+    border-radius: var(--radius);
+    margin-bottom: 1.5rem;
+    color: #fff;
+  }
+  .tool__header-logos {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+  }
+  .tool__logo {
+    height: 48px;
+    width: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(255,255,255,0.2);
+  }
+  .tool__logo--sagra {
+    height: 44px;
+    width: 44px;
+  }
+  .tool__header-text { flex: 1; }
+  .tool__title {
+    font-size: 1.15rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+  .tool__sub {
+    font-size: 0.82rem;
+    color: rgba(255,255,255,0.7);
+    margin-top: 0.15rem;
+  }
+  .tool__logout {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #fff;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-family: var(--font-family);
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .tool__logout:hover { background: rgba(255,255,255,0.2); }
+
+  /* === TABS === */
+  .tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 2px solid var(--mcf-platinum);
+    margin-bottom: 2rem;
+    overflow-x: auto;
+  }
+  .tabs__btn {
+    padding: 0.85rem 1.25rem;
+    font-family: var(--font-family);
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--mcf-taupe);
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+    margin-bottom: -2px;
+  }
+  .tabs__btn:hover { color: var(--mcf-accent); }
+  .tabs__btn.is-active {
+    color: var(--mcf-accent);
+    border-bottom-color: var(--mcf-accent);
+  }
+  .tab-panel { display: none; }
+  .tab-panel.is-active { display: block; }
+
+  /* === SECTION === */
+  .tool__section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--mcf-black);
+    margin-bottom: 0.5rem;
+  }
+  .tool__step {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: var(--mcf-accent);
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 800;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .tool__intro {
+    font-size: 0.95rem;
+    color: var(--mcf-charcoal);
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+  }
+
+  /* === SIM CARD === */
+  .sim-card {
+    background: #fff;
+    border: 1px solid var(--mcf-platinum);
+    border-radius: var(--radius);
+    padding: 2rem;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+    margin-bottom: 2rem;
+  }
+  .sim-card__field {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1.25rem;
+  }
+  .sim-card__label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--mcf-black);
+    margin-bottom: 0.5rem;
+  }
+  .sim-card__input, .sim-card__select, .sim-card__textarea {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border: 1.5px solid var(--mcf-platinum);
+    border-radius: 8px;
+    font-family: var(--font-family);
+    font-size: 1rem;
+    color: var(--mcf-black);
+    background: #fff;
+    transition: border-color 0.2s;
+  }
+  .sim-card__input--big {
+    font-size: 1.2rem;
+    font-weight: 600;
+  }
+  .sim-card__input:focus, .sim-card__select:focus, .sim-card__textarea:focus {
+    outline: none;
+    border-color: var(--mcf-accent);
+    box-shadow: 0 0 0 3px rgba(102,76,205,0.1);
+  }
+  .sim-card__hint {
+    font-size: 0.78rem;
+    color: var(--mcf-taupe);
+    margin-top: 0.35rem;
+  }
+
+  /* Radio row */
+  .sim-card__radio-row {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .sim-card__radio {
+    padding: 0.6rem 1rem;
+    border: 1.5px solid var(--mcf-platinum);
+    border-radius: 8px;
+    background: #fff;
+    font-family: var(--font-family);
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--mcf-charcoal);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .sim-card__radio:hover { border-color: var(--mcf-accent); }
+  .sim-card__radio.is-active {
+    border-color: var(--mcf-accent);
+    background: rgba(102,76,205,0.06);
+    color: var(--mcf-accent);
+  }
+
+  /* Result box */
+  .sim-card__result {
+    background: var(--mcf-ghost);
+    border-radius: 10px;
+    padding: 1.25rem;
+    margin: 1.25rem 0;
+  }
+  .sim-card__row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem 0;
+    font-size: 0.95rem;
+    color: var(--mcf-charcoal);
+    border-bottom: 1px solid var(--mcf-platinum);
+  }
+  .sim-card__row:last-child { border-bottom: none; }
+  .sim-card__row strong {
+    font-weight: 700;
+    color: var(--mcf-black);
+  }
+  .sim-card__row--highlight {
+    background: rgba(254,111,58,0.08);
+    margin: 0.2rem -0.75rem;
+    padding: 0.7rem 0.75rem;
+    border-radius: 8px;
+    border-bottom: none;
+  }
+  .sim-card__row--highlight strong {
+    color: var(--mcf-primary);
+    font-size: 1.05rem;
+  }
+  .sim-card__row--total strong {
+    color: var(--mcf-accent);
+    font-size: 1.1rem;
+  }
+  .sim-card__divider {
+    border: none;
+    border-top: 1px dashed var(--mcf-platinum);
+    margin: 0.5rem 0;
+  }
+
+  /* Note */
+  .sim-card__note {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    background: rgba(102,76,205,0.04);
+    border-left: 3px solid var(--mcf-accent);
+    border-radius: 6px;
+    padding: 0.85rem 1rem;
+    margin: 1rem 0;
+  }
+  .sim-card__note .material-icons-outlined {
+    color: var(--mcf-accent);
+    font-size: 1.2rem;
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+  }
+  .sim-card__note p {
+    font-size: 0.85rem;
+    color: var(--mcf-charcoal);
+    line-height: 1.55;
+    margin: 0;
+  }
+  .sim-card__link {
+    color: var(--mcf-accent);
+    font-weight: 600;
+    text-decoration: underline;
+  }
+
+  /* CTA */
+  .sim-card__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.85rem 1.5rem;
+    background: var(--mcf-primary);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-family: var(--font-family);
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+  }
+  .sim-card__cta:hover { background: var(--mcf-primary-dark); transform: translateY(-1px); }
+  .sim-card__cta:disabled { opacity: 0.5; cursor: not-allowed; }
+  .sim-card__cta--calc {
+    width: 100%;
+    justify-content: center;
+    margin-top: 0.5rem;
+  }
+  .sim-card__cta .material-icons-outlined { font-size: 1.1rem; }
+  .sim-card__actions {
+    margin-top: 1rem;
+  }
+
+  /* Customer section */
+  .sim-card__customer {
+    border-top: 1px solid var(--mcf-platinum);
+    padding-top: 1.25rem;
+    margin-top: 1.25rem;
+  }
+  .sim-card__customer h3 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--mcf-accent);
+    margin-bottom: 0.75rem;
+  }
+  .sim-card__customer .sim-card__input {
+    margin-bottom: 0.5rem;
+  }
+
+  /* Feedback */
+  .sim-card__feedback {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-top: 1rem;
+  }
+
+  /* Upload section */
+  .tool__section--upload {
+    border-top: 2px solid var(--mcf-platinum);
+    padding-top: 2rem;
+    margin-top: 2rem;
+  }
+
+  /* === PRINT STYLES === */
+  .prev-print {
+    display: none;
+  }
+
+  @media print {
+    /* Nascondi tutto tranne il preventivo */
+    body > *,
+    header, nav, footer, .tool, .gate,
+    [data-pagefind-body] { display: none !important; }
+    .prev-print {
+      display: block !important;
+      position: fixed;
+      inset: 0;
+      background: #fff;
+      z-index: 99999;
+      padding: 2.5rem;
+      font-family: 'Manrope', sans-serif;
+    }
+    .prev-print__header {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      padding-bottom: 1.25rem;
+      border-bottom: 3px solid #664CCD;
+      margin-bottom: 1.5rem;
+    }
+    .prev-print__logo {
+      height: 56px;
+      width: 56px;
+      border-radius: 50%;
+    }
+    .prev-print__title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #664CCD;
+      letter-spacing: 0.06em;
+    }
+    .prev-print__num {
+      font-size: 0.9rem;
+      color: #FE6F3A;
+      font-weight: 700;
+    }
+    .prev-print__meta {
+      margin-bottom: 1.5rem;
+    }
+    .prev-print__meta p {
+      font-size: 0.9rem;
+      margin: 0.3rem 0;
+      color: #444;
+    }
+    .prev-print__tipo {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #664CCD;
+      margin-bottom: 0.75rem;
+    }
+    .prev-print__table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1.5rem;
+    }
+    .prev-print__table td {
+      padding: 0.6rem 0.75rem;
+      border-bottom: 1px solid #E1DEE3;
+      font-size: 0.95rem;
+    }
+    .prev-print__table td:first-child { color: #444; }
+    .prev-print__table td:last-child { text-align: right; }
+    .prev-print__table strong { color: #0F1020; }
+    .prev-print__disclaimer {
+      background: #F8F7FA;
+      border-left: 3px solid #664CCD;
+      padding: 0.75rem 1rem;
+      margin-bottom: 1.5rem;
+      border-radius: 4px;
+    }
+    .prev-print__disclaimer p {
+      font-size: 0.78rem;
+      color: #787782;
+      line-height: 1.5;
+      margin: 0;
+    }
+    .prev-print__footer {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: #444;
+      border-top: 1px solid #E1DEE3;
+      padding-top: 1rem;
+    }
+  }
+
+  /* === RESPONSIVE === */
+  @media (max-width: 768px) {
+    .tool__header {
+      flex-direction: column;
+      text-align: center;
+      gap: 0.75rem;
+    }
+    .tool__header-logos { justify-content: center; }
+    .tabs { gap: 0; }
+    .tabs__btn { padding: 0.7rem 0.75rem; font-size: 0.78rem; }
+    .sim-card { padding: 1.25rem; }
+    .sim-card__radio-row { flex-direction: column; }
+    .sim-card__row { flex-direction: column; align-items: flex-start; gap: 0.25rem; }
+    .gate__form { flex-direction: column; }
+  }
+</style>
