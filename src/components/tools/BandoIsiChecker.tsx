@@ -1,204 +1,181 @@
 import { useState, useMemo } from 'preact/hooks';
 import './bando-isi-checker.css';
 
-// Tipologie
-type Asse = '1.1' | '1.2' | '2' | '3' | '4' | '5.1' | '5.2';
+// === TIPI ===
+
 type Dimensione = 'micro' | 'piccola' | 'media' | 'grande';
 
-// Configurazione assi del Bando ISI
+// Le tipologie di progetto in linguaggio imprenditore
+type ProgettoId =
+  | 'macchinari'       // Sostituire macchinari/attrezzature obsolete
+  | 'protezioni'       // Installare protezioni, anticaduta, barriere
+  | 'salute'           // Ridurre rischi salute (rumore, vibrazioni, chimici, ergonomia)
+  | 'amianto'          // Rimuovere amianto
+  | 'certificazione'   // Certificazione sicurezza (ISO 45001, MOG)
+  | 'agricoltura';     // Macchine agricole/forestali
+
+// Assi del bando (lato tecnico, nascosti all'utente)
 interface AsseConfig {
-  value: Asse;
+  id: string;
+  label: string;
+  percentuale: number;
+  interventoAggiuntivo: boolean;
+  minContributoZero: boolean; // Asse 1.2 <50 dip: nessun minimo
+}
+
+const ASSI: Record<string, AsseConfig> = {
+  '1.1': { id: '1.1', label: 'Asse 1.1', percentuale: 65, interventoAggiuntivo: true, minContributoZero: false },
+  '1.2': { id: '1.2', label: 'Asse 1.2', percentuale: 80, interventoAggiuntivo: false, minContributoZero: false },
+  '2':   { id: '2',   label: 'Asse 2',   percentuale: 65, interventoAggiuntivo: true, minContributoZero: false },
+  '3':   { id: '3',   label: 'Asse 3',   percentuale: 65, interventoAggiuntivo: true, minContributoZero: false },
+  '4':   { id: '4',   label: 'Asse 4',   percentuale: 65, interventoAggiuntivo: true, minContributoZero: false },
+  '5.1': { id: '5.1', label: 'Asse 5.1', percentuale: 65, interventoAggiuntivo: false, minContributoZero: false },
+  '5.2': { id: '5.2', label: 'Asse 5.2', percentuale: 80, interventoAggiuntivo: false, minContributoZero: false },
+};
+
+// Le card che l'utente vede: linguaggio concreto, non burocratico
+interface ProgettoOption {
+  id: ProgettoId;
   label: string;
   desc: string;
   icon: string;
-  percentuale: number;
-  richiedeDimensione: boolean;
-  soloMicroPiccola: boolean;
-  richiedeSettore: boolean;
-  richiedeEta: boolean;
-  richiedeDipendenti: boolean;
-  interventoAggiuntivo: boolean;
 }
 
-const ASSI: AsseConfig[] = [
+const PROGETTI: ProgettoOption[] = [
   {
-    value: '1.1',
-    label: 'Asse 1.1 — Rischi tecnopatologici',
-    desc: 'Rumore, vibrazioni, agenti chimici, ergonomia',
+    id: 'macchinari',
+    label: 'Sostituire macchinari o attrezzature',
+    desc: 'Macchine obsolete, impianti vecchi, attrezzature non a norma',
+    icon: 'precision_manufacturing',
+  },
+  {
+    id: 'protezioni',
+    label: 'Installare protezioni e sistemi anticaduta',
+    desc: 'Barriere fotoelettriche, parapetti, linee vita, protezioni fisse e mobili',
+    icon: 'health_and_safety',
+  },
+  {
+    id: 'salute',
+    label: 'Ridurre rischi per la salute dei lavoratori',
+    desc: 'Rumore, vibrazioni, sostanze chimiche, ergonomia, movimentazione carichi',
     icon: 'hearing',
-    percentuale: 65,
-    richiedeDimensione: false,
-    soloMicroPiccola: false,
-    richiedeSettore: false,
-    richiedeEta: false,
-    richiedeDipendenti: false,
-    interventoAggiuntivo: true,
   },
   {
-    value: '1.2',
-    label: 'Asse 1.2 — Modelli organizzativi',
-    desc: 'ISO 45001, SGSL, MOG art. 30 D.Lgs. 81/2008',
-    icon: 'verified',
-    percentuale: 80,
-    richiedeDimensione: false,
-    soloMicroPiccola: false,
-    richiedeSettore: false,
-    richiedeEta: false,
-    richiedeDipendenti: true,
-    interventoAggiuntivo: false,
-  },
-  {
-    value: '2',
-    label: 'Asse 2 — Rischi infortunistici',
-    desc: 'Sostituzione macchine, protezioni, anticaduta',
-    icon: 'engineering',
-    percentuale: 65,
-    richiedeDimensione: false,
-    soloMicroPiccola: false,
-    richiedeSettore: false,
-    richiedeEta: false,
-    richiedeDipendenti: false,
-    interventoAggiuntivo: true,
-  },
-  {
-    value: '3',
-    label: 'Asse 3 — Bonifica amianto',
-    desc: 'Rimozione e smaltimento materiali con amianto',
+    id: 'amianto',
+    label: 'Rimuovere amianto',
+    desc: 'Rimozione, smaltimento e sostituzione di coperture e materiali con amianto',
     icon: 'delete_sweep',
-    percentuale: 65,
-    richiedeDimensione: false,
-    soloMicroPiccola: false,
-    richiedeSettore: false,
-    richiedeEta: false,
-    richiedeDipendenti: false,
-    interventoAggiuntivo: true,
   },
   {
-    value: '4',
-    label: 'Asse 4 — Micro/piccole imprese',
-    desc: 'Settori specifici: ospitalita\', tessile, pesca, manifatturiero',
-    icon: 'storefront',
-    percentuale: 65,
-    richiedeDimensione: true,
-    soloMicroPiccola: true,
-    richiedeSettore: true,
-    richiedeEta: false,
-    richiedeDipendenti: false,
-    interventoAggiuntivo: true,
+    id: 'certificazione',
+    label: 'Certificare la sicurezza aziendale',
+    desc: 'ISO 45001, sistema gestione SGSL, modello organizzativo (MOG art. 30)',
+    icon: 'verified',
   },
   {
-    value: '5.1',
-    label: 'Asse 5.1 — Imprese agricole',
-    desc: 'Trattori e macchine agricole/forestali',
+    id: 'agricoltura',
+    label: 'Acquistare macchine agricole o forestali',
+    desc: 'Trattori, macchine agricole e forestali piu\' sicure',
     icon: 'agriculture',
-    percentuale: 65,
-    richiedeDimensione: true,
-    soloMicroPiccola: true,
-    richiedeSettore: false,
-    richiedeEta: false,
-    richiedeDipendenti: false,
-    interventoAggiuntivo: false,
-  },
-  {
-    value: '5.2',
-    label: 'Asse 5.2 — Giovani agricoltori',
-    desc: 'Come Asse 5.1 ma per titolari under 40',
-    icon: 'agriculture',
-    percentuale: 80,
-    richiedeDimensione: true,
-    soloMicroPiccola: true,
-    richiedeSettore: false,
-    richiedeEta: true,
-    richiedeDipendenti: false,
-    interventoAggiuntivo: false,
   },
 ];
 
 const DIMENSIONI: { value: Dimensione; label: string; hint: string }[] = [
   { value: 'micro', label: 'Microimpresa', hint: '< 10 dipendenti, fatturato < 2M \u20ac' },
-  { value: 'piccola', label: 'Piccola impresa', hint: '< 50 dipendenti, fatturato < 10M \u20ac' },
-  { value: 'media', label: 'Media impresa', hint: '< 250 dipendenti, fatturato < 50M \u20ac' },
+  { value: 'piccola', label: 'Piccola impresa', hint: '< 50 dip., fatturato < 10M \u20ac' },
+  { value: 'media', label: 'Media impresa', hint: '< 250 dip., fatturato < 50M \u20ac' },
   { value: 'grande', label: 'Grande impresa', hint: '\u2265 250 dipendenti' },
 ];
 
-// Contributo minimo e massimo
 const CONTRIBUTO_MIN = 5_000;
 const CONTRIBUTO_MAX = 130_000;
 
-// Risultato della verifica
+// === LOGICA DI MAPPATURA progetto → asse ===
+// Determina l'asse corretto in base al progetto + risposte di qualificazione
+
+function determinaAsse(
+  progetto: ProgettoId,
+  dimensione: Dimensione | null,
+  settoreSpecifico: boolean | null,
+  etaUnder40: boolean | null,
+  dipendentiSotto50: boolean | null,
+): { asse: AsseConfig; minContributoZero: boolean } | { errore: string; suggerimento?: string } {
+
+  switch (progetto) {
+    case 'salute':
+      // Sempre Asse 1.1 — aperto a tutti
+      return { asse: ASSI['1.1'], minContributoZero: false };
+
+    case 'certificazione':
+      // Sempre Asse 1.2 — aperto a tutti, ma min. contributo dipende dai dipendenti
+      return {
+        asse: ASSI['1.2'],
+        minContributoZero: dipendentiSotto50 === true,
+      };
+
+    case 'amianto':
+      // Sempre Asse 3 — aperto a tutti
+      return { asse: ASSI['3'], minContributoZero: false };
+
+    case 'macchinari':
+    case 'protezioni':
+      // Default Asse 2 — ma micro/piccola in settori specifici possono andare su Asse 4
+      if (
+        (dimensione === 'micro' || dimensione === 'piccola') &&
+        settoreSpecifico === true
+      ) {
+        return { asse: ASSI['4'], minContributoZero: false };
+      }
+      // Asse 2 aperto a tutti
+      return { asse: ASSI['2'], minContributoZero: false };
+
+    case 'agricoltura':
+      // Solo micro/piccole
+      if (dimensione === 'media' || dimensione === 'grande') {
+        return {
+          errore: 'Il contributo per macchine agricole e\' riservato a micro e piccole imprese.',
+          suggerimento: 'Se sei un\'impresa agricola di dimensioni maggiori, puoi valutare interventi su sicurezza e salute (Assi 1-3).',
+        };
+      }
+      // Under 40 → Asse 5.2 (80%), altrimenti 5.1 (65%)
+      if (etaUnder40 === true) {
+        return { asse: ASSI['5.2'], minContributoZero: false };
+      }
+      return { asse: ASSI['5.1'], minContributoZero: false };
+
+    default:
+      return { errore: 'Seleziona il tipo di progetto.' };
+  }
+}
+
+// === RISULTATO ===
+
 interface RisultatoISI {
   eleggibile: boolean;
   motivo?: string;
   suggerimento?: string;
+  asseLabel: string;
   percentuale: number;
   contributoBase: number;
   costoNetto: number;
   interventoAggiuntivoPossibile: boolean;
 }
 
-// Calcolo contributo ISI
 function calcolaContributoISI(
   asse: AsseConfig,
-  dimensione: Dimensione | null,
-  settoreSpecifico: boolean | null,
-  etaUnder40: boolean | null,
-  dipendendiSotto50: boolean | null,
+  minContributoZero: boolean,
   importo: number,
 ): RisultatoISI {
-  // Verifica dimensione per assi che la richiedono
-  if (asse.soloMicroPiccola && (dimensione === 'media' || dimensione === 'grande')) {
-    const nomeAsse = asse.value.startsWith('5') ? 'L\'Asse 5' : 'L\'Asse 4';
-    const tipo = asse.value.startsWith('5')
-      ? 'micro e piccole imprese agricole'
-      : 'micro e piccole imprese in settori specifici';
-    return {
-      eleggibile: false,
-      motivo: `${nomeAsse} e\' riservato a ${tipo}.`,
-      suggerimento: 'Le imprese di dimensioni maggiori possono valutare gli Assi 1, 2 o 3.',
-      percentuale: asse.percentuale,
-      contributoBase: 0,
-      costoNetto: importo,
-      interventoAggiuntivoPossibile: false,
-    };
-  }
-
-  // Verifica settore per asse 4
-  if (asse.richiedeSettore && settoreSpecifico === false) {
-    return {
-      eleggibile: false,
-      motivo: 'L\'Asse 4 e\' riservato a imprese in settori specifici (ospitalita\', tessile, pesca, manifatturiero).',
-      suggerimento: 'Se il tuo investimento riguarda la sicurezza sul lavoro, verifica gli Assi 1, 2 o 3.',
-      percentuale: asse.percentuale,
-      contributoBase: 0,
-      costoNetto: importo,
-      interventoAggiuntivoPossibile: false,
-    };
-  }
-
-  // Verifica eta' per asse 5.2
-  if (asse.richiedeEta && etaUnder40 === false) {
-    return {
-      eleggibile: false,
-      motivo: 'L\'Asse 5.2 e\' riservato a giovani agricoltori con titolare under 40.',
-      suggerimento: 'Puoi verificare l\'Asse 5.1 che ha gli stessi requisiti senza vincolo di eta\' (contributo al 65%).',
-      percentuale: asse.percentuale,
-      contributoBase: 0,
-      costoNetto: importo,
-      interventoAggiuntivoPossibile: false,
-    };
-  }
-
-  // Calcolo contributo
   const contributoBase = Math.min(importo * (asse.percentuale / 100), CONTRIBUTO_MAX);
 
-  // Verifica contributo minimo (eccezione Asse 1.2 con <50 dipendenti)
-  const esenteMinimo = asse.value === '1.2' && dipendendiSotto50 === true;
-  if (!esenteMinimo && contributoBase < CONTRIBUTO_MIN) {
+  // Verifica contributo minimo
+  if (!minContributoZero && contributoBase < CONTRIBUTO_MIN) {
     const investimentoMinimo = Math.ceil(CONTRIBUTO_MIN / (asse.percentuale / 100));
     return {
       eleggibile: false,
       motivo: `Investimento troppo basso. Il contributo minimo e\' di ${eur(CONTRIBUTO_MIN)}.`,
-      suggerimento: `Per questo asse, l'investimento minimo deve essere di almeno ${eur(investimentoMinimo)} (IVA esclusa).`,
+      suggerimento: `L'investimento deve essere di almeno ${eur(investimentoMinimo)} (IVA esclusa).`,
+      asseLabel: asse.label,
       percentuale: asse.percentuale,
       contributoBase,
       costoNetto: importo,
@@ -208,6 +185,7 @@ function calcolaContributoISI(
 
   return {
     eleggibile: true,
+    asseLabel: asse.label,
     percentuale: asse.percentuale,
     contributoBase,
     costoNetto: importo - contributoBase,
@@ -223,17 +201,20 @@ function eur(n: number): string {
   });
 }
 
-export default function BandoIsiChecker() {
-  // Stato selezione asse
-  const [asseId, setAsseId] = useState<Asse | null>(null);
 
-  // Stato domande di qualificazione
+// === COMPONENTE ===
+
+export default function BandoIsiChecker() {
+  // Step 1: cosa devi fare
+  const [progetto, setProgetto] = useState<ProgettoId | null>(null);
+
+  // Step 2: qualificazione (condizionale)
   const [dimensione, setDimensione] = useState<Dimensione | null>(null);
   const [settoreSpecifico, setSettoreSpecifico] = useState<boolean | null>(null);
   const [etaUnder40, setEtaUnder40] = useState<boolean | null>(null);
   const [dipendentiSotto50, setDipendentiSotto50] = useState<boolean | null>(null);
 
-  // Stato importo
+  // Step 3: importo
   const [importoInput, setImportoInput] = useState('');
   const [importo, setImporto] = useState(0);
   const [calcolato, setCalcolato] = useState(false);
@@ -245,40 +226,58 @@ export default function BandoIsiChecker() {
   const [formInvio, setFormInvio] = useState(false);
   const [formInviato, setFormInviato] = useState(false);
 
-  // Configurazione asse selezionato
-  const asseConfig = useMemo(
-    () => ASSI.find((a) => a.value === asseId) ?? null,
-    [asseId],
-  );
+  // Quali domande servono in base al progetto scelto
+  const serveDimensione = progetto === 'macchinari' || progetto === 'protezioni' || progetto === 'agricoltura';
+  const serveSettore = (progetto === 'macchinari' || progetto === 'protezioni') &&
+    (dimensione === 'micro' || dimensione === 'piccola');
+  const serveEta = progetto === 'agricoltura' &&
+    (dimensione === 'micro' || dimensione === 'piccola');
+  const serveDipendenti = progetto === 'certificazione';
 
-  // Verifica se le domande di qualificazione sono complete
+  const servonoDomande = serveDimensione || serveSettore || serveEta || serveDipendenti;
+
+  // Qualificazione completa?
   const qualificazioneCompleta = useMemo(() => {
-    if (!asseConfig) return false;
-    if (asseConfig.richiedeDimensione && dimensione === null) return false;
-    if (asseConfig.richiedeSettore && settoreSpecifico === null) return false;
-    if (asseConfig.richiedeEta && etaUnder40 === null) return false;
-    if (asseConfig.richiedeDipendenti && dipendentiSotto50 === null) return false;
+    if (!progetto) return false;
+    if (serveDimensione && dimensione === null) return false;
+    if (serveSettore && settoreSpecifico === null) return false;
+    if (serveEta && etaUnder40 === null) return false;
+    if (serveDipendenti && dipendentiSotto50 === null) return false;
     return true;
-  }, [asseConfig, dimensione, settoreSpecifico, etaUnder40, dipendentiSotto50]);
+  }, [progetto, serveDimensione, dimensione, serveSettore, settoreSpecifico, serveEta, etaUnder40, serveDipendenti, dipendentiSotto50]);
 
   const valido = importo > 0 && qualificazioneCompleta;
 
-  // Calcolo risultato
+  // Risultato del calcolo
   const risultato = useMemo(() => {
-    if (!asseConfig || !valido) return null;
-    return calcolaContributoISI(
-      asseConfig,
-      dimensione,
-      settoreSpecifico,
-      etaUnder40,
-      dipendentiSotto50,
-      importo,
-    );
-  }, [asseConfig, dimensione, settoreSpecifico, etaUnder40, dipendentiSotto50, importo, valido]);
+    if (!progetto || !valido) return null;
+    const mapping = determinaAsse(progetto, dimensione, settoreSpecifico, etaUnder40, dipendentiSotto50);
+    if ('errore' in mapping) {
+      return {
+        eleggibile: false,
+        motivo: mapping.errore,
+        suggerimento: mapping.suggerimento,
+        asseLabel: '',
+        percentuale: 0,
+        contributoBase: 0,
+        costoNetto: importo,
+        interventoAggiuntivoPossibile: false,
+      } as RisultatoISI;
+    }
+    return calcolaContributoISI(mapping.asse, mapping.minContributoZero, importo);
+  }, [progetto, dimensione, settoreSpecifico, etaUnder40, dipendentiSotto50, importo, valido]);
 
-  // Reset qualificazione quando cambia l'asse
-  const handleAsseChange = (value: Asse) => {
-    setAsseId(value);
+  // Asse risolto (per tracking)
+  const asseRisolto = useMemo(() => {
+    if (!progetto || !qualificazioneCompleta) return null;
+    const mapping = determinaAsse(progetto, dimensione, settoreSpecifico, etaUnder40, dipendentiSotto50);
+    if ('errore' in mapping) return null;
+    return mapping.asse.id;
+  }, [progetto, dimensione, settoreSpecifico, etaUnder40, dipendentiSotto50, qualificazioneCompleta]);
+
+  // Reset qualificazione quando cambia il progetto
+  const handleProgettoChange = (value: ProgettoId) => {
+    setProgetto(value);
     setDimensione(null);
     setSettoreSpecifico(null);
     setEtaUnder40(null);
@@ -301,7 +300,8 @@ export default function BandoIsiChecker() {
         event: 'lp_bando_isi_check',
         landing: 'bando-isi-inail',
         tool: 'bando_isi_checker',
-        asse: asseId,
+        tipo_progetto: progetto,
+        asse: asseRisolto,
         dimensione_impresa: dimensione,
         importo_investimento: importo,
         percentuale_copertura: risultato?.percentuale,
@@ -336,7 +336,8 @@ export default function BandoIsiChecker() {
     body.append('nome', formNome);
     body.append('telefono', formTelefono);
     body.append('email', formEmail);
-    if (asseId) body.append('asse_isi', asseId);
+    if (progetto) body.append('tipo_progetto', progetto);
+    if (asseRisolto) body.append('asse_isi', asseRisolto);
     if (dimensione) body.append('dimensione_impresa', dimensione);
     body.append('importo_investimento', importo.toString());
     if (risultato) {
@@ -356,51 +357,42 @@ export default function BandoIsiChecker() {
     }
   };
 
-  // Verifica se servono domande di qualificazione per l'asse selezionato
-  const servonoDomande = asseConfig && (
-    asseConfig.richiedeDimensione ||
-    asseConfig.richiedeSettore ||
-    asseConfig.richiedeEta ||
-    asseConfig.richiedeDipendenti
-  );
-
   return (
     <div class="isi-check">
-      {/* === SELEZIONE ASSE === */}
       <div class="isi-check__form">
         <h3 class="isi-check__form-title">Verifica se il tuo progetto rientra nel Bando ISI</h3>
         <p class="isi-check__form-sub">
-          Seleziona l'asse di finanziamento, rispondi a poche domande
-          e scopri subito se il tuo investimento e' agevolabile.
+          Dicci cosa devi fare, rispondi a poche domande e scopri
+          subito quanto puoi ottenere a fondo perduto.
         </p>
 
+        {/* === STEP 1: COSA DEVI FARE === */}
         <div class="isi-check__field">
-          <label class="isi-check__label">Su quale asse vuoi investire?</label>
+          <label class="isi-check__label">Cosa deve fare la tua azienda?</label>
           <div class="isi-check__axis-grid">
-            {ASSI.map((a) => (
+            {PROGETTI.map((p) => (
               <button
                 type="button"
-                class={`isi-check__axis-card ${asseId === a.value ? 'is-active' : ''}`}
-                onClick={() => handleAsseChange(a.value)}
+                class={`isi-check__axis-card ${progetto === p.id ? 'is-active' : ''}`}
+                onClick={() => handleProgettoChange(p.id)}
               >
-                <span class="isi-check__axis-badge">{a.percentuale}%</span>
                 <div class="isi-check__axis-head">
-                  <span class="material-icons-outlined">{a.icon}</span>
-                  <span class="isi-check__axis-name">{a.label}</span>
+                  <span class="material-icons-outlined">{p.icon}</span>
+                  <span class="isi-check__axis-name">{p.label}</span>
                 </div>
-                <span class="isi-check__axis-desc">{a.desc}</span>
+                <span class="isi-check__axis-desc">{p.desc}</span>
               </button>
             ))}
           </div>
         </div>
 
-        {/* === DOMANDE DI QUALIFICAZIONE === */}
-        {asseConfig && servonoDomande && (
+        {/* === STEP 2: QUALIFICAZIONE === */}
+        {progetto && servonoDomande && (
           <div class="isi-check__qualify">
             <p class="isi-check__qualify-title">Qualche dato sulla tua impresa</p>
 
             {/* Dimensione impresa */}
-            {asseConfig.richiedeDimensione && (
+            {serveDimensione && (
               <div class="isi-check__field">
                 <label class="isi-check__label">Dimensione impresa</label>
                 <div class="isi-check__radio">
@@ -408,7 +400,12 @@ export default function BandoIsiChecker() {
                     <button
                       type="button"
                       class={`isi-check__radio-btn ${dimensione === d.value ? 'is-active' : ''}`}
-                      onClick={() => { setDimensione(d.value); setCalcolato(false); }}
+                      onClick={() => {
+                        setDimensione(d.value);
+                        setSettoreSpecifico(null);
+                        setEtaUnder40(null);
+                        setCalcolato(false);
+                      }}
                     >
                       <strong>{d.label}</strong>
                       <span>{d.hint}</span>
@@ -418,11 +415,11 @@ export default function BandoIsiChecker() {
               </div>
             )}
 
-            {/* Settore specifico (Asse 4) */}
-            {asseConfig.richiedeSettore && (
+            {/* Settore specifico — solo per macchinari/protezioni se micro o piccola */}
+            {serveSettore && (
               <div class="isi-check__field">
                 <label class="isi-check__label">
-                  La tua impresa opera in uno dei settori ammessi dall'Asse 4?
+                  La tua impresa opera in uno di questi settori?
                 </label>
                 <div class="isi-check__radio">
                   <button
@@ -443,15 +440,15 @@ export default function BandoIsiChecker() {
                   </button>
                 </div>
                 <p class="isi-check__ateco-note">
-                  Settori ammessi: alloggio e ristorazione, tessile, confezioni, articoli in pelle,
-                  legno, carta, stampa, prodotti chimici, farmaceutici, gomma, minerali non metalliferi,
+                  Settori ammessi per micro/piccole imprese: alloggio e ristorazione, tessile, confezioni,
+                  articoli in pelle, legno, carta, stampa, chimica, farmaceutica, gomma, minerali non metalliferi,
                   metallurgia, pesca e acquacoltura.
                 </p>
               </div>
             )}
 
-            {/* Eta' titolare (Asse 5.2) */}
-            {asseConfig.richiedeEta && (
+            {/* Eta' titolare — solo per agricoltura se micro/piccola */}
+            {serveEta && (
               <div class="isi-check__field">
                 <label class="isi-check__label">Eta' del titolare dell'impresa</label>
                 <div class="isi-check__radio">
@@ -461,7 +458,7 @@ export default function BandoIsiChecker() {
                     onClick={() => { setEtaUnder40(true); setCalcolato(false); }}
                   >
                     <strong>Under 40</strong>
-                    <span>Il titolare ha meno di 40 anni</span>
+                    <span>Contributo maggiorato all'80%</span>
                   </button>
                   <button
                     type="button"
@@ -469,14 +466,14 @@ export default function BandoIsiChecker() {
                     onClick={() => { setEtaUnder40(false); setCalcolato(false); }}
                   >
                     <strong>40 anni o piu'</strong>
-                    <span>Il titolare ha 40 anni o piu'</span>
+                    <span>Contributo standard al 65%</span>
                   </button>
                 </div>
               </div>
             )}
 
-            {/* Numero dipendenti (Asse 1.2) */}
-            {asseConfig.richiedeDipendenti && (
+            {/* Numero dipendenti — solo per certificazione */}
+            {serveDipendenti && (
               <div class="isi-check__field">
                 <label class="isi-check__label">Numero di dipendenti</label>
                 <div class="isi-check__radio">
@@ -502,8 +499,8 @@ export default function BandoIsiChecker() {
           </div>
         )}
 
-        {/* === IMPORTO INVESTIMENTO === */}
-        {asseConfig && (servonoDomande ? qualificazioneCompleta : true) && (
+        {/* === STEP 3: IMPORTO === */}
+        {progetto && (servonoDomande ? qualificazioneCompleta : true) && (
           <>
             <div class="isi-check__field" style={{ marginTop: servonoDomande ? '0' : '0.5rem' }}>
               <label class="isi-check__label" for="isi-importo">
@@ -564,13 +561,13 @@ export default function BandoIsiChecker() {
             </div>
           </div>
 
-          {/* Intervento aggiuntivo */}
           {risultato.interventoAggiuntivoPossibile && (
             <div class="isi-check__extra-box">
               <span class="material-icons-outlined">add_circle_outline</span>
               <p>
-                Su questo asse puoi aggiungere un intervento supplementare: fino a 20.000 \u20ac
-                aggiuntivi con copertura all'80% (contributo extra fino a 16.000 \u20ac).
+                Per questo tipo di progetto puoi aggiungere un intervento supplementare:
+                fino a 20.000 \u20ac aggiuntivi con copertura all'80%
+                (contributo extra fino a 16.000 \u20ac).
               </p>
             </div>
           )}
@@ -585,7 +582,7 @@ export default function BandoIsiChecker() {
           </div>
 
           <p class="isi-check__disclaimer">
-            Stima indicativa basata sulle percentuali del Bando ISI 2025-2026.
+            Stima indicativa basata sulle percentuali del Bando ISI 2025-2026 ({risultato.asseLabel}).
             Il contributo definitivo dipende dal punteggio del progetto, dall'esito del click day
             e dalla rendicontazione finale. Importi IVA esclusa.
           </p>
@@ -596,7 +593,7 @@ export default function BandoIsiChecker() {
       {calcolato && risultato && !risultato.eleggibile && (
         <div class="isi-check__ineligible">
           <span class="material-icons-outlined">info</span>
-          <h3>Progetto non eleggibile su questo asse</h3>
+          <h3>Progetto non eleggibile con questi parametri</h3>
           <p>{risultato.motivo}</p>
           {risultato.suggerimento && (
             <p class="isi-check__ineligible-hint">{risultato.suggerimento}</p>
