@@ -75,8 +75,8 @@ function getRiscatto(durata: number): number {
 }
 
 // Costanti energetiche
-const ENERGY_PRICE = 0.25;    // €/kWh costo medio energia
-const FEED_IN_PRICE = 0.05;   // €/kWh ritiro dedicato (stima conservativa)
+const ENERGY_PRICE = 0.25;    // €/kWh costo medio energia (bolletta)
+const FEED_IN_PRICE = 0.13;   // €/kWh valore immissione in rete (ritiro dedicato / vendita)
 
 // Irraggiamento medio per zona (kWh/kWp/anno — fonte PVGIS)
 const IRRADIANCE: Record<string, number> = {
@@ -141,8 +141,11 @@ interface RisultatoDurata {
   riscatto: number;
   riscattoPerc: number;
   // Solo modalita BP
-  risparmioMensile?: number;
-  differenza?: number;
+  risparmioMensile?: number;             // Totale: autoconsumo + immissione
+  risparmioAutoconsumoMensile?: number;  // Abbatte la bolletta
+  valoreImmissioneMensile?: number;      // Ricavo dalla vendita in rete (abbatte la rata)
+  costoNettoMensile?: number;            // bolletta - autoconsumo + rata - immissione
+  differenza?: number;                   // bolletta - costoNettoMensile (>0 = risparmio complessivo)
 }
 
 interface Props {
@@ -219,6 +222,8 @@ export default function SimulatoreFotovoltaico({
       kwhAutoconsumo,
       kwhImmissione,
       risparmioMensile,
+      risparmioAutoconsumoMensile: risparmioAutoconsumo,
+      valoreImmissioneMensile: valoreImmissione,
     };
   }, [modalitaBP, potenza, accumulo, zonaEffettiva, tipoAttivita]);
 
@@ -241,10 +246,14 @@ export default function SimulatoreFotovoltaico({
 
     if (modalitaBP && energetica) {
       res.risparmioMensile = energetica.risparmioMensile;
-      res.differenza = energetica.risparmioMensile - rataTotale;
+      res.risparmioAutoconsumoMensile = energetica.risparmioAutoconsumoMensile;
+      res.valoreImmissioneMensile = energetica.valoreImmissioneMensile;
+      // Costo energetico totale mensile con impianto: bolletta - autoconsumo + rata - immissione
+      res.costoNettoMensile = bolletta - energetica.risparmioAutoconsumoMensile + rataTotale - energetica.valoreImmissioneMensile;
+      res.differenza = bolletta - res.costoNettoMensile;
     }
     return res;
-  }, [calcolato, costo, durata, modalitaBP, energetica, assicurazioneOpzionale, includiAssicurazione]);
+  }, [calcolato, costo, durata, modalitaBP, energetica, bolletta, assicurazioneOpzionale, includiAssicurazione]);
 
   // Tabella comparativa per tutte le durate
   const tabelladurate = useMemo((): RisultatoDurata[] => {
@@ -262,11 +271,14 @@ export default function SimulatoreFotovoltaico({
       const res: RisultatoDurata = { durata: d, coeff, canoneMensile, assicurazioneMensile, rataTotale, riscatto, riscattoPerc };
       if (modalitaBP && energetica) {
         res.risparmioMensile = energetica.risparmioMensile;
-        res.differenza = energetica.risparmioMensile - rataTotale;
+        res.risparmioAutoconsumoMensile = energetica.risparmioAutoconsumoMensile;
+        res.valoreImmissioneMensile = energetica.valoreImmissioneMensile;
+        res.costoNettoMensile = bolletta - energetica.risparmioAutoconsumoMensile + rataTotale - energetica.valoreImmissioneMensile;
+        res.differenza = bolletta - res.costoNettoMensile;
       }
       return res;
     }).filter((r): r is RisultatoDurata => r !== null);
-  }, [calcolato, costo, modalitaBP, energetica, assicurazioneOpzionale, includiAssicurazione]);
+  }, [calcolato, costo, modalitaBP, energetica, bolletta, assicurazioneOpzionale, includiAssicurazione]);
 
   // Gestione input numerico generico
   const handleNumericInput = (
@@ -693,23 +705,31 @@ export default function SimulatoreFotovoltaico({
             </div>
 
             {/* Card confronto bolletta (solo BP) */}
-            {modalitaBP && energetica && risultato.differenza !== undefined && (
+            {modalitaBP && energetica && risultato.differenza !== undefined && risultato.costoNettoMensile !== undefined && (
               <div class={`simpv__card simpv__card--confronto ${risultato.differenza >= 0 ? 'simpv__card--green' : 'simpv__card--red'}`}>
-                <h4 class="simpv__card-heading">Confronto con la bolletta</h4>
+                <h4 class="simpv__card-heading">La rata si sostiene con la bolletta?</h4>
                 <div class="simpv__card-row">
                   <span>Bolletta attuale</span>
                   <span>{eur(bolletta)}/mese</span>
                 </div>
                 <div class="simpv__card-row">
-                  <span>Risparmio energetico stimato</span>
-                  <span>{eur(energetica.risparmioMensile)}/mese</span>
+                  <span>Risparmio autoconsumo (abbatte la bolletta)</span>
+                  <span class="simpv__green">−{eur(energetica.risparmioAutoconsumoMensile)}/mese</span>
                 </div>
                 <div class="simpv__card-row">
                   <span>Rata noleggio</span>
-                  <span>−{eur(risultato.rataTotale)}/mese</span>
+                  <span>+{eur(risultato.rataTotale)}/mese</span>
+                </div>
+                <div class="simpv__card-row">
+                  <span>Immissione in rete a {eur(FEED_IN_PRICE)}/kWh (abbatte la rata)</span>
+                  <span class="simpv__green">−{eur(energetica.valoreImmissioneMensile)}/mese</span>
                 </div>
                 <div class="simpv__card-row simpv__card-row--total">
-                  <span>{risultato.differenza >= 0 ? 'Risparmio netto' : 'Costo netto'}</span>
+                  <span>Costo netto mensile con impianto</span>
+                  <span>{eur(risultato.costoNettoMensile)}/mese</span>
+                </div>
+                <div class="simpv__card-row simpv__card-row--total">
+                  <span>{risultato.differenza >= 0 ? 'Risparmio vs bolletta attuale' : 'Costo extra vs bolletta attuale'}</span>
                   <span class={risultato.differenza >= 0 ? 'simpv__green' : 'simpv__red'}>
                     {risultato.differenza >= 0 ? '+' : ''}{eur(risultato.differenza)}/mese
                   </span>
@@ -750,8 +770,8 @@ export default function SimulatoreFotovoltaico({
                         <th>Durata</th>
                         <th>Rata mensile</th>
                         <th>Riscatto</th>
-                        {modalitaBP && <th>Risparmio</th>}
-                        {modalitaBP && <th>Differenza</th>}
+                        {modalitaBP && <th>Costo netto</th>}
+                        {modalitaBP && <th>Saldo vs bolletta</th>}
                       </tr>
                     </thead>
                     <tbody>
@@ -764,8 +784,8 @@ export default function SimulatoreFotovoltaico({
                           <td>{r.durata} mesi</td>
                           <td>{eur(r.rataTotale)}</td>
                           <td>{Math.round(r.riscattoPerc * 100)}%</td>
-                          {modalitaBP && r.risparmioMensile !== undefined && (
-                            <td>{eur(r.risparmioMensile)}</td>
+                          {modalitaBP && r.costoNettoMensile !== undefined && (
+                            <td>{eur(r.costoNettoMensile)}</td>
                           )}
                           {modalitaBP && r.differenza !== undefined && (
                             <td class={r.differenza >= 0 ? 'simpv__green' : 'simpv__red'}>
@@ -790,7 +810,10 @@ export default function SimulatoreFotovoltaico({
               )}
               <p>* Riscatto finale variabile per durata: dal 3% (60+ mesi) al 10% (24 mesi).</p>
               {modalitaBP && (
-                <p>* La produzione e il risparmio sono stime basate su dati medi PVGIS. I valori reali dipendono da orientamento, inclinazione, ombreggiamenti e consumi effettivi.</p>
+                <>
+                  <p>* La produzione e il risparmio sono stime basate su dati medi PVGIS. I valori reali dipendono da orientamento, inclinazione, ombreggiamenti e consumi effettivi.</p>
+                  <p>* Valore immissione in rete stimato a 0,13 €/kWh (ritiro dedicato medio). L'autoconsumo abbatte la bolletta, l'immissione abbatte la rata del noleggio.</p>
+                </>
               )}
             </div>
           </>
