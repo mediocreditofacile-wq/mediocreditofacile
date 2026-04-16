@@ -603,6 +603,100 @@
   white-space: nowrap;
 }
 
+/* Variante EnergyTeam: form invio richiesta pratica con checklist documenti */
+.simpv__lead-bar--energyteam .simpv__lead-icon {
+  color: var(--color-primary);
+}
+
+.simpv__et-form {
+  gap: 1.25rem;
+}
+
+.simpv__et-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.simpv__et-section-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--color-text-light);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.simpv__et-form .simpv__lead-bar-fields {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.simpv__et-textarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 72px;
+  font-family: inherit;
+  line-height: 1.5;
+}
+
+.simpv__et-docs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem 1rem;
+}
+
+.simpv__et-doc label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  padding: 0.55rem 0.75rem;
+  background: var(--color-bg-alt, #f8f7fa);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.88rem;
+  line-height: 1.4;
+  color: var(--color-text);
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.simpv__et-doc label:hover {
+  border-color: var(--color-primary);
+}
+
+.simpv__et-doc input[type="checkbox"] {
+  margin-top: 0.15rem;
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.simpv__et-docs-hint {
+  font-size: 0.78rem;
+  color: var(--color-text-light);
+  line-height: 1.5;
+  margin: 0.25rem 0 0;
+}
+
+.simpv__lead-bar--energyteam .simpv__button--cta {
+  margin-top: 0;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .simpv__et-form .simpv__lead-bar-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .simpv__et-docs {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* --- Immagine placeholder (colonna destra, prima del calcolo) --- */
 .simpv__placeholder-img {
   border-radius: var(--radius);

@@ -108,6 +108,16 @@ const ATTIVITA_LABELS: Record<string, string> = {
 
 const DURATE = [24, 36, 48, 60, 72, 84];
 
+// Checklist documenti standard per richiesta pratica Grenke / Pagarent (variante EnergyTeam)
+const ENERGYTEAM_DOCS = [
+  'Visura camerale aggiornata',
+  "Documento d'identità del legale rappresentante",
+  'Codice fiscale del legale rappresentante',
+  'IBAN',
+  'Ultimi due bilanci depositati',
+  'Situazione contabile provvisoria 2025',
+];
+
 // Trova il coefficiente ESG per un importo e una durata
 function getCoeff(importo: number, durata: number): number | null {
   const fasce = ESG_COEFFS[durata];
@@ -137,9 +147,24 @@ interface RisultatoDurata {
 
 interface Props {
   modalitaPartner?: boolean;
+  // Quando true: toggle che permette di includere / escludere l'assicurazione all-risk dalla rata.
+  // Default OFF: la rata mostrata e' il canone puro, l'assicurazione e' solo informativa.
+  assicurazioneOpzionale?: boolean;
+  // Variante del form di richiesta in fondo al simulatore.
+  // 'standard' (default): nome/email/telefono + PDF. 'energyteam': partner + cliente + checklist documenti.
+  varianteForm?: 'standard' | 'energyteam';
+  // Se settata, forza un coefficiente di irraggiamento unico indipendentemente dalla zona selezionata,
+  // e nasconde il selettore "Zona geografica" nel business plan. Usato da EnergyTeam con 'sud' (1425 kWh/kWp/anno)
+  // per presentare numeri coerenti e piu' aggressivi di una media nazionale.
+  zonaFissa?: 'nord' | 'centro' | 'sud' | 'isole';
 }
 
-export default function SimulatoreFotovoltaico({ modalitaPartner = false }: Props) {
+export default function SimulatoreFotovoltaico({
+  modalitaPartner = false,
+  assicurazioneOpzionale = false,
+  varianteForm = 'standard',
+  zonaFissa,
+}: Props) {
   // Modalita base vs business plan
   const [modalitaBP, setModalitaBP] = useState(false);
 
@@ -148,6 +173,9 @@ export default function SimulatoreFotovoltaico({ modalitaPartner = false }: Prop
   const [costoInput, setCostoInput] = useState('');
   const [durata, setDurata] = useState(60);
   const [calcolato, setCalcolato] = useState(false);
+
+  // Toggle assicurazione (usato solo se assicurazioneOpzionale=true). Default OFF.
+  const [includiAssicurazione, setIncludiAssicurazione] = useState(false);
 
   // Campi business plan (visibili solo con modalitaBP)
   const [potenza, setPotenza] = useState(6);
@@ -171,10 +199,13 @@ export default function SimulatoreFotovoltaico({ modalitaPartner = false }: Prop
     }
   }, [durateDisponibili]);
 
+  // Zona effettiva: se e' stata passata una zonaFissa (variante EnergyTeam), ignora la selezione utente.
+  const zonaEffettiva = zonaFissa ?? zona;
+
   // Calcolo produzione e risparmio energetico (solo modalita BP)
   const energetica = useMemo(() => {
     if (!modalitaBP || potenza <= 0) return null;
-    const produzioneAnnua = potenza * (IRRADIANCE[zona] ?? 1100);
+    const produzioneAnnua = potenza * (IRRADIANCE[zonaEffettiva] ?? 1100);
     const autoconsumoPct = SELF_CONSUMPTION[tipoAttivita]?.[accumulo > 0 ? 'con' : 'senza'] ?? 0.47;
     const kwhAutoconsumo = produzioneAnnua * autoconsumoPct;
     const kwhImmissione = produzioneAnnua * (1 - autoconsumoPct);
@@ -189,7 +220,7 @@ export default function SimulatoreFotovoltaico({ modalitaPartner = false }: Prop
       kwhImmissione,
       risparmioMensile,
     };
-  }, [modalitaBP, potenza, accumulo, zona, tipoAttivita]);
+  }, [modalitaBP, potenza, accumulo, zonaEffettiva, tipoAttivita]);
 
   // Calcolo risultati per la durata selezionata
   const risultato = useMemo((): RisultatoDurata | null => {
@@ -199,7 +230,10 @@ export default function SimulatoreFotovoltaico({ modalitaPartner = false }: Prop
 
     const canoneMensile = (costo * coeff) / 100;
     const assicurazioneMensile = (costo * INSURANCE_RATE) / 12;
-    const rataTotale = canoneMensile + assicurazioneMensile;
+    // Se l'assicurazione e' opzionale e non attivata, la rata mostrata e' solo il canone puro.
+    const rataTotale = (assicurazioneOpzionale && !includiAssicurazione)
+      ? canoneMensile
+      : canoneMensile + assicurazioneMensile;
     const riscattoPerc = getRiscatto(durata);
     const riscatto = costo * riscattoPerc;
 
@@ -210,7 +244,7 @@ export default function SimulatoreFotovoltaico({ modalitaPartner = false }: Prop
       res.differenza = energetica.risparmioMensile - rataTotale;
     }
     return res;
-  }, [calcolato, costo, durata, modalitaBP, energetica]);
+  }, [calcolato, costo, durata, modalitaBP, energetica, assicurazioneOpzionale, includiAssicurazione]);
 
   // Tabella comparativa per tutte le durate
   const tabelladurate = useMemo((): RisultatoDurata[] => {
@@ -220,7 +254,9 @@ export default function SimulatoreFotovoltaico({ modalitaPartner = false }: Prop
       if (!coeff) return null;
       const canoneMensile = (costo * coeff) / 100;
       const assicurazioneMensile = (costo * INSURANCE_RATE) / 12;
-      const rataTotale = canoneMensile + assicurazioneMensile;
+      const rataTotale = (assicurazioneOpzionale && !includiAssicurazione)
+        ? canoneMensile
+        : canoneMensile + assicurazioneMensile;
       const riscattoPerc = getRiscatto(d);
       const riscatto = costo * riscattoPerc;
       const res: RisultatoDurata = { durata: d, coeff, canoneMensile, assicurazioneMensile, rataTotale, riscatto, riscattoPerc };
@@ -230,7 +266,7 @@ export default function SimulatoreFotovoltaico({ modalitaPartner = false }: Prop
       }
       return res;
     }).filter((r): r is RisultatoDurata => r !== null);
-  }, [calcolato, costo, modalitaBP, energetica]);
+  }, [calcolato, costo, modalitaBP, energetica, assicurazioneOpzionale, includiAssicurazione]);
 
   // Gestione input numerico generico
   const handleNumericInput = (
@@ -272,7 +308,7 @@ export default function SimulatoreFotovoltaico({ modalitaPartner = false }: Prop
         durata,
         modalita: modalitaBP ? 'business_plan' : 'base',
         rata_totale: risultato?.rataTotale,
-        ...(modalitaBP ? { potenza_kwp: potenza, zona, tipo_attivita: tipoAttivita } : {}),
+        ...(modalitaBP ? { potenza_kwp: potenza, zona: zonaEffettiva, tipo_attivita: tipoAttivita } : {}),
       });
     }
   };
@@ -299,6 +335,20 @@ export default function SimulatoreFotovoltaico({ modalitaPartner = false }: Prop
   const [formInvio, setFormInvio] = useState(false);
   const [partnerSbloccato, setPartnerSbloccato] = useState(false);
 
+  // State per il form variante EnergyTeam (partner + cliente + checklist documenti)
+  const [etPartnerNome, setEtPartnerNome] = useState('');
+  const [etPartnerEmail, setEtPartnerEmail] = useState('');
+  const [etPartnerTelefono, setEtPartnerTelefono] = useState('');
+  const [etClienteRs, setEtClienteRs] = useState('');
+  const [etClientePiva, setEtClientePiva] = useState('');
+  const [etClienteReferente, setEtClienteReferente] = useState('');
+  const [etNote, setEtNote] = useState('');
+  const [etDocsSpuntati, setEtDocsSpuntati] = useState<boolean[]>(() => new Array(ENERGYTEAM_DOCS.length).fill(false));
+
+  const toggleEtDoc = (idx: number) => {
+    setEtDocsSpuntati((prev) => prev.map((v, i) => (i === idx ? !v : v)));
+  };
+
   // Invio form a Zapier
   const handleFormSubmit = async (e: Event) => {
     e.preventDefault();
@@ -323,7 +373,7 @@ export default function SimulatoreFotovoltaico({ modalitaPartner = false }: Prop
     if (modalitaBP) {
       body.append('potenza_kwp', potenza.toString());
       body.append('accumulo_kwh', accumulo.toString());
-      body.append('zona', zona);
+      body.append('zona', zonaEffettiva);
       body.append('tipo_attivita', tipoAttivita);
       body.append('bolletta_mensile', bolletta.toString());
     }
@@ -385,9 +435,64 @@ export default function SimulatoreFotovoltaico({ modalitaPartner = false }: Prop
     setPartnerSbloccato(true);
   };
 
+  // Submit form variante EnergyTeam — richiesta pratica diretta con checklist documenti
+  const handleEnergyteamSubmit = async (e: Event) => {
+    e.preventDefault();
+    setFormInvio(true);
+
+    if (typeof window !== 'undefined' && (window as any).dataLayer) {
+      (window as any).dataLayer.push({
+        event: 'form_inviato',
+        tool: 'simulatore_energyteam',
+      });
+    }
+
+    const pronti: string[] = [];
+    const mancanti: string[] = [];
+    ENERGYTEAM_DOCS.forEach((doc, i) => {
+      if (etDocsSpuntati[i]) pronti.push(doc);
+      else mancanti.push(doc);
+    });
+
+    const body = new FormData();
+    body.append('fonte', 'energyteam');
+    body.append('tool', 'simulatore_energyteam');
+    body.append('partner_nome', etPartnerNome);
+    body.append('partner_email', etPartnerEmail);
+    body.append('partner_telefono', etPartnerTelefono);
+    body.append('cliente_ragione_sociale', etClienteRs);
+    body.append('cliente_piva', etClientePiva);
+    body.append('cliente_referente', etClienteReferente);
+    body.append('valore_bene', costo.toString());
+    body.append('durata', durata.toString());
+    if (risultato) {
+      body.append('coefficiente', risultato.coeff.toFixed(3));
+      body.append('canone_mensile', risultato.canoneMensile.toFixed(2));
+      body.append('assicurazione_mensile', risultato.assicurazioneMensile.toFixed(2));
+      body.append('assicurazione_inclusa', includiAssicurazione ? 'si' : 'no');
+      body.append('rata_mostrata', risultato.rataTotale.toFixed(2));
+      body.append('riscatto_perc', (risultato.riscattoPerc * 100).toFixed(0) + '%');
+      body.append('riscatto_euro', risultato.riscatto.toFixed(2));
+    }
+    body.append('documenti_pronti', pronti.join(' | '));
+    body.append('documenti_mancanti', mancanti.join(' | '));
+    body.append('note', etNote);
+
+    try {
+      await fetch('https://hooks.zapier.com/hooks/catch/26268853/ul50ccv/', {
+        method: 'POST',
+        body,
+      });
+    } catch (_) {}
+    window.location.href = '/grazie';
+  };
+
   const costoValido = costo >= 800 && costo <= 240000;
   const formValido = formNome.trim() && formAzienda.trim() && formEmail.trim() && formTelefono.trim() && formPrivacy;
   const formPartnerValido = formNome.trim() && formCognome.trim() && formTelefono.trim() && formPiva.trim().length >= 11 && formPrivacy;
+  const formEnergyteamValido = Boolean(
+    etPartnerNome.trim() && etPartnerEmail.trim() && etPartnerTelefono.trim() && etClienteRs.trim() && formPrivacy && risultato,
+  );
 
   return (
     <div class="simpv">
@@ -429,6 +534,31 @@ export default function SimulatoreFotovoltaico({ modalitaPartner = false }: Prop
             })}
           </div>
         </div>
+
+        {/* Toggle assicurazione all-risk (solo variante EnergyTeam) */}
+        {assicurazioneOpzionale && (
+          <div class="simpv__toggle">
+            <label class={`simpv__toggle-card ${includiAssicurazione ? 'simpv__toggle-card--active' : ''}`}>
+              <span class="material-icons-outlined simpv__toggle-icon" aria-hidden="true">
+                {includiAssicurazione ? 'check_circle' : 'shield'}
+              </span>
+              <div class="simpv__toggle-content">
+                <div class="simpv__toggle-title">Includi assicurazione all-risk</div>
+                <div class="simpv__toggle-desc">
+                  {includiAssicurazione
+                    ? 'Attiva — inclusa nel canone (+1,83% annuo del valore bene)'
+                    : "Copertura su danni elettrici, eventi atmosferici, furto e atti vandalici. +1,83% annuo sul valore dell'impianto."}
+                </div>
+              </div>
+              <input
+                type="checkbox"
+                checked={includiAssicurazione}
+                onChange={() => { setIncludiAssicurazione(!includiAssicurazione); }}
+              />
+              <span class="simpv__toggle-switch" />
+            </label>
+          </div>
+        )}
 
         {/* Toggle business plan — card visibile */}
         <div class="simpv__toggle">
@@ -492,19 +622,21 @@ export default function SimulatoreFotovoltaico({ modalitaPartner = false }: Prop
             />
           </div>
 
-          <div class="simpv__field">
-            <label class="simpv__label" for="pv-zona">Zona geografica</label>
-            <select
-              id="pv-zona"
-              class="simpv__select"
-              value={zona}
-              onChange={(e) => { setZona((e.target as HTMLSelectElement).value); setCalcolato(false); }}
-            >
-              {Object.entries(ZONE_LABELS).map(([k, v]) => (
-                <option key={k} value={k}>{v}</option>
-              ))}
-            </select>
-          </div>
+          {!zonaFissa && (
+            <div class="simpv__field">
+              <label class="simpv__label" for="pv-zona">Zona geografica</label>
+              <select
+                id="pv-zona"
+                class="simpv__select"
+                value={zona}
+                onChange={(e) => { setZona((e.target as HTMLSelectElement).value); setCalcolato(false); }}
+              >
+                {Object.entries(ZONE_LABELS).map(([k, v]) => (
+                  <option key={k} value={k}>{v}</option>
+                ))}
+              </select>
+            </div>
+          )}
 
           <div class="simpv__field">
             <label class="simpv__label" for="pv-attivita">Tipo di attività</label>
@@ -540,10 +672,15 @@ export default function SimulatoreFotovoltaico({ modalitaPartner = false }: Prop
 
             {/* Card rata principale */}
             <div class="simpv__card simpv__card--main">
-              <span class="simpv__card-label">Rata mensile totale</span>
+              <span class="simpv__card-label">
+                {assicurazioneOpzionale && !includiAssicurazione ? 'Canone mensile' : 'Rata mensile totale'}
+              </span>
               <span class="simpv__card-value">{eur(risultato.rataTotale)}</span>
               <span class="simpv__card-detail">
-                Canone {eur(risultato.canoneMensile)} + Assicurazione {eur(risultato.assicurazioneMensile)}
+                {assicurazioneOpzionale && !includiAssicurazione
+                  ? <>Canone puro — +{eur(risultato.assicurazioneMensile)}/mese se aggiungi l'all-risk</>
+                  : <>Canone {eur(risultato.canoneMensile)} + Assicurazione {eur(risultato.assicurazioneMensile)}</>
+                }
               </span>
             </div>
 
@@ -646,7 +783,11 @@ export default function SimulatoreFotovoltaico({ modalitaPartner = false }: Prop
             {/* Note */}
             <div class="simpv__note">
               <p>* Coefficienti indicativi per noleggio operativo fotovoltaico. Il preventivo definitivo dipende dalla società di locazione selezionata.</p>
-              <p>* Assicurazione all-risk obbligatoria inclusa nel calcolo (1,83% annuo).</p>
+              {assicurazioneOpzionale && !includiAssicurazione ? (
+                <p>* Assicurazione all-risk opzionale (1,83% annuo) — attiva il toggle sopra per includerla nella rata.</p>
+              ) : (
+                <p>* Assicurazione all-risk obbligatoria inclusa nel calcolo (1,83% annuo).</p>
+              )}
               <p>* Riscatto finale variabile per durata: dal 3% (60+ mesi) al 10% (24 mesi).</p>
               {modalitaBP && (
                 <p>* La produzione e il risparmio sono stime basate su dati medi PVGIS. I valori reali dipendono da orientamento, inclinazione, ombreggiamenti e consumi effettivi.</p>
@@ -672,8 +813,137 @@ export default function SimulatoreFotovoltaico({ modalitaPartner = false }: Prop
 
       </div>
 
-      {/* --- FORM SCARICA PDF o BOTTONE DIRETTO (partner) --- */}
-      {modalitaPartner ? (
+      {/* --- FORM INVIO RICHIESTA (variante EnergyTeam) --- */}
+      {varianteForm === 'energyteam' ? (
+        <div class="simpv__lead-bar simpv__lead-bar--energyteam" id="contatti">
+          <div class="simpv__lead-bar-info">
+            <span class="material-icons-outlined simpv__lead-icon" aria-hidden="true">send</span>
+            <div>
+              <h4 class="simpv__lead-title">Checklist documenti &amp; invio pratica</h4>
+              <p class="simpv__lead-sub">
+                {risultato
+                  ? "Compila i dati del cliente e spunta i documenti che hai già in tuo possesso. La richiesta arriva direttamente a Mediocredito Facile."
+                  : "Calcola prima il preventivo qui sopra, poi compila i dati per inviare la richiesta."}
+              </p>
+            </div>
+          </div>
+
+          <form class="simpv__lead-bar-form simpv__et-form" onSubmit={handleEnergyteamSubmit}>
+            {/* Dati partner */}
+            <div class="simpv__et-section">
+              <h5 class="simpv__et-section-title">Dati partner (chi invia la richiesta)</h5>
+              <div class="simpv__lead-bar-fields">
+                <input
+                  type="text"
+                  class="simpv__input"
+                  placeholder="Nome e cognome"
+                  value={etPartnerNome}
+                  onInput={(e) => setEtPartnerNome((e.target as HTMLInputElement).value)}
+                  required
+                />
+                <input
+                  type="email"
+                  class="simpv__input"
+                  placeholder="Email"
+                  value={etPartnerEmail}
+                  onInput={(e) => setEtPartnerEmail((e.target as HTMLInputElement).value)}
+                  required
+                />
+                <input
+                  type="tel"
+                  class="simpv__input"
+                  placeholder="Cellulare"
+                  value={etPartnerTelefono}
+                  onInput={(e) => setEtPartnerTelefono((e.target as HTMLInputElement).value)}
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Dati cliente finale */}
+            <div class="simpv__et-section">
+              <h5 class="simpv__et-section-title">Dati cliente finale</h5>
+              <div class="simpv__lead-bar-fields">
+                <input
+                  type="text"
+                  class="simpv__input"
+                  placeholder="Ragione sociale"
+                  value={etClienteRs}
+                  onInput={(e) => setEtClienteRs((e.target as HTMLInputElement).value)}
+                  required
+                />
+                <input
+                  type="text"
+                  class="simpv__input"
+                  placeholder="Partita IVA (opzionale)"
+                  value={etClientePiva}
+                  onInput={(e) => setEtClientePiva((e.target as HTMLInputElement).value.replace(/\D/g, '').slice(0, 11))}
+                  maxLength={11}
+                />
+                <input
+                  type="text"
+                  class="simpv__input"
+                  placeholder="Referente / Legale rappresentante"
+                  value={etClienteReferente}
+                  onInput={(e) => setEtClienteReferente((e.target as HTMLInputElement).value)}
+                />
+              </div>
+            </div>
+
+            {/* Checklist documenti */}
+            <div class="simpv__et-section">
+              <h5 class="simpv__et-section-title">Documenti richiesti ({ENERGYTEAM_DOCS.length})</h5>
+              <ul class="simpv__et-docs">
+                {ENERGYTEAM_DOCS.map((doc, i) => (
+                  <li key={doc} class="simpv__et-doc">
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={etDocsSpuntati[i]}
+                        onChange={() => toggleEtDoc(i)}
+                      />
+                      <span>{doc}</span>
+                    </label>
+                  </li>
+                ))}
+              </ul>
+              <p class="simpv__et-docs-hint">
+                Spunta i documenti che hai già pronti. I file puoi inviarli via email o WhatsApp dopo l'invio della richiesta.
+              </p>
+            </div>
+
+            {/* Note libere */}
+            <div class="simpv__et-section">
+              <h5 class="simpv__et-section-title">Note (opzionale)</h5>
+              <textarea
+                class="simpv__input simpv__et-textarea"
+                placeholder="Note sul cliente, sull'impianto, urgenze, condizioni particolari…"
+                rows={3}
+                value={etNote}
+                onInput={(e) => setEtNote((e.target as HTMLTextAreaElement).value)}
+              />
+            </div>
+
+            <div class="simpv__lead-bar-actions">
+              <label class="simpv__privacy">
+                <input
+                  type="checkbox"
+                  checked={formPrivacy}
+                  onChange={() => setFormPrivacy(!formPrivacy)}
+                />
+                <span>Ho letto e accetto l'<a href="/privacy" target="_blank">informativa privacy</a></span>
+              </label>
+              <button
+                type="submit"
+                class="simpv__button simpv__button--cta"
+                disabled={!formEnergyteamValido || formInvio}
+              >
+                {formInvio ? 'Invio in corso…' : 'Invia richiesta a Mediocredito Facile'}
+              </button>
+            </div>
+          </form>
+        </div>
+      ) : modalitaPartner ? (
         <div class="simpv__lead-bar simpv__lead-bar--partner" id="contatti">
           {partnerSbloccato ? (
             <>
