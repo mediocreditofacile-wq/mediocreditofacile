@@ -20,6 +20,15 @@
 - src/pages/finanziamenti/ → landing page core finanziamenti IFIS (chirografario, strutturato, factoring)
 - src/pages/finanziamenti/agevolazioni/ → hub agevolazioni + 3 landing (Sabatini, MCC, Bando ISI)
 - src/pages/grazie-fin.astro → thank you page finanziamenti (conversion tag form_finanziamenti)
+- src/pages/tools/energyteam.astro → area partner EnergyTeam (password: `energyteam`, localStorage key `mcf_energyteam_auth`, noindex). Monta `SimulatoreFotovoltaico` con prop `assicurazioneOpzionale` e `varianteForm="energyteam"`.
+
+## Simulatore Fotovoltaico — prop del componente
+Il componente `src/components/tools/SimulatoreFotovoltaico.tsx` accetta tre prop opzionali:
+- `modalitaPartner?: boolean` → fascia lead "Scarica PDF" con sblocco via form (usata in `simulatore-fotovoltaico-partner.astro`)
+- `assicurazioneOpzionale?: boolean` → aggiunge un toggle UI per includere/escludere l'assicurazione all-risk (1,83% annuo) dalla rata. Default OFF: la rata mostrata è il canone puro.
+- `varianteForm?: 'standard' | 'energyteam'` → cambia il form di richiesta in fondo al simulatore. `'energyteam'` mostra form partner+cliente+checklist 6 documenti e invia a Zapier con `fonte: "energyteam"`.
+
+Le prop sono retrocompatibili: pagine esistenti (`simulatore-noleggio-fotovoltaico.astro`, `simulatore-fotovoltaico-partner.astro`) non cambiano comportamento.
 
 ## Architettura landing page
 Le landing dinamiche si generano da landing-pages.json. Per creare una nuova landing basta aggiungere un oggetto al JSON con: slug, title, subtitle, benefits (array 3 oggetti), ctaText. Il template [slug].astro fa il resto.
