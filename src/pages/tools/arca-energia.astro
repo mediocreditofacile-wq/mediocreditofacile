@@ -1,0 +1,278 @@
+---
+/**
+ * Area Partner Arca Energia — /tools/arca-energia
+ * Pagina protetta da password. Simulatore fotovoltaico con:
+ * - switch noleggio operativo / leasing finanziario
+ * - assicurazione all-risk opzionale (solo noleggio)
+ * - agevolazioni 4.0: iperammortamento + Sabatini (solo leasing + BP)
+ * - form di invio richiesta pratica a MCF con checklist documenti
+ */
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import SimulatoreFotovoltaico from '../../components/tools/SimulatoreFotovoltaico.tsx';
+---
+
+<ToolLayout
+  title="Area Arca Energia — Simulatore Fotovoltaico | Mediocredito Facile"
+  description="Area riservata Arca Energia — simulatore noleggio operativo e leasing fotovoltaico con iperammortamento e Sabatini 4.0."
+  noindex={true}
+  breadcrumbs={[{ name: 'Area Arca Energia', href: '/tools/arca-energia' }]}
+>
+  <!-- Gate password -->
+  <div id="gate" class="gate">
+    <div class="gate__card">
+      <img src="/images/logo-mediocreditofacile.webp" alt="Mediocredito Facile" class="gate__logo" />
+      <p class="gate__label">Area Riservata Arca Energia</p>
+      <div class="gate__form">
+        <input type="password" id="gate-pwd" class="gate__input" placeholder="Password" autocomplete="off" />
+        <button id="gate-btn" class="gate__btn">Accedi</button>
+      </div>
+      <p id="gate-error" class="gate__error" hidden>Password non corretta</p>
+    </div>
+  </div>
+
+  <!-- Tool content (nascosto fino ad autenticazione) -->
+  <div id="tool" class="et" style="display:none !important;">
+    <!-- Header con logo MCF e titolo -->
+    <div class="et__header">
+      <img src="/images/logo-mediocreditofacile.webp" alt="Mediocredito Facile" class="et__logo" />
+      <div class="et__header-text">
+        <h1 class="et__title">Simulatore Fotovoltaico — Area Arca Energia</h1>
+        <p class="et__sub">
+          Confronta noleggio operativo e leasing finanziario sugli impianti fotovoltaici proposti ai tuoi clienti.
+          Attiva il business plan per il confronto con la bolletta e le agevolazioni 4.0 (iperammortamento + Sabatini).
+          Invia la richiesta direttamente a Mediocredito Facile.
+        </p>
+      </div>
+      <button id="logout-btn" class="et__logout">Esci</button>
+    </div>
+
+    <!-- Simulatore interattivo (Preact island) con varianti Arca Energia -->
+    <!-- zonaFissa="sud" forza 1425 kWh/kWp/anno (Sud Italia) -->
+    <section class="et__simulator">
+      <SimulatoreFotovoltaico
+        client:load
+        assicurazioneOpzionale
+        varianteForm="arcaenergia"
+        zonaFissa="sud"
+        abilitaLeasing
+        abilitaAgevolazioni
+      />
+    </section>
+  </div>
+</ToolLayout>
+
+<script>
+  const PASSWORD = 'arcaenergia';
+  const KEY = 'mcf_arcaenergia_auth';
+
+  const gate = document.getElementById('gate')!;
+  const tool = document.getElementById('tool')!;
+  const gatePwd = document.getElementById('gate-pwd') as HTMLInputElement;
+  const gateBtn = document.getElementById('gate-btn')!;
+  const gateError = document.getElementById('gate-error')!;
+  const logoutBtn = document.getElementById('logout-btn')!;
+
+  function showTool() {
+    gate.style.display = 'none';
+    tool.style.cssText = '';
+  }
+
+  function showGate() {
+    gate.style.display = '';
+    tool.style.cssText = 'display:none !important;';
+  }
+
+  if (localStorage.getItem(KEY) === 'ok') {
+    showTool();
+  }
+
+  gateBtn.addEventListener('click', () => {
+    if (gatePwd.value === PASSWORD) {
+      localStorage.setItem(KEY, 'ok');
+      showTool();
+      gateError.hidden = true;
+      gatePwd.classList.remove('gate__input--error');
+    } else {
+      gateError.hidden = false;
+      gatePwd.classList.add('gate__input--error');
+    }
+  });
+
+  gatePwd.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') gateBtn.click();
+  });
+
+  logoutBtn.addEventListener('click', () => {
+    localStorage.removeItem(KEY);
+    showGate();
+    gatePwd.value = '';
+    gateError.hidden = true;
+  });
+</script>
+
+<style>
+  /* === Gate password === */
+  .gate {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 60vh;
+    padding: 2rem 1.5rem;
+  }
+
+  .gate__card {
+    text-align: center;
+    background: #ffffff;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 3rem 2.5rem;
+    max-width: 400px;
+    width: 100%;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  }
+
+  .gate__logo {
+    height: 48px;
+    margin: 0 auto 1.5rem;
+    display: block;
+  }
+
+  .gate__label {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-text-light);
+    margin-bottom: 1.5rem;
+  }
+
+  .gate__form {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  .gate__input {
+    flex: 1;
+    padding: 0.8rem 1rem;
+    border: 1.5px solid var(--color-border);
+    border-radius: 8px;
+    font-family: var(--font-family);
+    font-size: 1rem;
+    color: var(--color-text);
+    background: var(--color-bg-alt);
+    transition: border-color 0.2s;
+  }
+
+  .gate__input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(102, 76, 205, 0.15);
+  }
+
+  .gate__input--error {
+    border-color: #ef4444;
+  }
+
+  .gate__btn {
+    padding: 0.8rem 1.5rem;
+    background: var(--color-accent);
+    color: #ffffff;
+    font-family: var(--font-family);
+    font-weight: 700;
+    font-size: 0.95rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .gate__btn:hover {
+    background: var(--color-accent-hover);
+  }
+
+  .gate__error {
+    color: #ef4444;
+    font-size: 0.85rem;
+    margin-top: 0.75rem;
+  }
+
+  /* === Tool === */
+  .et {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+  }
+
+  .et__header {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--color-border);
+    margin-bottom: 2rem;
+  }
+
+  .et__logo {
+    height: 44px;
+    flex-shrink: 0;
+  }
+
+  .et__header-text {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .et__title {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--color-primary);
+    line-height: 1.2;
+    margin-bottom: 0.3rem;
+  }
+
+  .et__sub {
+    font-size: 0.9rem;
+    color: var(--color-text-light);
+    line-height: 1.55;
+  }
+
+  .et__logout {
+    margin-left: auto;
+    background: none;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    padding: 0.4rem 1rem;
+    font-family: var(--font-family);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-text-light);
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+    flex-shrink: 0;
+  }
+
+  .et__logout:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+
+  .et__simulator {
+    margin-top: 1rem;
+  }
+
+  @media (max-width: 768px) {
+    .et__header {
+      flex-wrap: wrap;
+    }
+
+    .et__title {
+      font-size: 1.1rem;
+    }
+
+    .et__logo {
+      height: 36px;
+    }
+
+    .gate__form {
+      flex-direction: column;
+    }
+  }
+</style>
