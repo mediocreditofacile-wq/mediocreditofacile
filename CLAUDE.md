@@ -21,14 +21,19 @@
 - src/pages/finanziamenti/agevolazioni/ → hub agevolazioni + 3 landing (Sabatini, MCC, Bando ISI)
 - src/pages/grazie-fin.astro → thank you page finanziamenti (conversion tag form_finanziamenti)
 - src/pages/tools/energyteam.astro → area partner EnergyTeam (password: `energyteam`, localStorage key `mcf_energyteam_auth`, noindex). Monta `SimulatoreFotovoltaico` con prop `assicurazioneOpzionale` e `varianteForm="energyteam"`.
+- src/pages/tools/arca-energia.astro → area partner Arca Energia (password: `arcaenergia`, localStorage key `mcf_arcaenergia_auth`, noindex). Monta `SimulatoreFotovoltaico` con prop `assicurazioneOpzionale`, `varianteForm="arcaenergia"`, `zonaFissa="sud"`, `abilitaLeasing`, `abilitaAgevolazioni`. Include switch noleggio/leasing, iperammortamento 4.0 e Sabatini 4.0.
 
 ## Simulatore Fotovoltaico — prop del componente
-Il componente `src/components/tools/SimulatoreFotovoltaico.tsx` accetta tre prop opzionali:
+Il componente `src/components/tools/SimulatoreFotovoltaico.tsx` accetta queste prop opzionali:
 - `modalitaPartner?: boolean` → fascia lead "Scarica PDF" con sblocco via form (usata in `simulatore-fotovoltaico-partner.astro`)
-- `assicurazioneOpzionale?: boolean` → aggiunge un toggle UI per includere/escludere l'assicurazione all-risk (1,83% annuo) dalla rata. Default OFF: la rata mostrata è il canone puro.
-- `varianteForm?: 'standard' | 'energyteam'` → cambia il form di richiesta in fondo al simulatore. `'energyteam'` mostra form partner+cliente+checklist 6 documenti e invia a Zapier con `fonte: "energyteam"`.
+- `assicurazioneOpzionale?: boolean` → toggle UI per l'assicurazione all-risk (1,83% annuo). Default OFF.
+- `varianteForm?: 'standard' | 'energyteam' | 'arcaenergia'` → variante del form. `'energyteam'` e `'arcaenergia'` mostrano form partner+cliente+checklist documenti e inviano a Zapier con la fonte corrispondente.
+- `zonaFissa?: 'nord' | 'centro' | 'sud' | 'isole'` → forza irraggiamento e nasconde selettore zona.
+- `abilitaLeasing?: boolean` → mostra switch Noleggio Operativo / Leasing Finanziario. Il leasing usa ammortamento alla francese con TAN, anticipo e riscatto configurabili. Dati default dal preventivo l4b (TAN 6.24%, anticipo 20%, riscatto 1%).
+- `abilitaAgevolazioni?: boolean` → mostra toggle Iperammortamento 4.0 e Sabatini 4.0 (solo in modalità leasing + business plan attivo). L'iperammortamento non si applica al noleggio operativo.
 
-Le prop sono retrocompatibili: pagine esistenti (`simulatore-noleggio-fotovoltaico.astro`, `simulatore-fotovoltaico-partner.astro`) non cambiano comportamento.
+Dati leasing e agevolazioni: `src/data/leasing.ts`.
+Le prop sono retrocompatibili: pagine esistenti non cambiano comportamento.
 
 ## Architettura landing page
 Le landing dinamiche si generano da landing-pages.json. Per creare una nuova landing basta aggiungere un oggetto al JSON con: slug, title, subtitle, benefits (array 3 oggetti), ctaText. Il template [slug].astro fa il resto.

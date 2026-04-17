@@ -724,6 +724,123 @@
   margin-bottom: 0.2rem;
 }
 
+/* === Switch Noleggio / Leasing === */
+.simpv__modalita-switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+}
+
+.simpv__modalita-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1rem;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius, 8px);
+  background: #ffffff;
+  font-family: var(--font-family);
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, color 0.2s, box-shadow 0.2s;
+}
+
+.simpv__modalita-btn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.simpv__modalita-btn--active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(102, 76, 205, 0.25);
+}
+
+.simpv__modalita-btn--active:hover {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #ffffff;
+}
+
+.simpv__modalita-icon {
+  font-size: 1.15rem;
+}
+
+.simpv__modalita-btn--active .simpv__modalita-icon {
+  color: #ffffff;
+}
+
+/* === Campi leasing (espandibili) === */
+.simpv__leasing-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1rem 1.25rem;
+  background: rgba(102, 76, 205, 0.04);
+  border: 1px solid rgba(102, 76, 205, 0.15);
+  border-radius: var(--radius, 8px);
+}
+
+/* === Card agevolazioni === */
+.simpv__agevolazioni-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.25rem;
+  background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+  border: 1.5px solid #c4b5fd;
+  border-radius: var(--radius, 8px);
+}
+
+.simpv__agevolazioni-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-primary, #664CCD);
+  margin: 0;
+}
+
+.simpv__agevolazioni-nota {
+  font-size: 0.78rem;
+  color: var(--color-text-light);
+  line-height: 1.45;
+  margin: 0;
+}
+
+/* Toggle piccolo dentro la card agevolazioni */
+.simpv__toggle-card--small {
+  padding: 0.75rem 1rem;
+  background: #ffffff;
+  border: 1.5px solid var(--color-border);
+}
+
+.simpv__toggle-card--small .simpv__toggle-title {
+  font-size: 0.85rem;
+}
+
+.simpv__toggle-card--small .simpv__toggle-desc {
+  font-size: 0.75rem;
+}
+
+.simpv__toggle-card--small .simpv__toggle-icon {
+  font-size: 1.25rem;
+}
+
+/* === Righe agevolazioni nella card confronto === */
+.simpv__card-row--agevolazione {
+  background: rgba(102, 76, 205, 0.05);
+  margin: 0 -1.5rem;
+  padding: 0.3rem 1.5rem;
+}
+
+.simpv__violet {
+  color: var(--color-primary, #664CCD);
+  font-weight: 700;
+}
+
 /* --- Responsive --- */
 @media (max-width: 768px) {
   .simpv {
@@ -769,5 +886,18 @@
   .simpv__lead-bar-actions {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .simpv__modalita-switch {
+    gap: 0.5rem;
+  }
+
+  .simpv__modalita-btn {
+    font-size: 0.82rem;
+    padding: 0.7rem 0.75rem;
+  }
+
+  .simpv__agevolazioni-card {
+    padding: 1rem;
   }
 }

@@ -1,5 +1,14 @@
 import { useState, useMemo } from 'preact/hooks';
 import './simulatore-fotovoltaico.css';
+import {
+  calcolaRataLeasing,
+  calcolaIperammortamento,
+  calcolaSabatini,
+  LEASING_DEFAULTS,
+  DURATE_LEASING,
+  ANTICIPO_OPTIONS,
+  SABATINI_DEFAULT_PERC,
+} from '../../data/leasing';
 
 // --- Coefficienti GRENKE ESG++++ (fonte: Tabella ESG ++++.pdf) ---
 const ESG_COEFFS: Record<number, { da: number; a: number; c: number }[]> = {
@@ -118,6 +127,19 @@ const ENERGYTEAM_DOCS = [
   'Situazione contabile provvisoria 2025',
 ];
 
+// Checklist Arca Energia: stessi documenti base + condizionali per leasing/agevolazioni
+const ARCAENERGIA_DOCS_BASE = [
+  'Visura camerale aggiornata',
+  "Documento d'identità del legale rappresentante",
+  'Codice fiscale del legale rappresentante',
+  'IBAN',
+  'Ultimi due bilanci depositati',
+  'Situazione contabile provvisoria 2025',
+];
+const ARCAENERGIA_DOCS_LEASING = ['Preventivo fornitore impianto'];
+const ARCAENERGIA_DOCS_IPER = ['Perizia asseverata 4.0 (per investimenti > €300.000)'];
+const ARCAENERGIA_DOCS_SABATINI = ['Dichiarazione dimensione impresa (PMI)'];
+
 // Trova il coefficiente ESG per un importo e una durata
 function getCoeff(importo: number, durata: number): number | null {
   const fasce = ESG_COEFFS[durata];
@@ -140,11 +162,16 @@ interface RisultatoDurata {
   rataTotale: number;
   riscatto: number;
   riscattoPerc: number;
+  // Solo leasing
+  anticipo?: number;
+  capitaleFin?: number;
   // Solo modalita BP
   risparmioMensile?: number;             // Totale: autoconsumo + immissione
   risparmioAutoconsumoMensile?: number;  // Abbatte la bolletta
   valoreImmissioneMensile?: number;      // Ricavo dalla vendita in rete (abbatte la rata)
-  costoNettoMensile?: number;            // bolletta - autoconsumo + rata - immissione
+  iperBeneficioMensile?: number;         // Beneficio iperammortamento mensile
+  sabatiniBeneficioMensile?: number;     // Contributo Sabatini mensile
+  costoNettoMensile?: number;            // bolletta - autoconsumo + rata - immissione - agevolazioni
   differenza?: number;                   // bolletta - costoNettoMensile (>0 = risparmio complessivo)
 }
 
@@ -154,12 +181,13 @@ interface Props {
   // Default OFF: la rata mostrata e' il canone puro, l'assicurazione e' solo informativa.
   assicurazioneOpzionale?: boolean;
   // Variante del form di richiesta in fondo al simulatore.
-  // 'standard' (default): nome/email/telefono + PDF. 'energyteam': partner + cliente + checklist documenti.
-  varianteForm?: 'standard' | 'energyteam';
-  // Se settata, forza un coefficiente di irraggiamento unico indipendentemente dalla zona selezionata,
-  // e nasconde il selettore "Zona geografica" nel business plan. Usato da EnergyTeam con 'sud' (1425 kWh/kWp/anno)
-  // per presentare numeri coerenti e piu' aggressivi di una media nazionale.
+  varianteForm?: 'standard' | 'energyteam' | 'arcaenergia';
+  // Se settata, forza un coefficiente di irraggiamento unico indipendentemente dalla zona selezionata.
   zonaFissa?: 'nord' | 'centro' | 'sud' | 'isole';
+  // Quando true: mostra lo switch Noleggio Operativo / Leasing Finanziario
+  abilitaLeasing?: boolean;
+  // Quando true: mostra i toggle iperammortamento e Sabatini (solo in modalita' leasing + BP)
+  abilitaAgevolazioni?: boolean;
 }
 
 export default function SimulatoreFotovoltaico({
@@ -167,6 +195,8 @@ export default function SimulatoreFotovoltaico({
   assicurazioneOpzionale = false,
   varianteForm = 'standard',
   zonaFissa,
+  abilitaLeasing = false,
+  abilitaAgevolazioni = false,
 }: Props) {
   // Modalita base vs business plan
   const [modalitaBP, setModalitaBP] = useState(false);
@@ -180,6 +210,25 @@ export default function SimulatoreFotovoltaico({
   // Toggle assicurazione (usato solo se assicurazioneOpzionale=true). Default OFF.
   const [includiAssicurazione, setIncludiAssicurazione] = useState(false);
 
+  // --- Leasing ---
+  const [modalitaFin, setModalitaFin] = useState<'noleggio' | 'leasing'>('noleggio');
+  const [anticipoPerc, setAnticipoPerc] = useState(LEASING_DEFAULTS.anticipoPerc);
+  const [tanLeasing, setTanLeasing] = useState(LEASING_DEFAULTS.tan);
+  const [tanInput, setTanInput] = useState(LEASING_DEFAULTS.tan.toString());
+  const [riscattoLeasing, setRiscattoLeasing] = useState(LEASING_DEFAULTS.riscattoPerc);
+  const [riscattoLeasingInput, setRiscattoLeasingInput] = useState(LEASING_DEFAULTS.riscattoPerc.toString());
+
+  // --- Agevolazioni ---
+  const [includiIper, setIncludiIper] = useState(false);
+  const [includiSabatini, setIncludiSabatini] = useState(false);
+  const [sabatiniPerc, setSabatiniPerc] = useState(SABATINI_DEFAULT_PERC);
+  const [sabatiniPercInput, setSabatiniPercInput] = useState(SABATINI_DEFAULT_PERC.toString());
+
+  // Modalita' finanziaria effettiva (leasing solo se abilitato)
+  const isLeasing = abilitaLeasing && modalitaFin === 'leasing';
+  // Agevolazioni visibili solo con leasing + BP
+  const mostraAgevolazioni = abilitaAgevolazioni && isLeasing && modalitaBP;
+
   // Campi business plan (visibili solo con modalitaBP)
   const [potenza, setPotenza] = useState(6);
   const [potenzaInput, setPotenzaInput] = useState('6');
@@ -192,8 +241,9 @@ export default function SimulatoreFotovoltaico({
 
   // Durate disponibili per l'importo corrente
   const durateDisponibili = useMemo(() => {
+    if (isLeasing) return DURATE_LEASING;
     return DURATE.filter((d) => getCoeff(Math.max(costo, 800), d) !== null);
-  }, [costo]);
+  }, [costo, isLeasing]);
 
   // Se la durata selezionata non e' disponibile, resetta a 60
   useMemo(() => {
@@ -227,58 +277,93 @@ export default function SimulatoreFotovoltaico({
     };
   }, [modalitaBP, potenza, accumulo, zonaEffettiva, tipoAttivita]);
 
-  // Calcolo risultati per la durata selezionata
-  const risultato = useMemo((): RisultatoDurata | null => {
-    if (!calcolato || costo < 800 || costo > 240000) return null;
-    const coeff = getCoeff(costo, durata);
-    if (!coeff) return null;
+  // Funzione helper: calcola risultato per una durata specifica
+  function calcolaPerDurata(d: number): RisultatoDurata | null {
+    if (costo < 800 || costo > 240000) return null;
 
-    const canoneMensile = (costo * coeff) / 100;
-    const assicurazioneMensile = (costo * INSURANCE_RATE) / 12;
-    // Se l'assicurazione e' opzionale e non attivata, la rata mostrata e' solo il canone puro.
-    const rataTotale = (assicurazioneOpzionale && !includiAssicurazione)
-      ? canoneMensile
-      : canoneMensile + assicurazioneMensile;
-    const riscattoPerc = getRiscatto(durata);
-    const riscatto = costo * riscattoPerc;
+    let coeff = 0;
+    let canoneMensile = 0;
+    let assicurazioneMensile = 0;
+    let rataTotale = 0;
+    let riscattoPerc = 0;
+    let riscatto = 0;
+    let anticipo: number | undefined;
+    let capitaleFin: number | undefined;
 
-    const res: RisultatoDurata = { durata, coeff, canoneMensile, assicurazioneMensile, rataTotale, riscatto, riscattoPerc };
+    if (isLeasing) {
+      // Calcolo leasing alla francese
+      const leas = calcolaRataLeasing(costo, d, tanLeasing, anticipoPerc, riscattoLeasing);
+      coeff = tanLeasing; // per tracking
+      canoneMensile = leas.rataMensile;
+      assicurazioneMensile = 0; // nel leasing la gestione assicurativa e' separata
+      rataTotale = leas.rataMensile;
+      riscattoPerc = riscattoLeasing / 100;
+      riscatto = leas.riscatto;
+      anticipo = leas.anticipo;
+      capitaleFin = leas.capitaleFin;
+    } else {
+      // Calcolo noleggio operativo (coefficienti ESG++++)
+      const c = getCoeff(costo, d);
+      if (!c) return null;
+      coeff = c;
+      canoneMensile = (costo * c) / 100;
+      assicurazioneMensile = (costo * INSURANCE_RATE) / 12;
+      rataTotale = (assicurazioneOpzionale && !includiAssicurazione)
+        ? canoneMensile
+        : canoneMensile + assicurazioneMensile;
+      riscattoPerc = getRiscatto(d);
+      riscatto = costo * riscattoPerc;
+    }
+
+    const res: RisultatoDurata = {
+      durata: d, coeff, canoneMensile, assicurazioneMensile, rataTotale,
+      riscatto, riscattoPerc, anticipo, capitaleFin,
+    };
 
     if (modalitaBP && energetica) {
       res.risparmioMensile = energetica.risparmioMensile;
       res.risparmioAutoconsumoMensile = energetica.risparmioAutoconsumoMensile;
       res.valoreImmissioneMensile = energetica.valoreImmissioneMensile;
-      // Costo energetico totale mensile con impianto: bolletta - autoconsumo + rata - immissione
-      res.costoNettoMensile = bolletta - energetica.risparmioAutoconsumoMensile + rataTotale - energetica.valoreImmissioneMensile;
+
+      // Agevolazioni (solo leasing)
+      let beneficioAgevolazioni = 0;
+      if (isLeasing && includiIper) {
+        const iper = calcolaIperammortamento(costo);
+        res.iperBeneficioMensile = iper.beneficioMensile;
+        beneficioAgevolazioni += iper.beneficioMensile;
+      }
+      if (isLeasing && includiSabatini) {
+        const sab = calcolaSabatini(costo, sabatiniPerc);
+        res.sabatiniBeneficioMensile = sab.contributoMensile;
+        beneficioAgevolazioni += sab.contributoMensile;
+      }
+
+      // Costo netto: bolletta - autoconsumo + rata - immissione - agevolazioni
+      res.costoNettoMensile = bolletta - energetica.risparmioAutoconsumoMensile + rataTotale
+        - energetica.valoreImmissioneMensile - beneficioAgevolazioni;
       res.differenza = bolletta - res.costoNettoMensile;
     }
     return res;
-  }, [calcolato, costo, durata, modalitaBP, energetica, bolletta, assicurazioneOpzionale, includiAssicurazione]);
+  }
+
+  // Calcolo risultati per la durata selezionata
+  const risultato = useMemo((): RisultatoDurata | null => {
+    if (!calcolato) return null;
+    return calcolaPerDurata(durata);
+  }, [calcolato, costo, durata, modalitaBP, energetica, bolletta, assicurazioneOpzionale,
+      includiAssicurazione, isLeasing, tanLeasing, anticipoPerc, riscattoLeasing,
+      includiIper, includiSabatini, sabatiniPerc]);
 
   // Tabella comparativa per tutte le durate
+  const duratePerTabella = isLeasing ? DURATE_LEASING : DURATE;
   const tabelladurate = useMemo((): RisultatoDurata[] => {
     if (!calcolato || costo < 800 || costo > 240000) return [];
-    return DURATE.map((d) => {
-      const coeff = getCoeff(costo, d);
-      if (!coeff) return null;
-      const canoneMensile = (costo * coeff) / 100;
-      const assicurazioneMensile = (costo * INSURANCE_RATE) / 12;
-      const rataTotale = (assicurazioneOpzionale && !includiAssicurazione)
-        ? canoneMensile
-        : canoneMensile + assicurazioneMensile;
-      const riscattoPerc = getRiscatto(d);
-      const riscatto = costo * riscattoPerc;
-      const res: RisultatoDurata = { durata: d, coeff, canoneMensile, assicurazioneMensile, rataTotale, riscatto, riscattoPerc };
-      if (modalitaBP && energetica) {
-        res.risparmioMensile = energetica.risparmioMensile;
-        res.risparmioAutoconsumoMensile = energetica.risparmioAutoconsumoMensile;
-        res.valoreImmissioneMensile = energetica.valoreImmissioneMensile;
-        res.costoNettoMensile = bolletta - energetica.risparmioAutoconsumoMensile + rataTotale - energetica.valoreImmissioneMensile;
-        res.differenza = bolletta - res.costoNettoMensile;
-      }
-      return res;
-    }).filter((r): r is RisultatoDurata => r !== null);
-  }, [calcolato, costo, modalitaBP, energetica, bolletta, assicurazioneOpzionale, includiAssicurazione]);
+    return duratePerTabella
+      .map((d) => calcolaPerDurata(d))
+      .filter((r): r is RisultatoDurata => r !== null);
+  }, [calcolato, costo, modalitaBP, energetica, bolletta, assicurazioneOpzionale,
+      includiAssicurazione, isLeasing, tanLeasing, anticipoPerc, riscattoLeasing,
+      includiIper, includiSabatini, sabatiniPerc]);
 
   // Gestione input numerico generico
   const handleNumericInput = (
@@ -311,15 +396,22 @@ export default function SimulatoreFotovoltaico({
   };
 
   // GTM tracking
+  const toolName = varianteForm === 'arcaenergia' ? 'simulatore_arcaenergia'
+    : varianteForm === 'energyteam' ? 'simulatore_energyteam' : 'simulatore_fotovoltaico';
+
   const pushCalcolo = () => {
     if (typeof window !== 'undefined' && (window as any).dataLayer) {
       (window as any).dataLayer.push({
         event: 'calcolo_eseguito',
-        tool: 'simulatore_fotovoltaico',
+        tool: toolName,
         costo_impianto: costo,
         durata,
         modalita: modalitaBP ? 'business_plan' : 'base',
+        modalita_finanziaria: isLeasing ? 'leasing' : 'noleggio',
         rata_totale: risultato?.rataTotale,
+        ...(isLeasing ? { tan_leasing: tanLeasing, anticipo_perc: anticipoPerc } : {}),
+        ...(includiIper ? { iper_ammortamento: true } : {}),
+        ...(includiSabatini ? { sabatini: true } : {}),
         ...(modalitaBP ? { potenza_kwp: potenza, zona: zonaEffettiva, tipo_attivita: tipoAttivita } : {}),
       });
     }
@@ -347,7 +439,7 @@ export default function SimulatoreFotovoltaico({
   const [formInvio, setFormInvio] = useState(false);
   const [partnerSbloccato, setPartnerSbloccato] = useState(false);
 
-  // State per il form variante EnergyTeam (partner + cliente + checklist documenti)
+  // State per il form variante EnergyTeam / ArcaEnergia (partner + cliente + checklist documenti)
   const [etPartnerNome, setEtPartnerNome] = useState('');
   const [etPartnerEmail, setEtPartnerEmail] = useState('');
   const [etPartnerTelefono, setEtPartnerTelefono] = useState('');
@@ -355,7 +447,18 @@ export default function SimulatoreFotovoltaico({
   const [etClientePiva, setEtClientePiva] = useState('');
   const [etClienteReferente, setEtClienteReferente] = useState('');
   const [etNote, setEtNote] = useState('');
-  const [etDocsSpuntati, setEtDocsSpuntati] = useState<boolean[]>(() => new Array(ENERGYTEAM_DOCS.length).fill(false));
+
+  // Documenti: per arcaenergia sono dinamici (cambiano in base a leasing/agevolazioni)
+  const arcaEnergiaDocs = useMemo(() => {
+    const docs = [...ARCAENERGIA_DOCS_BASE];
+    if (isLeasing) docs.push(...ARCAENERGIA_DOCS_LEASING);
+    if (includiIper) docs.push(...ARCAENERGIA_DOCS_IPER);
+    if (includiSabatini) docs.push(...ARCAENERGIA_DOCS_SABATINI);
+    return docs;
+  }, [isLeasing, includiIper, includiSabatini]);
+
+  const currentDocs = varianteForm === 'arcaenergia' ? arcaEnergiaDocs : ENERGYTEAM_DOCS;
+  const [etDocsSpuntati, setEtDocsSpuntati] = useState<boolean[]>(() => new Array(20).fill(false));
 
   const toggleEtDoc = (idx: number) => {
     setEtDocsSpuntati((prev) => prev.map((v, i) => (i === idx ? !v : v)));
@@ -499,6 +602,67 @@ export default function SimulatoreFotovoltaico({
     window.location.href = '/grazie';
   };
 
+  // Submit form variante ArcaEnergia — simile a EnergyTeam ma con dati leasing/agevolazioni
+  const handleArcaenergiaSubmit = async (e: Event) => {
+    e.preventDefault();
+    setFormInvio(true);
+
+    if (typeof window !== 'undefined' && (window as any).dataLayer) {
+      (window as any).dataLayer.push({ event: 'form_inviato', tool: 'simulatore_arcaenergia' });
+    }
+
+    const pronti: string[] = [];
+    const mancanti: string[] = [];
+    currentDocs.forEach((doc, i) => {
+      if (etDocsSpuntati[i]) pronti.push(doc);
+      else mancanti.push(doc);
+    });
+
+    const body = new FormData();
+    body.append('fonte', 'arcaenergia');
+    body.append('tool', 'simulatore_arcaenergia');
+    body.append('modalita_finanziaria', isLeasing ? 'leasing' : 'noleggio');
+    body.append('partner_nome', etPartnerNome);
+    body.append('partner_email', etPartnerEmail);
+    body.append('partner_telefono', etPartnerTelefono);
+    body.append('cliente_ragione_sociale', etClienteRs);
+    body.append('cliente_piva', etClientePiva);
+    body.append('cliente_referente', etClienteReferente);
+    body.append('valore_bene', costo.toString());
+    body.append('durata', durata.toString());
+    if (risultato) {
+      body.append('rata_mensile', risultato.rataTotale.toFixed(2));
+      body.append('riscatto_perc', (risultato.riscattoPerc * 100).toFixed(0) + '%');
+      body.append('riscatto_euro', risultato.riscatto.toFixed(2));
+      if (isLeasing) {
+        body.append('anticipo_perc', anticipoPerc.toString() + '%');
+        body.append('anticipo_euro', (risultato.anticipo ?? 0).toFixed(2));
+        body.append('tan_leasing', tanLeasing.toString() + '%');
+      } else {
+        body.append('canone_mensile', risultato.canoneMensile.toFixed(2));
+        body.append('assicurazione_mensile', risultato.assicurazioneMensile.toFixed(2));
+        body.append('assicurazione_inclusa', includiAssicurazione ? 'si' : 'no');
+      }
+      if (risultato.iperBeneficioMensile) {
+        body.append('iper_beneficio_mensile', risultato.iperBeneficioMensile.toFixed(2));
+      }
+      if (risultato.sabatiniBeneficioMensile) {
+        body.append('sabatini_beneficio_mensile', risultato.sabatiniBeneficioMensile.toFixed(2));
+      }
+    }
+    body.append('documenti_pronti', pronti.join(' | '));
+    body.append('documenti_mancanti', mancanti.join(' | '));
+    body.append('note', etNote);
+
+    try {
+      await fetch('https://hooks.zapier.com/hooks/catch/26268853/ul50ccv/', {
+        method: 'POST',
+        body,
+      });
+    } catch (_) {}
+    window.location.href = '/grazie';
+  };
+
   const costoValido = costo >= 800 && costo <= 240000;
   const formValido = formNome.trim() && formAzienda.trim() && formEmail.trim() && formTelefono.trim() && formPrivacy;
   const formPartnerValido = formNome.trim() && formCognome.trim() && formTelefono.trim() && formPiva.trim().length >= 11 && formPrivacy;
@@ -506,10 +670,49 @@ export default function SimulatoreFotovoltaico({
     etPartnerNome.trim() && etPartnerEmail.trim() && etPartnerTelefono.trim() && etClienteRs.trim() && formPrivacy && risultato,
   );
 
+  // Handler input decimale generico (per TAN, riscatto, sabatini)
+  const handleDecimalInput = (
+    setter: (v: number) => void,
+    inputSetter: (v: string) => void,
+    max: number,
+  ) => (e: Event) => {
+    const raw = (e.target as HTMLInputElement).value.replace(/[^\d.,]/g, '').replace(',', '.');
+    inputSetter(raw);
+    setCalcolato(false);
+    const num = parseFloat(raw);
+    if (!isNaN(num)) setter(Math.min(max, Math.max(0, num)));
+  };
+
   return (
     <div class="simpv">
       {/* --- FORM --- */}
       <div class="simpv__form">
+
+        {/* Switch Noleggio / Leasing (solo se abilitato) */}
+        {abilitaLeasing && (
+          <div class="simpv__field">
+            <label class="simpv__label">Modalità finanziaria</label>
+            <div class="simpv__modalita-switch">
+              <button
+                type="button"
+                class={`simpv__modalita-btn ${modalitaFin === 'noleggio' ? 'simpv__modalita-btn--active' : ''}`}
+                onClick={() => { setModalitaFin('noleggio'); setCalcolato(false); }}
+              >
+                <span class="material-icons-outlined simpv__modalita-icon" aria-hidden="true">description</span>
+                Noleggio Operativo
+              </button>
+              <button
+                type="button"
+                class={`simpv__modalita-btn ${modalitaFin === 'leasing' ? 'simpv__modalita-btn--active' : ''}`}
+                onClick={() => { setModalitaFin('leasing'); setCalcolato(false); }}
+              >
+                <span class="material-icons-outlined simpv__modalita-icon" aria-hidden="true">account_balance</span>
+                Leasing Finanziario
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Costo impianto */}
         <div class="simpv__field">
           <label class="simpv__label" for="pv-costo">Costo impianto (€, netto IVA)</label>
@@ -530,7 +733,7 @@ export default function SimulatoreFotovoltaico({
         <div class="simpv__field">
           <label class="simpv__label">Durata contratto</label>
           <div class="simpv__durate">
-            {DURATE.map((d) => {
+            {(isLeasing ? DURATE_LEASING : DURATE).map((d) => {
               const disponibile = durateDisponibili.includes(d);
               return (
                 <button
@@ -547,8 +750,57 @@ export default function SimulatoreFotovoltaico({
           </div>
         </div>
 
-        {/* Toggle assicurazione all-risk (solo variante EnergyTeam) */}
-        {assicurazioneOpzionale && (
+        {/* Campi leasing (visibili solo in modalita' leasing) */}
+        {isLeasing && (
+          <div class="simpv__leasing-fields">
+            {/* Anticipo */}
+            <div class="simpv__field">
+              <label class="simpv__label">Anticipo / Maxicanone</label>
+              <div class="simpv__durate">
+                {ANTICIPO_OPTIONS.map((perc) => (
+                  <button
+                    key={perc}
+                    type="button"
+                    class={`simpv__durata ${perc === anticipoPerc ? 'simpv__durata--active' : ''}`}
+                    onClick={() => { setAnticipoPerc(perc); setCalcolato(false); }}
+                  >
+                    {perc}%
+                  </button>
+                ))}
+              </div>
+            </div>
+            {/* TAN */}
+            <div class="simpv__field">
+              <label class="simpv__label" for="pv-tan">TAN — Tasso annuo nominale (%)</label>
+              <input
+                id="pv-tan"
+                type="text"
+                inputMode="decimal"
+                class="simpv__input"
+                value={tanInput}
+                onInput={handleDecimalInput(setTanLeasing, setTanInput, 20)}
+                placeholder="6.24"
+              />
+              <span class="simpv__hint">Default: {LEASING_DEFAULTS.tan}% (base Euribor 3M)</span>
+            </div>
+            {/* Riscatto */}
+            <div class="simpv__field">
+              <label class="simpv__label" for="pv-riscatto-leasing">Riscatto finale (%)</label>
+              <input
+                id="pv-riscatto-leasing"
+                type="text"
+                inputMode="decimal"
+                class="simpv__input"
+                value={riscattoLeasingInput}
+                onInput={handleDecimalInput(setRiscattoLeasing, setRiscattoLeasingInput, 30)}
+                placeholder="1"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Toggle assicurazione all-risk (solo noleggio) */}
+        {assicurazioneOpzionale && !isLeasing && (
           <div class="simpv__toggle">
             <label class={`simpv__toggle-card ${includiAssicurazione ? 'simpv__toggle-card--active' : ''}`}>
               <span class="material-icons-outlined simpv__toggle-icon" aria-hidden="true">
@@ -665,6 +917,78 @@ export default function SimulatoreFotovoltaico({
           </div>
         </div>
 
+        {/* Card Agevolazioni 4.0 — visibile solo con leasing + BP attivo */}
+        {mostraAgevolazioni && (
+          <div class="simpv__agevolazioni-card">
+            <h4 class="simpv__agevolazioni-title">
+              <span class="material-icons-outlined" aria-hidden="true" style="font-size:1.1rem;vertical-align:middle;margin-right:0.35rem;color:#664CCD;">star</span>
+              Agevolazioni fiscali 4.0
+            </h4>
+            <p class="simpv__agevolazioni-nota">
+              Disponibili solo con leasing finanziario o acquisto diretto. Non applicabili al noleggio operativo.
+            </p>
+
+            {/* Toggle iperammortamento */}
+            <label class={`simpv__toggle-card simpv__toggle-card--small ${includiIper ? 'simpv__toggle-card--active' : ''}`}>
+              <span class="material-icons-outlined simpv__toggle-icon" aria-hidden="true">
+                {includiIper ? 'check_circle' : 'trending_up'}
+              </span>
+              <div class="simpv__toggle-content">
+                <div class="simpv__toggle-title">Iperammortamento 4.0</div>
+                <div class="simpv__toggle-desc">
+                  {includiIper
+                    ? 'Attivo — maggiorazione 280% del costo ammortizzabile (IRES 24%)'
+                    : 'Maggiorazione fino al 280% per beni nuovi Industria 4.0'}
+                </div>
+              </div>
+              <input
+                type="checkbox"
+                checked={includiIper}
+                onChange={() => { setIncludiIper(!includiIper); setCalcolato(false); }}
+              />
+              <span class="simpv__toggle-switch" />
+            </label>
+
+            {/* Toggle Sabatini 4.0 */}
+            <label class={`simpv__toggle-card simpv__toggle-card--small ${includiSabatini ? 'simpv__toggle-card--active' : ''}`}>
+              <span class="material-icons-outlined simpv__toggle-icon" aria-hidden="true">
+                {includiSabatini ? 'check_circle' : 'savings'}
+              </span>
+              <div class="simpv__toggle-content">
+                <div class="simpv__toggle-title">Sabatini 4.0</div>
+                <div class="simpv__toggle-desc">
+                  {includiSabatini
+                    ? `Attivo — contributo MISE ${sabatiniPerc}% in 6 quote annuali`
+                    : 'Contributo MISE per investimenti 4.0 in leasing'}
+                </div>
+              </div>
+              <input
+                type="checkbox"
+                checked={includiSabatini}
+                onChange={() => { setIncludiSabatini(!includiSabatini); setCalcolato(false); }}
+              />
+              <span class="simpv__toggle-switch" />
+            </label>
+
+            {/* Campo % Sabatini (visibile solo se attivo) */}
+            {includiSabatini && (
+              <div class="simpv__field" style="margin-top:0.5rem;">
+                <label class="simpv__label" for="pv-sabatini-perc">Contributo Sabatini stimato (%)</label>
+                <input
+                  id="pv-sabatini-perc"
+                  type="text"
+                  inputMode="decimal"
+                  class="simpv__input"
+                  value={sabatiniPercInput}
+                  onInput={handleDecimalInput(setSabatiniPerc, setSabatiniPercInput, 30)}
+                  placeholder="10"
+                />
+                <span class="simpv__hint">Default ~10% dell'investimento. Il calcolo esatto dipende dalla delibera MISE.</span>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Bottone calcola */}
         <button
           type="button"
@@ -685,13 +1009,16 @@ export default function SimulatoreFotovoltaico({
             {/* Card rata principale */}
             <div class="simpv__card simpv__card--main">
               <span class="simpv__card-label">
-                {assicurazioneOpzionale && !includiAssicurazione ? 'Canone mensile' : 'Rata mensile totale'}
+                {isLeasing ? 'Rata leasing mensile' :
+                 assicurazioneOpzionale && !includiAssicurazione ? 'Canone mensile' : 'Rata mensile totale'}
               </span>
               <span class="simpv__card-value">{eur(risultato.rataTotale)}</span>
               <span class="simpv__card-detail">
-                {assicurazioneOpzionale && !includiAssicurazione
-                  ? <>Canone puro — +{eur(risultato.assicurazioneMensile)}/mese se aggiungi l'all-risk</>
-                  : <>Canone {eur(risultato.canoneMensile)} + Assicurazione {eur(risultato.assicurazioneMensile)}</>
+                {isLeasing
+                  ? <>TAN {tanLeasing}% — Anticipo {anticipoPerc}% ({eur(risultato.anticipo ?? 0)})</>
+                  : assicurazioneOpzionale && !includiAssicurazione
+                    ? <>Canone puro — +{eur(risultato.assicurazioneMensile)}/mese se aggiungi l'all-risk</>
+                    : <>Canone {eur(risultato.canoneMensile)} + Assicurazione {eur(risultato.assicurazioneMensile)}</>
                 }
               </span>
             </div>
@@ -699,9 +1026,15 @@ export default function SimulatoreFotovoltaico({
             {/* Card dettaglio */}
             <div class="simpv__card">
               <div class="simpv__card-row">
-                <span>Riscatto finale ({Math.round(risultato.riscattoPerc * 100)}%)</span>
+                <span>Riscatto finale ({isLeasing ? riscattoLeasing : Math.round(risultato.riscattoPerc * 100)}%)</span>
                 <span>{eur(risultato.riscatto)}</span>
               </div>
+              {isLeasing && risultato.anticipo !== undefined && risultato.anticipo > 0 && (
+                <div class="simpv__card-row">
+                  <span>Anticipo alla firma ({anticipoPerc}%)</span>
+                  <span>{eur(risultato.anticipo)}</span>
+                </div>
+              )}
             </div>
 
             {/* Card confronto bolletta (solo BP) */}
@@ -717,13 +1050,26 @@ export default function SimulatoreFotovoltaico({
                   <span class="simpv__green">−{eur(energetica.risparmioAutoconsumoMensile)}/mese</span>
                 </div>
                 <div class="simpv__card-row">
-                  <span>Rata noleggio</span>
+                  <span>Rata {isLeasing ? 'leasing' : 'noleggio'}</span>
                   <span>+{eur(risultato.rataTotale)}/mese</span>
                 </div>
                 <div class="simpv__card-row">
                   <span>Immissione in rete a {eur(FEED_IN_PRICE)}/kWh (abbatte la rata)</span>
                   <span class="simpv__green">−{eur(energetica.valoreImmissioneMensile)}/mese</span>
                 </div>
+                {/* Righe agevolazioni */}
+                {risultato.iperBeneficioMensile !== undefined && risultato.iperBeneficioMensile > 0 && (
+                  <div class="simpv__card-row simpv__card-row--agevolazione">
+                    <span>Iperammortamento 4.0 (su 9 anni)</span>
+                    <span class="simpv__violet">−{eur(risultato.iperBeneficioMensile)}/mese</span>
+                  </div>
+                )}
+                {risultato.sabatiniBeneficioMensile !== undefined && risultato.sabatiniBeneficioMensile > 0 && (
+                  <div class="simpv__card-row simpv__card-row--agevolazione">
+                    <span>Contributo Sabatini 4.0 (su 6 anni)</span>
+                    <span class="simpv__violet">−{eur(risultato.sabatiniBeneficioMensile)}/mese</span>
+                  </div>
+                )}
                 <div class="simpv__card-row simpv__card-row--total">
                   <span>Costo netto mensile con impianto</span>
                   <span>{eur(risultato.costoNettoMensile)}/mese</span>
@@ -802,18 +1148,30 @@ export default function SimulatoreFotovoltaico({
 
             {/* Note */}
             <div class="simpv__note">
-              <p>* Coefficienti indicativi per noleggio operativo fotovoltaico. Il preventivo definitivo dipende dalla società di locazione selezionata.</p>
-              {assicurazioneOpzionale && !includiAssicurazione ? (
-                <p>* Assicurazione all-risk opzionale (1,83% annuo) — attiva il toggle sopra per includerla nella rata.</p>
+              {isLeasing ? (
+                <p>* Calcolo rata con ammortamento alla francese (TAN {tanLeasing}%). Il preventivo definitivo dipende dalla società di leasing.</p>
               ) : (
-                <p>* Assicurazione all-risk obbligatoria inclusa nel calcolo (1,83% annuo).</p>
+                <>
+                  <p>* Coefficienti indicativi per noleggio operativo fotovoltaico. Il preventivo definitivo dipende dalla società di locazione selezionata.</p>
+                  {assicurazioneOpzionale && !includiAssicurazione ? (
+                    <p>* Assicurazione all-risk opzionale (1,83% annuo) — attiva il toggle sopra per includerla nella rata.</p>
+                  ) : !isLeasing && (
+                    <p>* Assicurazione all-risk obbligatoria inclusa nel calcolo (1,83% annuo).</p>
+                  )}
+                  <p>* Riscatto finale variabile per durata: dal 3% (60+ mesi) al 10% (24 mesi).</p>
+                </>
               )}
-              <p>* Riscatto finale variabile per durata: dal 3% (60+ mesi) al 10% (24 mesi).</p>
               {modalitaBP && (
                 <>
                   <p>* La produzione e il risparmio sono stime basate su dati medi PVGIS. I valori reali dipendono da orientamento, inclinazione, ombreggiamenti e consumi effettivi.</p>
-                  <p>* Valore immissione in rete stimato a 0,13 €/kWh (ritiro dedicato medio). L'autoconsumo abbatte la bolletta, l'immissione abbatte la rata del noleggio.</p>
+                  <p>* Valore immissione in rete stimato a 0,13 €/kWh (ritiro dedicato medio).</p>
                 </>
+              )}
+              {risultato?.iperBeneficioMensile !== undefined && risultato.iperBeneficioMensile > 0 && (
+                <p>* Iperammortamento: beneficio fiscale IRES (24%) sulla maggiorazione 180%, distribuito su 9 anni di ammortamento. Richiede beni nuovi 4.0 e perizia asseverata sopra €300k.</p>
+              )}
+              {risultato?.sabatiniBeneficioMensile !== undefined && risultato.sabatiniBeneficioMensile > 0 && (
+                <p>* Sabatini 4.0: contributo MISE stimato al {sabatiniPerc}% dell'investimento, erogato in 6 quote annuali. Il calcolo esatto dipende dalla delibera MISE e dalla durata del finanziamento.</p>
               )}
             </div>
           </>
@@ -836,8 +1194,8 @@ export default function SimulatoreFotovoltaico({
 
       </div>
 
-      {/* --- FORM INVIO RICHIESTA (variante EnergyTeam) --- */}
-      {varianteForm === 'energyteam' ? (
+      {/* --- FORM INVIO RICHIESTA (variante EnergyTeam / ArcaEnergia) --- */}
+      {(varianteForm === 'energyteam' || varianteForm === 'arcaenergia') ? (
         <div class="simpv__lead-bar simpv__lead-bar--energyteam" id="contatti">
           <div class="simpv__lead-bar-info">
             <span class="material-icons-outlined simpv__lead-icon" aria-hidden="true">send</span>
@@ -851,7 +1209,7 @@ export default function SimulatoreFotovoltaico({
             </div>
           </div>
 
-          <form class="simpv__lead-bar-form simpv__et-form" onSubmit={handleEnergyteamSubmit}>
+          <form class="simpv__lead-bar-form simpv__et-form" onSubmit={varianteForm === 'arcaenergia' ? handleArcaenergiaSubmit : handleEnergyteamSubmit}>
             {/* Dati partner */}
             <div class="simpv__et-section">
               <h5 class="simpv__et-section-title">Dati partner (chi invia la richiesta)</h5>
@@ -915,9 +1273,9 @@ export default function SimulatoreFotovoltaico({
 
             {/* Checklist documenti */}
             <div class="simpv__et-section">
-              <h5 class="simpv__et-section-title">Documenti richiesti ({ENERGYTEAM_DOCS.length})</h5>
+              <h5 class="simpv__et-section-title">Documenti richiesti ({currentDocs.length})</h5>
               <ul class="simpv__et-docs">
-                {ENERGYTEAM_DOCS.map((doc, i) => (
+                {currentDocs.map((doc, i) => (
                   <li key={doc} class="simpv__et-doc">
                     <label>
                       <input
