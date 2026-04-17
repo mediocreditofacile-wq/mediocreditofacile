@@ -13,7 +13,7 @@ export const LEASING_DEFAULTS = {
 export const DURATE_LEASING = [36, 48, 60, 72, 84];
 
 // Opzioni anticipo selezionabili
-export const ANTICIPO_OPTIONS = [0, 10, 15, 20];
+export const ANTICIPO_OPTIONS = [10, 15, 20];
 
 /**
  * Calcola la rata mensile con ammortamento alla francese.
