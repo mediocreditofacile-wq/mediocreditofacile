@@ -1,0 +1,374 @@
+---
+/**
+ * Area Partner AGE SRL — /tools/age-srl
+ * Pagina protetta da password. Simulatore fotovoltaico con:
+ * - switch noleggio operativo / leasing finanziario
+ * - assicurazione all-risk opzionale (solo noleggio)
+ * - agevolazioni 4.0: iperammortamento + Sabatini + ZES (solo leasing + BP)
+ * - download preventivo PDF brandizzato MCF
+ * - form di invio richiesta pratica a MCF con checklist documenti
+ */
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import SimulatoreFotovoltaico from '../../components/tools/SimulatoreFotovoltaico.tsx';
+---
+
+<ToolLayout
+  title="Area AGE SRL — Simulatore Fotovoltaico | Mediocredito Facile"
+  description="Area riservata AGE SRL — simulatore noleggio operativo e leasing fotovoltaico con agevolazioni 4.0 e download preventivo PDF."
+  noindex={true}
+  breadcrumbs={[{ name: 'Area AGE SRL', href: '/tools/age-srl' }]}
+>
+  <!-- Gate password -->
+  <div id="gate" class="gate">
+    <div class="gate__card">
+      <div class="gate__logos">
+        <img src="/images/logo-mediocreditofacile.webp" alt="Mediocredito Facile" class="gate__logo" />
+        <span class="gate__x">&times;</span>
+        <span class="gate__partner-name">AGE SRL</span>
+      </div>
+      <div class="gate__divider"></div>
+      <p class="gate__label">Area Riservata Partner</p>
+      <p class="gate__desc">Accedi al simulatore fotovoltaico con confronto noleggio e leasing, agevolazioni 4.0 e preventivo PDF scaricabile.</p>
+      <div class="gate__form">
+        <input type="password" id="gate-pwd" class="gate__input" placeholder="Password" autocomplete="off" />
+        <button id="gate-btn" class="gate__btn">
+          <span class="material-icons-outlined" style="font-size:1.1rem;vertical-align:middle;margin-right:0.3rem;">lock_open</span>
+          Accedi
+        </button>
+      </div>
+      <p id="gate-error" class="gate__error" hidden>Password non corretta</p>
+    </div>
+  </div>
+
+  <!-- Tool content (nascosto fino ad autenticazione) -->
+  <div id="tool" class="arca" style="display:none !important;">
+    <!-- Header co-branded -->
+    <div class="arca__header">
+      <div class="arca__header-brand">
+        <img src="/images/logo-mediocreditofacile.webp" alt="Mediocredito Facile" class="arca__logo" />
+        <div class="arca__header-sep"></div>
+        <div class="arca__partner-badge">
+          <span class="material-icons-outlined arca__partner-icon" aria-hidden="true">wb_sunny</span>
+          <span class="arca__partner-label">AGE SRL</span>
+        </div>
+      </div>
+      <button id="logout-btn" class="arca__logout">
+        <span class="material-icons-outlined" style="font-size:0.95rem;vertical-align:middle;">logout</span>
+        Esci
+      </button>
+    </div>
+
+    <!-- Hero area -->
+    <div class="arca__hero">
+      <div class="arca__hero-content">
+        <h1 class="arca__title">Simulatore Fotovoltaico</h1>
+        <p class="arca__sub">
+          Confronta noleggio operativo e leasing finanziario sugli impianti proposti ai tuoi clienti.
+          Attiva il business plan per il confronto con la bolletta e le agevolazioni 4.0.
+          Scarica il preventivo PDF brandizzato da inviare al cliente.
+        </p>
+      </div>
+      <div class="arca__hero-badges">
+        <div class="arca__badge">
+          <span class="material-icons-outlined">compare_arrows</span>
+          <span>Noleggio vs Leasing</span>
+        </div>
+        <div class="arca__badge">
+          <span class="material-icons-outlined">trending_up</span>
+          <span>Iper 4.0 + Sabatini + ZES</span>
+        </div>
+        <div class="arca__badge">
+          <span class="material-icons-outlined">picture_as_pdf</span>
+          <span>Preventivo PDF</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Simulatore interattivo (Preact island) -->
+    <section class="arca__simulator">
+      <SimulatoreFotovoltaico
+        client:load
+        assicurazioneOpzionale
+        varianteForm="age-srl"
+        zonaFissa="sud"
+        abilitaLeasing
+        abilitaAgevolazioni
+      />
+    </section>
+  </div>
+</ToolLayout>
+
+<script>
+  const PASSWORD = 'age-srl';
+  const KEY = 'mcf_agesrl_auth';
+
+  const gate = document.getElementById('gate')!;
+  const tool = document.getElementById('tool')!;
+  const gatePwd = document.getElementById('gate-pwd') as HTMLInputElement;
+  const gateBtn = document.getElementById('gate-btn')!;
+  const gateError = document.getElementById('gate-error')!;
+  const logoutBtn = document.getElementById('logout-btn')!;
+
+  function showTool() {
+    gate.style.display = 'none';
+    tool.style.cssText = '';
+  }
+
+  function showGate() {
+    gate.style.display = '';
+    tool.style.cssText = 'display:none !important;';
+  }
+
+  if (localStorage.getItem(KEY) === 'ok') {
+    showTool();
+  }
+
+  gateBtn.addEventListener('click', () => {
+    if (gatePwd.value === PASSWORD) {
+      localStorage.setItem(KEY, 'ok');
+      showTool();
+      gateError.hidden = true;
+      gatePwd.classList.remove('gate__input--error');
+    } else {
+      gateError.hidden = false;
+      gatePwd.classList.add('gate__input--error');
+    }
+  });
+
+  gatePwd.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') gateBtn.click();
+  });
+
+  logoutBtn.addEventListener('click', () => {
+    localStorage.removeItem(KEY);
+    showGate();
+    gatePwd.value = '';
+    gateError.hidden = true;
+  });
+</script>
+
+<style>
+  /* === Gate password === */
+  .gate {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 70vh;
+    padding: 2rem 1.5rem;
+    background: linear-gradient(160deg, #f0fdf4 0%, #ecfdf5 40%, #f5f3ff 100%);
+  }
+
+  .gate__card {
+    text-align: center;
+    background: #ffffff;
+    border: 1px solid #d1fae5;
+    border-radius: 16px;
+    padding: 2.5rem 2.5rem 2rem;
+    max-width: 440px;
+    width: 100%;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06), 0 1px 4px rgba(16, 185, 129, 0.08);
+  }
+
+  .gate__logos {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .gate__logo { height: 40px; display: block; }
+  .gate__x { font-size: 1.2rem; font-weight: 300; color: #94a3b8; }
+
+  .gate__partner-name {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #059669;
+    letter-spacing: -0.01em;
+  }
+
+  .gate__divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #d1fae5, transparent);
+    margin-bottom: 1.25rem;
+  }
+
+  .gate__label {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.5rem;
+  }
+
+  .gate__desc {
+    font-size: 0.85rem;
+    color: #64748b;
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+    max-width: 340px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .gate__form { display: flex; gap: 0.6rem; }
+
+  .gate__input {
+    flex: 1;
+    padding: 0.8rem 1rem;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 10px;
+    font-family: var(--font-family);
+    font-size: 1rem;
+    color: var(--color-text);
+    background: #f8fafc;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .gate__input:focus {
+    outline: none;
+    border-color: #059669;
+    box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.12);
+    background: #fff;
+  }
+
+  .gate__input--error { border-color: #ef4444; }
+
+  .gate__btn {
+    padding: 0.8rem 1.5rem;
+    background: linear-gradient(135deg, #059669, #10b981);
+    color: #ffffff;
+    font-family: var(--font-family);
+    font-weight: 700;
+    font-size: 0.92rem;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.2s;
+    white-space: nowrap;
+  }
+
+  .gate__btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);
+  }
+
+  .gate__error { color: #ef4444; font-size: 0.82rem; margin-top: 0.75rem; }
+
+  /* === Tool layout === */
+  .arca {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 0 1.5rem 4rem;
+  }
+
+  .arca__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 0;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .arca__header-brand { display: flex; align-items: center; gap: 1rem; }
+  .arca__logo { height: 36px; flex-shrink: 0; }
+  .arca__header-sep { width: 1px; height: 28px; background: #e2e8f0; }
+
+  .arca__partner-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+    border: 1px solid #a7f3d0;
+    border-radius: 8px;
+    padding: 0.35rem 0.75rem;
+  }
+
+  .arca__partner-icon { font-size: 1.1rem; color: #059669; }
+  .arca__partner-label { font-size: 0.85rem; font-weight: 700; color: #059669; }
+
+  .arca__logout {
+    background: none;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.4rem 0.85rem;
+    font-family: var(--font-family);
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #64748b;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  .arca__logout:hover { border-color: var(--color-primary); color: var(--color-primary); }
+
+  /* Hero */
+  .arca__hero {
+    background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 50%, #f5f3ff 100%);
+    border: 1px solid #d1fae5;
+    border-radius: 16px;
+    padding: 2rem 2.5rem;
+    margin: 1.5rem 0 2rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 2rem;
+  }
+
+  .arca__hero-content { flex: 1; }
+
+  .arca__title {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
+  }
+
+  .arca__sub { font-size: 0.92rem; color: #475569; line-height: 1.6; max-width: 520px; }
+
+  .arca__hero-badges { display: flex; flex-direction: column; gap: 0.5rem; flex-shrink: 0; }
+
+  .arca__badge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.5rem 0.85rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #334155;
+    white-space: nowrap;
+  }
+
+  .arca__badge .material-icons-outlined { font-size: 1rem; color: #059669; }
+  .arca__simulator { margin-top: 0; }
+
+  /* Print: mostra solo il tool, nascondi gate e navigazione */
+  @media print {
+    .gate { display: none !important; }
+    .arca__header { display: none !important; }
+    .arca__hero { display: none !important; }
+    .arca { padding: 0; }
+    .arca__simulator { margin: 0; }
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .gate__card { padding: 2rem 1.5rem 1.5rem; }
+    .gate__form { flex-direction: column; }
+    .gate__logos { flex-wrap: wrap; gap: 0.5rem; }
+    .gate__logo { height: 32px; }
+    .arca__header-brand { gap: 0.65rem; }
+    .arca__logo { height: 28px; }
+    .arca__hero { flex-direction: column; padding: 1.5rem; gap: 1.25rem; }
+    .arca__title { font-size: 1.25rem; }
+    .arca__hero-badges { flex-direction: row; flex-wrap: wrap; }
+    .arca__badge { font-size: 0.75rem; padding: 0.4rem 0.65rem; }
+  }
+</style>

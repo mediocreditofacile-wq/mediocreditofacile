@@ -866,6 +866,49 @@
   border-radius: 8px;
 }
 
+/* === Barra download PDF === */
+.simpv__pdf-bar {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: center;
+  padding: 1rem 0 0;
+}
+
+.simpv__button--pdf {
+  background: var(--color-primary, #664CCD);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.simpv__button--pdf:hover {
+  background: #553bab;
+}
+
+/* Stile stampa PDF: nasconde gate, header, form, mostra solo risultati */
+@media print {
+  .simpv__form { display: none !important; }
+  .simpv__lead-bar { display: none !important; }
+  .simpv__pdf-bar { display: none !important; }
+  .simpv { display: block !important; }
+  .simpv__results { box-shadow: none; border: none; }
+}
+
+/* === Card risparmio totale sulla durata contratto === */
+.simpv__card--risparmio-totale {
+  background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+  border: 2px solid #34d399;
+  border-radius: var(--radius);
+  padding: 1rem 1.5rem;
+  margin-top: 0.75rem;
+}
+
+.simpv__big-number {
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
 /* === Righe agevolazioni nella card confronto === */
 .simpv__card-row--agevolazione {
   background: rgba(102, 76, 205, 0.05);

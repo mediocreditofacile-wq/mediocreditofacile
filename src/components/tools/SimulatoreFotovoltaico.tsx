@@ -187,7 +187,7 @@ interface Props {
   // Default OFF: la rata mostrata e' il canone puro, l'assicurazione e' solo informativa.
   assicurazioneOpzionale?: boolean;
   // Variante del form di richiesta in fondo al simulatore.
-  varianteForm?: 'standard' | 'energyteam' | 'arcaenergia';
+  varianteForm?: 'standard' | 'energyteam' | 'arcaenergia' | 'age-srl';
   // Se settata, forza un coefficiente di irraggiamento unico indipendentemente dalla zona selezionata.
   zonaFissa?: 'nord' | 'centro' | 'sud' | 'isole';
   // Quando true: mostra lo switch Noleggio Operativo / Leasing Finanziario
@@ -417,6 +417,7 @@ export default function SimulatoreFotovoltaico({
 
   // GTM tracking
   const toolName = varianteForm === 'arcaenergia' ? 'simulatore_arcaenergia'
+    : varianteForm === 'age-srl' ? 'simulatore_age_srl'
     : varianteForm === 'energyteam' ? 'simulatore_energyteam' : 'simulatore_fotovoltaico';
 
   const pushCalcolo = () => {
@@ -479,7 +480,7 @@ export default function SimulatoreFotovoltaico({
     return docs;
   }, [isLeasing, includiIper, includiSabatini, includiZES]);
 
-  const currentDocs = varianteForm === 'arcaenergia' ? arcaEnergiaDocs : ENERGYTEAM_DOCS;
+  const currentDocs = (varianteForm === 'arcaenergia' || varianteForm === 'age-srl') ? arcaEnergiaDocs : ENERGYTEAM_DOCS;
   const [etDocsSpuntati, setEtDocsSpuntati] = useState<boolean[]>(() => new Array(20).fill(false));
 
   const toggleEtDoc = (idx: number) => {
@@ -640,9 +641,10 @@ export default function SimulatoreFotovoltaico({
       else mancanti.push(doc);
     });
 
+    const fonte = varianteForm === 'age-srl' ? 'age-srl' : 'arcaenergia';
     const body = new FormData();
-    body.append('fonte', 'arcaenergia');
-    body.append('tool', 'simulatore_arcaenergia');
+    body.append('fonte', fonte);
+    body.append('tool', `simulatore_${fonte}`);
     body.append('modalita_finanziaria', isLeasing ? 'leasing' : 'noleggio');
     body.append('partner_nome', etPartnerNome);
     body.append('partner_email', etPartnerEmail);
@@ -1151,6 +1153,32 @@ export default function SimulatoreFotovoltaico({
                     {risultato.differenza >= 0 ? '+' : ''}{eur(risultato.differenza)}/mese
                   </span>
                 </div>
+
+                {/* Totale beneficio agevolazioni — solo leasing */}
+                {isLeasing && ((risultato.iperBeneficioMensile ?? 0) > 0 || (risultato.sabatiniBeneficioMensile ?? 0) > 0 || (risultato.zesBeneficioMensile ?? 0) > 0) && (
+                  <div class="simpv__card-row simpv__card-row--agevolazione" style="margin-top:0.5rem;">
+                    <span>Totale agevolazioni fiscali</span>
+                    <span class="simpv__violet">
+                      {eur(
+                        ((risultato.iperBeneficioMensile ?? 0) * 12 * 9) +
+                        ((risultato.sabatiniBeneficioMensile ?? 0) * 12 * 6) +
+                        ((risultato.zesBeneficioMensile ?? 0) * 12 * 5)
+                      )}
+                    </span>
+                  </div>
+                )}
+
+                {/* Risparmio totale sulla durata del contratto — solo se c'è risparmio */}
+                {risultato.differenza > 0 && (
+                  <div class="simpv__card simpv__card--risparmio-totale">
+                    <div class="simpv__card-row simpv__card-row--total">
+                      <span>Risparmio totale sui {durata} mesi di contratto</span>
+                      <span class="simpv__green simpv__big-number">
+                        +{eur(risultato.differenza * durata)}
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -1268,8 +1296,22 @@ export default function SimulatoreFotovoltaico({
 
       </div>
 
-      {/* --- FORM INVIO RICHIESTA (variante EnergyTeam / ArcaEnergia) --- */}
-      {(varianteForm === 'energyteam' || varianteForm === 'arcaenergia') ? (
+      {/* Bottone Scarica PDF (varianti partner con download) */}
+      {risultato && (varianteForm === 'age-srl') && (
+        <div class="simpv__pdf-bar">
+          <button
+            type="button"
+            class="simpv__button simpv__button--pdf"
+            onClick={() => window.print()}
+          >
+            <span class="material-icons-outlined" style="font-size:1.1rem;vertical-align:middle;margin-right:0.35rem;">picture_as_pdf</span>
+            Scarica preventivo PDF
+          </button>
+        </div>
+      )}
+
+      {/* --- FORM INVIO RICHIESTA (variante EnergyTeam / ArcaEnergia / AGE SRL) --- */}
+      {(varianteForm === 'energyteam' || varianteForm === 'arcaenergia' || varianteForm === 'age-srl') ? (
         <div class="simpv__lead-bar simpv__lead-bar--energyteam" id="contatti">
           <div class="simpv__lead-bar-info">
             <span class="material-icons-outlined simpv__lead-icon" aria-hidden="true">send</span>
@@ -1283,7 +1325,9 @@ export default function SimulatoreFotovoltaico({
             </div>
           </div>
 
-          <form class="simpv__lead-bar-form simpv__et-form" onSubmit={varianteForm === 'arcaenergia' ? handleArcaenergiaSubmit : handleEnergyteamSubmit}>
+          <form class="simpv__lead-bar-form simpv__et-form" onSubmit={
+            (varianteForm === 'arcaenergia' || varianteForm === 'age-srl') ? handleArcaenergiaSubmit : handleEnergyteamSubmit
+          }>
             {/* Dati partner */}
             <div class="simpv__et-section">
               <h5 class="simpv__et-section-title">Dati partner (chi invia la richiesta)</h5>
