@@ -7,6 +7,15 @@ import sitemap from '@astrojs/sitemap';
 export default defineConfig({
   output: 'static',
   adapter: vercel(),
+  // Astro 5 ha security.checkOrigin=true di default: dietro Vercel il check fallisce
+  // perche' Host arriva come deployment URL (mediocreditofacile-xxx.vercel.app)
+  // e Origin e' www.mediocreditofacile.it, quindi ogni POST multipart riceve 403.
+  // Disabilitiamo: la protezione CSRF qui e' ridondante perche' /api/submit non
+  // modifica stato autenticato (e' pure lead capture), c'e' honeypot nel form,
+  // e Resend+Zapier sono rate-limited.
+  security: {
+    checkOrigin: false,
+  },
   integrations: [
     preact(),
     sitemap({
