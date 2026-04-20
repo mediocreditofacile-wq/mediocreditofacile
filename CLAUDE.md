@@ -39,7 +39,25 @@ Le prop sono retrocompatibili: pagine esistenti non cambiano comportamento.
 ## Architettura landing page
 Le landing dinamiche si generano da landing-pages.json. Per creare una nuova landing basta aggiungere un oggetto al JSON con: slug, title, subtitle, benefits (array 3 oggetti), ctaText. Il template [slug].astro fa il resto.
 
+**Campi opzionali di personalizzazione (JSON):**
+- `valueTitle`, `valueText`, `valueText2` → personalizzano la sezione Value Proposition
+- `formHeading`, `formSubheading`, `formCta` → se tutti e tre valorizzati, il template aggiunge un secondo ContactForm dopo i Benefits (form intermedio) e personalizza anche il form finale con gli stessi valori. Serve per landing di conversione dove il CTA del Hero promette qualcosa di specifico (es. "Calcola il tuo canone") e il form ne è la porta di ingresso.
+
+Le 6 landing fotovoltaico (`noleggio-fotovoltaico-*`) usano tutti questi campi: sono landing di conversione con CTA/form allineati, ognuna con angolo distinto e numeri concreti (riferimento: impianto 30 kW, canone 526 €/mese, bolletta risparmiata 759 €/mese). Riscritte il 20 aprile 2026 nel voice profile di Alberto.
+
+Le altre landing (noleggio-operativo, leasing-strumentale, finanziamenti-pmi, diventa-partner, finanza-veloce, noleggio-operativo-ristorazione) usano solo i campi base e mantengono il form generico in fondo pagina.
+
 Le landing finanziamenti e agevolazioni sono pagine Astro dedicate (non da JSON) con CSS scoped e form custom.
+
+## ContactForm — prop del componente
+Il componente `src/components/ContactForm.astro` accetta queste prop opzionali:
+- `fonte?: string` → valorizza il campo nascosto `fonte` nel payload (slug della landing)
+- `heading?: string` → titolo del blocco form (default: "Richiedi Preventivo Gratuito")
+- `subheading?: string` → sottotitolo (default: "Compila il modulo e ti ricontatteremo entro 24 ore lavorative. Nessun impegno.")
+- `ctaText?: string` → testo del bottone di submit (default: "Richiedi Preventivo Gratuito")
+- `variant?: 'primary' | 'secondary'` → 'primary' è il form finale (mantiene `id="contatti"` per l'anchor scroll dal CTA Hero); 'secondary' è il form intermedio nella pagina (nessun id anchor, invia un campo `variante=secondary` al webhook per distinguere in Pipedrive). Default: 'primary'.
+
+Lo script di submit agisce su tutti i form presenti in pagina via `querySelectorAll`, così il form intermedio e quello finale vengono entrambi gestiti senza collisioni.
 
 ## Regole componenti
 - Header.astro ha prop "minimal" (boolean). minimal=true → solo logo + telefono (per landing ads). minimal=false → navbar completa (per homepage e pagine sito).
@@ -83,7 +101,7 @@ Mai nero puro #000000 — usare sempre #0F1020 o #444451
 - Form — campo "fonte" OBBLIGATORIO: ogni form del sito deve avere un campo nascosto `fonte` con lo slug della pagina. Per le landing dinamiche (da landing-pages.json), il componente ContactForm accetta la prop `fonte` e lo slug viene passato automaticamente in [slug].astro. Per i form inline nelle pagine statiche, usare `<input type="hidden" name="fonte" value="[slug]" />`. Il campo arriva a Zapier e da lì nella mail di notifica e in Pipedrive, così ogni lead porta con sé l'informazione della pagina di provenienza.
 
 ## API Routes (Vercel serverless)
-- `src/pages/api/submit.ts` → webhook form contatti (POST → Zapier)
+- `src/pages/api/submit.ts` → endpoint form contatti. Dal 20 aprile 2026 ha safety net: invia mail diretta via Resend (mittente `onboarding@resend.dev`, destinatario `mediocreditofacile@gmail.com`) IN PARALLELO alla chiamata Zapier. Loggga ogni submission come JSON strutturato (evento `form_submitted` con esito di entrambi i canali). Se entrambi falliscono, logga `lead_lost` con payload completo per recupero manuale. Risponde sempre 200 al browser per non degradare la UX. Honeypot loggato come `form_rejected` per debug.
 - `src/pages/api/cerved.ts` → proxy Cerved API per lookup P.IVA (GET, cache in-memory 24h, CORS per mcf-marotta.netlify.app)
 - `src/pages/api/credit-ai.ts` → layer AI credit policy via Claude Haiku (POST, CORS per mcf-marotta.netlify.app)
 - Tutte usano `export const prerender = false` per funzionare come serverless functions
@@ -93,6 +111,7 @@ Mai nero puro #000000 — usare sempre #0F1020 o #444451
 - `ZAPIER_WEBHOOK_URL` → webhook form contatti
 - `CERVED_CONSUMER_KEY` → API key Cerved (header: `apikey`)
 - `ANTHROPIC_API_KEY` → API key Anthropic per layer AI credit policy
+- `RESEND_API_KEY` → chiave Resend per notifiche mail dirette dai form (aggiunta il 20 aprile 2026, Fase 1 safety net)
 
 ## Redirect (vercel.json)
 - `/agevolazioni/nuova-sabatini-2026` → 301 → `/finanziamenti/agevolazioni/nuova-sabatini-2026`

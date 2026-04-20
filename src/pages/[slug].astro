@@ -24,6 +24,12 @@ const valueImage = p.valueImage || '/images/consulenza-business.webp';
 const valueTitle = p.valueTitle || 'Un unico interlocutore, tutte le opzioni';
 const valueText = p.valueText || 'Mediocredito Facile confronta le offerte di oltre 10 società per trovare la soluzione più vantaggiosa. Non sei vincolato a un solo istituto: noi lavoriamo per te, non per la banca.';
 const valueText2 = p.valueText2 || 'Dalla prima telefonata alla firma del contratto, hai sempre la stessa persona di riferimento. Niente rimbalzi, niente call center. Un consulente che conosce il tuo caso e risponde in 24 ore.';
+
+// Form personalizzato per landing: se definito, mostra un form intermedio dopo i Benefits e lo usa anche come form finale
+const formHeading: string | undefined = p.formHeading;
+const formSubheading: string | undefined = p.formSubheading;
+const formCta: string | undefined = p.formCta;
+const hasCustomForm = Boolean(formHeading && formSubheading && formCta);
 ---
 
 <Layout title={page.metaTitle} description={page.metaDescription}>
@@ -31,6 +37,16 @@ const valueText2 = p.valueText2 || 'Dalla prima telefonata alla firma del contra
   <main>
     <Hero title={page.heroTitle} subtitle={page.heroSubtitle} ctaText={page.ctaText} backgroundImage={heroImage} />
     <Benefits benefits={page.benefits} image={benefitsImage} />
+
+    {hasCustomForm && (
+      <ContactForm
+        fonte={page.slug}
+        heading={formHeading}
+        subheading={formSubheading}
+        ctaText={formCta}
+        variant="secondary"
+      />
+    )}
 
     <!-- VALUE PROPOSITION -->
     <section class="lp-value">
@@ -77,7 +93,12 @@ const valueText2 = p.valueText2 || 'Dalla prima telefonata alla firma del contra
     </section>
 
     <HowItWorks />
-    <ContactForm fonte={page.slug} />
+    <ContactForm
+      fonte={page.slug}
+      heading={formHeading}
+      subheading={formSubheading}
+      ctaText={formCta}
+    />
   </main>
   <Footer />
 </Layout>
