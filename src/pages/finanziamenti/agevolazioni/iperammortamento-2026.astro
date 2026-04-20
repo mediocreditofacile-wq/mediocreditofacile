@@ -123,6 +123,36 @@ const faqJsonLd = {
       </div>
     </section>
 
+    <!-- DOWNLOAD EXCEL — LEAD MAGNET -->
+    <section class="ipa-download">
+      <div class="ipa-download__inner">
+        <div class="ipa-download__content">
+          <span class="material-icons-outlined ipa-download__icon" aria-hidden="true">table_chart</span>
+          <div>
+            <h2 class="ipa-download__title">Scarica il foglio di calcolo: acquisto diretto vs leasing</h2>
+            <p class="ipa-download__desc">
+              Confronto anno per anno del risparmio fiscale con iperammortamento: quanto si deduce,
+              in quanto tempo, e perche' il leasing dimezza i tempi di ammortamento (Art. 102, c. 7 TUIR).
+              File Excel pronto, con i numeri reali.
+            </p>
+          </div>
+        </div>
+        <form class="ipa-download__form" id="form-download-excel">
+          <input name="website" type="text" tabindex="-1" autocomplete="off" style="position:absolute;opacity:0;pointer-events:none;height:0;overflow:hidden" aria-hidden="true" />
+          <input type="hidden" name="fonte" value="iperammortamento-excel" />
+          <div class="ipa-download__fields">
+            <input type="text" name="nome" placeholder="Nome e Cognome" required autocomplete="name" />
+            <input type="email" name="email" placeholder="Email aziendale" required autocomplete="email" />
+            <button type="submit" class="ipa-download__btn" id="btn-download-excel">
+              <span class="material-icons-outlined" style="font-size:1.1rem;vertical-align:middle;margin-right:0.3rem;">download</span>
+              Scarica Excel gratuito
+            </button>
+          </div>
+          <p class="ipa-download__privacy">Inviando accetti la <a href="/privacy">privacy policy</a>. Niente spam, solo il file.</p>
+        </form>
+      </div>
+    </section>
+
     <!-- REQUISITI -->
     <section class="ipa-req">
       <div class="ipa-req__inner">
@@ -281,6 +311,7 @@ const faqJsonLd = {
 </Layout>
 
 <script>
+  // Form principale (valutazione gratuita)
   const form = document.getElementById('form-iperammortamento') as HTMLFormElement | null;
   form?.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -291,6 +322,43 @@ const faqJsonLd = {
       await fetch('/api/submit', { method: 'POST', body: data });
     } catch (_) {}
     window.location.href = '/grazie-fin';
+  });
+
+  // Form download Excel (lead magnet: invia lead poi scarica il file)
+  const formExcel = document.getElementById('form-download-excel') as HTMLFormElement | null;
+  formExcel?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('btn-download-excel') as HTMLButtonElement | null;
+    if (btn) { btn.disabled = true; btn.textContent = 'Download in corso...'; }
+    const data = new FormData(formExcel);
+
+    // GTM tracking
+    if (typeof window !== 'undefined' && (window as any).dataLayer) {
+      (window as any).dataLayer.push({
+        event: 'download_excel',
+        tool: 'iperammortamento_excel',
+        email: data.get('email'),
+      });
+    }
+
+    // Invia il lead a Zapier
+    try {
+      await fetch('/api/submit', { method: 'POST', body: data });
+    } catch (_) {}
+
+    // Scarica il file
+    const link = document.createElement('a');
+    link.href = '/downloads/Confronto_Ammortamento_Acquisto_vs_Leasing.xlsx';
+    link.download = 'Confronto_Ammortamento_Acquisto_vs_Leasing.xlsx';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    // Feedback visivo
+    if (btn) { btn.textContent = 'Scaricato!'; }
+    setTimeout(() => {
+      if (btn) { btn.disabled = false; btn.textContent = 'Scarica Excel gratuito'; }
+    }, 3000);
   });
 </script>
 
@@ -405,6 +473,41 @@ const faqJsonLd = {
   .ipa-form__privacy { text-align: center; font-size: 0.8rem; color: var(--mcf-taupe); margin-top: 0.25rem; }
   .ipa-form__privacy a { color: var(--mcf-accent); text-decoration: underline; }
 
+  /* DOWNLOAD EXCEL — LEAD MAGNET */
+  .ipa-download { padding: 3.5rem 1.5rem; background: #fff; }
+  .ipa-download__inner {
+    max-width: 800px; margin: 0 auto;
+    background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+    border: 2px solid #c4b5fd;
+    border-radius: 16px;
+    padding: 2rem 2.5rem;
+  }
+  .ipa-download__content { display: flex; align-items: flex-start; gap: 1.25rem; margin-bottom: 1.5rem; }
+  .ipa-download__icon { font-size: 2.5rem; color: var(--mcf-accent); flex-shrink: 0; margin-top: 0.15rem; }
+  .ipa-download__title { font-size: 1.25rem; font-weight: 800; color: var(--mcf-black); margin-bottom: 0.5rem; line-height: 1.3; }
+  .ipa-download__desc { font-size: 0.92rem; color: var(--mcf-charcoal); line-height: 1.6; }
+  .ipa-download__fields {
+    display: grid; grid-template-columns: 1fr 1fr auto; gap: 0.65rem; align-items: start;
+  }
+  .ipa-download__fields input {
+    padding: 0.75rem 1rem; border: 1.5px solid #c4b5fd; border-radius: 8px;
+    font-family: var(--font-family); font-size: 0.95rem; color: var(--mcf-charcoal);
+    background: #fff; transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .ipa-download__fields input:focus {
+    outline: none; border-color: var(--mcf-accent); box-shadow: 0 0 0 3px rgba(102,76,205,0.15);
+  }
+  .ipa-download__btn {
+    display: inline-flex; align-items: center; padding: 0.75rem 1.5rem;
+    background: var(--mcf-accent); color: #fff; font-family: var(--font-family);
+    font-weight: 700; font-size: 0.92rem; border: none; border-radius: 8px;
+    cursor: pointer; transition: background 0.2s, transform 0.15s; white-space: nowrap;
+  }
+  .ipa-download__btn:hover { background: #553bab; transform: translateY(-1px); }
+  .ipa-download__btn:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+  .ipa-download__privacy { font-size: 0.78rem; color: var(--mcf-taupe); margin-top: 0.5rem; }
+  .ipa-download__privacy a { color: var(--mcf-accent); text-decoration: underline; }
+
   /* RESPONSIVE */
   @media (max-width: 960px) {
     .ipa-fasce__grid { grid-template-columns: 1fr; max-width: 400px; margin-left: auto; margin-right: auto; }
@@ -414,9 +517,13 @@ const faqJsonLd = {
   }
   @media (max-width: 640px) {
     .ipa-hero { padding: 4rem 1.25rem 3.5rem; }
-    .ipa-intro, .ipa-fasce, .ipa-req, .ipa-confronto, .ipa-combo, .ipa-faq, .ipa-mcf, .ipa-form { padding: 3rem 1.25rem; }
+    .ipa-intro, .ipa-fasce, .ipa-req, .ipa-confronto, .ipa-combo, .ipa-faq, .ipa-mcf, .ipa-form, .ipa-download { padding: 3rem 1.25rem; }
     .ipa-req__grid { grid-template-columns: 1fr; }
     .ipa-form__submit { width: 100%; }
     .ipa-mcf__cta { width: 100%; justify-content: center; }
+    .ipa-download__inner { padding: 1.5rem; }
+    .ipa-download__content { flex-direction: column; gap: 0.75rem; }
+    .ipa-download__fields { grid-template-columns: 1fr; }
+    .ipa-download__btn { width: 100%; justify-content: center; }
   }
 </style>
