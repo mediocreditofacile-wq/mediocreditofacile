@@ -64,7 +64,7 @@ export const RISCATTI: Record<string, Record<number, number | null>> = {
   'Sistemi di Cassa': { 24: 8, 30: 5, 36: 5, 48: 4, 60: 2, 72: null, 84: null },
   'Strumenti Elettromedicali': { 24: 9, 30: 6, 36: 6, 48: 4, 60: 3, 72: null, 84: null },
   'Arredamento per Ufficio': { 24: 6, 30: 5, 36: 5, 48: 3, 60: 2, 72: null, 84: null },
-  'Software Gestionali / CAD': { 24: null, 30: null, 36: null, 48: null, 60: null, 72: null, 84: null },
+  'Software Gestionali / CAD': { 24: 0, 30: 0, 36: 0, 48: 0, 60: 0, 72: null, 84: null },
   'Altri Beni Strumentali': { 24: 10, 30: 6, 36: 6, 48: 4, 60: 3, 72: null, 84: null },
   Fotovoltaico: { 24: 10, 30: 6, 36: 6, 48: 4, 60: 3, 72: 3, 84: 3 },
 };
@@ -72,6 +72,60 @@ export const RISCATTI: Record<string, Record<number, number | null>> = {
 // Durate disponibili
 export const DURATE_BASE = [24, 30, 36, 48, 60];
 export const DURATE_FOTOVOLTAICO = [24, 30, 36, 48, 60, 72, 84];
+
+// --- Coefficienti Grenke Pioneer++++ (Software Gestionali / CAD — riscatto 0%) ---
+// Fonte: Tabella PIONEER ++++.pdf — Kit collaboratore Grenke / ReteRent
+// Fascia max 100.000 (non 500.000 come Sputnik)
+export const PIONEER_COEFFS: Record<number, { da: number; a: number; c: number }[]> = {
+  24: [
+    { da: 500, a: 2500, c: 4.936 },
+    { da: 2501, a: 5000, c: 4.933 },
+    { da: 5001, a: 12000, c: 4.889 },
+    { da: 12001, a: 25000, c: 4.881 },
+    { da: 25001, a: 50000, c: 4.804 },
+    { da: 50001, a: 100000, c: 4.743 },
+  ],
+  30: [
+    { da: 500, a: 2500, c: 3.967 },
+    { da: 2501, a: 5000, c: 3.948 },
+    { da: 5001, a: 12000, c: 3.917 },
+    { da: 12001, a: 25000, c: 3.892 },
+    { da: 25001, a: 50000, c: 3.874 },
+    { da: 50001, a: 100000, c: 3.830 },
+  ],
+  36: [
+    { da: 500, a: 2500, c: 3.548 },
+    { da: 2501, a: 5000, c: 3.455 },
+    { da: 5001, a: 12000, c: 3.387 },
+    { da: 12001, a: 25000, c: 3.363 },
+    { da: 25001, a: 50000, c: 3.326 },
+    { da: 50001, a: 100000, c: 3.322 },
+  ],
+  48: [
+    { da: 500, a: 2500, c: 2.976 },
+    { da: 2501, a: 5000, c: 2.652 },
+    { da: 5001, a: 12000, c: 2.623 },
+    { da: 12001, a: 25000, c: 2.590 },
+    { da: 25001, a: 50000, c: 2.588 },
+    { da: 50001, a: 100000, c: 2.586 },
+  ],
+  60: [
+    { da: 500, a: 2500, c: 2.573 },
+    { da: 2501, a: 5000, c: 2.221 },
+    { da: 5001, a: 12000, c: 2.184 },
+    { da: 12001, a: 25000, c: 2.154 },
+    { da: 25001, a: 50000, c: 2.120 },
+    { da: 50001, a: 100000, c: 2.059 },
+  ],
+};
+
+// Trova il coefficiente Pioneer per un valore e una durata
+export function getPioneerCoeff(valore: number, durata: number): number | null {
+  const fasce = PIONEER_COEFFS[durata];
+  if (!fasce) return null;
+  const fascia = fasce.find((f) => valore >= f.da && valore <= f.a);
+  return fascia ? fascia.c : null;
+}
 
 // Trova il coefficiente Grenke per un valore e una durata (solo durate standard 24-60)
 export function getCoeff(valore: number, durata: number): number | null {

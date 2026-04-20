@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'preact/hooks';
-import { RISCATTI, DURATE_BASE, DURATE_FOTOVOLTAICO, getAdjustedCoeff, eur } from '../../data/grenke';
+import { RISCATTI, DURATE_BASE, DURATE_FOTOVOLTAICO, getAdjustedCoeff, getPioneerCoeff, eur } from '../../data/grenke';
 import './simulatore-noleggio.css';
 
 export default function SimulatoreNoleggio() {
@@ -24,21 +24,23 @@ export default function SimulatoreNoleggio() {
   // Percentuale di riscatto per tipologia e durata
   const riscattoPerc = RISCATTI[tipologia]?.[durata] ?? null;
 
-  // Tipologia "Software Gestionali / CAD" non è prevista
+  // Software usa coefficienti Pioneer (riscatto 0%, max €100.000)
   const isSoftware = tipologia === 'Software Gestionali / CAD';
   const isNonDisponibile = riscattoPerc === null;
+  const valoreMax = isSoftware ? 100000 : 500000;
 
   // Calcolo risultati (solo dopo click su "Calcola")
   const risultati = useMemo(() => {
-    if (!calcolato || isSoftware || isNonDisponibile || valore < 500 || valore > 500000) return null;
+    if (!calcolato || isNonDisponibile || valore < 500 || valore > valoreMax) return null;
 
-    const coeff = getAdjustedCoeff(valore, durata);
+    // Software: usa tabella Pioneer++++. Tutto il resto: Sputnik++++.
+    const coeff = isSoftware ? getPioneerCoeff(valore, durata) : getAdjustedCoeff(valore, durata);
 
     if (!coeff) return null;
 
     const canoneMensile = (valore * coeff) / 100;
     const canoneTrimestrale = canoneMensile * 3;
-    const valoreRiscatto = (valore * riscattoPerc!) / 100;
+    const valoreRiscatto = (valore * (riscattoPerc ?? 0)) / 100;
     const totaleContratto = canoneMensile * durata + valoreRiscatto;
 
     return {
@@ -46,7 +48,7 @@ export default function SimulatoreNoleggio() {
       canoneTrimestrale,
       valoreRiscatto,
       totaleContratto,
-      riscattoPerc: riscattoPerc!,
+      riscattoPerc: riscattoPerc ?? 0,
       coeff,
       risparmioLiquidita: valore,
     };
@@ -65,7 +67,7 @@ export default function SimulatoreNoleggio() {
 
   const handleValoreBlur = () => {
     if (valore > 0) {
-      const clamped = Math.min(500000, Math.max(500, valore));
+      const clamped = Math.min(valoreMax, Math.max(500, valore));
       setValore(clamped);
       setValoreInput(clamped.toString());
     }
@@ -128,7 +130,7 @@ export default function SimulatoreNoleggio() {
             onBlur={handleValoreBlur}
             placeholder="50000"
           />
-          <span class="sim__hint">Min €500 — Max €500.000</span>
+          <span class="sim__hint">Min €500 — Max €{isSoftware ? '100.000' : '500.000'}</span>
         </div>
 
         {/* Durata */}
@@ -151,18 +153,22 @@ export default function SimulatoreNoleggio() {
           <label class="sim__label">Riscatto finale</label>
           <div class="sim__readonly">
             {isSoftware
-              ? 'Non previsto per Software'
+              ? '0% — non previsto per Software'
               : isNonDisponibile
                 ? 'Non disponibile per questa combinazione'
                 : `${riscattoPerc}%`}
           </div>
         </div>
+        {/* Hint valore max per software */}
+        {isSoftware && (
+          <span class="sim__hint">Software: valore max €100.000 — coefficienti Pioneer++++</span>
+        )}
         {/* Bottone Calcola */}
         <button
           type="button"
           class="sim__button"
           onClick={handleCalcola}
-          disabled={isSoftware || valore < 1}
+          disabled={valore < 1}
         >
           Calcola preventivo
         </button>
@@ -170,13 +176,7 @@ export default function SimulatoreNoleggio() {
 
       {/* --- RISULTATI --- */}
       <div class="sim__results">
-        {isSoftware ? (
-          <div class="sim__message">
-            <span class="material-icons-outlined sim__message-icon">info</span>
-            <p>Il noleggio operativo per <strong>Software Gestionali / CAD</strong> richiede
-            una valutazione personalizzata. Contattaci per un preventivo dedicato.</p>
-          </div>
-        ) : isNonDisponibile ? (
+        {isNonDisponibile ? (
           <div class="sim__message">
             <span class="material-icons-outlined sim__message-icon">warning</span>
             <p>La combinazione <strong>{tipologia}</strong> con durata <strong>{durata} mesi</strong> non
@@ -211,7 +211,7 @@ export default function SimulatoreNoleggio() {
               <p>* Pagamento standard: trimestrale anticipato. Canone mensile disponibile
               sopra €12.000/mese con maggiorazione +5%.</p>
               <p>* Assicurazione obbligatoria non inclusa nei coefficienti indicati.</p>
-              <p>* Coefficienti Grenke Italia SpA — Rete Rent (tabella Sputnik++++).</p>
+              <p>* Coefficienti Grenke Italia SpA — Rete Rent (tabella {isSoftware ? 'Pioneer++++' : 'Sputnik++++'}){isSoftware ? '. Riscatto non previsto per Software.' : '.'}</p>
               {(durata === 72 || durata === 84) && (
                 <p>* Per durate di {durata} mesi i coefficienti sono stimati. Richiedi un preventivo
                 personalizzato per l'importo esatto.</p>
