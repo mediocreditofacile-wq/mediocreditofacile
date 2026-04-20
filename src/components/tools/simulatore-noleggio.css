@@ -273,6 +273,16 @@
   color: #ffffff;
 }
 
+.sim__freq-btn--disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.sim__freq-btn--disabled:hover {
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+
 /* Dettaglio sotto il valore principale nei risultati */
 .sim__result-detail {
   font-size: 0.8rem;
