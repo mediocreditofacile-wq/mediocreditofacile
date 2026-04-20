@@ -2,12 +2,16 @@ import { useState, useMemo } from 'preact/hooks';
 import { RISCATTI, DURATE_BASE, DURATE_FOTOVOLTAICO, getAdjustedCoeff, getPioneerCoeff, eur } from '../../data/grenke';
 import './simulatore-noleggio.css';
 
+// Maggiorazione per pagamento mensile (fonte: Guida Operativa Grenke)
+const MAGGIORAZIONE_MENSILE = 0.05; // +5%
+
 export default function SimulatoreNoleggio() {
   const [tipologia, setTipologia] = useState('Altri Beni Strumentali');
   const [valore, setValore] = useState(0);
   const [valoreInput, setValoreInput] = useState('');
   const [durata, setDurata] = useState(36);
   const [calcolato, setCalcolato] = useState(false);
+  const [frequenza, setFrequenza] = useState<'trimestrale' | 'mensile'>('trimestrale');
 
   // Durate disponibili in base alla tipologia
   const durateDisponibili = useMemo(() => {
@@ -30,6 +34,7 @@ export default function SimulatoreNoleggio() {
   const valoreMax = isSoftware ? 100000 : 500000;
 
   // Calcolo risultati (solo dopo click su "Calcola")
+  const isMensile = frequenza === 'mensile';
   const risultati = useMemo(() => {
     if (!calcolato || isNonDisponibile || valore < 500 || valore > valoreMax) return null;
 
@@ -38,12 +43,16 @@ export default function SimulatoreNoleggio() {
 
     if (!coeff) return null;
 
-    const canoneMensile = (valore * coeff) / 100;
-    const canoneTrimestrale = canoneMensile * 3;
+    // Canone base (trimestrale anticipato)
+    const canoneBase = (valore * coeff) / 100;
+    // Se mensile: maggiorazione +5%
+    const canoneMensile = isMensile ? canoneBase * (1 + MAGGIORAZIONE_MENSILE) : canoneBase;
+    const canoneTrimestrale = canoneBase * 3;
     const valoreRiscatto = (valore * (riscattoPerc ?? 0)) / 100;
     const totaleContratto = canoneMensile * durata + valoreRiscatto;
 
     return {
+      canoneBase,
       canoneMensile,
       canoneTrimestrale,
       valoreRiscatto,
@@ -52,7 +61,7 @@ export default function SimulatoreNoleggio() {
       coeff,
       risparmioLiquidita: valore,
     };
-  }, [calcolato, valore, durata, tipologia, riscattoPerc, isSoftware, isNonDisponibile]);
+  }, [calcolato, valore, durata, tipologia, riscattoPerc, isSoftware, isNonDisponibile, frequenza]);
 
   // Gestione input valore con validazione
   const handleValoreChange = (e: Event) => {
@@ -148,6 +157,27 @@ export default function SimulatoreNoleggio() {
           </select>
         </div>
 
+        {/* Frequenza pagamento */}
+        <div class="sim__field">
+          <label class="sim__label">Frequenza pagamento</label>
+          <div class="sim__freq-switch">
+            <button
+              type="button"
+              class={`sim__freq-btn ${frequenza === 'trimestrale' ? 'sim__freq-btn--active' : ''}`}
+              onClick={() => { setFrequenza('trimestrale'); setCalcolato(false); }}
+            >
+              Trimestrale anticipato
+            </button>
+            <button
+              type="button"
+              class={`sim__freq-btn ${frequenza === 'mensile' ? 'sim__freq-btn--active' : ''}`}
+              onClick={() => { setFrequenza('mensile'); setCalcolato(false); }}
+            >
+              Mensile (+5%)
+            </button>
+          </div>
+        </div>
+
         {/* Riscatto (read-only) */}
         <div class="sim__field">
           <label class="sim__label">Riscatto finale</label>
@@ -186,15 +216,23 @@ export default function SimulatoreNoleggio() {
           <>
             <h3 class="sim__results-title">Il tuo preventivo</h3>
 
-            <div class="sim__result-card sim__result-card--main">
-              <span class="sim__result-label">Canone mensile</span>
-              <span class="sim__result-value">{eur(risultati.canoneMensile)}</span>
-            </div>
-
-            <div class="sim__result-card">
-              <span class="sim__result-label">Canone trimestrale anticipato</span>
-              <span class="sim__result-value">{eur(risultati.canoneTrimestrale)}</span>
-            </div>
+            {isMensile ? (
+              <>
+                <div class="sim__result-card sim__result-card--main">
+                  <span class="sim__result-label">Canone mensile</span>
+                  <span class="sim__result-value">{eur(risultati.canoneMensile)}</span>
+                  <span class="sim__result-detail">Include maggiorazione +5% per pagamento mensile</span>
+                </div>
+              </>
+            ) : (
+              <>
+                <div class="sim__result-card sim__result-card--main">
+                  <span class="sim__result-label">Canone trimestrale anticipato</span>
+                  <span class="sim__result-value">{eur(risultati.canoneTrimestrale)}</span>
+                  <span class="sim__result-detail">Pari a {eur(risultati.canoneBase)}/mese</span>
+                </div>
+              </>
+            )}
 
             <div class="sim__result-card">
               <span class="sim__result-label">Riscatto finale ({risultati.riscattoPerc}%)</span>
@@ -208,8 +246,10 @@ export default function SimulatoreNoleggio() {
             </div>
 
             <div class="sim__note">
-              <p>* Pagamento standard: trimestrale anticipato. Canone mensile disponibile
-              sopra €12.000/mese con maggiorazione +5%.</p>
+              {isMensile
+                ? <p>* Pagamento mensile anticipato con maggiorazione +5% rispetto al trimestrale.</p>
+                : <p>* Pagamento trimestrale anticipato (1° gennaio, aprile, luglio, ottobre). Pagamento mensile disponibile con maggiorazione +5%.</p>
+              }
               <p>* Assicurazione obbligatoria non inclusa nei coefficienti indicati.</p>
               <p>* Coefficienti indicativi per noleggio operativo.{isSoftware ? ' Riscatto non previsto per Software.' : ''}</p>
               {(durata === 72 || durata === 84) && (
