@@ -21,7 +21,8 @@
 - src/pages/finanziamenti/agevolazioni/ → hub agevolazioni + 3 landing (Sabatini, MCC, Bando ISI)
 - src/pages/grazie-fin.astro → thank you page finanziamenti (conversion tag form_finanziamenti)
 - src/pages/tools/energyteam.astro → area partner EnergyTeam (password: `energyteam`, localStorage key `mcf_energyteam_auth`, noindex). Monta `SimulatoreFotovoltaico` con prop `assicurazioneOpzionale` e `varianteForm="energyteam"`.
-- src/pages/tools/arca-energia.astro → area partner Arca Energia (password: `arcaenergia`, localStorage key `mcf_arcaenergia_auth`, noindex). Monta `SimulatoreFotovoltaico` con prop `assicurazioneOpzionale`, `varianteForm="arcaenergia"`, `zonaFissa="sud"`, `abilitaLeasing`, `abilitaAgevolazioni`. Include switch noleggio/leasing, iperammortamento 4.0 e Sabatini 4.0.
+- src/pages/tools/arca-energia.astro → area partner Arca Energia (password: `arcaenergia`, localStorage key `mcf_arcaenergia_auth`, noindex). Monta `SimulatoreFotovoltaico` con prop `assicurazioneOpzionale`, `varianteForm="arcaenergia"`, `zonaFissa="sud"`, `abilitaLeasing`, `abilitaAgevolazioni`. Include switch noleggio/leasing, iperammortamento 4.0, Sabatini 4.0 e ZES Unica.
+- src/pages/tools/age-srl.astro → area partner AGE SRL (password: `age-srl`, localStorage key `mcf_agesrl_auth`, noindex). Stessa struttura di Arca Energia + download preventivo PDF brandizzato MCF.
 
 ## Simulatore Fotovoltaico — prop del componente
 Il componente `src/components/tools/SimulatoreFotovoltaico.tsx` accetta queste prop opzionali:
