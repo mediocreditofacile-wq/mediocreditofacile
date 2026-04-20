@@ -4,6 +4,7 @@ import './simulatore-noleggio.css';
 
 // Maggiorazione per pagamento mensile (fonte: Guida Operativa Grenke)
 const MAGGIORAZIONE_MENSILE = 0.05; // +5%
+const SOGLIA_MENSILE = 20000; // Pagamento mensile disponibile da €20.000 in su
 
 export default function SimulatoreNoleggio() {
   const [tipologia, setTipologia] = useState('Altri Beni Strumentali');
@@ -32,6 +33,13 @@ export default function SimulatoreNoleggio() {
   const isSoftware = tipologia === 'Software Gestionali / CAD';
   const isNonDisponibile = riscattoPerc === null;
   const valoreMax = isSoftware ? 100000 : 500000;
+
+  // Pagamento mensile disponibile solo sopra la soglia
+  const mensileDisponibile = valore >= SOGLIA_MENSILE;
+  // Se il valore scende sotto soglia, torna a trimestrale
+  useMemo(() => {
+    if (!mensileDisponibile && frequenza === 'mensile') setFrequenza('trimestrale');
+  }, [mensileDisponibile]);
 
   // Calcolo risultati (solo dopo click su "Calcola")
   const isMensile = frequenza === 'mensile';
@@ -170,12 +178,16 @@ export default function SimulatoreNoleggio() {
             </button>
             <button
               type="button"
-              class={`sim__freq-btn ${frequenza === 'mensile' ? 'sim__freq-btn--active' : ''}`}
-              onClick={() => { setFrequenza('mensile'); setCalcolato(false); }}
+              class={`sim__freq-btn ${frequenza === 'mensile' ? 'sim__freq-btn--active' : ''} ${!mensileDisponibile ? 'sim__freq-btn--disabled' : ''}`}
+              onClick={() => { if (mensileDisponibile) { setFrequenza('mensile'); setCalcolato(false); } }}
+              disabled={!mensileDisponibile}
             >
               Mensile (+5%)
             </button>
           </div>
+          {!mensileDisponibile && (
+            <span class="sim__hint">Pagamento mensile disponibile per importi da €{SOGLIA_MENSILE.toLocaleString('it-IT')} in su</span>
+          )}
         </div>
 
         {/* Riscatto (read-only) */}
