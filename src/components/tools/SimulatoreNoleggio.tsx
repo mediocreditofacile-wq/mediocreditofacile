@@ -161,7 +161,7 @@ export default function SimulatoreNoleggio() {
         </div>
         {/* Hint valore max per software */}
         {isSoftware && (
-          <span class="sim__hint">Software: valore max €100.000 — coefficienti Pioneer++++</span>
+          <span class="sim__hint">Software: valore massimo €100.000</span>
         )}
         {/* Bottone Calcola */}
         <button
@@ -211,7 +211,7 @@ export default function SimulatoreNoleggio() {
               <p>* Pagamento standard: trimestrale anticipato. Canone mensile disponibile
               sopra €12.000/mese con maggiorazione +5%.</p>
               <p>* Assicurazione obbligatoria non inclusa nei coefficienti indicati.</p>
-              <p>* Coefficienti Grenke Italia SpA — Rete Rent (tabella {isSoftware ? 'Pioneer++++' : 'Sputnik++++'}){isSoftware ? '. Riscatto non previsto per Software.' : '.'}</p>
+              <p>* Coefficienti indicativi per noleggio operativo.{isSoftware ? ' Riscatto non previsto per Software.' : ''}</p>
               {(durata === 72 || durata === 84) && (
                 <p>* Per durate di {durata} mesi i coefficienti sono stimati. Richiedi un preventivo
                 personalizzato per l'importo esatto.</p>

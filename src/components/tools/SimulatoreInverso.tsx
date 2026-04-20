@@ -264,7 +264,7 @@ export default function SimulatoreInverso() {
               <p>* Pagamento standard: trimestrale anticipato. Canone mensile disponibile
               sopra €12.000/mese con maggiorazione +5%.</p>
               <p>* Assicurazione obbligatoria non inclusa nei coefficienti indicati.</p>
-              <p>* Coefficienti Grenke Italia SpA — Rete Rent (tabella Sputnik++++).</p>
+              <p>* Coefficienti indicativi per noleggio operativo.</p>
               {(durata === 72 || durata === 84) && (
                 <p>* Per durate di {durata} mesi i coefficienti sono stimati. Richiedi un preventivo
                 personalizzato per l'importo esatto.</p>
