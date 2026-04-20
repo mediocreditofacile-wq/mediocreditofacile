@@ -769,33 +769,6 @@ export default function SimulatoreFotovoltaico({
                 ))}
               </div>
             </div>
-            {/* TAN */}
-            <div class="simpv__field">
-              <label class="simpv__label" for="pv-tan">TAN — Tasso annuo nominale (%)</label>
-              <input
-                id="pv-tan"
-                type="text"
-                inputMode="decimal"
-                class="simpv__input"
-                value={tanInput}
-                onInput={handleDecimalInput(setTanLeasing, setTanInput, 20)}
-                placeholder="6.24"
-              />
-              <span class="simpv__hint">Default: {LEASING_DEFAULTS.tan}% (base Euribor 3M)</span>
-            </div>
-            {/* Riscatto */}
-            <div class="simpv__field">
-              <label class="simpv__label" for="pv-riscatto-leasing">Riscatto finale (%)</label>
-              <input
-                id="pv-riscatto-leasing"
-                type="text"
-                inputMode="decimal"
-                class="simpv__input"
-                value={riscattoLeasingInput}
-                onInput={handleDecimalInput(setRiscattoLeasing, setRiscattoLeasingInput, 30)}
-                placeholder="1"
-              />
-            </div>
           </div>
         )}
 
@@ -1015,7 +988,7 @@ export default function SimulatoreFotovoltaico({
               <span class="simpv__card-value">{eur(risultato.rataTotale)}</span>
               <span class="simpv__card-detail">
                 {isLeasing
-                  ? <>TAN {tanLeasing}% — Anticipo {anticipoPerc}% ({eur(risultato.anticipo ?? 0)})</>
+                  ? <>Anticipo {anticipoPerc}% ({eur(risultato.anticipo ?? 0)}) — Riscatto {riscattoLeasing}%</>
                   : assicurazioneOpzionale && !includiAssicurazione
                     ? <>Canone puro — +{eur(risultato.assicurazioneMensile)}/mese se aggiungi l'all-risk</>
                     : <>Canone {eur(risultato.canoneMensile)} + Assicurazione {eur(risultato.assicurazioneMensile)}</>
@@ -1149,7 +1122,7 @@ export default function SimulatoreFotovoltaico({
             {/* Note */}
             <div class="simpv__note">
               {isLeasing ? (
-                <p>* Calcolo rata con ammortamento alla francese (TAN {tanLeasing}%). Il preventivo definitivo dipende dalla società di leasing.</p>
+                <p>* Il preventivo definitivo dipende dalla società di leasing e dalle condizioni di mercato al momento della delibera.</p>
               ) : (
                 <>
                   <p>* Coefficienti indicativi per noleggio operativo fotovoltaico. Il preventivo definitivo dipende dalla società di locazione selezionata.</p>
