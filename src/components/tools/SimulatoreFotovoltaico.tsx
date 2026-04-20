@@ -88,8 +88,8 @@ function getRiscatto(durata: number): number {
 }
 
 // Costanti energetiche
-const ENERGY_PRICE = 0.25;    // €/kWh costo medio energia (bolletta)
-const FEED_IN_PRICE = 0.13;   // €/kWh valore immissione in rete (ritiro dedicato / vendita)
+const ENERGY_PRICE_DEFAULT = 0.28; // €/kWh prezzo medio PMI Italia (aprile 2026, conservativo)
+const FEED_IN_PRICE = 0.13;        // €/kWh valore immissione in rete (ritiro dedicato)
 
 // Irraggiamento medio per zona (kWh/kWp/anno — fonte PVGIS)
 const IRRADIANCE: Record<string, number> = {
@@ -106,12 +106,74 @@ const ZONE_LABELS: Record<string, string> = {
   isole: 'Sicilia / Sardegna',
 };
 
-// Autoconsumo per tipo attivita (senza/con accumulo)
-const SELF_CONSUMPTION: Record<string, { senza: number; con: number }> = {
-  industriale: { senza: 0.60, con: 0.80 },
-  commerciale: { senza: 0.47, con: 0.72 },
-  residenziale: { senza: 0.37, con: 0.80 },
+// --- Modello autoconsumo dinamico ---
+// Fonti: HTW Berlin (Quaschning 2014), GSE Italia 2022-2024, validato su BP Le Pajare (MCF).
+// L'autoconsumo dipende dal rapporto produzione/consumo, non dalla tipologia di attivita'.
+// Il tipo attivita' influenza solo il load match (correlazione oraria produzione-consumo).
+
+// Load match: quota di consumo che avviene durante le ore di produzione FV (8-18)
+const LOAD_MATCH: Record<string, number> = {
+  industriale: 0.58,    // turno pieno 8-18, consumi concentrati
+  commerciale: 0.48,    // uffici/negozi 9-19
+  residenziale: 0.35,   // picco serale 18-22
+  ricettivo: 0.45,      // hotel/ristorante, consumo estivo alto
 };
+
+/**
+ * Calcola la percentuale di autoconsumo in base al rapporto reale produzione/consumo.
+ * Il consumo annuo e' derivato dalla bolletta mensile diviso il prezzo medio kWh.
+ */
+function calcolaAutoconsumo(
+  produzioneAnnua: number,
+  consumoAnnuo: number,
+  capacitaAccumulo: number,
+  profiloConsumo: string,
+): { autoconsumoPerc: number; autosufficienzaPerc: number } {
+  if (consumoAnnuo <= 0 || produzioneAnnua <= 0) {
+    return { autoconsumoPerc: 0.50, autosufficienzaPerc: 0 };
+  }
+
+  const R = produzioneAnnua / consumoAnnuo;
+  const loadMatch = LOAD_MATCH[profiloConsumo] ?? 0.48;
+
+  // Autoconsumo diretto a R=1 (punto di calibrazione)
+  const scAtR1 = loadMatch + 0.10;
+
+  // Componente diretta (senza batteria)
+  let autoconsumoBase: number;
+  if (R <= 1.0) {
+    // Sotto-dimensionato: quasi tutto autoconsumato, ma limitato dal mismatch orario
+    autoconsumoBase = 1.0 - (1.0 - scAtR1) * Math.pow(R, 1.3);
+  } else {
+    // Sovra-dimensionato: cala con curva iperbolica
+    autoconsumoBase = scAtR1 * Math.pow(1 / R, 0.75);
+  }
+
+  // Componente accumulo
+  let bonusBatteria = 0;
+  if (capacitaAccumulo > 0) {
+    const efficienzaRT = 0.90;
+    const fattoreDisponibilita = 0.85; // non tutti i giorni ciclo pieno
+    const prodGiorno = produzioneAnnua / 365;
+    const consGiorno = consumoAnnuo / 365;
+
+    const eccedenza = prodGiorno * (1 - autoconsumoBase);
+    const consumoNotturno = consGiorno * (1 - loadMatch);
+    const cicli = Math.min(1.0, eccedenza / Math.max(1, capacitaAccumulo));
+    const catturata = capacitaAccumulo * cicli * fattoreDisponibilita;
+    const restituita = Math.min(catturata * efficienzaRT, consumoNotturno);
+
+    bonusBatteria = restituita / prodGiorno;
+    bonusBatteria = Math.min(bonusBatteria, 0.95 - autoconsumoBase);
+    bonusBatteria = Math.max(0, bonusBatteria);
+  }
+
+  const autoconsumoPerc = Math.max(0.15, Math.min(0.95, autoconsumoBase + bonusBatteria));
+  const autoconsumokWh = produzioneAnnua * autoconsumoPerc;
+  const autosufficienzaPerc = Math.min(1.0, autoconsumokWh / consumoAnnuo);
+
+  return { autoconsumoPerc, autosufficienzaPerc };
+}
 
 const ATTIVITA_LABELS: Record<string, string> = {
   industriale: 'Industriale / Artigianale',
@@ -194,9 +256,6 @@ interface Props {
   abilitaLeasing?: boolean;
   // Quando true: mostra i toggle iperammortamento e Sabatini (solo in modalita' leasing + BP)
   abilitaAgevolazioni?: boolean;
-  // Se settato, forza la percentuale di autoconsumo (0-1) ignorando la tabella per tipo attivita'.
-  // Usato da Arca Energia con 0.80.
-  autoconsumoFisso?: number;
 }
 
 export default function SimulatoreFotovoltaico({
@@ -206,7 +265,6 @@ export default function SimulatoreFotovoltaico({
   zonaFissa,
   abilitaLeasing = false,
   abilitaAgevolazioni = false,
-  autoconsumoFisso,
 }: Props) {
   // Modalita base vs business plan
   const [modalitaBP, setModalitaBP] = useState(false);
@@ -276,25 +334,38 @@ export default function SimulatoreFotovoltaico({
 
   // Calcolo produzione e risparmio energetico (solo modalita BP)
   const energetica = useMemo(() => {
-    if (!modalitaBP || potenza <= 0) return null;
+    if (!modalitaBP || potenza <= 0 || bolletta <= 0) return null;
+
     const produzioneAnnua = potenza * (IRRADIANCE[zonaEffettiva] ?? 1100);
-    const autoconsumoPct = autoconsumoFisso ?? (SELF_CONSUMPTION[tipoAttivita]?.[accumulo > 0 ? 'con' : 'senza'] ?? 0.47);
+    // Consumo annuo derivato dalla bolletta (bolletta mensile × 12 / prezzo medio kWh)
+    const consumoAnnuo = (bolletta * 12) / ENERGY_PRICE_DEFAULT;
+    // Prezzo medio kWh effettivo del cliente (per calcolare il risparmio coerente)
+    const prezzoKwh = ENERGY_PRICE_DEFAULT;
+
+    // Autoconsumo calcolato dal rapporto reale produzione/consumo
+    const { autoconsumoPerc: autoconsumoPct, autosufficienzaPerc } = calcolaAutoconsumo(
+      produzioneAnnua, consumoAnnuo, accumulo, tipoAttivita,
+    );
+
     const kwhAutoconsumo = produzioneAnnua * autoconsumoPct;
     const kwhImmissione = produzioneAnnua * (1 - autoconsumoPct);
-    const risparmioAutoconsumo = kwhAutoconsumo * ENERGY_PRICE / 12;
+    const risparmioAutoconsumo = kwhAutoconsumo * prezzoKwh / 12;
     const valoreImmissione = kwhImmissione * FEED_IN_PRICE / 12;
     const risparmioMensile = risparmioAutoconsumo + valoreImmissione;
 
     return {
       produzioneAnnua,
+      consumoAnnuo,
       autoconsumoPct,
+      autosufficienzaPerc,
       kwhAutoconsumo,
       kwhImmissione,
       risparmioMensile,
       risparmioAutoconsumoMensile: risparmioAutoconsumo,
       valoreImmissioneMensile: valoreImmissione,
+      prezzoKwh,
     };
-  }, [modalitaBP, potenza, accumulo, zonaEffettiva, tipoAttivita, autoconsumoFisso]);
+  }, [modalitaBP, potenza, accumulo, bolletta, zonaEffettiva, tipoAttivita]);
 
   // Funzione helper: calcola risultato per una durata specifica
   function calcolaPerDurata(d: number): RisultatoDurata | null {
@@ -798,12 +869,14 @@ export default function SimulatoreFotovoltaico({
         ${sezioneBP}
 
         ${modalitaBP && energetica ? `
-        <h3 style="margin:24px 0 12px;font-size:14px;color:#293C5B;font-weight:700;">Stima produzione</h3>
+        <h3 style="margin:24px 0 12px;font-size:14px;color:#293C5B;font-weight:700;">Analisi energetica</h3>
         <table style="width:100%;border-collapse:collapse;font-size:12px;">
           <tr><td>Potenza impianto</td><td style="text-align:right">${potenza} kWp</td></tr>
           ${accumulo > 0 ? `<tr><td>Accumulo</td><td style="text-align:right">${accumulo} kWh</td></tr>` : ''}
-          <tr><td>Produzione annua stimata</td><td style="text-align:right">${Math.round(energetica.produzioneAnnua).toLocaleString('it-IT')} kWh</td></tr>
+          <tr><td>Consumo annuo stimato</td><td style="text-align:right">${Math.round(energetica.consumoAnnuo).toLocaleString('it-IT')} kWh</td></tr>
+          <tr><td>Produzione annua</td><td style="text-align:right">${Math.round(energetica.produzioneAnnua).toLocaleString('it-IT')} kWh</td></tr>
           <tr><td>Autoconsumo (${Math.round(energetica.autoconsumoPct * 100)}%)</td><td style="text-align:right">${Math.round(energetica.kwhAutoconsumo).toLocaleString('it-IT')} kWh</td></tr>
+          <tr style="font-weight:700"><td>Autosufficienza energetica</td><td style="text-align:right">${Math.round(energetica.autosufficienzaPerc * 100)}%</td></tr>
         </table>
         ` : ''}
 
@@ -1318,24 +1391,32 @@ export default function SimulatoreFotovoltaico({
               </div>
             )}
 
-            {/* Card produzione (solo BP) */}
+            {/* Card produzione e consumo (solo BP) */}
             {modalitaBP && energetica && (
               <div class="simpv__card simpv__card--produzione">
                 <h4 class="simpv__card-heading">
                   <span class="material-icons-outlined simpv__icon-sun">wb_sunny</span>
-                  Stima produzione
+                  Analisi energetica
                 </h4>
                 <div class="simpv__card-row">
-                  <span>Produzione annua</span>
+                  <span>Consumo annuo stimato (da bolletta {eur(bolletta)}/mese)</span>
+                  <span>{Math.round(energetica.consumoAnnuo).toLocaleString('it-IT')} kWh</span>
+                </div>
+                <div class="simpv__card-row">
+                  <span>Produzione annua impianto</span>
                   <span>{Math.round(energetica.produzioneAnnua).toLocaleString('it-IT')} kWh</span>
                 </div>
                 <div class="simpv__card-row">
-                  <span>Autoconsumo ({Math.round(energetica.autoconsumoPct * 100)}%)</span>
+                  <span>Autoconsumo ({Math.round(energetica.autoconsumoPct * 100)}% della produzione)</span>
                   <span>{Math.round(energetica.kwhAutoconsumo).toLocaleString('it-IT')} kWh</span>
                 </div>
                 <div class="simpv__card-row">
                   <span>Immissione in rete</span>
                   <span>{Math.round(energetica.kwhImmissione).toLocaleString('it-IT')} kWh</span>
+                </div>
+                <div class="simpv__card-row" style="font-weight:700;">
+                  <span>Autosufficienza energetica</span>
+                  <span>{Math.round(energetica.autosufficienzaPerc * 100)}%</span>
                 </div>
               </div>
             )}
