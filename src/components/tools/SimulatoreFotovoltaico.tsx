@@ -194,6 +194,9 @@ interface Props {
   abilitaLeasing?: boolean;
   // Quando true: mostra i toggle iperammortamento e Sabatini (solo in modalita' leasing + BP)
   abilitaAgevolazioni?: boolean;
+  // Se settato, forza la percentuale di autoconsumo (0-1) ignorando la tabella per tipo attivita'.
+  // Usato da Arca Energia con 0.80.
+  autoconsumoFisso?: number;
 }
 
 export default function SimulatoreFotovoltaico({
@@ -203,6 +206,7 @@ export default function SimulatoreFotovoltaico({
   zonaFissa,
   abilitaLeasing = false,
   abilitaAgevolazioni = false,
+  autoconsumoFisso,
 }: Props) {
   // Modalita base vs business plan
   const [modalitaBP, setModalitaBP] = useState(false);
@@ -274,7 +278,7 @@ export default function SimulatoreFotovoltaico({
   const energetica = useMemo(() => {
     if (!modalitaBP || potenza <= 0) return null;
     const produzioneAnnua = potenza * (IRRADIANCE[zonaEffettiva] ?? 1100);
-    const autoconsumoPct = SELF_CONSUMPTION[tipoAttivita]?.[accumulo > 0 ? 'con' : 'senza'] ?? 0.47;
+    const autoconsumoPct = autoconsumoFisso ?? (SELF_CONSUMPTION[tipoAttivita]?.[accumulo > 0 ? 'con' : 'senza'] ?? 0.47);
     const kwhAutoconsumo = produzioneAnnua * autoconsumoPct;
     const kwhImmissione = produzioneAnnua * (1 - autoconsumoPct);
     const risparmioAutoconsumo = kwhAutoconsumo * ENERGY_PRICE / 12;
@@ -290,7 +294,7 @@ export default function SimulatoreFotovoltaico({
       risparmioAutoconsumoMensile: risparmioAutoconsumo,
       valoreImmissioneMensile: valoreImmissione,
     };
-  }, [modalitaBP, potenza, accumulo, zonaEffettiva, tipoAttivita]);
+  }, [modalitaBP, potenza, accumulo, zonaEffettiva, tipoAttivita, autoconsumoFisso]);
 
   // Funzione helper: calcola risultato per una durata specifica
   function calcolaPerDurata(d: number): RisultatoDurata | null {
