@@ -699,6 +699,138 @@ export default function SimulatoreFotovoltaico({
     etPartnerNome.trim() && etPartnerEmail.trim() && etPartnerTelefono.trim() && etClienteRs.trim() && formPrivacy && risultato,
   );
 
+  // Generazione PDF brandizzato MCF
+  const generaPDF = async () => {
+    if (!risultato) return;
+
+    // Import dinamico per non caricare la libreria se non serve
+    const html2pdf = (await import('html2pdf.js')).default;
+
+    // Costruiamo l'HTML del preventivo
+    const oggi = new Date().toLocaleDateString('it-IT', { day: '2-digit', month: 'long', year: 'numeric' });
+    const modalitaLabel = isLeasing ? 'Leasing Finanziario' : 'Noleggio Operativo';
+
+    // Righe dettaglio
+    let righeDettaglio = '';
+    if (isLeasing) {
+      righeDettaglio += `<tr><td>Anticipo alla firma (${anticipoPerc}%)</td><td style="text-align:right">${eur(risultato.anticipo ?? 0)}</td></tr>`;
+    }
+    righeDettaglio += `<tr><td>Riscatto finale (${isLeasing ? riscattoLeasing : Math.round(risultato.riscattoPerc * 100)}%)</td><td style="text-align:right">${eur(risultato.riscatto)}</td></tr>`;
+    if (!isLeasing && risultato.assicurazioneMensile > 0) {
+      righeDettaglio += `<tr><td>Assicurazione all-risk</td><td style="text-align:right">${eur(risultato.assicurazioneMensile)}/mese</td></tr>`;
+    }
+
+    // Righe business plan
+    let sezioneBP = '';
+    if (modalitaBP && energetica && risultato.differenza !== undefined) {
+      let righeAgevolazioni = '';
+      if (risultato.iperBeneficioMensile && risultato.iperBeneficioMensile > 0) {
+        righeAgevolazioni += `<tr style="background:#f5f3ff"><td>Iperammortamento 4.0 (su 9 anni)</td><td style="text-align:right;color:#664CCD;font-weight:700">-${eur(risultato.iperBeneficioMensile)}/mese</td></tr>`;
+      }
+      if (risultato.sabatiniBeneficioMensile && risultato.sabatiniBeneficioMensile > 0) {
+        righeAgevolazioni += `<tr style="background:#f5f3ff"><td>Contributo Sabatini 4.0 (su 6 anni)</td><td style="text-align:right;color:#664CCD;font-weight:700">-${eur(risultato.sabatiniBeneficioMensile)}/mese</td></tr>`;
+      }
+      if (risultato.zesBeneficioMensile && risultato.zesBeneficioMensile > 0) {
+        righeAgevolazioni += `<tr style="background:#f5f3ff"><td>ZES Unica — credito d'imposta (su 5 anni)</td><td style="text-align:right;color:#664CCD;font-weight:700">-${eur(risultato.zesBeneficioMensile)}/mese</td></tr>`;
+      }
+
+      const coloreConfronto = risultato.differenza >= 0 ? '#16a34a' : '#dc2626';
+      const labelConfronto = risultato.differenza >= 0 ? 'Risparmio vs bolletta' : 'Costo extra vs bolletta';
+
+      sezioneBP = `
+        <h3 style="margin:24px 0 12px;font-size:14px;color:#293C5B;font-weight:700;">Confronto con la bolletta</h3>
+        <table style="width:100%;border-collapse:collapse;font-size:12px;">
+          <tr><td>Bolletta attuale</td><td style="text-align:right">${eur(bolletta)}/mese</td></tr>
+          <tr><td>Risparmio autoconsumo</td><td style="text-align:right;color:#16a34a;font-weight:700">-${eur(energetica.risparmioAutoconsumoMensile)}/mese</td></tr>
+          <tr><td>Rata ${isLeasing ? 'leasing' : 'noleggio'}</td><td style="text-align:right">+${eur(risultato.rataTotale)}/mese</td></tr>
+          <tr><td>Immissione in rete</td><td style="text-align:right;color:#16a34a;font-weight:700">-${eur(energetica.valoreImmissioneMensile)}/mese</td></tr>
+          ${righeAgevolazioni}
+          <tr style="border-top:2px solid #293C5B;font-weight:700;font-size:13px">
+            <td style="padding-top:8px">Costo netto mensile</td>
+            <td style="text-align:right;padding-top:8px">${eur(risultato.costoNettoMensile!)}/mese</td>
+          </tr>
+          <tr style="font-weight:700;font-size:13px">
+            <td>${labelConfronto}</td>
+            <td style="text-align:right;color:${coloreConfronto}">${risultato.differenza >= 0 ? '+' : ''}${eur(risultato.differenza)}/mese</td>
+          </tr>
+        </table>
+        ${risultato.differenza > 0 ? `
+        <div style="margin-top:16px;padding:12px 16px;background:#ecfdf5;border:2px solid #34d399;border-radius:8px;text-align:center;">
+          <div style="font-size:11px;color:#15803d;font-weight:600;margin-bottom:4px;">Risparmio totale sui ${durata} mesi di contratto</div>
+          <div style="font-size:20px;font-weight:800;color:#16a34a;">+${eur(risultato.differenza * durata)}</div>
+        </div>` : ''}
+      `;
+    }
+
+    const html = `
+      <div style="font-family:'Manrope',Helvetica,Arial,sans-serif;color:#293C5B;padding:32px;max-width:600px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid #664CCD;">
+          <div>
+            <div style="font-size:18px;font-weight:800;letter-spacing:-0.02em;">
+              <span style="color:#664CCD">Medio</span><span style="color:#293C5B">credito</span>
+              <span style="color:#FE6F3A;margin-left:4px">Facile</span>
+            </div>
+            <div style="font-size:8px;font-weight:400;letter-spacing:3.5px;color:#664CCD;text-transform:uppercase;margin-top:2px;">L'OFFICINA DEL CREDITO</div>
+          </div>
+          <div style="text-align:right;font-size:10px;color:#787782;">
+            Preventivo generato il ${oggi}
+          </div>
+        </div>
+
+        <h2 style="font-size:16px;font-weight:800;color:#664CCD;margin:0 0 4px;">Preventivo ${modalitaLabel} Fotovoltaico</h2>
+        <p style="font-size:11px;color:#787782;margin:0 0 20px;">Durata: ${durata} mesi — Importo: ${eur(costo)}</p>
+
+        <div style="background:#f5f3ff;border-left:4px solid #664CCD;border-radius:8px;padding:16px 20px;margin-bottom:20px;">
+          <div style="font-size:10px;color:#787782;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:4px;">
+            ${isLeasing ? 'Rata leasing mensile' : 'Rata mensile'}
+          </div>
+          <div style="font-size:28px;font-weight:800;color:#664CCD;letter-spacing:-0.02em;">${eur(risultato.rataTotale)}</div>
+        </div>
+
+        <table style="width:100%;border-collapse:collapse;font-size:12px;">
+          ${righeDettaglio}
+        </table>
+
+        ${sezioneBP}
+
+        ${modalitaBP && energetica ? `
+        <h3 style="margin:24px 0 12px;font-size:14px;color:#293C5B;font-weight:700;">Stima produzione</h3>
+        <table style="width:100%;border-collapse:collapse;font-size:12px;">
+          <tr><td>Potenza impianto</td><td style="text-align:right">${potenza} kWp</td></tr>
+          ${accumulo > 0 ? `<tr><td>Accumulo</td><td style="text-align:right">${accumulo} kWh</td></tr>` : ''}
+          <tr><td>Produzione annua stimata</td><td style="text-align:right">${Math.round(energetica.produzioneAnnua).toLocaleString('it-IT')} kWh</td></tr>
+          <tr><td>Autoconsumo (${Math.round(energetica.autoconsumoPct * 100)}%)</td><td style="text-align:right">${Math.round(energetica.kwhAutoconsumo).toLocaleString('it-IT')} kWh</td></tr>
+        </table>
+        ` : ''}
+
+        <div style="margin-top:32px;padding-top:16px;border-top:1px solid #E1DEE3;font-size:9px;color:#787782;line-height:1.5;">
+          <p>Coefficienti indicativi. Il preventivo definitivo dipende dalla società ${isLeasing ? 'di leasing' : 'di locazione'} e dalle condizioni al momento della delibera.
+          ${modalitaBP ? ' Produzione e risparmio sono stime basate su dati medi PVGIS.' : ''}</p>
+          <p style="margin-top:8px;">
+            <strong style="color:#664CCD">Mediocredito Facile</strong> — mediocreditofacile.it — +39 393 995 7840
+          </p>
+        </div>
+      </div>
+    `;
+
+    // Creo un container temporaneo
+    const container = document.createElement('div');
+    container.innerHTML = html;
+    document.body.appendChild(container);
+
+    const nomeFile = `Preventivo_MCF_${isLeasing ? 'Leasing' : 'Noleggio'}_${costo}€_${durata}mesi.pdf`;
+
+    await html2pdf().set({
+      margin: [10, 10, 10, 10],
+      filename: nomeFile,
+      image: { type: 'jpeg', quality: 0.95 },
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+    }).from(container.firstElementChild).save();
+
+    document.body.removeChild(container);
+  };
+
   // Handler input decimale generico (per TAN, riscatto, sabatini)
   const handleDecimalInput = (
     setter: (v: number) => void,
@@ -1302,7 +1434,7 @@ export default function SimulatoreFotovoltaico({
           <button
             type="button"
             class="simpv__button simpv__button--pdf"
-            onClick={() => window.print()}
+            onClick={generaPDF}
           >
             <span class="material-icons-outlined" style="font-size:1.1rem;vertical-align:middle;margin-right:0.35rem;">picture_as_pdf</span>
             Scarica preventivo PDF
