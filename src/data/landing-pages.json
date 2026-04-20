@@ -78,152 +78,188 @@
   {
     "slug": "noleggio-fotovoltaico-zero-anticipo",
     "metaTitle": "Fotovoltaico Aziendale Senza Anticipo | Mediocredito Facile",
-    "metaDescription": "Impianto fotovoltaico per la tua azienda con canone mensile fisso. Zero investimento iniziale, il risparmio in bolletta copre il canone dal primo mese.",
-    "heroTitle": "Fotovoltaico Aziendale Senza Anticipo",
-    "heroSubtitle": "Impianto fotovoltaico per la tua azienda con canone mensile fisso. Zero investimento iniziale, il risparmio in bolletta copre il canone dal primo mese.",
-    "ctaText": "Richiedi Preventivo Gratuito",
+    "metaDescription": "Impianto 30 kW a 526 €/mese, zero esborso iniziale. La bolletta risparmiata copre il canone e ne avanzano 233 € dal primo mese. Stima su misura in 24 ore.",
+    "heroTitle": "Prima Bolletta a Zero, Prima Rata Coperta",
+    "heroSubtitle": "Un impianto da 30 kW vale 30.000 €. In noleggio operativo non tiri fuori niente all'inizio: paghi 526 € al mese e ne risparmi 759 di bolletta. Il conto si chiude in attivo dal primo mese.",
+    "ctaText": "Calcola Quanto Risparmi",
+    "valueTitle": "È come cambiare fornitore di luce",
+    "valueText": "Solo che il nuovo fornitore ti porta anche i pannelli, l'inverter, l'assicurazione e la manutenzione dentro la stessa rata. Il canone è deducibile al 100% come costo operativo. Zero cassa immobilizzata, zero debiti in bilancio, zero pratiche GSE da inseguire.",
+    "valueText2": "Mediocredito Facile confronta le condizioni di Grenke, Pagarent e altre società di noleggio operativo. La combinazione giusta dipende dal settore, dal profilo di consumo e dalla durata del contratto. Te la portiamo noi.",
     "benefits": [
       {
         "icon": "savings",
-        "title": "Zero anticipo",
-        "description": "Nessun esborso iniziale. Il canone mensile parte dal primo mese e si ripaga con il risparmio energetico."
+        "title": "Zero dalla cassa",
+        "description": "Nessun anticipo, nessuna fideiussione, nessun pegno. L'impianto parte il giorno del collaudo, il canone il mese dopo."
+      },
+      {
+        "icon": "calculate",
+        "title": "233 € al mese che restano",
+        "description": "Canone 526 €, bolletta risparmiata 759 €. Esempio su impianto 30 kW con consumo diurno allineato; il canone varia per potenza, profilo e durata."
       },
       {
         "icon": "receipt",
-        "title": "Deducibilità 100%",
-        "description": "Il canone di noleggio è interamente deducibile come costo operativo. Vantaggio fiscale immediato."
-      },
-      {
-        "icon": "build",
-        "title": "Manutenzione inclusa",
-        "description": "Assistenza, manutenzione e assicurazione incluse nel canone. Nessun costo nascosto per tutta la durata."
+        "title": "Deducibile 100%",
+        "description": "Il canone è un costo operativo, non un investimento. Vantaggio fiscale immediato, rating aziendale intatto."
       }
-    ]
+    ],
+    "formHeading": "Calcola il tuo canone e il risparmio",
+    "formSubheading": "Lascia i contatti. Ti richiamiamo entro 24 ore lavorative con una stima su misura: canone, bolletta risparmiata, conto netto mese per mese.",
+    "formCta": "Voglio la stima"
   },
   {
     "slug": "noleggio-fotovoltaico-no-debito",
     "metaTitle": "Fotovoltaico per PMI Senza Debiti in Bilancio | Mediocredito Facile",
-    "metaDescription": "Il noleggio operativo non è un finanziamento. Non appare in centrale rischi, non tocca i tuoi fidi bancari, non peggiora il rating.",
-    "heroTitle": "Fotovoltaico per PMI Senza Debiti in Bilancio",
-    "heroSubtitle": "Il noleggio operativo non è un finanziamento. Non appare in centrale rischi, non tocca i tuoi fidi bancari, non peggiora il rating.",
-    "ctaText": "Scopri Come Funziona",
+    "metaDescription": "Il noleggio operativo è costo operativo, non debito. Non tocca centrale rischi, non erode i fidi bancari, non peggiora il rating. Canone 526 €/mese per 30 kW.",
+    "heroTitle": "Il Capannone Consuma, il Bilancio Resta Pulito",
+    "heroSubtitle": "Il noleggio operativo non è un finanziamento. Non appare in centrale rischi, non erode i fidi che hai in banca, non fa rumore sul rating. In bilancio entra come costo operativo: 526 € al mese per un impianto da 30 kW.",
+    "ctaText": "Verifica l'Impatto sul Bilancio",
+    "valueTitle": "È come noleggiare il furgone invece di comprarlo",
+    "valueText": "Resta fuori dal bilancio, le banche guardano altrove, i fidi restano liberi per il circolante o per l'investimento vero. Il canone è un costo operativo deducibile; l'impianto è di proprietà della società di noleggio. Tu paghi l'energia che produci, senza immobilizzare nulla.",
+    "valueText2": "È un punto che molti commercialisti sottovalutano. Se fra un anno ti serve un affidamento bancario per liquidità o per una nuova linea produttiva, la banca guarda il bilancio: un impianto in ammortamento comunica esposizione; un canone di noleggio no.",
     "benefits": [
       {
         "icon": "account_balance_wallet",
         "title": "Fuori bilancio",
-        "description": "Il noleggio operativo è un costo operativo (OPEX), non un debito. Il tuo bilancio resta pulito."
+        "description": "OPEX, non CAPEX. L'impianto non è tuo, non appare tra gli immobilizzi, non erode il patrimonio netto."
       },
       {
         "icon": "verified",
-        "title": "Rating intatto",
-        "description": "Nessuna segnalazione in centrale rischi. Le tue linee di credito bancarie restano libere per il tuo business."
+        "title": "Centrale rischi libera",
+        "description": "Nessuna segnalazione, nessun impegno sui fidi bancari. Le linee di credito restano per il business."
       },
       {
         "icon": "lock",
-        "title": "Canone fisso e certo",
-        "description": "Sai esattamente quanto paghi ogni mese. Nessuna variazione, nessuna sorpresa per tutta la durata del contratto."
+        "title": "Canone fisso per tutta la durata",
+        "description": "Sai esattamente quanto paghi ogni mese, da 24 fino a 84 mesi. Nessuna variabile, nessuna sorpresa."
       }
-    ]
+    ],
+    "formHeading": "Scopri cosa cambia nel tuo bilancio",
+    "formSubheading": "Lascia i contatti. Ti richiamiamo entro 24 ore lavorative con un confronto pratico: come appare oggi il tuo bilancio, come apparirebbe col noleggio operativo.",
+    "formCta": "Fammi vedere la differenza"
   },
   {
     "slug": "noleggio-fotovoltaico-canone-fisso",
-    "metaTitle": "Fotovoltaico a Canone Fisso: Zero Sorprese | Mediocredito Facile",
-    "metaDescription": "Basta business plan gonfiati e costi nascosti. Con il noleggio operativo il costo è certo: un canone mensile fisso con manutenzione e assicurazione incluse.",
-    "heroTitle": "Fotovoltaico a Canone Fisso: Zero Sorprese",
-    "heroSubtitle": "Basta business plan gonfiati e costi nascosti. Con il noleggio operativo il costo è certo: un canone mensile fisso con manutenzione e assicurazione incluse.",
-    "ctaText": "Calcola il Tuo Canone",
+    "metaTitle": "Fotovoltaico a Canone Fisso, Manutenzione Inclusa | MCF",
+    "metaDescription": "526 € al mese oggi, 526 € al mese tra cinque anni. Assicurazione e manutenzione nel canone. Zero costi nascosti, zero business plan gonfiati.",
+    "heroTitle": "526 € Oggi, 526 € Tra Cinque Anni",
+    "heroSubtitle": "Il canone del noleggio operativo non ha sorprese. Manutenzione ordinaria, straordinaria, assicurazione e assistenza stanno dentro la rata mensile. 526 € per un impianto da 30 kW, fissi per tutta la durata del contratto.",
+    "ctaText": "Vedi Cosa È Incluso",
+    "valueTitle": "Il fotovoltaico in acquisto ha due costi, non uno",
+    "valueText": "La rata del leasing o del finanziamento è il costo dichiarato. Poi c'è quello non dichiarato: inverter da sostituire dopo 8-10 anni, pannelli che perdono resa, assicurazione grandine, interventi tecnici quando la produzione scende. Numeri che nei business plan di vendita raramente vengono scritti, salvo poi bussare alla porta dell'imprenditore.",
+    "valueText2": "Con il noleggio operativo i due costi diventano uno. Il canone comprende il servizio tecnico completo per la durata del contratto. Il rischio sull'impianto è di chi te lo noleggia, non tuo.",
     "benefits": [
       {
         "icon": "all_inclusive",
-        "title": "Canone tutto incluso",
-        "description": "Manutenzione ordinaria, straordinaria, assicurazione e assistenza tecnica. Tutto dentro il canone mensile."
+        "title": "Canone omnicomprensivo",
+        "description": "Manutenzione programmata e straordinaria, assicurazione all-risk, assistenza tecnica. Tutto dentro i 526 € al mese."
       },
       {
         "icon": "visibility",
-        "title": "Nessun costo nascosto",
-        "description": "Niente spese impreviste per inverter, sostituzione componenti o interventi tecnici. Il canone copre tutto."
+        "title": "Zero costi nascosti",
+        "description": "L'inverter che cede dopo anni, la grandine che rompe un pannello, la visita tecnica. Te ne accorgi solo se chiami perché l'impianto si ferma."
       },
       {
         "icon": "event",
-        "title": "Durata certa",
-        "description": "Contratto da 24 a 84 mesi. A scadenza scegli tu: riscatto, rinnovo o restituzione dell'impianto."
+        "title": "Durata da 24 a 84 mesi",
+        "description": "Scegli tu la durata in base al piano aziendale. A scadenza riscatti, rinnovi o restituisci."
       }
-    ]
+    ],
+    "formHeading": "Chiedi il dettaglio del canone",
+    "formSubheading": "Lascia i contatti. Ti richiamiamo entro 24 ore lavorative con il dettaglio esploso: canone, servizi inclusi, durata, condizioni a fine contratto.",
+    "formCta": "Voglio il dettaglio"
   },
   {
     "slug": "noleggio-fotovoltaico-senza-burocrazia",
-    "metaTitle": "Fotovoltaico Aziendale Senza Burocrazia | Mediocredito Facile",
-    "metaDescription": "Oltre il 50% degli impianti ispezionati perde incentivi per errori nelle pratiche. Col noleggio operativo il tuo costo è fisso, indipendentemente da bandi e incentivi.",
-    "heroTitle": "Fotovoltaico Aziendale Senza Burocrazia",
-    "heroSubtitle": "Oltre il 50% degli impianti ispezionati perde incentivi per errori nelle pratiche. Col noleggio operativo il tuo costo è fisso, indipendentemente da bandi e incentivi.",
+    "metaTitle": "Fotovoltaico Senza Pratiche Incentivi | Mediocredito Facile",
+    "metaDescription": "Il canone di noleggio operativo non dipende dagli incentivi. Transizione 5.0 c'è o non c'è, tu paghi sempre 526 € al mese per un impianto da 30 kW.",
+    "heroTitle": "Il Canone È Fisso Anche Se Il Click Day Lo Perdi",
+    "heroSubtitle": "Transizione 5.0, Conto Termico, crediti d'imposta: ogni anno cambiano criteri, spese ammissibili, date di apertura. Un impianto che dipende da quelli è un impianto fragile. Il canone del noleggio operativo no: 526 € al mese per un 30 kW, punto.",
     "ctaText": "Parla con un Consulente",
+    "valueTitle": "Gli incentivi sono come il meteo di agosto",
+    "valueText": "Probabili, non certi. Il click day lo vinci, lo perdi, arriva in ritardo, le spese ammissibili cambiano a bando pubblicato. Costruire un impianto da 30.000 € su un incentivo ancora da confermare è come piantare l'ombrellone perché il meteo ha detto sole.",
+    "valueText2": "Il canone del noleggio operativo è la grondaia. Non toglie il sole dal cielo, ma ti mette al riparo se piove. Se l'incentivo arriva, meglio; se non arriva, il costo della tua azienda non cambia di un euro. Per accedere comunque a Transizione 5.0 o iperammortamento esiste una strada parallela, il leasing strumentale: te la illustriamo in chiamata.",
     "benefits": [
       {
         "icon": "task_alt",
-        "title": "Nessuna pratica GSE",
-        "description": "Il canone è fisso e non dipende dagli incentivi. Zero rischio di sanzioni o decurtazioni."
+        "title": "Niente pratica GSE",
+        "description": "L'impianto è di proprietà della società di noleggio. Non devi seguire comunicazioni, ispezioni o decurtazioni di incentivi."
       },
       {
         "icon": "eco",
-        "title": "Agevolazioni fiscali? Ti orientiamo",
-        "description": "Transizione 5.0 e Conto Termico richiedono leasing o acquisto. Il noleggio offre deducibilità piena del canone. Ti aiutiamo a scegliere il percorso giusto per la tua azienda."
+        "title": "Agevolazioni, se hanno senso per te",
+        "description": "Transizione 5.0 e Conto Termico richiedono leasing strumentale o acquisto. In callback valutiamo se il gioco vale la candela."
       },
       {
         "icon": "support_agent",
-        "title": "Tutto gestito da noi",
-        "description": "Dalla valutazione alla delibera, dalla documentazione all'attivazione. Un unico interlocutore per tutto il processo."
+        "title": "Un unico interlocutore",
+        "description": "Dalla valutazione tecnica alla delibera, dalla documentazione al collaudo. Seguiamo noi la pratica dall'inizio alla fine."
       }
-    ]
+    ],
+    "formHeading": "Scegliamo insieme la strada più adatta",
+    "formSubheading": "Lascia i contatti. Ti richiamiamo entro 24 ore lavorative. In 10 minuti capiamo se per te conviene il noleggio operativo, il leasing strumentale con agevolazioni, o una combinazione delle due.",
+    "formCta": "Parliamone"
   },
   {
     "slug": "noleggio-fotovoltaico-breve-termine",
-    "metaTitle": "Fotovoltaico da 24 a 84 Mesi | Mediocredito Facile",
-    "metaDescription": "PPA e leasing bancario ti vincolano per 10-20 anni. Il noleggio operativo dura da 24 a 84 mesi. A fine contratto scegli tu cosa fare.",
-    "heroTitle": "Fotovoltaico da 24 a 84 Mesi, Non 20 Anni",
-    "heroSubtitle": "PPA e leasing bancario ti vincolano per 10-20 anni. Il noleggio operativo dura da 24 a 84 mesi. A fine contratto scegli tu cosa fare.",
-    "ctaText": "Richiedi Informazioni",
+    "metaTitle": "Fotovoltaico da 60 Mesi, Non da 20 Anni | Mediocredito Facile",
+    "metaDescription": "PPA e leasing bancario ti vincolano dieci o vent'anni. Il noleggio operativo dura quanto il tuo business plan, da 24 a 84 mesi. Canone 526 €/mese per 30 kW.",
+    "heroTitle": "Dura Quanto il Tuo Business Plan, Non Quanto un Mutuo",
+    "heroSubtitle": "Un PPA da 20 anni è un matrimonio: duraturo, ma sei legato. Il noleggio operativo dura da 24 a 84 mesi. 60 mesi è un contratto, non un destino. A scadenza riscatti, rinnovi o restituisci.",
+    "ctaText": "Scegli la Durata",
+    "valueTitle": "Un contratto deve respirare quanto la tua azienda",
+    "valueText": "Non tutte le aziende pianificano a 20 anni. Una PMI media ragiona sul triennio o sul quinquennio, poi rivede tutto: mercati, prodotti, prezzi dell'energia, a volte perfino la sede. Firmare un PPA di 15 anni su un impianto significa bloccare oggi una decisione che tra 5 anni potrebbe non avere più senso.",
+    "valueText2": "Il noleggio operativo è fatto per questo. Scegli una durata coerente con il tuo orizzonte di pianificazione. A scadenza decidi con in mano altri cinque anni di storia aziendale, non quindici in anticipo.",
     "benefits": [
       {
         "icon": "date_range",
-        "title": "Durata flessibile",
-        "description": "Scegli la durata più adatta: da 24 a 84 mesi. Nessun vincolo ventennale."
+        "title": "Da 24 a 84 mesi",
+        "description": "Scegli la durata in base al business plan, non al limite del finanziamento. 60 mesi è la media, ma si modula."
       },
       {
         "icon": "checklist",
         "title": "Tre opzioni a scadenza",
-        "description": "Riscatta l'impianto a valore residuo, rinnova il contratto con tecnologia aggiornata, o restituisci senza costi."
+        "description": "Riscatto a valore residuo tipico del 6%, rinnovo con tecnologia aggiornata, oppure restituzione dell'impianto."
       },
       {
         "icon": "update",
-        "title": "Tecnologia aggiornata",
-        "description": "Con contratti più brevi puoi aggiornare l'impianto quando escono pannelli e inverter più efficienti."
+        "title": "Tecnologia aggiornabile",
+        "description": "Con contratti brevi puoi aggiornare pannelli e inverter quando escono generazioni più efficienti."
       }
-    ]
+    ],
+    "formHeading": "Trova la durata giusta per te",
+    "formSubheading": "Lascia i contatti. Ti richiamiamo entro 24 ore lavorative per capire insieme quale durata si adatta al piano della tua azienda e a quale canone corrisponde.",
+    "formCta": "Valutiamo insieme"
   },
   {
     "slug": "noleggio-fotovoltaico-tetto-affitto",
-    "metaTitle": "Fotovoltaico Anche con Capannone in Affitto | Mediocredito Facile",
-    "metaDescription": "Il tetto non è tuo? Con il noleggio operativo l'impianto resta della società di noleggio. Serve solo un accordo col proprietario.",
-    "heroTitle": "Fotovoltaico Anche con Capannone in Affitto",
-    "heroSubtitle": "Il tetto non è tuo? Con il noleggio operativo l'impianto resta della società di noleggio. Serve solo un accordo col proprietario. Ti aiutiamo noi.",
+    "metaTitle": "Fotovoltaico con Capannone in Affitto | Mediocredito Facile",
+    "metaDescription": "Il tetto non è tuo ma il risparmio energetico sì. Impianto di proprietà della società di noleggio, accordo col proprietario gestito da noi. Canone 526 €/mese per 30 kW.",
+    "heroTitle": "Il Tetto Non È Tuo, il Risparmio Sì",
+    "heroSubtitle": "Il fotovoltaico lo paga il consumo della tua azienda, non il metro quadro del capannone. In noleggio operativo l'impianto è di proprietà della società di noleggio: serve un accordo col proprietario del tetto, non un titolo di proprietà tuo. Alla documentazione ci pensiamo noi.",
     "ctaText": "Verifica la Fattibilità",
+    "valueTitle": "L'impianto segue l'energia, non la proprietà",
+    "valueText": "Chi affitta un capannone di solito rinuncia al fotovoltaico per due ragioni. La prima: non voglio investire su un tetto che non è mio. La seconda: il proprietario non se ne occupa. Il noleggio operativo ribalta entrambe. L'impianto è della società di noleggio, non tuo. Al proprietario chiediamo solo di firmare un accordo di diritto di superficie per la durata del contratto.",
+    "valueText2": "Le società di noleggio hanno procedure standard per questa casistica. Il tempo medio per arrivare alla firma è di due-tre settimane, se il proprietario accetta la modulistica.",
     "benefits": [
       {
         "icon": "home_work",
-        "title": "Impianto non tuo",
-        "description": "L'impianto è di proprietà della società di noleggio. Tu paghi il canone e usi l'energia. Nessun vincolo sul tetto."
+        "title": "L'impianto è di chi te lo noleggia",
+        "description": "Niente investimento in asset che non possiedi. Il capannone resta del proprietario, i pannelli della società di noleggio."
       },
       {
         "icon": "folder",
-        "title": "Documentazione gestita",
-        "description": "Ti aiutiamo con l'accordo col proprietario dell'immobile e il diritto di superficie. Zero complicazioni burocratiche."
+        "title": "Pratica col proprietario gestita",
+        "description": "Diritto di superficie, accordo tra le parti, documentazione urbanistica. Coordiniamo noi con il tuo locatore."
       },
       {
         "icon": "swap_horiz",
         "title": "Trasferibile",
-        "description": "Se cambi sede, il contratto può essere gestito e trasferito. Nessun rischio di restare bloccato."
+        "description": "Se cambi sede, il contratto può essere rivisto. Non resti vincolato a un tetto che non usi più."
       }
-    ]
+    ],
+    "formHeading": "Verifica la fattibilità sul tuo tetto",
+    "formSubheading": "Lascia i contatti. Ti richiamiamo entro 24 ore lavorative per capire se il tuo caso specifico (proprietario, metratura, consumo) è fattibile e a quali condizioni.",
+    "formCta": "Verifica il mio caso"
   },
   {
     "slug": "diventa-partner",

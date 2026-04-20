@@ -1,16 +1,25 @@
 ---
 interface Props {
   fonte?: string;
+  heading?: string;
+  subheading?: string;
+  ctaText?: string;
+  variant?: 'primary' | 'secondary';
 }
-const { fonte } = Astro.props;
+const {
+  fonte,
+  heading = 'Richiedi Preventivo Gratuito',
+  subheading = 'Compila il modulo e ti ricontatteremo entro 24 ore lavorative. Nessun impegno.',
+  ctaText = 'Richiedi Preventivo Gratuito',
+  variant = 'primary',
+} = Astro.props;
+const sectionId = variant === 'primary' ? 'contatti' : undefined;
 ---
 
-<section class="form-section" id="contatti">
+<section class="form-section" id={sectionId}>
   <div class="form-section__inner">
-    <h2 class="form-section__heading">Richiedi Preventivo Gratuito</h2>
-    <p class="form-section__sub">
-      Compila il modulo e ti ricontatteremo entro 24 ore lavorative. Nessun impegno.
-    </p>
+    <h2 class="form-section__heading">{heading}</h2>
+    <p class="form-section__sub">{subheading}</p>
     <form
       class="contact-form"
       action="/api/submit"
@@ -18,41 +27,42 @@ const { fonte } = Astro.props;
     >
       <input name="website" type="text" tabindex="-1" autocomplete="off" style="position:absolute;opacity:0;pointer-events:none;height:0;overflow:hidden" aria-hidden="true" />
       {fonte && <input type="hidden" name="fonte" value={fonte} />}
+      <input type="hidden" name="variante" value={variant} />
       <div class="contact-form__field">
-        <label for="nome">Nome e Cognome</label>
-        <input
-          type="text"
-          id="nome"
-          name="nome"
-          placeholder="Mario Rossi"
-          required
-          autocomplete="name"
-        />
+        <label>Nome e Cognome
+          <input
+            type="text"
+            name="nome"
+            placeholder="Mario Rossi"
+            required
+            autocomplete="name"
+          />
+        </label>
       </div>
       <div class="contact-form__field">
-        <label for="email">Email</label>
-        <input
-          type="email"
-          id="email"
-          name="email"
-          placeholder="mario@azienda.it"
-          required
-          autocomplete="email"
-        />
+        <label>Email
+          <input
+            type="email"
+            name="email"
+            placeholder="mario@azienda.it"
+            required
+            autocomplete="email"
+          />
+        </label>
       </div>
       <div class="contact-form__field">
-        <label for="telefono">Cellulare</label>
-        <input
-          type="tel"
-          id="telefono"
-          name="telefono"
-          placeholder="+39 333 123 4567"
-          required
-          autocomplete="tel"
-        />
+        <label>Cellulare
+          <input
+            type="tel"
+            name="telefono"
+            placeholder="+39 333 123 4567"
+            required
+            autocomplete="tel"
+          />
+        </label>
       </div>
-      <button type="submit" class="contact-form__submit" id="cf-submit">
-        Richiedi Preventivo Gratuito ➤
+      <button type="submit" class="contact-form__submit">
+        {ctaText} ➤
       </button>
       <p class="contact-form__privacy">
         Inviando il modulo accetti la nostra
@@ -113,6 +123,7 @@ const { fonte } = Astro.props;
     color: var(--color-text);
     background: var(--color-bg-alt);
     transition: border-color 0.2s, box-shadow 0.2s;
+    margin-top: 0.35rem;
   }
 
   .contact-form__field input::placeholder {
@@ -148,6 +159,12 @@ const { fonte } = Astro.props;
     transform: translateY(-1px);
   }
 
+  .contact-form__submit:disabled {
+    opacity: 0.7;
+    cursor: wait;
+    transform: none;
+  }
+
   .contact-form__submit .material-icons-outlined {
     font-size: 1.1rem;
   }
@@ -172,16 +189,28 @@ const { fonte } = Astro.props;
 </style>
 
 <script>
-  const form = document.querySelector<HTMLFormElement>('.contact-form');
-  if (form) {
+  // Inizializza tutti i form di contatto presenti in pagina (supporta form intermedio + finale)
+  const forms = document.querySelectorAll<HTMLFormElement>('.contact-form');
+  forms.forEach((form) => {
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const btn = document.getElementById('cf-submit') as HTMLButtonElement | null;
-      if (btn) { btn.disabled = true; btn.textContent = 'Invio in corso…'; }
+      const btn = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+      const originalLabel = btn?.textContent ?? '';
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Invio in corso…';
+      }
       try {
         await fetch('/api/submit', { method: 'POST', body: new FormData(form) });
       } catch (_) {}
       window.location.href = '/grazie';
+      // Fallback di ripristino nel caso il redirect tardi
+      setTimeout(() => {
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = originalLabel;
+        }
+      }, 5000);
     });
-  }
+  });
 </script>
