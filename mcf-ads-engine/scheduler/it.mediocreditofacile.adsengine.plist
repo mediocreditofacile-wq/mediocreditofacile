@@ -7,11 +7,11 @@
   <string>it.mediocreditofacile.adsengine</string>
   <key>ProgramArguments</key>
   <array>
-    <string>/Users/alberto/mediocreditofacile/mcf-ads-engine/.venv/bin/python</string>
-    <string>/Users/alberto/mediocreditofacile/mcf-ads-engine/main.py</string>
+    <string>/Users/alberto/dev/mediocreditofacile/mcf-ads-engine/.venv/bin/python</string>
+    <string>/Users/alberto/dev/mediocreditofacile/mcf-ads-engine/main.py</string>
   </array>
   <key>WorkingDirectory</key>
-  <string>/Users/alberto/mediocreditofacile/mcf-ads-engine</string>
+  <string>/Users/alberto/dev/mediocreditofacile/mcf-ads-engine</string>
   <key>StartCalendarInterval</key>
   <dict>
     <key>Hour</key>
@@ -20,9 +20,9 @@
     <integer>0</integer>
   </dict>
   <key>StandardOutPath</key>
-  <string>/Users/alberto/mediocreditofacile/mcf-ads-engine/logs/daily.log</string>
+  <string>/Users/alberto/dev/mediocreditofacile/mcf-ads-engine/logs/daily.log</string>
   <key>StandardErrorPath</key>
-  <string>/Users/alberto/mediocreditofacile/mcf-ads-engine/logs/daily.err</string>
+  <string>/Users/alberto/dev/mediocreditofacile/mcf-ads-engine/logs/daily.err</string>
   <key>EnvironmentVariables</key>
   <dict>
     <key>ANTHROPIC_API_KEY</key>

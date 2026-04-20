@@ -60,7 +60,10 @@ Fasi di rollout:
 - Fase 4 (da completare): Creazione campagne complete end-to-end
 
 Stato attuale:
-- Ultimo run daily: 2026-03-11. Ultimo run weekly (negatives): 2026-03-12. FERMO DA 3 SETTIMANE.
+- Ultimo run daily: 2026-04-20. Ultimo run weekly (negatives): 2026-03-12.
+- LaunchAgent installato in ~/Library/LaunchAgents/ con path corretti e chiavi reali iniettate. Schedulato alle 08:00 ogni giorno. Il plist nel repo (scheduler/) resta con placeholder SOSTITUISCI per sicurezza.
+- Refresh token OAuth2 rigenerato il 2026-04-20 dopo revoca Google (OAuth consent screen in Testing mode → token scade ogni 7 giorni). Soluzione strutturale aperta: promuovere app a "In production" in Google Cloud Console per evitare scadenze ricorrenti.
+- Bug aperto: analyzer/suggester.py non legge ANTHROPIC_API_KEY correttamente, fallisce con "Could not resolve authentication method" su suggest_kw_variants. Gli altri moduli AI (anomaly, classifier) funzionano. Probabilmente manca load_dotenv() o il client Anthropic viene istanziato senza api_key esplicita.
 - 66 test (pytest), tutti passavano all'ultimo check
 - La directory data/audits/ non esiste ancora (il campaign_audit è stato aggiunto ma mai eseguito con successo)
 - Dashboard FastAPI funzionante con template Jinja2
@@ -244,3 +247,32 @@ Sprint successivo:
 - Report e log in italiano
 - Quando proponi modifiche al codice, mostra il diff, non il file intero
 - Se devi spiegare una scelta architetturale, fallo in 3 frasi, non in un saggio
+
+## Regola di auto-aggiornamento (OBBLIGATORIA)
+
+Alla fine di ogni sessione di lavoro, prima di chiudere:
+
+### 1. Aggiorna QUESTO CLAUDE.md
+
+Se la sessione ha modificato qualcosa di strutturale, aggiorna la sezione pertinente di questo file. Esempi:
+- Nuovo modulo Python → aggiorna la lista "Moduli" nella sezione architettura
+- Nuovo endpoint dashboard → aggiorna la sezione dashboard
+- Cambio config scoring/soglie → aggiorna la sezione Config
+- Nuova campagna o ad group → aggiorna "LE DUE CAMPAGNE" (o tre, se ne nasce una nuova)
+- Cambio stato conversion tracking → aggiorna la sezione tracking
+- Fix o riattivazione engine → aggiorna "Stato attuale" e "OBIETTIVI APERTI"
+- Nuovo gotcha Python → aggiorna "Gotcha Python 3.9"
+
+Il CLAUDE.md e' la fonte di verita' per chiunque (umano o AI) lavori sul codice dopo di te. Se la sezione "OBIETTIVI APERTI" dice ancora "aggiornato 2026-04-03" quando siamo a maggio, il prossimo che apre il progetto lavora con priorita' vecchie.
+
+### 2. Aggiorna le reference Cowork
+
+Aggiorna `~/Desktop/_AI/knowledge/reference/mediocredito-facile/campagne/context-marketing.md`:
+- Aggiungi nuove campagne/ad group/landing nella sezione appropriata
+- Aggiorna metriche e stato conversion tracking se ci sono novita'
+- Aggiungi l'azione alle "Azioni Completate" con data
+- Aggiorna la data "Ultimo aggiornamento" in testa
+
+Se hai generato report o analisi, salvali in `~/Desktop/AREE/Mediocredito_Facile/01_Marketing/Google_Ads/` e aggiorna i riferimenti nel context-marketing.md.
+
+Path del file context-marketing: ~/Desktop/_AI/knowledge/reference/mediocredito-facile/campagne/context-marketing.md
