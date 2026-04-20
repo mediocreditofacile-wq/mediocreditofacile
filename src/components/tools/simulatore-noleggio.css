@@ -236,6 +236,50 @@
   margin-bottom: 0.2rem;
 }
 
+/* --- Selettore frequenza pagamento --- */
+.sim__freq-switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.sim__freq-btn {
+  padding: 0.65rem 0.75rem;
+  border: 1.5px solid var(--color-border);
+  border-radius: 8px;
+  background: #ffffff;
+  font-family: var(--font-family);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text);
+  cursor: pointer;
+  text-align: center;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.sim__freq-btn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.sim__freq-btn--active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #ffffff;
+}
+
+.sim__freq-btn--active:hover {
+  background: var(--color-primary);
+  color: #ffffff;
+}
+
+/* Dettaglio sotto il valore principale nei risultati */
+.sim__result-detail {
+  font-size: 0.8rem;
+  color: var(--color-text-light);
+  margin-top: 0.2rem;
+}
+
 /* --- Responsive --- */
 @media (max-width: 768px) {
   .sim {
