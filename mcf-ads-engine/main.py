@@ -7,7 +7,7 @@ from datetime import date
 from pathlib import Path
 from dotenv import load_dotenv
 
-from collector.google_ads import fetch_keyword_performance, fetch_daily_metrics, fetch_search_terms
+from collector.google_ads import fetch_keyword_performance, fetch_daily_metrics, fetch_search_terms, fetch_auction_insights
 from analyzer.scorer import score_keywords, load_exclusions
 from analyzer.suggester import suggest_kw_variants
 from analyzer.anomaly import detect_anomalies
@@ -15,6 +15,7 @@ from analyzer.search_terms import classify_search_terms, identify_negatives
 from analyzer.negatives import build_negative_proposals
 from analyzer.campaign_audit import run_audit
 from notifier.email import send_daily_report, send_anomaly_alert, send_weekly_search_terms_report, send_weekly_audit
+from utils.claude_md import update_last_run
 
 load_dotenv()
 
@@ -58,6 +59,19 @@ def run_daily():
 
     save_json(keywords, Path(f"data/raw/{today}.json"))
     print(f"[{today}] {len(keywords)} keywords fetched.")
+
+    # Auction insights — chi compete sulle nostre keyword
+    print(f"[{today}] Fetching auction insights...")
+    try:
+        auction_data = fetch_auction_insights(
+            customer_id=config["google_ads"]["customer_id"],
+            yaml_path="google-ads.yaml",
+        )
+        save_json(auction_data, Path(f"data/raw/{today}_auction.json"))
+        print(f"[{today}] {len(auction_data)} auction insight rows fetched.")
+    except Exception as e:
+        auction_data = []
+        print(f"[WARN] Auction insights failed (skipping): {e}")
 
     exclusions = load_exclusions(config["exclusions"]["file"])
     scores = score_keywords(keywords, config, exclusions)
@@ -104,6 +118,13 @@ def run_daily():
         date_str=today,
     )
     print(f"[{today}] Daily report sent. Done.")
+
+    # Livello 1 auto-detect CLAUDE.md: traccia la data dell'ultimo run riuscito
+    try:
+        if update_last_run("daily", today):
+            print(f"[{today}] CLAUDE.md: campo 'Ultimo run daily' aggiornato.")
+    except Exception as e:
+        print(f"[WARN] Update CLAUDE.md fallito (non bloccante): {e}")
 
 
 def run_weekly():
@@ -170,6 +191,13 @@ def run_weekly():
         print(f"[{today}] [WEEKLY] Audit email inviata. Done.")
     except Exception as e:
         print(f"[WARN] Campaign audit fallito (skipping): {e}")
+
+    # Livello 1 auto-detect CLAUDE.md: traccia la data dell'ultimo run weekly
+    try:
+        if update_last_run("weekly", today):
+            print(f"[{today}] [WEEKLY] CLAUDE.md: campo 'Ultimo run weekly' aggiornato.")
+    except Exception as e:
+        print(f"[WARN] Update CLAUDE.md fallito (non bloccante): {e}")
 
 
 if __name__ == "__main__":
