@@ -4,10 +4,14 @@ import {
   calcolaRataLeasing,
   calcolaIperammortamento,
   calcolaSabatini,
+  calcolaZES,
   LEASING_DEFAULTS,
   DURATE_LEASING,
   ANTICIPO_OPTIONS,
   SABATINI_DEFAULT_PERC,
+  ZES_REGIONI,
+  DIMENSIONE_LABELS,
+  type DimensioneImpresa,
 } from '../../data/leasing';
 
 // --- Coefficienti GRENKE ESG++++ (fonte: Tabella ESG ++++.pdf) ---
@@ -139,6 +143,7 @@ const ARCAENERGIA_DOCS_BASE = [
 const ARCAENERGIA_DOCS_LEASING = ['Preventivo fornitore impianto'];
 const ARCAENERGIA_DOCS_IPER = ['Perizia asseverata 4.0 (per investimenti > €300.000)'];
 const ARCAENERGIA_DOCS_SABATINI = ['Dichiarazione dimensione impresa (PMI)'];
+const ARCAENERGIA_DOCS_ZES = ['Visura camerale con sede in ZES', 'Dichiarazione dimensione impresa', 'DURC regolare'];
 
 // Trova il coefficiente ESG per un importo e una durata
 function getCoeff(importo: number, durata: number): number | null {
@@ -171,6 +176,7 @@ interface RisultatoDurata {
   valoreImmissioneMensile?: number;      // Ricavo dalla vendita in rete (abbatte la rata)
   iperBeneficioMensile?: number;         // Beneficio iperammortamento mensile
   sabatiniBeneficioMensile?: number;     // Contributo Sabatini mensile
+  zesBeneficioMensile?: number;          // Credito d'imposta ZES mensile (distribuito su 5 anni)
   costoNettoMensile?: number;            // bolletta - autoconsumo + rata - immissione - agevolazioni
   differenza?: number;                   // bolletta - costoNettoMensile (>0 = risparmio complessivo)
 }
@@ -223,6 +229,9 @@ export default function SimulatoreFotovoltaico({
   const [includiSabatini, setIncludiSabatini] = useState(false);
   const [sabatiniPerc, setSabatiniPerc] = useState(SABATINI_DEFAULT_PERC);
   const [sabatiniPercInput, setSabatiniPercInput] = useState(SABATINI_DEFAULT_PERC.toString());
+  const [includiZES, setIncludiZES] = useState(false);
+  const [zesRegione, setZesRegione] = useState('puglia');
+  const [zesDimensione, setZesDimensione] = useState<DimensioneImpresa>('piccola');
 
   // Modalita' finanziaria effettiva (leasing solo se abilitato)
   const isLeasing = abilitaLeasing && modalitaFin === 'leasing';
@@ -332,10 +341,15 @@ export default function SimulatoreFotovoltaico({
         res.iperBeneficioMensile = iper.beneficioMensile;
         beneficioAgevolazioni += iper.beneficioMensile;
       }
-      if (isLeasing && includiSabatini) {
+      if (isLeasing && includiSabatini && !includiZES) {
         const sab = calcolaSabatini(costo, sabatiniPerc);
         res.sabatiniBeneficioMensile = sab.contributoMensile;
         beneficioAgevolazioni += sab.contributoMensile;
+      }
+      if (isLeasing && includiZES) {
+        const zes = calcolaZES(costo, zesRegione, zesDimensione);
+        res.zesBeneficioMensile = zes.creditoMensile;
+        beneficioAgevolazioni += zes.creditoMensile;
       }
 
       // Costo netto: bolletta - autoconsumo + rata - immissione - agevolazioni
@@ -352,7 +366,7 @@ export default function SimulatoreFotovoltaico({
     return calcolaPerDurata(durata);
   }, [calcolato, costo, durata, modalitaBP, energetica, bolletta, assicurazioneOpzionale,
       includiAssicurazione, isLeasing, tanLeasing, anticipoPerc, riscattoLeasing,
-      includiIper, includiSabatini, sabatiniPerc]);
+      includiIper, includiSabatini, sabatiniPerc, includiZES, zesRegione, zesDimensione]);
 
   // Tabella comparativa per tutte le durate
   const duratePerTabella = isLeasing ? DURATE_LEASING : DURATE;
@@ -363,7 +377,7 @@ export default function SimulatoreFotovoltaico({
       .filter((r): r is RisultatoDurata => r !== null);
   }, [calcolato, costo, modalitaBP, energetica, bolletta, assicurazioneOpzionale,
       includiAssicurazione, isLeasing, tanLeasing, anticipoPerc, riscattoLeasing,
-      includiIper, includiSabatini, sabatiniPerc]);
+      includiIper, includiSabatini, sabatiniPerc, includiZES, zesRegione, zesDimensione]);
 
   // Gestione input numerico generico
   const handleNumericInput = (
@@ -412,6 +426,7 @@ export default function SimulatoreFotovoltaico({
         ...(isLeasing ? { tan_leasing: tanLeasing, anticipo_perc: anticipoPerc } : {}),
         ...(includiIper ? { iper_ammortamento: true } : {}),
         ...(includiSabatini ? { sabatini: true } : {}),
+        ...(includiZES ? { zes_unica: true, zes_regione: zesRegione, zes_dimensione: zesDimensione } : {}),
         ...(modalitaBP ? { potenza_kwp: potenza, zona: zonaEffettiva, tipo_attivita: tipoAttivita } : {}),
       });
     }
@@ -453,9 +468,10 @@ export default function SimulatoreFotovoltaico({
     const docs = [...ARCAENERGIA_DOCS_BASE];
     if (isLeasing) docs.push(...ARCAENERGIA_DOCS_LEASING);
     if (includiIper) docs.push(...ARCAENERGIA_DOCS_IPER);
-    if (includiSabatini) docs.push(...ARCAENERGIA_DOCS_SABATINI);
+    if (includiSabatini && !includiZES) docs.push(...ARCAENERGIA_DOCS_SABATINI);
+    if (includiZES) docs.push(...ARCAENERGIA_DOCS_ZES);
     return docs;
-  }, [isLeasing, includiIper, includiSabatini]);
+  }, [isLeasing, includiIper, includiSabatini, includiZES]);
 
   const currentDocs = varianteForm === 'arcaenergia' ? arcaEnergiaDocs : ENERGYTEAM_DOCS;
   const [etDocsSpuntati, setEtDocsSpuntati] = useState<boolean[]>(() => new Array(20).fill(false));
@@ -648,6 +664,11 @@ export default function SimulatoreFotovoltaico({
       }
       if (risultato.sabatiniBeneficioMensile) {
         body.append('sabatini_beneficio_mensile', risultato.sabatiniBeneficioMensile.toFixed(2));
+      }
+      if (risultato.zesBeneficioMensile) {
+        body.append('zes_regione', zesRegione);
+        body.append('zes_dimensione', zesDimensione);
+        body.append('zes_beneficio_mensile', risultato.zesBeneficioMensile.toFixed(2));
       }
     }
     body.append('documenti_pronti', pronti.join(' | '));
@@ -922,29 +943,32 @@ export default function SimulatoreFotovoltaico({
               <span class="simpv__toggle-switch" />
             </label>
 
-            {/* Toggle Sabatini 4.0 */}
-            <label class={`simpv__toggle-card simpv__toggle-card--small ${includiSabatini ? 'simpv__toggle-card--active' : ''}`}>
+            {/* Toggle Sabatini 4.0 — disabilitato se ZES attiva */}
+            <label class={`simpv__toggle-card simpv__toggle-card--small ${includiSabatini ? 'simpv__toggle-card--active' : ''} ${includiZES ? 'simpv__toggle-card--disabled' : ''}`}>
               <span class="material-icons-outlined simpv__toggle-icon" aria-hidden="true">
                 {includiSabatini ? 'check_circle' : 'savings'}
               </span>
               <div class="simpv__toggle-content">
                 <div class="simpv__toggle-title">Sabatini 4.0</div>
                 <div class="simpv__toggle-desc">
-                  {includiSabatini
-                    ? `Attivo — contributo MISE ${sabatiniPerc}% in 6 quote annuali`
-                    : 'Contributo MISE per investimenti 4.0 in leasing'}
+                  {includiZES
+                    ? 'Non cumulabile con ZES Unica'
+                    : includiSabatini
+                      ? `Attivo — contributo MISE ${sabatiniPerc}% in 6 quote annuali`
+                      : 'Contributo MISE per investimenti 4.0 in leasing'}
                 </div>
               </div>
               <input
                 type="checkbox"
-                checked={includiSabatini}
+                checked={includiSabatini && !includiZES}
+                disabled={includiZES}
                 onChange={() => { setIncludiSabatini(!includiSabatini); setCalcolato(false); }}
               />
               <span class="simpv__toggle-switch" />
             </label>
 
-            {/* Campo % Sabatini (visibile solo se attivo) */}
-            {includiSabatini && (
+            {/* Campo % Sabatini (visibile solo se attivo e ZES non attiva) */}
+            {includiSabatini && !includiZES && (
               <div class="simpv__field" style="margin-top:0.5rem;">
                 <label class="simpv__label" for="pv-sabatini-perc">Contributo Sabatini stimato (%)</label>
                 <input
@@ -957,6 +981,65 @@ export default function SimulatoreFotovoltaico({
                   placeholder="10"
                 />
                 <span class="simpv__hint">Default ~10% dell'investimento. Il calcolo esatto dipende dalla delibera MISE.</span>
+              </div>
+            )}
+
+            {/* Toggle ZES Unica — disabilita Sabatini quando attivo */}
+            <label class={`simpv__toggle-card simpv__toggle-card--small ${includiZES ? 'simpv__toggle-card--active simpv__toggle-card--zes' : ''}`}>
+              <span class="material-icons-outlined simpv__toggle-icon" aria-hidden="true">
+                {includiZES ? 'check_circle' : 'south'}
+              </span>
+              <div class="simpv__toggle-content">
+                <div class="simpv__toggle-title">ZES Unica Mezzogiorno</div>
+                <div class="simpv__toggle-desc">
+                  {includiZES
+                    ? 'Attivo — credito d\'imposta su investimenti in ZES'
+                    : 'Credito d\'imposta fino al 60% per investimenti al Sud'}
+                </div>
+              </div>
+              <input
+                type="checkbox"
+                checked={includiZES}
+                onChange={() => {
+                  const nuovoZES = !includiZES;
+                  setIncludiZES(nuovoZES);
+                  if (nuovoZES) setIncludiSabatini(false); // mutua esclusione
+                  setCalcolato(false);
+                }}
+              />
+              <span class="simpv__toggle-switch" />
+            </label>
+
+            {/* Campi ZES: regione e dimensione impresa */}
+            {includiZES && (
+              <div class="simpv__zes-fields">
+                <div class="simpv__field">
+                  <label class="simpv__label" for="pv-zes-regione">Regione sede produttiva</label>
+                  <select
+                    id="pv-zes-regione"
+                    class="simpv__select"
+                    value={zesRegione}
+                    onChange={(e) => { setZesRegione((e.target as HTMLSelectElement).value); setCalcolato(false); }}
+                  >
+                    {ZES_REGIONI.map((r) => (
+                      <option key={r.key} value={r.key}>{r.label} — fino al {r.aliquote.piccola}%</option>
+                    ))}
+                  </select>
+                </div>
+                <div class="simpv__field">
+                  <label class="simpv__label" for="pv-zes-dimensione">Dimensione impresa</label>
+                  <select
+                    id="pv-zes-dimensione"
+                    class="simpv__select"
+                    value={zesDimensione}
+                    onChange={(e) => { setZesDimensione((e.target as HTMLSelectElement).value as DimensioneImpresa); setCalcolato(false); }}
+                  >
+                    {(Object.entries(DIMENSIONE_LABELS) as [DimensioneImpresa, string][]).map(([k, v]) => (
+                      <option key={k} value={k}>{v}</option>
+                    ))}
+                  </select>
+                </div>
+                <p class="simpv__hint" style="margin-top:0.25rem;">Investimento minimo €200.000. Non cumulabile con Sabatini. Importo soggetto a riparto proporzionale AdE.</p>
               </div>
             )}
           </div>
@@ -1041,6 +1124,12 @@ export default function SimulatoreFotovoltaico({
                   <div class="simpv__card-row simpv__card-row--agevolazione">
                     <span>Contributo Sabatini 4.0 (su 6 anni)</span>
                     <span class="simpv__violet">−{eur(risultato.sabatiniBeneficioMensile)}/mese</span>
+                  </div>
+                )}
+                {risultato.zesBeneficioMensile !== undefined && risultato.zesBeneficioMensile > 0 && (
+                  <div class="simpv__card-row simpv__card-row--agevolazione">
+                    <span>ZES Unica — credito d'imposta (su 5 anni)</span>
+                    <span class="simpv__violet">−{eur(risultato.zesBeneficioMensile)}/mese</span>
                   </div>
                 )}
                 <div class="simpv__card-row simpv__card-row--total">
@@ -1145,6 +1234,9 @@ export default function SimulatoreFotovoltaico({
               )}
               {risultato?.sabatiniBeneficioMensile !== undefined && risultato.sabatiniBeneficioMensile > 0 && (
                 <p>* Sabatini 4.0: contributo MISE stimato al {sabatiniPerc}% dell'investimento, erogato in 6 quote annuali. Il calcolo esatto dipende dalla delibera MISE e dalla durata del finanziamento.</p>
+              )}
+              {risultato?.zesBeneficioMensile !== undefined && risultato.zesBeneficioMensile > 0 && (
+                <p>* ZES Unica: credito d'imposta su investimenti in Mezzogiorno (D.L. 124/2023, prorogato al 2028). Importo soggetto a riparto proporzionale AdE. Investimento minimo €200.000. Non cumulabile con Sabatini 4.0.</p>
               )}
             </div>
           </>

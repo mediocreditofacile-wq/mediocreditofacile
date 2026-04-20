@@ -108,3 +108,48 @@ export function calcolaSabatini(costoImpianto: number, percContributo: number): 
 
   return { contributoTotale, contributoAnnuo, contributoMensile };
 }
+
+
+// --- ZES Unica (D.L. 124/2023, prorogata L. 207/2025 fino al 31/12/2028) ---
+// Credito d'imposta su investimenti in beni strumentali nuovi per strutture produttive in ZES Unica (Mezzogiorno).
+// Soglia minima: €200.000 per progetto. NON cumulabile con Sabatini 4.0.
+
+// Aliquote per territorio e dimensione impresa (Carta Aiuti Regionali 2022-2027)
+export const ZES_REGIONI: { label: string; key: string; aliquote: { piccola: number; media: number; grande: number } }[] = [
+  { label: 'Campania', key: 'campania', aliquote: { piccola: 60, media: 50, grande: 40 } },
+  { label: 'Puglia', key: 'puglia', aliquote: { piccola: 60, media: 50, grande: 40 } },
+  { label: 'Calabria', key: 'calabria', aliquote: { piccola: 60, media: 50, grande: 40 } },
+  { label: 'Sicilia', key: 'sicilia', aliquote: { piccola: 60, media: 50, grande: 40 } },
+  { label: 'Basilicata', key: 'basilicata', aliquote: { piccola: 50, media: 40, grande: 30 } },
+  { label: 'Molise', key: 'molise', aliquote: { piccola: 50, media: 40, grande: 30 } },
+  { label: 'Sardegna', key: 'sardegna', aliquote: { piccola: 50, media: 40, grande: 30 } },
+  { label: 'Abruzzo', key: 'abruzzo', aliquote: { piccola: 35, media: 25, grande: 15 } },
+  { label: 'Puglia — JTF (Brindisi/Taranto)', key: 'puglia-jtf', aliquote: { piccola: 70, media: 60, grande: 50 } },
+  { label: 'Sardegna — JTF (Sulcis)', key: 'sardegna-jtf', aliquote: { piccola: 60, media: 50, grande: 40 } },
+];
+
+export type DimensioneImpresa = 'piccola' | 'media' | 'grande';
+
+export const DIMENSIONE_LABELS: Record<DimensioneImpresa, string> = {
+  piccola: 'Piccola impresa',
+  media: 'Media impresa',
+  grande: 'Grande impresa',
+};
+
+export function calcolaZES(
+  costoImpianto: number,
+  regioneKey: string,
+  dimensione: DimensioneImpresa,
+): {
+  aliquotaPerc: number;
+  creditoImposta: number;
+  creditoMensile: number; // distribuito sulla durata leasing per confronto BP
+} {
+  const regione = ZES_REGIONI.find(r => r.key === regioneKey);
+  const aliquotaPerc = regione?.aliquote[dimensione] ?? 0;
+  const creditoImposta = costoImpianto * (aliquotaPerc / 100);
+  // Distribuzione su 5 anni (durata minima mantenimento bene in ZES) per confronto mensile
+  const creditoMensile = creditoImposta / 60;
+
+  return { aliquotaPerc, creditoImposta, creditoMensile };
+}
