@@ -764,7 +764,21 @@ export default function SimulatoreFotovoltaico({
         body,
       });
     } catch (_) {}
-    window.location.href = '/grazie';
+
+    // Genera e scarica il PDF con i dati del cliente
+    if (risultato) {
+      await generaPDF({
+        ragioneSociale: etClienteRs,
+        referente: etClienteReferente,
+        piva: etClientePiva,
+      });
+    }
+
+    // Feedback: mostra messaggio di successo senza redirect
+    setFormInvio(false);
+    setCalcolato(true);
+    // Scroll verso i risultati
+    document.querySelector('.simpv__results')?.scrollIntoView({ behavior: 'smooth' });
   };
 
   const costoValido = costo >= 800 && costo <= 240000;
@@ -775,15 +789,24 @@ export default function SimulatoreFotovoltaico({
   );
 
   // Generazione PDF brandizzato MCF
-  const generaPDF = async () => {
+  // Genera PDF brandizzato MCF con dati preventivo e opzionalmente dati cliente
+  const generaPDF = async (datiCliente?: { ragioneSociale: string; referente: string; piva: string }) => {
     if (!risultato) return;
 
-    // Import dinamico per non caricare la libreria se non serve
     const html2pdf = (await import('html2pdf.js')).default;
 
-    // Costruiamo l'HTML del preventivo
     const oggi = new Date().toLocaleDateString('it-IT', { day: '2-digit', month: 'long', year: 'numeric' });
     const modalitaLabel = isLeasing ? 'Leasing Finanziario' : 'Noleggio Operativo';
+
+    // Sezione dati cliente (se presenti)
+    const sezioneCliente = datiCliente?.ragioneSociale ? `
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:14px 18px;margin-bottom:20px;">
+        <div style="font-size:10px;color:#787782;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;">Intestato a</div>
+        <div style="font-size:14px;font-weight:700;color:#293C5B;">${datiCliente.ragioneSociale}</div>
+        ${datiCliente.referente ? `<div style="font-size:11px;color:#475569;margin-top:2px;">Rif. ${datiCliente.referente}</div>` : ''}
+        ${datiCliente.piva ? `<div style="font-size:11px;color:#787782;margin-top:2px;">P.IVA ${datiCliente.piva}</div>` : ''}
+      </div>
+    ` : '';
 
     // Righe dettaglio
     let righeDettaglio = '';
@@ -855,6 +878,8 @@ export default function SimulatoreFotovoltaico({
         <h2 style="font-size:16px;font-weight:800;color:#664CCD;margin:0 0 4px;">Preventivo ${modalitaLabel} Fotovoltaico</h2>
         <p style="font-size:11px;color:#787782;margin:0 0 20px;">Durata: ${durata} mesi — Importo: ${eur(costo)}</p>
 
+        ${sezioneCliente}
+
         <div style="background:#f5f3ff;border-left:4px solid #664CCD;border-radius:8px;padding:16px 20px;margin-bottom:20px;">
           <div style="font-size:10px;color:#787782;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:4px;">
             ${isLeasing ? 'Rata leasing mensile' : 'Rata mensile'}
@@ -895,7 +920,10 @@ export default function SimulatoreFotovoltaico({
     container.innerHTML = html;
     document.body.appendChild(container);
 
-    const nomeFile = `Preventivo_MCF_${isLeasing ? 'Leasing' : 'Noleggio'}_${costo}€_${durata}mesi.pdf`;
+    const clienteSlug = datiCliente?.ragioneSociale
+      ? '_' + datiCliente.ragioneSociale.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 30)
+      : '';
+    const nomeFile = `Preventivo_MCF_${isLeasing ? 'Leasing' : 'Noleggio'}${clienteSlug}_${durata}mesi.pdf`;
 
     await html2pdf().set({
       margin: [10, 10, 10, 10],
@@ -1514,12 +1542,14 @@ export default function SimulatoreFotovoltaico({
       </div>
 
       {/* Bottone Scarica PDF (varianti partner con download) */}
-      {risultato && (varianteForm === 'age-srl') && (
+      {risultato && (varianteForm === 'age-srl' || varianteForm === 'arcaenergia') && (
         <div class="simpv__pdf-bar">
           <button
             type="button"
             class="simpv__button simpv__button--pdf"
-            onClick={generaPDF}
+            onClick={() => generaPDF(
+              etClienteRs.trim() ? { ragioneSociale: etClienteRs, referente: etClienteReferente, piva: etClientePiva } : undefined
+            )}
           >
             <span class="material-icons-outlined" style="font-size:1.1rem;vertical-align:middle;margin-right:0.35rem;">picture_as_pdf</span>
             Scarica preventivo PDF
@@ -1654,7 +1684,11 @@ export default function SimulatoreFotovoltaico({
                 class="simpv__button simpv__button--cta"
                 disabled={!formEnergyteamValido || formInvio}
               >
-                {formInvio ? 'Invio in corso…' : 'Invia richiesta a Mediocredito Facile'}
+                {formInvio ? 'Generazione preventivo…' :
+                  (varianteForm === 'arcaenergia' || varianteForm === 'age-srl')
+                    ? 'Invia e scarica preventivo PDF'
+                    : 'Invia richiesta a Mediocredito Facile'
+                }
               </button>
             </div>
           </form>
