@@ -237,6 +237,12 @@ export default function SimulatoreFotovoltaico({
   const isLeasing = abilitaLeasing && modalitaFin === 'leasing';
   // Agevolazioni visibili solo con leasing + BP
   const mostraAgevolazioni = abilitaAgevolazioni && isLeasing && modalitaBP;
+  // ZES attivabile solo sopra €200.000
+  const zesSogliaOk = costo >= 200000;
+  // Se il costo scende sotto soglia, disattiva ZES
+  useMemo(() => {
+    if (!zesSogliaOk && includiZES) setIncludiZES(false);
+  }, [zesSogliaOk]);
 
   // Campi business plan (visibili solo con modalitaBP)
   const [potenza, setPotenza] = useState(6);
@@ -984,22 +990,25 @@ export default function SimulatoreFotovoltaico({
               </div>
             )}
 
-            {/* Toggle ZES Unica — disabilita Sabatini quando attivo */}
-            <label class={`simpv__toggle-card simpv__toggle-card--small ${includiZES ? 'simpv__toggle-card--active simpv__toggle-card--zes' : ''}`}>
+            {/* Toggle ZES Unica — disabilita Sabatini quando attivo, richiede costo >= 200k */}
+            <label class={`simpv__toggle-card simpv__toggle-card--small ${includiZES ? 'simpv__toggle-card--active simpv__toggle-card--zes' : ''} ${!zesSogliaOk ? 'simpv__toggle-card--disabled' : ''}`}>
               <span class="material-icons-outlined simpv__toggle-icon" aria-hidden="true">
                 {includiZES ? 'check_circle' : 'south'}
               </span>
               <div class="simpv__toggle-content">
                 <div class="simpv__toggle-title">ZES Unica Mezzogiorno</div>
                 <div class="simpv__toggle-desc">
-                  {includiZES
-                    ? 'Attivo — credito d\'imposta su investimenti in ZES'
-                    : 'Credito d\'imposta fino al 60% per investimenti al Sud'}
+                  {!zesSogliaOk
+                    ? 'Investimento minimo €200.000 per accedere alla ZES'
+                    : includiZES
+                      ? 'Attivo — credito d\'imposta su investimenti in ZES'
+                      : 'Credito d\'imposta fino al 60% per investimenti al Sud'}
                 </div>
               </div>
               <input
                 type="checkbox"
-                checked={includiZES}
+                checked={includiZES && zesSogliaOk}
+                disabled={!zesSogliaOk}
                 onChange={() => {
                   const nuovoZES = !includiZES;
                   setIncludiZES(nuovoZES);
@@ -1230,7 +1239,7 @@ export default function SimulatoreFotovoltaico({
                 </>
               )}
               {risultato?.iperBeneficioMensile !== undefined && risultato.iperBeneficioMensile > 0 && (
-                <p>* Iperammortamento: beneficio fiscale IRES (24%) sulla maggiorazione 180%, distribuito su 9 anni di ammortamento. Richiede beni nuovi 4.0 e perizia asseverata sopra €300k.</p>
+                <p>* Iperammortamento: beneficio fiscale (IRES + IRAP = 27,8%) sulla maggiorazione 180%, distribuito su 9 anni di ammortamento. Richiede beni nuovi 4.0 e perizia asseverata sopra €300k.</p>
               )}
               {risultato?.sabatiniBeneficioMensile !== undefined && risultato.sabatiniBeneficioMensile > 0 && (
                 <p>* Sabatini 4.0: contributo MISE stimato al {sabatiniPerc}% dell'investimento, erogato in 6 quote annuali. Il calcolo esatto dipende dalla delibera MISE e dalla durata del finanziamento.</p>

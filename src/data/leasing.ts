@@ -55,7 +55,7 @@ const IPER_FASCE = [
   { fino: 20_000_000, maggiorazionePerc: 50 },   // 150%
 ];
 
-const ALIQUOTA_IRES = 0.24;
+const ALIQUOTA_IRES = 0.278; // IRES 24% + IRAP 3,8% = 27,8% effettivo
 const ANNI_AMMORTAMENTO_FV = 9; // coefficiente 11,11% — impianti FER
 
 export function calcolaIperammortamento(costoImpianto: number): {
