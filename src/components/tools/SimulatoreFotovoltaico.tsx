@@ -254,7 +254,7 @@ interface Props {
   zonaFissa?: 'nord' | 'centro' | 'sud' | 'isole';
   // Quando true: mostra lo switch Noleggio Operativo / Leasing Finanziario
   abilitaLeasing?: boolean;
-  // Quando true: mostra i toggle iperammortamento e Sabatini (solo in modalita' leasing + BP)
+  // Quando true: mostra i toggle iperammortamento, Sabatini e ZES in modalita' leasing (indipendenti dal business plan)
   abilitaAgevolazioni?: boolean;
 }
 
@@ -297,8 +297,8 @@ export default function SimulatoreFotovoltaico({
 
   // Modalita' finanziaria effettiva (leasing solo se abilitato)
   const isLeasing = abilitaLeasing && modalitaFin === 'leasing';
-  // Agevolazioni visibili solo con leasing + BP
-  const mostraAgevolazioni = abilitaAgevolazioni && isLeasing && modalitaBP;
+  // Agevolazioni visibili con leasing — indipendenti dal business plan
+  const mostraAgevolazioni = abilitaAgevolazioni && isLeasing;
   // ZES attivabile solo sopra €200.000
   const zesSogliaOk = costo >= 200000;
   // Se il costo scende sotto soglia, disattiva ZES
@@ -410,28 +410,28 @@ export default function SimulatoreFotovoltaico({
       riscatto, riscattoPerc, anticipo, capitaleFin,
     };
 
+    // Agevolazioni fiscali: calcolate sempre che si e' in leasing, indipendenti dal business plan
+    let beneficioAgevolazioni = 0;
+    if (isLeasing && includiIper) {
+      const iper = calcolaIperammortamento(costo);
+      res.iperBeneficioMensile = iper.beneficioMensile;
+      beneficioAgevolazioni += iper.beneficioMensile;
+    }
+    if (isLeasing && includiSabatini && !includiZES) {
+      const sab = calcolaSabatini(costo, sabatiniPerc);
+      res.sabatiniBeneficioMensile = sab.contributoMensile;
+      beneficioAgevolazioni += sab.contributoMensile;
+    }
+    if (isLeasing && includiZES) {
+      const zes = calcolaZES(costo, zesRegione, zesDimensione);
+      res.zesBeneficioMensile = zes.creditoMensile;
+      beneficioAgevolazioni += zes.creditoMensile;
+    }
+
     if (modalitaBP && energetica) {
       res.risparmioMensile = energetica.risparmioMensile;
       res.risparmioAutoconsumoMensile = energetica.risparmioAutoconsumoMensile;
       res.valoreImmissioneMensile = energetica.valoreImmissioneMensile;
-
-      // Agevolazioni (solo leasing)
-      let beneficioAgevolazioni = 0;
-      if (isLeasing && includiIper) {
-        const iper = calcolaIperammortamento(costo);
-        res.iperBeneficioMensile = iper.beneficioMensile;
-        beneficioAgevolazioni += iper.beneficioMensile;
-      }
-      if (isLeasing && includiSabatini && !includiZES) {
-        const sab = calcolaSabatini(costo, sabatiniPerc);
-        res.sabatiniBeneficioMensile = sab.contributoMensile;
-        beneficioAgevolazioni += sab.contributoMensile;
-      }
-      if (isLeasing && includiZES) {
-        const zes = calcolaZES(costo, zesRegione, zesDimensione);
-        res.zesBeneficioMensile = zes.creditoMensile;
-        beneficioAgevolazioni += zes.creditoMensile;
-      }
 
       // Costo netto: bolletta - autoconsumo + rata - immissione - agevolazioni
       res.costoNettoMensile = bolletta - energetica.risparmioAutoconsumoMensile + rataTotale
@@ -1156,7 +1156,7 @@ export default function SimulatoreFotovoltaico({
           </div>
         </div>
 
-        {/* Card Agevolazioni 4.0 — visibile solo con leasing + BP attivo */}
+        {/* Card Agevolazioni 4.0 — visibile con leasing, indipendente dal business plan */}
         {mostraAgevolazioni && (
           <div class="simpv__agevolazioni-card">
             <h4 class="simpv__agevolazioni-title">
@@ -1340,6 +1340,52 @@ export default function SimulatoreFotovoltaico({
                 </div>
               )}
             </div>
+
+            {/* Card Agevolazioni fiscali — visibile senza business plan, quando leasing + agevolazione e' attiva */}
+            {isLeasing && !modalitaBP && ((risultato.iperBeneficioMensile ?? 0) > 0 || (risultato.sabatiniBeneficioMensile ?? 0) > 0 || (risultato.zesBeneficioMensile ?? 0) > 0) && (
+              <div class="simpv__card simpv__card--confronto">
+                <h4 class="simpv__card-heading">
+                  <span class="material-icons-outlined" aria-hidden="true" style="color:#664CCD;vertical-align:middle;margin-right:0.35rem;">star</span>
+                  Agevolazioni fiscali
+                </h4>
+                <div class="simpv__card-row">
+                  <span>Rata leasing</span>
+                  <span>+{eur(risultato.rataTotale)}/mese</span>
+                </div>
+                {risultato.iperBeneficioMensile !== undefined && risultato.iperBeneficioMensile > 0 && (
+                  <div class="simpv__card-row simpv__card-row--agevolazione">
+                    <span>Iperammortamento 4.0 (su 9 anni)</span>
+                    <span class="simpv__violet">−{eur(risultato.iperBeneficioMensile)}/mese</span>
+                  </div>
+                )}
+                {risultato.sabatiniBeneficioMensile !== undefined && risultato.sabatiniBeneficioMensile > 0 && (
+                  <div class="simpv__card-row simpv__card-row--agevolazione">
+                    <span>Contributo Sabatini 4.0 (su 6 anni)</span>
+                    <span class="simpv__violet">−{eur(risultato.sabatiniBeneficioMensile)}/mese</span>
+                  </div>
+                )}
+                {risultato.zesBeneficioMensile !== undefined && risultato.zesBeneficioMensile > 0 && (
+                  <div class="simpv__card-row simpv__card-row--agevolazione">
+                    <span>ZES Unica — credito d'imposta (su 5 anni)</span>
+                    <span class="simpv__violet">−{eur(risultato.zesBeneficioMensile)}/mese</span>
+                  </div>
+                )}
+                <div class="simpv__card-row simpv__card-row--total">
+                  <span>Rata effettiva al netto delle agevolazioni</span>
+                  <span>{eur(Math.max(0, risultato.rataTotale - (risultato.iperBeneficioMensile ?? 0) - (risultato.sabatiniBeneficioMensile ?? 0) - (risultato.zesBeneficioMensile ?? 0)))}/mese</span>
+                </div>
+                <div class="simpv__card-row simpv__card-row--agevolazione" style="margin-top:0.5rem;">
+                  <span>Totale agevolazioni nel periodo di beneficio</span>
+                  <span class="simpv__violet">
+                    {eur(
+                      ((risultato.iperBeneficioMensile ?? 0) * 12 * 9) +
+                      ((risultato.sabatiniBeneficioMensile ?? 0) * 12 * 6) +
+                      ((risultato.zesBeneficioMensile ?? 0) * 12 * 5)
+                    )}
+                  </span>
+                </div>
+              </div>
+            )}
 
             {/* Card confronto bolletta (solo BP) */}
             {modalitaBP && energetica && risultato.differenza !== undefined && risultato.costoNettoMensile !== undefined && (
