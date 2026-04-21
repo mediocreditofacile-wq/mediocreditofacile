@@ -1,0 +1,19 @@
+# Google Ads API Configuration
+# Segui i passaggi sotto per ottenere ogni valore.
+
+# 1. Developer Token: Google Ads → Strumenti → Centro API
+developer_token: "INSERISCI_QUI"
+
+# 2. OAuth2: Google Cloud Console → API & Services → Credentials
+client_id: "INSERISCI_QUI.apps.googleusercontent.com"
+client_secret: "INSERISCI_QUI"
+
+# 3. Refresh Token: esegui python3 scripts/get_refresh_token.py
+refresh_token: "INSERISCI_QUI"
+
+# 4. Customer ID: il tuo ID cliente Google Ads (senza trattini, es: 1234567890)
+#    Lo trovi in alto a destra su ads.google.com
+customer_id: "INSERISCI_QUI"
+
+# Se usi un account manager (MCC), inserisci anche:
+# login_customer_id: "INSERISCI_QUI"

@@ -20,7 +20,8 @@
       "Bash(cp /Users/alberto/mediocreditofacile/.claude/skills/recosta/SKILL.md ~/.claude/skills/recosta/SKILL.md)",
       "Bash(rm /Users/alberto/mediocreditofacile/.claude/skills/recosta/SKILL.md)",
       "Bash(rmdir /Users/alberto/mediocreditofacile/.claude/skills/recosta)",
-      "Bash(rmdir /Users/alberto/mediocreditofacile/.claude/skills)"
+      "Bash(rmdir /Users/alberto/mediocreditofacile/.claude/skills)",
+      "mcp__Claude_in_Chrome__tabs_context_mcp"
     ]
   }
 }

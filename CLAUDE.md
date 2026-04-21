@@ -101,17 +101,19 @@ Mai nero puro #000000 — usare sempre #0F1020 o #444451
 - Form — campo "fonte" OBBLIGATORIO: ogni form del sito deve avere un campo nascosto `fonte` con lo slug della pagina. Per le landing dinamiche (da landing-pages.json), il componente ContactForm accetta la prop `fonte` e lo slug viene passato automaticamente in [slug].astro. Per i form inline nelle pagine statiche, usare `<input type="hidden" name="fonte" value="[slug]" />`. Il campo arriva a Zapier e da lì nella mail di notifica e in Pipedrive, così ogni lead porta con sé l'informazione della pagina di provenienza.
 
 ## API Routes (Vercel serverless)
-- `src/pages/api/submit.ts` → endpoint form contatti. Dal 20 aprile 2026 ha safety net: invia mail diretta via Resend (mittente `onboarding@resend.dev`, destinatario `mediocreditofacile@gmail.com`) IN PARALLELO alla chiamata Zapier. Loggga ogni submission come JSON strutturato (evento `form_submitted` con esito di entrambi i canali). Se entrambi falliscono, logga `lead_lost` con payload completo per recupero manuale. Risponde sempre 200 al browser per non degradare la UX. Honeypot loggato come `form_rejected` per debug.
+- `src/pages/api/submit.ts` → endpoint form contatti standard MCF. Dal 20 aprile 2026 ha safety net: invia mail diretta via Resend (mittente `onboarding@resend.dev`, destinatario `mediocreditofacile@gmail.com`) IN PARALLELO alla chiamata Zapier. Logga ogni submission come JSON strutturato (evento `form_submitted` con esito di entrambi i canali). Se entrambi falliscono, logga `lead_lost` con payload completo per recupero manuale. Risponde sempre 200 al browser per non degradare la UX. Honeypot loggato come `form_rejected` per debug.
+- `src/pages/api/submit-agevolazioni.ts` → endpoint dedicato alla campagna Agevolazioni in partnership con Ambico Group (aggiunto il 21 aprile 2026). Usato SOLO dalle 4 landing `/finanziamenti/agevolazioni/*` (Sabatini, MCC, Bando ISI, Iperammortamento). Notifica Resend in copia a `mediocreditofacile@gmail.com` e `mkt@ambicogroup.it` con subject `Nuovo lead Agevolazioni — [fonte]`, header che dichiara la partnership e tabella con i dati calcolo inviati dai calcolatori (importo, tipologia bene, contributo stimato, ecc.). Chiamata Zapier opzionale tramite env var `ZAPIER_WEBHOOK_URL_AGEVOLAZIONI` (oggi vuota: quando verra' creato lo Zap dedicato alla pipeline Pipedrive "Agevolazioni IMC", basta valorizzarla e l'endpoint inizia a chiamarlo). Log separati `form_submitted_agevolazioni` / `lead_rejected_agevolazioni` / `lead_lost_agevolazioni` per tenere i dati della campagna isolabili nei log Vercel. Se Zapier non e' configurato, non conta come errore nel calcolo del `lead_lost`.
 - `src/pages/api/cerved.ts` → proxy Cerved API per lookup P.IVA (GET, cache in-memory 24h, CORS per mcf-marotta.netlify.app)
 - `src/pages/api/credit-ai.ts` → layer AI credit policy via Claude Haiku (POST, CORS per mcf-marotta.netlify.app)
 - Tutte usano `export const prerender = false` per funzionare come serverless functions
 - IMPORTANTE: il dominio fa redirect da `mediocreditofacile.it` a `www.mediocreditofacile.it` — usare sempre `www` nelle chiamate fetch dal frontend
 
 ## Environment Variables (Vercel)
-- `ZAPIER_WEBHOOK_URL` → webhook form contatti
+- `ZAPIER_WEBHOOK_URL` → webhook form contatti MCF standard
+- `ZAPIER_WEBHOOK_URL_AGEVOLAZIONI` → webhook Zapier dedicato alla pipeline Pipedrive "Agevolazioni IMC" (partnership Ambico). Predisposto il 21 aprile 2026, valore oggi vuoto: l'endpoint `submit-agevolazioni` salta la chiamata se la variabile non e' valorizzata. Va popolato quando lo Zap dedicato verra' creato.
 - `CERVED_CONSUMER_KEY` → API key Cerved (header: `apikey`)
 - `ANTHROPIC_API_KEY` → API key Anthropic per layer AI credit policy
-- `RESEND_API_KEY` → chiave Resend per notifiche mail dirette dai form (aggiunta il 20 aprile 2026, Fase 1 safety net)
+- `RESEND_API_KEY` → chiave Resend per notifiche mail dirette dai form (aggiunta il 20 aprile 2026, Fase 1 safety net). Riusata anche da `submit-agevolazioni` per le notifiche a MCF + Ambico.
 
 ## Redirect (vercel.json)
 - `/agevolazioni/nuova-sabatini-2026` → 301 → `/finanziamenti/agevolazioni/nuova-sabatini-2026`
