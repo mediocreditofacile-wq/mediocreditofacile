@@ -6,6 +6,7 @@ author: "Alberto Amà"
 tags: ["noleggio operativo", "caseificio", "burrata", "automazione", "food machinery", "caso studio", "vendita a canone"]
 image: "/images/blog-caseificio-burrata.webp"
 imageAlt: "Macchinario automatico per produzione burrata in un caseificio italiano"
+cluster: "casi-studio"
 ---
 
 *Quando un produttore di macchine per caseifici smette di vendere e inizia a noleggiare, succedono due cose: vende di più e incassa prima.*

@@ -6,6 +6,7 @@ author: "Alberto Amà"
 tags: ["noleggio operativo", "mini-escavatori", "edilizia", "mezzi edili", "grace period", "stagionalità", "caso studio"]
 image: "/images/blog-mezzi-edili.webp"
 imageAlt: "Mini escavatore nuovo consegnato a una fiera di mezzi edili"
+cluster: "noleggio"
 ---
 
 A febbraio, nelle fiere di settore, si chiudono gli ordini. A marzo il mini-escavatore arriva in cantiere. Ma il primo lavoro fatturato si incassa ad aprile, forse maggio. In mezzo ci sono due o tre mesi dove il mezzo c'è, il cliente lo sta già usando, ma il flusso di cassa per pagarlo ancora no.

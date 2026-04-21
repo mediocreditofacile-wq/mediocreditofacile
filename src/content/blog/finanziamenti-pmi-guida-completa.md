@@ -6,6 +6,7 @@ author: "Alberto Amà"
 tags: ["finanziamenti", "pmi", "guida", "chirografario", "factoring", "finanziamento imprese"]
 image: "/images/blog-finanziamenti-pmi-guida.webp"
 imageAlt: "Imprenditore che valuta documenti finanziari alla scrivania"
+cluster: "finanziamenti"
 ---
 
 Ogni imprenditore che gestisce una PMI prima o poi si trova davanti alla stessa domanda: come finanziare la crescita senza dipendere esclusivamente dalla banca sotto casa?

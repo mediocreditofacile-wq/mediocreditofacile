@@ -6,6 +6,7 @@ author: "Alberto Amà"
 tags: ["fotovoltaico", "capannone affitto", "noleggio operativo", "diritto di superficie", "PMI", "guida"]
 image: "/images/blog-fotovoltaico-affitto.webp"
 imageAlt: "Pannelli solari installati su un capannone industriale in affitto"
+cluster: "fotovoltaico"
 ---
 
 *Il 60% delle PMI italiane opera in immobili in affitto. Il leasing tradizionale richiede la proprietà dell'immobile. Il noleggio operativo no.*

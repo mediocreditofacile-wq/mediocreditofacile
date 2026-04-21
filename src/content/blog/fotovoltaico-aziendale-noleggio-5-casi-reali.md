@@ -6,6 +6,7 @@ author: "Alberto Amà"
 tags: ["fotovoltaico", "noleggio operativo", "caso studio", "risparmio energetico", "ESG", "PMI", "bolletta"]
 image: "/images/blog-fotovoltaico-5-casi.webp"
 imageAlt: "Pannelli solari su tetti industriali italiani visti dall'alto al tramonto"
+cluster: "fotovoltaico"
 ---
 
 *Cinque aziende, cinque settori diversi, un denominatore comune: il canone del noleggio si ripaga con il risparmio in bolletta. Ecco i numeri.*

@@ -6,6 +6,7 @@ author: "Alberto Amà"
 tags: ["Nuova Sabatini", "noleggio operativo", "agevolazioni", "PMI", "contributo", "guida"]
 image: "/images/blog-sabatini-confronto.webp"
 imageAlt: "Documenti di agevolazioni fiscali per PMI con calcoli"
+cluster: "agevolazioni"
 ---
 
 La domanda arriva almeno una volta a settimana: "Posso usare la Nuova Sabatini se prendo il bene a noleggio operativo?" La risposta breve è no. La risposta completa è più interessante, perché spesso il noleggio operativo conviene comunque, anche senza Sabatini.

@@ -6,6 +6,7 @@ author: "Alberto Amà"
 tags: ["noleggio operativo", "attrezzature medicali", "farmacie", "telemedicina", "healthcare", "caso studio"]
 image: "/images/blog-farmacie-noleggio.webp"
 imageAlt: "Farmacia moderna con attrezzature medicali in noleggio operativo"
+cluster: "noleggio"
 ---
 
 *300 farmacie, ciascuna con un corner salute equipaggiato con Holter, telemedicina e diagnostica. Tutto a noleggio, tutto deducibile, zero investimento iniziale per il farmacista.*

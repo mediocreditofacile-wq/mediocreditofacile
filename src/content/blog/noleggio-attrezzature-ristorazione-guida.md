@@ -6,6 +6,7 @@ author: "Alberto Amà"
 tags: ["noleggio operativo", "ristorazione", "forni professionali", "cucina", "HORECA", "attrezzature", "caso studio"]
 image: "/images/blog-ristorazione-canone.webp"
 imageAlt: "Cucina professionale con nuove attrezzature in fase di installazione"
+cluster: "noleggio"
 ---
 
 *Un forno professionale costa 15.000 euro. Un abbattitore 8.000. Una cella frigorifera 12.000. Oppure puoi noleggiare tutto a 780 euro al mese, deducibili al 100%.*

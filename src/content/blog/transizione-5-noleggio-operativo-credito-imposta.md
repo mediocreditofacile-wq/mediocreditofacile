@@ -6,6 +6,7 @@ author: "Alberto Amà"
 tags: ["Transizione 5.0", "credito d'imposta", "noleggio operativo", "leasing", "agevolazioni", "PMI", "fotovoltaico", "efficientamento"]
 image: "/images/blog-transizione-5.webp"
 imageAlt: "Documenti ufficiali Transizione 5.0 con calcoli di credito d'imposta"
+cluster: "agevolazioni"
 ---
 
 Transizione 5.0 è il piano di incentivi del governo per le imprese che investono in beni strumentali che riducono i consumi energetici. Credito d'imposta dal 35% al 45%, compensabile in F24. Per un impianto fotovoltaico da 120.000 euro, parliamo di un beneficio fino a 54.000 euro.

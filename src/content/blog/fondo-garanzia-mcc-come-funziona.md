@@ -6,6 +6,7 @@ author: "Alberto Amà"
 tags: ["fondo garanzia", "mcc", "mediocredito centrale", "garanzia statale", "pmi"]
 image: "/images/blog-fondo-garanzia-mcc.webp"
 imageAlt: "Documenti finanziari e calcolatrice su scrivania, concetto di garanzia"
+cluster: "agevolazioni"
 ---
 
 *Cos'è il Fondo di Garanzia, quanto copre nel 2026, come si attiva e perché conviene combinarlo con la Nuova Sabatini. Guida pratica per imprenditori che vogliono capire lo strumento, non solo usarlo.*

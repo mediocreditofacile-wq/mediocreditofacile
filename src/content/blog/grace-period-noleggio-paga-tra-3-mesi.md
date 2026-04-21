@@ -6,6 +6,7 @@ author: "Alberto Amà"
 tags: ["noleggio operativo", "grace period", "pagamento differito", "mezzi edili", "stagionalità", "caso studio"]
 image: "/images/blog-grace-period.webp"
 imageAlt: "Mini escavatore nuovo consegnato in un cantiere edile"
+cluster: "noleggio"
 ---
 
 *Il bene arriva a gennaio, il primo canone parte ad aprile. Nel mezzo: tre mesi per farlo lavorare e generare ricavi prima di pagare il primo euro.*

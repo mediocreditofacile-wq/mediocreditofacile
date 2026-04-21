@@ -6,6 +6,7 @@ author: "Alberto Amà"
 tags: ["ammortamento", "leasing", "noleggio operativo", "confronto fiscale", "beni strumentali"]
 image: "/images/blog-combinare-agevolazioni.webp"
 imageAlt: "Documenti finanziari a confronto su scrivania"
+cluster: "leasing"
 ---
 
 *Ogni PMI che deve acquisire un bene strumentale si trova davanti alla stessa scelta: comprare, fare un leasing o prendere a noleggio. Tre strade, tre trattamenti fiscali diversi, tre impatti sul bilancio. I numeri cambiano parecchio a seconda di quale scegli.*

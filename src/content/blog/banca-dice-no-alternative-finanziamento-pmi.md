@@ -6,6 +6,7 @@ author: "Alberto Amà"
 tags: ["finanziamento rifiutato", "alternativa banca", "noleggio operativo", "lease-back", "fintech", "PMI", "patrimonio netto negativo"]
 image: "/images/blog-banca-dice-no.webp"
 imageAlt: "Broker che mostra alternative di finanziamento a un imprenditore dopo un rifiuto bancario"
+cluster: "finanziamenti"
 ---
 
 *"Ci dispiace, la sua richiesta non è stata accolta." L'hai ricevuta anche tu, quella mail. Ecco cosa fare dopo.*

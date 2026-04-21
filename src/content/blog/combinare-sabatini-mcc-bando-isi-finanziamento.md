@@ -6,6 +6,7 @@ author: "Alberto Amà"
 tags: ["iperammortamento", "sabatini", "fondo garanzia", "bando isi", "agevolazioni", "finanziamenti", "combinare"]
 image: "/images/blog-combinare-agevolazioni.webp"
 imageAlt: "Vista dall'alto di scrivania con documenti di agevolazioni a confronto"
+cluster: "agevolazioni"
 ---
 
 Le agevolazioni pubbliche per le PMI non si escludono a vicenda. Eppure la maggior parte delle aziende ne usa una sola, quando potrebbe combinarne tre o quattro sullo stesso investimento. Il motivo e' semplice: ogni misura agisce su un livello diverso del costo, e capire dove si incastrano richiede qualcuno che le conosca tutte.

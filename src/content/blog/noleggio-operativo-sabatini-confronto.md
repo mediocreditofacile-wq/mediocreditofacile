@@ -6,6 +6,7 @@ author: "Alberto Amà"
 tags: ["noleggio operativo", "Nuova Sabatini", "confronto", "PMI", "acquisto", "leasing", "guida"]
 image: "/images/blog-sabatini-vs-noleggio.webp"
 imageAlt: "Confronto tra opzioni di finanziamento per PMI su una scrivania"
+cluster: "agevolazioni"
 ---
 
 Una PMI deve acquistare un macchinario da 50.000 euro. Ha due strade davanti: comprarlo con un finanziamento bancario e incassare il contributo della Nuova Sabatini, oppure prenderlo a noleggio operativo rinunciando alla Sabatini ma guadagnando in flessibilità e trattamento fiscale.

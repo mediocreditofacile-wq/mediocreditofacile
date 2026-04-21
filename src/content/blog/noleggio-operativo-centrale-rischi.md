@@ -6,6 +6,7 @@ author: "Alberto Amà"
 tags: ["noleggio operativo", "centrale rischi", "rating bancario", "leasing", "PMI", "bilancio", "guida"]
 image: "/images/blog-centrale-rischi.webp"
 imageAlt: "Imprenditore che esce dalla banca verso un ufficio broker con luce calda"
+cluster: "noleggio"
 ---
 
 *Il noleggio operativo non entra in Centrale Rischi. Il leasing sì. Questa differenza, da sola, può valere centinaia di migliaia di euro di accesso al credito per la tua azienda.*

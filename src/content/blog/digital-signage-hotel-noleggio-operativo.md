@@ -6,6 +6,7 @@ author: "Alberto Amà"
 tags: ["digital signage", "noleggio operativo", "hotel", "HORECA", "totem", "caso studio"]
 image: "/images/blog-digital-signage.webp"
 imageAlt: "Totem digital signage in una lobby di hotel con contenuti dinamici"
+cluster: "casi-studio"
 ---
 
 Un totem in lobby che mostra le previsioni meteo, il menu del ristorante, gli eventi in zona e le tariffe aggiornate in tempo reale. Costo per l'hotel: 70 euro al mese, tutto incluso. Nessun investimento iniziale, nessuna competenza tecnica richiesta.

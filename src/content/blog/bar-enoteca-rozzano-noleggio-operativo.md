@@ -6,6 +6,7 @@ author: "Alberto Amà"
 tags: ["noleggio operativo", "ristorazione", "finanziamento bar", "patrimonio netto negativo", "caso studio", "fintech", "cucina professionale"]
 image: "/images/blog-caso-studio-enoteca.webp"
 imageAlt: "Bar enoteca in fase di ristrutturazione"
+cluster: "casi-studio"
 ---
 
 *Quando il sistema automatico legge "attività sospesa" e non capisce che stai solo cambiando sede. Un caso reale di come funziona (e non funziona) il credito per le PMI italiane.*

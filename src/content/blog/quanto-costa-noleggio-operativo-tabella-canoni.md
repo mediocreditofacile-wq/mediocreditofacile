@@ -6,6 +6,7 @@ author: "Alberto Amà"
 tags: ["noleggio operativo", "canoni", "tabella", "costi", "coefficienti", "preventivo", "PMI"]
 image: "/images/blog-tabella-canoni.webp"
 imageAlt: "Tabella con calcoli dei canoni mensili di noleggio operativo per diverse durate"
+cluster: "noleggio"
 ---
 
 *La prima domanda è sempre la stessa: "Ma quanto mi viene al mese?" Ecco la tabella con i numeri veri.*

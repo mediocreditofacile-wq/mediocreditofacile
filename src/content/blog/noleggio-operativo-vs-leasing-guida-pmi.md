@@ -6,6 +6,7 @@ author: "Alberto Amà"
 tags: ["noleggio operativo", "leasing", "confronto", "PMI", "guida", "deducibilità", "centrale rischi"]
 image: "/images/blog-noleggio-vs-leasing.webp"
 imageAlt: "Confronto tra noleggio operativo e leasing su una scrivania con documenti finanziari"
+cluster: "leasing"
 ---
 
 *La domanda che mi fanno più spesso: "Meglio il noleggio o il leasing?" La risposta onesta è: dipende. Ma dipende da cose precise, che si possono misurare.*
