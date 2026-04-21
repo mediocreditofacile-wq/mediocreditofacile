@@ -60,6 +60,7 @@ const ANNI_AMMORTAMENTO_FV = 9; // coefficiente 11,11% — impianti FER
 
 export function calcolaIperammortamento(costoImpianto: number): {
   maggiorazionePerc: number;
+  costoAmmortizzabilePerc: number;
   maggiorazione: number;
   costoAmmortizzabileTotale: number;
   beneficioFiscaleTotale: number;
@@ -68,19 +69,20 @@ export function calcolaIperammortamento(costoImpianto: number): {
 } {
   const fascia = IPER_FASCE.find(f => costoImpianto <= f.fino);
   const maggiorazionePerc = fascia?.maggiorazionePerc ?? 0;
+  // Costo ammortizzabile totale = 100% (ordinario) + maggiorazione (180/100/50%)
+  const costoAmmortizzabilePerc = 100 + maggiorazionePerc; // 280%, 200% o 150%
   const maggiorazione = costoImpianto * (maggiorazionePerc / 100);
-
-  // Beneficio fiscale = (ammortamento ordinario + maggiorazione) × IRES
-  // L'ammortamento ordinario (100%) genera gia' un risparmio fiscale di suo,
-  // ma qui calcoliamo SOLO il beneficio AGGIUNTIVO della maggiorazione
-  // perche' l'ammortamento ordinario si avrebbe comunque
   const costoAmmortizzabileTotale = costoImpianto + maggiorazione;
-  const beneficioFiscaleTotale = maggiorazione * ALIQUOTA_IRES;
+
+  // Beneficio fiscale sull'INTERO costo ammortizzabile (280%, non solo la maggiorazione)
+  // Il cliente scarica fiscalmente il 280% del bene, non il 100% standard
+  const beneficioFiscaleTotale = costoAmmortizzabileTotale * ALIQUOTA_IRES;
   const beneficioAnnuo = beneficioFiscaleTotale / ANNI_AMMORTAMENTO_FV;
   const beneficioMensile = beneficioAnnuo / 12;
 
   return {
     maggiorazionePerc,
+    costoAmmortizzabilePerc,
     maggiorazione,
     costoAmmortizzabileTotale,
     beneficioFiscaleTotale,
