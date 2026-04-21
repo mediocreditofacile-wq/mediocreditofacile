@@ -278,3 +278,251 @@ def test_export_negatives_csv_returns_csv_content(tmp_negatives):
     assert "text/csv" in response.headers["content-type"]
     assert "noleggio auto privati" in response.text
     assert "Campaign" in response.text
+
+
+# --- Recommendations (budget advisor) routes ----------------------------------
+
+def _write_recommendations(tmp_path, recs: list, date_str: str = "2026-04-21") -> Path:
+    rec_dir = tmp_path / "recommendations"
+    rec_dir.mkdir(parents=True, exist_ok=True)
+    (rec_dir / f"{date_str}.json").write_text(
+        json.dumps({"date": date_str, "recommendations": recs})
+    )
+    (tmp_path / "proposals").mkdir(exist_ok=True)
+    return tmp_path
+
+
+def _rec(
+    campaign: str,
+    action_type: str,
+    current: float,
+    recommended: float,
+    alert_aggressive: bool = False,
+    resource: str = "customers/123/campaignBudgets/999",
+    **extra,
+) -> dict:
+    d = {
+        "campaign": campaign,
+        "trigger": "lost_budget_high",
+        "action_type": action_type,
+        "current_budget": current,
+        "recommended_budget": recommended,
+        "bid_change_pct": 0.0,
+        "pillar_adgroup": "Pilastro X",
+        "reason": "test reason",
+        "priority": 2,
+        "status": "pending",
+        "campaign_budget_resource_name": resource,
+    }
+    if alert_aggressive:
+        d["alert_aggressive"] = True
+    d.update(extra)
+    return d
+
+
+def _get_client_with_recs(tmp_path):
+    import os
+    os.environ["PROPOSALS_DIR"] = str(tmp_path / "proposals")
+    os.environ["RECOMMENDATIONS_DIR"] = str(tmp_path / "recommendations")
+    os.environ["LANDING_PAGES_PATH"] = str(tmp_path / "landing-pages.json")
+    os.environ["ANTHROPIC_API_KEY"] = "fake"
+    os.environ["GOOGLE_ADS_CUSTOMER_ID"] = "123"
+    from dashboard.server import app
+    return TestClient(app)
+
+
+def test_get_recommendations_latest_returns_file(tmp_path):
+    _write_recommendations(tmp_path, [_rec("Camp A", "budget_increase", 10, 15)])
+    client = _get_client_with_recs(tmp_path)
+    response = client.get("/api/recommendations/latest")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["date"] == "2026-04-21"
+    assert len(data["recommendations"]) == 1
+    assert data["recommendations"][0]["campaign"] == "Camp A"
+
+
+def test_recommendations_reject_sets_status_without_api_call(tmp_path, monkeypatch):
+    mock_update = MagicMock()
+    monkeypatch.setattr("dashboard.server.update_campaign_budget", mock_update)
+    _write_recommendations(tmp_path, [_rec("Camp A", "budget_increase", 10, 15)])
+    client = _get_client_with_recs(tmp_path)
+    response = client.post("/api/recommendations/approve", json={
+        "date": "2026-04-21", "index": 0, "action": "rejected",
+    })
+    assert response.status_code == 200
+    assert response.json()["status"] == "rejected"
+    mock_update.assert_not_called()
+    saved = json.loads((tmp_path / "recommendations" / "2026-04-21.json").read_text())
+    assert saved["recommendations"][0]["status"] == "rejected"
+
+
+def test_recommendations_approve_budget_increase_calls_update(tmp_path, monkeypatch):
+    """Non-aggressivo: approve => chiama update_campaign_budget + status applied_budget."""
+    mock_update = MagicMock(return_value={"resource_name": "x"})
+    monkeypatch.setattr("dashboard.server.update_campaign_budget", mock_update)
+    _write_recommendations(tmp_path, [_rec("Camp A", "budget_increase", 10, 15)])
+    client = _get_client_with_recs(tmp_path)
+    response = client.post("/api/recommendations/approve", json={
+        "date": "2026-04-21", "index": 0, "action": "approved",
+    })
+    assert response.status_code == 200
+    mock_update.assert_called_once()
+    args = mock_update.call_args.args
+    # Signature: update_campaign_budget(customer_id, resource, new_daily_budget_euros)
+    assert args[0] == "123"
+    assert args[1] == "customers/123/campaignBudgets/999"
+    assert args[2] == 15.0
+    saved = json.loads((tmp_path / "recommendations" / "2026-04-21.json").read_text())
+    assert saved["recommendations"][0]["status"] == "applied_budget"
+    assert "applied_at" in saved["recommendations"][0]
+
+
+def test_recommendations_aggressive_requires_force_apply(tmp_path, monkeypatch):
+    """Aggressiva + force_apply=False => NON chiama API, requires_manual=True."""
+    mock_update = MagicMock()
+    monkeypatch.setattr("dashboard.server.update_campaign_budget", mock_update)
+    _write_recommendations(tmp_path, [
+        _rec("Camp A", "budget_increase", 10, 25, alert_aggressive=True),
+    ])
+    client = _get_client_with_recs(tmp_path)
+    response = client.post("/api/recommendations/approve", json={
+        "date": "2026-04-21", "index": 0, "action": "approved",
+    })
+    assert response.status_code == 200
+    body = response.json()
+    assert body["status"] == "approved"
+    assert body["requires_manual"] is True
+    mock_update.assert_not_called()
+
+
+def test_recommendations_aggressive_with_force_apply_executes(tmp_path, monkeypatch):
+    """Aggressiva + force_apply=True => chiama API, status applied_budget."""
+    mock_update = MagicMock(return_value={"resource_name": "x"})
+    monkeypatch.setattr("dashboard.server.update_campaign_budget", mock_update)
+    _write_recommendations(tmp_path, [
+        _rec("Camp A", "budget_increase", 10, 25, alert_aggressive=True),
+    ])
+    client = _get_client_with_recs(tmp_path)
+    response = client.post("/api/recommendations/approve", json={
+        "date": "2026-04-21", "index": 0, "action": "approved",
+        "force_apply": True,
+    })
+    assert response.status_code == 200
+    mock_update.assert_called_once()
+    saved = json.loads((tmp_path / "recommendations" / "2026-04-21.json").read_text())
+    assert saved["recommendations"][0]["status"] == "applied_budget"
+
+
+def test_recommendations_bid_change_never_auto_applied(tmp_path, monkeypatch):
+    """bid_increase/bid_decrease non devono mai chiamare update_campaign_budget."""
+    mock_update = MagicMock()
+    monkeypatch.setattr("dashboard.server.update_campaign_budget", mock_update)
+    _write_recommendations(tmp_path, [_rec("Camp A", "bid_increase", 20, 20)])
+    client = _get_client_with_recs(tmp_path)
+    response = client.post("/api/recommendations/approve", json={
+        "date": "2026-04-21", "index": 0, "action": "approved",
+    })
+    assert response.status_code == 200
+    body = response.json()
+    assert body["status"] == "approved"
+    assert body["requires_manual"] is True
+    mock_update.assert_not_called()
+
+
+def test_recommendations_budget_then_bid_review_applies_budget_and_notes_bid(
+    tmp_path, monkeypatch,
+):
+    """Per budget_increase_then_bid_review: applica budget, nota bid manuale."""
+    mock_update = MagicMock(return_value={"resource_name": "x"})
+    monkeypatch.setattr("dashboard.server.update_campaign_budget", mock_update)
+    _write_recommendations(tmp_path, [
+        _rec("Camp A", "budget_increase_then_bid_review", 10, 15),
+    ])
+    client = _get_client_with_recs(tmp_path)
+    response = client.post("/api/recommendations/approve", json={
+        "date": "2026-04-21", "index": 0, "action": "approved",
+    })
+    assert response.status_code == 200
+    mock_update.assert_called_once()
+    saved = json.loads((tmp_path / "recommendations" / "2026-04-21.json").read_text())
+    assert saved["recommendations"][0]["status"] == "applied_budget"
+    assert "bid" in saved["recommendations"][0]["note"].lower()
+
+
+def test_recommendations_missing_resource_yields_apply_error(tmp_path, monkeypatch):
+    """Senza campaign_budget_resource_name: status approved + apply_error, no API call."""
+    mock_update = MagicMock()
+    monkeypatch.setattr("dashboard.server.update_campaign_budget", mock_update)
+    rec = _rec("Camp A", "budget_increase", 10, 15)
+    del rec["campaign_budget_resource_name"]
+    _write_recommendations(tmp_path, [rec])
+    client = _get_client_with_recs(tmp_path)
+    response = client.post("/api/recommendations/approve", json={
+        "date": "2026-04-21", "index": 0, "action": "approved",
+    })
+    assert response.status_code == 200
+    assert response.json()["apply_error"] is not None
+    mock_update.assert_not_called()
+
+
+def test_recommendations_api_failure_records_error(tmp_path, monkeypatch):
+    """Se update_campaign_budget solleva, l'errore viene persistito."""
+    monkeypatch.setattr(
+        "dashboard.server.update_campaign_budget",
+        MagicMock(side_effect=Exception("API error")),
+    )
+    _write_recommendations(tmp_path, [_rec("Camp A", "budget_increase", 10, 15)])
+    client = _get_client_with_recs(tmp_path)
+    response = client.post("/api/recommendations/approve", json={
+        "date": "2026-04-21", "index": 0, "action": "approved",
+    })
+    assert response.status_code == 200
+    saved = json.loads((tmp_path / "recommendations" / "2026-04-21.json").read_text())
+    assert saved["recommendations"][0]["status"] == "approved"
+    assert "API error" in saved["recommendations"][0]["apply_error"]
+
+
+def test_recommendations_approve_with_invalid_index_returns_400(tmp_path):
+    _write_recommendations(tmp_path, [_rec("Camp A", "budget_increase", 10, 15)])
+    client = _get_client_with_recs(tmp_path)
+    response = client.post("/api/recommendations/approve", json={
+        "date": "2026-04-21", "index": 5, "action": "approved",
+    })
+    assert response.status_code == 400
+
+
+def test_annotate_for_dashboard_fills_status_and_resource():
+    """Unit test sull'helper di arricchimento (no server)."""
+    from analyzer.budget_advisor import annotate_for_dashboard
+    recs = [
+        {"campaign": "Camp A", "action_type": "budget_increase",
+         "current_budget": 10.0, "recommended_budget": 15.0},
+    ]
+    budgets = [
+        {"campaign": "Camp A",
+         "campaign_budget_resource_name": "customers/1/campaignBudgets/42",
+         "daily_budget_euros": 10.0},
+    ]
+    out = annotate_for_dashboard(recs, budgets)
+    assert out[0]["status"] == "pending"
+    assert out[0]["campaign_budget_resource_name"] == "customers/1/campaignBudgets/42"
+
+
+def test_annotate_for_dashboard_idempotent():
+    """Se status o resource gia presenti, non devono essere sovrascritti."""
+    from analyzer.budget_advisor import annotate_for_dashboard
+    recs = [{
+        "campaign": "Camp A", "action_type": "budget_increase",
+        "current_budget": 10.0, "recommended_budget": 15.0,
+        "status": "approved",
+        "campaign_budget_resource_name": "customers/1/campaignBudgets/EXISTING",
+    }]
+    budgets = [{
+        "campaign": "Camp A",
+        "campaign_budget_resource_name": "customers/1/campaignBudgets/OTHER",
+        "daily_budget_euros": 10.0,
+    }]
+    out = annotate_for_dashboard(recs, budgets)
+    assert out[0]["status"] == "approved"
+    assert out[0]["campaign_budget_resource_name"].endswith("EXISTING")

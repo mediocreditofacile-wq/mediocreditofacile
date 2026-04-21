@@ -20,6 +20,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from collector.google_ads import fetch_keyword_performance_period
 from generator.report_docx import build_report
+from analyzer.budget_advisor import recommend as recommend_budget
 
 
 def load_config(path: str = "config.yaml") -> dict:
@@ -87,6 +88,14 @@ def main():
         print(f"[WARN] Fetch 7gg fallito: {e}. Report generato solo con dati 30gg.")
         kws_7d = []
 
+    # ---- Raccomandazioni strategiche (budget advisor) ----
+    recommendations = []
+    try:
+        recommendations = recommend_budget(customer_id, config, "google-ads.yaml")
+        print(f"[INFO] {len(recommendations)} raccomandazioni strategiche generate")
+    except Exception as e:
+        print(f"[WARN] Budget advisor fallito: {e}. Report senza raccomandazioni.")
+
     # ---- Genera DOCX ----
     output_path = str(output_dir / f"report_{today_str}.docx")
     print(f"[INFO] Generando DOCX...")
@@ -96,6 +105,7 @@ def main():
         proposals=proposals,
         date_str=today_str,
         output_path=output_path,
+        recommendations=recommendations,
     )
     print(f"[OK] Report salvato: {output_path}")
 

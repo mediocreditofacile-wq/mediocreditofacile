@@ -37,20 +37,22 @@ Alberto Amà è un broker B2B titolare di Mediocredito Facile (mediocreditofacil
 Esiste un progetto Python chiamato mcf-ads-engine in ~/dev/mediocreditofacile/mcf-ads-engine/. È un sistema di automazione campagne Google Ads con questa architettura:
 
 Moduli:
-- collector/google_ads.py — fetch_keyword_performance (30gg), fetch_search_terms, fetch_daily_metrics
+- collector/google_ads.py — fetch_keyword_performance (30gg), fetch_search_terms, fetch_daily_metrics, fetch_auction_insights, fetch_campaign_budgets
 - analyzer/scorer.py — score_keywords con soglie configurabili (pause/reward/review)
 - analyzer/search_terms.py — classify_search_terms via Claude AI (6 categorie) + identify_negatives
 - analyzer/negatives.py — build_negative_proposals + export CSV per Google Ads Editor
 - analyzer/anomaly.py — detect_anomalies (confronto 8gg vs 7gg baseline)
 - analyzer/suggester.py — suggest_kw_variants via Claude
 - analyzer/campaign_audit.py — run_audit completo sulle campagne
+- analyzer/budget_advisor.py — compute_recommendations() + recommend(): raccomandazioni strategiche su budget e bid a partire da impression share lost, CPL target e CPC-proxy (quando conversion tracking non attivo). Output: lista dict con trigger/action_type/current_budget/recommended_budget/bid_change_pct/priority. Config in config.yaml → budget_advisor.
 - writer/google_ads.py — pause_keyword, add_negative_keyword, update_campaign_budget, update_keyword_bid (scrittura diretta via API)
 - generator/landing.py — genera landing page via Claude e le appende al sito Astro
 - generator/campaign.py — genera draft campagne via Claude
 - generator/copy.py — genera copy annunci
-- generator/report_docx.py — build_report() per DOCX analisi
-- notifier/email.py — send_daily_report, send_weekly_search_terms_report, send_anomaly_alert, send_weekly_audit (via Resend)
-- dashboard/server.py — FastAPI su porta 5001: approvazione pause/reward, negatives, landing, audit, budget update
+- generator/report_docx.py — build_report() per DOCX analisi. Accetta parametro opzionale `recommendations` che, se presente, inserisce la sezione 1 "Raccomandazioni Strategiche" (tabella + dettaglio) e rinumera le altre a scalare.
+- notifier/email.py — send_daily_report (accetta parametro opzionale `recommendations` per includere top-3 in cima all'email), send_weekly_search_terms_report, send_anomaly_alert, send_weekly_audit (via Resend)
+- dashboard/server.py — FastAPI su porta 5001: approvazione pause/reward, negatives, landing, audit, budget update, raccomandazioni budget_advisor (`/api/recommendations/latest`, `/api/recommendations/approve` con auto-apply per budget_increase non aggressivo, `force_apply=True` obbligatorio per aumenti aggressivi, bid_increase/decrease mai auto-applicati — requires_manual=True)
+- dashboard/templates/index.html — UI Alpine.js con tab "Strategia" (prima tab, default all'apertura) che mostra la tabella raccomandazioni + dettaglio reason per ciascuna. Bottoni Approva/Rifiuta: Approva su alert_aggressive chiede conferma e manda force_apply=true; le azioni bid mostrano badge "approvata (manuale)" senza chiamare l'API write.
 - scheduler/ — LaunchAgent macOS (it.mediocreditofacile.adsengine.plist)
 
 Fasi di rollout:
@@ -60,7 +62,7 @@ Fasi di rollout:
 - Fase 4 (da completare): Creazione campagne complete end-to-end
 
 Stato attuale:
-- Ultimo run daily: 2026-04-20. Ultimo run weekly (negatives): 2026-03-12.
+- Ultimo run daily: 2026-04-21. Ultimo run weekly (negatives): 2026-03-12.
 - LaunchAgent installato in ~/Library/LaunchAgents/ con path corretti e chiavi reali iniettate. Schedulato alle 08:00 ogni giorno. Il plist nel repo (scheduler/) resta con placeholder SOSTITUISCI per sicurezza.
 - Refresh token OAuth2 rigenerato il 2026-04-20 dopo revoca Google (OAuth consent screen in Testing mode → token scade ogni 7 giorni). Soluzione strutturale aperta: promuovere app a "In production" in Google Cloud Console per evitare scadenze ricorrenti.
 - Bug aperto: analyzer/suggester.py non legge ANTHROPIC_API_KEY correttamente, fallisce con "Could not resolve authentication method" su suggest_kw_variants. Gli altri moduli AI (anomaly, classifier) funzionano. Probabilmente manca load_dotenv() o il client Anthropic viene istanziato senza api_key esplicita.
@@ -73,30 +75,37 @@ Config (config.yaml):
 - customer_id: 5572178058
 - scoring: pause_threshold_cost €10, reward_cpc_percentile 40, reward_ctr_percentile 60
 - anomaly: cost_increase 50%, cpc_increase 30%, ctr_decrease 40%, conversions_decrease 50%
+- budget_advisor: lost_budget_threshold 0.50, lost_rank_threshold 0.40, bid_increase_pct 0.30, budget_increase_aggressive_threshold 0.50, expected_cvr 0.10 (per proxy CPC quando conv=0), cpl_targets {Diventa Partner: 8-40, Finanza Veloce: 4-25}, pillar_adgroups {Diventa Partner: "Vendi a Rate", Finanza Veloce: "Noleggio Operativo"}
 - schedule: daily alle 08:00, weekly il lunedì
 
 Credenziali: google-ads.yaml (OAuth2), .env (ANTHROPIC_API_KEY, RESEND_API_KEY, NOTIFICATION_EMAIL)
 
-## LE DUE CAMPAGNE
+## LE CAMPAGNE ATTIVE
 
-Account Google Ads: AW-16800748626 (customer_id API: 5572178058)
+Account Google Ads: AW-16800748626 (customer_id API: 5572178058). Le campagne attive verificate il 2026-04-21 sono due (Diventa Partner — Vendor, Noleggio Operativo Fotovoltaico). La campagna storica "Finanza Veloce" non risulta tra le campaign.status=ENABLED in account; va riverificato il suo stato (paused/removed) prima di citarla in nuovi report.
 
-Campagna "Diventa Partner" (lato vendor — acquisire fornitori che vogliono offrire noleggio):
-- 5 ad group: Vendi a Rate (45% budget), Noleggio Fornitori, Fornitore Convenzionato, Competitor, Pratica Rifiutata
+Campagna "Diventa Partner — Vendor" (lato vendor — acquisire fornitori che vogliono offrire noleggio):
+- Bidding strategy: **MAXIMIZE_CONVERSIONS** (no manual bid: i bid sono gestiti da Google, niente target CPA esplicito attivo). Per intervenire sui bid serve switchare strategia.
+- Budget: 20 €/giorno
+- 7 ad group censiti, di cui ATTIVI in 30gg: NOLEGGIO OPERATIVO FORNITORI (SOLUTION-AWARE) — pilastro reale (49 click, 177€ in 30gg), SIMULATORE NOLEGGIO OPERATIVO, FORNITORE CONVENZIONATO (TERMINE TECNICO), COMPETITOR, PRATICA RIFIUTATA / AZIENDE GIOVANI. INATTIVI (0 click in 30gg): VENDI A RATE (111 keyword caricate ma non gira), INSTALLATORI FOTOVOLTAICO — PARTNER. La doc storica indicava "Vendi a Rate" come pilastro 45%: **OBSOLETA**, va riallineata.
 - CPL target: 8-40€
 - Landing: /diventapartner
+- Ottimizzazioni 2026-04-21 via writer engine: aggiunte 2 negative EXACT a livello campagna ("noleggio operativo", "grenke italia") + promosse a EXACT 3 search term convertenti ("noleggio operativo con riscatto", "grenke noleggio operativo", "società finanziarie per noleggio operativo")
 
-Campagna "Finanza Veloce" (lato end-user — PMI che cercano finanziamento):
-- 5 ad group: Noleggio Operativo (35% budget), Leasing Strumentale, Finanziamento Attrezzature, Rateizzazione Acquisti, Settoriale
-- CPL target: 4-25€
-- Landing: /finanzaveloce
+Campagna "Noleggio Operativo Fotovoltaico" (end-user PMI per fotovoltaico aziendale):
+- Bidding strategy: **MANUAL_CPC** (bid impostabili manualmente, oggi 1.80€ uniforme su 6 ad group + 10€ su SIMULATORE FOTOVOLTAICO)
+- Budget: **25 €/giorno** (raddoppiato da 10 il 2026-04-21 per recuperare il 78% di lost_budget)
+- Ad group attivi (con click in 30gg): Fotovoltaico – Tetto in Affitto (top, 77 click), Fotovoltaico – Zero Anticipo (76 click), FV – Simulatore Calcolo, Fotovoltaico – Canone Fisso, Fotovoltaico – No Debito, SIMULATORE FOTOVOLTAICO. Inattivi: Breve Termine, Risparmio Bolletta.
+- Landing: 6 pagine /noleggio-fotovoltaico-* in landing-pages.json (ridisegnate il 2026-04-20 da informative a conversion: form intermedio dopo i Benefits + form finale custom + safety net Resend)
+- CPL target: da definire (in attesa di prima settimana di dati post-fix tag GTM)
 
-Problemi noti (dal report feb 2026):
-- Conversion tracking rotto (zero conversioni su 385 click)
-- 11.5% budget sprecato su query irrilevanti
-- Impression share sotto 10%
+Note di config in conflitto con la realtà:
+- `config.yaml → budget_advisor.pillar_adgroups` indica ancora "Vendi a Rate" e "Noleggio Operativo" come pilastri ma i nomi reali sono diversi. Da aggiornare in una prossima sessione.
+
+Problemi noti (dal report feb 2026, alcuni superati a 2026-04-21):
+- Conversion tracking: GTM v18 pubblicata il 2026-04-20 con i 6 trigger fotovoltaico ora a pattern referrer + /grazie. In attesa di accumulo dati nei prossimi 7-14 giorni
 - CPC anomalo su "grenke partner" (€14.69/click, 3x benchmark)
-- Quality score sotto 70% su Finanza Veloce
+- Quality score sotto 70% su Finanza Veloce (se ancora attiva)
 
 ## AGGIORNAMENTO CONVERSION TRACKING (2026-04-03)
 
@@ -226,19 +235,28 @@ Ogni form del sito DEVE avere un campo nascosto `fonte` con lo slug della pagina
 - Claude AI: usato per classificazione search terms (6 categorie), suggerimento varianti keyword, generazione landing e copy. Modello: Claude Haiku per task veloci, Sonnet per generazione complessa.
 - Google Ads API: OAuth2 con refresh token. Developer token attivo. Client library google-ads-python.
 
-## OBIETTIVI APERTI (aggiornato 2026-04-03)
+## OBIETTIVI APERTI (aggiornato 2026-04-21)
+
+Completato in questa sessione (2026-04-21):
+- Modulo analyzer/budget_advisor.py operativo: raccomandazioni strategiche su budget/bid da auction insights + budgets + kws 30gg, con fallback CPC proxy quando conversions=0 (cvr attesa 10%).
+- Integrazione in main.py (run_daily scrive data/recommendations/YYYY-MM-DD.json) e in generate_report.py.
+- Sezione 1 "Raccomandazioni Strategiche" nel DOCX (tabella + dettaglio reason), rinumerate le sezioni successive a scalare.
+- Top 3 raccomandazioni in cima all'email giornaliera, con evidenza "[ALERT]" se aumento aggregato > 50%.
+- Endpoint dashboard FastAPI per approvazione/rifiuto raccomandazioni: `GET /api/recommendations/latest` e `POST /api/recommendations/approve`. Auto-apply per `budget_increase` non aggressivo (chiama `update_campaign_budget`, status → `applied_budget`). `alert_aggressive=True` richiede `force_apply=True`, altrimenti resta `approved` con `requires_manual=True`. `bid_increase`/`bid_decrease` mai auto-applicati (alcune campagne, es. Diventa Partner con MAXIMIZE_CONVERSIONS, non accettano bid manuali). Helper pubblico `annotate_for_dashboard(recs, budgets)` in budget_advisor per arricchire con `status` e `campaign_budget_resource_name`.
+- UI dashboard: tab "Strategia" (default) con tabella raccomandazioni, priorità, budget attuale → raccomandato, badge stato, bottoni Approva/Rifiuta. Approva su `alert_aggressive` chiede conferma esplicita prima di mandare `force_apply=true`.
+- 23 nuovi test totali (11 budget_advisor + 12 server endpoint), suite 120/120 passing.
 
 Sprint immediato (questa settimana):
-1. Diagnosticare e riattivare l'engine (fermo dal 2026-03-11)
-2. Completare il setup conversion tracking in GTM (tag referrer per tutte le landing)
-3. Spostare i 6 tag TechSol fotovoltaico da primarie a secondarie in Google Ads
-4. Primo report con dati di conversione reali
+1. Completare il setup conversion tracking in GTM (tag referrer per tutte le landing) — GTM v18 pubblicata il 2026-04-20 con i 6 trigger fotovoltaico riallineati a pattern referrer + /grazie. Restano: tag per /diventapartner e /finanzaveloce
+2. Spostare i 6 tag TechSol fotovoltaico da primarie a secondarie in Google Ads — verificato 2026-04-20: gia' Secondarie e tutte ENABLED. Il flag "Inattivo" era diagnostico, si aggiornera' automaticamente quando inizieranno ad arrivare hit
+3. Primo report con dati di conversione reali — a quel punto il budget_advisor passera automaticamente dalla modalita CPC-proxy alla modalita CPL reale
+4. Aggiornare config.yaml → budget_advisor.pillar_adgroups con i nomi reali ("NOLEGGIO OPERATIVO FORNITORI (SOLUTION-AWARE)" per Diventa Partner — Vendor) e verificare se "Finanza Veloce" e' ancora una campagna attiva o va rimossa
 
 Sprint successivo:
-5. Aggiungere modulo collector/ga4.py per metriche engagement (tempo permanenza, bounce rate, pagine migliori)
-6. Completare la Fase 2 (dashboard landing + approvazione end-to-end)
-7. Automatizzare il flusso: report settimanale → proposta ottimizzazioni → approvazione Alberto → esecuzione
-8. Valutare se ricostruire parti del sistema o procedere con l'esistente
+4. Aggiungere modulo collector/ga4.py per metriche engagement (tempo permanenza, bounce rate, pagine migliori)
+5. Completare la Fase 2 (dashboard landing + approvazione end-to-end)
+6. Automatizzare il flusso: report settimanale → proposta ottimizzazioni → approvazione Alberto → esecuzione
+7. Fix bug suggester (ANTHROPIC_API_KEY non letto) — doc noto nello stato attuale
 
 ## STILE OUTPUT
 
