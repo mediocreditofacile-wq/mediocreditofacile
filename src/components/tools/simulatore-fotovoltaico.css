@@ -870,7 +870,9 @@
 .simpv__pdf-bar {
   grid-column: 1 / -1;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
   padding: 1rem 0 0;
 }
 
@@ -883,6 +885,14 @@
 
 .simpv__button--pdf:hover {
   background: #553bab;
+}
+
+.simpv__pdf-hint {
+  font-size: 0.82rem;
+  color: var(--mcf-taupe, #787782);
+  text-align: center;
+  max-width: 520px;
+  line-height: 1.4;
 }
 
 /* Stile stampa PDF: nasconde gate, header, form, mostra solo risultati */

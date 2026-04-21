@@ -14,6 +14,13 @@ import {
   type DimensioneImpresa,
 } from '../../data/leasing';
 
+// Limiti costo impianto per modalita' finanziaria
+// Il noleggio operativo e' limitato dalle fasce dei coefficienti GRENKE (max 240k)
+// Il leasing finanziario non ha tetto commerciale: alziamo a 500M per coprire qualsiasi impianto industriale
+const MAX_COSTO_NOLEGGIO = 240_000;
+const MAX_COSTO_LEASING = 500_000_000;
+const MIN_COSTO = 800;
+
 // --- Coefficienti GRENKE ESG++++ (fonte: Tabella ESG ++++.pdf) ---
 const ESG_COEFFS: Record<number, { da: number; a: number; c: number }[]> = {
   24: [
@@ -299,12 +306,22 @@ export default function SimulatoreFotovoltaico({
   const isLeasing = abilitaLeasing && modalitaFin === 'leasing';
   // Agevolazioni visibili con leasing — indipendenti dal business plan
   const mostraAgevolazioni = abilitaAgevolazioni && isLeasing;
+  // Limite massimo costo impianto: 500M in leasing, 240k in noleggio
+  const maxCosto = isLeasing ? MAX_COSTO_LEASING : MAX_COSTO_NOLEGGIO;
   // ZES attivabile solo sopra €200.000
   const zesSogliaOk = costo >= 200000;
   // Se il costo scende sotto soglia, disattiva ZES
   useMemo(() => {
     if (!zesSogliaOk && includiZES) setIncludiZES(false);
   }, [zesSogliaOk]);
+  // Se si passa da leasing a noleggio con costo sopra 240k, clampa al limite noleggio
+  useMemo(() => {
+    if (!isLeasing && costo > MAX_COSTO_NOLEGGIO) {
+      setCosto(MAX_COSTO_NOLEGGIO);
+      setCostoInput(MAX_COSTO_NOLEGGIO.toString());
+      setCalcolato(false);
+    }
+  }, [isLeasing]);
 
   // Campi business plan (visibili solo con modalitaBP)
   const [potenza, setPotenza] = useState(6);
@@ -369,7 +386,7 @@ export default function SimulatoreFotovoltaico({
 
   // Funzione helper: calcola risultato per una durata specifica
   function calcolaPerDurata(d: number): RisultatoDurata | null {
-    if (costo < 800 || costo > 240000) return null;
+    if (costo < MIN_COSTO || costo > maxCosto) return null;
 
     let coeff = 0;
     let canoneMensile = 0;
@@ -452,7 +469,7 @@ export default function SimulatoreFotovoltaico({
   // Tabella comparativa per tutte le durate
   const duratePerTabella = isLeasing ? DURATE_LEASING : DURATE;
   const tabelladurate = useMemo((): RisultatoDurata[] => {
-    if (!calcolato || costo < 800 || costo > 240000) return [];
+    if (!calcolato || costo < MIN_COSTO || costo > maxCosto) return [];
     return duratePerTabella
       .map((d) => calcolaPerDurata(d))
       .filter((r): r is RisultatoDurata => r !== null);
@@ -475,7 +492,7 @@ export default function SimulatoreFotovoltaico({
 
   const handleCostoBlur = () => {
     if (costo > 0) {
-      const clamped = Math.min(240000, Math.max(800, costo));
+      const clamped = Math.min(maxCosto, Math.max(MIN_COSTO, costo));
       setCosto(clamped);
       setCostoInput(clamped.toString());
     }
@@ -517,7 +534,7 @@ export default function SimulatoreFotovoltaico({
   // Click "Calcola"
   const handleCalcola = () => {
     if (costo > 0) {
-      const clamped = Math.min(240000, Math.max(800, costo));
+      const clamped = Math.min(maxCosto, Math.max(MIN_COSTO, costo));
       setCosto(clamped);
       setCostoInput(clamped.toString());
     }
@@ -781,7 +798,7 @@ export default function SimulatoreFotovoltaico({
     document.querySelector('.simpv__results')?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const costoValido = costo >= 800 && costo <= 240000;
+  const costoValido = costo >= MIN_COSTO && costo <= maxCosto;
   const formValido = formNome.trim() && formAzienda.trim() && formEmail.trim() && formTelefono.trim() && formPrivacy;
   const formPartnerValido = formNome.trim() && formCognome.trim() && formTelefono.trim() && formPiva.trim().length >= 11 && formPrivacy;
   const formEnergyteamValido = Boolean(
@@ -988,11 +1005,13 @@ export default function SimulatoreFotovoltaico({
             inputMode="numeric"
             class="simpv__input"
             value={costoInput}
-            onInput={handleNumericInput(setCosto, setCostoInput, 240000)}
+            onInput={handleNumericInput(setCosto, setCostoInput, maxCosto)}
             onBlur={handleCostoBlur}
             placeholder="15000"
           />
-          <span class="simpv__hint">Min €800 — Max €240.000</span>
+          <span class="simpv__hint">
+            Min €800 — Max {isLeasing ? '€500.000.000' : '€240.000'}
+          </span>
         </div>
 
         {/* Durata — bottoni per selezione diretta */}
@@ -1571,7 +1590,7 @@ export default function SimulatoreFotovoltaico({
         ) : calcolato && !costoValido ? (
           <div class="simpv__message">
             <span class="material-icons-outlined simpv__message-icon">warning</span>
-            <p>Il costo dell'impianto deve essere compreso tra <strong>€800</strong> e <strong>€240.000</strong>.</p>
+            <p>Il costo dell'impianto deve essere compreso tra <strong>€800</strong> e <strong>{isLeasing ? '€500.000.000' : '€240.000'}</strong>.</p>
           </div>
         ) : calcolato && !risultato ? (
           <div class="simpv__message">
@@ -1587,8 +1606,8 @@ export default function SimulatoreFotovoltaico({
 
       </div>
 
-      {/* Bottone Scarica PDF (varianti partner con download) */}
-      {risultato && (varianteForm === 'age-srl' || varianteForm === 'arcaenergia') && (
+      {/* Bottone Scarica PDF — disponibile su tutte le varianti partner, fuori dal form invia pratica */}
+      {risultato && (varianteForm === 'age-srl' || varianteForm === 'arcaenergia' || varianteForm === 'energyteam') && (
         <div class="simpv__pdf-bar">
           <button
             type="button"
@@ -1600,6 +1619,9 @@ export default function SimulatoreFotovoltaico({
             <span class="material-icons-outlined" style="font-size:1.1rem;vertical-align:middle;margin-right:0.35rem;">picture_as_pdf</span>
             Scarica preventivo PDF
           </button>
+          <span class="simpv__pdf-hint">
+            Il PDF si scarica subito. Se compili la ragione sociale del cliente qui sotto, verra' intestato a lui.
+          </span>
         </div>
       )}
 
