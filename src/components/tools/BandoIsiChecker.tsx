@@ -347,7 +347,7 @@ export default function BandoIsiChecker() {
     }
 
     try {
-      await fetch('/api/submit', { method: 'POST', body });
+      await fetch('/api/submit-agevolazioni', { method: 'POST', body });
       setFormInviato(true);
       setTimeout(() => {
         window.location.href = '/grazie-fin';

@@ -319,7 +319,7 @@ const faqJsonLd = {
     if (btn) { btn.disabled = true; btn.textContent = 'Invio in corso...'; }
     const data = new FormData(form);
     try {
-      await fetch('/api/submit', { method: 'POST', body: data });
+      await fetch('/api/submit-agevolazioni', { method: 'POST', body: data });
     } catch (_) {}
     window.location.href = '/grazie-fin';
   });
@@ -341,9 +341,9 @@ const faqJsonLd = {
       });
     }
 
-    // Invia il lead a Zapier
+    // Invia il lead via endpoint dedicato Agevolazioni (Resend a MCF + Ambico)
     try {
-      await fetch('/api/submit', { method: 'POST', body: data });
+      await fetch('/api/submit-agevolazioni', { method: 'POST', body: data });
     } catch (_) {}
 
     // Scarica il file
