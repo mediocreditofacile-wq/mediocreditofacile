@@ -6,6 +6,7 @@ author: "Alberto Amà"
 tags: ["conto termico", "efficientamento energetico", "noleggio operativo", "leasing", "agevolazioni", "PMI", "guida"]
 image: "/images/blog-conto-termico.webp"
 imageAlt: "Documenti di incentivi fiscali per efficientamento energetico"
+cluster: "noleggio"
 ---
 
 Il Conto Termico 3.0 copre fino al 65% della spesa per interventi di efficientamento energetico. Contributo diretto, erogato dal GSE, non una detrazione. Arriva sul conto corrente. Per una PMI che deve sostituire la caldaia con una pompa di calore, è l'incentivo migliore sul mercato.

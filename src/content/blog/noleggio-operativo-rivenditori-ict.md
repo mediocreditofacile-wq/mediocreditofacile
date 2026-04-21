@@ -6,6 +6,7 @@ author: "Alberto Amà"
 tags: ["noleggio operativo", "ICT", "rivenditore informatica", "tecnologia", "vendita a canone", "partner", "caso studio"]
 image: "/images/blog-rivenditore-ict.webp"
 imageAlt: "Rivenditore IT che configura laptop nuovi con contratto di noleggio"
+cluster: "noleggio"
 ---
 
 *Il cliente vuole 20 laptop, un server e una stampante multifunzione. Non ha 35.000 euro da tirare fuori. Tu non puoi aspettare 6 mesi. Il noleggio operativo risolve entrambi i problemi.*

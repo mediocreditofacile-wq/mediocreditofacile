@@ -6,6 +6,7 @@ author: "Alberto Amà"
 tags: ["noleggio operativo piccoli importi", "noleggio operativo LED aziende", "crisi automotive PMI", "patrimonio netto negativo noleggio", "noleggio operativo Torino", "collaudi industriali", "deducibilità canone noleggio", "alternativa acquisto beni strumentali"]
 image: "/images/blog-caso-studio-laboratorio.webp"
 imageAlt: "Laboratorio di collaudi industriali con illuminazione LED"
+cluster: "noleggio"
 ---
 
 *Quando il settore automotive va in crisi e il patrimonio netto si sgonfia, anche un noleggio operativo da 8mila euro racconta una strategia. Storia vera di una PMI torinese.*

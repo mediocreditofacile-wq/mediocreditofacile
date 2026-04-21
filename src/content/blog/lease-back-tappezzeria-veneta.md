@@ -6,6 +6,7 @@ author: "Alberto Amà"
 tags: ["lease back", "noleggio operativo", "liquidità PMI", "fotovoltaico aziende", "caso studio"]
 image: "/images/blog-caso-studio-tappezzeria.webp"
 imageAlt: "Laboratorio di tappezzeria industriale in Veneto"
+cluster: "leasing"
 ---
 
 *Come un investimento intelligente ha messo in crisi la cassa di un'azienda da un milione di euro — e perché la soluzione non era quella che pensavate.*

@@ -6,6 +6,7 @@ author: "Alberto Amà"
 tags: ["noleggio operativo", "come funziona", "guida", "PMI", "2026", "canone", "deducibilità"]
 image: "/images/blog-come-funziona.webp"
 imageAlt: "Consegna di attrezzature in noleggio operativo a un'azienda italiana"
+cluster: "noleggio"
 ---
 
 *Tutto quello che serve sapere sul noleggio operativo in un unico articolo. Dalla meccanica base ai numeri reali, passando per i vantaggi fiscali e i casi in cui NON conviene.*

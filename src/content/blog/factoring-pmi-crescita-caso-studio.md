@@ -6,6 +6,7 @@ author: "Alberto Amà"
 tags: ["factoring", "PMI", "crescita", "trading", "pellet", "caso studio", "plafond"]
 image: "/images/blog-factoring-pellet.webp"
 imageAlt: "Magazzino di pellet con trader che analizza documenti di crescita"
+cluster: "finanziamenti"
 ---
 
 Un'azienda che cresce del 50% all'anno ha un problema che sembra paradossale: più fattura, più rischia di restare senza liquidità. È il classico circolo vizioso delle PMI in espansione: compri merce oggi, la vendi tra 60 giorni, incassi tra 90. Nel frattempo i fornitori vogliono essere pagati.

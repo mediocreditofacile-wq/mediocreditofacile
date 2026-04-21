@@ -6,6 +6,7 @@ author: "Alberto Amà"
 tags: ["sabatini", "agevolazioni", "beni strumentali", "contributo mise"]
 image: "/images/blog-nuova-sabatini-2026.webp"
 imageAlt: "Macchinario CNC in officina moderna acquistato con contributo Sabatini"
+cluster: "agevolazioni"
 ---
 
 *Contributo a fondo perduto, finanziamento bancario agevolato, iter burocratico gestibile. La Nuova Sabatini resta la misura piu concreta per le PMI che investono in beni strumentali. Ecco come funziona nel 2026, con numeri e formule.*

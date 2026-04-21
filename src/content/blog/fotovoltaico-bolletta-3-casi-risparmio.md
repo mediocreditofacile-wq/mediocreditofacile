@@ -6,6 +6,7 @@ author: "Alberto Amà"
 tags: ["fotovoltaico", "risparmio bolletta", "noleggio operativo", "caso studio", "energia", "ROI"]
 image: "/images/blog-fotovoltaico-bolletta.webp"
 imageAlt: "Pannelli solari su tetti industriali italiani al tramonto"
+cluster: "fotovoltaico"
 ---
 
 Il fotovoltaico a noleggio operativo funziona quando il canone mensile è inferiore al risparmio in bolletta. In quel caso l'impianto non costa nulla: si ripaga con l'energia che produce. Sembra marketing, ma è aritmetica.

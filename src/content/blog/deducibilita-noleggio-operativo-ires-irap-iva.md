@@ -6,6 +6,7 @@ author: "Alberto Amà"
 tags: ["noleggio operativo", "deducibilità", "IRES", "IRAP", "IVA", "fiscalità", "PMI", "guida"]
 image: "/images/blog-deducibilita-noleggio.webp"
 imageAlt: "Documenti fiscali con calcoli di deducibilità IRES e IRAP per noleggio operativo"
+cluster: "noleggio"
 ---
 
 *Il canone di noleggio operativo è deducibile al 100%. Ma cosa significa in pratica? Quanto risparmi davvero? Facciamo i conti su un caso reale.*

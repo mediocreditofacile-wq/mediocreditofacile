@@ -6,14 +6,79 @@ import { getCollection, render } from 'astro:content';
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog');
+
+  // Calcola i 3 articoli correlati per ogni post con priorita':
+  // 1. stesso cluster (se definito), ordinati per data desc
+  // 2. se <3, completa con articoli che condividono almeno 2 tag
+  // 3. se <3, completa con articoli piu' recenti
+  function pickRelated(current: typeof posts[number]) {
+    const others = posts.filter((p) => p.id !== current.id);
+    const byDateDesc = (a: typeof posts[number], b: typeof posts[number]) =>
+      new Date(b.data.date).getTime() - new Date(a.data.date).getTime();
+
+    const picked: typeof posts = [];
+    const pickedIds = new Set<string>();
+
+    // 1) stesso cluster
+    if (current.data.cluster) {
+      const sameCluster = others
+        .filter((p) => p.data.cluster === current.data.cluster)
+        .sort(byDateDesc);
+      for (const p of sameCluster) {
+        if (picked.length >= 3) break;
+        picked.push(p);
+        pickedIds.add(p.id);
+      }
+    }
+
+    // 2) almeno 2 tag in comune
+    if (picked.length < 3) {
+      const currentTags = new Set(current.data.tags);
+      const sharedTags = others
+        .filter((p) => !pickedIds.has(p.id))
+        .map((p) => ({
+          post: p,
+          shared: p.data.tags.filter((t) => currentTags.has(t)).length,
+        }))
+        .filter((x) => x.shared >= 2)
+        .sort((a, b) => b.shared - a.shared || byDateDesc(a.post, b.post));
+      for (const { post: p } of sharedTags) {
+        if (picked.length >= 3) break;
+        picked.push(p);
+        pickedIds.add(p.id);
+      }
+    }
+
+    // 3) piu' recenti
+    if (picked.length < 3) {
+      const recents = others
+        .filter((p) => !pickedIds.has(p.id))
+        .sort(byDateDesc);
+      for (const p of recents) {
+        if (picked.length >= 3) break;
+        picked.push(p);
+        pickedIds.add(p.id);
+      }
+    }
+
+    return picked.slice(0, 3);
+  }
+
   return posts.map((post) => ({
     params: { slug: post.id },
-    props: { post },
+    props: { post, related: pickRelated(post) },
   }));
 }
 
-const { post } = Astro.props;
+const { post, related } = Astro.props;
 const { Content } = await render(post);
+
+// Prime 15-20 parole della description per le card correlate
+function previewText(text: string, maxWords = 20): string {
+  const words = text.split(/\s+/);
+  if (words.length <= maxWords) return text;
+  return words.slice(0, maxWords).join(' ') + '…';
+}
 
 // Formatta la data in italiano
 function formatDate(dateStr: string): string {
@@ -110,6 +175,29 @@ const breadcrumbLD = {
         <div class="article__content prose">
           <Content />
         </div>
+
+        {/* Articoli correlati */}
+        {related.length > 0 && (
+          <aside class="related-posts">
+            <h2 class="related-posts__title">Articoli correlati</h2>
+            <div class="related-posts__grid">
+              {related.map((rp) => (
+                <a href={`/blog/${rp.id}/`} class="related-posts__card">
+                  {rp.data.image && (
+                    <div class="related-posts__image">
+                      <img src={rp.data.image} alt={rp.data.imageAlt || rp.data.title} loading="lazy" />
+                    </div>
+                  )}
+                  <div class="related-posts__body">
+                    <h3 class="related-posts__card-title">{rp.data.title}</h3>
+                    <p class="related-posts__preview">{previewText(rp.data.description)}</p>
+                    <time class="related-posts__date" datetime={rp.data.date}>{formatDate(rp.data.date)}</time>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </aside>
+        )}
 
         {/* CTA finale */}
         <div class="article__cta">
@@ -336,6 +424,98 @@ const breadcrumbLD = {
 
   .article__cta-btn--outline .material-icons-outlined {
     font-size: 1.1rem;
+  }
+
+  /* ═══ Articoli correlati ═══ */
+  .related-posts {
+    margin-top: 3.5rem;
+    padding-top: 2.5rem;
+    border-top: 1px solid #E1DEE3;
+  }
+
+  .related-posts__title {
+    font-family: 'Manrope', system-ui, sans-serif;
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #0F1020;
+    margin-bottom: 1.5rem;
+    letter-spacing: -0.01em;
+  }
+
+  .related-posts__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+
+  .related-posts__card {
+    display: flex;
+    flex-direction: column;
+    background: #ffffff;
+    border: 1px solid #E1DEE3;
+    border-radius: 12px;
+    padding: 20px;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+
+  .related-posts__card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(15, 16, 32, 0.08);
+    border-color: #664CCD;
+  }
+
+  .related-posts__image {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-radius: 8px;
+    margin-bottom: 14px;
+    background: #F8F7FA;
+  }
+
+  .related-posts__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .related-posts__body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .related-posts__card-title {
+    font-family: 'Manrope', system-ui, sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    color: #0F1020;
+    line-height: 1.3;
+    margin: 0;
+  }
+
+  .related-posts__preview {
+    font-family: 'Manrope', system-ui, sans-serif;
+    font-size: 14px;
+    color: #444451;
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  .related-posts__date {
+    font-family: 'Manrope', system-ui, sans-serif;
+    font-size: 13px;
+    color: #787782;
+    margin-top: 4px;
+  }
+
+  @media (max-width: 768px) {
+    .related-posts__grid {
+      grid-template-columns: 1fr;
+    }
   }
 
   /* ═══ Torna al blog ═══ */

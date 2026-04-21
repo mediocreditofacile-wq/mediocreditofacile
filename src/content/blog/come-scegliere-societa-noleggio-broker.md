@@ -6,6 +6,7 @@ author: "Alberto Amà"
 tags: ["broker noleggio", "confronto società noleggio", "Grenke", "PagaRent", "Grant", "DLL", "scelta noleggio"]
 image: "/images/blog-broker-indipendente.webp"
 imageAlt: "Broker finanziario che media tra diversi clienti e settori industriali"
+cluster: "noleggio"
 ---
 
 *Non tutte le società di noleggio sono uguali. I criteri di approvazione, i tassi, la velocità, i settori coperti cambiano radicalmente. Ecco come orientarsi.*

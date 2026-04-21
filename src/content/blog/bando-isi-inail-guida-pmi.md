@@ -6,6 +6,7 @@ author: "Alberto Amà"
 tags: ["bando isi", "inail", "sicurezza lavoro", "fondo perduto", "pmi"]
 image: "/images/blog-bando-isi-inail.webp"
 imageAlt: "Cantiere con attrezzature di sicurezza e dispositivi di protezione"
+cluster: "agevolazioni"
 ---
 
 *Il Bando ISI Inail è il principale strumento con cui lo Stato finanzia a fondo perduto gli investimenti in sicurezza sul lavoro. Ogni anno mette a disposizione centinaia di milioni di euro, eppure la maggior parte delle PMI non lo conosce o non sa come accedervi. Questa guida spiega come funziona, quanto copre, e soprattutto come gestire il nodo finanziario che blocca molte imprese: l'anticipo del 100% dell'investimento.*

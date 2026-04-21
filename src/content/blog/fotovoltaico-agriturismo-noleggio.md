@@ -6,6 +6,7 @@ author: "Alberto Amà"
 tags: ["agriturismo", "noleggio operativo", "fotovoltaico", "arredi", "attrezzature", "agricoltura"]
 image: "/images/blog-agriturismo.webp"
 imageAlt: "Agriturismo italiano con pannelli solari sul tetto"
+cluster: "fotovoltaico"
 ---
 
 L'agriturismo è probabilmente il tipo di attività dove il noleggio operativo ha più senso in assoluto. Servono investimenti in ogni categoria: fotovoltaico per i costi energetici, cucina professionale per il ristorante, arredi per le camere, attrezzature agricole per la produzione. E il fatturato è concentrato in cinque o sei mesi all'anno.

@@ -6,6 +6,7 @@ author: "Alberto Amà"
 tags: ["noleggio operativo", "fotovoltaico", "risparmio energetico", "caso studio", "Sicilia", "ristorazione", "accumulo"]
 image: "/images/blog-caso-studio-lampedusa.webp"
 imageAlt: "Pescheria con celle frigorifere a Lampedusa"
+cluster: "fotovoltaico"
 ---
 
 *Una SAS che vende pesce fresco sull'isola, un impianto da 70 kW con accumulo, e il noleggio operativo come unica strada percorribile. I numeri di un caso reale.*

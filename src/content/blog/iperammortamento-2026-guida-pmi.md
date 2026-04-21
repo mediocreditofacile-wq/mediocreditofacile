@@ -6,6 +6,7 @@ author: "Alberto Amà"
 tags: ["iperammortamento", "beni strumentali", "agevolazioni fiscali", "4.0", "legge bilancio 2026"]
 image: "/images/blog-nuova-sabatini-2026.webp"
 imageAlt: "Macchinario 4.0 in stabilimento industriale moderno"
+cluster: "agevolazioni"
 ---
 
 *La Legge di Bilancio 2026 ha riportato in vita l'iperammortamento. Non e un credito d'imposta, non e un contributo a fondo perduto: e una maggiorazione del costo fiscalmente ammortizzabile. Per le PMI che investono in beni 4.0 cambia tutto il calcolo della convenienza. Ecco come funziona, con numeri reali.*

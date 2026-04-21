@@ -6,6 +6,7 @@ author: "Alberto Amà"
 tags: ["lease-back", "liquidità", "PMI", "guida", "caso studio", "cash flow"]
 image: "/images/blog-lease-back-guida.webp"
 imageAlt: "Imprenditore che esamina documenti di lease-back per recuperare liquidità"
+cluster: "leasing"
 ---
 
 *Hai comprato un macchinario da 80.000 euro e adesso non hai liquidità per pagare i fornitori. Il lease-back ti restituisce i soldi e ti lascia la macchina.*

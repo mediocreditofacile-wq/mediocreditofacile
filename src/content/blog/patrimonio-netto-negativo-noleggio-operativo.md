@@ -6,6 +6,7 @@ author: "Alberto Amà"
 tags: ["patrimonio netto negativo", "noleggio operativo", "azienda in perdita", "caso studio", "PMI", "crisi"]
 image: "/images/blog-patrimonio-negativo.webp"
 imageAlt: "Broker che mostra alternative di finanziamento a un imprenditore"
+cluster: "noleggio"
 ---
 
 *Il bilancio è in rosso, la banca ha chiuso la porta, il commercialista allarga le braccia. Ma l'azienda lavora, fattura, paga i fornitori. Serve un bene strumentale per continuare. Cosa fare?*
