@@ -45,6 +45,32 @@ const articleLD = {
   }),
   keywords: post.data.tags.join(', '),
 };
+
+// Structured data BreadcrumbList per rich snippet Home > Blog > Titolo
+const breadcrumbLD = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    {
+      '@type': 'ListItem',
+      position: 1,
+      name: 'Home',
+      item: 'https://www.mediocreditofacile.it/',
+    },
+    {
+      '@type': 'ListItem',
+      position: 2,
+      name: 'Blog',
+      item: 'https://www.mediocreditofacile.it/blog/',
+    },
+    {
+      '@type': 'ListItem',
+      position: 3,
+      name: post.data.title,
+      item: `https://www.mediocreditofacile.it/blog/${post.id}/`,
+    },
+  ],
+};
 ---
 
 <Layout
@@ -53,6 +79,7 @@ const articleLD = {
   ogImage={post.data.image}
 >
   <script type="application/ld+json" set:html={JSON.stringify(articleLD)} />
+  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbLD)} />
   <Header />
   <main>
     <article class="article">
