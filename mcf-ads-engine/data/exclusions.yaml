@@ -1,0 +1,10 @@
+excluded_terms:
+  - privati
+  - consumatori
+  - mutuo prima casa
+  - prestito personale
+  - cessione del quinto
+
+excluded_sectors:
+  - agricoltura
+  - startup pre-revenue

@@ -210,6 +210,56 @@ WHERE campaign.status = 'ENABLED'
     return campaigns
 
 
+def fetch_auction_insights(customer_id: str, yaml_path: str = "google-ads.yaml") -> list[dict]:
+    """Scarica impression share e posizionamento per campagna (ultimi 30gg).
+
+    I domini competitor dettagliati non sono disponibili via GAQL v23,
+    ma impression share, top position e budget/rank lost sì — e sono
+    i dati che servono per capire come ci posizioniamo nell'asta.
+    """
+    query = """
+SELECT
+  campaign.name,
+  metrics.search_impression_share,
+  metrics.search_rank_lost_impression_share,
+  metrics.search_budget_lost_impression_share,
+  metrics.search_top_impression_share,
+  metrics.search_absolute_top_impression_share,
+  metrics.impressions,
+  metrics.clicks,
+  metrics.cost_micros,
+  metrics.conversions
+FROM campaign
+WHERE segments.date DURING LAST_30_DAYS
+  AND campaign.status = 'ENABLED'
+  AND campaign.advertising_channel_type = 'SEARCH'
+"""
+    client = GoogleAdsClient.load_from_storage(yaml_path)
+    service = client.get_service("GoogleAdsService")
+    try:
+        response = service.search(customer_id=customer_id, query=query)
+        results = []
+        for api_row in response:
+            m = api_row.metrics
+            cost = m.cost_micros / 1_000_000
+            results.append({
+                "campaign": api_row.campaign.name,
+                "impression_share": round(m.search_impression_share, 4),
+                "top_impression_share": round(m.search_top_impression_share, 4),
+                "abs_top_impression_share": round(m.search_absolute_top_impression_share, 4),
+                "lost_rank_pct": round(m.search_rank_lost_impression_share, 4),
+                "lost_budget_pct": round(m.search_budget_lost_impression_share, 4),
+                "impressions": m.impressions,
+                "clicks": m.clicks,
+                "cost": round(cost, 2),
+                "conversions": m.conversions,
+            })
+        return results
+    except Exception as e:
+        print(f"[WARN] Auction insights non disponibili: {e}")
+        return []
+
+
 def fetch_daily_metrics(customer_id: str, yaml_path: str = "google-ads.yaml") -> list:
     """Scarica 8 giorni di dati giornalieri per campagna per il rilevamento anomalie."""
     from datetime import date, timedelta

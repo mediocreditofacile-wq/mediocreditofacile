@@ -28,19 +28,32 @@
     .badge-pending { background: #fef7e0; color: #b06000; }
     .badge-approved { background: #e6f4ea; color: #137333; }
     .badge-rejected { background: #fce8e6; color: #c5221f; }
+    .badge-applied, .badge-applied_budget { background: #d4edda; color: #0f5132; font-weight: 600; }
+    .badge-reviewed { background: #e8f0fe; color: #1967d2; }
+    .badge-priority-1 { background: #fce8e6; color: #c5221f; font-weight: 600; }
+    .badge-priority-2 { background: #fef7e0; color: #b06000; }
+    .alert-chip { display:inline-block; background:#fce8e6; color:#c5221f; font-size:.7rem; font-weight:700; padding:1px 6px; border-radius:3px; margin-left:6px; letter-spacing:.5px; }
+    .rec-note { color:#1a73e8; font-size:.85rem; margin-top:6px; font-style:italic; }
+    .rec-error { color:#c5221f; font-size:.85rem; margin-top:6px; }
+    .rec-manual { color:#b06000; font-size:.85rem; margin-top:6px; }
+    .budget-delta { color:#137333; font-size:.75rem; margin-left:4px; }
+    .pillar-hint { color:#666; font-size:.75rem; margin-top:2px; }
     textarea { width: 100%; border: 1px solid #ddd; border-radius: 4px; padding: 8px; font-size: .9rem; resize: vertical; }
     input[type=text] { width: 100%; border: 1px solid #ddd; border-radius: 4px; padding: 10px; font-size: .95rem; }
     .empty { color: #999; font-style: italic; padding: 16px 0; }
     .loading { color: #1a73e8; }
   </style>
 </head>
-<body x-data="dashboard()" x-init="loadProposals()">
+<body x-data="dashboard()" x-init="loadProposals(); loadRecommendations()">
 
 <header>
   <h1>MCF Ads Engine Dashboard</h1>
 </header>
 
 <div class="tabs">
+  <div class="tab" :class="{ active: tab === 'strategy' }" @click="tab = 'strategy'">
+    Strategia <span x-text="countPendingRecs()"></span>
+  </div>
   <div class="tab" :class="{ active: tab === 'kw' }" @click="tab = 'kw'">
     KW Review <span x-text="countPending('to_pause')"></span>
   </div>
@@ -55,6 +68,95 @@
 <div class="content">
   <div x-show="loading" class="loading">Caricamento...</div>
   <div x-show="error" style="color:red" x-text="error"></div>
+
+  <!-- TAB 0: Strategia (budget advisor) -->
+  <div x-show="tab === 'strategy'">
+
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:baseline">
+        <h3>Raccomandazioni Strategiche — Budget Advisor</h3>
+        <span style="color:#888;font-size:.8rem" x-show="recommendationsDate"
+          x-text="'Ultimo run: ' + recommendationsDate"></span>
+      </div>
+      <div style="color:#666;font-size:.85rem;margin-top:6px">
+        Proposte su budget e bid derivate dall'impression share lost. L'aumento budget non aggressivo
+        viene applicato automaticamente via Google Ads API. Gli aumenti aggressivi richiedono conferma.
+        Le proposte sui bid richiedono intervento manuale.
+      </div>
+
+      <div x-show="recommendations.length === 0 && !recommendationsError" class="empty" style="margin-top:16px">
+        Nessuna raccomandazione attiva: impression share lost sotto soglia su tutte le campagne.
+      </div>
+      <div x-show="recommendationsError" style="color:#c5221f;margin-top:12px" x-text="recommendationsError"></div>
+
+      <table x-show="recommendations.length > 0" style="margin-top:16px">
+        <tr>
+          <th>Campagna</th>
+          <th>Trigger</th>
+          <th>Azione</th>
+          <th>Budget</th>
+          <th>Priorità</th>
+          <th>Stato</th>
+          <th>Azioni</th>
+        </tr>
+        <template x-for="(rec, i) in recommendations" :key="i">
+          <tr>
+            <td>
+              <strong x-text="rec.campaign"></strong>
+              <div class="pillar-hint" x-show="rec.pillar_adgroup"
+                x-text="'Ad group pilastro: ' + (rec.pillar_adgroup || '')"></div>
+            </td>
+            <td x-text="formatTrigger(rec.trigger)"></td>
+            <td>
+              <span x-text="formatAction(rec.action_type, rec.bid_change_pct)"></span>
+              <span class="alert-chip" x-show="rec.alert_aggressive">ALERT</span>
+            </td>
+            <td>
+              <span x-text="'€' + (rec.current_budget || 0).toFixed(2)"></span>
+              <template x-if="rec.recommended_budget !== rec.current_budget">
+                <span>
+                  → <strong x-text="'€' + (rec.recommended_budget || 0).toFixed(2)"></strong>
+                  <span class="budget-delta" x-text="budgetDelta(rec)"></span>
+                </span>
+              </template>
+            </td>
+            <td>
+              <span class="badge" :class="'badge-priority-' + rec.priority"
+                x-text="priorityLabel(rec.priority)"></span>
+            </td>
+            <td>
+              <span class="badge" :class="'badge-' + (rec.status || 'pending')"
+                x-text="statusLabel(rec)"></span>
+            </td>
+            <td>
+              <template x-if="rec.status === 'pending'">
+                <div style="display:flex;gap:6px">
+                  <button class="btn btn-approve" @click="approveRecommendation(i)">Approva</button>
+                  <button class="btn btn-reject" @click="rejectRecommendation(i)">Rifiuta</button>
+                </div>
+              </template>
+            </td>
+          </tr>
+        </template>
+      </table>
+    </div>
+
+    <!-- Dettaglio reason, nota e errori per ogni raccomandazione -->
+    <template x-for="(rec, i) in recommendations" :key="'detail-'+i">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:baseline">
+          <strong x-text="rec.campaign + ' — ' + formatAction(rec.action_type, rec.bid_change_pct)"></strong>
+          <span class="badge" :class="'badge-' + (rec.status || 'pending')" x-text="statusLabel(rec)"></span>
+        </div>
+        <div style="color:#333;font-size:.9rem;margin-top:8px" x-text="rec.reason"></div>
+        <div class="rec-note" x-show="rec.note" x-text="rec.note ? 'Nota: ' + rec.note : ''"></div>
+        <div class="rec-manual" x-show="rec.requires_manual && !rec.note">
+          Richiede intervento manuale (non auto-applicato).
+        </div>
+        <div class="rec-error" x-show="rec.apply_error" x-text="rec.apply_error ? 'Errore: ' + rec.apply_error : ''"></div>
+      </div>
+    </template>
+  </div>
 
   <!-- TAB 1: KW Review -->
   <div x-show="tab === 'kw' && !loading">
@@ -166,12 +268,15 @@
 <script>
 function dashboard() {
   return {
-    tab: 'kw',
+    tab: 'strategy',
     loading: true,
     error: null,
     proposals: {},
     newAngle: '',
     generating: false,
+    recommendations: [],
+    recommendationsDate: null,
+    recommendationsError: null,
 
     async loadProposals() {
       try {
@@ -239,6 +344,130 @@ function dashboard() {
       });
       if (!r.ok) { alert('Errore approvazione: ' + await r.text()); return; }
       await this.loadProposals();
+    },
+
+    // --- Recommendations (budget advisor) ---
+
+    async loadRecommendations() {
+      try {
+        const r = await fetch('/api/recommendations/latest');
+        if (r.status === 404) {
+          this.recommendations = [];
+          this.recommendationsDate = null;
+          return;
+        }
+        if (!r.ok) throw new Error(await r.text());
+        const data = await r.json();
+        this.recommendationsDate = data.date;
+        this.recommendations = data.recommendations || [];
+      } catch (e) {
+        this.recommendationsError = 'Errore caricamento raccomandazioni: ' + e.message;
+        this.recommendations = [];
+      }
+    },
+
+    countPendingRecs() {
+      const n = (this.recommendations || []).filter(x => (x.status || 'pending') === 'pending').length;
+      return n > 0 ? '(' + n + ')' : '';
+    },
+
+    formatTrigger(t) {
+      const map = {
+        'lost_budget_high': 'Budget perso',
+        'lost_rank_high': 'Posizione persa',
+        'lost_budget_and_rank_high': 'Budget + Rank persi',
+        'cost_over_target': 'Costo sopra target',
+      };
+      return map[t] || (t || '').replace(/_/g, ' ');
+    },
+
+    formatAction(action, bidPct) {
+      const map = {
+        'budget_increase': 'Aumenta budget',
+        'bid_increase': 'Aumenta bid (ad group pilastro)',
+        'bid_decrease': 'Riduci bid',
+        'budget_increase_then_bid_review': 'Aumenta budget, bid in revisione',
+      };
+      let label = map[action] || action;
+      if ((action === 'bid_increase' || action === 'bid_decrease') && bidPct) {
+        const sign = bidPct > 0 ? '+' : '';
+        label += ' ' + sign + Math.round(bidPct * 100) + '%';
+      }
+      return label;
+    },
+
+    priorityLabel(p) {
+      return p === 1 ? 'Alta' : p === 2 ? 'Media' : 'Bassa';
+    },
+
+    statusLabel(rec) {
+      const status = rec.status || 'pending';
+      const map = {
+        'pending': 'da approvare',
+        'approved': rec.requires_manual ? 'approvata (manuale)' : 'approvata',
+        'rejected': 'rifiutata',
+        'applied_budget': 'budget applicato',
+        'applied': 'applicata',
+      };
+      return map[status] || status;
+    },
+
+    budgetDelta(rec) {
+      if (!rec.current_budget || rec.current_budget === 0) return '';
+      const delta = (rec.recommended_budget - rec.current_budget) / rec.current_budget * 100;
+      const sign = delta >= 0 ? '+' : '';
+      return '(' + sign + Math.round(delta) + '%)';
+    },
+
+    async approveRecommendation(index) {
+      const rec = this.recommendations[index];
+      let forceApply = false;
+      if (rec.alert_aggressive) {
+        const msg = 'SCELTA STRATEGICA\n\n' +
+          rec.campaign + ': budget €' + rec.current_budget.toFixed(2) +
+          ' → €' + rec.recommended_budget.toFixed(2) + ' ' + this.budgetDelta(rec) + '\n\n' +
+          'L\'aumento aggregato supera la soglia conservativa. Confermi l\'applicazione automatica?';
+        if (!confirm(msg)) return;
+        forceApply = true;
+      }
+      try {
+        const r = await fetch('/api/recommendations/approve', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            date: this.recommendationsDate,
+            index: index,
+            action: 'approved',
+            force_apply: forceApply,
+          }),
+        });
+        if (!r.ok) throw new Error(await r.text());
+        const data = await r.json();
+        rec.status = data.status;
+        rec.note = data.note;
+        rec.requires_manual = data.requires_manual;
+        rec.apply_error = data.apply_error;
+      } catch (e) {
+        alert('Errore approvazione: ' + e.message);
+      }
+    },
+
+    async rejectRecommendation(index) {
+      try {
+        const r = await fetch('/api/recommendations/approve', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            date: this.recommendationsDate,
+            index: index,
+            action: 'rejected',
+          }),
+        });
+        if (!r.ok) throw new Error(await r.text());
+        this.recommendations[index].status = 'rejected';
+      } catch (e) {
+        alert('Errore: ' + e.message);
+      }
     },
   }
 }

@@ -14,6 +14,8 @@ from analyzer.anomaly import detect_anomalies
 from analyzer.search_terms import classify_search_terms, identify_negatives
 from analyzer.negatives import build_negative_proposals
 from analyzer.campaign_audit import run_audit
+from analyzer.budget_advisor import compute_recommendations, annotate_for_dashboard
+from collector.google_ads import fetch_campaign_budgets
 from notifier.email import send_daily_report, send_anomaly_alert, send_weekly_search_terms_report, send_weekly_audit
 from utils.claude_md import update_last_run
 
@@ -111,11 +113,36 @@ def run_daily():
     except Exception as e:
         print(f"[WARN] Anomaly check failed (skipping): {e}")
 
+    # Budget advisor — raccomandazioni strategiche budget/bid
+    recommendations = []
+    try:
+        budgets = fetch_campaign_budgets(
+            customer_id=config["google_ads"]["customer_id"],
+            yaml_path="google-ads.yaml",
+        )
+        recommendations = compute_recommendations(
+            auction_insights=auction_data,
+            budgets=budgets,
+            kws_30d=keywords,
+            config=config,
+        )
+        # Arricchisce con status=pending e campaign_budget_resource_name
+        # per permettere l'auto-apply dalla dashboard FastAPI
+        annotate_for_dashboard(recommendations, budgets)
+        save_json(
+            {"date": today, "recommendations": recommendations},
+            Path(f"data/recommendations/{today}.json"),
+        )
+        print(f"[{today}] {len(recommendations)} raccomandazioni strategiche generate.")
+    except Exception as e:
+        print(f"[WARN] Budget advisor fallito (skipping): {e}")
+
     send_daily_report(
         proposals=proposals,
         api_key=os.environ["RESEND_API_KEY"],
         to_email=os.environ["NOTIFICATION_EMAIL"],
         date_str=today,
+        recommendations=recommendations,
     )
     print(f"[{today}] Daily report sent. Done.")
 

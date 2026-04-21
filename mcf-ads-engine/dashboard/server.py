@@ -324,3 +324,125 @@ async def export_negatives(body: ExportNegativesBody):
         media_type="text/csv",
         headers={"Content-Disposition": f"attachment; filename=negatives-{body.date}.csv"},
     )
+
+
+# --- Recommendations (budget advisor) -----------------------------------------
+
+def get_recommendations_dir() -> Path:
+    return Path(os.environ.get("RECOMMENDATIONS_DIR", "data/recommendations"))
+
+
+def load_recommendations(date_str: str) -> dict:
+    path = get_recommendations_dir() / f"{date_str}.json"
+    if not path.exists():
+        raise HTTPException(
+            status_code=404,
+            detail=f"No recommendations for {date_str}",
+        )
+    with open(path) as f:
+        return json.load(f)
+
+
+def save_recommendations(data: dict, date_str: str) -> None:
+    path = get_recommendations_dir() / f"{date_str}.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "w") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
+
+def latest_recommendations_date() -> str:
+    rec_dir = get_recommendations_dir()
+    files = sorted(rec_dir.glob("*.json"), reverse=True)
+    if not files:
+        raise HTTPException(status_code=404, detail="No recommendations found")
+    return files[0].stem
+
+
+@app.get("/api/recommendations/latest")
+async def get_latest_recommendations():
+    date_str = latest_recommendations_date()
+    return load_recommendations(date_str)
+
+
+class ApproveRecommendationBody(BaseModel):
+    date: str
+    index: int
+    action: Literal["approved", "rejected"]
+    # Richiesto per applicare in automatico le raccomandazioni con
+    # alert_aggressive=True (aumento aggregato > soglia strategica).
+    force_apply: bool = False
+
+
+@app.post("/api/recommendations/approve")
+async def approve_recommendation(body: ApproveRecommendationBody):
+    """
+    Approva o rifiuta una raccomandazione del budget_advisor.
+
+    Logica di applicazione automatica:
+    - budget_increase / budget_increase_then_bid_review: se non aggressiva,
+      chiama update_campaign_budget; se aggressiva, richiede force_apply=True
+      altrimenti status=approved ma non applicata.
+    - bid_increase / bid_decrease: non auto-apply. Richiedono intervento
+      manuale perche agiscono su piu keyword e alcune campagne (es. quelle
+      con MAXIMIZE_CONVERSIONS) non accettano bid manuali. La dashboard
+      segnala requires_manual=True.
+    """
+    data = load_recommendations(body.date)
+    lst = data.get("recommendations", [])
+    if body.index >= len(lst):
+        raise HTTPException(status_code=400, detail="Invalid index")
+    item = lst[body.index]
+    item["status"] = body.action
+
+    if body.action == "approved":
+        action_type = item.get("action_type", "")
+        is_aggressive = bool(item.get("alert_aggressive"))
+
+        if action_type in ("budget_increase", "budget_increase_then_bid_review"):
+            if is_aggressive and not body.force_apply:
+                item["requires_manual"] = True
+                item["note"] = (
+                    "Aumento aggressivo — richiede force_apply=True per "
+                    "l'applicazione automatica. Decisione strategica."
+                )
+            else:
+                resource = item.get("campaign_budget_resource_name")
+                if not resource:
+                    item["apply_error"] = (
+                        "campaign_budget_resource_name mancante: "
+                        "rigenera le raccomandazioni con main.py"
+                    )
+                else:
+                    customer_id = _get_customer_id()
+                    try:
+                        update_campaign_budget(
+                            customer_id,
+                            resource,
+                            float(item["recommended_budget"]),
+                        )
+                        item["status"] = "applied_budget"
+                        item["applied_at"] = datetime.utcnow().isoformat()
+                        if action_type == "budget_increase_then_bid_review":
+                            item["note"] = (
+                                "Budget applicato. Il bid sull'ad group "
+                                "pilastro va rivisto manualmente la prossima "
+                                "settimana."
+                            )
+                    except Exception as e:
+                        item["apply_error"] = str(e)
+        elif action_type in ("bid_increase", "bid_decrease"):
+            item["requires_manual"] = True
+            item["note"] = (
+                "Richiede aggiornamento manuale dei bid sull'ad group "
+                "pilastro (Google Ads Editor o vista keyword). Alcune "
+                "campagne non accettano bid manuali (MAXIMIZE_CONVERSIONS)."
+            )
+
+    save_recommendations(data, body.date)
+    return {
+        "ok": True,
+        "status": item["status"],
+        "note": item.get("note"),
+        "requires_manual": item.get("requires_manual", False),
+        "apply_error": item.get("apply_error"),
+    }

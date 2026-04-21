@@ -1,14 +1,66 @@
 # mcf-ads-engine/notifier/email.py
+from typing import Optional, List
+
 import resend
 
 
-def build_daily_html(proposals: dict, date_str: str) -> str:
+def _recommendations_summary_html(recommendations: Optional[List[dict]]) -> str:
+    """Blocco HTML con le prime 3 raccomandazioni strategiche per priorita."""
+    if not recommendations:
+        return ""
+    top3 = recommendations[:3]
+    items = []
+    action_labels = {
+        "budget_increase": "Aumenta budget",
+        "bid_increase": "Aumenta bid (ad group pilastro)",
+        "bid_decrease": "Riduci bid",
+        "budget_increase_then_bid_review": "Budget prima, bid dopo",
+    }
+    for r in top3:
+        action = action_labels.get(r["action_type"], r["action_type"])
+        current = r["current_budget"]
+        recommended = r["recommended_budget"]
+        if recommended != current and current > 0:
+            delta_pct = (recommended - current) / current * 100
+            sign = "+" if delta_pct >= 0 else ""
+            budget_str = (
+                "EUR %.2f &rarr; EUR %.2f (%s%.0f%%)"
+                % (current, recommended, sign, delta_pct)
+            )
+        else:
+            bid_pct = r.get("bid_change_pct") or 0.0
+            if bid_pct != 0:
+                sign = "+" if bid_pct > 0 else ""
+                budget_str = "bid %s%d%%" % (sign, int(round(bid_pct * 100)))
+            else:
+                budget_str = "invariato"
+        alert = ""
+        if r.get("alert_aggressive"):
+            alert = " <span style='color:red;font-weight:bold'>[ALERT]</span>"
+        items.append(
+            "<li><strong>%s</strong>%s &mdash; %s (%s)<br>"
+            "<span style='color:#555;font-size:0.9em'>%s</span></li>"
+            % (r["campaign"], alert, action, budget_str, r["reason"])
+        )
+    return (
+        "<h3>Raccomandazioni strategiche (top 3)</h3>"
+        "<ol>" + "".join(items) + "</ol>"
+    )
+
+
+def build_daily_html(
+    proposals: dict,
+    date_str: str,
+    recommendations: Optional[List[dict]] = None,
+) -> str:
     n_pause = sum(1 for x in proposals.get("to_pause", []) if x["status"] == "pending")
     n_landing = sum(1 for x in proposals.get("landing_proposals", []) if x["status"] == "pending")
     n_campaigns = sum(1 for x in proposals.get("campaign_drafts", []) if x["status"] == "pending")
     total = n_pause + n_landing + n_campaigns
+    recs_block = _recommendations_summary_html(recommendations)
     return f"""
 <h2>MCF Ads Engine — Report {date_str}</h2>
+{recs_block}
 <p><strong>{total} azioni da approvare</strong></p>
 <ul>
   <li>⏸️ {n_pause} KW da mettere in pausa</li>
@@ -36,18 +88,26 @@ def build_weekly_html(data: dict, date_str: str) -> str:
 """
 
 
-def send_daily_report(proposals: dict, api_key: str, to_email: str, date_str: str) -> None:
+def send_daily_report(
+    proposals: dict,
+    api_key: str,
+    to_email: str,
+    date_str: str,
+    recommendations: Optional[List[dict]] = None,
+) -> None:
     resend.api_key = api_key
     n_total = (
         sum(1 for x in proposals.get("to_pause", []) if x["status"] == "pending")
         + sum(1 for x in proposals.get("landing_proposals", []) if x["status"] == "pending")
         + sum(1 for x in proposals.get("campaign_drafts", []) if x["status"] == "pending")
     )
+    n_recs = len(recommendations or [])
+    subject_tag = f" | {n_recs} racc. strategiche" if n_recs > 0 else ""
     resend.Emails.send({
         "from": "MCF Ads Engine <noreply@mediocreditofacile.it>",
         "to": [to_email],
-        "subject": f"MCF Ads Engine — Report {date_str} | {n_total} azioni da approvare",
-        "html": build_daily_html(proposals, date_str),
+        "subject": f"MCF Ads Engine — Report {date_str} | {n_total} azioni da approvare{subject_tag}",
+        "html": build_daily_html(proposals, date_str, recommendations=recommendations),
     })
 
 

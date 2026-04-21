@@ -23,3 +23,32 @@ anomaly:
   cpc_increase_pct: 30
   ctr_decrease_pct: 40
   conversions_decrease_pct: 50
+
+budget_advisor:
+  # Soglie che innescano le raccomandazioni (valori frazionari 0-1)
+  lost_budget_threshold: 0.50        # lost IS per budget oltre cui raccomandare aumento
+  lost_rank_threshold: 0.40          # lost IS per rank oltre cui raccomandare aumento bid
+  bid_increase_pct: 0.30             # aumento bid standard sull'ad group pilastro
+  budget_increase_aggressive_threshold: 0.50  # aumento aggregato oltre cui serve approvazione esplicita
+
+  # Conversion rate atteso quando conversions == 0 (tracking non ancora attivo),
+  # usato per derivare un CPC target proxy da CPL_target x cvr.
+  expected_cvr: 0.10
+
+  # Target CPL per campagna (range min-max in euro). Match case-insensitive
+  # su substring del nome campagna.
+  cpl_targets:
+    "Diventa Partner": [8, 40]
+    "Finanza Veloce": [4, 25]            # campagna non attualmente ENABLED in account (verificato 2026-04-21); valore conservato per eventuale riattivazione
+    "Fotovoltaico": [10, 50]             # range provvisorio post-riconfigurazione landing + tag (2026-04-21); da rivedere dopo 14gg di dati reali
+
+  # Ad group pilastro su cui concentrare gli aumenti di bid quando il trigger
+  # e lost_rank. Chiave = substring del nome campagna.
+  # Allineato alla realta verificata il 2026-04-21 via keyword_view 30gg:
+  # - "Vendi a Rate" era il pilastro storico di Diventa Partner ma oggi ha 0 click in 30gg (111 kw caricate, campagna non gira). Il pilastro reale e "NOLEGGIO OPERATIVO FORNITORI (SOLUTION-AWARE)" con 49 click, 177EUR, 5 conv.
+  # - Fotovoltaico usa MANUAL_CPC, pilastro attuale per spesa e il "Fotovoltaico – Tetto in Affitto" (77 click, 135EUR, top performer).
+  # - Diventa Partner usa MAXIMIZE_CONVERSIONS: il bid_increase non e applicabile ma la chiave resta utile per l'attribuzione.
+  pillar_adgroups:
+    "Diventa Partner": "NOLEGGIO OPERATIVO FORNITORI (SOLUTION-AWARE)"
+    "Finanza Veloce": "Noleggio Operativo"
+    "Fotovoltaico": "Fotovoltaico – Tetto in Affitto"

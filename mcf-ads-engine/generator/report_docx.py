@@ -128,15 +128,112 @@ def _add_kv_table(doc: Document, rows: list):
     doc.add_paragraph()
 
 
+def _priority_label(priority: int) -> str:
+    return {1: "Alta", 2: "Media"}.get(priority, "Bassa")
+
+
+def _action_label(action_type: str) -> str:
+    labels = {
+        "budget_increase": "Aumenta budget",
+        "bid_increase": "Aumenta bid (ad group pilastro)",
+        "bid_decrease": "Riduci bid",
+        "budget_increase_then_bid_review": "Aumenta budget, poi rivedi bid",
+    }
+    return labels.get(action_type, action_type)
+
+
+def _add_recommendations_section(doc: Document, recommendations: list):
+    """Sezione 1 del report: raccomandazioni strategiche su budget e bid."""
+    _add_heading(doc, "1. Raccomandazioni Strategiche", 1)
+
+    if not recommendations:
+        doc.add_paragraph(
+            "Nessuna raccomandazione attiva: impression share lost sotto "
+            "soglia su tutte le campagne."
+        )
+        doc.add_paragraph()
+        return
+
+    doc.add_paragraph(
+        "Raccomandazioni generate dall'analisi impression share lost "
+        "(budget e rank) incrociata con CPL/CPC target. Ordine per priorita."
+    )
+    doc.add_paragraph()
+
+    table = doc.add_table(rows=1, cols=6)
+    table.style = "Table Grid"
+    _header_row(table, [
+        "Campagna", "Trigger", "Azione",
+        "Budget attuale", "Budget racc.", "Priorita",
+    ])
+
+    priority_colors = {1: RED, 2: ORANGE}
+
+    for r in recommendations:
+        row = table.add_row()
+        row.cells[0].text = r["campaign"]
+        row.cells[1].text = r["trigger"].replace("_", " ")
+        action_txt = _action_label(r["action_type"])
+        bid_pct = r.get("bid_change_pct") or 0.0
+        if abs(bid_pct) > 0 and r["action_type"] != "budget_increase":
+            sign = "+" if bid_pct > 0 else ""
+            action_txt = "%s (%s%d%%)" % (action_txt, sign, int(round(bid_pct * 100)))
+        row.cells[2].text = action_txt
+        row.cells[3].text = "EUR %.2f" % r["current_budget"]
+        recommended = r["recommended_budget"]
+        if recommended != r["current_budget"]:
+            delta_pct = (recommended - r["current_budget"]) / r["current_budget"] * 100 \
+                if r["current_budget"] > 0 else 0.0
+            sign = "+" if delta_pct >= 0 else ""
+            row.cells[4].text = "EUR %.2f (%s%.0f%%)" % (recommended, sign, delta_pct)
+        else:
+            row.cells[4].text = "invariato"
+        row.cells[5].text = _priority_label(r["priority"])
+        for i, cell in enumerate(row.cells):
+            if cell.paragraphs[0].runs:
+                cell.paragraphs[0].runs[0].font.size = Pt(9)
+        # Colora priorita
+        prio_run = row.cells[5].paragraphs[0].runs[0] if row.cells[5].paragraphs[0].runs else None
+        if prio_run is not None:
+            prio_run.font.color.rgb = priority_colors.get(r["priority"], GREY)
+            prio_run.bold = True
+        # Alert aggressivo: evidenzia in rosso il budget raccomandato
+        if r.get("alert_aggressive") and row.cells[4].paragraphs[0].runs:
+            row.cells[4].paragraphs[0].runs[0].font.color.rgb = RED
+            row.cells[4].paragraphs[0].runs[0].bold = True
+
+    doc.add_paragraph()
+
+    # Dettaglio reason per ogni raccomandazione
+    _add_heading(doc, "Dettaglio raccomandazioni", 2)
+    for r in recommendations:
+        p = doc.add_paragraph()
+        run = p.add_run("%s - %s" % (r["campaign"], _action_label(r["action_type"])))
+        run.bold = True
+        if r.get("alert_aggressive"):
+            run.font.color.rgb = RED
+        if r.get("pillar_adgroup") and r["action_type"] in (
+            "bid_increase", "budget_increase_then_bid_review",
+        ):
+            doc.add_paragraph(
+                "   Ad group pilastro: %s" % r["pillar_adgroup"],
+                style="Normal",
+            )
+        doc.add_paragraph("   " + r["reason"], style="Normal")
+        doc.add_paragraph()
+
+
 def build_report(
     kws_30d: list,
     kws_7d: list,
     proposals: dict,
     date_str: str,
     output_path: str,
+    recommendations: list = None,
 ):
     """
     Costruisce il report DOCX completo con:
+    - Raccomandazioni strategiche (se fornite)
     - Overview 30 giorni
     - Confronto 30gg vs ultima settimana
     - Analisi campagne
@@ -159,8 +256,11 @@ def build_report(
     s30 = _compute_stats(kws_30d)
     s7 = _compute_stats(kws_7d) if kws_7d else None
 
-    # ---------------------------------------------------------------- SEZIONE 1: OVERVIEW 30gg
-    _add_heading(doc, "1. Account Overview — Ultimi 30 giorni", 1)
+    # ---------------------------------------------------------------- SEZIONE 1: RACCOMANDAZIONI
+    _add_recommendations_section(doc, recommendations or [])
+
+    # ---------------------------------------------------------------- SEZIONE 2: OVERVIEW 30gg
+    _add_heading(doc, "2. Account Overview — Ultimi 30 giorni", 1)
 
     _add_kv_table(doc, [
         ("Spesa totale", f"€{s30['total_cost']:,.2f}"),
@@ -175,9 +275,9 @@ def build_report(
         ("Keyword con 0 impressioni", f"{s30['n_zero_impr']}"),
     ])
 
-    # ---------------------------------------------------------------- SEZIONE 2: CONFRONTO 7gg vs 30gg
+    # ---------------------------------------------------------------- SEZIONE 3: CONFRONTO 7gg vs 30gg
     if s7:
-        _add_heading(doc, "2. Confronto — Ultima settimana vs 30 giorni", 1)
+        _add_heading(doc, "3. Confronto — Ultima settimana vs 30 giorni", 1)
 
         doc.add_paragraph(
             "Analisi comparativa tra le performance dell'ultima settimana (post-modifiche di mercoledì) "
@@ -259,7 +359,7 @@ def build_report(
         doc.add_paragraph()
 
         # ---- Analisi campagne 7gg
-        _add_heading(doc, "2a. Campagne — Ultima settimana", 2)
+        _add_heading(doc, "3a. Campagne — Ultima settimana", 2)
         camp7 = _compute_camp_stats(kws_7d)
         table_c = doc.add_table(rows=1, cols=6)
         table_c.style = "Table Grid"
@@ -275,8 +375,8 @@ def build_report(
             ], align_right_cols=[1, 2, 3, 4, 5])
         doc.add_paragraph()
 
-    # ---------------------------------------------------------------- SEZIONE 3: CAMPAGNE 30gg
-    _add_heading(doc, "3. Analisi Campagne — 30 giorni", 1)
+    # ---------------------------------------------------------------- SEZIONE 4: CAMPAGNE 30gg
+    _add_heading(doc, "4. Analisi Campagne — 30 giorni", 1)
     camp30 = _compute_camp_stats(kws_30d)
     table_camp = doc.add_table(rows=1, cols=7)
     table_camp.style = "Table Grid"
@@ -293,9 +393,9 @@ def build_report(
         ], align_right_cols=[1, 2, 3, 4, 5, 6])
     doc.add_paragraph()
 
-    # ---------------------------------------------------------------- SEZIONE 4: DA PAUSARE
+    # ---------------------------------------------------------------- SEZIONE 5: DA PAUSARE
     if proposals.get("to_pause"):
-        _add_heading(doc, "4. Keyword da Mettere in Pausa", 1)
+        _add_heading(doc, "5. Keyword da Mettere in Pausa", 1)
         waste_total = sum(k["cost"] for k in proposals["to_pause"])
         doc.add_paragraph(
             f"Trovate {len(proposals['to_pause'])} keyword con spesa elevata e zero conversioni. "
@@ -318,9 +418,9 @@ def build_report(
                     cell.paragraphs[0].runs[0].bold = True
         doc.add_paragraph()
 
-    # ---------------------------------------------------------------- SEZIONE 5: DA REVISIONARE
+    # ---------------------------------------------------------------- SEZIONE 6: DA REVISIONARE
     if proposals.get("to_review"):
-        _add_heading(doc, "5. Keyword che Convertono (da Revisionare)", 1)
+        _add_heading(doc, "6. Keyword che Convertono (da Revisionare)", 1)
         doc.add_paragraph(
             "Keyword con almeno 1 conversione. Analizza il CPA rispetto al valore del lead "
             "per decidere se aumentare o mantenere il bid."
@@ -338,9 +438,9 @@ def build_report(
             ], align_right_cols=[1, 2, 3, 4])
         doc.add_paragraph()
 
-    # ---------------------------------------------------------------- SEZIONE 6: DA PREMIARE
+    # ---------------------------------------------------------------- SEZIONE 7: DA PREMIARE
     if proposals.get("to_reward"):
-        _add_heading(doc, "6. Keyword da Espandere (CPC basso + CTR alto)", 1)
+        _add_heading(doc, "7. Keyword da Espandere (CPC basso + CTR alto)", 1)
         doc.add_paragraph(
             "Keyword con ottime performance (CPC sotto percentile 40°, CTR sopra percentile 60°). "
             "Aggiungi le varianti suggerite per aumentare il volume qualificato."
@@ -360,8 +460,8 @@ def build_report(
                     doc.add_paragraph(f"      • {v}", style="Normal")
             doc.add_paragraph()
 
-    # ---------------------------------------------------------------- SEZIONE 7: PIANO D'AZIONE
-    _add_heading(doc, "7. Piano d'Azione Prioritizzato", 1)
+    # ---------------------------------------------------------------- SEZIONE 8: PIANO D'AZIONE
+    _add_heading(doc, "8. Piano d'Azione Prioritizzato", 1)
 
     waste = sum(k["cost"] for k in proposals.get("to_pause", []))
     actions = [
