@@ -1176,8 +1176,8 @@ export default function SimulatoreFotovoltaico({
                 <div class="simpv__toggle-title">Iperammortamento 4.0</div>
                 <div class="simpv__toggle-desc">
                   {includiIper
-                    ? 'Attivo — maggiorazione 280% del costo ammortizzabile (IRES 24%)'
-                    : 'Maggiorazione fino al 280% per beni nuovi Industria 4.0'}
+                    ? 'Attivo — costo ammortizzabile al 280% (100% ordinario + 180% maggiorazione)'
+                    : 'Costo ammortizzabile al 280% per beni nuovi Industria 4.0'}
                 </div>
               </div>
               <input
@@ -1512,7 +1512,7 @@ export default function SimulatoreFotovoltaico({
                 </>
               )}
               {risultato?.iperBeneficioMensile !== undefined && risultato.iperBeneficioMensile > 0 && (
-                <p>* Iperammortamento: beneficio fiscale (IRES + IRAP = 27,8%) sulla maggiorazione 180%, distribuito su 9 anni di ammortamento. Richiede beni nuovi 4.0 e perizia asseverata sopra €300k.</p>
+                <p>* Iperammortamento: il costo ammortizzabile del bene sale al 280% (100% ordinario + 180% maggiorazione). Beneficio fiscale calcolato al 27,8% (IRES + IRAP) sull'intero importo ammortizzabile, distribuito su 9 anni. Richiede beni nuovi 4.0 e perizia asseverata sopra €300k.</p>
               )}
               {risultato?.sabatiniBeneficioMensile !== undefined && risultato.sabatiniBeneficioMensile > 0 && (
                 <p>* Sabatini 4.0: contributo MISE stimato al {sabatiniPerc}% dell'investimento, erogato in 6 quote annuali. Il calcolo esatto dipende dalla delibera MISE e dalla durata del finanziamento.</p>
