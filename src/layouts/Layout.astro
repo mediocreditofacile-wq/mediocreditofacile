@@ -3,9 +3,10 @@ interface Props {
   title: string;
   description: string;
   ogImage?: string;
+  noindex?: boolean;
 }
 
-const { title, description, ogImage = '/images/hero-homepage.webp' } = Astro.props;
+const { title, description, ogImage = '/images/hero-homepage.webp', noindex = false } = Astro.props;
 const canonicalURL = new URL(Astro.url.pathname, 'https://www.mediocreditofacile.it');
 
 // Structured data — Organization (appare su tutte le pagine)
@@ -38,6 +39,7 @@ const organizationLD = {
     <!-- End Google Tag Manager -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
     <link rel="canonical" href={canonicalURL.href} />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
