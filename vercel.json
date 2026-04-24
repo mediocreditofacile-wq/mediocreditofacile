@@ -2,73 +2,79 @@
   "redirects": [
     {
       "source": "/blogs/finanza-urgente:rest*",
-      "has": [{ "type": "host", "value": "(www\\.)?mediocreditofacile\\.com" }],
+      "has": [{ "type": "host", "value": "www.mediocreditofacile.com" }],
       "destination": "https://www.mediocreditofacile.it/blog/finanza-urgente-pmi/",
       "permanent": true
     },
     {
       "source": "/blogs/nuova-sabatini:rest*",
-      "has": [{ "type": "host", "value": "(www\\.)?mediocreditofacile\\.com" }],
+      "has": [{ "type": "host", "value": "www.mediocreditofacile.com" }],
       "destination": "https://www.mediocreditofacile.it/blog/sabatini-zes-zls-strategia-2026/",
       "permanent": true
     },
     {
       "source": "/blogs/iper:rest*",
-      "has": [{ "type": "host", "value": "(www\\.)?mediocreditofacile\\.com" }],
+      "has": [{ "type": "host", "value": "www.mediocreditofacile.com" }],
       "destination": "https://www.mediocreditofacile.it/finanziamenti/agevolazioni/iperammortamento-2026/",
       "permanent": true
     },
     {
       "source": "/blogs/codice-etico",
-      "has": [{ "type": "host", "value": "(www\\.)?mediocreditofacile\\.com" }],
+      "has": [{ "type": "host", "value": "www.mediocreditofacile.com" }],
       "destination": "https://www.mediocreditofacile.it/codice-etico/",
       "permanent": true
     },
     {
       "source": "/blogs",
-      "has": [{ "type": "host", "value": "(www\\.)?mediocreditofacile\\.com" }],
+      "has": [{ "type": "host", "value": "www.mediocreditofacile.com" }],
       "destination": "https://www.mediocreditofacile.it/blog/",
       "permanent": true
     },
     {
       "source": "/diventapartner",
-      "has": [{ "type": "host", "value": "(www\\.)?mediocreditofacile\\.com" }],
+      "has": [{ "type": "host", "value": "www.mediocreditofacile.com" }],
       "destination": "https://www.mediocreditofacile.it/diventa-partner/",
       "permanent": true
     },
     {
       "source": "/finanzaveloce",
-      "has": [{ "type": "host", "value": "(www\\.)?mediocreditofacile\\.com" }],
+      "has": [{ "type": "host", "value": "www.mediocreditofacile.com" }],
       "destination": "https://www.mediocreditofacile.it/finanza-veloce/",
       "permanent": true
     },
     {
       "source": "/grazie",
-      "has": [{ "type": "host", "value": "(www\\.)?mediocreditofacile\\.com" }],
+      "has": [{ "type": "host", "value": "www.mediocreditofacile.com" }],
       "destination": "https://www.mediocreditofacile.it/grazie/",
       "permanent": true
     },
     {
       "source": "/grazie-fv",
-      "has": [{ "type": "host", "value": "(www\\.)?mediocreditofacile\\.com" }],
+      "has": [{ "type": "host", "value": "www.mediocreditofacile.com" }],
       "destination": "https://www.mediocreditofacile.it/grazie-fin/",
       "permanent": true
     },
     {
       "source": "/leasing",
-      "has": [{ "type": "host", "value": "(www\\.)?mediocreditofacile\\.com" }],
+      "has": [{ "type": "host", "value": "www.mediocreditofacile.com" }],
       "destination": "https://www.mediocreditofacile.it/leasing-strumentale/",
       "permanent": true
     },
     {
       "source": "/agevolazioni",
-      "has": [{ "type": "host", "value": "(www\\.)?mediocreditofacile\\.com" }],
+      "has": [{ "type": "host", "value": "www.mediocreditofacile.com" }],
       "destination": "https://www.mediocreditofacile.it/finanziamenti/agevolazioni/",
       "permanent": true
     },
     {
       "source": "/:path*",
-      "has": [{ "type": "host", "value": "(www\\.)?mediocreditofacile\\.com" }],
+      "has": [{ "type": "host", "value": "www.mediocreditofacile.com" }],
+      "destination": "https://www.mediocreditofacile.it/",
+      "permanent": true
+    },
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "mediocreditofacile.com" }],
       "destination": "https://www.mediocreditofacile.it/",
       "permanent": true
     },
