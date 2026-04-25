@@ -1,6 +1,18 @@
 {
   "redirects": [
     {
+      "source": "/",
+      "has": [{ "type": "host", "value": "www.mediocreditofacile.com" }],
+      "destination": "https://www.mediocreditofacile.it/",
+      "permanent": true
+    },
+    {
+      "source": "/",
+      "has": [{ "type": "host", "value": "mediocreditofacile.com" }],
+      "destination": "https://www.mediocreditofacile.it/",
+      "permanent": true
+    },
+    {
       "source": "/blogs/finanza-urgente:rest*",
       "has": [{ "type": "host", "value": "www.mediocreditofacile.com" }],
       "destination": "https://www.mediocreditofacile.it/blog/finanza-urgente-pmi/",
