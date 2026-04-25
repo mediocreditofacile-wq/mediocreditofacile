@@ -190,6 +190,7 @@ def fetch_campaign_budgets(customer_id: str, yaml_path: str = "google-ads.yaml")
 SELECT
   campaign.name,
   campaign.resource_name,
+  campaign.bidding_strategy_type,
   campaign_budget.resource_name,
   campaign_budget.amount_micros
 FROM campaign
@@ -206,6 +207,10 @@ WHERE campaign.status = 'ENABLED'
             "campaign_resource_name": api_row.campaign.resource_name,
             "campaign_budget_resource_name": api_row.campaign_budget.resource_name,
             "daily_budget_euros": round(api_row.campaign_budget.amount_micros / 1_000_000, 2),
+            # Stringa enum tipo "MAXIMIZE_CONVERSIONS", "MANUAL_CPC", "TARGET_CPA"...
+            # Serve al budget_advisor per evitare di proporre bid manuali su
+            # strategie automatiche (dove i bid li gestisce Google).
+            "bidding_strategy_type": api_row.campaign.bidding_strategy_type.name,
         })
     return campaigns
 

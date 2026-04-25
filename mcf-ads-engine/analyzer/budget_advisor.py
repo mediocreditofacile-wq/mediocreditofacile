@@ -316,15 +316,21 @@ def compute_recommendations(
     )
     expected_cvr = advisor_cfg.get("expected_cvr", DEFAULT_EXPECTED_CVR)
 
-    cpl_targets = DEFAULT_CPL_TARGETS.copy()
+    # Merge case-insensitive: i default usano chiavi lowercase, il config.yaml
+    # tipicamente usa Title Case ("Diventa Partner"). Senza normalizzare, il
+    # config NON sovrascrive il default, lo affianca: il dict finale contiene
+    # entrambe le chiavi e _match_campaign_key restituisce la prima inserita
+    # (la default). Bug riscontrato 2026-04-25 sui pillar_adgroups.
+    cpl_targets = {k.lower(): v for k, v in DEFAULT_CPL_TARGETS.items()}
     raw_targets = advisor_cfg.get("cpl_targets") or {}
     for k, v in raw_targets.items():
         if isinstance(v, (list, tuple)) and len(v) == 2:
-            cpl_targets[k] = (float(v[0]), float(v[1]))
+            cpl_targets[k.lower()] = (float(v[0]), float(v[1]))
 
-    pillars = DEFAULT_PILLAR_ADGROUPS.copy()
+    pillars = {k.lower(): v for k, v in DEFAULT_PILLAR_ADGROUPS.items()}
     pillars_cfg = advisor_cfg.get("pillar_adgroups") or {}
-    pillars.update(pillars_cfg)
+    for k, v in pillars_cfg.items():
+        pillars[k.lower()] = v
 
     budget_by_camp = {b["campaign"]: b for b in budgets}
     camp_metrics = _aggregate_campaign_metrics(kws_30d)
@@ -346,11 +352,48 @@ def compute_recommendations(
         classification = _classify_cost_vs_target(metrics, cpl_target, expected_cvr)
         pillar_adgroup = _get_pillar_adgroup(camp_name, pillars)
 
+        # Su strategie automatiche (Google decide i bid) le raccomandazioni
+        # bid_increase / bid_decrease non sono applicabili. Riconvertiamo
+        # all'azione piu vicina applicabile o le marchiamo come "review".
+        bidding_type = budget_info.get("bidding_strategy_type") or "MANUAL_CPC"
+        auto_bidding = bidding_type in (
+            "MAXIMIZE_CONVERSIONS",
+            "MAXIMIZE_CONVERSION_VALUE",
+            "TARGET_CPA",
+            "TARGET_ROAS",
+            "TARGET_IMPRESSION_SHARE",
+        )
+
         lost_budget_high = lost_budget > lost_budget_threshold
         lost_rank_high = lost_rank > lost_rank_threshold
 
         # Regola 1: costo sopra target -> ridurre bid prima di alzare qualsiasi cosa.
         if classification == "over":
+            if auto_bidding:
+                # Su auto-bidding non possiamo abbassare i bid manualmente.
+                # L'unica leva e revisione search terms / negative / qualita
+                # annunci, oppure switch strategia.
+                recs.append({
+                    "campaign": camp_name,
+                    "trigger": "cost_over_target",
+                    "action_type": "search_terms_review",
+                    "current_budget": current_budget,
+                    "recommended_budget": current_budget,
+                    "bid_change_pct": 0.0,
+                    "pillar_adgroup": pillar_adgroup,
+                    "bidding_strategy_type": bidding_type,
+                    "requires_manual": True,
+                    "reason": (
+                        _reason_over_target(
+                            metrics, cpl_target, expected_cvr, lost_budget, lost_rank,
+                        )
+                        + " NOTA: campagna su " + bidding_type + ", bid manuali"
+                        " non applicabili. Azione: revisione search term,"
+                        " aggiunta negative, controllo qualita landing."
+                    ),
+                    "priority": 1,
+                })
+                continue
             recs.append({
                 "campaign": camp_name,
                 "trigger": "cost_over_target",
@@ -359,6 +402,7 @@ def compute_recommendations(
                 "recommended_budget": current_budget,
                 "bid_change_pct": -0.15,
                 "pillar_adgroup": pillar_adgroup,
+                "bidding_strategy_type": bidding_type,
                 "reason": _reason_over_target(
                     metrics, cpl_target, expected_cvr, lost_budget, lost_rank,
                 ),
@@ -407,6 +451,33 @@ def compute_recommendations(
 
         # Regola 4: solo lost_rank alto -> aumenta bid sull'ad group pilastro.
         if lost_rank_high:
+            if auto_bidding:
+                # Su auto-bidding il bid manuale non e applicabile: la leva
+                # equivalente e un boost di budget moderato (1.25x), che da
+                # piu spazio all'algoritmo Google per competere nelle aste.
+                recommended = round(current_budget * 1.25, 2)
+                recs.append({
+                    "campaign": camp_name,
+                    "trigger": "lost_rank_high",
+                    "action_type": "budget_increase",
+                    "current_budget": current_budget,
+                    "recommended_budget": recommended,
+                    "bid_change_pct": 0.0,
+                    "pillar_adgroup": pillar_adgroup,
+                    "bidding_strategy_type": bidding_type,
+                    "reason": (
+                        _reason_rank_only(
+                            metrics, lost_rank, bid_increase_pct, pillar_adgroup,
+                            cpl_target, expected_cvr,
+                        )
+                        + " NOTA: campagna su " + bidding_type + ", convertito"
+                        " bid_increase in budget_increase moderato (+25%):"
+                        " e la leva equivalente per dare a Google piu spazio"
+                        " nelle aste."
+                    ),
+                    "priority": 2,
+                })
+                continue
             recs.append({
                 "campaign": camp_name,
                 "trigger": "lost_rank_high",
@@ -415,6 +486,7 @@ def compute_recommendations(
                 "recommended_budget": current_budget,
                 "bid_change_pct": bid_increase_pct,
                 "pillar_adgroup": pillar_adgroup,
+                "bidding_strategy_type": bidding_type,
                 "reason": _reason_rank_only(
                     metrics, lost_rank, bid_increase_pct, pillar_adgroup,
                     cpl_target, expected_cvr,
