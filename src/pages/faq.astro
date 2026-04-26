@@ -1,4 +1,5 @@
 ---
+import Icon from '../components/Icon.astro';
 import Layout from '../layouts/Layout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
@@ -119,7 +120,6 @@ const faqSchema = {
   })),
 };
 ---
-
 <Layout
   title="Domande Frequenti su Noleggio Operativo e Leasing | Mediocredito Facile"
   description="Risposte alle domande più comuni su noleggio operativo, leasing, fiscalità, fotovoltaico e processo di delibera. Tutto quello che serve sapere prima di scegliere."
@@ -147,7 +147,7 @@ const faqSchema = {
         {faqCategories.map((category) => (
           <div class="faq-category">
             <div class="category-header">
-              <span class="material-icons-outlined category-icon">{category.icon}</span>
+              <Icon name={category.icon} class="category-icon" />
               <h2>{category.title}</h2>
             </div>
             <div class="faq-list">
@@ -155,7 +155,7 @@ const faqSchema = {
                 <details class="faq-item">
                   <summary>
                     <span class="faq-question">{faq.question}</span>
-                    <span class="material-icons-outlined faq-chevron">expand_more</span>
+                    <Icon name="expand_more" class="faq-chevron" />
                   </summary>
                   <div class="faq-answer">
                     <Fragment set:html={faq.answer} />
@@ -179,7 +179,7 @@ const faqSchema = {
           </p>
           <a href="/contatti" class="cta-button">
             Parliamone
-            <span class="material-icons-outlined">arrow_forward</span>
+            <Icon name="arrow_forward" />
           </a>
         </div>
       </div>

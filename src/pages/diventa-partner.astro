@@ -1,9 +1,9 @@
 ---
+import Icon from '../components/Icon.astro';
 import Layout from '../layouts/Layout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 ---
-
 <Layout
   title="Diventa Partner Noleggio Operativo | Mediocredito Facile"
   description="Offri il noleggio operativo ai tuoi clienti: convenzione gratuita, accesso a 12+ società, incasso immediato. Il cliente paga a canone, tu fatturi subito. Zero rischio credito."
@@ -59,22 +59,22 @@ import Footer from '../components/Footer.astro';
       <div class="dp-benefits__inner">
         <div class="dp-benefits__grid">
           <div class="dp-card">
-            <div class="dp-card__icon"><span class="material-icons-outlined" aria-hidden="true">payments</span></div>
+            <div class="dp-card__icon"><Icon name="payments" /></div>
             <h3 class="dp-card__title">Tu incassi subito, tutto</h3>
             <p class="dp-card__desc">Alla delibera, fatturi l'intero importo alla società di noleggio. Nessuna rata da inseguire, nessun rischio credito. Il tuo incasso è immediato.</p>
           </div>
           <div class="dp-card">
-            <div class="dp-card__icon"><span class="material-icons-outlined" aria-hidden="true">hub</span></div>
+            <div class="dp-card__icon"><Icon name="hub" /></div>
             <h3 class="dp-card__title">Accesso a oltre 12 società</h3>
             <p class="dp-card__desc">Un'unica convenzione, accesso a Grenke, PagaRent, Grant, DLL e altre. Se una rifiuta, proviamo le altre. Più approvazioni per i tuoi clienti.</p>
           </div>
           <div class="dp-card">
-            <div class="dp-card__icon"><span class="material-icons-outlined" aria-hidden="true">calculate</span></div>
+            <div class="dp-card__icon"><Icon name="calculate" /></div>
             <h3 class="dp-card__title">Simulatore canone per il tuo cliente</h3>
             <p class="dp-card__desc">Calcola il canone in autonomia e presenta l'offerta al cliente. Inserisci importo e durata, ottieni il canone in tempo reale.</p>
           </div>
           <div class="dp-card">
-            <div class="dp-card__icon"><span class="material-icons-outlined" aria-hidden="true">card_giftcard</span></div>
+            <div class="dp-card__icon"><Icon name="card_giftcard" /></div>
             <h3 class="dp-card__title">Convenzione gratuita, zero vincoli</h3>
             <p class="dp-card__desc">Nessun costo di attivazione, nessun canone mensile, nessun vincolo di esclusiva. Ti convenzionioni una volta e usi il servizio quando serve.</p>
           </div>
@@ -106,32 +106,32 @@ import Footer from '../components/Footer.astro';
 
         <div class="dp-why__grid">
           <div class="dp-why__item">
-            <span class="material-icons-outlined dp-why__icon" aria-hidden="true">speed</span>
+            <Icon name="speed" class="dp-why__icon" />
             <h3>Caricamento in 2 click e Delibera in 2 giorni</h3>
             <p>Se la pratica è completa e ci sono tutti i documenti, l'esito può arrivare in 1–2 giorni lavorativi, così ti muovi subito con il cliente e incassi velocemente.</p>
           </div>
           <div class="dp-why__item">
-            <span class="material-icons-outlined dp-why__icon" aria-hidden="true">account_balance_wallet</span>
+            <Icon name="account_balance_wallet" class="dp-why__icon" />
             <h3>Il cliente paga l'uso, non immobilizza capitale</h3>
             <p>La proprietà immobilizza capitale: l'utilizzo crea valore. Il canone libera risorse aziendali o permette utilizzo di strumenti altrimenti inaccessibili.</p>
           </div>
           <div class="dp-why__item">
-            <span class="material-icons-outlined dp-why__icon" aria-hidden="true">payments</span>
+            <Icon name="payments" class="dp-why__icon" />
             <h3>Pagamenti Veloci, Rischio Zero</h3>
             <p>Non gestisci incassi rateali: ricevi rapidamente i pagamenti per ogni fornitura approvata. Riduci le attese, elimina il rischio insoluti e migliora la tua liquidità.</p>
           </div>
           <div class="dp-why__item">
-            <span class="material-icons-outlined dp-why__icon" aria-hidden="true">receipt</span>
+            <Icon name="receipt" class="dp-why__icon" />
             <h3>Vantaggi fiscali e Servizi Inclusi</h3>
             <p>Per molte aziende i canoni sono deducibili come costo, secondo regole fiscali. È una leva concreta che aiuta a chiudere. Come l'assicurazione all-risk e l'assistenza garantita.</p>
           </div>
           <div class="dp-why__item">
-            <span class="material-icons-outlined dp-why__icon" aria-hidden="true">savings</span>
+            <Icon name="savings" class="dp-why__icon" />
             <h3>Liquidità protetta</h3>
             <p>Il cliente conserva cassa per scorte, marketing, personale e investimenti. Meno stress finanziario, più continuità operativa.</p>
           </div>
           <div class="dp-why__item">
-            <span class="material-icons-outlined dp-why__icon" aria-hidden="true">autorenew</span>
+            <Icon name="autorenew" class="dp-why__icon" />
             <h3>Fine contratto = nuova opportunità</h3>
             <p>A fine contratto puoi riacquistare, rivendere (anche con mark-up) o gestire un usato. Risultato: più fidelizzazione e ricavi.</p>
           </div>
@@ -452,7 +452,7 @@ import Footer from '../components/Footer.astro';
     margin-bottom: 1rem;
   }
 
-  .dp-card__icon .material-icons-outlined {
+  .dp-card__icon .mcf-icon {
     font-size: 1.6rem;
   }
 

@@ -1,4 +1,5 @@
 ---
+import Icon from '../../components/Icon.astro';
 /**
  * Area Partner AGE SRL — /tools/age-srl
  * Pagina protetta da password. Simulatore fotovoltaico con:
@@ -11,7 +12,6 @@
 import ToolLayout from '../../layouts/ToolLayout.astro';
 import SimulatoreFotovoltaico from '../../components/tools/SimulatoreFotovoltaico.tsx';
 ---
-
 <ToolLayout
   title="Area AGE SRL — Simulatore Fotovoltaico | Mediocredito Facile"
   description="Area riservata AGE SRL — simulatore noleggio operativo e leasing fotovoltaico con agevolazioni 4.0 e download preventivo PDF."
@@ -32,7 +32,7 @@ import SimulatoreFotovoltaico from '../../components/tools/SimulatoreFotovoltaic
       <div class="gate__form">
         <input type="password" id="gate-pwd" class="gate__input" placeholder="Password" autocomplete="off" />
         <button id="gate-btn" class="gate__btn">
-          <span class="material-icons-outlined" style="font-size:1.1rem;vertical-align:middle;margin-right:0.3rem;">lock_open</span>
+          <Icon name="lock_open" />
           Accedi
         </button>
       </div>
@@ -48,12 +48,12 @@ import SimulatoreFotovoltaico from '../../components/tools/SimulatoreFotovoltaic
         <img src="/images/logo-mediocreditofacile.webp" alt="Mediocredito Facile" class="arca__logo" />
         <div class="arca__header-sep"></div>
         <div class="arca__partner-badge">
-          <span class="material-icons-outlined arca__partner-icon" aria-hidden="true">wb_sunny</span>
+          <Icon name="wb_sunny" class="arca__partner-icon" />
           <span class="arca__partner-label">AGE SRL</span>
         </div>
       </div>
       <button id="logout-btn" class="arca__logout">
-        <span class="material-icons-outlined" style="font-size:0.95rem;vertical-align:middle;">logout</span>
+        <Icon name="logout" />
         Esci
       </button>
     </div>
@@ -70,15 +70,15 @@ import SimulatoreFotovoltaico from '../../components/tools/SimulatoreFotovoltaic
       </div>
       <div class="arca__hero-badges">
         <div class="arca__badge">
-          <span class="material-icons-outlined">compare_arrows</span>
+          <Icon name="compare_arrows" />
           <span>Noleggio vs Leasing</span>
         </div>
         <div class="arca__badge">
-          <span class="material-icons-outlined">trending_up</span>
+          <Icon name="trending_up" />
           <span>Iper 4.0 + Sabatini + ZES</span>
         </div>
         <div class="arca__badge">
-          <span class="material-icons-outlined">picture_as_pdf</span>
+          <Icon name="picture_as_pdf" />
           <span>Preventivo PDF</span>
         </div>
       </div>
@@ -346,7 +346,7 @@ import SimulatoreFotovoltaico from '../../components/tools/SimulatoreFotovoltaic
     white-space: nowrap;
   }
 
-  .arca__badge .material-icons-outlined { font-size: 1rem; color: #059669; }
+  .arca__badge .mcf-icon { font-size: 1rem; color: #059669; }
   .arca__simulator { margin-top: 0; }
 
   /* Print: mostra solo il tool, nascondi gate e navigazione */

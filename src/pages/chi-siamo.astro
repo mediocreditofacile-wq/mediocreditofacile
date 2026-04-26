@@ -1,9 +1,9 @@
 ---
+import Icon from '../components/Icon.astro';
 import Layout from '../layouts/Layout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 ---
-
 <Layout
   title="Chi Siamo — Alberto Amà | Mediocredito Facile"
   description="Mediocredito Facile: servizi finanziari per PMI italiane. Accesso a 12+ società di noleggio operativo e leasing, un unico interlocutore. Chi è Alberto Amà."
@@ -24,7 +24,7 @@ import Footer from '../components/Footer.astro';
           </p>
           <a href="/contatti" class="about-hero__cta">
             Parliamo del tuo progetto
-            <span class="material-icons-outlined">arrow_forward</span>
+            <Icon name="arrow_forward" />
           </a>
         </div>
         <div class="about-hero__image-wrap">
@@ -125,22 +125,22 @@ import Footer from '../components/Footer.astro';
         <h2 class="about-method__title">Come lavoro</h2>
         <div class="about-method__grid">
           <div class="about-method__card">
-            <div class="about-method__icon"><span class="material-icons-outlined">hearing</span></div>
+            <div class="about-method__icon"><Icon name="hearing" /></div>
             <h3>Ascolto</h3>
             <p>Mi racconti di cosa hai bisogno, quanto vale, per quanto tempo ti serve. Non ti chiedo di compilare un form da 30 campi.</p>
           </div>
           <div class="about-method__card">
-            <div class="about-method__icon"><span class="material-icons-outlined">analytics</span></div>
+            <div class="about-method__icon"><Icon name="analytics" /></div>
             <h3>Analizzo</h3>
             <p>Guardo il tuo bilancio, il settore, il tipo di bene. So già quali società accetteranno e a quali condizioni.</p>
           </div>
           <div class="about-method__card">
-            <div class="about-method__icon"><span class="material-icons-outlined">compare_arrows</span></div>
+            <div class="about-method__icon"><Icon name="compare_arrows" /></div>
             <h3>Confronto</h3>
             <p>Invio la pratica alla società con il miglior rapporto condizioni-probabilità di approvazione. Se rifiuta, passo alla seconda.</p>
           </div>
           <div class="about-method__card">
-            <div class="about-method__icon"><span class="material-icons-outlined">handshake</span></div>
+            <div class="about-method__icon"><Icon name="handshake" /></div>
             <h3>Chiudo</h3>
             <p>Ti presento la soluzione, gestiamo la firma, il fornitore consegna. Hai un interlocutore solo, dall'inizio alla fine.</p>
           </div>
@@ -155,17 +155,17 @@ import Footer from '../components/Footer.astro';
         <h2 class="about-values__title">Tre principi, nessun compromesso</h2>
         <div class="about-values__grid">
           <div class="about-values__item">
-            <div class="about-values__icon"><span class="material-icons-outlined">shield</span></div>
+            <div class="about-values__icon"><Icon name="shield" /></div>
             <h3>Indipendenza</h3>
             <p>Non sono legato a una singola società. Guadagno la stessa commissione qualunque partner scelga. L'unico incentivo è trovare la soluzione migliore per te.</p>
           </div>
           <div class="about-values__item">
-            <div class="about-values__icon"><span class="material-icons-outlined">visibility</span></div>
+            <div class="about-values__icon"><Icon name="visibility" /></div>
             <h3>Trasparenza</h3>
             <p>Ti dico i numeri prima. Il canone, la durata, il costo totale, il confronto con l'acquisto. Se il noleggio non conviene, te lo dico — e ti suggerisco l'alternativa.</p>
           </div>
           <div class="about-values__item">
-            <div class="about-values__icon"><span class="material-icons-outlined">bolt</span></div>
+            <div class="about-values__icon"><Icon name="bolt" /></div>
             <h3>Velocità</h3>
             <p>Rispondo in 24 ore. La delibera arriva in 24-72 ore. Non perché sia un supereroe, ma perché so a chi mandare la pratica e con quale documentazione.</p>
           </div>
@@ -212,7 +212,7 @@ import Footer from '../components/Footer.astro';
   .about-hero__sub { font-size: 1.05rem; line-height: 1.65; color: rgba(255,255,255,0.85); margin-bottom: 2rem; }
   .about-hero__cta { display: inline-flex; align-items: center; gap: 0.5rem; background: var(--color-accent); color: #fff; font-weight: 700; font-size: 1rem; padding: 0.9rem 2rem; border-radius: 8px; transition: background 0.2s, transform 0.15s; }
   .about-hero__cta:hover { background: var(--color-accent-hover); transform: translateY(-1px); }
-  .about-hero__cta .material-icons-outlined { font-size: 1.1rem; }
+  .about-hero__cta .mcf-icon { font-size: 1.1rem; }
   .about-hero__image { width: 100%; max-width: 420px; border-radius: 16px 16px 0 0; object-fit: cover; display: block; margin-left: auto; box-shadow: 0 -8px 40px rgba(0,0,0,0.3); }
 
   /* STATS */
@@ -252,7 +252,7 @@ import Footer from '../components/Footer.astro';
   .about-method__card { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius); padding: 2rem 1.5rem; text-align: center; transition: transform 0.2s, background 0.2s; }
   .about-method__card:hover { transform: translateY(-4px); background: rgba(255,255,255,0.1); }
   .about-method__icon { display: inline-flex; align-items: center; justify-content: center; width: 56px; height: 56px; border-radius: 50%; background: var(--color-accent); color: #fff; margin-bottom: 1.25rem; }
-  .about-method__icon .material-icons-outlined { font-size: 1.5rem; }
+  .about-method__icon .mcf-icon { font-size: 1.5rem; }
   .about-method__card h3 { font-size: 1.05rem; font-weight: 700; color: #fff; margin-bottom: 0.5rem; }
   .about-method__card p { font-size: 0.88rem; color: rgba(255,255,255,0.7); line-height: 1.6; }
 
@@ -265,7 +265,7 @@ import Footer from '../components/Footer.astro';
   .about-values__item { text-align: center; padding: 2rem 1.5rem; background: var(--color-bg-alt); border-radius: var(--radius); border: 1px solid var(--color-border); transition: transform 0.2s, box-shadow 0.2s; }
   .about-values__item:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(102,76,205,0.1); }
   .about-values__icon { display: inline-flex; align-items: center; justify-content: center; width: 52px; height: 52px; border-radius: 50%; background: var(--color-primary-bg); color: var(--color-primary); margin-bottom: 1rem; }
-  .about-values__icon .material-icons-outlined { font-size: 1.5rem; }
+  .about-values__icon .mcf-icon { font-size: 1.5rem; }
   .about-values__item h3 { font-size: 1.15rem; font-weight: 700; color: var(--color-primary); margin-bottom: 0.75rem; }
   .about-values__item p { font-size: 0.95rem; color: var(--color-text); line-height: 1.65; }
 

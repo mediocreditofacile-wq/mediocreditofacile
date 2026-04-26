@@ -1,10 +1,10 @@
 ---
+import Icon from '../components/Icon.astro';
 import Layout from '../layouts/Layout.astro';
 import Header from '../components/Header.astro';
 import ContactForm from '../components/ContactForm.astro';
 import Footer from '../components/Footer.astro';
 ---
-
 <Layout
   title="Contatti | Mediocredito Facile"
   description="Contattaci per una consulenza gratuita su noleggio operativo, leasing e finanziamenti per PMI. Rispondiamo entro 24 ore lavorative."
@@ -40,7 +40,7 @@ import Footer from '../components/Footer.astro';
           <h2 class="contatti-info__title">Come raggiungerci</h2>
 
           <div class="contatti-info__item">
-            <span class="material-icons-outlined" aria-hidden="true">phone</span>
+            <Icon name="phone" />
             <div>
               <strong>Telefono</strong>
               <a href="tel:+393939957840">+39 393 995 7840</a>
@@ -48,7 +48,7 @@ import Footer from '../components/Footer.astro';
           </div>
 
           <div class="contatti-info__item">
-            <span class="material-icons-outlined" aria-hidden="true">mail</span>
+            <Icon name="mail" />
             <div>
               <strong>Email</strong>
               <a href="mailto:mediocreditofacile@gmail.com">mediocreditofacile@gmail.com</a>
@@ -56,7 +56,7 @@ import Footer from '../components/Footer.astro';
           </div>
 
           <div class="contatti-info__item">
-            <span class="material-icons-outlined" aria-hidden="true">schedule</span>
+            <Icon name="schedule" />
             <div>
               <strong>Orari</strong>
               <span>Lun – Ven, 9:00 – 18:00</span>
@@ -165,7 +165,7 @@ import Footer from '../components/Footer.astro';
     margin-bottom: 1.5rem;
   }
 
-  .contatti-info__item .material-icons-outlined {
+  .contatti-info__item .mcf-icon {
     font-size: 1.4rem;
     color: var(--color-accent);
     flex-shrink: 0;

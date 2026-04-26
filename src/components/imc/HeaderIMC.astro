@@ -1,4 +1,5 @@
 ---
+import Icon from '../Icon.astro';
 interface Props {
   minimal?: boolean;
 }
@@ -14,7 +15,6 @@ const navLinks = [
   { label: 'Contatti', href: `${basePath}#contatti` },
 ];
 ---
-
 <header class="imc-header">
   <div class="imc-header__inner">
     <a href={basePath} class="imc-header__logo" aria-label="IMC Finanziamenti — Home">
@@ -23,7 +23,7 @@ const navLinks = [
 
     {minimal ? (
       <a href="tel:+39" class="imc-header__phone">
-        <span class="material-icons-outlined" aria-hidden="true">phone</span>
+        <Icon name="phone" />
         Chiedi Informazioni
       </a>
     ) : (
@@ -137,7 +137,7 @@ const navLinks = [
     color: var(--color-accent);
   }
 
-  .imc-header__phone .material-icons-outlined {
+  .imc-header__phone .mcf-icon {
     font-size: 1.2rem;
   }
 

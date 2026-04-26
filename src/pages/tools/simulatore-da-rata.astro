@@ -1,4 +1,5 @@
 ---
+import Icon from '../../components/Icon.astro';
 /**
  * Simulatore da Rata — /tools/simulatore-da-rata
  * Pagina completa: hero, simulatore inverso, sezione SEO, cross-link, form consulenza.
@@ -6,7 +7,6 @@
 import ToolLayout from '../../layouts/ToolLayout.astro';
 import SimulatoreInverso from '../../components/tools/SimulatoreInverso.tsx';
 ---
-
 <ToolLayout
   title="Simulatore da Rata — Calcola l'Importo Massimo Noleggiabile | Mediocredito Facile"
   description="Parti dalla rata che vuoi pagare e scopri il valore massimo del bene che puoi noleggiare. Coefficienti Grenke reali, risultato immediato. Gratis, senza registrazione."
@@ -27,11 +27,11 @@ import SimulatoreInverso from '../../components/tools/SimulatoreInverso.tsx';
   <nav class="tool-tabs" aria-label="Modalità simulatore">
     <div class="tool-tabs__inner">
       <a href="/tools/simulatore-noleggio-operativo" class="tool-tabs__tab">
-        <span class="material-icons-outlined tool-tabs__icon" aria-hidden="true">calculate</span>
+        <Icon name="calculate" class="tool-tabs__icon" />
         Hai l'importo? Calcola la rata
       </a>
       <span class="tool-tabs__tab tool-tabs__tab--active">
-        <span class="material-icons-outlined tool-tabs__icon" aria-hidden="true">swap_vert</span>
+        <Icon name="swap_vert" class="tool-tabs__icon" />
         Hai la rata? Calcola l'importo
       </span>
     </div>
@@ -51,7 +51,7 @@ import SimulatoreInverso from '../../components/tools/SimulatoreInverso.tsx';
 
       <div class="tool-seo__grid">
         <div class="tool-seo__block">
-          <span class="tool-seo__icon material-icons-outlined" aria-hidden="true">groups</span>
+          <Icon name="groups" class="tool-seo__icon" />
           <h3 class="tool-seo__subtitle">A chi serve questo strumento</h3>
           <p>
             I fornitori che propongono il noleggio operativo ai clienti ragionano a rata:
@@ -62,7 +62,7 @@ import SimulatoreInverso from '../../components/tools/SimulatoreInverso.tsx';
         </div>
 
         <div class="tool-seo__block">
-          <span class="tool-seo__icon material-icons-outlined" aria-hidden="true">swap_vert</span>
+          <Icon name="swap_vert" class="tool-seo__icon" />
           <h3 class="tool-seo__subtitle">Come funziona il calcolo</h3>
           <p>
             Il canone del noleggio operativo dipende dal valore del bene, dalla durata e dai
@@ -73,7 +73,7 @@ import SimulatoreInverso from '../../components/tools/SimulatoreInverso.tsx';
         </div>
 
         <div class="tool-seo__block">
-          <span class="tool-seo__icon material-icons-outlined" aria-hidden="true">arrow_forward</span>
+          <Icon name="arrow_forward" class="tool-seo__icon" />
           <h3 class="tool-seo__subtitle">Il passo successivo</h3>
           <p>
             Il risultato è indicativo e basato sui coefficienti standard. Per un preventivo
@@ -88,7 +88,7 @@ import SimulatoreInverso from '../../components/tools/SimulatoreInverso.tsx';
   <!-- Cross-link verso il simulatore classico -->
   <section class="tool-crosslink">
     <div class="tool-crosslink__inner">
-      <span class="material-icons-outlined tool-crosslink__icon" aria-hidden="true">calculate</span>
+      <Icon name="calculate" class="tool-crosslink__icon" />
       <div>
         <p><strong>Conosci già il valore del bene?</strong></p>
         <p>Usa il <a href="/tools/simulatore-noleggio-operativo">Simulatore Noleggio Operativo</a> per calcolare il canone mensile.</p>

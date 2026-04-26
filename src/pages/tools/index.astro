@@ -1,4 +1,5 @@
 ---
+import Icon from '../../components/Icon.astro';
 /**
  * Hub strumenti gratuiti — /tools/
  * Lista dei tool disponibili per le PMI.
@@ -6,7 +7,6 @@
 import ToolLayout from '../../layouts/ToolLayout.astro';
 import ToolCard from '../../components/tools/ToolCard.astro';
 ---
-
 <ToolLayout
   title="Strumenti Gratuiti per PMI — Simulatori e Calcolatori | Mediocredito Facile"
   description="Simulatori, calcolatori e strumenti pratici per valutare noleggio operativo, leasing e finanziamenti. Gratis, senza registrazione."
@@ -64,34 +64,34 @@ import ToolCard from '../../components/tools/ToolCard.astro';
 
         <a href="/tools/gruppo-barone" class="tool-card tool-card--reserved">
           <span class="tool-card__badge">Riservato</span>
-          <span class="tool-card__icon material-icons-outlined" aria-hidden="true">construction</span>
+          <Icon name="construction" class="tool-card__icon" />
           <h2 class="tool-card__title">Gruppo Barone — Strumenti Finanziari</h2>
           <p class="tool-card__desc">Simulatore ISI Inail, noleggio Grenke, finanziamento e BCC Tasso Zero per la rete Gruppo Barone.</p>
           <span class="tool-card__link">
             Apri il tool
-            <span class="material-icons-outlined" aria-hidden="true">arrow_forward</span>
+            <Icon name="arrow_forward" />
           </span>
         </a>
 
         <a href="/tools/marotta" class="tool-card tool-card--reserved">
           <span class="tool-card__badge">Riservato</span>
-          <span class="tool-card__icon material-icons-outlined" aria-hidden="true">precision_manufacturing</span>
+          <Icon name="precision_manufacturing" class="tool-card__icon" />
           <h2 class="tool-card__title">Marotta Evolution — Tool Finanziario</h2>
           <p class="tool-card__desc">Lookup P.IVA, simulatore canone e credit policy dedicata per la rete commerciale Marotta.</p>
           <span class="tool-card__link">
             Apri il tool
-            <span class="material-icons-outlined" aria-hidden="true">arrow_forward</span>
+            <Icon name="arrow_forward" />
           </span>
         </a>
 
         <a href="/tools/energyteam" class="tool-card tool-card--reserved">
           <span class="tool-card__badge">Riservato</span>
-          <span class="tool-card__icon material-icons-outlined" aria-hidden="true">solar_power</span>
+          <Icon name="solar_power" class="tool-card__icon" />
           <h2 class="tool-card__title">EnergyTeam — Simulatore Fotovoltaico</h2>
           <p class="tool-card__desc">Simulatore noleggio fotovoltaico dedicato alla rete EnergyTeam: assicurazione opzionale, coefficiente Sud Italia e invio richiesta pratica con checklist documenti.</p>
           <span class="tool-card__link">
             Apri il tool
-            <span class="material-icons-outlined" aria-hidden="true">arrow_forward</span>
+            <Icon name="arrow_forward" />
           </span>
         </a>
       </div>
@@ -115,7 +115,7 @@ import ToolCard from '../../components/tools/ToolCard.astro';
         </p>
         <a href="/contatti" class="tools-why__cta">
           I numeri funzionano? Parliamone
-          <span class="material-icons-outlined" aria-hidden="true">arrow_forward</span>
+          <Icon name="arrow_forward" />
         </a>
       </div>
       <div class="tools-why__image-wrap">
@@ -283,7 +283,7 @@ import ToolCard from '../../components/tools/ToolCard.astro';
     color: var(--color-accent);
   }
 
-  .tool-card__link .material-icons-outlined {
+  .tool-card__link .mcf-icon {
     font-size: 1rem;
   }
 
@@ -343,7 +343,7 @@ import ToolCard from '../../components/tools/ToolCard.astro';
     gap: 0.75rem;
   }
 
-  .tools-why__cta .material-icons-outlined {
+  .tools-why__cta .mcf-icon {
     font-size: 1.1rem;
   }
 

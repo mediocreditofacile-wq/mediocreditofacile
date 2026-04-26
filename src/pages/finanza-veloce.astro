@@ -1,9 +1,9 @@
 ---
+import Icon from '../components/Icon.astro';
 import Layout from '../layouts/Layout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 ---
-
 <Layout
   title="Finanzia il Tuo Investimento Aziendale | Mediocredito Facile"
   description="Finanziamento rapido per PMI: leasing, noleggio operativo, finanziamenti da 5.000 a 500.000 euro. Risposta in 24 ore con Mediocredito Facile."
@@ -61,22 +61,22 @@ import Footer from '../components/Footer.astro';
       <div class="fv-benefits__inner">
         <div class="fv-benefits__grid">
           <div class="fv-card">
-            <div class="fv-card__icon"><span class="material-icons-outlined" aria-hidden="true">compare_arrows</span></div>
+            <div class="fv-card__icon"><Icon name="compare_arrows" /></div>
             <h3 class="fv-card__title">Confronto multi-società</h3>
             <p class="fv-card__desc">Non ti affidi a un solo istituto. Confrontiamo le offerte di oltre 10 società per trovare condizioni e tassi migliori per te.</p>
           </div>
           <div class="fv-card">
-            <div class="fv-card__icon"><span class="material-icons-outlined" aria-hidden="true">schedule</span></div>
+            <div class="fv-card__icon"><Icon name="schedule" /></div>
             <h3 class="fv-card__title">Risposta in 24-48 ore</h3>
             <p class="fv-card__desc">Pre-valutazione in 24 ore, delibera entro 48. Niente settimane di attesa come con le banche tradizionali.</p>
           </div>
           <div class="fv-card">
-            <div class="fv-card__icon"><span class="material-icons-outlined" aria-hidden="true">person</span></div>
+            <div class="fv-card__icon"><Icon name="person" /></div>
             <h3 class="fv-card__title">Un unico interlocutore</h3>
             <p class="fv-card__desc">Alberto ti segue dall'inizio alla fine. Una sola persona di riferimento per tutta la pratica, senza rimbalzi.</p>
           </div>
           <div class="fv-card">
-            <div class="fv-card__icon"><span class="material-icons-outlined" aria-hidden="true">workspace_premium</span></div>
+            <div class="fv-card__icon"><Icon name="workspace_premium" /></div>
             <h3 class="fv-card__title">Zero costi per te</h3>
             <p class="fv-card__desc">La nostra consulenza è gratuita. Nessuna commissione a tuo carico: il nostro compenso arriva dalla società che eroga il servizio.</p>
           </div>
@@ -108,32 +108,32 @@ import Footer from '../components/Footer.astro';
 
         <div class="fv-why__grid">
           <div class="fv-why__item">
-            <span class="material-icons-outlined fv-why__icon" aria-hidden="true">chat</span>
+            <Icon name="chat" class="fv-why__icon" />
             <h3>1. Raccontaci cosa ti serve</h3>
             <p>Compila il modulo o chiamaci. Ci dici il bene che ti serve, l'importo indicativo e le tue preferenze. Noi analizziamo la tua situazione.</p>
           </div>
           <div class="fv-why__item">
-            <span class="material-icons-outlined fv-why__icon" aria-hidden="true">compare_arrows</span>
+            <Icon name="compare_arrows" class="fv-why__icon" />
             <h3>2. Confrontiamo le offerte</h3>
             <p>Inviamo la tua richiesta a più società di noleggio, leasing e credito. Confrontiamo tassi, durate e condizioni per trovare la proposta migliore.</p>
           </div>
           <div class="fv-why__item">
-            <span class="material-icons-outlined fv-why__icon" aria-hidden="true">verified</span>
+            <Icon name="verified" class="fv-why__icon" />
             <h3>3. Scegli e attiva</h3>
             <p>Ti presentiamo le opzioni, scegli quella che preferisci. Ti seguiamo nella documentazione e nella firma. In pochi giorni sei operativo.</p>
           </div>
           <div class="fv-why__item">
-            <span class="material-icons-outlined fv-why__icon" aria-hidden="true">receipt</span>
+            <Icon name="receipt" class="fv-why__icon" />
             <h3>Vantaggi fiscali concreti</h3>
             <p>Noleggio 100% deducibile, leasing con ammortamento accelerato, finanziamenti su misura. Ogni formula ha i suoi vantaggi fiscali.</p>
           </div>
           <div class="fv-why__item">
-            <span class="material-icons-outlined fv-why__icon" aria-hidden="true">account_balance_wallet</span>
+            <Icon name="account_balance_wallet" class="fv-why__icon" />
             <h3>Liquidità preservata</h3>
             <p>Non immobilizzi capitale. Che tu scelga noleggio, leasing o finanziamento, paghi nel tempo e mantieni libere le tue risorse.</p>
           </div>
           <div class="fv-why__item">
-            <span class="material-icons-outlined fv-why__icon" aria-hidden="true">security</span>
+            <Icon name="security" class="fv-why__icon" />
             <h3>Nessun vincolo, massima trasparenza</h3>
             <p>Non sei obbligato ad accettare. Ti presentiamo le opzioni, tu decidi. Nessun costo nascosto, nessuna sorpresa in fase contrattuale.</p>
           </div>
@@ -456,7 +456,7 @@ import Footer from '../components/Footer.astro';
     margin-bottom: 1rem;
   }
 
-  .fv-card__icon .material-icons-outlined {
+  .fv-card__icon .mcf-icon {
     font-size: 1.6rem;
   }
 

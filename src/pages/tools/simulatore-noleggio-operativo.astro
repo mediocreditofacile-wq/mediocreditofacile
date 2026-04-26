@@ -1,4 +1,5 @@
 ---
+import Icon from '../../components/Icon.astro';
 /**
  * Simulatore Noleggio Operativo — /tools/simulatore-noleggio-operativo
  * Pagina completa: hero, simulatore interattivo, sezione SEO, form consulenza.
@@ -6,7 +7,6 @@
 import ToolLayout from '../../layouts/ToolLayout.astro';
 import SimulatoreNoleggio from '../../components/tools/SimulatoreNoleggio.tsx';
 ---
-
 <ToolLayout
   title="Simulatore Noleggio Operativo — Calcola il Canone | Mediocredito Facile"
   description="Calcola subito il canone mensile del noleggio operativo. Inserisci il valore del bene, scegli la durata e scopri quanto paghi al mese. Gratis, senza registrazione."
@@ -27,11 +27,11 @@ import SimulatoreNoleggio from '../../components/tools/SimulatoreNoleggio.tsx';
   <nav class="tool-tabs" aria-label="Modalità simulatore">
     <div class="tool-tabs__inner">
       <span class="tool-tabs__tab tool-tabs__tab--active">
-        <span class="material-icons-outlined tool-tabs__icon" aria-hidden="true">calculate</span>
+        <Icon name="calculate" class="tool-tabs__icon" />
         Hai l'importo? Calcola la rata
       </span>
       <a href="/tools/simulatore-da-rata" class="tool-tabs__tab">
-        <span class="material-icons-outlined tool-tabs__icon" aria-hidden="true">swap_vert</span>
+        <Icon name="swap_vert" class="tool-tabs__icon" />
         Hai la rata? Calcola l'importo
       </a>
     </div>
@@ -51,7 +51,7 @@ import SimulatoreNoleggio from '../../components/tools/SimulatoreNoleggio.tsx';
 
       <div class="tool-seo__grid">
         <div class="tool-seo__block">
-          <span class="tool-seo__icon material-icons-outlined" aria-hidden="true">description</span>
+          <Icon name="description" class="tool-seo__icon" />
           <h3 class="tool-seo__subtitle">Cos'è il noleggio operativo</h3>
           <p>
             Il noleggio operativo è un contratto con cui un'azienda utilizza un bene strumentale
@@ -62,7 +62,7 @@ import SimulatoreNoleggio from '../../components/tools/SimulatoreNoleggio.tsx';
         </div>
 
         <div class="tool-seo__block">
-          <span class="tool-seo__icon material-icons-outlined" aria-hidden="true">calculate</span>
+          <Icon name="calculate" class="tool-seo__icon" />
           <h3 class="tool-seo__subtitle">Come si calcola il canone</h3>
           <p>
             Il canone dipende dal valore del bene, dalla durata del contratto e dal coefficiente
@@ -73,7 +73,7 @@ import SimulatoreNoleggio from '../../components/tools/SimulatoreNoleggio.tsx';
         </div>
 
         <div class="tool-seo__block">
-          <span class="tool-seo__icon material-icons-outlined" aria-hidden="true">compare_arrows</span>
+          <Icon name="compare_arrows" class="tool-seo__icon" />
           <h3 class="tool-seo__subtitle">Noleggio operativo vs acquisto diretto</h3>
           <p>
             Con l'acquisto diretto l'azienda immobilizza capitale. Con il noleggio operativo
@@ -89,7 +89,7 @@ import SimulatoreNoleggio from '../../components/tools/SimulatoreNoleggio.tsx';
   <!-- Cross-link verso il simulatore inverso -->
   <section class="tool-crosslink">
     <div class="tool-crosslink__inner">
-      <span class="material-icons-outlined tool-crosslink__icon" aria-hidden="true">swap_vert</span>
+      <Icon name="swap_vert" class="tool-crosslink__icon" />
       <div>
         <p><strong>Conosci il budget mensile ma non il valore del bene?</strong></p>
         <p>Usa il <a href="/tools/simulatore-da-rata">Simulatore da Rata</a> per scoprire l'importo massimo finanziabile.</p>

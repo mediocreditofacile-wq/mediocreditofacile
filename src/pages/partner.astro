@@ -1,4 +1,5 @@
 ---
+import Icon from '../components/Icon.astro';
 import Layout from '../layouts/Layout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
@@ -74,7 +75,6 @@ const typeColors: Record<string, { bg: string; color: string }> = {
   'Agevolazioni': { bg: '#FFF8E1', color: '#F57F17' },
 };
 ---
-
 <Layout
   title="Le Società con cui Lavoriamo | Mediocredito Facile"
   description="Oltre 12 società di noleggio operativo, leasing e finanziamento. Un unico interlocutore, tutte le opzioni: Grenke, DLL, Sella Leasing, IFIS e molte altre."
@@ -122,7 +122,7 @@ const typeColors: Record<string, { bg: string; color: string }> = {
           <h2>Perché il multi-partner fa la differenza</h2>
           <div class="value-grid">
             <div class="value-item">
-              <span class="material-icons-outlined value-icon">compare_arrows</span>
+              <Icon name="compare_arrows" class="value-icon" />
               <h3>Criteri diversi, stessa richiesta</h3>
               <p>
                 Una società può rifiutare un'operazione che un'altra approva senza problemi.
@@ -131,7 +131,7 @@ const typeColors: Record<string, { bg: string; color: string }> = {
               </p>
             </div>
             <div class="value-item">
-              <span class="material-icons-outlined value-icon">savings</span>
+              <Icon name="savings" class="value-icon" />
               <h3>Condizioni su misura</h3>
               <p>
                 I tassi e le condizioni variano in modo significativo tra una società e l'altra.
@@ -140,7 +140,7 @@ const typeColors: Record<string, { bg: string; color: string }> = {
               </p>
             </div>
             <div class="value-item">
-              <span class="material-icons-outlined value-icon">speed</span>
+              <Icon name="speed" class="value-icon" />
               <h3>Tempi di delibera reali</h3>
               <p>
                 Alcune società deliberano in 24 ore, altre in due settimane.
@@ -164,7 +164,7 @@ const typeColors: Record<string, { bg: string; color: string }> = {
           </p>
           <a href="/contatti" class="cta-button">
             Richiedi un confronto gratuito
-            <span class="material-icons-outlined">arrow_forward</span>
+            <Icon name="arrow_forward" />
           </a>
         </div>
       </div>
