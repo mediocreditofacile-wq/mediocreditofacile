@@ -20,6 +20,7 @@
 - src/pages/finanziamenti/ → landing page core finanziamenti IFIS (chirografario, strutturato, factoring)
 - src/pages/finanziamenti/agevolazioni/ → hub agevolazioni + 3 landing (Sabatini, MCC, Bando ISI)
 - src/pages/grazie-fin.astro → thank you page finanziamenti (conversion tag form_finanziamenti)
+- src/pages/grazie-agev.astro → thank you page agevolazioni (conversion tag form_agevolazioni). Riceve `?fonte=<slug>` da SabatiniCalculator, FondoGaranziaChecker, BandoIsiChecker e dal form di iperammortamento-2026; in mancanza di querystring, fallback su referrer. dataLayer event: `form_agevolazioni` + `generate_lead`.
 - src/pages/tools/energyteam.astro → area partner EnergyTeam (password: `energyteam`, localStorage key `mcf_energyteam_auth`, noindex). Monta `SimulatoreFotovoltaico` con prop `assicurazioneOpzionale` e `varianteForm="energyteam"`.
 - src/pages/tools/arca-energia.astro → area partner Arca Energia (password: `arcaenergia`, localStorage key `mcf_arcaenergia_auth`, noindex). Monta `SimulatoreFotovoltaico` con prop `assicurazioneOpzionale`, `varianteForm="arcaenergia"`, `zonaFissa="sud"`, `abilitaLeasing`, `abilitaAgevolazioni`. Include switch noleggio/leasing, iperammortamento 4.0, Sabatini 4.0 e ZES Unica.
 - src/pages/tools/age-srl.astro → area partner AGE SRL (password: `age-srl`, localStorage key `mcf_agesrl_auth`, noindex). Stessa struttura di Arca Energia + download preventivo PDF brandizzato MCF.
@@ -56,13 +57,15 @@ Il componente `src/components/ContactForm.astro` accetta queste prop opzionali:
 - `subheading?: string` → sottotitolo (default: "Compila il modulo e ti ricontatteremo entro 24 ore lavorative. Nessun impegno.")
 - `ctaText?: string` → testo del bottone di submit (default: "Richiedi Preventivo Gratuito")
 - `variant?: 'primary' | 'secondary'` → 'primary' è il form finale (mantiene `id="contatti"` per l'anchor scroll dal CTA Hero); 'secondary' è il form intermedio nella pagina (nessun id anchor, invia un campo `variante=secondary` al webhook per distinguere in Pipedrive). Default: 'primary'.
+- `endpoint?: string` → URL dell'API a cui POST il form. Default `/api/submit`. Diventa l'attributo `action` del form e l'URL del fetch script.
+- `redirectOnSuccess?: string` → URL su cui fare `window.location.href` dopo il submit (anche su errore di rete). Default `/grazie`. Viene scritto come `data-redirect` sul form e letto dallo script di submit.
 
-Lo script di submit agisce su tutti i form presenti in pagina via `querySelectorAll`, così il form intermedio e quello finale vengono entrambi gestiti senza collisioni.
+Lo script di submit agisce su tutti i form presenti in pagina via `querySelectorAll`, così il form intermedio e quello finale vengono entrambi gestiti senza collisioni. Endpoint e redirect sono letti dinamicamente da `form.action` e `form.dataset.redirect`, quindi più form sulla stessa pagina possono avere endpoint/redirect diversi.
 
 ## Regole componenti
 - Header.astro ha prop "minimal" (boolean). minimal=true → solo logo + telefono (per landing ads). minimal=false → navbar completa (per homepage e pagine sito).
 - Le landing con slug che contiene "fotovoltaico" mostrano le foto hero-fotovoltaico.png e pannelli-tetto.png.
-- Form invia a webhook Zapier. Thank you pages: /grazie (vendor), /grazie-fin (finanziamenti IFIS).
+- Form invia a webhook Zapier. Thank you pages: /grazie (vendor), /grazie-fin (finanziamenti IFIS), /grazie-agev (agevolazioni Sabatini/MCC/ISI/Iperammortamento).
 - Il campo `fonte` nei form identifica la provenienza: "finanziamenti-ifis", "sabatini", "fondo-garanzia-mcc", "bando-isi-inail".
 
 ## Brand (aggiornato aprile 2026)

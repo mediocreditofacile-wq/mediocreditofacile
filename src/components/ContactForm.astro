@@ -5,6 +5,8 @@ interface Props {
   subheading?: string;
   ctaText?: string;
   variant?: 'primary' | 'secondary';
+  endpoint?: string;
+  redirectOnSuccess?: string;
 }
 const {
   fonte,
@@ -12,6 +14,8 @@ const {
   subheading = 'Compila il modulo e ti ricontatteremo entro 24 ore lavorative. Nessun impegno.',
   ctaText = 'Richiedi Preventivo Gratuito',
   variant = 'primary',
+  endpoint = '/api/submit',
+  redirectOnSuccess = '/grazie',
 } = Astro.props;
 const sectionId = variant === 'primary' ? 'contatti' : undefined;
 ---
@@ -22,8 +26,9 @@ const sectionId = variant === 'primary' ? 'contatti' : undefined;
     <p class="form-section__sub">{subheading}</p>
     <form
       class="contact-form"
-      action="/api/submit"
+      action={endpoint}
       method="POST"
+      data-redirect={redirectOnSuccess}
     >
       <input name="website" type="text" tabindex="-1" autocomplete="off" style="position:absolute;opacity:0;pointer-events:none;height:0;overflow:hidden" aria-hidden="true" />
       {fonte && <input type="hidden" name="fonte" value={fonte} />}
@@ -165,10 +170,6 @@ const sectionId = variant === 'primary' ? 'contatti' : undefined;
     transform: none;
   }
 
-  .contact-form__submit .material-icons-outlined {
-    font-size: 1.1rem;
-  }
-
   .contact-form__privacy {
     text-align: center;
     font-size: 0.8rem;
@@ -200,10 +201,13 @@ const sectionId = variant === 'primary' ? 'contatti' : undefined;
         btn.disabled = true;
         btn.textContent = 'Invio in corso…';
       }
+      // Endpoint e redirect sono configurabili via prop del componente Astro
+      const endpoint = form.getAttribute('action') || '/api/submit';
+      const redirect = form.dataset.redirect || '/grazie';
       try {
-        await fetch('/api/submit', { method: 'POST', body: new FormData(form) });
+        await fetch(endpoint, { method: 'POST', body: new FormData(form) });
       } catch (_) {}
-      window.location.href = '/grazie';
+      window.location.href = redirect;
       // Fallback di ripristino nel caso il redirect tardi
       setTimeout(() => {
         if (btn) {

@@ -321,7 +321,7 @@ const faqJsonLd = {
     try {
       await fetch('/api/submit-agevolazioni', { method: 'POST', body: data });
     } catch (_) {}
-    window.location.href = '/grazie-fin';
+    window.location.href = '/grazie-agev?fonte=iperammortamento-2026';
   });
 
   // Form download Excel (lead magnet: invia lead poi scarica il file)

@@ -350,7 +350,7 @@ export default function BandoIsiChecker() {
       await fetch('/api/submit-agevolazioni', { method: 'POST', body });
       setFormInviato(true);
       setTimeout(() => {
-        window.location.href = '/grazie-fin';
+        window.location.href = '/grazie-agev?fonte=bando-isi-inail';
       }, 800);
     } catch (_) {
       setFormInvio(false);

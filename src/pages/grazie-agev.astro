@@ -1,0 +1,177 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<Layout
+  title="Richiesta ricevuta | Mediocredito Facile"
+  description="Abbiamo ricevuto la tua richiesta di consulenza sulle agevolazioni. Ti richiamo entro 24 ore lavorative."
+  noindex={true}
+>
+  <Header minimal={true} />
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    // Fonte: prima dal querystring, poi dal referrer, infine "diretto"
+    let fonte = 'diretto';
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const qFonte = params.get('fonte');
+      if (qFonte) {
+        fonte = qFonte;
+      } else if (document.referrer) {
+        const url = new URL(document.referrer);
+        const path = url.pathname.replace(/^\/|\/$/g, '');
+        if (path) fonte = path;
+        else fonte = 'homepage';
+      }
+    } catch (_) {}
+    window.dataLayer.push({ event: 'form_agevolazioni', fonte: fonte });
+    window.dataLayer.push({ event: 'generate_lead', fonte: fonte });
+  </script>
+  <main class="grazie-agev">
+    <div class="grazie-agev__inner">
+      <div class="grazie-agev__icon">
+        <span class="material-icons-outlined" aria-hidden="true">check_circle</span>
+      </div>
+      <span class="grazie-agev__eyebrow">Agevolazioni 2026</span>
+      <h1 class="grazie-agev__title">Richiesta ricevuta</h1>
+      <p class="grazie-agev__sub">
+        Ti richiamo entro 24 ore lavorative. Insieme verifichiamo l'agevolazione che fa al caso tuo
+        e come incastrarla con il finanziamento dell'investimento.
+      </p>
+      <p class="grazie-agev__steps-intro">Cosa succede adesso</p>
+      <ul class="grazie-agev__steps">
+        <li><strong>1.</strong> Leggo la tua richiesta e i dati del calcolatore.</li>
+        <li><strong>2.</strong> Ti richiamo io entro 24 ore lavorative per una prima valutazione, gratuita e senza impegno.</li>
+        <li><strong>3.</strong> Se la pratica regge, prepariamo insieme la documentazione per portarla avanti.</li>
+      </ul>
+      <div class="grazie-agev__actions">
+        <a href="/finanziamenti/agevolazioni/" class="grazie-agev__cta">Torna alle Agevolazioni</a>
+        <a href="tel:+393939957840" class="grazie-agev__phone">
+          <span class="material-icons-outlined" aria-hidden="true">phone</span>
+          Preferisci chiamare? +39 393 995 7840
+        </a>
+      </div>
+    </div>
+  </main>
+  <Footer />
+</Layout>
+
+<style>
+  .grazie-agev {
+    min-height: 70vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 1.5rem;
+  }
+
+  .grazie-agev__inner {
+    text-align: center;
+    max-width: 560px;
+  }
+
+  .grazie-agev__icon {
+    margin-bottom: 1.25rem;
+  }
+
+  .grazie-agev__icon .material-icons-outlined {
+    font-size: 4rem;
+    color: var(--mcf-success, #2D8F4E);
+  }
+
+  .grazie-agev__eyebrow {
+    display: inline-block;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--mcf-accent);
+    margin-bottom: 0.5rem;
+  }
+
+  .grazie-agev__title {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--mcf-black);
+    margin-bottom: 1rem;
+  }
+
+  .grazie-agev__sub {
+    font-size: 1.1rem;
+    color: var(--mcf-charcoal);
+    margin-bottom: 2rem;
+    line-height: 1.65;
+  }
+
+  .grazie-agev__steps-intro {
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--mcf-accent);
+    margin: 0 0 0.75rem;
+  }
+
+  .grazie-agev__steps {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 2rem;
+    text-align: left;
+    display: grid;
+    gap: 0.6rem;
+  }
+
+  .grazie-agev__steps li {
+    font-size: 0.98rem;
+    color: var(--mcf-charcoal);
+    line-height: 1.5;
+    padding-left: 0.25rem;
+  }
+
+  .grazie-agev__steps li strong {
+    color: var(--mcf-accent);
+    margin-right: 0.4rem;
+  }
+
+  .grazie-agev__actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .grazie-agev__cta {
+    display: inline-block;
+    background: var(--mcf-accent);
+    color: #fff;
+    padding: 0.875rem 2rem;
+    border-radius: var(--radius);
+    font-weight: 700;
+    font-size: 1rem;
+    transition: background 0.2s;
+  }
+
+  .grazie-agev__cta:hover {
+    background: #5a3fbf;
+  }
+
+  .grazie-agev__phone {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--mcf-primary);
+    transition: color 0.2s;
+  }
+
+  .grazie-agev__phone:hover {
+    color: var(--mcf-primary-dark);
+  }
+
+  .grazie-agev__phone .material-icons-outlined {
+    font-size: 1.1rem;
+  }
+</style>
