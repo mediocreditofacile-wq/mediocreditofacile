@@ -15,23 +15,28 @@ import Footer from '../../../components/Footer.astro';
     <!-- HERO -->
     <section class="agev-hero">
       <div class="agev-hero__inner">
-        <span class="agev-hero__badge">Agevolazioni 2026</span>
-        <h1 class="agev-hero__title">
-          Quattro strumenti<br />per abbattere il costo<br />del tuo investimento
-        </h1>
-        <p class="agev-hero__sub">
-          Sabatini fino a 4 milioni, garanzia statale fino all'80%, fondo perduto fino al 65%,
-          iperammortamento fino al 280%. Te li integro col finanziamento giusto, in un'unica pratica.
-        </p>
-        <div class="agev-hero__actions">
-          <a href="#agev-cards" class="agev-hero__btn agev-hero__btn--primary">
-            Trova quella che fa per te
-            <Icon name="arrow-down" size={18} />
-          </a>
-          <a href="tel:+393939957840" class="agev-hero__btn agev-hero__btn--outline">
-            <Icon name="phone" size={18} />
-            393 995 7840
-          </a>
+        <div class="agev-hero__content">
+          <span class="agev-hero__badge">Agevolazioni 2026</span>
+          <h1 class="agev-hero__title">
+            Quattro strumenti per abbattere il costo del tuo investimento
+          </h1>
+          <p class="agev-hero__sub">
+            Sabatini fino a 4 milioni, garanzia statale fino all'80%, fondo perduto fino al 65%,
+            iperammortamento fino al 280%. Te li integro col finanziamento giusto, in un'unica pratica.
+          </p>
+          <div class="agev-hero__actions">
+            <a href="#agev-cards" class="agev-hero__btn agev-hero__btn--primary">
+              Trova quella che fa per te
+              <Icon name="arrow-down" size={18} />
+            </a>
+            <a href="tel:+393939957840" class="agev-hero__btn agev-hero__btn--outline">
+              <Icon name="phone" size={18} />
+              393 995 7840
+            </a>
+          </div>
+        </div>
+        <div class="agev-hero__image">
+          <img src="/images/alberto-consulenza.webp" alt="Alberto Ama, consulente Mediocredito Facile, durante una consulenza su agevolazioni e finanziamenti per PMI" loading="eager" />
         </div>
       </div>
     </section>
@@ -139,16 +144,24 @@ import Footer from '../../../components/Footer.astro';
 </Layout>
 
 <style>
-  /* HERO — pattern brand visual MCF (gradient soft, badge viola, CTA primary+outline) */
+  /* HERO — pattern brand visual MCF (gradient soft, layout 2-col content+image) */
   .agev-hero {
     background: linear-gradient(135deg, #f8f6ff 0%, #eef0ff 50%, #f0f8ff 100%);
-    padding: 4.5rem 1.5rem 4rem;
+    padding: 4rem 1.5rem 0;
+    overflow: hidden;
   }
 
   .agev-hero__inner {
     max-width: var(--max-width);
     margin: 0 auto;
-    text-align: center;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: center;
+  }
+
+  .agev-hero__content {
+    padding-bottom: 3.5rem;
   }
 
   .agev-hero__badge {
@@ -159,32 +172,43 @@ import Footer from '../../../components/Footer.astro';
     font-weight: 700;
     padding: 0.4rem 1rem;
     border-radius: 100px;
-    margin-bottom: 1.75rem;
+    margin-bottom: 1.5rem;
   }
 
   .agev-hero__title {
-    font-size: clamp(2rem, 5vw, 2.85rem);
+    font-size: clamp(1.85rem, 4.5vw, 2.65rem);
     font-weight: 800;
     line-height: 1.15;
     letter-spacing: -0.03em;
     color: var(--color-primary-dark);
-    margin: 0 auto 1.25rem;
-    max-width: 880px;
+    margin-bottom: 1.25rem;
   }
 
   .agev-hero__sub {
-    font-size: 1.1rem;
+    font-size: 1.08rem;
     line-height: 1.7;
     color: var(--color-text);
-    margin: 0 auto 2rem;
-    max-width: 680px;
+    margin-bottom: 2rem;
+    max-width: 520px;
   }
 
   .agev-hero__actions {
     display: flex;
     gap: 1rem;
     flex-wrap: wrap;
+  }
+
+  .agev-hero__image {
+    display: flex;
+    align-items: flex-end;
     justify-content: center;
+  }
+
+  .agev-hero__image img {
+    width: 100%;
+    max-width: 500px;
+    border-radius: 16px 16px 0 0;
+    object-fit: cover;
   }
 
   .agev-hero__btn {
@@ -374,9 +398,40 @@ import Footer from '../../../components/Footer.astro';
     }
   }
 
+  @media (max-width: 880px) {
+    .agev-hero__inner {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      text-align: center;
+    }
+
+    .agev-hero__content {
+      padding-bottom: 0;
+    }
+
+    .agev-hero__sub {
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .agev-hero__actions {
+      justify-content: center;
+    }
+
+    .agev-hero__image {
+      order: -1;
+      max-height: 280px;
+      overflow: hidden;
+    }
+
+    .agev-hero__image img {
+      max-width: 360px;
+    }
+  }
+
   @media (max-width: 640px) {
     .agev-hero {
-      padding: 4rem 1.25rem 3.5rem;
+      padding: 3rem 1.25rem 0;
     }
 
     .agev-intro,
