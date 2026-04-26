@@ -2,44 +2,69 @@
 import Layout from '../layouts/Layout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import Icon from '../components/Icon.astro';
 
-// Servizi principali da mostrare in homepage (6 card)
-const servizi = [
+// Servizi homepage — layout asimmetrico:
+// - 1 feature (Noleggio): card grande con immagine, bullets, cta dedicato
+// - 2 main (Leasing, Finanziamenti): card medie a destra, impilate
+// - 3 secondary (Fotovoltaico, Ristorazione, Agevolazioni): card piccole sotto
+const servizioFeature = {
+  icon: 'noleggio-operativo',
+  slug: 'noleggio-operativo',
+  title: 'Noleggio Operativo',
+  tagline: 'Il modo piu intelligente di portare in azienda macchinari e tecnologia.',
+  bullets: [
+    'Zero anticipo, canone mensile 100% deducibile (art. 108 TUIR)',
+    'Manutenzione e assicurazione incluse, nessuna sorpresa',
+    'Non appare come debito in bilancio, niente Centrale Rischi',
+  ],
+  ctaText: 'Calcola il canone',
+  ctaHref: '/tools/simulatore-noleggio-operativo',
+  // Foto definitiva (Nano Banana 2K, 25 apr 2026) generata secondo
+  // visual-identity-images.md: imprenditore PMI veneto al telefono mid-stride
+  // nel suo capannone, scena rubata, regola dei terzi, anatomia rigorosa.
+  image: '/images/feature-noleggio-operativo.webp',
+  imageAlt: 'Imprenditore PMI veneto al telefono nel suo capannone, mentre attraversa il reparto produzione',
+};
+
+const serviziMain = [
   {
-    icon: 'description',
-    slug: 'noleggio-operativo',
-    title: 'Noleggio Operativo',
-    desc: 'Tecnologia, veicoli e attrezzature senza immobilizzare capitale. Canone fisso e 100% deducibile.',
-  },
-  {
-    icon: 'settings',
+    icon: 'leasing-strumentale',
     slug: 'leasing-strumentale',
     title: 'Leasing Strumentale',
-    desc: 'Macchinari e attrezzature con soluzioni flessibili e il vantaggio del riscatto finale a condizioni negoziate.',
+    desc: 'Macchinari e attrezzature con riscatto finale a condizioni negoziate. Flessibilita su durata e maxi-canone iniziale.',
+    ctaText: 'Scegli il leasing',
   },
   {
-    icon: 'account_balance',
-    slug: 'finanziamenti-pmi',
+    icon: 'finanziamenti-pmi',
+    slug: 'finanziamenti/',
     title: 'Finanziamenti PMI',
-    desc: 'Liquidità per crescere e investire. Confrontiamo oltre 10 istituti per trovare le condizioni migliori.',
+    desc: 'Liquidita per crescere. Confrontiamo oltre 10 istituti bancari per trovare il finanziamento adatto, da 50.000 euro in su.',
+    ctaText: 'Richiedi una proposta',
   },
+];
+
+const serviziSecondary = [
   {
-    icon: 'solar_power',
+    icon: 'fotovoltaico',
     slug: 'noleggio-fotovoltaico-zero-anticipo',
     title: 'Fotovoltaico Aziendale',
-    desc: 'Impianto fotovoltaico a canone fisso da 24 a 84 mesi. Il risparmio in bolletta copre il canone.',
+    desc: 'Impianto a canone fisso. Il risparmio in bolletta copre la rata.',
+    ctaText: 'Simula il risparmio',
   },
   {
-    icon: 'restaurant',
+    icon: 'ristorazione',
     slug: 'noleggio-operativo-ristorazione',
     title: 'Ristorazione',
-    desc: 'Forni, frigoriferi e cucine professionali a canone mensile fisso. Zero anticipo, manutenzione inclusa.',
+    desc: 'Cucine professionali, forni, abbattitori a canone mensile fisso.',
+    ctaText: 'Vedi i canoni',
   },
   {
-    icon: 'bolt',
+    icon: 'agevolazioni',
     slug: 'agevolazioni-fiscali',
     title: 'Agevolazioni Fiscali',
-    desc: 'Transizione 5.0, Sabatini e deducibilità totale. Ti guidiamo tra gli incentivi per massimizzare il risparmio.',
+    desc: 'Sabatini, Transizione 5.0, Fondo Garanzia MCC: massimizziamo il vantaggio.',
+    ctaText: 'Verifica idoneita',
   },
 ];
 
@@ -100,7 +125,7 @@ const faqLD = {
           <div class="hero__actions">
             <a href="/finanza-veloce" class="hero__btn hero__btn--primary">Richiedi Preventivo</a>
             <a href="tel:+393939957840" class="hero__btn hero__btn--outline">
-              <span class="material-icons-outlined" aria-hidden="true">phone</span>
+              <Icon name="phone" size={20} />
               Chiama Ora
             </a>
           </div>
@@ -112,37 +137,77 @@ const faqLD = {
       </div>
     </section>
 
-    {/* ═══ SERVIZI ═══ */}
+    {/* ═══ SERVIZI — LAYOUT ASIMMETRICO ═══ */}
     <section class="servizi">
       <div class="servizi__inner">
         <h2 class="section-title">Gli strumenti dell'Officina</h2>
-        <p class="section-subtitle">Un punto di accesso a più soluzioni di credito</p>
-        {/* Card principali: Noleggio, Leasing, Finanziamenti */}
-        <div class="servizi__grid servizi__grid--main">
-          {servizi.slice(0, 3).map((s) => (
-            <a href={`/${s.slug}`} class="scard scard--main">
-              <span class="material-icons-outlined scard__icon" aria-hidden="true">{s.icon}</span>
-              <div>
-                <h3 class="scard__title">{s.title}</h3>
-                <p class="scard__desc">{s.desc}</p>
-                <span class="scard__link">
-                  Scopri di più
-                  <span class="material-icons-outlined" aria-hidden="true">arrow_forward</span>
-                </span>
+        <p class="section-subtitle">Un punto di accesso a piu soluzioni di credito. Sei strumenti, un solo interlocutore.</p>
+
+        {/* Riga 1: feature Noleggio + 2 main impilate */}
+        <div class="servizi__top">
+          <a href={`/${servizioFeature.slug}`} class="sfeature">
+            <div class="sfeature__media">
+              {servizioFeature.image ? (
+                <img src={servizioFeature.image} alt={servizioFeature.imageAlt} loading="lazy" />
+              ) : (
+                <div class="sfeature__placeholder" aria-hidden="true">
+                  <Icon name="noleggio-operativo" size={64} />
+                </div>
+              )}
+              <span class="sfeature__badge">Servizio piu richiesto</span>
+            </div>
+            <div class="sfeature__body">
+              <div class="sfeature__icon">
+                <Icon name={servizioFeature.icon} size={28} />
               </div>
-            </a>
-          ))}
+              <h3 class="sfeature__title">{servizioFeature.title}</h3>
+              <p class="sfeature__tagline">{servizioFeature.tagline}</p>
+              <ul class="sfeature__bullets">
+                {servizioFeature.bullets.map((b) => (
+                  <li>
+                    <Icon name="check-circle" size={18} />
+                    <span>{b}</span>
+                  </li>
+                ))}
+              </ul>
+              <span class="sfeature__cta">
+                {servizioFeature.ctaText}
+                <Icon name="arrow-right" size={16} />
+              </span>
+            </div>
+          </a>
+
+          <div class="servizi__main">
+            {serviziMain.map((s) => (
+              <a href={`/${s.slug}`} class="smain">
+                <div class="smain__icon">
+                  <Icon name={s.icon} size={24} />
+                </div>
+                <div class="smain__body">
+                  <h3 class="smain__title">{s.title}</h3>
+                  <p class="smain__desc">{s.desc}</p>
+                  <span class="smain__cta">
+                    {s.ctaText}
+                    <Icon name="arrow-right" size={14} />
+                  </span>
+                </div>
+              </a>
+            ))}
+          </div>
         </div>
-        {/* Card secondarie: Fotovoltaico, Ristorazione, Agevolazioni */}
-        <div class="servizi__grid servizi__grid--secondary">
-          {servizi.slice(3).map((s) => (
-            <a href={`/${s.slug}`} class="scard scard--compact">
-              <span class="material-icons-outlined scard__icon" aria-hidden="true">{s.icon}</span>
-              <h3 class="scard__title">{s.title}</h3>
-              <p class="scard__desc">{s.desc}</p>
-              <span class="scard__link">
-                Scopri di più
-                <span class="material-icons-outlined" aria-hidden="true">arrow_forward</span>
+
+        {/* Riga 2: 3 card secondarie compatte */}
+        <div class="servizi__bottom">
+          {serviziSecondary.map((s) => (
+            <a href={`/${s.slug}`} class="ssecondary">
+              <div class="ssecondary__icon">
+                <Icon name={s.icon} size={22} />
+              </div>
+              <h3 class="ssecondary__title">{s.title}</h3>
+              <p class="ssecondary__desc">{s.desc}</p>
+              <span class="ssecondary__cta">
+                {s.ctaText}
+                <Icon name="arrow-right" size={14} />
               </span>
             </a>
           ))}
@@ -188,7 +253,7 @@ const faqLD = {
             <details class="faq__item" open={i === 0}>
               <summary class="faq__question">
                 {f.q}
-                <span class="material-icons-outlined faq__chevron" aria-hidden="true">expand_more</span>
+                <Icon name="chevron-down" class="faq__chevron" size={20} />
               </summary>
               <p class="faq__answer">{f.a}</p>
             </details>
@@ -328,10 +393,6 @@ const faqLD = {
     background: var(--color-primary-bg);
   }
 
-  .hero__btn--outline .material-icons-outlined {
-    font-size: 1.1rem;
-  }
-
   .hero__image {
     display: flex;
     align-items: flex-end;
@@ -345,9 +406,10 @@ const faqLD = {
     object-fit: cover;
   }
 
-  /* ═══ SERVIZI ═══ */
+  /* ═══ SERVIZI — LAYOUT ASIMMETRICO ═══ */
   .servizi {
     padding: 5rem 1.5rem;
+    background: var(--color-bg-alt);
   }
 
   .servizi__inner {
@@ -355,110 +417,341 @@ const faqLD = {
     margin: 0 auto;
   }
 
-  .servizi__grid {
+  /* Riga 1: feature 60% + 2 main 40% impilate */
+  .servizi__top {
     display: grid;
+    grid-template-columns: 1.6fr 1fr;
     gap: 1.5rem;
-  }
-
-  .servizi__grid--main {
-    grid-template-columns: repeat(3, 1fr);
     margin-bottom: 1.5rem;
   }
 
-  .servizi__grid--secondary {
-    grid-template-columns: repeat(3, 1fr);
+  .servizi__main {
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    gap: 1.5rem;
   }
 
-  .scard {
+  /* Riga 2: 3 secondarie */
+  .servizi__bottom {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+
+  /* === Feature card (Noleggio Operativo) === */
+  .sfeature {
     display: flex;
     flex-direction: column;
     background: #ffffff;
     border: 1px solid var(--color-border);
-    border-radius: var(--radius);
-    padding: 2rem 1.75rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    border-radius: 16px;
+    overflow: hidden;
     transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   }
 
-  .scard:hover {
+  .sfeature:hover {
     transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(102, 76, 205, 0.12);
+    box-shadow: 0 12px 32px rgba(102, 76, 205, 0.14);
     border-color: var(--color-primary-light);
   }
 
-  /* Card principali: layout orizzontale con icona grande */
-  .scard--main {
-    flex-direction: row;
-    align-items: flex-start;
-    gap: 1.25rem;
-    padding: 2.25rem 2rem;
-    border-left: 3px solid var(--color-accent);
+  .sfeature__media {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: var(--color-primary-bg);
   }
 
-  .scard--main .scard__icon {
-    font-size: 2.5rem;
+  .sfeature__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+  }
+
+  .sfeature:hover .sfeature__media img {
+    transform: scale(1.03);
+  }
+
+  /* Placeholder quando manca la foto definitiva */
+  .sfeature__placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background:
+      linear-gradient(135deg, rgba(254, 111, 58, 0.10) 0%, rgba(102, 76, 205, 0.12) 100%),
+      repeating-linear-gradient(
+        45deg,
+        transparent 0,
+        transparent 14px,
+        rgba(102, 76, 205, 0.04) 14px,
+        rgba(102, 76, 205, 0.04) 15px
+      );
+    color: var(--color-primary);
+  }
+
+  .sfeature__badge {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    background: var(--color-accent);
+    color: #ffffff;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0.35rem 0.75rem;
+    border-radius: 100px;
+    backdrop-filter: blur(8px);
+  }
+
+  .sfeature__body {
+    padding: 1.75rem 1.75rem 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .sfeature__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+    background: var(--color-primary-bg);
+    color: var(--color-primary);
+    margin-bottom: 0.25rem;
+  }
+
+  .sfeature__title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--color-primary-dark);
+    letter-spacing: -0.02em;
+    margin: 0;
+  }
+
+  .sfeature__tagline {
+    font-size: 1rem;
+    color: var(--color-text);
+    line-height: 1.55;
+    margin: 0 0 0.5rem;
+  }
+
+  .sfeature__bullets {
+    list-style: none;
+    padding: 0;
+    margin: 0.5rem 0 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .sfeature__bullets li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    font-size: 0.92rem;
+    color: var(--color-text);
+    line-height: 1.5;
+  }
+
+  .sfeature__bullets li :global(.mcf-icon) {
+    color: var(--color-accent);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .sfeature__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    align-self: flex-start;
+    background: var(--color-accent);
+    color: #ffffff;
+    font-size: 0.95rem;
+    font-weight: 700;
+    padding: 0.7rem 1.25rem;
+    border-radius: 8px;
+    transition: gap 0.2s, background 0.2s;
+  }
+
+  .sfeature:hover .sfeature__cta {
+    gap: 0.7rem;
+    background: var(--color-accent-hover);
+  }
+
+  /* === Card medie (Leasing, Finanziamenti) === */
+  .smain {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    background: #ffffff;
+    border: 1px solid var(--color-border);
+    border-radius: 14px;
+    padding: 1.5rem 1.5rem 1.5rem 1.6rem;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    box-shadow: 0 4px 14px rgba(102, 76, 205, 0.08);
+    overflow: hidden;
+  }
+
+  /* Accento verticale sinistro per gerarchia visiva (alterna viola/arancio) */
+  .smain::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--color-accent);
+    transition: width 0.2s;
+  }
+
+  .smain:nth-child(2)::before {
+    background: var(--color-primary);
+  }
+
+  .smain:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px rgba(102, 76, 205, 0.14);
+    border-color: var(--color-primary-light);
+  }
+
+  .smain:hover::before {
+    width: 6px;
+  }
+
+  .smain__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: var(--color-primary-bg);
+    color: var(--color-primary);
     flex-shrink: 0;
   }
 
-  .scard--main .scard__title {
-    font-size: 1.2rem;
-  }
-
-  /* Card secondarie: più compatte */
-  .scard--compact {
-    padding: 1.5rem;
-  }
-
-  .scard--compact .scard__icon {
-    font-size: 1.5rem;
-    margin-bottom: 0.6rem;
-  }
-
-  .scard--compact .scard__title {
-    font-size: 0.95rem;
-  }
-
-  .scard--compact .scard__desc {
-    font-size: 0.85rem;
-  }
-
-  .scard__icon {
-    font-size: 2rem;
-    color: var(--color-accent);
-    margin-bottom: 1rem;
-  }
-
-  .scard__title {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--color-primary);
-    margin-bottom: 0.5rem;
-  }
-
-  .scard__desc {
-    font-size: 0.92rem;
-    color: var(--color-text-light);
-    line-height: 1.6;
+  .smain__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
     flex: 1;
   }
 
-  .scard__link {
+  .smain__title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--color-primary-dark);
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+
+  .smain__desc {
+    font-size: 0.88rem;
+    color: var(--color-text-light);
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  .smain__cta {
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
-    margin-top: 1.25rem;
-    font-size: 0.88rem;
+    margin-top: 0.4rem;
+    font-size: 0.85rem;
     font-weight: 600;
     color: var(--color-accent);
     transition: gap 0.2s;
   }
 
-  .scard:hover .scard__link {
-    gap: 0.6rem;
+  .smain:hover .smain__cta {
+    gap: 0.55rem;
   }
 
-  .scard__link .material-icons-outlined {
+  /* === Card piccole (Fotovoltaico, Ristorazione, Agevolazioni) === */
+  .ssecondary {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: #ffffff;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 1.4rem 1.3rem 1.4rem;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    box-shadow: 0 4px 14px rgba(102, 76, 205, 0.06);
+    overflow: hidden;
+  }
+
+  /* Topbar colorata sottile per identita visiva */
+  .ssecondary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--color-accent), var(--color-primary));
+    transform: translateX(-100%);
+    transition: transform 0.35s ease;
+  }
+
+  .ssecondary:hover::before {
+    transform: translateX(0);
+  }
+
+  .ssecondary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px rgba(102, 76, 205, 0.12);
+    border-color: var(--color-primary-light);
+  }
+
+  .ssecondary__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, rgba(254, 111, 58, 0.12), rgba(102, 76, 205, 0.10));
+    color: var(--color-accent);
+    margin-bottom: 0.85rem;
+  }
+
+  .ssecondary__title {
     font-size: 1rem;
+    font-weight: 700;
+    color: var(--color-primary-dark);
+    margin: 0 0 0.35rem;
+  }
+
+  .ssecondary__desc {
+    font-size: 0.85rem;
+    color: var(--color-text-light);
+    line-height: 1.5;
+    margin: 0;
+    flex: 1;
+  }
+
+  .ssecondary__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin-top: 0.85rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--color-accent);
+    transition: gap 0.2s;
+  }
+
+  .ssecondary:hover .ssecondary__cta {
+    gap: 0.55rem;
   }
 
   /* ═══ COME FUNZIONA ═══ */
@@ -673,16 +966,17 @@ const faqLD = {
       border-radius: 16px;
     }
 
-    .servizi__grid--main {
-      grid-template-columns: repeat(2, 1fr);
+    .servizi__top {
+      grid-template-columns: 1fr;
     }
 
-    .servizi__grid--secondary {
+    .servizi__main {
+      grid-template-rows: auto auto;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .servizi__bottom {
       grid-template-columns: repeat(3, 1fr);
-    }
-
-    .scard--main {
-      flex-direction: column;
     }
 
     .steps__grid {
@@ -720,9 +1014,13 @@ const faqLD = {
       padding: 2.5rem 1.25rem;
     }
 
-    .servizi__grid--main,
-    .servizi__grid--secondary {
+    .servizi__main,
+    .servizi__bottom {
       grid-template-columns: 1fr;
+    }
+
+    .sfeature__title {
+      font-size: 1.3rem;
     }
 
     .hero__actions {

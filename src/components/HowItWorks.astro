@@ -1,5 +1,5 @@
 ---
-
+import Icon from './Icon.astro';
 ---
 
 <section class="steps">
@@ -9,7 +9,7 @@
     <div class="steps__grid">
       <div class="step">
         <div class="step__icon-wrap">
-          <span class="material-icons-outlined" aria-hidden="true">chat_bubble_outline</span>
+          <Icon name="message-circle" size={26} />
         </div>
         <span class="step__label">Passo 1</span>
         <h3 class="step__title">Parlaci del tuo progetto</h3>
@@ -20,7 +20,7 @@
       </div>
       <div class="step">
         <div class="step__icon-wrap">
-          <span class="material-icons-outlined" aria-hidden="true">compare_arrows</span>
+          <Icon name="arrow-right-left" size={26} />
         </div>
         <span class="step__label">Passo 2</span>
         <h3 class="step__title">Confrontiamo le offerte</h3>
@@ -31,7 +31,7 @@
       </div>
       <div class="step">
         <div class="step__icon-wrap">
-          <span class="material-icons-outlined" aria-hidden="true">rocket_launch</span>
+          <Icon name="rocket" size={26} />
         </div>
         <span class="step__label">Passo 3</span>
         <h3 class="step__title">Attivi e risparmi subito</h3>
@@ -105,10 +105,6 @@
     background: var(--color-accent);
     color: #ffffff;
     margin-bottom: 1.25rem;
-  }
-
-  .step__icon-wrap .material-icons-outlined {
-    font-size: 1.6rem;
   }
 
   .step__label {

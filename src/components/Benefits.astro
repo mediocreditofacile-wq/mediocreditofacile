@@ -1,4 +1,6 @@
 ---
+import Icon from './Icon.astro';
+
 interface Benefit {
   icon: string;
   title: string;
@@ -24,7 +26,7 @@ const { benefits, image, imageAlt = 'Mediocredito Facile — noleggio operativo 
       {benefits.map((b) => (
         <div class="benefit-card">
           <div class="benefit-card__icon">
-            <span class="material-icons-outlined" aria-hidden="true">{b.icon}</span>
+            <Icon name={b.icon} size={26} />
           </div>
           <h3 class="benefit-card__title">{b.title}</h3>
           <p class="benefit-card__desc">{b.description}</p>
@@ -94,10 +96,6 @@ const { benefits, image, imageAlt = 'Mediocredito Facile — noleggio operativo 
     background: var(--color-primary-bg);
     color: var(--color-primary);
     margin-bottom: 1.25rem;
-  }
-
-  .benefit-card__icon .material-icons-outlined {
-    font-size: 1.6rem;
   }
 
   .benefit-card__title {

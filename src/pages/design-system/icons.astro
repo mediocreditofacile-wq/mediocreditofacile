@@ -1,0 +1,204 @@
+---
+// Anteprima del set icone MCF — tutte le icone in tutti i contesti cromatici brand.
+// Pagina noindex, accessibile solo via URL diretto. Non linkata da navigation.
+import Icon from '../../components/Icon.astro';
+import { icons } from '../../data/icons';
+---
+
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex,nofollow" />
+    <title>Design System — Set icone MCF</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --mcf-primary: #fe6f3a;
+        --mcf-accent: #664ccd;
+        --mcf-charcoal: #444451;
+        --mcf-black: #0f1020;
+        --mcf-taupe: #787782;
+        --mcf-platinum: #e1ded3;
+        --mcf-ghost: #f8f7fa;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: 'Manrope', system-ui, sans-serif;
+        background: var(--mcf-ghost);
+        color: var(--mcf-charcoal);
+        padding: 3rem 1.5rem 6rem;
+      }
+      .wrap {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+      h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--mcf-black);
+        margin: 0 0 0.5rem;
+        letter-spacing: -0.5px;
+      }
+      .lede {
+        font-size: 1rem;
+        color: var(--mcf-taupe);
+        max-width: 720px;
+        line-height: 1.55;
+        margin: 0 0 2.5rem;
+      }
+      h2 {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--mcf-accent);
+        margin: 3rem 0 1.25rem;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 1rem;
+      }
+      .cell {
+        background: #fff;
+        border: 1px solid var(--mcf-platinum);
+        border-radius: 12px;
+        padding: 1.5rem 1rem 1rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+      .cell:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(102, 76, 205, 0.1);
+      }
+      .cell--dark {
+        background: var(--mcf-black);
+        border-color: var(--mcf-black);
+      }
+      .cell--violet {
+        background: var(--mcf-accent);
+        border-color: var(--mcf-accent);
+      }
+      .cell .label {
+        font-size: 0.78rem;
+        font-weight: 600;
+        text-align: center;
+        line-height: 1.3;
+        color: var(--mcf-charcoal);
+      }
+      .cell .lucide-name {
+        font-size: 0.7rem;
+        color: var(--mcf-taupe);
+        font-family: 'JetBrains Mono', ui-monospace, monospace;
+      }
+      .cell--dark .label,
+      .cell--violet .label {
+        color: #fff;
+      }
+      .cell--dark .lucide-name,
+      .cell--violet .lucide-name {
+        color: rgba(255, 255, 255, 0.6);
+      }
+      .legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        background: #fff;
+        border: 1px solid var(--mcf-platinum);
+        border-radius: 12px;
+        padding: 1rem 1.5rem;
+        margin-bottom: 2rem;
+        font-size: 0.85rem;
+        color: var(--mcf-charcoal);
+      }
+      .legend strong { color: var(--mcf-black); }
+      .legend code {
+        background: var(--mcf-ghost);
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-family: 'JetBrains Mono', ui-monospace, monospace;
+        font-size: 0.78rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>Set icone MCF — anteprima</h1>
+      <p class="lede">
+        24 icone Lucide selezionate per coprire le aree principali del sito (prodotti, agevolazioni, valori, settori).
+        Ogni icona e' renderizzata da <code>src/components/Icon.astro</code> e selezionabile via slug MCF.
+        Nessuna chiamata di rete: gli SVG sono inline, ~1KB ciascuno.
+      </p>
+
+      <div class="legend">
+        <span><strong>Uso:</strong> <code>&lt;Icon name="noleggio-operativo" size={'{32}'} color="var(--mcf-primary)" /&gt;</code></span>
+      </div>
+
+      <h2>Variante arancio — <code>#FE6F3A</code></h2>
+      <div class="grid">
+        {icons.map((i) => (
+          <div class="cell">
+            <Icon name={i.slug} size={40} color="#FE6F3A" strokeWidth={1.75} />
+            <div class="label">{i.label}</div>
+            <div class="lucide-name">lucide / {i.lucideName}</div>
+          </div>
+        ))}
+      </div>
+
+      <h2>Variante viola — <code>#664CCD</code></h2>
+      <div class="grid">
+        {icons.map((i) => (
+          <div class="cell">
+            <Icon name={i.slug} size={40} color="#664CCD" strokeWidth={1.75} />
+            <div class="label">{i.label}</div>
+            <div class="lucide-name">lucide / {i.lucideName}</div>
+          </div>
+        ))}
+      </div>
+
+      <h2>Variante charcoal — <code>#444451</code></h2>
+      <div class="grid">
+        {icons.map((i) => (
+          <div class="cell">
+            <Icon name={i.slug} size={40} color="#444451" strokeWidth={1.75} />
+            <div class="label">{i.label}</div>
+            <div class="lucide-name">lucide / {i.lucideName}</div>
+          </div>
+        ))}
+      </div>
+
+      <h2>Su sfondo viola — bianco</h2>
+      <div class="grid">
+        {icons.map((i) => (
+          <div class="cell cell--violet">
+            <Icon name={i.slug} size={40} color="#FFFFFF" strokeWidth={1.75} />
+            <div class="label">{i.label}</div>
+            <div class="lucide-name">lucide / {i.lucideName}</div>
+          </div>
+        ))}
+      </div>
+
+      <h2>Su sfondo Rich Black — arancio</h2>
+      <div class="grid">
+        {icons.map((i) => (
+          <div class="cell cell--dark">
+            <Icon name={i.slug} size={40} color="#FE6F3A" strokeWidth={1.75} />
+            <div class="label">{i.label}</div>
+            <div class="lucide-name">lucide / {i.lucideName}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </body>
+</html>

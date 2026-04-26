@@ -3,6 +3,8 @@
  * Card per la pagina hub /tools/.
  * Mostra titolo, descrizione e link a uno strumento.
  */
+import Icon from '../Icon.astro';
+
 interface Props {
   title: string;
   description: string;
@@ -14,12 +16,14 @@ const { title, description, href, icon = 'calculate' } = Astro.props;
 ---
 
 <a href={href} class="tool-card">
-  <span class="tool-card__icon material-icons-outlined" aria-hidden="true">{icon}</span>
+  <span class="tool-card__icon">
+    <Icon name={icon} size={40} />
+  </span>
   <h2 class="tool-card__title">{title}</h2>
   <p class="tool-card__desc">{description}</p>
   <span class="tool-card__link">
     Apri il simulatore
-    <span class="material-icons-outlined" aria-hidden="true">arrow_forward</span>
+    <Icon name="arrow-right" size={16} />
   </span>
 </a>
 
@@ -41,9 +45,9 @@ const { title, description, href, icon = 'calculate' } = Astro.props;
   }
 
   .tool-card__icon {
-    font-size: 2.5rem;
     color: var(--color-primary);
     margin-bottom: 1rem;
+    display: inline-flex;
   }
 
   .tool-card__title {
@@ -68,9 +72,5 @@ const { title, description, href, icon = 'calculate' } = Astro.props;
     font-size: 0.9rem;
     font-weight: 600;
     color: var(--color-accent);
-  }
-
-  .tool-card__link .material-icons-outlined {
-    font-size: 1rem;
   }
 </style>
