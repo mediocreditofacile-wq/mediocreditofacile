@@ -1,5 +1,6 @@
 ---
 import Logo from './Logo.astro';
+import Icon from './Icon.astro';
 
 interface Props {
   minimal?: boolean;
@@ -11,6 +12,7 @@ const serviceLinks = [
   { label: 'Noleggio Operativo', href: '/noleggio-operativo' },
   { label: 'Leasing Strumentale', href: '/leasing-strumentale' },
   { label: 'Finanziamenti PMI', href: '/finanziamenti/' },
+  { label: 'Agevolazioni', href: '/finanziamenti/agevolazioni/' },
   { label: 'Agevolazioni Fiscali', href: '/agevolazioni-fiscali' },
 ];
 
@@ -30,7 +32,7 @@ const navLinks = [
 
     {minimal ? (
       <a href="tel:+393939957840" class="header__phone">
-        <span class="material-icons-outlined" aria-hidden="true">phone</span>
+        <Icon name="phone" size={18} />
         +39 393 995 7840
       </a>
     ) : (
@@ -40,7 +42,7 @@ const navLinks = [
           <div class="header__dropdown" id="services-dropdown">
             <button class="header__nav-link header__dropdown-trigger" aria-expanded="false" aria-haspopup="true">
               Servizi
-              <span class="material-icons-outlined header__dropdown-arrow">expand_more</span>
+              <Icon name="chevron-down" size={16} class="header__dropdown-arrow" />
             </button>
             <div class="header__dropdown-menu">
               {serviceLinks.map((link) => (
@@ -74,7 +76,7 @@ const navLinks = [
         <!-- Servizi espandibili -->
         <button class="header__mobile-section" id="mobile-services-btn">
           Servizi
-          <span class="material-icons-outlined">expand_more</span>
+          <Icon name="chevron-down" size={20} class="header__mobile-section-arrow" />
         </button>
         <div class="header__mobile-sub" id="mobile-services-sub">
           {serviceLinks.map((link) => (
@@ -177,7 +179,6 @@ const navLinks = [
     transition: color 0.2s;
   }
   .header__phone:hover { color: var(--color-accent); }
-  .header__phone .material-icons-outlined { font-size: 1.2rem; }
 
   /* Nav */
   .header__nav {
@@ -212,11 +213,10 @@ const navLinks = [
   }
 
   .header__dropdown-arrow {
-    font-size: 1.1rem;
     transition: transform 0.2s;
   }
 
-  .header__dropdown.open .header__dropdown-arrow {
+  .header__dropdown.open :global(.header__dropdown-arrow) {
     transform: rotate(180deg);
   }
 
@@ -356,11 +356,10 @@ const navLinks = [
     cursor: pointer;
     font-family: var(--font-family);
   }
-  .header__mobile-section .material-icons-outlined {
-    font-size: 1.2rem;
+  .header__mobile-section :global(.header__mobile-section-arrow) {
     transition: transform 0.2s;
   }
-  .header__mobile-section.open .material-icons-outlined {
+  .header__mobile-section.open :global(.header__mobile-section-arrow) {
     transform: rotate(180deg);
   }
 

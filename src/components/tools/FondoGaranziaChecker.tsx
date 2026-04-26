@@ -156,7 +156,7 @@ export default function FondoGaranziaChecker() {
       await fetch('/api/submit-agevolazioni', { method: 'POST', body });
       setFormInviato(true);
       setTimeout(() => {
-        window.location.href = '/grazie';
+        window.location.href = '/grazie-agev?fonte=fondo-garanzia-mcc';
       }, 800);
     } catch (_) {
       setFormInvio(false);
