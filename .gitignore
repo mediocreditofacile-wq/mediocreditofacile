@@ -25,3 +25,6 @@ firebase-debug.log
 # jetbrains setting folder
 .idea/
 .vercel
+
+# backup local di immagini originali pre-ricompressione
+.image-archive/

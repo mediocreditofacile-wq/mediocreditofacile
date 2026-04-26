@@ -1,4 +1,6 @@
 ---
+import Icon from './Icon.astro';
+
 interface Props {
   title: string;
   subtitle: string;
@@ -16,7 +18,7 @@ const { title, subtitle, ctaText = 'Richiedi Informazioni', backgroundImage } = 
     <p class="hero__subtitle">{subtitle}</p>
     <a href="#contatti" class="hero__cta">
       {ctaText}
-      <span class="material-icons-outlined" aria-hidden="true">arrow_downward</span>
+      <Icon name="arrow-down" size={18} />
     </a>
   </div>
 </section>
@@ -66,10 +68,6 @@ const { title, subtitle, ctaText = 'Richiedi Informazioni', backgroundImage } = 
   .hero__cta:hover {
     background: var(--color-accent-hover);
     transform: translateY(-1px);
-  }
-
-  .hero__cta .material-icons-outlined {
-    font-size: 1.15rem;
   }
 
   /* Background image variant */
