@@ -44,16 +44,21 @@ import Footer from '../../../components/Footer.astro';
     <!-- INTRO -->
     <section class="agev-intro">
       <div class="agev-intro__inner">
-        <p>
-          Le agevolazioni per le PMI non sono un bonus a pioggia: sono strumenti tecnici che si attivano
-          in combinazione con un finanziamento o un leasing. La Sabatini copre gli interessi, il Fondo
-          di Garanzia copre il rischio, il Bando ISI copre fino al 65% dell'investimento a fondo perduto.
-          Ognuna ha regole, requisiti e iter diversi.
-        </p>
-        <p>
-          MCF ti aiuta a capire a quale hai diritto, come combinarle tra loro, e gestisce la pratica
-          di finanziamento insieme a quella di agevolazione. Un unico interlocutore, un unico percorso.
-        </p>
+        <h2 class="agev-intro__hook">
+          Le agevolazioni non si ottengono <em>prima</em> di investire.
+        </h2>
+        <div class="agev-intro__body">
+          <p>
+            Si ottengono <strong>mentre</strong> o <strong>dopo</strong> aver investito. La Sabatini
+            sconta gli interessi di un finanziamento gia' acceso. Il Fondo di Garanzia copre la banca
+            quando ti presta i soldi. Il Bando ISI rimborsa fino al 65% solo dopo che hai chiuso i
+            lavori e rendicontato. Senza un finanziamento dietro, l'agevolazione resta sulla carta.
+          </p>
+          <p>
+            Il mio ruolo e' chiudere il cerchio: trovare il finanziamento giusto e attivare in
+            parallelo l'agevolazione che fa la differenza, su un'unica pratica.
+          </p>
+        </div>
       </div>
     </section>
 
@@ -246,22 +251,49 @@ import Footer from '../../../components/Footer.astro';
     background: var(--color-primary-bg);
   }
 
-  /* INTRO */
+  /* INTRO — split asimmetrico: hook forte a sx, body a dx, sfondo ghost */
   .agev-intro {
-    padding: 4rem 1.5rem;
-    background: #fff;
+    padding: 5rem 1.5rem;
+    background: var(--mcf-ghost);
   }
 
   .agev-intro__inner {
-    max-width: 720px;
+    max-width: var(--max-width);
     margin: 0 auto;
+    display: grid;
+    grid-template-columns: 5fr 7fr;
+    gap: 3rem;
+    align-items: start;
   }
 
-  .agev-intro__inner p {
+  .agev-intro__hook {
+    font-size: clamp(1.5rem, 3.2vw, 2rem);
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    color: var(--color-primary-dark);
+    margin: 0;
+  }
+
+  .agev-intro__hook em {
+    font-style: normal;
+    color: var(--color-accent);
+  }
+
+  .agev-intro__body p {
     font-size: 1.05rem;
     line-height: 1.75;
     color: var(--mcf-charcoal);
-    margin-bottom: 1rem;
+    margin: 0 0 1.1rem;
+  }
+
+  .agev-intro__body p:last-child {
+    margin-bottom: 0;
+  }
+
+  .agev-intro__body strong {
+    color: var(--color-primary-dark);
+    font-weight: 700;
   }
 
   /* CARD */
@@ -426,6 +458,15 @@ import Footer from '../../../components/Footer.astro';
 
     .agev-hero__image img {
       max-width: 360px;
+    }
+
+    .agev-intro__inner {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+
+    .agev-intro {
+      padding: 3.5rem 1.25rem;
     }
   }
 
