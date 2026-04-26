@@ -1,9 +1,9 @@
 ---
+import Icon from '../../../components/Icon.astro';
 import Layout from '../../../layouts/Layout.astro';
 import Header from '../../../components/Header.astro';
 import Footer from '../../../components/Footer.astro';
 ---
-
 <Layout
   title="Agevolazioni PMI: Sabatini, Fondo Garanzia, Bando ISI | Mediocredito Facile"
   description="Sabatini, Fondo di Garanzia MCC, Bando ISI Inail: le agevolazioni statali per finanziare beni strumentali. Guida pratica e supporto completo."
@@ -46,7 +46,7 @@ import Footer from '../../../components/Footer.astro';
       <div class="agev-cards__inner">
         <a href="/finanziamenti/agevolazioni/nuova-sabatini-2026" class="agev-card">
           <div class="agev-card__icon">
-            <span class="material-icons-outlined" aria-hidden="true">savings</span>
+            <Icon name="savings" />
           </div>
           <h2 class="agev-card__title">Nuova Sabatini 2026</h2>
           <p class="agev-card__benefit">Contributo MISE sugli interessi del finanziamento</p>
@@ -60,7 +60,7 @@ import Footer from '../../../components/Footer.astro';
 
         <a href="/finanziamenti/agevolazioni/fondo-garanzia-mcc" class="agev-card">
           <div class="agev-card__icon">
-            <span class="material-icons-outlined" aria-hidden="true">shield</span>
+            <Icon name="shield" />
           </div>
           <h2 class="agev-card__title">Fondo di Garanzia MCC</h2>
           <p class="agev-card__benefit">Garanzia statale gratuita fino all'80%</p>
@@ -74,7 +74,7 @@ import Footer from '../../../components/Footer.astro';
 
         <a href="/finanziamenti/agevolazioni/iperammortamento-2026" class="agev-card">
           <div class="agev-card__icon">
-            <span class="material-icons-outlined" aria-hidden="true">memory</span>
+            <Icon name="memory" />
           </div>
           <h2 class="agev-card__title">Iperammortamento 2026</h2>
           <p class="agev-card__benefit">Scarica fino al 280% del costo del bene 4.0</p>
@@ -88,7 +88,7 @@ import Footer from '../../../components/Footer.astro';
 
         <a href="/finanziamenti/agevolazioni/bando-isi-inail" class="agev-card">
           <div class="agev-card__icon">
-            <span class="material-icons-outlined" aria-hidden="true">health_and_safety</span>
+            <Icon name="health_and_safety" />
           </div>
           <h2 class="agev-card__title">Bando ISI Inail</h2>
           <p class="agev-card__benefit">Fino al 65% a fondo perduto per investimenti in sicurezza</p>
@@ -218,7 +218,7 @@ import Footer from '../../../components/Footer.astro';
     margin-bottom: 1.25rem;
   }
 
-  .agev-card__icon .material-icons-outlined {
+  .agev-card__icon .mcf-icon {
     font-size: 1.6rem;
   }
 

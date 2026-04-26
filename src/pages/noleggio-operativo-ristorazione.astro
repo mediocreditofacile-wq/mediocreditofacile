@@ -1,4 +1,5 @@
 ---
+import Icon from '../components/Icon.astro';
 import Layout from '../layouts/Layout.astro';
 import Header from '../components/Header.astro';
 import Hero from '../components/Hero.astro';
@@ -49,7 +50,6 @@ const faqs = [
   },
 ];
 ---
-
 <Layout title={page.metaTitle} description={page.metaDescription}>
   <Header minimal={false} />
   <main>
@@ -63,17 +63,17 @@ const faqs = [
         <h2 class="benefits__heading">Perché scegliere Mediocredito Facile</h2>
         <div class="benefits__grid">
           <div class="benefit-card">
-            <div class="benefit-card__icon"><span class="material-icons-outlined">payments</span></div>
+            <div class="benefit-card__icon"><Icon name="payments" /></div>
             <h3 class="benefit-card__title">Zero Anticipo per il Tuo Locale</h3>
             <p class="benefit-card__desc">Forni, banconi e cucine professionali subito operativi senza esborso iniziale. Canone mensile fisso dal primo giorno.</p>
           </div>
           <div class="benefit-card">
-            <div class="benefit-card__icon"><span class="material-icons-outlined">receipt</span></div>
+            <div class="benefit-card__icon"><Icon name="receipt" /></div>
             <h3 class="benefit-card__title">100% Deducibile Fiscalmente</h3>
             <p class="benefit-card__desc">Il canone di noleggio è deducibile come costo d'impresa. Vantaggio fiscale immediato per la tua attività.</p>
           </div>
           <div class="benefit-card">
-            <div class="benefit-card__icon"><span class="material-icons-outlined">build</span></div>
+            <div class="benefit-card__icon"><Icon name="build" /></div>
             <h3 class="benefit-card__title">Manutenzione e Assistenza Incluse</h3>
             <p class="benefit-card__desc">Assistenza tecnica e manutenzione incluse nel canone. Zero spese impreviste, il tuo locale resta sempre operativo.</p>
           </div>
@@ -99,7 +99,7 @@ const faqs = [
         <div class="equipment__grid">
           {equipmentItems.map((item) => (
             <div class="equipment-card">
-              <span class="material-icons-outlined equipment-card__icon">{item.icon}</span>
+              <Icon name={item.icon} class="equipment-card__icon" />
               <h3 class="equipment-card__label">{item.label}</h3>
               <p class="equipment-card__desc">{item.desc}</p>
             </div>
@@ -118,9 +118,9 @@ const faqs = [
           <h2 class="mid-form__heading">Hai già in mente cosa ti serve?</h2>
           <p class="mid-form__desc">Dimmi di che attrezzatura hai bisogno e ti preparo un preventivo personalizzato entro 24 ore. Senza impegno.</p>
           <ul class="mid-form__list">
-            <li><span class="material-icons-outlined">check_circle</span> Risposta in 24 ore lavorative</li>
-            <li><span class="material-icons-outlined">check_circle</span> Nessun costo di consulenza</li>
-            <li><span class="material-icons-outlined">check_circle</span> Confronto tra 10+ società</li>
+            <li><Icon name="check_circle" /> Risposta in 24 ore lavorative</li>
+            <li><Icon name="check_circle" /> Nessun costo di consulenza</li>
+            <li><Icon name="check_circle" /> Confronto tra 10+ società</li>
           </ul>
           <img
             src="/images/ristoratore-cucina.webp"
@@ -176,7 +176,7 @@ const faqs = [
             <details class="faq-item" open={i === 0}>
               <summary class="faq-item__question">
                 <span>{item.q}</span>
-                <span class="material-icons-outlined faq-item__chevron">expand_more</span>
+                <Icon name="expand_more" class="faq-item__chevron" />
               </summary>
               <p class="faq-item__answer">{item.a}</p>
             </details>
@@ -259,7 +259,7 @@ const faqs = [
     width: 56px; height: 56px; border-radius: 50%;
     background: var(--color-primary-bg); color: var(--color-primary); margin-bottom: 1.25rem;
   }
-  .benefit-card__icon .material-icons-outlined { font-size: 1.6rem; }
+  .benefit-card__icon .mcf-icon { font-size: 1.6rem; }
   .benefit-card__title { font-size: 1.1rem; font-weight: 700; color: var(--color-primary); margin-bottom: .6rem; }
   .benefit-card__desc { font-size: .95rem; color: var(--color-text-light); line-height: 1.6; }
   .benefits__compare { text-align: center; color: #293C5B; font-size: 1.05rem; margin-top: 2.5rem; font-style: italic; }
@@ -317,7 +317,7 @@ const faqs = [
     display: flex; align-items: center; gap: .5rem;
     font-size: .95rem; color: rgba(255,255,255,.9); font-weight: 500;
   }
-  .mid-form__list .material-icons-outlined { font-size: 1.1rem; color: var(--color-accent); }
+  .mid-form__list .mcf-icon { font-size: 1.1rem; color: var(--color-accent); }
   .mid-form__photo {
     width: 100%; max-width: 420px; border-radius: 12px; margin-top: 2rem;
     object-fit: cover; display: block;

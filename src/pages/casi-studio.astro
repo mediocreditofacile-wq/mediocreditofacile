@@ -1,4 +1,5 @@
 ---
+import Icon from '../components/Icon.astro';
 import Layout from '../layouts/Layout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
@@ -23,7 +24,6 @@ const sectors = [
   { name: 'Healthcare e Farmacie', icon: 'local_pharmacy', filter: (p: any) => p.data.tags?.some((t: string) => t.includes('farmacie') || t.includes('healthcare') || t.includes('medicali')) },
 ];
 ---
-
 <Layout
   title="Casi Studio — Noleggio Operativo e Leasing per PMI | Mediocredito Facile"
   description="Casi studio reali di PMI italiane che hanno usato il noleggio operativo e il leasing: ristorazione, fotovoltaico, manifattura, ICT, edilizia. Numeri veri, risultati misurati."
@@ -55,7 +55,7 @@ const sectors = [
             return (
               <div class="cs-sector">
                 <div class="cs-sector__header">
-                  <span class="material-icons-outlined cs-sector__icon">{sector.icon}</span>
+                  <Icon name={sector.icon} class="cs-sector__icon" />
                   <h3>{sector.name}</h3>
                   <span class="cs-sector__count">{sectorPosts.length} casi</span>
                 </div>
@@ -64,7 +64,7 @@ const sectors = [
                     <li>
                       <a href={`/blog/${post.id}/`} class="cs-sector__link">
                         {post.data.title}
-                        <span class="material-icons-outlined">arrow_forward</span>
+                        <Icon name="arrow_forward" />
                       </a>
                     </li>
                   ))}
@@ -96,7 +96,7 @@ const sectors = [
                 <p class="cs-card__desc">{post.data.description}</p>
                 <span class="cs-card__link">
                   Leggi il caso
-                  <span class="material-icons-outlined">arrow_forward</span>
+                  <Icon name="arrow_forward" />
                 </span>
               </div>
             </a>
@@ -144,8 +144,8 @@ const sectors = [
   .cs-sector__list { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; }
   .cs-sector__link { display: flex; align-items: center; justify-content: space-between; font-size: 0.9rem; color: var(--color-text); padding: 0.5rem; border-radius: 6px; transition: background 0.2s; }
   .cs-sector__link:hover { background: var(--color-bg-alt); }
-  .cs-sector__link .material-icons-outlined { font-size: 0.9rem; color: var(--color-accent); opacity: 0; transition: opacity 0.2s; }
-  .cs-sector__link:hover .material-icons-outlined { opacity: 1; }
+  .cs-sector__link .mcf-icon { font-size: 0.9rem; color: var(--color-accent); opacity: 0; transition: opacity 0.2s; }
+  .cs-sector__link:hover .mcf-icon { opacity: 1; }
 
   .cs-all { padding: 4.5rem 1.5rem; }
   .cs-all__inner { max-width: var(--max-width); margin: 0 auto; }
@@ -161,7 +161,7 @@ const sectors = [
   .cs-card__title { font-size: 1rem; font-weight: 700; color: var(--color-primary); margin-bottom: 0.5rem; line-height: 1.35; }
   .cs-card__desc { font-size: 0.85rem; color: var(--color-text-light); line-height: 1.55; flex: 1; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
   .cs-card__link { display: inline-flex; align-items: center; gap: 0.3rem; margin-top: 1rem; font-size: 0.85rem; font-weight: 600; color: var(--color-accent); }
-  .cs-card__link .material-icons-outlined { font-size: 0.9rem; }
+  .cs-card__link .mcf-icon { font-size: 0.9rem; }
 
   .cs-cta { padding: 4.5rem 1.5rem; background: var(--color-bg-alt); text-align: center; }
   .cs-cta__inner { max-width: 600px; margin: 0 auto; }

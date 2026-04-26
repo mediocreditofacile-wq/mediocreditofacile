@@ -1,4 +1,5 @@
 ---
+import Icon from '../../components/Icon.astro';
 /**
  * Simulatore Noleggio Fotovoltaico — /tools/simulatore-noleggio-fotovoltaico
  * Pagina dedicata: hero con immagine, simulatore interattivo PV, sezioni SEO, contenuto.
@@ -6,7 +7,6 @@
 import ToolLayout from '../../layouts/ToolLayout.astro';
 import SimulatoreFotovoltaico from '../../components/tools/SimulatoreFotovoltaico.tsx';
 ---
-
 <ToolLayout
   title="Simulatore Noleggio Fotovoltaico — Rata e Risparmio | Mediocredito Facile"
   description="Calcola la rata del noleggio operativo per impianti fotovoltaici e confrontala con il risparmio in bolletta. Risultato immediato, scarica il preventivo PDF."
@@ -68,7 +68,7 @@ import SimulatoreFotovoltaico from '../../components/tools/SimulatoreFotovoltaic
 
       <div class="tool-seo__grid">
         <div class="tool-seo__block tool-seo__block--accent" style="--block-accent: #f59e0b;">
-          <span class="tool-seo__icon material-icons-outlined" aria-hidden="true">solar_power</span>
+          <Icon name="solar_power" class="tool-seo__icon" />
           <h3 class="tool-seo__subtitle">Installi subito, paghi a rate</h3>
           <p>
             L'impianto fotovoltaico viene installato e utilizzato dalla tua azienda fin dal primo giorno.
@@ -78,7 +78,7 @@ import SimulatoreFotovoltaico from '../../components/tools/SimulatoreFotovoltaic
         </div>
 
         <div class="tool-seo__block tool-seo__block--accent" style="--block-accent: #10b981;">
-          <span class="tool-seo__icon material-icons-outlined" aria-hidden="true">account_balance</span>
+          <Icon name="account_balance" class="tool-seo__icon" />
           <h3 class="tool-seo__subtitle">100% deducibile, zero debiti</h3>
           <p>
             Il canone è interamente deducibile come costo operativo (OPEX), senza limiti
@@ -88,7 +88,7 @@ import SimulatoreFotovoltaico from '../../components/tools/SimulatoreFotovoltaic
         </div>
 
         <div class="tool-seo__block tool-seo__block--accent" style="--block-accent: #3b82f6;">
-          <span class="tool-seo__icon material-icons-outlined" aria-hidden="true">trending_down</span>
+          <Icon name="trending_down" class="tool-seo__icon" />
           <h3 class="tool-seo__subtitle">La rata può costare meno della bolletta</h3>
           <p>
             Con il fotovoltaico a noleggio l'energia prodotta abbatte la bolletta fin dal primo mese.

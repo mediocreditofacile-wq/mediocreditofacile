@@ -1,9 +1,9 @@
 ---
+import Icon from '../components/Icon.astro';
 import Layout from '../layouts/Layout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 ---
-
 <Layout
   title="Agevolazioni Fiscali per Imprese | Mediocredito Facile"
   description="Nuova Sabatini, Fondo di Garanzia MCC, Bando ISI Inail, Iperammortamento 4.0, ZES Unica Mezzogiorno: tutte le agevolazioni per PMI che investono. Guida e supporto completo."
@@ -60,7 +60,7 @@ import Footer from '../components/Footer.astro';
 
         <a href="/finanziamenti/agevolazioni/nuova-sabatini-2026" class="af-card">
           <div class="af-card__icon">
-            <span class="material-icons-outlined" aria-hidden="true">savings</span>
+            <Icon name="savings" />
           </div>
           <h2 class="af-card__title">Nuova Sabatini</h2>
           <p class="af-card__tag">Contributo in conto interessi</p>
@@ -74,7 +74,7 @@ import Footer from '../components/Footer.astro';
 
         <a href="/finanziamenti/agevolazioni/fondo-garanzia-mcc" class="af-card">
           <div class="af-card__icon">
-            <span class="material-icons-outlined" aria-hidden="true">shield</span>
+            <Icon name="shield" />
           </div>
           <h2 class="af-card__title">Fondo di Garanzia MCC</h2>
           <p class="af-card__tag">Garanzia statale gratuita</p>
@@ -88,7 +88,7 @@ import Footer from '../components/Footer.astro';
 
         <a href="/finanziamenti/agevolazioni/bando-isi-inail" class="af-card">
           <div class="af-card__icon">
-            <span class="material-icons-outlined" aria-hidden="true">health_and_safety</span>
+            <Icon name="health_and_safety" />
           </div>
           <h2 class="af-card__title">Bando ISI Inail</h2>
           <p class="af-card__tag">Fino al 65% a fondo perduto</p>
@@ -102,7 +102,7 @@ import Footer from '../components/Footer.astro';
 
         <a href="/finanziamenti/agevolazioni/iperammortamento-2026" class="af-card">
           <div class="af-card__icon">
-            <span class="material-icons-outlined" aria-hidden="true">memory</span>
+            <Icon name="memory" />
           </div>
           <h2 class="af-card__title">Iperammortamento 2026</h2>
           <p class="af-card__tag">Scarica fino al 280% del costo del bene 4.0</p>
@@ -117,7 +117,7 @@ import Footer from '../components/Footer.astro';
 
         <div class="af-card af-card--info">
           <div class="af-card__icon">
-            <span class="material-icons-outlined" aria-hidden="true">south</span>
+            <Icon name="south" />
           </div>
           <h2 class="af-card__title">ZES Unica Mezzogiorno</h2>
           <p class="af-card__tag">Credito d'imposta fino al 60% per investimenti al Sud</p>
@@ -308,7 +308,7 @@ import Footer from '../components/Footer.astro';
     margin-bottom: 1rem;
   }
 
-  .af-card__icon .material-icons-outlined {
+  .af-card__icon .mcf-icon {
     font-size: 1.5rem;
   }
 

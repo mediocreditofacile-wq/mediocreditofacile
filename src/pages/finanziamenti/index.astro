@@ -1,4 +1,5 @@
 ---
+import Icon from '../../components/Icon.astro';
 import Layout from '../../layouts/Layout.astro';
 import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
@@ -64,7 +65,6 @@ const serviceJsonLd = {
   serviceType: ['Finanziamento chirografario', 'Finanziamento strutturato', 'Factoring', 'Anticipo fatture'],
 };
 ---
-
 <Layout
   title="Finanziamento PMI | Chirografario, Strutturato, Factoring | Mediocredito Facile"
   description="Accesso rapido a finanziamenti bancari per PMI. Chirografario, strutturato, anticipo fatture. Valutazione gratuita in 24 ore. Oltre 10 operatori."
@@ -132,7 +132,7 @@ const serviceJsonLd = {
 
           <div class="fin-product-card">
             <div class="fin-product-card__icon">
-              <span class="material-icons-outlined" aria-hidden="true">account_balance</span>
+              <Icon name="account_balance" />
             </div>
             <h3 class="fin-product-card__title">Chirografario</h3>
             <p class="fin-product-card__desc">
@@ -150,7 +150,7 @@ const serviceJsonLd = {
 
           <div class="fin-product-card">
             <div class="fin-product-card__icon">
-              <span class="material-icons-outlined" aria-hidden="true">trending_up</span>
+              <Icon name="trending_up" />
             </div>
             <h3 class="fin-product-card__title">Strutturato</h3>
             <p class="fin-product-card__desc">
@@ -168,7 +168,7 @@ const serviceJsonLd = {
 
           <div class="fin-product-card">
             <div class="fin-product-card__icon">
-              <span class="material-icons-outlined" aria-hidden="true">receipt_long</span>
+              <Icon name="receipt_long" />
             </div>
             <h3 class="fin-product-card__title">Anticipo fatture / Factoring</h3>
             <p class="fin-product-card__desc">
@@ -250,7 +250,7 @@ const serviceJsonLd = {
         <div class="fin-agevolazioni__grid">
           <a href="/finanziamenti/agevolazioni/nuova-sabatini-2026" class="fin-agev-card">
             <div class="fin-agev-card__icon">
-              <span class="material-icons-outlined" aria-hidden="true">savings</span>
+              <Icon name="savings" />
             </div>
             <h3 class="fin-agev-card__title">Nuova Sabatini</h3>
             <p class="fin-agev-card__desc">
@@ -260,7 +260,7 @@ const serviceJsonLd = {
           </a>
           <a href="/finanziamenti/agevolazioni/fondo-garanzia-mcc" class="fin-agev-card">
             <div class="fin-agev-card__icon">
-              <span class="material-icons-outlined" aria-hidden="true">shield</span>
+              <Icon name="shield" />
             </div>
             <h3 class="fin-agev-card__title">Fondo di Garanzia MCC</h3>
             <p class="fin-agev-card__desc">
@@ -270,7 +270,7 @@ const serviceJsonLd = {
           </a>
           <a href="/finanziamenti/agevolazioni/iperammortamento-2026" class="fin-agev-card">
             <div class="fin-agev-card__icon">
-              <span class="material-icons-outlined" aria-hidden="true">memory</span>
+              <Icon name="memory" />
             </div>
             <h3 class="fin-agev-card__title">Iperammortamento 2026</h3>
             <p class="fin-agev-card__desc">
@@ -280,7 +280,7 @@ const serviceJsonLd = {
           </a>
           <a href="/finanziamenti/agevolazioni/bando-isi-inail" class="fin-agev-card">
             <div class="fin-agev-card__icon">
-              <span class="material-icons-outlined" aria-hidden="true">health_and_safety</span>
+              <Icon name="health_and_safety" />
             </div>
             <h3 class="fin-agev-card__title">Bando ISI Inail</h3>
             <p class="fin-agev-card__desc">
@@ -298,7 +298,7 @@ const serviceJsonLd = {
         <h2 class="fin-section-title">Cosa cambia rispetto alla tua banca</h2>
         <div class="fin-why__grid">
           <div class="fin-why__block">
-            <span class="material-icons-outlined fin-why__icon" aria-hidden="true">person</span>
+            <Icon name="person" class="fin-why__icon" />
             <h3>Un unico interlocutore, dal primo giorno</h3>
             <p>
               Dal primo contatto all'erogazione, parli con Alberto. Niente call center,
@@ -307,7 +307,7 @@ const serviceJsonLd = {
             </p>
           </div>
           <div class="fin-why__block">
-            <span class="material-icons-outlined fin-why__icon" aria-hidden="true">compare_arrows</span>
+            <Icon name="compare_arrows" class="fin-why__icon" />
             <h3>Piu' operatori, piu' possibilita'</h3>
             <p>
               Non dipendi da un solo istituto. Lavoriamo con piu' operatori bancari e finanziari:
@@ -315,7 +315,7 @@ const serviceJsonLd = {
             </p>
           </div>
           <div class="fin-why__block">
-            <span class="material-icons-outlined fin-why__icon" aria-hidden="true">speed</span>
+            <Icon name="speed" class="fin-why__icon" />
             <h3>Risposta in 48 ore, non in settimane</h3>
             <p>
               Pre-valutazione in 24 ore, proposta formale in 48. Niente rimbalzi tra uffici,
@@ -323,7 +323,7 @@ const serviceJsonLd = {
             </p>
           </div>
           <div class="fin-why__block">
-            <span class="material-icons-outlined fin-why__icon" aria-hidden="true">money_off</span>
+            <Icon name="money_off" class="fin-why__icon" />
             <h3>Valutazione gratuita, zero istruttoria</h3>
             <p>
               La consulenza e' gratuita. Non ci sono costi di istruttoria a carico tuo.
@@ -331,7 +331,7 @@ const serviceJsonLd = {
             </p>
           </div>
           <div class="fin-why__block">
-            <span class="material-icons-outlined fin-why__icon" aria-hidden="true">integration_instructions</span>
+            <Icon name="integration_instructions" class="fin-why__icon" />
             <h3>Agevolazioni integrate</h3>
             <p>
               Sabatini, Fondo di Garanzia, Bando ISI: se la tua operazione rientra in un'agevolazione,
@@ -410,7 +410,7 @@ const serviceJsonLd = {
 
           <!-- Nota per ditte individuali / professionisti -->
           <div class="fin-form__note" id="fin-note-alternativo" style="display:none;">
-            <span class="material-icons-outlined" aria-hidden="true">info</span>
+            <Icon name="info" />
             Per ditte individuali e professionisti valutiamo soluzioni alternative con gli altri
             operatori della nostra rete. Ti ricontatto comunque per trovare la soluzione giusta.
           </div>
@@ -644,7 +644,7 @@ const serviceJsonLd = {
     margin-bottom: 1.25rem;
   }
 
-  .fin-product-card__icon .material-icons-outlined {
+  .fin-product-card__icon .mcf-icon {
     font-size: 1.7rem;
   }
 
@@ -854,7 +854,7 @@ const serviceJsonLd = {
     margin-bottom: 1rem;
   }
 
-  .fin-agev-card__icon .material-icons-outlined {
+  .fin-agev-card__icon .mcf-icon {
     font-size: 1.5rem;
   }
 
@@ -1088,7 +1088,7 @@ const serviceJsonLd = {
     color: var(--mcf-charcoal);
   }
 
-  .fin-form__note .material-icons-outlined {
+  .fin-form__note .mcf-icon {
     font-size: 1.1rem;
     color: var(--mcf-primary);
     flex-shrink: 0;

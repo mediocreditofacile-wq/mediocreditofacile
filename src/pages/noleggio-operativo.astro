@@ -1,9 +1,9 @@
 ---
+import Icon from '../components/Icon.astro';
 import Layout from '../layouts/Layout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 ---
-
 <Layout
   title="Noleggio Operativo per Aziende | Mediocredito Facile"
   description="Noleggio operativo per aziende: canone mensile fisso, deducibilità 100% IRES/IRAP, IVA detraibile. Confronta 12 società con Mediocredito Facile."
@@ -61,22 +61,22 @@ import Footer from '../components/Footer.astro';
       <div class="no-benefits__inner">
         <div class="no-benefits__grid">
           <div class="no-card">
-            <div class="no-card__icon"><span class="material-icons-outlined" aria-hidden="true">savings</span></div>
+            <div class="no-card__icon"><Icon name="savings" /></div>
             <h3 class="no-card__title">Zero anticipo, canone fisso</h3>
             <p class="no-card__desc">Nessun investimento iniziale. Inizi subito a utilizzare ciò che ti serve con un canone mensile fisso e prevedibile.</p>
           </div>
           <div class="no-card">
-            <div class="no-card__icon"><span class="material-icons-outlined" aria-hidden="true">receipt</span></div>
+            <div class="no-card__icon"><Icon name="receipt" /></div>
             <h3 class="no-card__title">100% deducibile fiscalmente</h3>
             <p class="no-card__desc">Il canone di noleggio è interamente deducibile dal reddito d'impresa, riducendo il carico fiscale della tua azienda.</p>
           </div>
           <div class="no-card">
-            <div class="no-card__icon"><span class="material-icons-outlined" aria-hidden="true">verified_user</span></div>
+            <div class="no-card__icon"><Icon name="verified_user" /></div>
             <h3 class="no-card__title">Assicurazione All-Risk inclusa</h3>
             <p class="no-card__desc">Copertura completa contro furto, incendio, danni accidentali e guasti. Tutto già incluso nel canone mensile.</p>
           </div>
           <div class="no-card">
-            <div class="no-card__icon"><span class="material-icons-outlined" aria-hidden="true">build</span></div>
+            <div class="no-card__icon"><Icon name="build" /></div>
             <h3 class="no-card__title">Manutenzione inclusa</h3>
             <p class="no-card__desc">Assistenza tecnica, manutenzione ordinaria e straordinaria incluse. Nessun costo imprevisto per tutta la durata.</p>
           </div>
@@ -108,32 +108,32 @@ import Footer from '../components/Footer.astro';
 
         <div class="no-why__grid">
           <div class="no-why__item">
-            <span class="material-icons-outlined no-why__icon" aria-hidden="true">account_balance_wallet</span>
+            <Icon name="account_balance_wallet" class="no-why__icon" />
             <h3>Nessun debito in bilancio</h3>
             <p>Il noleggio è un costo operativo (OPEX), non un finanziamento. Non appare in centrale rischi e non peggiora il tuo rating bancario.</p>
           </div>
           <div class="no-why__item">
-            <span class="material-icons-outlined no-why__icon" aria-hidden="true">speed</span>
+            <Icon name="speed" class="no-why__icon" />
             <h3>Attivazione in pochi giorni</h3>
             <p>Processo snello: dalla richiesta alla delibera in 24-48 ore. Niente settimane di attesa come con le banche tradizionali.</p>
           </div>
           <div class="no-why__item">
-            <span class="material-icons-outlined no-why__icon" aria-hidden="true">lock</span>
+            <Icon name="lock" class="no-why__icon" />
             <h3>Canone fisso e certo</h3>
             <p>Sai esattamente quanto paghi ogni mese per tutta la durata del contratto. Nessuna variazione, nessuna sorpresa.</p>
           </div>
           <div class="no-why__item">
-            <span class="material-icons-outlined no-why__icon" aria-hidden="true">receipt</span>
+            <Icon name="receipt" class="no-why__icon" />
             <h3>Vantaggi fiscali immediati</h3>
             <p>Il canone è interamente deducibile come costo d'esercizio. Un vantaggio fiscale concreto che riduce l'imponibile della tua azienda.</p>
           </div>
           <div class="no-why__item">
-            <span class="material-icons-outlined no-why__icon" aria-hidden="true">savings</span>
+            <Icon name="savings" class="no-why__icon" />
             <h3>Liquidità protetta</h3>
             <p>Non immobilizzi capitale. Le tue risorse restano disponibili per scorte, personale, marketing e investimenti strategici.</p>
           </div>
           <div class="no-why__item">
-            <span class="material-icons-outlined no-why__icon" aria-hidden="true">autorenew</span>
+            <Icon name="autorenew" class="no-why__icon" />
             <h3>Flessibilità a fine contratto</h3>
             <p>A scadenza scegli tu: riscatta il bene a prezzo concordato, rinnova con tecnologia aggiornata, o restituisci senza costi.</p>
           </div>
@@ -457,7 +457,7 @@ import Footer from '../components/Footer.astro';
     margin-bottom: 1rem;
   }
 
-  .no-card__icon .material-icons-outlined {
+  .no-card__icon .mcf-icon {
     font-size: 1.6rem;
   }
 

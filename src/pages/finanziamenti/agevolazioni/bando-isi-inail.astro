@@ -1,4 +1,5 @@
 ---
+import Icon from '../../../components/Icon.astro';
 import Layout from '../../../layouts/Layout.astro';
 import Header from '../../../components/Header.astro';
 import Footer from '../../../components/Footer.astro';
@@ -40,7 +41,6 @@ const faqJsonLd = {
   })),
 };
 ---
-
 <Layout
   title="Bando ISI Inail 2026: Guida e Finanziamento | Mediocredito Facile"
   description="Bando ISI Inail: fino al 65% a fondo perduto per investimenti in sicurezza. Come finanziare anticipo e quota residua."
@@ -157,7 +157,7 @@ const faqJsonLd = {
         <div class="isi-scenari__grid">
 
           <div class="isi-scenario">
-            <span class="material-icons-outlined isi-scenario__icon" aria-hidden="true">precision_manufacturing</span>
+            <Icon name="precision_manufacturing" class="isi-scenario__icon" />
             <h3>PMI manifatturiera</h3>
             <p class="isi-scenario__desc">Macchinario piu' sicuro per la produzione</p>
             <ul>
@@ -169,7 +169,7 @@ const faqJsonLd = {
           </div>
 
           <div class="isi-scenario">
-            <span class="material-icons-outlined isi-scenario__icon" aria-hidden="true">construction</span>
+            <Icon name="construction" class="isi-scenario__icon" />
             <h3>Impresa edile</h3>
             <p class="isi-scenario__desc">Attrezzature anti-caduta e ponteggi</p>
             <ul>
@@ -181,7 +181,7 @@ const faqJsonLd = {
           </div>
 
           <div class="isi-scenario">
-            <span class="material-icons-outlined isi-scenario__icon" aria-hidden="true">science</span>
+            <Icon name="science" class="isi-scenario__icon" />
             <h3>Laboratorio</h3>
             <p class="isi-scenario__desc">Bonifica amianto e messa in sicurezza</p>
             <ul>
@@ -245,7 +245,7 @@ const faqJsonLd = {
             Scopri i finanziamenti MCF
           </a>
           <a href="tel:+393939957840" class="isi-mcf__cta isi-mcf__cta--outline">
-            <span class="material-icons-outlined">phone</span>
+            <Icon name="phone" />
             Chiama Alberto
           </a>
         </div>

@@ -1,4 +1,5 @@
 ---
+import Icon from '../../components/Icon.astro';
 /**
  * Marotta Evolution — Tool Finanziario (uso interno, protetto da password)
  * P.IVA lookup, classificazione credit policy, simulatore canone Grenke,
@@ -6,7 +7,6 @@
  */
 import ToolLayout from '../../layouts/ToolLayout.astro';
 ---
-
 <ToolLayout
   title="Marotta Tool — MCF Interno"
   description="Strumento interno MCF — accesso riservato"
@@ -85,7 +85,7 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
           </div>
         </div>
         <div id="incentivi-box" class="tool__incentivi" hidden>
-          <span class="material-icons-outlined" aria-hidden="true">verified</span>
+          <Icon name="verified" />
           <p>Questa azienda può accedere alle agevolazioni <strong>Nuova Sabatini</strong> (contributo in conto interessi fino al 3,575%).</p>
         </div>
       </section>
@@ -440,7 +440,7 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
       <div class="tool__docs-group">
         <h3 class="tool__docs-title">${l.title}</h3>
         <ul class="tool__docs-list">
-          ${l.docs.map(d => `<li><span class="material-icons-outlined" aria-hidden="true">check_circle</span> ${d}</li>`).join('')}
+          ${l.docs.map(d => `<li><Icon name="check_circle" /> ${d}</li>`).join('')}
         </ul>
       </div>
     `).join('');
@@ -817,7 +817,7 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
     margin-top: 1rem;
   }
 
-  .tool__incentivi .material-icons-outlined {
+  .tool__incentivi .mcf-icon {
     color: #16a34a;
     font-size: 1.5rem;
     flex-shrink: 0;
@@ -1021,7 +1021,7 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
     color: var(--color-text);
   }
 
-  .tool__docs-list .material-icons-outlined {
+  .tool__docs-list .mcf-icon {
     color: var(--color-primary);
     font-size: 1.1rem;
     flex-shrink: 0;

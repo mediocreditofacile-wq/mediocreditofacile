@@ -1,4 +1,5 @@
 ---
+import Icon from '../../components/Icon.astro';
 /**
  * Gruppo Barone — Area Riservata
  * Simulatore ISI Inail, Noleggio Grenke,
@@ -7,7 +8,6 @@
  */
 import ToolLayout from '../../layouts/ToolLayout.astro';
 ---
-
 <ToolLayout
   title="Area Riservata Gruppo Barone — Mediocredito Facile"
   description="Strumenti riservati Gruppo Barone — accesso riservato"
@@ -117,7 +117,7 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
         </div>
 
         <div class="sim-card__note">
-          <span class="material-icons-outlined">info</span>
+          <Icon name="info" />
           <p>
             Il contributo ISI Inail viene erogato dopo la realizzazione e rendicontazione del progetto (12-24 mesi).
             MCF finanzia l'anticipo del 100%. Il residuo puo' essere frazionato in 10 rate a tasso zero con BCC Rent&amp;Lease
@@ -135,7 +135,7 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
 
         <div class="sim-card__actions">
           <button class="sim-card__cta" id="inail-preventivo">
-            <span class="material-icons-outlined">description</span> Genera Preventivo
+            <Icon name="description" /> Genera Preventivo
           </button>
         </div>
       </div>
@@ -189,7 +189,7 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
         </div>
 
         <div class="sim-card__note" id="nol-note-mensile" style="display:none">
-          <span class="material-icons-outlined">info</span>
+          <Icon name="info" />
           <p>
             Per importi sopra 12.000 €, e' disponibile il pagamento mensile anticipato con maggiorazione del 5% sul canone.
             Canone mensile anticipato: <strong id="nol-mens-magg"></strong>
@@ -197,7 +197,7 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
         </div>
 
         <div class="sim-card__note">
-          <span class="material-icons-outlined">warning</span>
+          <Icon name="warning" />
           <p>Assicurazione obbligatoria NON inclusa nel canone. L'utilizzatore puo' assicurarsi in proprio o tramite Grenke.</p>
         </div>
 
@@ -209,7 +209,7 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
           <input type="tel" id="nol-telefono" class="sim-card__input" placeholder="Telefono" autocomplete="tel" />
           <div class="sim-card__actions">
             <button class="sim-card__cta" id="nol-preventivo">
-              <span class="material-icons-outlined">description</span> Genera Preventivo
+              <Icon name="description" /> Genera Preventivo
             </button>
           </div>
         </div>
@@ -268,7 +268,7 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
         </div>
 
         <div class="sim-card__note">
-          <span class="material-icons-outlined">gavel</span>
+          <Icon name="gavel" />
           <p>
             TAN indicativo 6,00%. Il tasso effettivo sara' determinato al momento della valutazione
             di merito creditizio del potenziale cliente.
@@ -283,7 +283,7 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
           <input type="tel" id="fin-telefono" class="sim-card__input" placeholder="Telefono" autocomplete="tel" />
           <div class="sim-card__actions">
             <button class="sim-card__cta" id="fin-preventivo">
-              <span class="material-icons-outlined">description</span> Genera Preventivo
+              <Icon name="description" /> Genera Preventivo
             </button>
           </div>
         </div>
@@ -327,7 +327,7 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
         </div>
 
         <div class="sim-card__note">
-          <span class="material-icons-outlined">download</span>
+          <Icon name="download" />
           <p>
             Per attivare BCC Rent&amp;Lease, il cliente deve firmare l'informativa privacy BCC.
             <a href="/docs/privacy-bcc.pdf" download class="sim-card__link">Scarica modulo Privacy BCC (PDF)</a>
@@ -342,7 +342,7 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
           <input type="tel" id="bcc-telefono" class="sim-card__input" placeholder="Telefono" autocomplete="tel" />
           <div class="sim-card__actions">
             <button class="sim-card__cta" id="bcc-preventivo">
-              <span class="material-icons-outlined">description</span> Genera Preventivo
+              <Icon name="description" /> Genera Preventivo
             </button>
           </div>
         </div>
@@ -382,7 +382,7 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
           <textarea id="up-note" class="sim-card__textarea" rows="3" placeholder="Eventuali note sulla richiesta..."></textarea>
         </div>
         <button class="sim-card__cta" id="up-invia">
-          <span class="material-icons-outlined">send</span> Invia richiesta ad Alberto
+          <Icon name="send" /> Invia richiesta ad Alberto
         </button>
         <p id="up-feedback" class="sim-card__feedback" hidden></p>
       </div>
@@ -802,7 +802,7 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
         })
         .finally(function () {
           $('up-invia').disabled = false;
-          $('up-invia').innerHTML = '<span class="material-icons-outlined">send</span> Invia richiesta ad Alberto';
+          $('up-invia').innerHTML = '<Icon name="send" /> Invia richiesta ad Alberto';
         });
     });
   }
@@ -1219,7 +1219,7 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
     padding: 1rem 1.15rem;
     margin: 1.25rem 0;
   }
-  .sim-card__note .material-icons-outlined {
+  .sim-card__note .mcf-icon {
     color: var(--mcf-accent);
     font-size: 1.25rem;
     flex-shrink: 0;
@@ -1272,7 +1272,7 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
   .sim-card__cta--calc:hover:not(:disabled) {
     box-shadow: 0 8px 24px rgba(102,76,205,0.35);
   }
-  .sim-card__cta .material-icons-outlined { font-size: 1.15rem; }
+  .sim-card__cta .mcf-icon { font-size: 1.15rem; }
   .sim-card__actions { margin-top: 1.25rem; }
 
   /* Customer section */
@@ -1444,7 +1444,7 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
     .sim-card__row--total strong { font-size: 1.05rem; }
 
     .sim-card__note { padding: 0.75rem 0.85rem; gap: 0.5rem; }
-    .sim-card__note .material-icons-outlined { font-size: 1.1rem; }
+    .sim-card__note .mcf-icon { font-size: 1.1rem; }
     .sim-card__note p { font-size: 0.82rem; }
 
     .sim-card__cta { padding: 0.9rem 1.25rem; font-size: 0.95rem; }

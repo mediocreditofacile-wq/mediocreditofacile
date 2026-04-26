@@ -1,4 +1,5 @@
 ---
+import Icon from '../../components/Icon.astro';
 import Layout from '../../layouts/Layout.astro';
 import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
@@ -64,7 +65,6 @@ const webAppJsonLd = {
   operatingSystem: 'Web',
 };
 ---
-
 <Layout
   title="Nuova Sabatini 2026: Calcola il Contributo per Beni Strumentali"
   description="Calcolatore Nuova Sabatini 2026: scopri in tempo reale il contributo MISE sull'acquisto di macchinari e attrezzature. Beni ordinari e 4.0, esempi numerici, FAQ. Mediocredito Facile."
@@ -90,7 +90,7 @@ const webAppJsonLd = {
         </p>
         <a href="#calcolatore" class="lp-hero__cta">
           Calcola il tuo contributo
-          <span class="material-icons-outlined">arrow_downward</span>
+          <Icon name="arrow_downward" />
         </a>
       </div>
     </section>
@@ -119,28 +119,28 @@ const webAppJsonLd = {
           <div class="lp-intro__col">
             <ul class="lp-intro__list">
               <li>
-                <span class="material-icons-outlined">check_circle</span>
+                <Icon name="check_circle" />
                 <div>
                   <strong>Investimento ammesso</strong>
                   <span>Da 20.000 a 4.000.000 di euro</span>
                 </div>
               </li>
               <li>
-                <span class="material-icons-outlined">check_circle</span>
+                <Icon name="check_circle" />
                 <div>
                   <strong>Beni 4.0</strong>
                   <span>Contributo maggiorato del 30%</span>
                 </div>
               </li>
               <li>
-                <span class="material-icons-outlined">check_circle</span>
+                <Icon name="check_circle" />
                 <div>
                   <strong>Erogazione</strong>
                   <span>5 quote annuali direttamente all'impresa</span>
                 </div>
               </li>
               <li>
-                <span class="material-icons-outlined">check_circle</span>
+                <Icon name="check_circle" />
                 <div>
                   <strong>Combinabile</strong>
                   <span>Con Fondo di Garanzia MCC e altri incentivi</span>
@@ -176,7 +176,7 @@ const webAppJsonLd = {
         </p>
         <div class="lp-esempi__grid">
           <div class="lp-esempi__card">
-            <span class="lp-esempi__icon material-icons-outlined">precision_manufacturing</span>
+            <Icon name="precision_manufacturing" class="lp-esempi__icon" />
             <h3>Officina meccanica</h3>
             <p class="lp-esempi__product">Tornio CNC 4.0</p>
             <ul>
@@ -189,7 +189,7 @@ const webAppJsonLd = {
             </ul>
           </div>
           <div class="lp-esempi__card">
-            <span class="lp-esempi__icon material-icons-outlined">restaurant</span>
+            <Icon name="restaurant" class="lp-esempi__icon" />
             <h3>Ristorante</h3>
             <p class="lp-esempi__product">Forno e attrezzature cucina</p>
             <ul>
@@ -202,7 +202,7 @@ const webAppJsonLd = {
             </ul>
           </div>
           <div class="lp-esempi__card">
-            <span class="lp-esempi__icon material-icons-outlined">medical_services</span>
+            <Icon name="medical_services" class="lp-esempi__icon" />
             <h3>Studio medico</h3>
             <p class="lp-esempi__product">Ecografo digitale</p>
             <ul>
@@ -252,7 +252,7 @@ const webAppJsonLd = {
         </div>
         <a href="/agevolazioni/fondo-garanzia-mcc" class="lp-combo__link">
           Scopri come funziona il Fondo di Garanzia MCC
-          <span class="material-icons-outlined">arrow_forward</span>
+          <Icon name="arrow_forward" />
         </a>
       </div>
     </section>
@@ -266,7 +266,7 @@ const webAppJsonLd = {
             <details class="lp-faq__item">
               <summary>
                 {faq.q}
-                <span class="material-icons-outlined">expand_more</span>
+                <Icon name="expand_more" />
               </summary>
               <p>{faq.a}</p>
             </details>
@@ -293,7 +293,7 @@ const webAppJsonLd = {
         </p>
         <div class="lp-mcf__cta-row">
           <a href="tel:+393939957840" class="lp-mcf__cta lp-mcf__cta--outline">
-            <span class="material-icons-outlined">phone</span>
+            <Icon name="phone" />
             Chiama Alberto
           </a>
           <a href="#calcolatore" class="lp-mcf__cta lp-mcf__cta--solid">
@@ -422,7 +422,7 @@ const webAppJsonLd = {
     border-left: 3px solid var(--mcf-primary);
   }
 
-  .lp-intro__list .material-icons-outlined {
+  .lp-intro__list .mcf-icon {
     color: var(--mcf-primary);
     font-size: 1.4rem;
     flex-shrink: 0;
@@ -734,12 +734,12 @@ const webAppJsonLd = {
     display: none;
   }
 
-  .lp-faq__item summary .material-icons-outlined {
+  .lp-faq__item summary .mcf-icon {
     transition: transform 0.25s;
     color: var(--mcf-accent);
   }
 
-  .lp-faq__item[open] summary .material-icons-outlined {
+  .lp-faq__item[open] summary .mcf-icon {
     transform: rotate(180deg);
   }
 

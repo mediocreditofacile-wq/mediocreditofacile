@@ -1,4 +1,5 @@
 ---
+import Icon from '../../components/Icon.astro';
 import Layout from '../../layouts/Layout.astro';
 import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
@@ -137,7 +138,6 @@ const breadcrumbLD = {
   ],
 };
 ---
-
 <Layout
   title={`${post.data.title} | Mediocredito Facile`}
   description={post.data.description}
@@ -205,7 +205,7 @@ const breadcrumbLD = {
           <div class="article__cta-actions">
             <a href="/finanza-veloce" class="article__cta-btn article__cta-btn--primary">Richiedi una Valutazione Gratuita</a>
             <a href="tel:+393939957840" class="article__cta-btn article__cta-btn--outline">
-              <span class="material-icons-outlined" aria-hidden="true">phone</span>
+              <Icon name="phone" />
               Chiama Ora
             </a>
           </div>
@@ -213,7 +213,7 @@ const breadcrumbLD = {
 
         {/* Link torna al blog */}
         <a href="/blog" class="article__back">
-          <span class="material-icons-outlined" aria-hidden="true">arrow_back</span>
+          <Icon name="arrow_back" />
           Torna al blog
         </a>
       </div>
@@ -422,7 +422,7 @@ const breadcrumbLD = {
     background: var(--color-primary-bg);
   }
 
-  .article__cta-btn--outline .material-icons-outlined {
+  .article__cta-btn--outline .mcf-icon {
     font-size: 1.1rem;
   }
 
@@ -534,7 +534,7 @@ const breadcrumbLD = {
     gap: 0.7rem;
   }
 
-  .article__back .material-icons-outlined {
+  .article__back .mcf-icon {
     font-size: 1.1rem;
   }
 

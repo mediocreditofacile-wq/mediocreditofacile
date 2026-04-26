@@ -1,4 +1,5 @@
 ---
+import Icon from '../../components/Icon.astro';
 import Layout from '../../layouts/Layout.astro';
 import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
@@ -63,7 +64,6 @@ const webAppJsonLd = {
   operatingSystem: 'Web',
 };
 ---
-
 <Layout
   title="Fondo di Garanzia MCC: Come Accedere alla Garanzia Statale per le PMI"
   description="Verifica in tempo reale la copertura del Fondo di Garanzia Mediocredito Centrale sul tuo finanziamento. Requisiti, percentuali, FAQ. Mediocredito Facile gestisce la pratica."
@@ -88,7 +88,7 @@ const webAppJsonLd = {
         </p>
         <a href="#checker" class="lp-hero__cta">
           Verifica la copertura
-          <span class="material-icons-outlined">arrow_downward</span>
+          <Icon name="arrow_downward" />
         </a>
       </div>
     </section>
@@ -116,28 +116,28 @@ const webAppJsonLd = {
           <div class="lp-intro__col">
             <ul class="lp-intro__list">
               <li>
-                <span class="material-icons-outlined">check_circle</span>
+                <Icon name="check_circle" />
                 <div>
                   <strong>Copertura garantita</strong>
                   <span>Fino all'80% del finanziamento</span>
                 </div>
               </li>
               <li>
-                <span class="material-icons-outlined">check_circle</span>
+                <Icon name="check_circle" />
                 <div>
                   <strong>Massimale per impresa</strong>
                   <span>5 milioni di euro cumulativi</span>
                 </div>
               </li>
               <li>
-                <span class="material-icons-outlined">check_circle</span>
+                <Icon name="check_circle" />
                 <div>
                   <strong>Operazioni ammesse</strong>
                   <span>Investimenti, liquidita', capitalizzazione</span>
                 </div>
               </li>
               <li>
-                <span class="material-icons-outlined">check_circle</span>
+                <Icon name="check_circle" />
                 <div>
                   <strong>Costo per la PMI</strong>
                   <span>Gratuito o di importo simbolico</span>
@@ -174,7 +174,7 @@ const webAppJsonLd = {
         </p>
         <div class="lp-esempi__grid">
           <div class="lp-esempi__card">
-            <span class="lp-esempi__icon material-icons-outlined">looks_one</span>
+            <Icon name="looks_one" class="lp-esempi__icon" />
             <h3>Microimpresa</h3>
             <ul>
               <li><span>Dipendenti</span><strong>&lt; 10</strong></li>
@@ -185,7 +185,7 @@ const webAppJsonLd = {
             </ul>
           </div>
           <div class="lp-esempi__card">
-            <span class="lp-esempi__icon material-icons-outlined">looks_two</span>
+            <Icon name="looks_two" class="lp-esempi__icon" />
             <h3>Piccola impresa</h3>
             <ul>
               <li><span>Dipendenti</span><strong>&lt; 50</strong></li>
@@ -196,7 +196,7 @@ const webAppJsonLd = {
             </ul>
           </div>
           <div class="lp-esempi__card">
-            <span class="lp-esempi__icon material-icons-outlined">looks_3</span>
+            <Icon name="looks_3" class="lp-esempi__icon" />
             <h3>Media impresa</h3>
             <ul>
               <li><span>Dipendenti</span><strong>&lt; 250</strong></li>
@@ -276,7 +276,7 @@ const webAppJsonLd = {
         </div>
         <a href="/agevolazioni/nuova-sabatini-2026" class="lp-combo__link">
           Scopri come funziona la Nuova Sabatini 2026
-          <span class="material-icons-outlined">arrow_forward</span>
+          <Icon name="arrow_forward" />
         </a>
       </div>
     </section>
@@ -290,7 +290,7 @@ const webAppJsonLd = {
             <details class="lp-faq__item">
               <summary>
                 {faq.q}
-                <span class="material-icons-outlined">expand_more</span>
+                <Icon name="expand_more" />
               </summary>
               <p>{faq.a}</p>
             </details>
@@ -316,7 +316,7 @@ const webAppJsonLd = {
         </p>
         <div class="lp-mcf__cta-row">
           <a href="tel:+393939957840" class="lp-mcf__cta lp-mcf__cta--outline">
-            <span class="material-icons-outlined">phone</span>
+            <Icon name="phone" />
             Chiama Alberto
           </a>
           <a href="#checker" class="lp-mcf__cta lp-mcf__cta--solid">
@@ -445,7 +445,7 @@ const webAppJsonLd = {
     border-left: 3px solid var(--mcf-primary);
   }
 
-  .lp-intro__list .material-icons-outlined {
+  .lp-intro__list .mcf-icon {
     color: var(--mcf-primary);
     font-size: 1.4rem;
     flex-shrink: 0;
@@ -815,12 +815,12 @@ const webAppJsonLd = {
     display: none;
   }
 
-  .lp-faq__item summary .material-icons-outlined {
+  .lp-faq__item summary .mcf-icon {
     transition: transform 0.25s;
     color: var(--mcf-accent);
   }
 
-  .lp-faq__item[open] summary .material-icons-outlined {
+  .lp-faq__item[open] summary .mcf-icon {
     transform: rotate(180deg);
   }
 
