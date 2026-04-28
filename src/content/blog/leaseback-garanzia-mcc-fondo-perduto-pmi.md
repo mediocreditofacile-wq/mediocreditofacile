@@ -4,7 +4,7 @@ description: "Un caso reale di PMI che combina leaseback sui macchinari e finanz
 date: "2026-04-21"
 author: "Alberto Amà"
 tags: ["leaseback", "fondo garanzia mcc", "liquidità pmi", "finanziamenti", "caso studio"]
-image: "/images/blog-placeholder.webp"
+image: "/images/blog-leaseback-mcc.webp"
 imageAlt: "Bancone in legno di un'enoteca con bottiglie esposte e attrezzatura da bar"
 cluster: "agevolazioni"
 ---

@@ -4,7 +4,7 @@ description: "Quando la cassa non è più comoda, l'imprenditore cerca finanza u
 date: "2026-04-24"
 author: "Alberto Amà"
 tags: ["finanza urgente", "liquidità pmi", "leaseback", "cassa", "factoring"]
-image: "/images/blog-placeholder.webp"
+image: "/images/blog-finanza-urgente.webp"
 imageAlt: "Imprenditore che analizza il flusso di cassa aziendale"
 cluster: "finanziamenti"
 ---

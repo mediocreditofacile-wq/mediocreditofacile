@@ -4,7 +4,7 @@ description: "Come cumulare Nuova Sabatini e crediti d'imposta ZES/ZLS nella str
 date: "2026-04-24"
 author: "Alberto Amà"
 tags: ["nuova sabatini", "zes unica", "zls", "credito d'imposta", "strategia investimenti"]
-image: "/images/blog-placeholder.webp"
+image: "/images/blog-sabatini-zes.webp"
 imageAlt: "Mappa Italia con zone economiche speciali evidenziate"
 cluster: "agevolazioni"
 ---

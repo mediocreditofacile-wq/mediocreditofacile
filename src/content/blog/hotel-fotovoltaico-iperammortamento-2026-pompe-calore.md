@@ -4,7 +4,7 @@ description: "Caso reale di un hotel cinque stelle del basso Lazio: fotovoltaico
 date: "2026-04-21"
 author: "Alberto Amà"
 tags: ["iperammortamento 2026", "hotel", "fotovoltaico aziendale", "pompe calore", "leasing strumentale"]
-image: "/images/blog-placeholder.webp"
+image: "/images/blog-hotel-fotovoltaico.webp"
 imageAlt: "Hotel con impianto fotovoltaico sul tetto e facciata energeticamente riqualificata"
 cluster: "agevolazioni"
 ---

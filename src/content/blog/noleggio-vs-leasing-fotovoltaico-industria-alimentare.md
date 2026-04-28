@@ -4,7 +4,7 @@ description: "Azienda alimentare in provincia di Cremona, tetto da rifare, impia
 date: "2026-04-21"
 author: "Alberto Amà"
 tags: ["noleggio operativo", "leasing fotovoltaico", "industria alimentare", "iperammortamento", "caso studio"]
-image: "/images/blog-placeholder.webp"
+image: "/images/blog-fotovoltaico-alimentare.webp"
 imageAlt: "Impianto fotovoltaico industriale su tetto di stabilimento alimentare"
 cluster: "agevolazioni"
 ---

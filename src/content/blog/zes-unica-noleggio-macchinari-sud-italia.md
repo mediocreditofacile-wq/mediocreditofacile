@@ -4,7 +4,7 @@ description: "Caso reale di un caseificio nel Mezzogiorno che combina credito d'
 date: "2026-04-21"
 author: "Alberto Amà"
 tags: ["ZES unica", "noleggio operativo", "Mezzogiorno", "credito imposta", "caso studio"]
-image: "/images/blog-placeholder.webp"
+image: "/images/blog-zes-sud.webp"
 imageAlt: "Linea di produzione lattiero-casearia con macchinari in acciaio inox"
 cluster: "agevolazioni"
 ---
