@@ -32,14 +32,24 @@ const serviziMain = [
     icon: 'leasing-strumentale',
     slug: 'leasing-strumentale',
     title: 'Leasing Strumentale',
-    desc: 'Macchinari e attrezzature con riscatto finale a condizioni negoziate. Flessibilita su durata e maxi-canone iniziale.',
+    desc: 'Per chi vuole il bene a libro, con il riscatto finale gia scritto in contratto.',
+    bullets: [
+      'Riscatto finale a condizioni negoziate',
+      'Maxi-canone iniziale flessibile',
+      'Beni 4.0 con iperammortamento incluso',
+    ],
     ctaText: 'Scegli il leasing',
   },
   {
     icon: 'finanziamenti-pmi',
     slug: 'finanziamenti/',
     title: 'Finanziamenti PMI',
-    desc: 'Liquidita per crescere. Confrontiamo oltre 10 istituti bancari per trovare il finanziamento adatto, da 50.000 euro in su.',
+    desc: 'Liquidita per crescere o per investire. Confrontiamo gli istituti per le condizioni migliori.',
+    bullets: [
+      'Da 50.000 euro in su',
+      '12 istituti bancari a confronto',
+      'Pre-delibera in 24 ore lavorative',
+    ],
     ctaText: 'Richiedi una proposta',
   },
 ];
@@ -186,6 +196,16 @@ const faqLD = {
                 <div class="smain__body">
                   <h3 class="smain__title">{s.title}</h3>
                   <p class="smain__desc">{s.desc}</p>
+                  {s.bullets && (
+                    <ul class="smain__bullets">
+                      {s.bullets.map((b) => (
+                        <li>
+                          <Icon name="check-circle" size={14} />
+                          <span>{b}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                   <span class="smain__cta">
                     {s.ctaText}
                     <Icon name="arrow-right" size={14} />
@@ -661,11 +681,40 @@ const faqLD = {
     margin: 0;
   }
 
+  .smain__bullets {
+    list-style: none;
+    padding: 0;
+    margin: 0.5rem 0 0.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .smain__bullets li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    font-size: 0.83rem;
+    color: var(--color-text);
+    line-height: 1.4;
+  }
+
+  .smain__bullets li :global(.mcf-icon) {
+    color: var(--color-accent);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* Su Finanziamenti (seconda card) i check sono viola */
+  .smain:nth-child(2) .smain__bullets li :global(.mcf-icon) {
+    color: var(--color-primary);
+  }
+
   .smain__cta {
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
-    margin-top: 0.4rem;
+    margin-top: 0.5rem;
     font-size: 0.85rem;
     font-weight: 600;
     color: var(--color-accent);
