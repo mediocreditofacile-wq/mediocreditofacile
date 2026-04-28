@@ -4,7 +4,7 @@ description: "Concessionario Sunward in Puglia, flotta di mini escavatori per ed
 date: "2026-04-21"
 author: "Alberto Amà"
 tags: ["bando isi", "inail", "mini escavatori", "edilizia", "grace period", "noleggio operativo"]
-image: "/images/blog-placeholder.webp"
+image: "/images/blog-isi-escavatori.webp"
 imageAlt: "Mini escavatore Sunward in lavoro su cantiere edile estivo"
 cluster: "agevolazioni"
 ---

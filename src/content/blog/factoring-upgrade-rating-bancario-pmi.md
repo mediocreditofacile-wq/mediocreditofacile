@@ -4,7 +4,7 @@ description: "Il factoring non è solo anticipo fatture. Usato bene, ripulisce l
 date: "2026-04-21"
 author: "Alberto Amà"
 tags: ["factoring", "rating bancario", "centrale rischi", "pmi in crescita", "caso studio"]
-image: "/images/blog-placeholder.webp"
+image: "/images/blog-factoring-rating.webp"
 imageAlt: "Documenti finanziari con grafico di andamento del rating creditizio aziendale"
 cluster: "agevolazioni"
 ---
