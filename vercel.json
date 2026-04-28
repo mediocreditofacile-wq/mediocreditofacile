@@ -99,6 +99,11 @@
       "source": "/agevolazioni/fondo-garanzia-mcc",
       "destination": "/finanziamenti/agevolazioni/fondo-garanzia-mcc",
       "permanent": true
+    },
+    {
+      "source": "/agevolazioni-fiscali",
+      "destination": "/finanziamenti/agevolazioni/",
+      "permanent": true
     }
   ]
 }
