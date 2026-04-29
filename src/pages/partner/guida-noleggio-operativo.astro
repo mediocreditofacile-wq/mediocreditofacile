@@ -1,0 +1,1144 @@
+---
+import Icon from '../../components/Icon.astro';
+import Layout from '../../layouts/Layout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+---
+<Layout
+  title="Guida al Noleggio Operativo per Partner | Mediocredito Facile"
+  description="Come funziona il noleggio operativo quando passa da Mediocredito Facile: definizione, vantaggi commerciali, fatturazione, documenti, fine contratto. La guida operativa pensata per concessionari, installatori e fornitori di beni strumentali."
+>
+  <Header minimal={false} />
+  <main class="gp">
+
+    <!-- HERO -->
+    <section class="gp-hero">
+      <div class="gp-hero__inner">
+        <span class="gp-hero__eyebrow">Guida operativa per partner · Edizione 2026</span>
+        <h1 class="gp-hero__title">Noleggio operativo.<br/>Senza giri.</h1>
+        <p class="gp-hero__lede">
+          La guida che spiega come funziona la locazione operativa quando passa da Mediocredito Facile.
+          Dalle prime domande del cliente alla chiusura del contratto: tutto quello che serve per chiudere.
+        </p>
+        <div class="gp-hero__ctas">
+          <a href="#indice" class="gp-btn gp-btn--accent">Inizia dalla guida</a>
+          <a href="#cta-finale" class="gp-btn gp-btn--ghost">Diventa partner</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- INDICE -->
+    <section class="gp-section gp-section--alt" id="indice">
+      <div class="gp-container">
+        <span class="gp-eyebrow">Indice</span>
+        <h2 class="gp-h2">Sette sezioni. Tutto quello che serve per chiudere.</h2>
+
+        <div class="gp-toc">
+          <a href="#cose" class="gp-step">
+            <span class="gp-step__n">01</span>
+            <div>
+              <h3>Cos'è la locazione operativa</h3>
+              <p>La definizione, in due righe. Senza fronzoli.</p>
+            </div>
+          </a>
+          <a href="#vantaggi" class="gp-step">
+            <span class="gp-step__n">02</span>
+            <div>
+              <h3>Vantaggi per te e per il cliente</h3>
+              <p>Otto leve commerciali. Tutte verificabili.</p>
+            </div>
+          </a>
+          <a href="#fatturazione" class="gp-step">
+            <span class="gp-step__n">03</span>
+            <div>
+              <h3>Come avviene la fatturazione</h3>
+              <p>Canoni, spese, pro-rata, assicurazione.</p>
+            </div>
+          </a>
+          <a href="#istruttoria" class="gp-step">
+            <span class="gp-step__n">04</span>
+            <div>
+              <h3>Documenti per l'istruttoria</h3>
+              <p>Cosa allegare alla richiesta. Per ogni tipologia di cliente.</p>
+            </div>
+          </a>
+          <a href="#decorrenza" class="gp-step">
+            <span class="gp-step__n">05</span>
+            <div>
+              <h3>Documenti per la decorrenza</h3>
+              <p>Cosa serve quando il contratto parte davvero.</p>
+            </div>
+          </a>
+          <a href="#fine-contratto" class="gp-step">
+            <span class="gp-step__n">06</span>
+            <div>
+              <h3>Le opzioni a fine contratto</h3>
+              <p>Proroga, riacquisto, nuovo contratto. Niente sorprese.</p>
+            </div>
+          </a>
+          <a href="#faq" class="gp-step">
+            <span class="gp-step__n">07</span>
+            <div>
+              <h3>Domande frequenti dai partner</h3>
+              <p>Commissioni, esclusiva, beni usati, tempi.</p>
+            </div>
+          </a>
+          <a href="#glossario" class="gp-step">
+            <span class="gp-step__n">08</span>
+            <div>
+              <h3>Glossario</h3>
+              <p>Sei termini chiave per parlare la stessa lingua dell'operatore.</p>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- 1. COS'E + IN PRATICA -->
+    <section class="gp-section" id="cose">
+      <div class="gp-container">
+        <div class="gp-twocol">
+          <div class="gp-twocol__left">
+            <span class="gp-eyebrow">La definizione</span>
+            <h2 class="gp-h2">Il cliente usa il bene. Tu lo vendi due volte.</h2>
+            <p class="gp-lede">
+              La locazione operativa è il contratto con cui il proprietario di un bene
+              (l'operatore finanziario partner) lo concede al cliente per un periodo definito,
+              a fronte di un canone periodico. Il cliente non immobilizza capitale.
+              Tu incassi la fattura intera in 48 ore lavorative.
+            </p>
+            <span class="gp-pill gp-pill--orange">Canoni dal cliente · fattura piena al fornitore</span>
+          </div>
+          <aside class="gp-card gp-card--strong">
+            <h3 class="gp-card__title">In pratica</h3>
+            <ol class="gp-card__list">
+              <li>Il cliente sceglie il bene da te.</li>
+              <li>L'operatore partner lo compra e lo dà in locazione al cliente.</li>
+              <li>Tu ricevi il bonifico del bene a consegna avvenuta.</li>
+              <li>Il cliente paga un canone trimestrale anticipato.</li>
+              <li>A fine contratto: proroga, riacquisto o rinnovo.</li>
+            </ol>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. OTTO VANTAGGI -->
+    <section class="gp-section gp-section--alt" id="vantaggi">
+      <div class="gp-container">
+        <span class="gp-eyebrow">Otto vantaggi</span>
+        <h2 class="gp-h2">Quello che cambia rispetto a una vendita tradizionale.</h2>
+
+        <div class="gp-grid gp-grid--4">
+          <div class="gp-ben">
+            <div class="gp-ben__ic"><Icon name="payments" /></div>
+            <h4>Incassi sicuri e rapidi</h4>
+            <p>Fattura saldata in 48 ore lavorative dalla consegna. Nessuna rata da inseguire.</p>
+          </div>
+          <div class="gp-ben">
+            <div class="gp-ben__ic gp-ben__ic--orange"><Icon name="trending_up" /></div>
+            <h4>Upselling naturale</h4>
+            <p>Il canone abbassa la barriera. Il cliente prende anche gli accessori e l'estensione di garanzia.</p>
+          </div>
+          <div class="gp-ben">
+            <div class="gp-ben__ic"><Icon name="bolt" /></div>
+            <h4>Procedure semplici</h4>
+            <p>Portale dedicato, contratto digitale, firma elettronica. Niente carta.</p>
+          </div>
+          <div class="gp-ben">
+            <div class="gp-ben__ic gp-ben__ic--orange"><Icon name="autorenew" /></div>
+            <h4>Clienti fidelizzati</h4>
+            <p>A fine contratto torna da te per il rinnovo. Lo prevede la struttura del contratto.</p>
+          </div>
+          <div class="gp-ben">
+            <div class="gp-ben__ic"><Icon name="account_balance_wallet" /></div>
+            <h4>Salvaguardia liquidità</h4>
+            <p>Il cliente non immobilizza capitale circolante. Mantiene cassa per scorte, marketing, personale.</p>
+          </div>
+          <div class="gp-ben">
+            <div class="gp-ben__ic gp-ben__ic--orange"><Icon name="money_off" /></div>
+            <h4>Nessun indebitamento</h4>
+            <p>Il canone non è un finanziamento. Non rientra nella centrale rischi del cliente.</p>
+          </div>
+          <div class="gp-ben">
+            <div class="gp-ben__ic"><Icon name="receipt" /></div>
+            <h4>Vantaggi fiscali</h4>
+            <p>Canone deducibile al 100% come costo d'esercizio. IVA detraibile sul canone.</p>
+          </div>
+          <div class="gp-ben">
+            <div class="gp-ben__ic gp-ben__ic--orange"><Icon name="update" /></div>
+            <h4>Tecnologia rinnovabile</h4>
+            <p>A scadenza, beni nuovi senza dover gestire la dismissione del vecchio.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. FATTURAZIONE -->
+    <section class="gp-section" id="fatturazione">
+      <div class="gp-container">
+        <div class="gp-twocol gp-twocol--media">
+          <div>
+            <span class="gp-eyebrow">Come avviene la fatturazione</span>
+            <h2 class="gp-h2">Numeri secchi. Niente costi nascosti.</h2>
+            <p class="gp-lede">
+              Tre voci da conoscere: il canone, il pro-rata di prelocazione, le spese amministrative.
+              Tutto lineare, tutto previsto da contratto.
+            </p>
+          </div>
+          <div class="gp-media">
+            <img src="/images/guida-partner-fatturazione-desk.webp" alt="Scrivania di un partner con preventivo, smartphone con notifica bonifico, calcolatrice e Post-it" loading="lazy" />
+          </div>
+        </div>
+
+        <div class="gp-grid gp-grid--2 gp-spaced">
+          <div>
+            <h3 class="gp-h3">Canone</h3>
+            <p>Fatturazione trimestrale anticipata con addebito SEPA. Le scadenze sono fisse: <strong>1° gennaio, 1° aprile, 1° luglio, 1° ottobre</strong>. Nessuna spesa di incasso sui canoni.</p>
+
+            <h3 class="gp-h3">Pro-rata di prelocazione</h3>
+            <p>Dal giorno della consegna fino al primo giorno del trimestre successivo, viene fatturata un'indennità giornaliera pari a <strong>1/30 del canone mensile</strong>. Serve a coprire il periodo di utilizzo prima dell'avvio del trimestre regolare.</p>
+
+            <h3 class="gp-h3">Contratto</h3>
+            <p>Elettronico, con firma e-signature. <strong>Nessun costo di gestione.</strong></p>
+          </div>
+          <div>
+            <h3 class="gp-h3">Spese amministrative</h3>
+            <table class="gp-table">
+              <thead><tr><th>Imponibile</th><th>Una tantum</th></tr></thead>
+              <tbody>
+                <tr><td>500 € — 12.500 €</td><td>75 €</td></tr>
+                <tr><td>12.500 € — 25.000 €</td><td>90 €</td></tr>
+                <tr><td>25.000 € — 100.000 €</td><td>100 €</td></tr>
+                <tr><td>oltre 100.000 €</td><td>200 €</td></tr>
+              </tbody>
+            </table>
+
+            <h3 class="gp-h3">Assicurazione All Risk</h3>
+            <p class="gp-meta">Non compresa nel canone. Fatturata al perfezionamento e poi una volta l'anno. Quota minima <strong>115 € l'anno</strong>.</p>
+            <table class="gp-table">
+              <thead><tr><th>Tipologia bene</th><th>% sul costo</th></tr></thead>
+              <tbody>
+                <tr><td>Materiale fisso (PC, server, plotter)</td><td>1,95 %</td></tr>
+                <tr><td>Allarmi, videosorveglianza, officina</td><td>3,55 %</td></tr>
+                <tr><td>Materiale portatile (notebook, tablet, smartphone)</td><td>5,15 %</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. ISTRUTTORIA -->
+    <section class="gp-section gp-section--alt" id="istruttoria">
+      <div class="gp-container">
+        <span class="gp-eyebrow">La gestione della richiesta</span>
+        <h2 class="gp-h2">I documenti per aprire la pratica.</h2>
+        <p class="gp-lede gp-lede--center">Quattro tipologie di cliente, quattro liste. Allega tutto in una volta. Risparmi un giro di mail.</p>
+
+        <div class="gp-grid gp-grid--4 gp-spaced">
+          <div class="gp-card">
+            <div class="gp-card__label">Società di capitali</div>
+            <ul class="gp-doclist">
+              <li>Email non PEC del cliente</li>
+              <li>Telefono cellulare o fisso</li>
+              <li>Offerta dei beni con costo dettagliato per prodotto</li>
+            </ul>
+          </div>
+          <div class="gp-card">
+            <div class="gp-card__label">Società di persone · Ditta individuale</div>
+            <ul class="gp-doclist">
+              <li>Email non PEC del cliente</li>
+              <li>Telefono cellulare o fisso</li>
+              <li>Offerta dei beni dettagliata</li>
+              <li>Imponibile &gt; 10.000 € + IVA: ultimo modello UNICO con ricevuta telematica</li>
+            </ul>
+          </div>
+          <div class="gp-card">
+            <div class="gp-card__label">Libero professionista</div>
+            <ul class="gp-doclist">
+              <li>Carta d'identità in corso di validità (fronte/retro)</li>
+              <li>Codice fiscale</li>
+              <li>Certificato Partita IVA</li>
+              <li>Email non PEC + email PEC + telefono</li>
+              <li>Offerta dei beni dettagliata</li>
+              <li>Imponibile &gt; 10.000 € + IVA: ultimo UNICO</li>
+            </ul>
+          </div>
+          <div class="gp-card">
+            <div class="gp-card__label">Associazioni · Enti</div>
+            <ul class="gp-doclist">
+              <li>Documenti standard del firmatario</li>
+              <li>Email PEC e non PEC + telefono</li>
+              <li>Offerta dei beni dettagliata</li>
+              <li>Copia dello Statuto societario con poteri di firma</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. DECORRENZA -->
+    <section class="gp-section" id="decorrenza">
+      <div class="gp-container">
+        <span class="gp-eyebrow">La messa in decorrenza</span>
+        <h2 class="gp-h2">Quando il contratto parte davvero.</h2>
+
+        <div class="gp-grid gp-grid--2 gp-spaced">
+          <div class="gp-card">
+            <span class="gp-pill">Sempre necessari</span>
+            <h3 class="gp-card__title">Documenti standard</h3>
+            <ul class="gp-doclist">
+              <li>Documento d'identità e codice fiscale del firmatario, fronte/retro in corso di validità</li>
+              <li>Fattura in formato elettronico (più copia di cortesia, se disponibile)</li>
+              <li>Seriali e matricole dei beni consegnati</li>
+              <li>Dichiarazione CE, dove la tipologia di bene la richiede</li>
+              <li>Contratto firmato digitalmente</li>
+            </ul>
+          </div>
+
+          <div class="gp-stack">
+            <div class="gp-card">
+              <span class="gp-pill gp-pill--orange">In base al tipo di contratto</span>
+              <ul class="gp-doclist">
+                <li><strong>E-contract:</strong> contratto elettronico controfirmato</li>
+                <li><strong>E-contract con verbale:</strong> verbale controfirmato con data di consegna</li>
+              </ul>
+            </div>
+            <div class="gp-card">
+              <span class="gp-pill gp-pill--orange">Gestioni particolari</span>
+              <ul class="gp-doclist">
+                <li><strong>Beni usati:</strong> modulo materiale usato controfirmato</li>
+                <li><strong>Canale ESG:</strong> contratto codice 22IT05 Classic Rent ESG</li>
+                <li><strong>Fotovoltaico:</strong> modulo di non accatastabilità</li>
+                <li><strong>Software:</strong> codice di attivazione o numero di licenza</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. FINE CONTRATTO -->
+    <section class="gp-section gp-section--alt" id="fine-contratto">
+      <div class="gp-container">
+        <div class="gp-twocol gp-twocol--media gp-twocol--reverse">
+          <div class="gp-media">
+            <img src="/images/guida-partner-fine-contratto.webp" alt="Tecnico che ispeziona un macchinario industriale a fine contratto, con i tre cartelli Proroga, Riacquisto, Rinnovo sulla parete" loading="lazy" />
+          </div>
+          <div>
+            <span class="gp-eyebrow">Le opzioni a fine contratto</span>
+            <h2 class="gp-h2">Tre strade. Decide il cliente, vinci tu.</h2>
+            <p class="gp-lede">
+              Il contratto si chiude in modo naturale: una delle tre opzioni si attiva sempre.
+              Tutte e tre ti riportano in conversazione con il cliente.
+            </p>
+          </div>
+        </div>
+
+        <div class="gp-grid gp-grid--3 gp-spaced">
+          <div class="gp-step gp-step--col">
+            <span class="gp-step__n">A</span>
+            <div>
+              <h3>Proroga</h3>
+              <p>Il cliente continua a usare i beni oltre la scadenza con una rinegoziazione del canone. Ti viene riconosciuta una percentuale del canone stesso.</p>
+            </div>
+          </div>
+          <div class="gp-step gp-step--col">
+            <span class="gp-step__n gp-step__n--orange">B</span>
+            <div>
+              <h3>Riacquisto</h3>
+              <p>Il cliente ha facoltà di riacquistare le attrezzature a un prezzo calcolato in base alla tipologia dei beni e all'età.</p>
+            </div>
+          </div>
+          <div class="gp-step gp-step--col">
+            <span class="gp-step__n">C</span>
+            <div>
+              <h3>Nuovo contratto</h3>
+              <p>L'operatore rientra in possesso delle vecchie attrezzature. Tu proponi al cliente un nuovo contratto con beni tecnologicamente avanzati.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. FAQ -->
+    <section class="gp-section" id="faq">
+      <div class="gp-container gp-container--narrow">
+        <span class="gp-eyebrow">Domande frequenti dai partner</span>
+        <h2 class="gp-h2">Le otto cose che ci chiedono prima di partire.</h2>
+
+        <div class="gp-faq">
+          <details class="gp-faq__item">
+            <summary>Quanto costa convenzionarsi con Mediocredito Facile?</summary>
+            <p>Zero. Nessun costo di adesione, nessun canone mensile, nessun vincolo di esclusiva. Ti registri una volta e usi il canale quando ti serve.</p>
+          </details>
+          <details class="gp-faq__item">
+            <summary>Devo lavorare in esclusiva con voi?</summary>
+            <p>No. Continui a lavorare con tutti gli operatori che usi già. Mediocredito Facile è un canale aggiuntivo: quando una pratica è complicata o vuoi alzare le probabilità di delibera, la fai girare da noi su 12+ operatori in parallelo.</p>
+          </details>
+          <details class="gp-faq__item">
+            <summary>Cosa fate di concreto rispetto a un singolo operatore di noleggio?</summary>
+            <p>Selezioniamo l'operatore giusto per il profilo del cliente, gestiamo l'istruttoria documentale, seguiamo la pratica fino alla decorrenza. Se il primo operatore rifiuta, la riproviamo sugli altri senza che tu debba ricaricare nulla. Tu parli con un solo interlocutore.</p>
+          </details>
+          <details class="gp-faq__item">
+            <summary>Quali sono i tempi di delibera?</summary>
+            <p>Su pratica completa e cliente standard: 24-48 ore lavorative per importi sotto i 25.000 €, 3-5 giorni lavorativi per importi più alti o profili che richiedono valutazione approfondita.</p>
+          </details>
+          <details class="gp-faq__item">
+            <summary>Si possono noleggiare beni usati?</summary>
+            <p>Sì, con il modulo materiale usato controfirmato. Alcuni operatori sono più aperti di altri sul revamping: l'apertura dipende dalla tipologia di bene, dall'anno di produzione e dalle condizioni. Lo verifichiamo caso per caso.</p>
+          </details>
+          <details class="gp-faq__item">
+            <summary>Cosa succede se il primo operatore rifiuta la pratica?</summary>
+            <p>La giriamo agli operatori successivi senza ulteriori passaggi a tuo carico. È il vantaggio principale di passare da noi: una sola istruttoria, più tentativi, più probabilità di delibera per il tuo cliente.</p>
+          </details>
+          <details class="gp-faq__item">
+            <summary>Quali settori sono esclusi?</summary>
+            <p>Pochi. Gambling, alcuni segmenti high-risk, attività con bilanci fortemente compromessi. Tutto il resto si valuta caso per caso, anche con apertura di plafond Master Rent dedicato.</p>
+          </details>
+          <details class="gp-faq__item">
+            <summary>La commissione la pago io?</summary>
+            <p>No. La commissione è riconosciuta dall'operatore di noleggio a Mediocredito Facile. Tu fatturi il 100% del bene alla società di noleggio, senza decurtazioni.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8. GLOSSARIO -->
+    <section class="gp-section gp-section--alt" id="glossario">
+      <div class="gp-container">
+        <span class="gp-eyebrow">Glossario</span>
+        <h2 class="gp-h2">Sei termini che ricorrono in ogni pratica.</h2>
+
+        <div class="gp-gloss">
+          <div class="gp-gloss__col">
+            <div class="gp-gloss__item">
+              <h3>Locatore</h3>
+              <p>L'operatore finanziario partner. Dà in locazione al cliente i beni oggetto del contratto.</p>
+            </div>
+            <div class="gp-gloss__item">
+              <h3>Conduttore</h3>
+              <p>Il cliente finale. Intestatario del contratto, utilizzatore del bene.</p>
+            </div>
+            <div class="gp-gloss__item">
+              <h3>Richiesta</h3>
+              <p>La domanda di noleggio relativa a una specifica fornitura, sottoposta all'operatore per l'approvazione.</p>
+            </div>
+          </div>
+          <div class="gp-gloss__col">
+            <div class="gp-gloss__item">
+              <h3>E-contract</h3>
+              <p>Il contratto in formato digitale, con firma elettronica.</p>
+            </div>
+            <div class="gp-gloss__item">
+              <h3>Fatturazione</h3>
+              <p>Il pagamento al fornitore (te), effettuato dall'operatore una volta che i beni sono stati consegnati.</p>
+            </div>
+            <div class="gp-gloss__item">
+              <h3>Perfezionamento</h3>
+              <p>La messa in decorrenza del contratto intestato al cliente.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA FINALE -->
+    <section class="gp-cta" id="cta-finale">
+      <div class="gp-container">
+        <div class="gp-cta__inner">
+          <span class="gp-cta__eyebrow">Pronto a chiudere</span>
+          <h2 class="gp-cta__title">Una richiesta. Dodici operatori. Risposta in 24 ore.</h2>
+          <p class="gp-cta__sub">
+            Mediocredito Facile è un intermediario del credito iscritto OAM.
+            Apri una pratica una volta, la facciamo girare sui partner che pesano davvero per il tuo cliente.
+          </p>
+
+          <form class="gp-cta__form zapier-form" action="">
+            <input name="website" type="text" tabindex="-1" autocomplete="off" style="position:absolute;opacity:0;pointer-events:none;height:0;overflow:hidden" aria-hidden="true" />
+            <input type="hidden" name="fonte" value="guida-partner-noleggio" />
+            <div class="gp-cta__field">
+              <label for="gp-nome">Nome e Cognome</label>
+              <input type="text" id="gp-nome" name="nome" placeholder="Mario Rossi" required autocomplete="name" />
+            </div>
+            <div class="gp-cta__field">
+              <label for="gp-cell">Cellulare</label>
+              <input type="tel" id="gp-cell" name="telefono" placeholder="+39 333 123 4567" required autocomplete="tel" />
+            </div>
+            <div class="gp-cta__field">
+              <label for="gp-email">Email</label>
+              <input type="email" id="gp-email" name="email" placeholder="mario@azienda.it" required autocomplete="email" />
+            </div>
+            <div class="gp-cta__field">
+              <label for="gp-exp">Come sei messo con il noleggio operativo?</label>
+              <select id="gp-exp" name="esperienza">
+                <option value="" disabled selected>Seleziona...</option>
+                <option value="lo-conosco">Lo conosco già</option>
+                <option value="non-lo-conosco">Non lo conosco</option>
+                <option value="pratiche-respinte">Ho avuto pratiche respinte</option>
+              </select>
+            </div>
+            <button type="submit" class="gp-cta__submit">Richiedi attivazione gratuita</button>
+            <p class="gp-cta__privacy">Inviando il modulo accetti la nostra <a href="/privacy">informativa sulla privacy</a>.</p>
+          </form>
+
+          <div class="gp-cta__contacts">
+            <strong>mediocreditofacile@gmail.com</strong> · +39 393 995 7840 · lun-ven 9-18
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+  <Footer />
+</Layout>
+
+<script>
+  document.querySelectorAll<HTMLFormElement>('.zapier-form').forEach((form) => {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Invio in corso…';
+      }
+      const data = new FormData(form);
+      try {
+        await fetch('/api/submit', { method: 'POST', body: data });
+      } catch (_) {}
+      window.location.href = '/grazie';
+    });
+  });
+</script>
+
+<style>
+  /* ------------------------------------------------------------------
+     GUIDA PARTNER · prefisso .gp-
+     Riprende lo spirito visivo del deck Claude Design su web responsive.
+     ------------------------------------------------------------------ */
+
+  .gp { color: var(--mcf-charcoal); }
+
+  /* HERO */
+  .gp-hero {
+    position: relative;
+    color: #fff;
+    padding: 6rem 1.5rem 5.5rem;
+    background:
+      linear-gradient(160deg, rgba(15,16,32,0.78) 0%, rgba(102,76,205,0.62) 100%),
+      url('/images/guida-partner-hero-officina.webp') center/cover no-repeat;
+  }
+
+  .gp-hero__inner {
+    max-width: 880px;
+    margin: 0 auto;
+  }
+
+  .gp-hero__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--mcf-primary);
+    margin-bottom: 1.5rem;
+  }
+  .gp-hero__eyebrow::before {
+    content: '';
+    width: 36px;
+    height: 2px;
+    background: currentColor;
+  }
+
+  .gp-hero__title {
+    font-size: clamp(2.5rem, 7vw, 5rem);
+    font-weight: 800;
+    line-height: 1.02;
+    letter-spacing: -0.025em;
+    margin-bottom: 1.75rem;
+  }
+
+  .gp-hero__lede {
+    font-size: clamp(1.05rem, 2.2vw, 1.35rem);
+    line-height: 1.55;
+    color: rgba(255,255,255,0.86);
+    max-width: 640px;
+    margin-bottom: 2.5rem;
+  }
+
+  .gp-hero__ctas {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  /* SECTIONS */
+  .gp-section {
+    padding: 5rem 1.5rem;
+    background: var(--mcf-bg, #fff);
+  }
+  .gp-section--alt {
+    background: var(--mcf-ghost);
+  }
+
+  .gp-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .gp-container--narrow {
+    max-width: 820px;
+  }
+
+  /* TYPOGRAPHY */
+  .gp-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-primary);
+    margin-bottom: 1rem;
+  }
+  .gp-eyebrow::before {
+    content: '';
+    width: 28px;
+    height: 2px;
+    background: currentColor;
+  }
+
+  .gp-h2 {
+    font-size: clamp(1.75rem, 4vw, 2.75rem);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: var(--mcf-black);
+    max-width: 22ch;
+    margin-bottom: 1.5rem;
+  }
+
+  .gp-h3 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--mcf-black);
+    letter-spacing: -0.01em;
+    margin: 1.5rem 0 0.6rem;
+  }
+  .gp-h3:first-child { margin-top: 0; }
+
+  .gp-lede {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: var(--mcf-charcoal);
+    max-width: 55ch;
+    margin-bottom: 1.5rem;
+  }
+  .gp-lede--center {
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .gp-meta {
+    font-size: 0.95rem;
+    color: var(--mcf-taupe);
+    margin: 0.4rem 0 0.8rem;
+  }
+
+  /* PILL */
+  .gp-pill {
+    display: inline-block;
+    padding: 0.35rem 0.85rem;
+    border-radius: 999px;
+    background: rgba(102,76,205,0.1);
+    color: var(--color-primary);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+  .gp-pill--orange {
+    background: rgba(254,111,58,0.12);
+    color: var(--mcf-primary-dark);
+  }
+
+  /* TWO-COL LAYOUTS */
+  .gp-twocol {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 3.5rem;
+    align-items: flex-start;
+  }
+  .gp-twocol--media {
+    align-items: center;
+    margin-bottom: 3rem;
+  }
+  .gp-twocol--reverse {
+    grid-template-columns: 1fr 1.1fr;
+  }
+
+  /* TOC */
+  .gp-toc {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  /* STEPS (used both in TOC and fine-contratto) */
+  .gp-step {
+    display: flex;
+    gap: 1.25rem;
+    align-items: flex-start;
+    background: #fff;
+    border: 1px solid var(--mcf-platinum);
+    border-radius: 14px;
+    padding: 1.4rem 1.5rem;
+    transition: border-color 0.2s, transform 0.15s;
+    color: inherit;
+  }
+  a.gp-step:hover {
+    border-color: var(--color-primary);
+    transform: translateY(-2px);
+  }
+  .gp-step--col {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  .gp-step__n {
+    flex: none;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: var(--color-primary);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+  }
+  .gp-step__n--orange {
+    background: var(--color-accent);
+  }
+  .gp-step h3 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--mcf-black);
+    margin-bottom: 0.3rem;
+  }
+  .gp-step p {
+    font-size: 0.95rem;
+    color: var(--mcf-taupe);
+    line-height: 1.5;
+  }
+
+  /* CARDS */
+  .gp-card {
+    background: #fff;
+    border: 1px solid var(--mcf-platinum);
+    border-radius: 16px;
+    padding: 1.75rem;
+  }
+  .gp-card--strong {
+    background: var(--mcf-ghost);
+    border-color: transparent;
+  }
+  .gp-card__title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--mcf-black);
+    margin-bottom: 1rem;
+  }
+  .gp-card__label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-primary);
+    margin-bottom: 1rem;
+    line-height: 1.3;
+  }
+  .gp-card__list {
+    margin: 0;
+    padding-left: 1.25rem;
+    display: grid;
+    gap: 0.65rem;
+  }
+  .gp-card__list li {
+    font-size: 1rem;
+    line-height: 1.55;
+    color: var(--mcf-charcoal);
+  }
+
+  /* DOC LIST con check */
+  .gp-doclist {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0.6rem;
+  }
+  .gp-doclist li {
+    display: flex;
+    gap: 0.7rem;
+    align-items: flex-start;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--mcf-charcoal);
+  }
+  .gp-doclist li::before {
+    content: '';
+    flex: none;
+    width: 18px;
+    height: 18px;
+    margin-top: 3px;
+    border-radius: 6px;
+    background: rgba(102,76,205,0.12);
+    background-image:
+      linear-gradient(45deg, transparent 45%, var(--color-primary) 45%, var(--color-primary) 55%, transparent 55%),
+      linear-gradient(-45deg, transparent 45%, var(--color-primary) 45%, var(--color-primary) 55%, transparent 55%);
+    background-size: 12px 2px, 12px 2px;
+    background-repeat: no-repeat;
+    background-position: 3px 8px, 3px 8px;
+  }
+
+  /* GRID */
+  .gp-grid {
+    display: grid;
+    gap: 1.25rem;
+  }
+  .gp-grid--2 { grid-template-columns: 1fr 1fr; gap: 2rem; }
+  .gp-grid--3 { grid-template-columns: repeat(3, 1fr); }
+  .gp-grid--4 { grid-template-columns: repeat(4, 1fr); }
+  .gp-spaced { margin-top: 2.5rem; }
+
+  /* BENEFIT TILES */
+  .gp-ben {
+    background: #fff;
+    border: 1px solid var(--mcf-platinum);
+    border-radius: 14px;
+    padding: 1.5rem;
+    transition: transform 0.15s, box-shadow 0.2s;
+  }
+  .gp-ben:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(102,76,205,0.08);
+  }
+  .gp-ben__ic {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: rgba(102,76,205,0.1);
+    color: var(--color-primary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+  }
+  .gp-ben__ic--orange {
+    background: rgba(254,111,58,0.12);
+    color: var(--color-accent);
+  }
+  .gp-ben__ic .mcf-icon { font-size: 1.4rem; }
+  .gp-ben h4 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--mcf-black);
+    margin-bottom: 0.4rem;
+  }
+  .gp-ben p {
+    font-size: 0.9rem;
+    color: var(--mcf-taupe);
+    line-height: 1.55;
+  }
+
+  /* MEDIA */
+  .gp-media {
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 16px 40px rgba(15,16,32,0.12);
+  }
+  .gp-media img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  /* TABLE */
+  .gp-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: #fff;
+    border: 1px solid var(--mcf-platinum);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+  }
+  .gp-table th, .gp-table td {
+    padding: 0.85rem 1rem;
+    text-align: left;
+    font-size: 0.95rem;
+  }
+  .gp-table th {
+    background: var(--mcf-ghost);
+    color: var(--mcf-taupe);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--mcf-platinum);
+  }
+  .gp-table td {
+    color: var(--mcf-charcoal);
+    border-bottom: 1px solid var(--mcf-platinum);
+  }
+  .gp-table td:last-child {
+    text-align: right;
+    font-weight: 700;
+    color: var(--mcf-black);
+    font-feature-settings: 'tnum';
+  }
+  .gp-table tr:last-child td { border-bottom: none; }
+
+  /* STACK */
+  .gp-stack {
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  /* FAQ */
+  .gp-faq {
+    margin-top: 2rem;
+    display: grid;
+    gap: 0.75rem;
+  }
+  .gp-faq__item {
+    background: #fff;
+    border: 1px solid var(--mcf-platinum);
+    border-radius: 12px;
+    padding: 0;
+    overflow: hidden;
+  }
+  .gp-faq__item summary {
+    padding: 1.1rem 1.4rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--mcf-black);
+    cursor: pointer;
+    list-style: none;
+    position: relative;
+  }
+  .gp-faq__item summary::after {
+    content: '+';
+    position: absolute;
+    right: 1.4rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-accent);
+    font-size: 1.4rem;
+    font-weight: 400;
+    transition: transform 0.2s;
+  }
+  .gp-faq__item[open] summary::after {
+    transform: translateY(-50%) rotate(45deg);
+  }
+  .gp-faq__item summary::-webkit-details-marker { display: none; }
+  .gp-faq__item p {
+    padding: 0 1.4rem 1.2rem;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--mcf-charcoal);
+  }
+
+  /* GLOSSARY */
+  .gp-gloss {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem 3rem;
+    margin-top: 2rem;
+  }
+  .gp-gloss__col { display: grid; gap: 1.5rem; }
+  .gp-gloss__item h3 {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--color-accent);
+    letter-spacing: -0.01em;
+    margin-bottom: 0.3rem;
+  }
+  .gp-gloss__item p {
+    font-size: 0.95rem;
+    line-height: 1.55;
+    color: var(--mcf-charcoal);
+  }
+
+  /* CTA FINALE */
+  .gp-cta {
+    background: var(--mcf-black);
+    color: #fff;
+    padding: 5rem 1.5rem;
+  }
+  .gp-cta__inner {
+    max-width: 720px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  .gp-cta__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--mcf-primary);
+    margin-bottom: 1rem;
+  }
+  .gp-cta__eyebrow::before {
+    content: '';
+    width: 28px;
+    height: 2px;
+    background: currentColor;
+  }
+  .gp-cta__title {
+    font-size: clamp(1.75rem, 4.5vw, 2.75rem);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: #fff;
+    margin-bottom: 1.25rem;
+  }
+  .gp-cta__sub {
+    font-size: 1.05rem;
+    line-height: 1.6;
+    color: rgba(255,255,255,0.78);
+    margin-bottom: 2.5rem;
+  }
+  .gp-cta__form {
+    display: grid;
+    gap: 1rem;
+    text-align: left;
+    background: #fff;
+    color: var(--mcf-charcoal);
+    padding: 2rem;
+    border-radius: 16px;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.3);
+  }
+  .gp-cta__field label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-primary);
+    margin-bottom: 0.3rem;
+  }
+  .gp-cta__field input,
+  .gp-cta__field select {
+    width: 100%;
+    padding: 0.75rem 0.95rem;
+    border: 1.5px solid var(--mcf-platinum);
+    border-radius: 8px;
+    font-family: var(--font-family);
+    font-size: 1rem;
+    color: var(--mcf-charcoal);
+    background: #fff;
+  }
+  .gp-cta__field input:focus,
+  .gp-cta__field select:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(102,76,205,0.15);
+  }
+  .gp-cta__submit {
+    background: var(--color-accent);
+    color: #fff;
+    border: none;
+    padding: 0.95rem 2rem;
+    border-radius: 8px;
+    font-family: var(--font-family);
+    font-weight: 700;
+    font-size: 1.05rem;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    margin-top: 0.5rem;
+  }
+  .gp-cta__submit:hover {
+    background: var(--color-accent-hover);
+    transform: translateY(-1px);
+  }
+  .gp-cta__privacy {
+    font-size: 0.8rem;
+    color: var(--mcf-taupe);
+    text-align: center;
+  }
+  .gp-cta__privacy a {
+    color: var(--color-primary);
+    text-decoration: underline;
+  }
+  .gp-cta__contacts {
+    margin-top: 2.5rem;
+    font-size: 0.95rem;
+    color: rgba(255,255,255,0.65);
+  }
+  .gp-cta__contacts strong { color: #fff; font-weight: 600; }
+
+  /* SHARED BUTTONS */
+  .gp-btn {
+    display: inline-flex;
+    align-items: center;
+    font-weight: 700;
+    font-size: 1rem;
+    padding: 0.85rem 2rem;
+    border-radius: 8px;
+    transition: background 0.2s, transform 0.15s;
+  }
+  .gp-btn--accent {
+    background: var(--color-accent);
+    color: #fff;
+  }
+  .gp-btn--accent:hover {
+    background: var(--color-accent-hover);
+    transform: translateY(-1px);
+  }
+  .gp-btn--ghost {
+    background: transparent;
+    color: #fff;
+    border: 1.5px solid rgba(255,255,255,0.4);
+  }
+  .gp-btn--ghost:hover {
+    border-color: #fff;
+    background: rgba(255,255,255,0.08);
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 1024px) {
+    .gp-grid--4 { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 880px) {
+    .gp-twocol,
+    .gp-twocol--reverse {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+    .gp-toc { grid-template-columns: 1fr; }
+    .gp-grid--2 { grid-template-columns: 1fr; }
+    .gp-grid--3 { grid-template-columns: 1fr; }
+    .gp-gloss { grid-template-columns: 1fr; gap: 1.5rem; }
+  }
+  @media (max-width: 640px) {
+    .gp-hero { padding: 4.5rem 1.25rem 4rem; }
+    .gp-section { padding: 3.5rem 1.25rem; }
+    .gp-cta { padding: 3.5rem 1.25rem; }
+    .gp-grid--4 { grid-template-columns: 1fr; }
+    .gp-hero__ctas { flex-direction: column; align-items: stretch; }
+    .gp-btn { justify-content: center; }
+    .gp-cta__form { padding: 1.5rem; }
+  }
+</style>
