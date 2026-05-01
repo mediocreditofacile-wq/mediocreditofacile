@@ -124,13 +124,14 @@ const faqLD = {
     <section class="hero">
       <div class="hero__inner">
         <div class="hero__content">
-          <span class="hero__badge">L'Officina del Credito</span>
+          <span class="hero__badge">Mediatore creditizio · iscritto OAM</span>
           <h1 class="hero__title">
-            Noleggio, Leasing e Finanziamenti<br />per la Tua Impresa
+            L'Officina del Credito.<br />Una pratica, dodici società,<br />un solo interlocutore.
           </h1>
           <p class="hero__sub">
-            Confrontiamo le migliori soluzioni finanziarie da oltre 10 società partner.
-            Zero anticipo, canone fisso, delibera in 48 ore.
+            Noleggio operativo, leasing strumentale, finanziamenti e advisory per la PMI.
+            Confronto le condizioni dei principali operatori italiani ed europei e porto
+            al cliente la soluzione giusta per il caso, in tempi che dipendono dal prodotto e non dalla burocrazia.
           </p>
           <div class="hero__actions">
             <a href="/finanza-veloce" class="hero__btn hero__btn--primary">Richiedi Preventivo</a>
@@ -141,8 +142,7 @@ const faqLD = {
           </div>
         </div>
         <div class="hero__image">
-          {/* Placeholder per foto hero — vedi prompt Midjourney */}
-          <img src="/images/hero-homepage.webp" alt="Servizi finanziari per PMI — Mediocredito Facile" loading="eager" />
+          <img src="/images/alberto-officina-cliente.webp" alt="Alberto Amà al fianco di un cliente in fabbrica, durante un sopralluogo per una pratica di noleggio operativo" loading="eager" />
         </div>
       </div>
     </section>
@@ -330,9 +330,10 @@ const faqLD = {
 
   /* ═══ HERO ═══ */
   .hero {
-    background: linear-gradient(135deg, #f8f6ff 0%, #eef0ff 50%, #f0f8ff 100%);
-    padding: 3rem 1.5rem 0;
+    background: linear-gradient(135deg, #1e1b3a 0%, #2d2556 50%, #1a1640 100%);
+    padding: 5rem 1.5rem;
     overflow: hidden;
+    color: #ffffff;
   }
 
   .hero__inner {
@@ -346,10 +347,12 @@ const faqLD = {
 
   .hero__badge {
     display: inline-block;
-    background: var(--color-primary-bg);
-    color: var(--color-primary);
-    font-size: 0.85rem;
+    background: rgba(254, 111, 58, 0.16);
+    color: var(--color-accent);
+    font-size: 0.78rem;
     font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
     padding: 0.4rem 1rem;
     border-radius: 100px;
     margin-bottom: 1.5rem;
@@ -360,16 +363,16 @@ const faqLD = {
     font-weight: 800;
     line-height: 1.15;
     letter-spacing: -0.03em;
-    color: var(--color-primary-dark);
+    color: #ffffff;
     margin-bottom: 1.25rem;
   }
 
   .hero__sub {
     font-size: 1.1rem;
     line-height: 1.7;
-    color: var(--color-text);
+    color: rgba(255, 255, 255, 0.82);
     margin-bottom: 2rem;
-    max-width: 480px;
+    max-width: 520px;
   }
 
   .hero__actions {
@@ -404,26 +407,31 @@ const faqLD = {
   }
 
   .hero__btn--outline {
-    background: #ffffff;
-    color: var(--color-primary);
-    border: 2px solid var(--color-primary);
+    background: transparent;
+    color: #ffffff;
+    border: 2px solid rgba(255, 255, 255, 0.45);
   }
 
   .hero__btn--outline:hover {
-    background: var(--color-primary-bg);
+    background: rgba(255, 255, 255, 0.08);
+    border-color: #ffffff;
   }
 
   .hero__image {
     display: flex;
-    align-items: flex-end;
+    align-items: center;
     justify-content: center;
   }
 
   .hero__image img {
     width: 100%;
-    max-width: 500px;
-    border-radius: 16px 16px 0 0;
+    max-width: 560px;
+    aspect-ratio: 16 / 10;
+    border-radius: 16px;
     object-fit: cover;
+    object-position: center;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.06);
   }
 
   /* ═══ SERVIZI — LAYOUT ASIMMETRICO ═══ */
@@ -1012,8 +1020,9 @@ const faqLD = {
     }
 
     .hero__image img {
-      max-width: 360px;
-      border-radius: 16px;
+      max-width: 100%;
+      aspect-ratio: 16 / 10;
+      border-radius: 14px;
     }
 
     .servizi__top {
