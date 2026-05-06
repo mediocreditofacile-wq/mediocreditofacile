@@ -1,0 +1,605 @@
+---
+import Icon from '../../components/Icon.astro';
+/**
+ * Area Partner Edilizia GIERRE SRL — /tools/edilizia-gierre
+ * Pagina protetta da password. Contiene:
+ * - simulatore canone noleggio operativo (riuso SimulatoreNoleggio Grenke)
+ * - form di caricamento pratica con checklist documenti DINAMICA:
+ *   - sotto 10.000 €: documenti base (visura, CI, TS, IBAN, contatti)
+ *   - sopra 10.000 € + Ditta Individuale: + ultime 2 dichiarazioni + situazione contabile 2025
+ *   - sopra 10.000 € + SRL/SPA: + ultimi 2 bilanci + bilancio definitivo 2025
+ * Lead vanno a /api/submit-edilizia-gierre (mail dettagliata + Zapier).
+ *
+ * Ratio interna (non esposta sulla pagina):
+ *  - Master Rent del partner intestato ad Alba Leasing (Cerved 4 -> approvazione automatica).
+ *  - Le pratiche dei suoi clienti vengono ruotate da Alberto su ReteRent o PagaRent in base al merito.
+ */
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import SimulatoreNoleggio from '../../components/tools/SimulatoreNoleggio.tsx';
+---
+<ToolLayout
+  title="Area Edilizia GIERRE — Caricamento Pratiche | Mediocredito Facile"
+  description="Area riservata Edilizia GIERRE SRL: simulazione canone noleggio operativo e caricamento pratiche cliente con checklist documenti."
+  noindex={true}
+  breadcrumbs={[{ name: 'Area Edilizia GIERRE', href: '/tools/edilizia-gierre' }]}
+>
+  <!-- Gate password -->
+  <div id="gate" class="gate">
+    <div class="gate__card">
+      <div class="gate__logos">
+        <img src="/images/logo-mediocreditofacile.webp" alt="Mediocredito Facile" class="gate__logo" />
+        <span class="gate__x">&times;</span>
+        <span class="gate__partner-name">Edilizia GIERRE SRL</span>
+      </div>
+      <div class="gate__divider"></div>
+      <p class="gate__label">Area Riservata Partner</p>
+      <p class="gate__desc">Simulatore canone noleggio operativo e caricamento pratiche cliente con checklist documenti automatica.</p>
+      <div class="gate__form">
+        <input type="password" id="gate-pwd" class="gate__input" placeholder="Password" autocomplete="off" />
+        <button id="gate-btn" class="gate__btn">
+          <Icon name="lock_open" />
+          Accedi
+        </button>
+      </div>
+      <p id="gate-error" class="gate__error" hidden>Password non corretta</p>
+    </div>
+  </div>
+
+  <!-- Tool content (nascosto fino ad autenticazione) -->
+  <div id="tool" class="eg" style="display:none !important;">
+    <!-- Header co-branded -->
+    <div class="eg__header">
+      <div class="eg__header-brand">
+        <img src="/images/logo-mediocreditofacile.webp" alt="Mediocredito Facile" class="eg__logo" />
+        <div class="eg__header-sep"></div>
+        <div class="eg__partner-badge">
+          <Icon name="construction" class="eg__partner-icon" />
+          <span class="eg__partner-label">Edilizia GIERRE SRL</span>
+        </div>
+      </div>
+      <button id="logout-btn" class="eg__logout">
+        <Icon name="logout" />
+        Esci
+      </button>
+    </div>
+
+    <!-- Hero -->
+    <div class="eg__hero">
+      <div class="eg__hero-content">
+        <h1 class="eg__title">Area pratiche Edilizia GIERRE</h1>
+        <p class="eg__sub">
+          Simula il canone di noleggio operativo per attrezzature edili, muletti, mezzi Isuzu e attrezzature di cantiere.
+          Quando il cliente conferma, carica la pratica direttamente da qui: ti dico al volo quali documenti servono in base all'importo e alla forma giuridica.
+        </p>
+      </div>
+      <div class="eg__hero-badges">
+        <div class="eg__badge">
+          <Icon name="calculate" />
+          <span>Canone immediato</span>
+        </div>
+        <div class="eg__badge">
+          <Icon name="checklist" />
+          <span>Checklist automatica</span>
+        </div>
+        <div class="eg__badge">
+          <Icon name="bolt" />
+          <span>Approvazione veloce</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1. Simulatore canone -->
+    <section class="eg__section">
+      <header class="eg__section-head">
+        <span class="eg__section-num">1</span>
+        <div>
+          <h2 class="eg__section-title">Simula il canone</h2>
+          <p class="eg__section-sub">
+            Coefficienti di riferimento per noleggio operativo. Usa la tipologia "Altri Beni Strumentali" per attrezzature edili e muletti.
+            Il canone definitivo viene confermato dopo delibera della finanziaria.
+          </p>
+        </div>
+      </header>
+      <div class="eg__simulator">
+        <SimulatoreNoleggio client:load />
+      </div>
+    </section>
+
+    <!-- 2. Carica pratica -->
+    <section class="eg__section">
+      <header class="eg__section-head">
+        <span class="eg__section-num">2</span>
+        <div>
+          <h2 class="eg__section-title">Carica una pratica</h2>
+          <p class="eg__section-sub">
+            Compila i dati del cliente finale e del bene. La checklist documenti qui sotto si aggiorna mentre scrivi: chiede solo quello che serve davvero per quell'importo e per quella forma giuridica.
+          </p>
+        </div>
+      </header>
+
+      <form id="pratica-form" class="eg__form" novalidate>
+        <input type="text" name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;" aria-hidden="true" />
+
+        <div class="eg__form-block">
+          <h3 class="eg__form-block-title">Cliente finale</h3>
+          <div class="eg__grid">
+            <label class="eg__field eg__field--full">
+              <span class="eg__field-label">Ragione sociale / Nominativo *</span>
+              <input type="text" name="ragione_sociale" required placeholder="Es. Costruzioni Rossi SRL" />
+            </label>
+
+            <label class="eg__field">
+              <span class="eg__field-label">Forma giuridica *</span>
+              <select name="forma_giuridica" id="forma-giuridica" required>
+                <option value="">Seleziona</option>
+                <option value="Ditta Individuale">Ditta Individuale</option>
+                <option value="SRL">SRL</option>
+                <option value="SRLS">SRL Semplificata</option>
+                <option value="SPA">SPA</option>
+                <option value="SAPA">SAPA</option>
+                <option value="SNC">SNC</option>
+                <option value="SAS">SAS</option>
+                <option value="Lavoratore Autonomo">Lavoratore Autonomo</option>
+                <option value="Cooperativa">Cooperativa</option>
+              </select>
+            </label>
+
+            <label class="eg__field">
+              <span class="eg__field-label">Partita IVA / CF</span>
+              <input type="text" name="piva" placeholder="11 cifre" inputmode="numeric" />
+            </label>
+
+            <label class="eg__field">
+              <span class="eg__field-label">Referente</span>
+              <input type="text" name="referente" placeholder="Nome e cognome" />
+            </label>
+
+            <label class="eg__field">
+              <span class="eg__field-label">Telefono *</span>
+              <input type="tel" name="telefono" required placeholder="+39 333 1234567" />
+            </label>
+
+            <label class="eg__field eg__field--full">
+              <span class="eg__field-label">Email *</span>
+              <input type="email" name="email" required placeholder="cliente@esempio.it" />
+            </label>
+          </div>
+        </div>
+
+        <div class="eg__form-block">
+          <h3 class="eg__form-block-title">Bene da noleggiare</h3>
+          <div class="eg__grid">
+            <label class="eg__field eg__field--full">
+              <span class="eg__field-label">Descrizione bene *</span>
+              <input type="text" name="bene_descrizione" required placeholder="Es. Muletto Toyota 25Q diesel + escavatore mini 1.8t" />
+            </label>
+
+            <label class="eg__field">
+              <span class="eg__field-label">Fornitore</span>
+              <input type="text" name="fornitore" placeholder="Es. Movimovi SRL" />
+            </label>
+
+            <label class="eg__field">
+              <span class="eg__field-label">Importo bene (€) *</span>
+              <input type="number" name="importo" id="importo" required min="500" step="100" placeholder="15000" />
+            </label>
+
+            <label class="eg__field">
+              <span class="eg__field-label">Durata noleggio (mesi)</span>
+              <select name="durata">
+                <option value="24">24 mesi</option>
+                <option value="36" selected>36 mesi</option>
+                <option value="48">48 mesi</option>
+                <option value="60">60 mesi</option>
+              </select>
+            </label>
+
+            <label class="eg__field eg__field--full">
+              <span class="eg__field-label">Note (opzionale)</span>
+              <textarea name="note" rows="3" placeholder="Particolarita' del cliente, urgenza, contesto del cantiere..."></textarea>
+            </label>
+          </div>
+        </div>
+
+        <!-- Checklist documenti dinamica -->
+        <div class="eg__form-block">
+          <h3 class="eg__form-block-title">Documenti da raccogliere</h3>
+
+          <div id="checklist-banner" class="eg__banner eg__banner--base">
+            <Icon name="info" class="eg__banner-icon" />
+            <div>
+              <strong id="banner-title">Documenti base</strong>
+              <p id="banner-sub">Per importi fino a 10.000 € bastano i documenti standard. Sopra i 10.000 € la finanziaria chiede anche i reddituali.</p>
+            </div>
+          </div>
+
+          <table class="eg__table">
+            <thead>
+              <tr>
+                <th>Documento</th>
+                <th class="eg__th-when">Quando serve</th>
+              </tr>
+            </thead>
+            <tbody id="checklist-body">
+              <tr><td>Visura camerale (o visura ditta individuale)</td><td>Sempre</td></tr>
+              <tr><td>Carta d'identita' del legale rappresentante / titolare</td><td>Sempre</td></tr>
+              <tr><td>Tessera sanitaria / codice fiscale</td><td>Sempre</td></tr>
+              <tr><td>Coordinate IBAN aziendali</td><td>Sempre</td></tr>
+              <tr><td>Email aziendale</td><td>Sempre</td></tr>
+              <tr><td>Cellulare del referente</td><td>Sempre</td></tr>
+              <tr class="eg__row-extra" data-extra="di" hidden>
+                <td>Ultime 2 dichiarazioni dei redditi (Modello Unico)</td>
+                <td>Solo Ditta Individuale, importo &gt; 10.000 €</td>
+              </tr>
+              <tr class="eg__row-extra" data-extra="di" hidden>
+                <td>Situazione contabile aggiornata 2025</td>
+                <td>Solo Ditta Individuale, importo &gt; 10.000 €</td>
+              </tr>
+              <tr class="eg__row-extra" data-extra="srl" hidden>
+                <td>Ultimi 2 bilanci depositati</td>
+                <td>Solo societa' di capitali, importo &gt; 10.000 €</td>
+              </tr>
+              <tr class="eg__row-extra" data-extra="srl" hidden>
+                <td>Bilancio definitivo 2025 (anche pre-deposito)</td>
+                <td>Solo societa' di capitali, importo &gt; 10.000 €</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="eg__submit-row">
+          <button type="submit" class="eg__submit">
+            <Icon name="send" />
+            Invia pratica
+          </button>
+          <p class="eg__submit-hint">
+            Riceviamo la pratica in tempo reale. Ti chiamo al telefono indicato per la conferma e per concordare la finanziaria di destinazione (Alba / ReteRent / PagaRent).
+          </p>
+        </div>
+
+        <div id="form-feedback" class="eg__feedback" hidden></div>
+      </form>
+    </section>
+  </div>
+</ToolLayout>
+
+<script>
+  const PASSWORD = 'gierreedilizia';
+  const KEY = 'mcf_ediliziagierre_auth';
+
+  const gate = document.getElementById('gate')!;
+  const tool = document.getElementById('tool')!;
+  const gatePwd = document.getElementById('gate-pwd') as HTMLInputElement;
+  const gateBtn = document.getElementById('gate-btn')!;
+  const gateError = document.getElementById('gate-error')!;
+  const logoutBtn = document.getElementById('logout-btn')!;
+
+  function showTool() { gate.style.display = 'none'; tool.style.cssText = ''; }
+  function showGate() { gate.style.display = ''; tool.style.cssText = 'display:none !important;'; }
+
+  if (localStorage.getItem(KEY) === 'ok') showTool();
+
+  gateBtn.addEventListener('click', () => {
+    if (gatePwd.value.trim().toLowerCase() === PASSWORD) {
+      localStorage.setItem(KEY, 'ok');
+      showTool();
+      gateError.hidden = true;
+      gatePwd.classList.remove('gate__input--error');
+    } else {
+      gateError.hidden = false;
+      gatePwd.classList.add('gate__input--error');
+    }
+  });
+  gatePwd.addEventListener('keydown', (e) => { if (e.key === 'Enter') gateBtn.click(); });
+  logoutBtn.addEventListener('click', () => {
+    localStorage.removeItem(KEY); showGate(); gatePwd.value = ''; gateError.hidden = true;
+  });
+
+  // === Checklist dinamica ===
+  const formaGiuridica = document.getElementById('forma-giuridica') as HTMLSelectElement;
+  const importoInput = document.getElementById('importo') as HTMLInputElement;
+  const banner = document.getElementById('checklist-banner')!;
+  const bannerTitle = document.getElementById('banner-title')!;
+  const bannerSub = document.getElementById('banner-sub')!;
+  const extraRows = document.querySelectorAll<HTMLTableRowElement>('.eg__row-extra');
+
+  const FORMA_DI = ['Ditta Individuale', 'Lavoratore Autonomo'];
+
+  function updateChecklist() {
+    const importo = parseFloat(importoInput.value) || 0;
+    const fg = formaGiuridica.value;
+    const sopraSoglia = importo > 10000;
+    const isDi = FORMA_DI.includes(fg);
+    const isSocieta = fg && !isDi;
+
+    extraRows.forEach((row) => {
+      const tag = row.dataset.extra;
+      let show = false;
+      if (sopraSoglia) {
+        if (tag === 'di' && isDi) show = true;
+        if (tag === 'srl' && isSocieta) show = true;
+      }
+      row.hidden = !show;
+    });
+
+    // Banner
+    banner.classList.remove('eg__banner--base', 'eg__banner--full');
+    if (sopraSoglia && fg) {
+      banner.classList.add('eg__banner--full');
+      bannerTitle.textContent = `Documenti completi (${isDi ? 'Ditta Individuale' : 'Societa\' di capitali'})`;
+      bannerSub.textContent = isDi
+        ? 'Importo sopra 10.000 €: oltre ai documenti base servono le ultime 2 dichiarazioni dei redditi e la situazione contabile 2025.'
+        : 'Importo sopra 10.000 €: oltre ai documenti base servono gli ultimi 2 bilanci depositati e il bilancio definitivo 2025.';
+    } else if (sopraSoglia && !fg) {
+      banner.classList.add('eg__banner--base');
+      bannerTitle.textContent = 'Seleziona la forma giuridica';
+      bannerSub.textContent = 'Sopra 10.000 € la documentazione reddituale richiesta cambia tra Ditta Individuale e Societa\' di capitali. Scegli la forma giuridica per vedere la lista esatta.';
+    } else {
+      banner.classList.add('eg__banner--base');
+      bannerTitle.textContent = 'Documenti base';
+      bannerSub.textContent = 'Per importi fino a 10.000 € bastano i documenti standard. Sopra i 10.000 € la finanziaria chiede anche i reddituali.';
+    }
+  }
+
+  formaGiuridica.addEventListener('change', updateChecklist);
+  importoInput.addEventListener('input', updateChecklist);
+
+  // === Submit form ===
+  const form = document.getElementById('pratica-form') as HTMLFormElement;
+  const feedback = document.getElementById('form-feedback')!;
+  const submitBtn = form.querySelector<HTMLButtonElement>('.eg__submit')!;
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    feedback.hidden = true;
+    feedback.classList.remove('eg__feedback--ok', 'eg__feedback--err');
+
+    if (!form.reportValidity()) return;
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Invio in corso...';
+
+    try {
+      const res = await fetch('/api/submit-edilizia-gierre', {
+        method: 'POST',
+        body: new FormData(form),
+      });
+      const json = await res.json();
+      if (res.ok && json.ok) {
+        feedback.textContent = 'Pratica ricevuta. Ti chiamo al numero indicato per confermare e concordare la finanziaria di destinazione.';
+        feedback.classList.add('eg__feedback--ok');
+        feedback.hidden = false;
+        form.reset();
+        updateChecklist();
+        submitBtn.innerHTML = '<span class="material-icons-outlined">check</span> Inviata';
+        // Permetto un nuovo invio dopo 3s
+        setTimeout(() => {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<span class="material-icons-outlined">send</span> Invia pratica';
+        }, 3000);
+      } else {
+        throw new Error('server_error');
+      }
+    } catch (err) {
+      feedback.textContent = 'Invio non riuscito. Riprova tra qualche secondo o chiamami al 393 995 7840.';
+      feedback.classList.add('eg__feedback--err');
+      feedback.hidden = false;
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<span class="material-icons-outlined">send</span> Invia pratica';
+    }
+  });
+</script>
+
+<style>
+  /* === Gate password === */
+  .gate {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 70vh;
+    padding: 2rem 1.5rem;
+    background: linear-gradient(160deg, #fff7f3 0%, #fef3ec 40%, #f5f3ff 100%);
+  }
+  .gate__card {
+    text-align: center;
+    background: #ffffff;
+    border: 1px solid #fde4d4;
+    border-radius: 16px;
+    padding: 2.5rem 2.5rem 2rem;
+    max-width: 460px;
+    width: 100%;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06), 0 1px 4px rgba(254, 111, 58, 0.08);
+  }
+  .gate__logos { display: flex; align-items: center; justify-content: center; gap: 0.75rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+  .gate__logo { height: 40px; display: block; }
+  .gate__x { font-size: 1.2rem; font-weight: 300; color: #94a3b8; }
+  .gate__partner-name { font-size: 1.05rem; font-weight: 800; color: #FE6F3A; letter-spacing: -0.01em; }
+  .gate__divider { height: 1px; background: linear-gradient(90deg, transparent, #fde4d4, transparent); margin-bottom: 1.25rem; }
+  .gate__label {
+    font-size: 0.82rem; font-weight: 700; color: #64748b;
+    text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.5rem;
+  }
+  .gate__desc { font-size: 0.85rem; color: #64748b; line-height: 1.5; margin-bottom: 1.5rem; max-width: 360px; margin-left: auto; margin-right: auto; }
+  .gate__form { display: flex; gap: 0.6rem; }
+  .gate__input {
+    flex: 1; padding: 0.8rem 1rem; border: 1.5px solid #e2e8f0; border-radius: 10px;
+    font-family: var(--font-family); font-size: 1rem; color: var(--color-text); background: #f8fafc;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .gate__input:focus { outline: none; border-color: #FE6F3A; box-shadow: 0 0 0 3px rgba(254, 111, 58, 0.12); background: #fff; }
+  .gate__input--error { border-color: #ef4444; }
+  .gate__btn {
+    padding: 0.8rem 1.5rem;
+    background: linear-gradient(135deg, #FE6F3A, #664CCD);
+    color: #ffffff; font-family: var(--font-family); font-weight: 700; font-size: 0.92rem;
+    border: none; border-radius: 10px; cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.2s; white-space: nowrap;
+  }
+  .gate__btn:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(254, 111, 58, 0.28); }
+  .gate__error { color: #ef4444; font-size: 0.82rem; margin-top: 0.75rem; }
+
+  /* === Tool layout === */
+  .eg { max-width: var(--max-width); margin: 0 auto; padding: 0 1.5rem 4rem; }
+  .eg__header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.25rem 0; border-bottom: 1px solid #e2e8f0;
+  }
+  .eg__header-brand { display: flex; align-items: center; gap: 1rem; }
+  .eg__logo { height: 36px; flex-shrink: 0; }
+  .eg__header-sep { width: 1px; height: 28px; background: #e2e8f0; }
+  .eg__partner-badge {
+    display: flex; align-items: center; gap: 0.4rem;
+    background: linear-gradient(135deg, #fff7f3, #fde4d4);
+    border: 1px solid #fbcfb0; border-radius: 8px; padding: 0.35rem 0.75rem;
+  }
+  .eg__partner-icon { font-size: 1.1rem; color: #FE6F3A; }
+  .eg__partner-label { font-size: 0.85rem; font-weight: 700; color: #D45A2E; }
+  .eg__logout {
+    background: none; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.4rem 0.85rem;
+    font-family: var(--font-family); font-size: 0.82rem; font-weight: 600; color: #64748b;
+    cursor: pointer; transition: border-color 0.2s, color 0.2s;
+    display: flex; align-items: center; gap: 0.3rem;
+  }
+  .eg__logout:hover { border-color: #FE6F3A; color: #FE6F3A; }
+
+  /* Hero */
+  .eg__hero {
+    background: linear-gradient(135deg, #fff7f3 0%, #fef3ec 50%, #f5f3ff 100%);
+    border: 1px solid #fde4d4; border-radius: 16px;
+    padding: 2rem 2.5rem; margin: 1.5rem 0 2.5rem;
+    display: flex; align-items: flex-start; gap: 2rem;
+  }
+  .eg__hero-content { flex: 1; }
+  .eg__title { font-size: 1.7rem; font-weight: 800; color: #0F1020; line-height: 1.2; margin-bottom: 0.6rem; }
+  .eg__sub { font-size: 0.95rem; color: #444451; line-height: 1.65; max-width: 600px; }
+  .eg__hero-badges { display: flex; flex-direction: column; gap: 0.5rem; flex-shrink: 0; }
+  .eg__badge {
+    display: flex; align-items: center; gap: 0.5rem;
+    background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px;
+    padding: 0.5rem 0.85rem; font-size: 0.8rem; font-weight: 600; color: #334155; white-space: nowrap;
+  }
+  .eg__badge .mcf-icon { font-size: 1rem; color: #FE6F3A; }
+
+  /* Sezioni */
+  .eg__section { margin-bottom: 3rem; }
+  .eg__section-head { display: flex; gap: 1rem; align-items: flex-start; margin-bottom: 1.25rem; }
+  .eg__section-num {
+    flex-shrink: 0; width: 36px; height: 36px;
+    background: linear-gradient(135deg, #FE6F3A, #664CCD);
+    color: #ffffff; font-weight: 800; font-size: 1rem;
+    display: flex; align-items: center; justify-content: center; border-radius: 50%;
+  }
+  .eg__section-title { font-size: 1.2rem; font-weight: 800; color: #0F1020; margin: 0 0 0.3rem; line-height: 1.3; }
+  .eg__section-sub { font-size: 0.9rem; color: #444451; line-height: 1.55; margin: 0; max-width: 720px; }
+
+  .eg__simulator { background: #ffffff; border: 1px solid #E1DEE3; border-radius: 14px; padding: 0.5rem; }
+
+  /* Form */
+  .eg__form { display: flex; flex-direction: column; gap: 1.5rem; }
+  .eg__form-block {
+    background: #ffffff; border: 1px solid #E1DEE3; border-radius: 14px; padding: 1.5rem 1.75rem;
+  }
+  .eg__form-block-title {
+    font-size: 0.78rem; font-weight: 800; color: #664CCD;
+    text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 1rem;
+  }
+  .eg__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .eg__field { display: flex; flex-direction: column; gap: 0.35rem; }
+  .eg__field--full { grid-column: 1 / -1; }
+  .eg__field-label { font-size: 0.82rem; font-weight: 600; color: #444451; }
+  .eg__field input, .eg__field select, .eg__field textarea {
+    padding: 0.7rem 0.85rem; border: 1.5px solid #E1DEE3; border-radius: 10px;
+    font-family: var(--font-family); font-size: 0.95rem; color: #0F1020; background: #fafafa;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .eg__field input:focus, .eg__field select:focus, .eg__field textarea:focus {
+    outline: none; border-color: #FE6F3A; background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(254, 111, 58, 0.1);
+  }
+  .eg__field textarea { resize: vertical; min-height: 80px; }
+
+  /* Banner checklist */
+  .eg__banner {
+    display: flex; gap: 0.85rem; align-items: flex-start;
+    border-radius: 10px; padding: 0.9rem 1.1rem; margin-bottom: 1rem;
+    border: 1px solid; transition: background 0.2s, border-color 0.2s;
+  }
+  .eg__banner-icon { font-size: 1.3rem; flex-shrink: 0; margin-top: 0.05rem; }
+  .eg__banner strong { display: block; font-size: 0.92rem; margin-bottom: 0.2rem; color: #0F1020; }
+  .eg__banner p { margin: 0; font-size: 0.85rem; color: #444451; line-height: 1.5; }
+  .eg__banner--base { background: #f8fafc; border-color: #E1DEE3; }
+  .eg__banner--base .eg__banner-icon { color: #664CCD; }
+  .eg__banner--full { background: #fff7f3; border-color: #fde4d4; }
+  .eg__banner--full .eg__banner-icon { color: #FE6F3A; }
+
+  /* Tabella documenti */
+  .eg__table {
+    width: 100%; border-collapse: collapse;
+    font-size: 0.9rem;
+    border: 1px solid #E1DEE3; border-radius: 10px; overflow: hidden;
+  }
+  .eg__table thead { background: #f8fafc; }
+  .eg__table th {
+    text-align: left; padding: 0.75rem 1rem;
+    font-size: 0.78rem; font-weight: 700; color: #444451;
+    text-transform: uppercase; letter-spacing: 0.05em;
+    border-bottom: 1px solid #E1DEE3;
+  }
+  .eg__th-when { width: 40%; }
+  .eg__table td {
+    padding: 0.75rem 1rem; border-bottom: 1px solid #f1f1f3;
+    color: #0F1020; line-height: 1.4;
+  }
+  .eg__table tbody tr:last-child td { border-bottom: none; }
+  .eg__table tbody tr:hover { background: #fafafa; }
+  .eg__row-extra td:last-child { color: #FE6F3A; font-weight: 600; font-size: 0.82rem; }
+
+  /* Submit */
+  .eg__submit-row {
+    display: flex; align-items: center; gap: 1.25rem;
+    background: linear-gradient(135deg, #fff7f3, #f5f3ff);
+    border: 1px solid #fde4d4; border-radius: 14px; padding: 1.25rem 1.5rem;
+    flex-wrap: wrap;
+  }
+  .eg__submit {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    background: linear-gradient(135deg, #FE6F3A, #664CCD); color: #ffffff;
+    font-family: var(--font-family); font-weight: 700; font-size: 0.95rem;
+    border: none; border-radius: 10px; padding: 0.85rem 1.6rem; cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.2s; white-space: nowrap;
+  }
+  .eg__submit:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(254, 111, 58, 0.28); }
+  .eg__submit:disabled { opacity: 0.6; cursor: wait; }
+  .eg__submit-hint { margin: 0; font-size: 0.85rem; color: #444451; line-height: 1.5; flex: 1; min-width: 240px; }
+
+  /* Feedback */
+  .eg__feedback {
+    padding: 0.9rem 1.1rem; border-radius: 10px; font-size: 0.9rem; line-height: 1.5;
+    border: 1px solid;
+  }
+  .eg__feedback--ok { background: #ecfdf5; border-color: #a7f3d0; color: #047857; }
+  .eg__feedback--err { background: #fef2f2; border-color: #fecaca; color: #b91c1c; }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .gate__card { padding: 2rem 1.5rem 1.5rem; }
+    .gate__form { flex-direction: column; }
+    .gate__logos { gap: 0.5rem; }
+    .gate__logo { height: 32px; }
+
+    .eg__header-brand { gap: 0.65rem; }
+    .eg__logo { height: 28px; }
+    .eg__hero { flex-direction: column; padding: 1.5rem; gap: 1.25rem; }
+    .eg__title { font-size: 1.3rem; }
+    .eg__hero-badges { flex-direction: row; flex-wrap: wrap; }
+    .eg__badge { font-size: 0.75rem; padding: 0.4rem 0.65rem; }
+
+    .eg__form-block { padding: 1.25rem; }
+    .eg__grid { grid-template-columns: 1fr; gap: 0.85rem; }
+    .eg__table { font-size: 0.82rem; }
+    .eg__table th, .eg__table td { padding: 0.6rem 0.75rem; }
+    .eg__th-when { width: 45%; }
+    .eg__submit-row { flex-direction: column; align-items: stretch; }
+    .eg__submit { justify-content: center; }
+  }
+</style>
