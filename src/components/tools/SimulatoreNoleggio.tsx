@@ -239,9 +239,9 @@ export default function SimulatoreNoleggio() {
             ) : (
               <>
                 <div class="sim__result-card sim__result-card--main">
-                  <span class="sim__result-label">Canone trimestrale anticipato</span>
-                  <span class="sim__result-value">{eur(risultati.canoneTrimestrale)}</span>
-                  <span class="sim__result-detail">Pari a {eur(risultati.canoneBase)}/mese</span>
+                  <span class="sim__result-label">Canone mensile</span>
+                  <span class="sim__result-value">{eur(risultati.canoneBase)}</span>
+                  <span class="sim__result-detail">Pagamento trimestrale anticipato ({eur(risultati.canoneTrimestrale)} ogni trimestre)</span>
                 </div>
               </>
             )}

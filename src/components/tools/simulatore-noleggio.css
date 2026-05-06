@@ -285,9 +285,10 @@
 
 /* Dettaglio sotto il valore principale nei risultati */
 .sim__result-detail {
-  font-size: 0.8rem;
-  color: var(--color-text-light);
-  margin-top: 0.2rem;
+  font-size: 0.9rem;
+  color: var(--color-text);
+  font-weight: 600;
+  margin-top: 0.35rem;
 }
 
 /* --- Responsive --- */
