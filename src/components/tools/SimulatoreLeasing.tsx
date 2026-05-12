@@ -65,7 +65,6 @@ export default function SimulatoreLeasing({ varianteFornitori = false }: Simulat
   const [pdfClienteRs, setPdfClienteRs] = useState<string>('');
   const [pdfClientePiva, setPdfClientePiva] = useState<string>('');
   const [pdfReferente, setPdfReferente] = useState<string>('');
-  const [pdfMostraTasso, setPdfMostraTasso] = useState<boolean>(true);
   const [generandoPdf, setGenerandoPdf] = useState<boolean>(false);
 
   // --- Campagna Alba Easy Lease ---
@@ -223,11 +222,8 @@ export default function SimulatoreLeasing({ varianteFornitori = false }: Simulat
            </table>`
         : '';
 
-      // PDF lato cliente: provvigione MAI mostrata.
-      // Tasso del piano: opzionale via toggle (default mostrato).
-      const tassoRow = pdfMostraTasso
-        ? `<tr><td>Tasso del piano (Spread + Euribor 3M)</td><td style="text-align:right">${pct(risultato.tassoEffettivo)}</td></tr>`
-        : '';
+      // PDF lato cliente: nessun riferimento al tasso del piano e zero provvigione.
+      // La rata mostrata è indicativa: quella definitiva dipende dal rating creditizio post-istruttoria.
 
       const html = `
         <div style="font-family:'Manrope',Helvetica,Arial,sans-serif;color:#293C5B;padding:32px;max-width:600px;">
@@ -247,10 +243,13 @@ export default function SimulatoreLeasing({ varianteFornitori = false }: Simulat
 
           ${sezioneCliente}
 
-          <div style="background:#f5f3ff;border-left:4px solid #664CCD;border-radius:8px;padding:16px 20px;margin-bottom:20px;">
-            <div style="font-size:10px;color:#787782;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:4px;">Rata mensile</div>
+          <div style="background:#f5f3ff;border-left:4px solid #664CCD;border-radius:8px;padding:16px 20px;margin-bottom:14px;">
+            <div style="font-size:10px;color:#787782;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:4px;">Rata mensile indicativa</div>
             <div style="font-size:28px;font-weight:800;color:#664CCD;letter-spacing:-0.02em;">${eurDec(risultato.rataMensile)}</div>
             <div style="font-size:11px;color:#787782;margin-top:4px;">${risultato.numRate} rate dopo l'anticipo</div>
+          </div>
+          <div style="background:#fff7ed;border:1px solid #fdba74;border-radius:8px;padding:12px 16px;margin-bottom:20px;font-size:11px;color:#7c2d12;line-height:1.5;">
+            <strong style="color:#c2410c;">Nota:</strong> la rata definitiva sarà assegnata in base al rating di merito creditizio del cliente, una volta esaminata la documentazione. Il valore qui sopra è una stima indicativa basata sui parametri di simulazione.
           </div>
 
           ${easyLeaseAttiva ? `
@@ -265,7 +264,6 @@ export default function SimulatoreLeasing({ varianteFornitori = false }: Simulat
             <tr><td>Riscatto finale (${riscattoPerc}%)</td><td style="text-align:right">${eur(risultato.riscatto)}</td></tr>
             <tr${easyLeaseAttiva ? ' style="background:#fff7ed"' : ''}><td>Spese istruttoria${easyLeaseAttiva ? ' — promo' : ''}</td><td style="text-align:right">${eur(risultato.speseIstruttoria)}</td></tr>
             <tr><td>Spese incasso rata</td><td style="text-align:right">${eur(risultato.speseIncassoRata)} × ${risultato.numRate}</td></tr>
-            ${tassoRow}
             <tr style="border-top:1px solid #E1DEE3;font-weight:700"><td style="padding-top:8px">Totale dovuto</td><td style="text-align:right;padding-top:8px">${eur(risultato.totaleCanoni)}</td></tr>
           </table>
 
@@ -651,7 +649,7 @@ export default function SimulatoreLeasing({ varianteFornitori = false }: Simulat
         <div class="simlea__pdf">
           <h3 class="simlea__panel-title">Preventivo PDF per il cliente</h3>
           <p class="simlea__pdf-hint">
-            Brandizzato MCF, senza il nome del partner finanziario e senza la provvigione. Compila i dati cliente per intestarlo.
+            Brandizzato MCF, senza il nome del partner finanziario, senza tasso e senza provvigione. Include la nota che la rata definitiva sarà assegnata in base al rating creditizio dopo esame documenti. Compila i dati cliente per intestarlo.
           </p>
           <div class="simlea__row">
             <label class="simlea__field">
@@ -682,14 +680,6 @@ export default function SimulatoreLeasing({ varianteFornitori = false }: Simulat
               />
             </label>
           </div>
-          <label class="simlea__pdf-toggle">
-            <input
-              type="checkbox"
-              checked={pdfMostraTasso}
-              onChange={(e) => setPdfMostraTasso((e.currentTarget as HTMLInputElement).checked)}
-            />
-            <span>Mostra il tasso del piano nel PDF ({pct(risultato.tassoEffettivo)})</span>
-          </label>
           <button
             type="button"
             class="simlea__pdf-btn"

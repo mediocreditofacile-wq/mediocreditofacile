@@ -506,27 +506,6 @@
   line-height: 1.5;
 }
 
-.simlea__pdf-toggle {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.88rem;
-  font-weight: 600;
-  color: #444451;
-  cursor: pointer;
-  padding: 0.55rem 0.85rem;
-  background: #f8fafc;
-  border: 1px solid #E1DEE3;
-  border-radius: 8px;
-}
-
-.simlea__pdf-toggle input[type='checkbox'] {
-  width: 16px;
-  height: 16px;
-  accent-color: #664CCD;
-  cursor: pointer;
-}
-
 .simlea__pdf-btn {
   align-self: flex-start;
   padding: 0.85rem 1.6rem;
