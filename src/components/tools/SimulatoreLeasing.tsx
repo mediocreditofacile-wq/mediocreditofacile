@@ -144,15 +144,16 @@ export default function SimulatoreLeasing({ varianteFornitori = false }: Simulat
   // --- Calcolo agevolazioni ---
   // Regole di esclusione:
   // - Sabatini ordinaria e Sabatini 4.0 sono la stessa misura → un solo toggle, scelta tipo dentro
-  // - ZES non cumulabile con Sabatini 4.0 (D.L. 124/2023): se entrambi attivi, ZES "vince" e disattiva il toggle Sabatini visivamente
+  // - ZES Unica e Nuova Sabatini (qualunque tipo, ord o 4.0) NON cumulabili: se entrambi attivi
+  //   ZES "vince" e disattiva il contributo Sabatini con warning visibile
   // - Iperammortamento cumulabile con tutto
-  const zesIncompatibileSabatini40 = zesAttiva && sabatiniAttiva && sabatiniTipo === '4-0';
+  const zesIncompatibileSabatini = zesAttiva && sabatiniAttiva;
 
   const sabatiniRis = useMemo(() => {
     if (!sabatiniAttiva || !risultato) return null;
-    if (zesIncompatibileSabatini40) return null; // disattivata per cumulabilità
+    if (zesIncompatibileSabatini) return null; // disattivata per cumulabilità
     return calcolaSabatiniMise(importo, sabatiniTipo);
-  }, [sabatiniAttiva, sabatiniTipo, importo, risultato, zesIncompatibileSabatini40]);
+  }, [sabatiniAttiva, sabatiniTipo, importo, risultato, zesIncompatibileSabatini]);
 
   const iperRis = useMemo(() => {
     if (!iperAttivo || !risultato) return null;
@@ -508,9 +509,9 @@ export default function SimulatoreLeasing({ varianteFornitori = false }: Simulat
                     4.0 (beni Industria 4.0) <span class="simlea__radio-meta">tasso 3,575%</span>
                   </label>
                 </div>
-                {zesIncompatibileSabatini40 && (
+                {zesIncompatibileSabatini && (
                   <div class="simlea__warning">
-                    ZES Unica e Sabatini 4.0 non sono cumulabili: il contributo Sabatini è disattivato finché ZES è attivo.
+                    ZES Unica e Nuova Sabatini non sono cumulabili (sia ordinaria che 4.0): il contributo Sabatini è disattivato finché ZES è attivo.
                   </div>
                 )}
                 {sabatiniRis && (
