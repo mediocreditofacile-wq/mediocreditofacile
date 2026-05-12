@@ -75,7 +75,7 @@ Agevolazioni in `src/data/leasing.ts`:
 
 Costanti `EURIBOR_3M` e `EURIBOR_3M_DATA` da aggiornare manualmente quando il valore di mercato cambia in modo significativo.
 
-Cumulabilità: Sabatini ordinaria/4.0 mutuamente esclusive (è la stessa misura, scelta tipo dentro il toggle); Sabatini 4.0 e ZES Unica non cumulabili (D.L. 124/2023): se entrambi attivi il toggle Sabatini si disattiva con warning; iperammortamento cumulabile con tutto.
+Cumulabilità: Sabatini ordinaria/4.0 mutuamente esclusive (è la stessa misura, scelta tipo dentro il toggle); ZES Unica e Nuova Sabatini (sia ordinaria sia 4.0) NON cumulabili: se entrambi attivi il contributo Sabatini si disattiva con warning visibile; iperammortamento cumulabile con tutto.
 
 ## Architettura landing page
 Le landing dinamiche si generano da landing-pages.json. Per creare una nuova landing basta aggiungere un oggetto al JSON con: slug, title, subtitle, benefits (array 3 oggetti), ctaText. Il template [slug].astro fa il resto.
