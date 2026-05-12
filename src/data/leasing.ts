@@ -292,6 +292,43 @@ export const ALBA: PartnerLeasing = {
   },
 };
 
+// ──────────────────────────────────────────────────────────────────────────
+// CAMPAGNA ALBA — Easy Lease (valida fino al 30/06/2026)
+// Comunicazione Help Desk Leasing Alba di maggio 2026.
+// Condizioni dedicate alla rete segnalatori MCF.
+// ──────────────────────────────────────────────────────────────────────────
+export const ALBA_EASY_LEASE = {
+  attiva: true,
+  nome: 'Easy Lease',
+  scadenza: '2026-06-30',
+  scadenzaLabel: '30 giugno 2026',
+  importoMax: 200_000,
+  prodottiAmmessi: ['strumentale-generico'] as const,
+  // Override delle condizioni standard ALBA quando la campagna si applica:
+  override: {
+    anticipoPerc: 0,        // canone anticipato 0
+    speseIstruttoria: 0,    // IST 0
+    // NB: "spese di contratto (IMP)" sono spese di stipula una tantum NON modellate
+    // nella nostra rata (la nostra somma è anticipo + N×rata + riscatto + istruttoria + N×incasso rata),
+    // quindi non c'è nulla da azzerare oltre.
+  },
+  cumulabilita: 'Cumulabile con Nuova Sabatini, MCC – Fondo di Garanzia e Crediti d\'imposta.',
+};
+
+/**
+ * Verifica se la campagna Easy Lease è applicabile a un dato partner+importo+tipologia.
+ * NB: non controlla la data di scadenza (lasciamo che la pagina mostri la promo finché
+ * Alberto non aggiorna `attiva: false` o sposta la scadenza).
+ */
+export function easyLeaseEligibile(partner: PartnerLeasing, importo: number, tipologia: TipologiaBene): boolean {
+  if (!ALBA_EASY_LEASE.attiva) return false;
+  if (partner.key !== 'alba') return false;
+  if (importo <= 0 || importo > ALBA_EASY_LEASE.importoMax) return false;
+  if (!ALBA_EASY_LEASE.prodottiAmmessi.includes(tipologia)) return false;
+  return true;
+}
+
+
 // CREDEM LEASING SPA
 // Modello pricing identico a SELLA (spread netto + provvigione % separata),
 // ma a differenza di SELLA la provvigione % varia per condizione (1% → 4,25%).

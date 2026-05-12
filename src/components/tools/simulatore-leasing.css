@@ -68,6 +68,117 @@
   font-weight: 500;
 }
 
+/* === Badge promo sui partner === */
+.simlea__partner-promo {
+  display: inline-block;
+  margin-top: 0.4rem;
+  padding: 0.2rem 0.55rem;
+  background: linear-gradient(135deg, #fdba74, #f97316);
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-radius: 12px;
+}
+
+/* === Banner promo Easy Lease === */
+.simlea__promo {
+  background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+  border: 2px solid #fdba74;
+  border-radius: 12px;
+  padding: 1.1rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  position: relative;
+}
+
+.simlea__promo--off {
+  opacity: 0.85;
+  border-style: dashed;
+}
+
+.simlea__promo--out {
+  background: #fef3c7;
+  border-color: #fcd34d;
+  color: #78350f;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.simlea__promo-head {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.simlea__promo-tag {
+  background: linear-gradient(135deg, #f97316, #c2410c);
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.simlea__promo-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #7c2d12;
+  letter-spacing: -0.01em;
+}
+
+.simlea__promo-deadline {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #9a3412;
+  margin-left: auto;
+}
+
+.simlea__promo-body {
+  font-size: 0.9rem;
+  color: #7c2d12;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.simlea__promo-body strong {
+  color: #c2410c;
+  font-weight: 800;
+}
+
+.simlea__promo-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: #7c2d12;
+  cursor: pointer;
+}
+
+.simlea__promo-toggle input[type='checkbox'] {
+  width: 16px;
+  height: 16px;
+  accent-color: #f97316;
+  cursor: pointer;
+}
+
+.simlea__breakdown-promo td {
+  background: #fff7ed;
+  color: #7c2d12 !important;
+  font-weight: 700;
+}
+
+.simlea__breakdown-promo td:first-child {
+  border-left: 3px solid #f97316;
+  padding-left: 0.5rem;
+}
+
 /* === Layout grid === */
 .simlea__grid {
   display: grid;

@@ -7,6 +7,8 @@ import {
   EURIBOR_3M,
   EURIBOR_3M_DATA,
   TIPOLOGIE_BENE,
+  ALBA_EASY_LEASE,
+  easyLeaseEligibile,
   getCondizioniPerDurata,
   getCondizioneFornitori,
   calcolaRataLeasingPartner,
@@ -66,6 +68,11 @@ export default function SimulatoreLeasing({ varianteFornitori = false }: Simulat
   const [pdfMostraTasso, setPdfMostraTasso] = useState<boolean>(true);
   const [generandoPdf, setGenerandoPdf] = useState<boolean>(false);
 
+  // --- Campagna Alba Easy Lease ---
+  // Toggle utente per disattivare manualmente la campagna anche quando eligibile.
+  // Default ON: se eligibile la applichiamo automaticamente.
+  const [easyLeaseManualOff, setEasyLeaseManualOff] = useState<boolean>(false);
+
   const partner = useMemo<PartnerLeasing>(
     () => PARTNERS_LEASING.find((p) => p.key === partnerKey) ?? SELLA,
     [partnerKey],
@@ -100,19 +107,39 @@ export default function SimulatoreLeasing({ varianteFornitori = false }: Simulat
   // Validazione importo
   const importoValido = importo >= partner.importoMin && importo <= partner.importoMax;
 
+  // --- Easy Lease (Alba) ---
+  const easyLeaseDisponibile = easyLeaseEligibile(partner, importo, tipologia);
+  const easyLeaseAttiva = easyLeaseDisponibile && !easyLeaseManualOff;
+  const albaSoprasoglia = partner.key === 'alba' && importo > ALBA_EASY_LEASE.importoMax;
+
+  // Override anticipo + spese istruttoria quando la campagna è attiva
+  const anticipoEffettivo = easyLeaseAttiva ? ALBA_EASY_LEASE.override.anticipoPerc : anticipoPerc;
+  const speseIstruttoriaOverride = easyLeaseAttiva ? ALBA_EASY_LEASE.override.speseIstruttoria : null;
+
   // --- Calcolo rata ---
   const risultato = useMemo(() => {
     if (!importoValido || !condizioneEffettiva) return null;
     const riscattoSafe = Math.min(riscattoPerc, riscattoMax);
-    return calcolaRataLeasingPartner(
+    const r = calcolaRataLeasingPartner(
       partner,
       importo,
       durata,
-      anticipoPerc,
+      anticipoEffettivo,
       riscattoSafe,
       condizioneEffettiva.id,
     );
-  }, [partner, importo, durata, anticipoPerc, riscattoPerc, riscattoMax, condizioneEffettiva, importoValido]);
+    // Override spese istruttoria per Easy Lease (la rata mensile non cambia, ma il totale dovuto sì)
+    if (speseIstruttoriaOverride !== null) {
+      const speseDelta = r.speseIstruttoria - speseIstruttoriaOverride;
+      return {
+        ...r,
+        speseIstruttoria: speseIstruttoriaOverride,
+        totaleCanoni: r.totaleCanoni - speseDelta,
+        costoComplessivo: r.costoComplessivo - speseDelta,
+      };
+    }
+    return r;
+  }, [partner, importo, durata, anticipoEffettivo, riscattoPerc, riscattoMax, condizioneEffettiva, importoValido, speseIstruttoriaOverride]);
 
   // --- Calcolo agevolazioni ---
   // Regole di esclusione:
@@ -225,10 +252,17 @@ export default function SimulatoreLeasing({ varianteFornitori = false }: Simulat
             <div style="font-size:11px;color:#787782;margin-top:4px;">${risultato.numRate} rate dopo l'anticipo</div>
           </div>
 
+          ${easyLeaseAttiva ? `
+            <div style="background:#fff7ed;border:1px solid #fdba74;border-radius:8px;padding:12px 16px;margin-bottom:14px;">
+              <div style="font-size:10px;color:#9a3412;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Promo Easy Lease — fino al ${ALBA_EASY_LEASE.scadenzaLabel}</div>
+              <div style="font-size:12px;color:#7c2d12;line-height:1.4;">Canone anticipato <strong>0 €</strong> · Spese istruttoria <strong>0 €</strong> · Spese contratto <strong>0 €</strong>. ${ALBA_EASY_LEASE.cumulabilita}</div>
+            </div>
+          ` : ''}
+
           <table style="width:100%;border-collapse:collapse;font-size:12px;">
-            <tr><td>Anticipo / maxicanone (${anticipoPerc}%)</td><td style="text-align:right">${eur(risultato.anticipo)}</td></tr>
+            <tr${easyLeaseAttiva ? ' style="background:#fff7ed"' : ''}><td>Anticipo / maxicanone (${anticipoEffettivo}%)${easyLeaseAttiva ? ' — promo' : ''}</td><td style="text-align:right">${eur(risultato.anticipo)}</td></tr>
             <tr><td>Riscatto finale (${riscattoPerc}%)</td><td style="text-align:right">${eur(risultato.riscatto)}</td></tr>
-            <tr><td>Spese istruttoria</td><td style="text-align:right">${eur(risultato.speseIstruttoria)}</td></tr>
+            <tr${easyLeaseAttiva ? ' style="background:#fff7ed"' : ''}><td>Spese istruttoria${easyLeaseAttiva ? ' — promo' : ''}</td><td style="text-align:right">${eur(risultato.speseIstruttoria)}</td></tr>
             <tr><td>Spese incasso rata</td><td style="text-align:right">${eur(risultato.speseIncassoRata)} × ${risultato.numRate}</td></tr>
             ${tassoRow}
             <tr style="border-top:1px solid #E1DEE3;font-weight:700"><td style="padding-top:8px">Totale dovuto</td><td style="text-align:right;padding-top:8px">${eur(risultato.totaleCanoni)}</td></tr>
@@ -285,9 +319,40 @@ export default function SimulatoreLeasing({ varianteFornitori = false }: Simulat
             <span class="simlea__partner-meta">
               Da {eur(p.importoMin)} • Istruttoria {eur(p.speseIstruttoria)}
             </span>
+            {p.key === 'alba' && ALBA_EASY_LEASE.attiva && (
+              <span class="simlea__partner-promo">Promo Easy Lease attiva</span>
+            )}
           </button>
         ))}
       </div>
+
+      {/* === Banner promo Easy Lease === */}
+      {easyLeaseDisponibile && (
+        <div class={`simlea__promo ${easyLeaseAttiva ? 'simlea__promo--on' : 'simlea__promo--off'}`}>
+          <div class="simlea__promo-head">
+            <span class="simlea__promo-tag">PROMO ALBA</span>
+            <strong class="simlea__promo-title">Campagna Easy Lease</strong>
+            <span class="simlea__promo-deadline">fino al {ALBA_EASY_LEASE.scadenzaLabel}</span>
+          </div>
+          <p class="simlea__promo-body">
+            Canone anticipato <strong>0 €</strong> · Spese istruttoria <strong>0 €</strong> · Spese contratto <strong>0 €</strong>.
+            Cumulabile con Sabatini, MCC e Crediti d'imposta. Validità: prodotti strumentali e targati fino a {eur(ALBA_EASY_LEASE.importoMax)}.
+          </p>
+          <label class="simlea__promo-toggle">
+            <input
+              type="checkbox"
+              checked={easyLeaseAttiva}
+              onChange={(e) => setEasyLeaseManualOff(!(e.currentTarget as HTMLInputElement).checked)}
+            />
+            <span>{easyLeaseAttiva ? 'Promo applicata: anticipo 0% e spese istruttoria 0 €' : 'Riapplica la promo Easy Lease'}</span>
+          </label>
+        </div>
+      )}
+      {albaSoprasoglia && (
+        <div class="simlea__promo simlea__promo--out">
+          <strong>Promo Easy Lease</strong>: il limite della campagna è {eur(ALBA_EASY_LEASE.importoMax)}. L'importo inserito è {eur(importo)}, sopra soglia: la promo non si applica.
+        </div>
+      )}
 
       <div class="simlea__grid">
         {/* === Pannello input === */}
@@ -339,11 +404,16 @@ export default function SimulatoreLeasing({ varianteFornitori = false }: Simulat
             </label>
 
             <label class="simlea__field">
-              <span class="simlea__field-label">Anticipo</span>
+              <span class="simlea__field-label">
+                Anticipo
+                {easyLeaseAttiva && <span class="simlea__field-hint">— promo: 0%</span>}
+              </span>
               <select
-                value={anticipoPerc}
+                value={easyLeaseAttiva ? 0 : anticipoPerc}
+                disabled={easyLeaseAttiva}
                 onChange={(e) => setAnticipoPerc(Number((e.currentTarget as HTMLSelectElement).value))}
               >
+                {easyLeaseAttiva && <option value={0}>0%</option>}
                 {[5, 10, 15, 20, 25, 30].map((a) => (
                   <option key={a} value={a}>{a}%</option>
                 ))}
@@ -548,9 +618,15 @@ export default function SimulatoreLeasing({ varianteFornitori = false }: Simulat
             <h4>Dettaglio piano</h4>
             <table>
               <tbody>
-                <tr><td>Anticipo ({anticipoPerc}%)</td><td>{eur(risultato.anticipo)}</td></tr>
+                <tr class={easyLeaseAttiva ? 'simlea__breakdown-promo' : ''}>
+                  <td>Anticipo ({anticipoEffettivo}%){easyLeaseAttiva && ' — Promo Easy Lease'}</td>
+                  <td>{eur(risultato.anticipo)}</td>
+                </tr>
                 <tr><td>Riscatto finale ({riscattoPerc}%)</td><td>{eur(risultato.riscatto)}</td></tr>
-                <tr><td>Spese istruttoria</td><td>{eur(risultato.speseIstruttoria)}</td></tr>
+                <tr class={easyLeaseAttiva ? 'simlea__breakdown-promo' : ''}>
+                  <td>Spese istruttoria{easyLeaseAttiva && ' — Promo Easy Lease'}</td>
+                  <td>{eur(risultato.speseIstruttoria)}</td>
+                </tr>
                 <tr><td>Spese incasso rata</td><td>{eur(risultato.speseIncassoRata)} × {risultato.numRate}</td></tr>
                 <tr><td>Tasso del piano</td><td>{pct(risultato.tassoEffettivo)}</td></tr>
                 {partner.modello === 'capitale-gonfiato' && !varianteFornitori && (
