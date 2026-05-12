@@ -413,7 +413,7 @@ export default function SimulatoreLeasing({ varianteFornitori = false }: Simulat
                 onChange={(e) => setAnticipoPerc(Number((e.currentTarget as HTMLSelectElement).value))}
               >
                 {easyLeaseAttiva && <option value={0}>0%</option>}
-                {[5, 10, 15, 20, 25, 30].map((a) => (
+                {[10, 15, 20, 25, 30].map((a) => (
                   <option key={a} value={a}>{a}%</option>
                 ))}
               </select>
