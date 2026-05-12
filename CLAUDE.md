@@ -48,7 +48,7 @@ Il componente `src/components/tools/SimulatoreLeasing.tsx` calcola la rata leasi
 
 Tutti e tre i partner: rata francese su (durata - 1) rate (il primo mese è l'anticipo), riscatto attualizzato e sottratto dal capitale. Validato contro 18 simulazioni del quotatore Lease for Business di Affida (6 SELLA + 6 ALBA + 6 CREDEM) con errore max 0,42 € su rate di centinaia di euro.
 
-Destinazione d'uso: STRUMENTO INTERNO. La pagina mostra ad Alberto tutti i numeri (provvigione caricata sulla rata visibile per modello capitale-gonfiato), il PDF generato è invece "client-safe": brandizzato MCF, nessun riferimento al partner finanziario, nessuna provvigione esposta, riga "Tasso del piano" controllata da toggle (default visibile, opzionale).
+Destinazione d'uso: STRUMENTO INTERNO. La pagina mostra ad Alberto tutti i numeri (provvigione caricata sulla rata visibile per modello capitale-gonfiato), il PDF generato è invece "client-safe": brandizzato MCF, nessun riferimento al partner finanziario, nessuna provvigione esposta, NESSUNA indicazione del tasso applicato. La rata mostrata è etichettata come "indicativa" e accompagnata da una nota esplicita ("La rata definitiva sarà assegnata in base al rating di merito creditizio del cliente, una volta esaminata la documentazione") in evidenza sotto il box rata.
 
 Prop `varianteFornitori` (boolean, default false): attiva la modalità per pagina pubblica destinata ai fornitori/rivenditori. Effetti:
 - Nasconde la riga "Provvigione caricata sulla rata" anche in pagina (i fornitori non devono mai vederla)
