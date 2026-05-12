@@ -1,0 +1,188 @@
+---
+import Icon from '../../components/Icon.astro';
+/**
+ * Simulatore Leasing — variante FORNITORI/RIVENDITORI — /tools/simulatore-leasing-fornitori
+ * Pagina pubblica, NESSUNA password.
+ * Monta `SimulatoreLeasing` con `varianteFornitori`:
+ *  - Spread fissato al "medio commerciale" definito su ogni partner (PartnerLeasing.spreadFornitori)
+ *  - SELLA 2,75% — ALBA 3,00% — CREDEM 2,80%
+ *  - Provvigione MAI mostrata (nemmeno in pagina, nemmeno nel breakdown)
+ *  - PDF brandizzato MCF "client-safe" come la variante interna
+ *
+ * Differenza con /tools/simulazione-leasing (interno, password gated):
+ *  - quella mostra la provvigione + select spread modificabile (uso operativo Alberto)
+ *  - questa è uno strumento self-service per fornitori e segnalatori
+ */
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import SimulatoreLeasing from '../../components/tools/SimulatoreLeasing.tsx';
+---
+<ToolLayout
+  title="Simulatore Leasing per Fornitori | Mediocredito Facile"
+  description="Calcola al volo la rata leasing strumentale sulle nostre tre mandanti (Sella, Alba, Credem). Nessuna registrazione, preventivo PDF brandizzato MCF da inviare al cliente."
+  noindex={true}
+  breadcrumbs={[{ name: 'Simulatore Leasing Fornitori', href: '/tools/simulatore-leasing-fornitori' }]}
+>
+  <div class="leaf">
+    <!-- Hero -->
+    <div class="leaf__hero">
+      <div class="leaf__hero-content">
+        <span class="leaf__eyebrow">Strumento per fornitori e segnalatori</span>
+        <h1 class="leaf__title">Simulatore Leasing Strumentale</h1>
+        <p class="leaf__sub">
+          Tre mandanti, una rata. Inserisci l'importo del bene, scegli durata e anticipo: in pagina vedi subito
+          il canone mensile per Sella, Alba o Credem allo spread medio commerciale. Quando il cliente è convinto
+          scarichi il preventivo PDF brandizzato MCF e glielo mandi via WhatsApp o email.
+        </p>
+      </div>
+      <div class="leaf__hero-badges">
+        <div class="leaf__badge">
+          <Icon name="compare_arrows" />
+          <span>Sella · Alba · Credem</span>
+        </div>
+        <div class="leaf__badge">
+          <Icon name="trending_up" />
+          <span>Sabatini + Iper + ZES</span>
+        </div>
+        <div class="leaf__badge">
+          <Icon name="picture_as_pdf" />
+          <span>PDF cliente brandizzato</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Simulatore -->
+    <section class="leaf__simulator">
+      <SimulatoreLeasing client:load varianteFornitori />
+    </section>
+
+    <!-- Footer informativo -->
+    <div class="leaf__footer">
+      <p>
+        I canoni mostrati sono calcolati con spread medio commerciale e tasso Euribor 3M alla rilevazione corrente.
+        Il preventivo definitivo dipende dalla società di leasing e dalle condizioni al momento della delibera.
+        Per assistenza:
+        <a href="tel:+393939957840">+39 393 995 7840</a> —
+        <a href="mailto:mediocreditofacile@gmail.com">mediocreditofacile@gmail.com</a>
+      </p>
+    </div>
+  </div>
+</ToolLayout>
+
+<style>
+  .leaf {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 1.5rem 1.5rem 4rem;
+  }
+
+  .leaf__hero {
+    background: linear-gradient(135deg, #fff7f3 0%, #fef3ec 50%, #f5f3ff 100%);
+    border: 1px solid #fde4d4;
+    border-radius: 16px;
+    padding: 2rem 2.5rem;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 2rem;
+  }
+
+  .leaf__hero-content { flex: 1; }
+
+  .leaf__eyebrow {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: #FE6F3A;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.6rem;
+  }
+
+  .leaf__title {
+    font-size: 1.7rem;
+    font-weight: 800;
+    color: #0F1020;
+    line-height: 1.2;
+    margin-bottom: 0.6rem;
+  }
+
+  .leaf__sub {
+    font-size: 0.95rem;
+    color: #444451;
+    line-height: 1.65;
+    max-width: 640px;
+  }
+
+  .leaf__hero-badges {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex-shrink: 0;
+  }
+
+  .leaf__badge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.5rem 0.85rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #334155;
+    white-space: nowrap;
+  }
+
+  .leaf__badge .mcf-icon {
+    font-size: 1rem;
+    color: #FE6F3A;
+  }
+
+  .leaf__simulator {
+    margin-bottom: 2rem;
+  }
+
+  .leaf__footer {
+    border-top: 1px solid #E1DEE3;
+    padding-top: 1.5rem;
+    font-size: 0.85rem;
+    color: #787782;
+    line-height: 1.6;
+    text-align: center;
+  }
+
+  .leaf__footer a {
+    color: #664CCD;
+    text-decoration: none;
+    font-weight: 600;
+  }
+
+  .leaf__footer a:hover {
+    text-decoration: underline;
+  }
+
+  /* Print: nascondi solo il footer informativo (il simulatore stampa il PDF separatamente) */
+  @media print {
+    .leaf__hero { display: none !important; }
+    .leaf__footer { display: none !important; }
+    .leaf { padding: 0; }
+  }
+
+  @media (max-width: 768px) {
+    .leaf__hero {
+      flex-direction: column;
+      padding: 1.5rem;
+      gap: 1.25rem;
+    }
+    .leaf__title { font-size: 1.3rem; }
+    .leaf__hero-badges {
+      flex-direction: row;
+      flex-wrap: wrap;
+    }
+    .leaf__badge {
+      font-size: 0.75rem;
+      padding: 0.4rem 0.65rem;
+    }
+  }
+</style>

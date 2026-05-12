@@ -1,0 +1,255 @@
+---
+import Icon from '../../components/Icon.astro';
+/**
+ * Simulazione Leasing — /tools/simulazione-leasing
+ * Strumento INTERNO MCF per Alberto: simula leasing finanziario su tre partner
+ * (Sella Leasing × Affida, Alba Leasing, Credem Leasing).
+ * Reverse engineering quotatore Lease for Business (Affida) — maggio 2026.
+ *
+ * Calcoli supportati:
+ *  - Modello SELLA / CREDEM "capitale gonfiato": tasso = spread + Euribor,
+ *    provvigione caricata sulla rata (mostrata in pagina, NASCOSTA nel PDF cliente)
+ *  - Modello ALBA "standard": tasso = spread lordo + Euribor, provvigione esterna al calcolo cliente
+ *  - Agevolazioni: Nuova Sabatini ord/4.0 (formula MISE su VAN interessi),
+ *    iperammortamento 4.0 parametrizzato per tipologia bene, ZES Unica per regione/dimensione.
+ *
+ * Output PDF brandizzato MCF, neutro (nessun riferimento al partner finanziario,
+ * nessuna provvigione). Toggle "Mostra tasso del piano" opzionale: il tasso compare
+ * nel PDF solo se Alberto vuole esporlo al cliente.
+ *
+ * Pattern di password gate identico a tools/age-srl.astro (con palette differente).
+ */
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import SimulatoreLeasing from '../../components/tools/SimulatoreLeasing.tsx';
+---
+<ToolLayout
+  title="Simulazione Leasing | Mediocredito Facile"
+  description="Strumento interno MCF — simulatore leasing finanziario Sella, Alba e Credem con agevolazioni Sabatini, iperammortamento 4.0 e ZES Unica."
+  noindex={true}
+  breadcrumbs={[{ name: 'Simulazione Leasing', href: '/tools/simulazione-leasing' }]}
+>
+  <!-- Gate password -->
+  <div id="gate" class="gate">
+    <div class="gate__card">
+      <div class="gate__logos">
+        <img src="/images/logo-mediocreditofacile.webp" alt="Mediocredito Facile" class="gate__logo" />
+      </div>
+      <div class="gate__divider"></div>
+      <p class="gate__label">Strumento Interno MCF</p>
+      <h1 class="gate__title">Simulazione Leasing</h1>
+      <p class="gate__desc">Simulatore canone leasing strumentale con scelta partner (Sella, Alba, Credem), agevolazioni Sabatini, iperammortamento 4.0, ZES Unica. PDF brandizzato MCF per il cliente.</p>
+      <div class="gate__form">
+        <input type="password" id="gate-pwd" class="gate__input" placeholder="Password" autocomplete="off" />
+        <button id="gate-btn" class="gate__btn">
+          <Icon name="lock_open" />
+          Accedi
+        </button>
+      </div>
+      <p id="gate-error" class="gate__error" hidden>Password non corretta</p>
+    </div>
+  </div>
+
+  <!-- Tool content (nascosto fino ad autenticazione) -->
+  <div id="tool" class="lea" style="display:none !important;">
+    <!-- Header co-branded -->
+    <div class="lea__header">
+      <div class="lea__header-brand">
+        <img src="/images/logo-mediocreditofacile.webp" alt="Mediocredito Facile" class="lea__logo" />
+        <div class="lea__header-sep"></div>
+        <div class="lea__partner-badge">
+          <Icon name="account_balance" class="lea__partner-icon" />
+          <span class="lea__partner-label">Simulazione Leasing</span>
+        </div>
+      </div>
+      <button id="logout-btn" class="lea__logout">
+        <Icon name="logout" />
+        Esci
+      </button>
+    </div>
+
+    <!-- Hero -->
+    <div class="lea__hero">
+      <div class="lea__hero-content">
+        <h1 class="lea__title">Simulazione Leasing Strumentale</h1>
+        <p class="lea__sub">
+          Strumento interno MCF: confronta Sella, Alba e Credem sui beni strumentali generici.
+          Lo spread va scelto in base al merito creditizio del cliente; le agevolazioni Sabatini, iperammortamento 4.0
+          e ZES Unica si attivano qui sotto e abbattono il costo netto mensile.
+          Il PDF brandizzato MCF è pulito (nessun riferimento al partner finanziario, nessuna provvigione)
+          e include il tasso del piano solo se vuoi esporlo al cliente.
+        </p>
+      </div>
+      <div class="lea__hero-badges">
+        <div class="lea__badge">
+          <Icon name="compare_arrows" />
+          <span>Sella · Alba · Credem</span>
+        </div>
+        <div class="lea__badge">
+          <Icon name="trending_up" />
+          <span>Sabatini + Iper + ZES</span>
+        </div>
+        <div class="lea__badge">
+          <Icon name="picture_as_pdf" />
+          <span>PDF cliente brandizzato</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Simulatore -->
+    <section class="lea__simulator">
+      <SimulatoreLeasing client:load />
+    </section>
+  </div>
+</ToolLayout>
+
+<script>
+  const PASSWORD = 'mcf-leasing';
+  const KEY = 'mcf_leasing_auth';
+
+  const gate = document.getElementById('gate')!;
+  const tool = document.getElementById('tool')!;
+  const gatePwd = document.getElementById('gate-pwd') as HTMLInputElement;
+  const gateBtn = document.getElementById('gate-btn')!;
+  const gateError = document.getElementById('gate-error')!;
+  const logoutBtn = document.getElementById('logout-btn')!;
+
+  function showTool() { gate.style.display = 'none'; tool.style.cssText = ''; }
+  function showGate() { gate.style.display = ''; tool.style.cssText = 'display:none !important;'; }
+
+  if (localStorage.getItem(KEY) === 'ok') showTool();
+
+  gateBtn.addEventListener('click', () => {
+    if (gatePwd.value.trim().toLowerCase() === PASSWORD) {
+      localStorage.setItem(KEY, 'ok');
+      showTool();
+      gateError.hidden = true;
+      gatePwd.classList.remove('gate__input--error');
+    } else {
+      gateError.hidden = false;
+      gatePwd.classList.add('gate__input--error');
+    }
+  });
+  gatePwd.addEventListener('keydown', (e) => { if (e.key === 'Enter') gateBtn.click(); });
+  logoutBtn.addEventListener('click', () => {
+    localStorage.removeItem(KEY); showGate(); gatePwd.value = ''; gateError.hidden = true;
+  });
+</script>
+
+<style>
+  /* === Gate password === */
+  .gate {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 70vh;
+    padding: 2rem 1.5rem;
+    background: linear-gradient(160deg, #f5f3ff 0%, #ede9fe 40%, #fff7f3 100%);
+  }
+  .gate__card {
+    text-align: center;
+    background: #ffffff;
+    border: 1px solid #ddd6fe;
+    border-radius: 16px;
+    padding: 2.5rem 2.5rem 2rem;
+    max-width: 460px;
+    width: 100%;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06), 0 1px 4px rgba(102, 76, 205, 0.08);
+  }
+  .gate__logos { display: flex; align-items: center; justify-content: center; gap: 0.75rem; margin-bottom: 1.25rem; }
+  .gate__logo { height: 40px; display: block; }
+  .gate__divider { height: 1px; background: linear-gradient(90deg, transparent, #ddd6fe, transparent); margin-bottom: 1.25rem; }
+  .gate__label {
+    font-size: 0.82rem; font-weight: 700; color: #64748b;
+    text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.4rem;
+  }
+  .gate__title {
+    font-size: 1.4rem; font-weight: 800; color: #0F1020;
+    margin: 0 0 0.6rem; letter-spacing: -0.01em;
+  }
+  .gate__desc { font-size: 0.85rem; color: #64748b; line-height: 1.5; margin-bottom: 1.5rem; max-width: 380px; margin-left: auto; margin-right: auto; }
+  .gate__form { display: flex; gap: 0.6rem; }
+  .gate__input {
+    flex: 1; padding: 0.8rem 1rem; border: 1.5px solid #e2e8f0; border-radius: 10px;
+    font-family: var(--font-family); font-size: 1rem; color: var(--color-text); background: #f8fafc;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .gate__input:focus { outline: none; border-color: #664CCD; box-shadow: 0 0 0 3px rgba(102, 76, 205, 0.15); background: #fff; }
+  .gate__input--error { border-color: #ef4444; }
+  .gate__btn {
+    padding: 0.8rem 1.5rem;
+    background: linear-gradient(135deg, #664CCD, #FE6F3A);
+    color: #ffffff; font-family: var(--font-family); font-weight: 700; font-size: 0.92rem;
+    border: none; border-radius: 10px; cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.2s; white-space: nowrap;
+  }
+  .gate__btn:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(102, 76, 205, 0.28); }
+  .gate__error { color: #ef4444; font-size: 0.82rem; margin-top: 0.75rem; }
+
+  /* === Tool layout === */
+  .lea { max-width: var(--max-width); margin: 0 auto; padding: 0 1.5rem 4rem; }
+  .lea__header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.25rem 0; border-bottom: 1px solid #e2e8f0;
+  }
+  .lea__header-brand { display: flex; align-items: center; gap: 1rem; }
+  .lea__logo { height: 36px; flex-shrink: 0; }
+  .lea__header-sep { width: 1px; height: 28px; background: #e2e8f0; }
+  .lea__partner-badge {
+    display: flex; align-items: center; gap: 0.4rem;
+    background: linear-gradient(135deg, #f5f3ff, #ede9fe);
+    border: 1px solid #ddd6fe; border-radius: 8px; padding: 0.35rem 0.75rem;
+  }
+  .lea__partner-icon { font-size: 1.1rem; color: #664CCD; }
+  .lea__partner-label { font-size: 0.85rem; font-weight: 700; color: #5b21b6; }
+  .lea__logout {
+    background: none; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.4rem 0.85rem;
+    font-family: var(--font-family); font-size: 0.82rem; font-weight: 600; color: #64748b;
+    cursor: pointer; transition: border-color 0.2s, color 0.2s;
+    display: flex; align-items: center; gap: 0.3rem;
+  }
+  .lea__logout:hover { border-color: #664CCD; color: #664CCD; }
+
+  /* Hero */
+  .lea__hero {
+    background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 50%, #fff7f3 100%);
+    border: 1px solid #ddd6fe; border-radius: 16px;
+    padding: 2rem 2.5rem; margin: 1.5rem 0 2rem;
+    display: flex; align-items: flex-start; gap: 2rem;
+  }
+  .lea__hero-content { flex: 1; }
+  .lea__title { font-size: 1.7rem; font-weight: 800; color: #0F1020; line-height: 1.2; margin-bottom: 0.6rem; }
+  .lea__sub { font-size: 0.95rem; color: #444451; line-height: 1.65; max-width: 640px; }
+  .lea__hero-badges { display: flex; flex-direction: column; gap: 0.5rem; flex-shrink: 0; }
+  .lea__badge {
+    display: flex; align-items: center; gap: 0.5rem;
+    background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px;
+    padding: 0.5rem 0.85rem; font-size: 0.8rem; font-weight: 600; color: #334155; white-space: nowrap;
+  }
+  .lea__badge .mcf-icon { font-size: 1rem; color: #664CCD; }
+
+  .lea__simulator { margin-top: 0; }
+
+  /* Print: nascondi gate e navigazione */
+  @media print {
+    .gate { display: none !important; }
+    .lea__header { display: none !important; }
+    .lea__hero { display: none !important; }
+    .lea { padding: 0; }
+    .lea__simulator { margin: 0; }
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .gate__card { padding: 2rem 1.5rem 1.5rem; }
+    .gate__form { flex-direction: column; }
+    .gate__logo { height: 32px; }
+    .gate__title { font-size: 1.2rem; }
+
+    .lea__header-brand { gap: 0.65rem; }
+    .lea__logo { height: 28px; }
+    .lea__hero { flex-direction: column; padding: 1.5rem; gap: 1.25rem; }
+    .lea__title { font-size: 1.3rem; }
+    .lea__hero-badges { flex-direction: row; flex-wrap: wrap; }
+    .lea__badge { font-size: 0.75rem; padding: 0.4rem 0.65rem; }
+  }
+</style>
