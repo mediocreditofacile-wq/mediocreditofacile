@@ -1,0 +1,471 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Simulatore Leasing Multi-Partner — Mediocredito Facile
+   Stile coerente con altri tool MCF (palette arancio/viola, font Manrope)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.simlea {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  font-family: var(--font-family, 'Manrope', sans-serif);
+  color: #0F1020;
+}
+
+/* === Selettore partner === */
+.simlea__partners {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+}
+
+.simlea__partner {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.3rem;
+  background: #ffffff;
+  border: 2px solid #E1DEE3;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  cursor: pointer;
+  transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s;
+  font-family: inherit;
+  text-align: left;
+}
+
+.simlea__partner:hover {
+  border-color: var(--partner-color, #664CCD);
+  transform: translateY(-1px);
+}
+
+.simlea__partner--active {
+  border-color: var(--partner-color, #664CCD);
+  background: linear-gradient(135deg, #ffffff, #fafafa);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+}
+
+.simlea__partner--active::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--partner-color, #664CCD);
+  margin-right: 0.4rem;
+  vertical-align: middle;
+}
+
+.simlea__partner-label {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #0F1020;
+  letter-spacing: -0.01em;
+}
+
+.simlea__partner-meta {
+  font-size: 0.78rem;
+  color: #787782;
+  font-weight: 500;
+}
+
+/* === Layout grid === */
+.simlea__grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 1.25rem;
+}
+
+.simlea__panel {
+  background: #ffffff;
+  border: 1px solid #E1DEE3;
+  border-radius: 14px;
+  padding: 1.5rem 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.simlea__panel--agev {
+  background: linear-gradient(180deg, #ffffff, #fafaff);
+  border-color: #E1DEE3;
+}
+
+.simlea__panel-title {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #664CCD;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin: 0 0 0.25rem;
+}
+
+/* === Form fields === */
+.simlea__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.simlea__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.simlea__field-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #444451;
+}
+
+.simlea__field-hint {
+  font-weight: 400;
+  color: #787782;
+  font-size: 0.76rem;
+  margin-left: 0.25rem;
+}
+
+.simlea__field-error {
+  font-size: 0.78rem;
+  color: #b91c1c;
+  margin-top: 0.25rem;
+}
+
+.simlea__field input,
+.simlea__field select {
+  padding: 0.65rem 0.85rem;
+  border: 1.5px solid #E1DEE3;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  color: #0F1020;
+  background: #fafafa;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+}
+
+.simlea__field input:focus,
+.simlea__field select:focus {
+  outline: none;
+  border-color: #FE6F3A;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(254, 111, 58, 0.1);
+}
+
+.simlea__euribor {
+  font-size: 0.78rem;
+  color: #787782;
+  background: #f8fafc;
+  border: 1px dashed #E1DEE3;
+  border-radius: 8px;
+  padding: 0.55rem 0.85rem;
+  margin-top: 0.25rem;
+}
+
+.simlea__spread-fixed {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  padding: 0.65rem 0.85rem;
+  border: 1.5px solid #E1DEE3;
+  border-radius: 10px;
+  background: #fafafa;
+}
+
+.simlea__spread-fixed strong {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #0F1020;
+}
+
+.simlea__spread-fixed-meta {
+  font-size: 0.82rem;
+  color: #787782;
+  font-weight: 500;
+}
+
+/* === Agevolazioni === */
+.simlea__agev {
+  border-top: 1px solid #f1eef5;
+  padding-top: 1rem;
+}
+
+.simlea__agev:first-of-type {
+  border-top: none;
+  padding-top: 0;
+}
+
+.simlea__agev-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #0F1020;
+  cursor: pointer;
+}
+
+.simlea__agev-toggle input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
+  accent-color: #664CCD;
+  cursor: pointer;
+}
+
+.simlea__agev-detail {
+  margin-top: 0.85rem;
+  padding-left: 1.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.simlea__radios {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.simlea__radios label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.88rem;
+  color: #444451;
+  cursor: pointer;
+}
+
+.simlea__radios input[type='radio'] {
+  accent-color: #FE6F3A;
+}
+
+.simlea__radio-meta {
+  color: #787782;
+  font-size: 0.78rem;
+}
+
+.simlea__agev-result {
+  background: #f5f3ff;
+  border: 1px solid #ddd6fe;
+  border-radius: 8px;
+  padding: 0.6rem 0.85rem;
+  font-size: 0.88rem;
+  color: #4c1d95;
+  line-height: 1.45;
+}
+
+.simlea__agev-result strong {
+  font-weight: 800;
+  color: #5b21b6;
+}
+
+.simlea__agev-meta {
+  color: #6d28d9;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.simlea__warning {
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 8px;
+  padding: 0.55rem 0.85rem;
+  font-size: 0.82rem;
+  color: #9a3412;
+  line-height: 1.45;
+}
+
+/* === Risultati === */
+.simlea__results {
+  background: #ffffff;
+  border: 1px solid #E1DEE3;
+  border-radius: 14px;
+  padding: 1.75rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.simlea__result-main {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+.simlea__result-rata,
+.simlea__result-netto {
+  background: linear-gradient(135deg, #fef3ec, #fff);
+  border: 1px solid #fde4d4;
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.simlea__result-netto {
+  background: linear-gradient(135deg, #f5f3ff, #fff);
+  border-color: #ddd6fe;
+}
+
+.simlea__result-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #787782;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.simlea__result-value {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #FE6F3A;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.simlea__result-value--netto {
+  color: #664CCD;
+}
+
+.simlea__result-sub {
+  font-size: 0.82rem;
+  color: #787782;
+  font-weight: 500;
+}
+
+/* === Breakdown === */
+.simlea__breakdown h4 {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #664CCD;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin: 0 0 0.75rem;
+}
+
+.simlea__breakdown table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+.simlea__breakdown td {
+  padding: 0.55rem 0;
+  border-bottom: 1px solid #f1eef5;
+  color: #444451;
+}
+
+.simlea__breakdown td:last-child {
+  text-align: right;
+  font-weight: 600;
+  color: #0F1020;
+}
+
+.simlea__breakdown-prov td {
+  color: #92400e;
+  background: #fffbeb;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+
+.simlea__breakdown-total td {
+  font-weight: 800;
+  font-size: 0.98rem;
+  color: #0F1020;
+  border-bottom: none;
+  border-top: 2px solid #0F1020;
+  padding-top: 0.75rem;
+}
+
+/* === PDF section === */
+.simlea__pdf {
+  background: #ffffff;
+  border: 1px solid #E1DEE3;
+  border-radius: 14px;
+  padding: 1.5rem 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.simlea__pdf-hint {
+  font-size: 0.88rem;
+  color: #787782;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.simlea__pdf-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #444451;
+  cursor: pointer;
+  padding: 0.55rem 0.85rem;
+  background: #f8fafc;
+  border: 1px solid #E1DEE3;
+  border-radius: 8px;
+}
+
+.simlea__pdf-toggle input[type='checkbox'] {
+  width: 16px;
+  height: 16px;
+  accent-color: #664CCD;
+  cursor: pointer;
+}
+
+.simlea__pdf-btn {
+  align-self: flex-start;
+  padding: 0.85rem 1.6rem;
+  background: linear-gradient(135deg, #FE6F3A, #664CCD);
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.2s, opacity 0.2s;
+}
+
+.simlea__pdf-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(254, 111, 58, 0.25);
+}
+
+.simlea__pdf-btn:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+/* === Responsive === */
+@media (max-width: 900px) {
+  .simlea__grid {
+    grid-template-columns: 1fr;
+  }
+  .simlea__partners {
+    grid-template-columns: 1fr;
+  }
+  .simlea__row {
+    grid-template-columns: 1fr 1fr;
+  }
+  .simlea__result-main {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .simlea__panel,
+  .simlea__results,
+  .simlea__pdf {
+    padding: 1.25rem;
+  }
+  .simlea__row {
+    grid-template-columns: 1fr;
+  }
+  .simlea__result-value {
+    font-size: 1.65rem;
+  }
+}
