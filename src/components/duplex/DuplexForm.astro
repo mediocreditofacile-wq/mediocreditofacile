@@ -1,0 +1,265 @@
+---
+// Form richiesta Duplex. Submit AJAX a /api/duplex-submit con conferma inline.
+// La configurazione del simulatore viene scritta nell'hidden #dx-form-config
+// dal componente DuplexSimulator.tsx via querySelector al cambio.
+
+const REGIONI = [
+  'Abruzzo','Basilicata','Calabria','Campania','Emilia-Romagna','Friuli-Venezia Giulia',
+  'Lazio','Liguria','Lombardia','Marche','Molise','Piemonte','Puglia','Sardegna',
+  'Sicilia','Toscana','Trentino-Alto Adige','Umbria',"Valle d'Aosta",'Veneto',
+];
+
+const SETTORI = [
+  'Pulizie professionali',
+  'Struttura ricettiva',
+  'Industria e manifattura',
+  'GDO e retail',
+  'Sanità',
+  'Logistica e magazzini',
+  'Altro',
+];
+---
+
+<section class="dx-form" id="contatti">
+  <div class="dx-form__inner">
+    <h2 class="dx-form__title">Richiedi il tuo preventivo Duplex</h2>
+    <p class="dx-form__intro">Compila i campi qui sotto. Ricevi il preventivo definitivo entro 24 ore lavorative.</p>
+
+    <form class="dx-form__form" id="dx-form" action="/api/duplex-submit" method="POST" novalidate>
+      <div class="dx-form__row">
+        <label class="dx-form__field">
+          <span class="dx-form__label">Ragione sociale *</span>
+          <input class="dx-form__input" type="text" name="ragione_sociale" required autocomplete="organization" />
+        </label>
+        <label class="dx-form__field">
+          <span class="dx-form__label">Partita IVA *</span>
+          <input class="dx-form__input" type="text" name="partita_iva" required pattern="[0-9]{11}" inputmode="numeric" maxlength="11" placeholder="11 cifre" />
+        </label>
+      </div>
+
+      <label class="dx-form__field">
+        <span class="dx-form__label">Settore di attività *</span>
+        <select class="dx-form__input" name="settore" required>
+          <option value="">Seleziona...</option>
+          {SETTORI.map((s) => <option value={s}>{s}</option>)}
+        </select>
+      </label>
+
+      <div class="dx-form__row">
+        <label class="dx-form__field">
+          <span class="dx-form__label">Nome referente *</span>
+          <input class="dx-form__input" type="text" name="nome_referente" required autocomplete="name" />
+        </label>
+        <label class="dx-form__field">
+          <span class="dx-form__label">Regione *</span>
+          <select class="dx-form__input" name="regione" required>
+            <option value="">Seleziona...</option>
+            {REGIONI.map((r) => <option value={r}>{r}</option>)}
+          </select>
+        </label>
+      </div>
+
+      <div class="dx-form__row">
+        <label class="dx-form__field">
+          <span class="dx-form__label">Email *</span>
+          <input class="dx-form__input" type="email" name="email" required autocomplete="email" />
+        </label>
+        <label class="dx-form__field">
+          <span class="dx-form__label">Telefono *</span>
+          <input class="dx-form__input" type="tel" name="telefono" required autocomplete="tel" />
+        </label>
+      </div>
+
+      <label class="dx-form__field">
+        <span class="dx-form__label">Distributore di riferimento</span>
+        <input class="dx-form__input" type="text" name="distributore" placeholder="Se conosci gia' il distributore Duplex con cui parli" />
+      </label>
+
+      <label class="dx-form__field">
+        <span class="dx-form__label">Note</span>
+        <textarea class="dx-form__input dx-form__textarea" name="note" rows="3" placeholder="Esigenze specifiche, tempi, eventuali domande"></textarea>
+      </label>
+
+      <input type="hidden" name="configurazione" id="dx-form-config" value="" />
+      <input type="hidden" name="fonte" value="duplex" />
+      {/* Honeypot anti-bot, reso invisibile via CSS */}
+      <input type="text" name="website" class="dx-form__honeypot" tabindex="-1" autocomplete="off" />
+
+      <label class="dx-form__check">
+        <input type="checkbox" name="privacy" required />
+        <span>Ho letto l'<a href="/privacy" target="_blank" rel="noopener">informativa privacy</a> e acconsento al trattamento dei dati per essere ricontattato.</span>
+      </label>
+
+      <button class="dx-form__submit" type="submit" id="dx-form-submit">
+        Invia richiesta
+      </button>
+
+      <div class="dx-form__feedback" id="dx-form-feedback" role="status" aria-live="polite" hidden></div>
+    </form>
+  </div>
+</section>
+
+<script>
+  const form = document.getElementById('dx-form') as HTMLFormElement | null;
+  const feedback = document.getElementById('dx-form-feedback') as HTMLDivElement | null;
+  const submitBtn = document.getElementById('dx-form-submit') as HTMLButtonElement | null;
+
+  if (form && feedback && submitBtn) {
+    form.addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Invio in corso...';
+      feedback.hidden = true;
+
+      try {
+        const data = new FormData(form);
+        const res = await fetch(form.action, { method: 'POST', body: data });
+        if (res.ok) {
+          // Tracking GTM: form inviato con successo
+          if (typeof window !== 'undefined') {
+            (window as unknown as { dataLayer?: unknown[] }).dataLayer = (window as unknown as { dataLayer?: unknown[] }).dataLayer || [];
+            (window as unknown as { dataLayer: unknown[] }).dataLayer.push({ event: 'duplex_form_submitted' });
+          }
+          feedback.className = 'dx-form__feedback dx-form__feedback--ok';
+          feedback.textContent = 'Richiesta ricevuta. Ti ricontattiamo entro 24 ore lavorative.';
+          feedback.hidden = false;
+          form.reset();
+          submitBtn.textContent = 'Inviato';
+        } else {
+          throw new Error('submit_failed');
+        }
+      } catch (_err) {
+        feedback.className = 'dx-form__feedback dx-form__feedback--err';
+        feedback.textContent = 'Qualcosa non ha funzionato. Riprova oppure scrivi a mediocreditofacile@gmail.com.';
+        feedback.hidden = false;
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Invia richiesta';
+      }
+    });
+  }
+</script>
+
+<style>
+  .dx-form {
+    background: var(--dx-grey-soft, #F2F0EC);
+    padding: 56px 0;
+  }
+  .dx-form__inner {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+  .dx-form__title {
+    font-family: 'Manrope', system-ui, sans-serif;
+    font-weight: 800;
+    font-size: clamp(22px, 3.6vw, 30px);
+    color: var(--dx-blue, #1B3A57);
+    margin: 0 0 8px 0;
+  }
+  .dx-form__intro {
+    font-family: 'Manrope', system-ui, sans-serif;
+    font-size: 15px;
+    color: var(--dx-text, #1A1A1A);
+    margin: 0 0 24px 0;
+  }
+  .dx-form__form {
+    background: #ffffff;
+    border: 1px solid var(--dx-border, #D9D7D2);
+    border-radius: 4px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .dx-form__row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  .dx-form__field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .dx-form__label {
+    font-family: 'Manrope', system-ui, sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--dx-text, #1A1A1A);
+  }
+  .dx-form__input,
+  .dx-form__textarea {
+    font-family: 'Manrope', system-ui, sans-serif;
+    font-size: 15px;
+    padding: 11px 12px;
+    border: 1px solid #c9c8c5;
+    border-radius: 4px;
+    background: #ffffff;
+    color: var(--dx-text, #1A1A1A);
+    width: 100%;
+  }
+  .dx-form__input:focus,
+  .dx-form__textarea:focus {
+    outline: 2px solid var(--dx-blue, #1B3A57);
+    outline-offset: 1px;
+    border-color: var(--dx-blue, #1B3A57);
+  }
+  .dx-form__textarea { resize: vertical; min-height: 80px; }
+  .dx-form__honeypot {
+    position: absolute !important;
+    left: -10000px !important;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+  }
+  .dx-form__check {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-family: 'Manrope', system-ui, sans-serif;
+    font-size: 13px;
+    color: #3a3a3a;
+    line-height: 1.45;
+  }
+  .dx-form__check input { margin-top: 3px; flex-shrink: 0; }
+  .dx-form__check a { color: var(--dx-blue, #1B3A57); text-decoration: underline; }
+  .dx-form__submit {
+    background: var(--dx-orange, #E66A2C);
+    color: #ffffff;
+    font-family: 'Manrope', system-ui, sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    border: 0;
+    border-radius: 4px;
+    padding: 14px 22px;
+    cursor: pointer;
+    transition: background-color 120ms ease;
+    margin-top: 6px;
+  }
+  .dx-form__submit:hover { background: #c95820; }
+  .dx-form__submit:disabled { background: #999; cursor: default; }
+  .dx-form__feedback {
+    font-family: 'Manrope', system-ui, sans-serif;
+    font-size: 14px;
+    padding: 12px 14px;
+    border-radius: 4px;
+    margin-top: 4px;
+  }
+  .dx-form__feedback--ok {
+    background: #eaf3ec;
+    color: #1f6033;
+    border: 1px solid #c5dfca;
+  }
+  .dx-form__feedback--err {
+    background: #fbeaea;
+    color: #8a2222;
+    border: 1px solid #e2bcbc;
+  }
+  @media (min-width: 600px) {
+    .dx-form__row { grid-template-columns: 1fr 1fr; }
+  }
+</style>

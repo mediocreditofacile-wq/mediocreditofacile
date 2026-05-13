@@ -1,0 +1,230 @@
+/* Stili dedicati al simulatore Duplex. Scoping via prefisso .dx-sim__ */
+
+.dx-sim {
+  background: #ffffff;
+  padding: 56px 0;
+  border-top: 1px solid var(--dx-border, #D9D7D2);
+  border-bottom: 1px solid var(--dx-border, #D9D7D2);
+}
+.dx-sim__inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+.dx-sim__title {
+  font-family: 'Manrope', system-ui, sans-serif;
+  font-weight: 800;
+  font-size: clamp(22px, 3.6vw, 30px);
+  color: var(--dx-blue, #1B3A57);
+  margin: 0 0 6px 0;
+}
+.dx-sim__sub {
+  font-family: 'Manrope', system-ui, sans-serif;
+  font-size: 15px;
+  color: #4a4a4a;
+  margin: 0 0 28px 0;
+}
+.dx-sim__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 28px;
+  align-items: start;
+}
+.dx-sim__panel {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.dx-sim__field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.dx-sim__label {
+  font-family: 'Manrope', system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--dx-text, #1A1A1A);
+  letter-spacing: 0.01em;
+}
+.dx-sim__select {
+  font-family: 'Manrope', system-ui, sans-serif;
+  font-size: 15px;
+  padding: 11px 12px;
+  border: 1px solid #c9c8c5;
+  border-radius: 4px;
+  background: #ffffff;
+  color: var(--dx-text, #1A1A1A);
+  width: 100%;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%231B3A57' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+}
+.dx-sim__select:focus {
+  outline: 2px solid var(--dx-blue, #1B3A57);
+  outline-offset: 1px;
+  border-color: var(--dx-blue, #1B3A57);
+}
+
+.dx-sim__counter {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #c9c8c5;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #ffffff;
+  width: max-content;
+}
+.dx-sim__counter-btn {
+  background: transparent;
+  border: 0;
+  width: 40px;
+  height: 40px;
+  font-family: 'Manrope', system-ui, sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--dx-blue, #1B3A57);
+  cursor: pointer;
+}
+.dx-sim__counter-btn:disabled { color: #b9b9b9; cursor: default; }
+.dx-sim__counter-val {
+  width: 44px;
+  text-align: center;
+  font-family: 'Manrope', system-ui, sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--dx-text, #1A1A1A);
+}
+
+.dx-sim__tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.dx-sim__tab {
+  background: #ffffff;
+  border: 1px solid #c9c8c5;
+  color: var(--dx-text, #1A1A1A);
+  font-family: 'Manrope', system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 9px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 120ms ease;
+}
+.dx-sim__tab--active {
+  background: var(--dx-blue, #1B3A57);
+  color: #ffffff;
+  border-color: var(--dx-blue, #1B3A57);
+}
+
+.dx-sim__toggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: #fafaf8;
+  border: 1px solid var(--dx-border, #D9D7D2);
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'Manrope', system-ui, sans-serif;
+  font-size: 14px;
+}
+.dx-sim__toggle input { width: 18px; height: 18px; flex-shrink: 0; }
+
+.dx-sim__results {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.dx-sim__hero {
+  background: #FCEBDF;
+  border: 1px solid #f3c9ad;
+  border-radius: 4px;
+  padding: 26px 24px;
+}
+.dx-sim__hero-label {
+  font-family: 'Manrope', system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #9a4a1c;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0 0 6px 0;
+}
+.dx-sim__hero-value {
+  font-family: 'Manrope', system-ui, sans-serif;
+  font-size: clamp(34px, 6vw, 46px);
+  font-weight: 800;
+  color: var(--dx-blue, #1B3A57);
+  line-height: 1.05;
+  margin: 0 0 6px 0;
+}
+.dx-sim__hero-note {
+  font-family: 'Manrope', system-ui, sans-serif;
+  font-size: 13px;
+  color: #6b3818;
+  margin: 0;
+}
+
+.dx-sim__detail {
+  background: #ffffff;
+  border: 1px solid var(--dx-border, #D9D7D2);
+  border-radius: 4px;
+  padding: 20px;
+}
+.dx-sim__detail-h {
+  font-family: 'Manrope', system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--dx-blue, #1B3A57);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0 0 12px 0;
+}
+.dx-sim__detail-row {
+  font-family: 'Manrope', system-ui, sans-serif;
+  font-size: 14px;
+  color: var(--dx-text, #1A1A1A);
+  padding: 10px 0;
+  border-top: 1px solid #ededed;
+  line-height: 1.5;
+}
+.dx-sim__detail-row:first-of-type { border-top: 0; padding-top: 4px; }
+.dx-sim__detail-row strong { color: var(--dx-blue, #1B3A57); font-weight: 700; }
+
+.dx-sim__disclaimer {
+  font-family: 'Manrope', system-ui, sans-serif;
+  font-size: 12px;
+  color: #6a6a6a;
+  font-style: italic;
+  margin: 0;
+}
+
+.dx-sim__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--dx-orange, #E66A2C);
+  color: #ffffff;
+  font-family: 'Manrope', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  border: 0;
+  border-radius: 4px;
+  padding: 14px 22px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 120ms ease;
+}
+.dx-sim__cta:hover { background: #c95820; }
+
+@media (min-width: 900px) {
+  .dx-sim__grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+  }
+}

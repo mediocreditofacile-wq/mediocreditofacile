@@ -1,0 +1,66 @@
+---
+// Header minimale Duplex: logo testuale (placeholder finche' non arriva l'SVG vero)
+// e un solo link che ancora al form a fine pagina.
+---
+
+<header class="dx-header">
+  <div class="dx-header__inner">
+    <a href="#top" class="dx-logo" aria-label="Duplex - torna su">
+      <span class="dx-logo__mark">DUPLEX</span>
+    </a>
+    <nav class="dx-header__nav" aria-label="Navigazione principale">
+      <a href="#contatti" class="dx-header__link">Contatti</a>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .dx-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: #ffffff;
+    border-bottom: 1px solid var(--dx-border, #D9D7D2);
+  }
+  .dx-header__inner {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+  }
+  .dx-logo {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+  }
+  .dx-logo__mark {
+    font-family: 'Manrope', system-ui, sans-serif;
+    font-weight: 800;
+    font-size: 22px;
+    letter-spacing: 0.18em;
+    color: var(--dx-blue, #1B3A57);
+  }
+  .dx-header__link {
+    font-family: 'Manrope', system-ui, sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--dx-text, #1A1A1A);
+    text-decoration: none;
+    padding: 8px 14px;
+    border: 1px solid var(--dx-border, #D9D7D2);
+    border-radius: 4px;
+    transition: border-color 120ms ease, color 120ms ease;
+  }
+  .dx-header__link:hover {
+    color: var(--dx-orange, #E66A2C);
+    border-color: var(--dx-orange, #E66A2C);
+  }
+  @media (max-width: 480px) {
+    .dx-header__inner { padding: 12px 16px; }
+    .dx-logo__mark { font-size: 19px; letter-spacing: 0.16em; }
+    .dx-header__link { font-size: 14px; padding: 7px 12px; }
+  }
+</style>

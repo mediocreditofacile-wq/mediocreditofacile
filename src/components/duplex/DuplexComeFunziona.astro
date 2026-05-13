@@ -1,0 +1,87 @@
+---
+const steps = [
+  { n: '1', text: 'Compili il form qui sotto con le sei cose' },
+  { n: '2', text: 'Ricevi il preventivo definitivo entro 24 ore' },
+  { n: '3', text: 'Firma elettronica e la macchina parte' },
+];
+---
+
+<section class="dx-cf">
+  <div class="dx-cf__inner">
+    <h2 class="dx-cf__title">Come funziona</h2>
+    <ol class="dx-cf__list">
+      {steps.map(({ n, text }) => (
+        <li class="dx-cf__step">
+          <span class="dx-cf__num">{n}</span>
+          <span class="dx-cf__text">{text}</span>
+        </li>
+      ))}
+    </ol>
+  </div>
+</section>
+
+<style>
+  .dx-cf {
+    background: #ffffff;
+    padding: 56px 0;
+    border-top: 1px solid var(--dx-border, #D9D7D2);
+    border-bottom: 1px solid var(--dx-border, #D9D7D2);
+  }
+  .dx-cf__inner {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+  .dx-cf__title {
+    font-family: 'Manrope', system-ui, sans-serif;
+    font-weight: 800;
+    font-size: clamp(22px, 3.6vw, 30px);
+    color: var(--dx-blue, #1B3A57);
+    margin: 0 0 28px 0;
+  }
+  .dx-cf__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 18px;
+    counter-reset: dxstep;
+  }
+  .dx-cf__step {
+    display: flex;
+    align-items: flex-start;
+    gap: 18px;
+    padding: 20px;
+    border: 1px solid var(--dx-border, #D9D7D2);
+    border-radius: 4px;
+    background: #fcfcfb;
+  }
+  .dx-cf__num {
+    flex-shrink: 0;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--dx-blue, #1B3A57);
+    color: #ffffff;
+    font-family: 'Manrope', system-ui, sans-serif;
+    font-weight: 800;
+    font-size: 17px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .dx-cf__text {
+    font-family: 'Manrope', system-ui, sans-serif;
+    font-size: 16px;
+    color: var(--dx-text, #1A1A1A);
+    line-height: 1.5;
+    padding-top: 6px;
+  }
+  @media (min-width: 768px) {
+    .dx-cf__list {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+  }
+</style>

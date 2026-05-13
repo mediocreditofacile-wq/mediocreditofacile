@@ -1,0 +1,193 @@
+---
+// Accordion FAQ accessibile (keyboard, aria-expanded). Toggle gestito via JS inline,
+// fallback: anche senza JS i pannelli restano leggibili (open di default per il primo).
+const faq = [
+  {
+    q: "Cos'è il noleggio operativo e perché non è un finanziamento?",
+    a: "Nel finanziamento la macchina diventa tua subito e tu la metti a bilancio con il debito. Nel noleggio operativo paghi un canone per usare la macchina, che resta del locatore fino a fine contratto. È una modalità di vendita, non uno strumento finanziario. Il canone è 100% deducibile come costo d'esercizio e l'IVA è detraibile mese per mese. Non incide sulla centrale rischi finanziamenti.",
+  },
+  {
+    q: "Come si paga il canone? Mensile o trimestrale?",
+    a: "La fatturazione standard è trimestrale anticipata. Se il canone è 72 euro al mese, ricevi una fattura da 216 euro ogni tre mesi all'inizio del trimestre. Per importi sopra i 10.000 euro è disponibile la fatturazione mensile con una maggiorazione del 5%. È utile saperlo prima di firmare, perché alcune offerte di mercato pubblicizzano il canone mensile senza chiarire la trimestralità reale.",
+  },
+  {
+    q: "Cos'è il trimestre di grazia?",
+    a: "È la promozione di lancio per chi attiva il noleggio adesso. Dal giorno di consegna fino a fine mese non paghi (pro rata azzerato), poi hai un trimestre completo di grazia, poi inizi a pagare dal trimestre successivo. In pratica, se la macchina ti arriva a maggio, la prima fattura ti arriva a settembre.",
+  },
+  {
+    q: "Cosa succede a fine contratto?",
+    a: "Hai tre strade. Estendi il noleggio con canoni ridotti per continuare a usare la macchina, riscatti la macchina a un valore residuo indicativo (circa un canone mensile per i beni strumentali a 60 mesi, verificato sullo stato del bene), oppure restituisci la macchina al locatore. La scelta la fai tu nei mesi finali del contratto.",
+  },
+  {
+    q: "Posso aggiungere spazzole o accessori dopo aver firmato?",
+    a: "No, gli accessori vanno previsti nel preventivo iniziale e rientrano nel canone. Aggiunte successive si trattano come vendita separata e non si finanziano sullo stesso contratto. Per questo motivo conviene chiudere la configurazione completa al momento della richiesta.",
+  },
+  {
+    q: "La mia azienda ha meno di due anni di storico. Posso accedere lo stesso?",
+    a: "Sì. Esiste un percorso parallelo attraverso una società intermediaria che assume il bene e lo rinoleggia al cliente finale. I tempi di pagamento al fornitore sono leggermente più lunghi (30 giorni invece di 48 ore) e c'è un passaggio amministrativo in più, ma per il cliente il servizio è identico.",
+  },
+  {
+    q: "Quanto tempo serve per l'approvazione?",
+    a: "La pratica standard si delibera in 24-48 ore lavorative dal momento in cui arrivano tutti i documenti. Pratiche più articolate (importi alti, strutture societarie complesse, casi senza storico) possono richiedere qualche giorno in più.",
+  },
+  {
+    q: "Le condizioni sono le stesse in tutta Italia?",
+    a: "Sì. Duplex ha definito un canone unico nazionale, applicato identico da ogni distributore aderente. Se vedi offerte sotto il canone qui esposto, verifica che includano davvero tutto (assicurazione, trimestralità reale, canone effettivo). Spesso la differenza è solo apparente.",
+  },
+  {
+    q: "La mia partita IVA è coerente con l'acquisto?",
+    a: "Sì se il codice ATECO della tua azienda è compatibile con l'uso del bene (esempio: impresa di pulizie, attività industriale o manifatturiera, struttura ricettiva, logistica, sanità, GDO). Se in visura la tua attività è completamente non collegata (esempio: parrucchiere, consulenza, attività artistiche) la pratica può non passare. In caso di dubbio chiedi prima di inoltrare la richiesta.",
+  },
+  {
+    q: "Quali documenti servono per partire?",
+    a: "Sei cose. Email aziendale, cellulare del legale rappresentante, IBAN aziendale, visura camerale recente, carta d'identità del legale rappresentante, tessera sanitaria. Tutto qui.",
+  },
+  {
+    q: "Posso chiudere il contratto in anticipo?",
+    a: "Sì. Il riscatto anticipato è sempre possibile e si calcola sulla somma dei canoni residui attualizzata, secondo le condizioni indicate nel contratto. È un'opzione, non un obbligo.",
+  },
+  {
+    q: "Cosa succede se la macchina si guasta?",
+    a: "La macchina è coperta da garanzia del produttore Duplex secondo i termini standard. In caso di sinistro o danno grave la copertura assicurativa del locatore interviene con una franchigia del 15% a carico del cliente. Sopra una certa soglia di danno conviene chiudere la pratica e aprire un contratto su una macchina nuova.",
+  },
+  {
+    q: "Cosa succede se Duplex o il locatore vanno in difficoltà?",
+    a: "Il locatore è una multinazionale tedesca con sede in Germania, presente in oltre 30 paesi. La macchina resta tua durante tutto il contratto al canone pattuito, indipendentemente da eventi commerciali del fornitore o del locatore stesso. La cornice contrattuale è autonoma.",
+  },
+  {
+    q: "Sono un distributore Duplex. Posso integrare lo strumento nel mio gestionale o nel mio sito?",
+    a: "Sì. È in sviluppo un'area riservata dedicata per ogni distributore aderente, con accesso credenziali, caricamento pratiche e visibilità sullo stato. Per chi vuole integrare i preventivi nel proprio gestionale o sito sono disponibili API. I dettagli operativi si definiscono in fase di onboarding diretto con la convenzione Duplex.",
+  },
+];
+---
+
+<section class="dx-faq">
+  <div class="dx-faq__inner">
+    <h2 class="dx-faq__title">Domande frequenti</h2>
+    <ul class="dx-faq__list" role="list">
+      {faq.map(({ q, a }, i) => (
+        <li class="dx-faq__item">
+          <button
+            class="dx-faq__btn"
+            type="button"
+            aria-expanded="false"
+            aria-controls={`dx-faq-panel-${i}`}
+            id={`dx-faq-btn-${i}`}
+          >
+            <span class="dx-faq__q">{q}</span>
+            <span class="dx-faq__chev" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </span>
+          </button>
+          <div
+            class="dx-faq__panel"
+            id={`dx-faq-panel-${i}`}
+            role="region"
+            aria-labelledby={`dx-faq-btn-${i}`}
+            hidden
+          >
+            <p class="dx-faq__a">{a}</p>
+          </div>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<script>
+  const items = document.querySelectorAll<HTMLButtonElement>('.dx-faq__btn');
+  items.forEach((btn) => {
+    btn.addEventListener('click', () => toggle(btn));
+    btn.addEventListener('keydown', (ev) => {
+      const e = ev as KeyboardEvent;
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        toggle(btn);
+      }
+    });
+  });
+
+  function toggle(btn: HTMLButtonElement) {
+    const expanded = btn.getAttribute('aria-expanded') === 'true';
+    const panelId = btn.getAttribute('aria-controls');
+    if (!panelId) return;
+    const panel = document.getElementById(panelId);
+    if (!panel) return;
+    btn.setAttribute('aria-expanded', String(!expanded));
+    if (expanded) {
+      panel.setAttribute('hidden', '');
+    } else {
+      panel.removeAttribute('hidden');
+    }
+  }
+</script>
+
+<style>
+  .dx-faq {
+    background: #ffffff;
+    padding: 56px 0;
+  }
+  .dx-faq__inner {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+  .dx-faq__title {
+    font-family: 'Manrope', system-ui, sans-serif;
+    font-weight: 800;
+    font-size: clamp(22px, 3.6vw, 30px);
+    color: var(--dx-blue, #1B3A57);
+    margin: 0 0 24px 0;
+  }
+  .dx-faq__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid var(--dx-border, #D9D7D2);
+  }
+  .dx-faq__item {
+    border-bottom: 1px solid var(--dx-border, #D9D7D2);
+  }
+  .dx-faq__btn {
+    width: 100%;
+    text-align: left;
+    background: transparent;
+    border: 0;
+    padding: 18px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    cursor: pointer;
+    font-family: 'Manrope', system-ui, sans-serif;
+    color: var(--dx-text, #1A1A1A);
+  }
+  .dx-faq__btn:focus-visible {
+    outline: 2px solid var(--dx-orange, #E66A2C);
+    outline-offset: 2px;
+  }
+  .dx-faq__q {
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+  .dx-faq__chev {
+    color: var(--dx-blue, #1B3A57);
+    flex-shrink: 0;
+    transition: transform 180ms ease;
+  }
+  .dx-faq__btn[aria-expanded="true"] .dx-faq__chev {
+    transform: rotate(180deg);
+  }
+  .dx-faq__panel {
+    padding: 0 0 18px 0;
+  }
+  .dx-faq__panel[hidden] { display: none; }
+  .dx-faq__a {
+    font-family: 'Manrope', system-ui, sans-serif;
+    font-size: 15px;
+    color: #3a3a3a;
+    line-height: 1.6;
+    margin: 0;
+  }
+</style>
