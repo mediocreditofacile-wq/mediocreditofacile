@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'preact/hooks';
 import listino from '../../data/duplex-listino.json';
 import coefficienti from '../../data/duplex-coefficienti.json';
+import accessoriDB from '../../data/duplex-accessori.json';
 import './duplex-simulator.css';
 
 // Tipi del listino e dei coefficienti
@@ -16,6 +17,22 @@ type Coefficienti = {
   senza_servizi: Record<string, number>;
   con_servizi: Record<string, number>;
 };
+
+// Tipi accessori: una voce e' un add-on (spazzola o accessorio).
+// step = incremento del counter (es. 2 per "in coppia"), max = limite superiore.
+interface Accessorio {
+  id: string;
+  label: string;
+  prezzo: number;
+  step: number;
+  max: number;
+  note?: string;
+}
+interface AccessoriFamiglia {
+  spazzole: Accessorio[];
+  extra: Accessorio[];
+}
+type AccessoriDB = Record<string, AccessoriFamiglia>;
 
 const DURATE = [24, 36, 48, 60] as const;
 type Durata = typeof DURATE[number];
@@ -62,12 +79,13 @@ function trackEvent(name: string, payload: Record<string, unknown> = {}) {
 export default function DuplexSimulator() {
   const items = listino as ModelloListino[];
   const coeff = coefficienti as Coefficienti;
+  const accessori = accessoriDB as AccessoriDB;
   const famiglie = useMemo(() => buildFamiglie(items), [items]);
 
   // Stato simulatore. Default: Ultrax 45.
   const [famigliaNome, setFamigliaNome] = useState<string>('Ultrax 45');
   const [alimentazione, setAlimentazione] = useState<'cavo' | 'batteria'>('cavo');
-  const [spazzole, setSpazzole] = useState<number>(0);
+  const [quantita, setQuantita] = useState<Record<string, number>>({});
   const [durata, setDurata] = useState<Durata>(60);
   const [serviziInclusi, setServiziInclusi] = useState<boolean>(false);
 
@@ -84,8 +102,22 @@ export default function DuplexSimulator() {
     return famigliaCorrente.varianti[0];
   }, [famigliaCorrente, alimentazione, items]);
 
+  // Accessori disponibili per la famiglia corrente.
+  // L'ordine in pagina e' spazzole + extra concatenati.
+  const accessoriFamiglia: AccessoriFamiglia = accessori[famigliaNome] ?? { spazzole: [], extra: [] };
+  const tuttiAccessori: Accessorio[] = useMemo(
+    () => [...accessoriFamiglia.spazzole, ...accessoriFamiglia.extra],
+    [accessoriFamiglia],
+  );
+
+  // Aggregato accessori: somma di (quantita x prezzo) per ogni voce della famiglia corrente.
+  const totaleAccessori = useMemo(
+    () => tuttiAccessori.reduce((sum, acc) => sum + (quantita[acc.id] ?? 0) * acc.prezzo, 0),
+    [tuttiAccessori, quantita],
+  );
+
   // Calcoli
-  const prezzoFinale = varianteAttiva.prezzo + spazzole * 75;
+  const prezzoFinale = varianteAttiva.prezzo + totaleAccessori;
   const coefficiente = (serviziInclusi ? coeff.con_servizi : coeff.senza_servizi)[String(durata)] ?? 0;
   const canoneMensile = Math.round(prezzoFinale * coefficiente);
   const importoTrimestrale = canoneMensile * 3;
@@ -93,17 +125,26 @@ export default function DuplexSimulator() {
   const mensileDisponibile = prezzoFinale > 10000;
 
   // Stringa configurazione: viene scritta nell'hidden field del form principale
-  // cosi' arriva al webhook insieme al lead.
+  // cosi' arriva al webhook insieme al lead. Include il dettaglio accessori scelti.
+  const dettaglioAccessori = useMemo(
+    () =>
+      tuttiAccessori
+        .filter((acc) => (quantita[acc.id] ?? 0) > 0)
+        .map((acc) => `${quantita[acc.id]}x ${acc.label}`)
+        .join(', '),
+    [tuttiAccessori, quantita],
+  );
+
   const configurazione = useMemo(() => {
     const parts = [
       varianteAttiva.label,
       `${durata} mesi`,
       serviziInclusi ? 'servizi inclusi' : 'senza servizi',
       `canone ${canoneMensile} euro`,
-      spazzole > 0 ? `${spazzole} spazzole` : null,
+      dettaglioAccessori ? `accessori: ${dettaglioAccessori}` : null,
     ].filter(Boolean);
     return parts.join(' - ');
-  }, [varianteAttiva, durata, serviziInclusi, canoneMensile, spazzole]);
+  }, [varianteAttiva, durata, serviziInclusi, canoneMensile, dettaglioAccessori]);
 
   // Sincronizza l'hidden #dx-form-config: il form Astro lo legge al submit.
   useEffect(() => {
@@ -111,26 +152,38 @@ export default function DuplexSimulator() {
     if (el) el.value = configurazione;
   }, [configurazione]);
 
-  // Tracking: cambio modello/durata/servizi
+  // Tracking: cambio modello/durata/servizi/accessori
   useEffect(() => {
     trackEvent('duplex_simulator_changed', {
       modello: varianteAttiva.label,
       durata,
       servizi: serviziInclusi,
-      spazzole,
+      accessori: dettaglioAccessori || 'nessuno',
       canone: canoneMensile,
     });
-  }, [varianteAttiva.label, durata, serviziInclusi, spazzole, canoneMensile]);
+  }, [varianteAttiva.label, durata, serviziInclusi, dettaglioAccessori, canoneMensile]);
 
-  // Quando cambia famiglia, se la nuova ha alimentazione e la corrente e' invalida, normalizzo.
+  // Quando cambia famiglia, normalizzo alimentazione e azzero quantita' accessori
+  // (gli accessori sono per-famiglia, non hanno senso da portarsi dietro).
   useEffect(() => {
-    if (!famigliaCorrente?.hasAlimentazione) return;
-    const valida = famigliaCorrente.varianti.some((v) => v.alimentazione === alimentazione);
-    if (!valida) {
-      const primaConAlim = famigliaCorrente.varianti.find((v) => v.alimentazione !== null);
-      if (primaConAlim?.alimentazione) setAlimentazione(primaConAlim.alimentazione);
+    if (famigliaCorrente?.hasAlimentazione) {
+      const valida = famigliaCorrente.varianti.some((v) => v.alimentazione === alimentazione);
+      if (!valida) {
+        const primaConAlim = famigliaCorrente.varianti.find((v) => v.alimentazione !== null);
+        if (primaConAlim?.alimentazione) setAlimentazione(primaConAlim.alimentazione);
+      }
     }
-  }, [famigliaCorrente, alimentazione]);
+    setQuantita({});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [famigliaNome]);
+
+  function changeQuantita(acc: Accessorio, delta: number) {
+    setQuantita((prev) => {
+      const current = prev[acc.id] ?? 0;
+      const next = Math.max(0, Math.min(acc.max, current + delta * acc.step));
+      return { ...prev, [acc.id]: next };
+    });
+  }
 
   function handleCtaClick() {
     trackEvent('duplex_simulator_cta_clicked', {
@@ -192,30 +245,48 @@ export default function DuplexSimulator() {
               </div>
             )}
 
-            <div class="dx-sim__field">
-              <label class="dx-sim__label">Spazzole opzionali (+75 euro ognuna)</label>
-              <div class="dx-sim__counter" role="group" aria-label="Numero spazzole">
-                <button
-                  type="button"
-                  class="dx-sim__counter-btn"
-                  onClick={() => setSpazzole((n) => Math.max(0, n - 1))}
-                  disabled={spazzole === 0}
-                  aria-label="Diminuisci spazzole"
-                >
-                  -
-                </button>
-                <span class="dx-sim__counter-val" aria-live="polite">{spazzole}</span>
-                <button
-                  type="button"
-                  class="dx-sim__counter-btn"
-                  onClick={() => setSpazzole((n) => Math.min(3, n + 1))}
-                  disabled={spazzole === 3}
-                  aria-label="Aumenta spazzole"
-                >
-                  +
-                </button>
+            {tuttiAccessori.length > 0 && (
+              <div class="dx-sim__field">
+                <label class="dx-sim__label">Accessori opzionali</label>
+                <ul class="dx-sim__acc-list">
+                  {tuttiAccessori.map((acc) => {
+                    const q = quantita[acc.id] ?? 0;
+                    return (
+                      <li class="dx-sim__acc-row">
+                        <div class="dx-sim__acc-info">
+                          <span class="dx-sim__acc-label">{acc.label}</span>
+                          <span class="dx-sim__acc-meta">
+                            {formatEuro(acc.prezzo)} euro
+                            {acc.step > 1 ? ` x ${acc.step} (${acc.note ?? 'multipli di ' + acc.step})` : ''}
+                          </span>
+                        </div>
+                        <div class="dx-sim__counter" role="group" aria-label={`Quantita ${acc.label}`}>
+                          <button
+                            type="button"
+                            class="dx-sim__counter-btn"
+                            onClick={() => changeQuantita(acc, -1)}
+                            disabled={q === 0}
+                            aria-label={`Diminuisci ${acc.label}`}
+                          >
+                            -
+                          </button>
+                          <span class="dx-sim__counter-val" aria-live="polite">{q}</span>
+                          <button
+                            type="button"
+                            class="dx-sim__counter-btn"
+                            onClick={() => changeQuantita(acc, +1)}
+                            disabled={q >= acc.max}
+                            aria-label={`Aumenta ${acc.label}`}
+                          >
+                            +
+                          </button>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
               </div>
-            </div>
+            )}
 
             <div class="dx-sim__field">
               <label class="dx-sim__label">Durata</label>
