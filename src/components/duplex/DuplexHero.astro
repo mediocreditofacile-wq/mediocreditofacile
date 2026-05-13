@@ -1,0 +1,96 @@
+---
+// Hero della landing Duplex. Foto Ultrax 45 in placeholder finche' non arriva il file vero.
+---
+
+<section class="dx-hero" id="top">
+  <div class="dx-hero__inner">
+    <div class="dx-hero__copy">
+      <h1 class="dx-hero__title">Ultrax 45 in noleggio operativo, da 72 euro al mese</h1>
+      <p class="dx-hero__subtitle">Canone fisso, condizioni uguali in tutta Italia, trimestre di grazia per chi parte adesso</p>
+      <p class="dx-hero__note">Disponibile anche per la gamma Duplex 340, 420, 620 e Escalator</p>
+      <a href="#simulatore" class="dx-hero__cta">Calcola il tuo canone</a>
+    </div>
+    <div class="dx-hero__media">
+      <img
+        src="/images/duplex/ultrax-45-hero.jpg"
+        alt="Ultrax 45 in posa frontale, illuminazione viola, marchio ultra45 visibile"
+        class="dx-hero__img"
+        width="1702"
+        height="2168"
+        loading="eager"
+        fetchpriority="high"
+      />
+    </div>
+  </div>
+</section>
+
+<style>
+  .dx-hero {
+    background: #ffffff;
+    border-bottom: 1px solid var(--dx-border, #D9D7D2);
+  }
+  .dx-hero__inner {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 48px 20px 56px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 32px;
+    align-items: center;
+  }
+  .dx-hero__title {
+    font-family: 'Manrope', system-ui, sans-serif;
+    font-weight: 800;
+    font-size: clamp(28px, 5.5vw, 46px);
+    line-height: 1.12;
+    color: var(--dx-blue, #1B3A57);
+    margin: 0 0 14px 0;
+  }
+  .dx-hero__subtitle {
+    font-family: 'Manrope', system-ui, sans-serif;
+    font-weight: 500;
+    font-size: clamp(16px, 2.4vw, 19px);
+    line-height: 1.5;
+    color: var(--dx-text, #1A1A1A);
+    margin: 0 0 10px 0;
+  }
+  .dx-hero__note {
+    font-family: 'Manrope', system-ui, sans-serif;
+    font-weight: 400;
+    font-size: 14px;
+    color: #5a5a5a;
+    margin: 0 0 24px 0;
+  }
+  .dx-hero__cta {
+    display: inline-block;
+    background: var(--dx-orange, #E66A2C);
+    color: #ffffff;
+    text-decoration: none;
+    font-family: 'Manrope', system-ui, sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    padding: 14px 26px;
+    border-radius: 4px;
+    transition: background-color 120ms ease;
+  }
+  .dx-hero__cta:hover { background: #c95820; }
+  .dx-hero__img {
+    width: 100%;
+    height: auto;
+    max-height: 520px;
+    object-fit: contain;
+    background: #0e0a18;
+    border-radius: 4px;
+    display: block;
+  }
+  @media (min-width: 768px) {
+    .dx-hero__img { max-height: 600px; }
+  }
+  @media (min-width: 768px) {
+    .dx-hero__inner {
+      grid-template-columns: 1.1fr 1fr;
+      padding: 72px 32px 80px;
+      gap: 48px;
+    }
+  }
+</style>

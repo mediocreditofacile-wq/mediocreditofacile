@@ -1,0 +1,281 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import DuplexHeader from '../../components/duplex/DuplexHeader.astro';
+import DuplexHero from '../../components/duplex/DuplexHero.astro';
+import DuplexSimulator from '../../components/duplex/DuplexSimulator.tsx';
+import DuplexSeiCose from '../../components/duplex/DuplexSeiCose.astro';
+import DuplexComeFunziona from '../../components/duplex/DuplexComeFunziona.astro';
+import DuplexFAQ from '../../components/duplex/DuplexFAQ.astro';
+import DuplexForm from '../../components/duplex/DuplexForm.astro';
+import DuplexFooter from '../../components/duplex/DuplexFooter.astro';
+
+const title = 'Noleggio operativo macchine Duplex - Ultrax 45 da 72 euro/mese';
+const description = 'Noleggio operativo macchine Duplex per la pulizia industriale: Ultrax 45 da 72 euro al mese. Canone fisso, condizioni uguali in tutta Italia, trimestre di grazia. Calcola il canone in pagina.';
+const ogImage = '/images/duplex/ultrax-45-og.png';
+---
+
+<Layout title={title} description={description} ogImage={ogImage} noindex={true}>
+  <!-- Gate password (stesso pattern delle altre area partner). -->
+  <div id="dx-gate" class="dx-gate">
+    <div class="dx-gate__card">
+      <p class="dx-gate__brand">DUPLEX</p>
+      <p class="dx-gate__label">Area riservata distributori</p>
+      <div class="dx-gate__form">
+        <input type="password" id="dx-gate-pwd" class="dx-gate__input" placeholder="Password" autocomplete="off" />
+        <button id="dx-gate-btn" type="button" class="dx-gate__btn">Accedi</button>
+      </div>
+      <p id="dx-gate-error" class="dx-gate__error" hidden>Password non corretta</p>
+    </div>
+  </div>
+
+  <!-- Contenuto pagina (nascosto fino allo sblocco gate). -->
+  <div id="dx-tool" class="duplex-page" style="display:none !important;">
+    <DuplexHeader />
+    <button type="button" id="dx-logout" class="dx-logout" aria-label="Esci dall'area riservata">Esci</button>
+    <main>
+      <DuplexHero />
+
+      <!-- Strip allineamento Italia: tre voci affiancate, mobile in colonna. -->
+      <section class="dx-strip" aria-label="Vantaggi rete Duplex">
+        <div class="dx-strip__inner">
+          <div class="dx-strip__item">
+            <span class="dx-strip__text">Una sola rata, valida in tutta Italia</span>
+          </div>
+          <div class="dx-strip__sep" aria-hidden="true"></div>
+          <div class="dx-strip__item">
+            <span class="dx-strip__text">Oltre 10 operatori finanziari alle spalle</span>
+          </div>
+          <div class="dx-strip__sep" aria-hidden="true"></div>
+          <div class="dx-strip__item">
+            <span class="dx-strip__text">Approvazione in 24-48 ore</span>
+          </div>
+        </div>
+      </section>
+
+      <DuplexSimulator client:visible />
+      <DuplexSeiCose />
+      <DuplexComeFunziona />
+      <DuplexFAQ />
+      <DuplexForm />
+    </main>
+    <DuplexFooter />
+  </div>
+</Layout>
+
+<script>
+  const PASSWORD = 'duplex';
+  const KEY = 'mcf_duplex_auth';
+
+  const gate = document.getElementById('dx-gate') as HTMLDivElement | null;
+  const tool = document.getElementById('dx-tool') as HTMLDivElement | null;
+  const pwd = document.getElementById('dx-gate-pwd') as HTMLInputElement | null;
+  const btn = document.getElementById('dx-gate-btn') as HTMLButtonElement | null;
+  const err = document.getElementById('dx-gate-error') as HTMLParagraphElement | null;
+  const logout = document.getElementById('dx-logout') as HTMLButtonElement | null;
+
+  if (!gate || !tool || !pwd || !btn || !err || !logout) {
+    // Niente da fare: gli ID dovrebbero essere sempre presenti, log silenzioso.
+    console.warn('[duplex-gate] elementi mancanti');
+  } else {
+    function showTool() {
+      gate!.style.display = 'none';
+      tool!.style.cssText = '';
+    }
+    function showGate() {
+      gate!.style.display = '';
+      tool!.style.cssText = 'display:none !important;';
+    }
+
+    if (localStorage.getItem(KEY) === 'ok') {
+      showTool();
+    }
+
+    btn.addEventListener('click', () => {
+      if (pwd.value.trim().toLowerCase() === PASSWORD) {
+        localStorage.setItem(KEY, 'ok');
+        showTool();
+        err.hidden = true;
+        pwd.classList.remove('dx-gate__input--error');
+      } else {
+        err.hidden = false;
+        pwd.classList.add('dx-gate__input--error');
+      }
+    });
+
+    pwd.addEventListener('keydown', (e) => {
+      if ((e as KeyboardEvent).key === 'Enter') btn.click();
+    });
+
+    logout.addEventListener('click', () => {
+      localStorage.removeItem(KEY);
+      showGate();
+      pwd.value = '';
+      err.hidden = true;
+    });
+  }
+</script>
+
+<style is:global>
+  /* Token brand Duplex applicati solo dentro .duplex-page per non inquinare il sito MCF. */
+  .duplex-page {
+    --dx-blue: #1B3A57;
+    --dx-orange: #E66A2C;
+    --dx-text: #1A1A1A;
+    --dx-bg: #FFFFFF;
+    --dx-grey-soft: #F2F0EC;
+    --dx-border: #D9D7D2;
+
+    background: var(--dx-bg);
+    color: var(--dx-text);
+    font-family: 'Manrope', system-ui, sans-serif;
+    position: relative;
+  }
+  .duplex-page main { display: block; }
+  .duplex-page section { background: inherit; }
+</style>
+
+<style>
+  /* === Gate password (stand-alone, brand Duplex) === */
+  .dx-gate {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 20px;
+    background: #F2F0EC;
+    font-family: 'Manrope', system-ui, sans-serif;
+  }
+  .dx-gate__card {
+    background: #ffffff;
+    border: 1px solid #D9D7D2;
+    border-radius: 4px;
+    padding: 40px 32px;
+    max-width: 400px;
+    width: 100%;
+    text-align: center;
+  }
+  .dx-gate__brand {
+    font-weight: 800;
+    font-size: 26px;
+    letter-spacing: 0.18em;
+    color: #1B3A57;
+    margin: 0 0 8px 0;
+  }
+  .dx-gate__label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #5a5a5a;
+    margin: 0 0 24px 0;
+  }
+  .dx-gate__form {
+    display: flex;
+    gap: 10px;
+  }
+  .dx-gate__input {
+    flex: 1;
+    padding: 12px 14px;
+    border: 1px solid #c9c8c5;
+    border-radius: 4px;
+    font-family: 'Manrope', system-ui, sans-serif;
+    font-size: 15px;
+    color: #1A1A1A;
+    background: #ffffff;
+  }
+  .dx-gate__input:focus {
+    outline: 2px solid #1B3A57;
+    outline-offset: 1px;
+    border-color: #1B3A57;
+  }
+  .dx-gate__input--error {
+    border-color: #cc3333;
+  }
+  .dx-gate__btn {
+    padding: 12px 20px;
+    background: #E66A2C;
+    color: #ffffff;
+    font-family: 'Manrope', system-ui, sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    border: 0;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 120ms ease;
+  }
+  .dx-gate__btn:hover { background: #c95820; }
+  .dx-gate__error {
+    color: #cc3333;
+    font-size: 13px;
+    margin: 12px 0 0 0;
+  }
+
+  /* Bottone "Esci" in alto a destra dentro la pagina sbloccata. */
+  .dx-logout {
+    position: absolute;
+    top: 14px;
+    right: 20px;
+    z-index: 60;
+    background: transparent;
+    border: 1px solid #D9D7D2;
+    border-radius: 4px;
+    padding: 6px 12px;
+    font-family: 'Manrope', system-ui, sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: #6a6a6a;
+    cursor: pointer;
+    transition: border-color 120ms ease, color 120ms ease;
+  }
+  .dx-logout:hover {
+    border-color: #1B3A57;
+    color: #1B3A57;
+  }
+
+  @media (max-width: 480px) {
+    .dx-gate__form { flex-direction: column; }
+    .dx-logout { top: 12px; right: 12px; padding: 5px 10px; font-size: 11px; }
+  }
+
+  /* === Strip allineamento Italia === */
+  .dx-strip {
+    background: var(--dx-grey-soft, #F2F0EC);
+    border-bottom: 1px solid var(--dx-border, #D9D7D2);
+  }
+  .dx-strip__inner {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 22px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+  }
+  .dx-strip__item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  .dx-strip__text {
+    font-family: 'Manrope', system-ui, sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--dx-blue, #1B3A57);
+    line-height: 1.4;
+  }
+  .dx-strip__sep { display: none; }
+  @media (min-width: 768px) {
+    .dx-strip__inner {
+      flex-direction: row;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 18px 32px;
+    }
+    .dx-strip__sep {
+      display: block;
+      width: 1px;
+      align-self: stretch;
+      background: #c8c5be;
+    }
+    .dx-strip__item { flex: 1; }
+  }
+</style>
