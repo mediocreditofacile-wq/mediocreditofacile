@@ -258,7 +258,7 @@ export default function DuplexSimulator() {
                 <strong>Pagamento:</strong> trimestrale anticipato ({formatEuro(canoneMensile)} x 3 = {formatEuro(importoTrimestrale)} euro)
               </p>
               <p class="dx-sim__detail-row">
-                <strong>Promo lancio:</strong> trimestre di grazia + pro rata dal giorno di consegna. Inizi a pagare a settembre.
+                <strong>Promo lancio:</strong> grace period + pro rata dal giorno di consegna. Inizi a pagare a settembre.
               </p>
               <p class="dx-sim__detail-row">
                 <strong>Pagamento mensile:</strong> {mensileDisponibile
