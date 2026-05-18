@@ -1,0 +1,37 @@
+{
+  "Ultrax 45": {
+    "spazzole": [
+      { "id": "ux-microfibra", "label": "Spazzola microfibra bianca", "prezzo": 119, "step": 2, "max": 4, "note": "in coppia" }
+    ],
+    "extra": [
+      { "id": "ux-squeegy", "label": "Squeegy Assembly (uso cucina)", "prezzo": 150, "step": 1, "max": 1 }
+    ]
+  },
+  "Duplex 340": {
+    "spazzole": [
+      { "id": "d340-blu", "label": "Brush Blu (non abrasiva, +30% potere pulente)", "prezzo": 56, "step": 1, "max": 4 },
+      { "id": "d340-med", "label": "Brush Med (gialla, abrasivo medio)", "prezzo": 100, "step": 1, "max": 4 },
+      { "id": "d340-max", "label": "Brush Max (rossa, altamente abrasiva)", "prezzo": 100, "step": 1, "max": 4 }
+    ],
+    "extra": []
+  },
+  "Duplex 420": {
+    "spazzole": [
+      { "id": "d420-blu", "label": "Brush Blu (non abrasiva, +30% potere pulente)", "prezzo": 65, "step": 1, "max": 4 },
+      { "id": "d420-med", "label": "Brush Med (gialla, abrasivo medio)", "prezzo": 100, "step": 1, "max": 4 },
+      { "id": "d420-max", "label": "Brush Max (rossa, altamente abrasiva)", "prezzo": 100, "step": 1, "max": 4 }
+    ],
+    "extra": []
+  },
+  "Duplex 620": {
+    "spazzole": [
+      { "id": "d620-med", "label": "Brush Med (gialla, abrasivo medio)", "prezzo": 120, "step": 1, "max": 4 },
+      { "id": "d620-max", "label": "Brush Max (rossa, altamente abrasiva)", "prezzo": 120, "step": 1, "max": 4 }
+    ],
+    "extra": []
+  },
+  "Duplex Escalator": {
+    "spazzole": [],
+    "extra": []
+  }
+}

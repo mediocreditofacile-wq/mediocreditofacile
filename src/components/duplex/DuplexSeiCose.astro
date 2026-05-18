@@ -1,0 +1,105 @@
+---
+// Sezione "Per partire bastano sei cose": griglia 6 tile con icona SVG inline minimale.
+const tile = [
+  { label: 'Email', icon: 'email' },
+  { label: 'Cellulare', icon: 'phone' },
+  { label: 'IBAN', icon: 'iban' },
+  { label: 'Visura camerale', icon: 'doc' },
+  { label: 'Carta d\'identita\'', icon: 'id' },
+  { label: 'Tessera sanitaria', icon: 'card' },
+];
+---
+
+<section class="dx-sei">
+  <div class="dx-sei__inner">
+    <h2 class="dx-sei__title">Per partire bastano sei cose</h2>
+    <p class="dx-sei__intro">Per attivare un noleggio servono sei dati. Li raccogliamo noi, tu ci dici solo che vuoi partire.</p>
+    <ul class="dx-sei__grid">
+      {tile.map(({ label, icon }) => (
+        <li class="dx-sei__tile">
+          <span class="dx-sei__icon" aria-hidden="true">
+            {icon === 'email' && (
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="1"/><path d="M3 7l9 7 9-7"/></svg>
+            )}
+            {icon === 'phone' && (
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="7" y="3" width="10" height="18" rx="1.5"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
+            )}
+            {icon === 'iban' && (
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 10l9-5 9 5"/><line x1="5" y1="10" x2="5" y2="18"/><line x1="10" y1="10" x2="10" y2="18"/><line x1="14" y1="10" x2="14" y2="18"/><line x1="19" y1="10" x2="19" y2="18"/><line x1="3" y1="20" x2="21" y2="20"/></svg>
+            )}
+            {icon === 'doc' && (
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4"/><line x1="9" y1="13" x2="16" y2="13"/><line x1="9" y1="16" x2="16" y2="16"/></svg>
+            )}
+            {icon === 'id' && (
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="6" width="18" height="12" rx="1.5"/><circle cx="9" cy="12" r="2"/><line x1="14" y1="11" x2="18" y2="11"/><line x1="14" y1="14" x2="17" y2="14"/></svg>
+            )}
+            {icon === 'card' && (
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="6" width="18" height="12" rx="1.5"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="7" y1="14" x2="11" y2="14"/></svg>
+            )}
+          </span>
+          <span class="dx-sei__label">{label}</span>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .dx-sei {
+    background: var(--dx-grey-soft, #F2F0EC);
+    padding: 56px 0;
+  }
+  .dx-sei__inner {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+  .dx-sei__title {
+    font-family: 'Manrope', system-ui, sans-serif;
+    font-weight: 800;
+    font-size: clamp(22px, 3.6vw, 30px);
+    color: var(--dx-blue, #1B3A57);
+    margin: 0 0 10px 0;
+  }
+  .dx-sei__intro {
+    font-family: 'Manrope', system-ui, sans-serif;
+    font-size: 16px;
+    color: var(--dx-text, #1A1A1A);
+    margin: 0 0 28px 0;
+    max-width: 640px;
+  }
+  .dx-sei__grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  .dx-sei__tile {
+    background: #ffffff;
+    border: 1px solid var(--dx-border, #D9D7D2);
+    border-radius: 4px;
+    padding: 18px 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .dx-sei__icon {
+    color: var(--dx-blue, #1B3A57);
+    display: inline-flex;
+    flex-shrink: 0;
+  }
+  .dx-sei__label {
+    font-family: 'Manrope', system-ui, sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--dx-text, #1A1A1A);
+  }
+  @media (min-width: 600px) {
+    .dx-sei__grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (min-width: 1024px) {
+    .dx-sei__grid { grid-template-columns: repeat(3, 1fr); }
+  }
+</style>

@@ -1,0 +1,10 @@
+[
+  { "id": "ultrax-45", "label": "Ultrax 45", "prezzo": 3500, "alimentazione": null, "highlight": true },
+  { "id": "duplex-340-cavo", "label": "Duplex 340 a cavo", "prezzo": 1931, "alimentazione": "cavo" },
+  { "id": "duplex-340-batteria", "label": "Duplex 340 a batteria", "prezzo": 2800, "alimentazione": "batteria" },
+  { "id": "duplex-420-cavo", "label": "Duplex 420 a cavo", "prezzo": 2259, "alimentazione": "cavo" },
+  { "id": "duplex-420-batteria", "label": "Duplex 420 a batteria", "prezzo": 3200, "alimentazione": "batteria" },
+  { "id": "duplex-620-cavo", "label": "Duplex 620 a cavo", "prezzo": 3800, "alimentazione": "cavo" },
+  { "id": "duplex-620-batteria", "label": "Duplex 620 a batteria", "prezzo": 6200, "alimentazione": "batteria" },
+  { "id": "duplex-escalator", "label": "Duplex Escalator", "prezzo": 10000, "alimentazione": null }
+]

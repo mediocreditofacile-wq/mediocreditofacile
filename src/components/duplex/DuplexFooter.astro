@@ -1,0 +1,98 @@
+---
+// Footer Duplex: tre colonne (mobile in stack), dicitura legale piccola in fondo
+// con la menzione MCF (unico punto della pagina dove appare il brand MCF).
+---
+
+<footer class="dx-footer">
+  <div class="dx-footer__inner">
+    <div class="dx-footer__cols">
+      <div class="dx-footer__col">
+        <h3 class="dx-footer__h">Duplex Italia</h3>
+        <p class="dx-footer__p">Duplex Italia Srl</p>
+        <p class="dx-footer__p">Firenze</p>
+        <p class="dx-footer__p"><a href="https://www.duplex-italia.com" target="_blank" rel="noopener">www.duplex-italia.com</a></p>
+        <p class="dx-footer__p dx-footer__hint">Dati di contatto da confermare</p>
+      </div>
+
+      <div class="dx-footer__col">
+        <h3 class="dx-footer__h">Link utili</h3>
+        <ul class="dx-footer__list">
+          <li><a href="/privacy">Privacy</a></li>
+          <li><a href="/cookie">Cookie</a></li>
+          <li><a href="/termini">Termini</a></li>
+        </ul>
+      </div>
+
+      <div class="dx-footer__col">
+        <h3 class="dx-footer__h">Contatti</h3>
+        <p class="dx-footer__p">Per assistenza sulla pratica:</p>
+        <p class="dx-footer__p"><a href="mailto:mediocreditofacile@gmail.com">mediocreditofacile@gmail.com</a></p>
+        <p class="dx-footer__p"><a href="tel:+393939957840">+39 393 995 7840</a></p>
+      </div>
+    </div>
+
+    <p class="dx-footer__legal">
+      Locazione operativa a cura di Mediocredito Facile (Alberto Amà) —
+      <a href="mailto:mediocreditofacile@gmail.com">mediocreditofacile@gmail.com</a> —
+      +39 393 995 7840 —
+      <a href="https://www.mediocreditofacile.it" target="_blank" rel="noopener">www.mediocreditofacile.it</a>.
+      La presente pagina è uno strumento informativo non vincolante. Le condizioni finali sono
+      definite dal contratto di locazione.
+    </p>
+  </div>
+</footer>
+
+<style>
+  .dx-footer {
+    background: #14283d;
+    color: #d8dde3;
+    padding: 48px 0 24px;
+  }
+  .dx-footer__inner {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+  .dx-footer__cols {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 32px;
+    margin-bottom: 32px;
+  }
+  .dx-footer__col h3 { margin-top: 0; }
+  .dx-footer__h {
+    font-family: 'Manrope', system-ui, sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #ffffff;
+    margin: 0 0 12px 0;
+  }
+  .dx-footer__p,
+  .dx-footer__list li {
+    font-family: 'Manrope', system-ui, sans-serif;
+    font-size: 14px;
+    margin: 0 0 6px 0;
+    color: #c5cad2;
+    line-height: 1.5;
+  }
+  .dx-footer__list { list-style: none; padding: 0; margin: 0; }
+  .dx-footer__hint { font-size: 12px; color: #8a93a0; margin-top: 8px; font-style: italic; }
+  .dx-footer a { color: #ffffff; text-decoration: none; border-bottom: 1px solid transparent; }
+  .dx-footer a:hover { border-bottom-color: var(--dx-orange, #E66A2C); }
+  .dx-footer__legal {
+    border-top: 1px solid #2a3f55;
+    padding-top: 18px;
+    font-family: 'Manrope', system-ui, sans-serif;
+    font-size: 12px;
+    color: #8a93a0;
+    line-height: 1.5;
+    margin: 0;
+  }
+  @media (min-width: 768px) {
+    .dx-footer__cols {
+      grid-template-columns: 1.4fr 1fr 1.2fr;
+    }
+  }
+</style>
