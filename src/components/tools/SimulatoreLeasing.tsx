@@ -434,15 +434,7 @@ export default function SimulatoreLeasing({ varianteFornitori = false }: Simulat
             </label>
           </div>
 
-          {varianteFornitori ? (
-            <div class="simlea__field">
-              <span class="simlea__field-label">Spread applicato</span>
-              <div class="simlea__spread-fixed">
-                <strong>{pct(partner.spreadFornitori)}</strong>
-                <span class="simlea__spread-fixed-meta">spread medio commerciale</span>
-              </div>
-            </div>
-          ) : (
+          {!varianteFornitori && (
             <label class="simlea__field">
               <span class="simlea__field-label">
                 Condizione (spread)
@@ -466,9 +458,11 @@ export default function SimulatoreLeasing({ varianteFornitori = false }: Simulat
             </label>
           )}
 
-          <div class="simlea__euribor">
-            Tasso piano = Spread + Euribor 3M ({pct(EURIBOR_3M)} • {EURIBOR_3M_DATA})
-          </div>
+          {!varianteFornitori && (
+            <div class="simlea__euribor">
+              Tasso piano = Spread + Euribor 3M ({pct(EURIBOR_3M)} • {EURIBOR_3M_DATA})
+            </div>
+          )}
         </div>
 
         {/* === Pannello agevolazioni === */}
@@ -627,7 +621,9 @@ export default function SimulatoreLeasing({ varianteFornitori = false }: Simulat
                   <td>{eur(risultato.speseIstruttoria)}</td>
                 </tr>
                 <tr><td>Spese incasso rata</td><td>{eur(risultato.speseIncassoRata)} × {risultato.numRate}</td></tr>
-                <tr><td>Tasso del piano</td><td>{pct(risultato.tassoEffettivo)}</td></tr>
+                {!varianteFornitori && (
+                  <tr><td>Tasso del piano</td><td>{pct(risultato.tassoEffettivo)}</td></tr>
+                )}
                 {partner.modello === 'capitale-gonfiato' && !varianteFornitori && (
                   <tr class="simlea__breakdown-prov">
                     <td>Provvigione caricata sulla rata</td>
