@@ -1,0 +1,304 @@
+/* === Simulatore Econocom Pubblica Amministrazione === */
+.sepa {
+  font-family: var(--font-family, 'Manrope', system-ui, sans-serif);
+  color: #0F1020;
+}
+
+.sepa__panel {
+  background: #ffffff;
+  border: 1px solid #E1DEE3;
+  border-radius: 14px;
+  padding: 1.75rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  gap: 1.75rem;
+}
+
+/* === Colonna input === */
+.sepa__form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.sepa__legend {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #1e3a8a;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin: 0;
+}
+
+.sepa__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.sepa__label {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #0F1020;
+}
+
+.sepa__hint {
+  font-size: 0.78rem;
+  color: #64748b;
+  line-height: 1.45;
+}
+
+.sepa__input-wrap {
+  position: relative;
+}
+
+.sepa__input {
+  width: 100%;
+  padding: 0.95rem 2.7rem 0.95rem 1.05rem;
+  border: 1.5px solid #E1DEE3;
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #0F1020;
+  background: #fafafa;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+  -moz-appearance: textfield;
+}
+
+.sepa__input::-webkit-outer-spin-button,
+.sepa__input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.sepa__input:focus {
+  outline: none;
+  border-color: #FE6F3A;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(254, 111, 58, 0.12);
+}
+
+.sepa__input--error {
+  border-color: #ef4444;
+  background: #fff5f5;
+}
+
+.sepa__input-suffix {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1rem;
+  font-weight: 700;
+  color: #64748b;
+  pointer-events: none;
+}
+
+.sepa__duration-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.75rem;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #1e40af;
+  align-self: flex-start;
+}
+
+.sepa__note {
+  font-size: 0.78rem;
+  color: #64748b;
+  line-height: 1.55;
+  padding: 0.65rem 0.85rem;
+  background: #f8fafc;
+  border-left: 3px solid #1e40af;
+  border-radius: 4px;
+}
+
+/* === Colonna risultato === */
+.sepa__result {
+  background: linear-gradient(155deg, #eff6ff 0%, #f5f3ff 100%);
+  border: 1px solid #c7d2fe;
+  border-radius: 14px;
+  padding: 1.6rem 1.6rem 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.sepa__result-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background: #f8fafc;
+  border: 1.5px dashed #cbd5e1;
+  color: #64748b;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  padding: 2.5rem 1.5rem;
+}
+
+.sepa__result-warning {
+  background: linear-gradient(155deg, #fff7ed 0%, #fef3ec 100%);
+  border-color: #fdba74;
+}
+
+.sepa__result-warning .sepa__result-label,
+.sepa__result-warning .sepa__result-rata-label {
+  color: #9a3412;
+}
+
+.sepa__result-label {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #1e3a8a;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.sepa__result-fascia {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #0F1020;
+  margin: 0;
+}
+
+.sepa__result-coeff {
+  font-size: 0.78rem;
+  color: #475569;
+  margin-top: 0.15rem;
+}
+
+.sepa__result-rata {
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 1.1rem 1.2rem;
+  border: 1px solid #c7d2fe;
+}
+
+.sepa__result-rata-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #1e3a8a;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0 0 0.25rem;
+}
+
+.sepa__result-rata-value {
+  font-size: 2.1rem;
+  font-weight: 800;
+  color: #0F1020;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.sepa__result-rata-unit {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #64748b;
+  margin-left: 0.3rem;
+}
+
+.sepa__result-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+}
+
+.sepa__result-cell {
+  background: #ffffffaa;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.7rem 0.85rem;
+}
+
+.sepa__result-cell-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0 0 0.2rem;
+}
+
+.sepa__result-cell-value {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #0F1020;
+}
+
+.sepa__result-disclaimer {
+  font-size: 0.78rem;
+  color: #475569;
+  line-height: 1.55;
+  margin: 0;
+  padding-top: 0.4rem;
+  border-top: 1px dashed #c7d2fe;
+}
+
+/* Tabella coefficienti collassabile */
+.sepa__table-toggle {
+  margin-top: 0.5rem;
+  background: none;
+  border: none;
+  color: #1e40af;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+  align-self: flex-start;
+}
+
+.sepa__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+  border: 1px solid #c7d2fe;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.sepa__table th,
+.sepa__table td {
+  padding: 0.55rem 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #e0e7ff;
+}
+
+.sepa__table th {
+  background: #eef2ff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #3730a3;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.sepa__table tr:last-child td {
+  border-bottom: none;
+}
+
+.sepa__table tr.is-active td {
+  background: #fef3c7;
+  font-weight: 700;
+}
+
+/* Responsive */
+@media (max-width: 860px) {
+  .sepa__panel {
+    grid-template-columns: 1fr;
+    padding: 1.25rem;
+    gap: 1.25rem;
+  }
+  .sepa__result-rata-value {
+    font-size: 1.8rem;
+  }
+}
