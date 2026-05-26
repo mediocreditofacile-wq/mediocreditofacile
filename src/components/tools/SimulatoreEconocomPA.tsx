@@ -1,6 +1,5 @@
 import { useState, useMemo } from 'preact/hooks';
 import {
-  ECONOCOM_PA_COEFFICIENTI_60M,
   ECONOCOM_PA_DURATA_MESI,
   ECONOCOM_PA_IMPORTO_MIN,
   calcolaRataEconocomPA,
@@ -39,7 +38,6 @@ const fmtEUR2 = (v: number) =>
 
 export default function SimulatoreEconocomPA() {
   const [importoInput, setImportoInput] = useState('');
-  const [showTable, setShowTable] = useState(false);
 
   const importo = useMemo(() => {
     const clean = importoInput.replace(/[^\d]/g, '');
@@ -94,40 +92,10 @@ export default function SimulatoreEconocomPA() {
           <span class="sepa__duration-pill">Durata fissa {ECONOCOM_PA_DURATA_MESI} mesi</span>
 
           <p class="sepa__note">
-            Il coefficiente applicato dipende dalla fascia di investimento:
+            La condizione applicata dipende dalla fascia di investimento:
             piu' alto l'importo, migliore la condizione. Per durate superiori
             (72/84 mesi) o operazioni fuori range, Econocom valuta caso per caso.
           </p>
-
-          <button
-            type="button"
-            class="sepa__table-toggle"
-            onClick={() => setShowTable((s) => !s)}
-          >
-            {showTable ? 'Nascondi tabella coefficienti' : 'Mostra tabella coefficienti'}
-          </button>
-
-          {showTable && (
-            <table class="sepa__table">
-              <thead>
-                <tr>
-                  <th>Fascia investimento</th>
-                  <th>Coefficiente 60m</th>
-                </tr>
-              </thead>
-              <tbody>
-                {ECONOCOM_PA_COEFFICIENTI_60M.map((f) => {
-                  const isActive = risultato?.fascia.label === f.label;
-                  return (
-                    <tr class={isActive ? 'is-active' : ''}>
-                      <td>{f.label}</td>
-                      <td>{f.coefficiente.toFixed(4).replace('.', ',')}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          )}
         </div>
 
         {/* === Colonna risultato === */}
