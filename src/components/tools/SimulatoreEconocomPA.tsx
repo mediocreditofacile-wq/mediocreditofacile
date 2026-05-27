@@ -4,10 +4,7 @@ import {
   ECONOCOM_PA_IMPORTO_MIN,
   calcolaRataEconocomPA,
 } from '../../data/econocom-pa';
-import {
-  ATTIVITA_LABELS_PA,
-  calcolaBilancioEnergetico,
-} from '../../data/bp-fotovoltaico';
+import { calcolaBilancioEnergetico } from '../../data/bp-fotovoltaico';
 import './simulatore-econocom-pa.css';
 
 /**
@@ -51,6 +48,13 @@ const fmtPct = (v: number) =>
 // basta esporre una prop e aggiungere il selettore.
 const ZONA_PA = 'sud';
 
+// Profilo di consumo che ottimizza l'autoconsumo (load match 0,58 — ospedali,
+// municipalizzate, strutture attive 24/7). Scelto come default ottimistico per
+// il primo incontro: rappresenta il caso piu' favorevole tra i tre profili
+// disponibili (autoconsumo a R=1 ~68%, contro 58% commerciale e 45% residenziale).
+// Per profili reali piu' "diurni standard" o "serali" il risparmio cala del 15-25%.
+const PROFILO_OTTIMIZZANTE = 'industriale';
+
 export default function SimulatoreEconocomPA() {
   // === Input rata ===
   const [importoInput, setImportoInput] = useState('');
@@ -62,7 +66,6 @@ export default function SimulatoreEconocomPA() {
   const [potenzaInput, setPotenzaInput] = useState('');
   const [accumuloInput, setAccumuloInput] = useState('');
   const [bollettaInput, setBollettaInput] = useState('');
-  const [profilo, setProfilo] = useState('commerciale');
 
   // === Parsing input ===
   const importo = useMemo(() => {
@@ -91,10 +94,11 @@ export default function SimulatoreEconocomPA() {
   const sottoSoglia = importo > 0 && importo < ECONOCOM_PA_IMPORTO_MIN;
 
   // === Calcolo bilancio energetico (solo se BP attivo) ===
+  // Profilo fissato sul caso piu' favorevole (vedi PROFILO_OTTIMIZZANTE).
   const bilancio = useMemo(() => {
     if (!modalitaBP) return null;
-    return calcolaBilancioEnergetico(potenza, accumulo, ZONA_PA, profilo, bolletta);
-  }, [modalitaBP, potenza, accumulo, profilo, bolletta]);
+    return calcolaBilancioEnergetico(potenza, accumulo, ZONA_PA, PROFILO_OTTIMIZZANTE, bolletta);
+  }, [modalitaBP, potenza, accumulo, bolletta]);
 
   // === Confronto rata vs bolletta (solo se ho sia rata che bilancio) ===
   const confronto = useMemo(() => {
@@ -241,29 +245,16 @@ export default function SimulatoreEconocomPA() {
                     onInput={handleAccumulo}
                   />
                 </div>
-
-                <div class="sepa__field">
-                  <label class="sepa__bp-label" for="sepa-profilo">
-                    Profilo dell'ente
-                  </label>
-                  <select
-                    id="sepa-profilo"
-                    class="sepa__input sepa__input--small"
-                    value={profilo}
-                    onChange={(e) => setProfilo((e.target as HTMLSelectElement).value)}
-                  >
-                    {Object.entries(ATTIVITA_LABELS_PA).map(([k, v]) => (
-                      <option value={k}>{v}</option>
-                    ))}
-                  </select>
-                </div>
               </div>
 
               <p class="sepa__note sepa__note--bp">
                 Il consumo annuo dell'ente viene stimato dalla bolletta mensile
-                al prezzo medio di rete (0,28 €/kWh). La produzione e' calcolata
-                con l'irraggiamento medio del Sud Italia (1.425 kWh/kWp/anno, fonte PVGIS).
-                Il valore di immissione in rete e' fissato a 0,13 €/kWh (ritiro dedicato GSE).
+                al prezzo medio di rete (0,28 €/kWh). La produzione usa l'irraggiamento
+                medio del Sud Italia (1.425 kWh/kWp/anno, PVGIS). L'immissione in rete
+                e' valorizzata a 0,13 €/kWh (ritiro dedicato GSE). Calcolo calibrato sul
+                profilo di consumo che ottimizza l'autoconsumo (ente attivo 24/7 tipo
+                ospedale o municipalizzata): per uffici comunali o presidi serali il
+                risparmio reale e' inferiore del 15-25%.
               </p>
             </div>
           )}
