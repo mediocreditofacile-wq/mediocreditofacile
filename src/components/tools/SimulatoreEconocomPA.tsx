@@ -100,18 +100,30 @@ export default function SimulatoreEconocomPA() {
     return calcolaBilancioEnergetico(potenza, accumulo, ZONA_PA, PROFILO_OTTIMIZZANTE, bolletta);
   }, [modalitaBP, potenza, accumulo, bolletta]);
 
-  // === Confronto rata vs bolletta (solo se ho sia rata che bilancio) ===
-  const confronto = useMemo(() => {
-    if (!risultato || !bilancio || bolletta <= 0) return null;
-    // costo netto = bolletta - risparmio autoconsumo + rata Econocom - valore immissione
-    const costoNettoMensile =
-      bolletta
-      - bilancio.risparmioAutoconsumoMensile
-      + risultato.rataMensile
-      - bilancio.valoreImmissioneMensile;
-    const differenza = bolletta - costoNettoMensile; // > 0 = risparmio complessivo
-    return { costoNettoMensile, differenza };
-  }, [risultato, bilancio, bolletta]);
+  // === Conto economico dell'investimento (solo se ho sia rata che bilancio) ===
+  // Logica PA: l'ente investe in un impianto sovra-dimensionato che genera DUE
+  // ricavi (autoconsumo che azzera la bolletta + vendita dell'eccedenza al GSE)
+  // a fronte della rata Econocom. Quello che conta e' la CASSA NETTA mensile e i
+  // KPI di investimento, non il "risparmio vs bolletta" tipico delle PMI private.
+  const investimento = useMemo(() => {
+    if (!risultato || !bilancio) return null;
+    const ricaviMensili = bilancio.risparmioAutoconsumoMensile + bilancio.valoreImmissioneMensile;
+    const cassaNettaMensile = ricaviMensili - risultato.rataMensile;
+    const cassaNettaAnnua = cassaNettaMensile * 12;
+    const cassaCumulata60m = cassaNettaMensile * ECONOCOM_PA_DURATA_MESI;
+    const ricaviAnnui = ricaviMensili * 12;
+    // Payback dell'impianto: anni per cui i SOLI ricavi (senza considerare la rata)
+    // ripagano il valore dell'investimento. KPI classico degli investimenti FV.
+    const paybackAnni = ricaviAnnui > 0 ? importo / ricaviAnnui : Infinity;
+    return {
+      ricaviMensili,
+      cassaNettaMensile,
+      cassaNettaAnnua,
+      cassaCumulata60m,
+      ricaviAnnui,
+      paybackAnni,
+    };
+  }, [risultato, bilancio, importo]);
 
   // === Handlers ===
   const handleImporto = (e: Event) => {
@@ -316,56 +328,99 @@ export default function SimulatoreEconocomPA() {
         )}
       </div>
 
-      {/* === Riga 2: business plan (solo se attivo + dati completi) === */}
-      {modalitaBP && risultato && bilancio && confronto && (
+      {/* === Riga 2: conto economico investimento === */}
+      {modalitaBP && risultato && bilancio && investimento && (
         <div class="sepa__bp-results">
-          {/* Card: la rata si sostiene con la bolletta? */}
-          <div class={`sepa__bp-card sepa__bp-card--saldo ${confronto.differenza >= 0 ? 'is-positive' : 'is-negative'}`}>
-            <h3 class="sepa__bp-card-title">La rata si sostiene con la bolletta?</h3>
+          {/* Card: conto economico dell'investimento */}
+          <div class={`sepa__bp-card sepa__bp-card--conto ${investimento.cassaNettaMensile >= 0 ? 'is-positive' : 'is-negative'}`}>
+            <h3 class="sepa__bp-card-title">Conto economico dell'investimento</h3>
+            <p class="sepa__bp-intro">
+              L'ente non possiede l'impianto (e' un noleggio operativo Econocom)
+              ma <strong>ne incassa i due ricavi</strong>: azzera o riduce la
+              bolletta con l'autoconsumo e vende al GSE l'energia eccedente.
+            </p>
 
-            <div class="sepa__bp-row">
-              <span>Bolletta attuale dell'ente</span>
-              <span class="sepa__bp-val">{fmtEUR2(bolletta)}<span class="sepa__bp-unit">/mese</span></span>
+            <div class="sepa__bp-row sepa__bp-row--green">
+              <span>+ Ricavo da autoconsumo <em>(bolletta evitata)</em></span>
+              <span class="sepa__bp-val">+{fmtEUR2(bilancio.risparmioAutoconsumoMensile)}<span class="sepa__bp-unit">/mese</span></span>
             </div>
 
             <div class="sepa__bp-row sepa__bp-row--green">
-              <span>− Risparmio autoconsumo (abbatte la bolletta)</span>
-              <span class="sepa__bp-val">−{fmtEUR2(bilancio.risparmioAutoconsumoMensile)}<span class="sepa__bp-unit">/mese</span></span>
+              <span>+ Ricavo da vendita in rete <em>(ritiro dedicato GSE)</em></span>
+              <span class="sepa__bp-val">+{fmtEUR2(bilancio.valoreImmissioneMensile)}<span class="sepa__bp-unit">/mese</span></span>
             </div>
 
             <div class="sepa__bp-row sepa__bp-row--neutral">
-              <span>+ Rata Econocom (60 mesi)</span>
-              <span class="sepa__bp-val">+{fmtEUR2(risultato.rataMensile)}<span class="sepa__bp-unit">/mese</span></span>
+              <span>= Ricavi totali per l'ente</span>
+              <span class="sepa__bp-val">{fmtEUR2(investimento.ricaviMensili)}<span class="sepa__bp-unit">/mese</span></span>
             </div>
 
-            <div class="sepa__bp-row sepa__bp-row--green">
-              <span>− Ricavo immissione in rete (ritiro dedicato GSE)</span>
-              <span class="sepa__bp-val">−{fmtEUR2(bilancio.valoreImmissioneMensile)}<span class="sepa__bp-unit">/mese</span></span>
-            </div>
-
-            <div class="sepa__bp-row sepa__bp-row--total">
-              <span>Costo netto mensile per l'ente</span>
-              <span class="sepa__bp-val sepa__bp-val--big">{fmtEUR2(confronto.costoNettoMensile)}<span class="sepa__bp-unit">/mese</span></span>
+            <div class="sepa__bp-row sepa__bp-row--red">
+              <span>− Rata Econocom (60 mesi)</span>
+              <span class="sepa__bp-val">−{fmtEUR2(risultato.rataMensile)}<span class="sepa__bp-unit">/mese</span></span>
             </div>
 
             <div class="sepa__bp-saldo">
               <span class="sepa__bp-saldo-label">
-                {confronto.differenza >= 0
-                  ? 'Risparmio complessivo rispetto alla bolletta attuale'
-                  : 'Costo extra rispetto alla bolletta attuale'}
+                {investimento.cassaNettaMensile >= 0
+                  ? 'Cassa netta generata mensilmente'
+                  : 'Quota mensile a carico dell\'ente (rata > ricavi)'}
               </span>
               <span class="sepa__bp-saldo-value">
-                {confronto.differenza >= 0 ? '+' : ''}{fmtEUR2(confronto.differenza)}<span class="sepa__bp-unit">/mese</span>
+                {investimento.cassaNettaMensile >= 0 ? '+' : ''}{fmtEUR2(investimento.cassaNettaMensile)}<span class="sepa__bp-unit">/mese</span>
               </span>
             </div>
 
-            {confronto.differenza >= 0 && (
+            {investimento.cassaNettaMensile >= 0 ? (
               <p class="sepa__bp-extra">
-                Sui {ECONOCOM_PA_DURATA_MESI} mesi del contratto: risparmio totale stimato{' '}
-                <strong>{fmtEUR0(confronto.differenza * ECONOCOM_PA_DURATA_MESI)}</strong>.
-                A fine periodo l'impianto resta in uso e continua a produrre energia.
+                Sui {ECONOCOM_PA_DURATA_MESI} mesi del contratto: cassa cumulata{' '}
+                <strong>{fmtEUR0(investimento.cassaCumulata60m)}</strong>.
+                Da fine contratto in poi, i ricavi continuano senza piu' la rata.
+              </p>
+            ) : (
+              <p class="sepa__bp-extra sepa__bp-extra--warn">
+                L'ente paga una quota residua durante i 60 mesi, comunque molto
+                inferiore alla bolletta attuale ({fmtEUR0(bolletta)}/mese). A fine
+                contratto i ricavi continuano senza piu' la rata.
               </p>
             )}
+          </div>
+
+          {/* Card: KPI di investimento */}
+          <div class="sepa__bp-card sepa__bp-card--kpi">
+            <h3 class="sepa__bp-card-title">Indicatori di investimento</h3>
+
+            <div class="sepa__kpi-grid">
+              <div class={`sepa__kpi-cell ${investimento.cassaNettaAnnua >= 0 ? 'is-positive' : 'is-negative'}`}>
+                <span class="sepa__kpi-label">Cassa netta annua</span>
+                <span class="sepa__kpi-value">{investimento.cassaNettaAnnua >= 0 ? '+' : ''}{fmtEUR0(investimento.cassaNettaAnnua)}</span>
+                <span class="sepa__kpi-hint">
+                  {investimento.cassaNettaAnnua >= 0 ? 'in entrata per l\'ente' : 'a carico dell\'ente'}
+                </span>
+              </div>
+
+              <div class={`sepa__kpi-cell ${investimento.cassaCumulata60m >= 0 ? 'is-positive' : 'is-negative'}`}>
+                <span class="sepa__kpi-label">Cassa cumulata 60 mesi</span>
+                <span class="sepa__kpi-value">{investimento.cassaCumulata60m >= 0 ? '+' : ''}{fmtEUR0(investimento.cassaCumulata60m)}</span>
+                <span class="sepa__kpi-hint">durata del contratto Econocom</span>
+              </div>
+
+              <div class="sepa__kpi-cell">
+                <span class="sepa__kpi-label">Payback dell'impianto</span>
+                <span class="sepa__kpi-value">
+                  {isFinite(investimento.paybackAnni)
+                    ? `${investimento.paybackAnni.toFixed(1)} anni`
+                    : '—'}
+                </span>
+                <span class="sepa__kpi-hint">solo con i ricavi (no rata) — {fmtEUR0(investimento.ricaviAnnui)}/anno</span>
+              </div>
+            </div>
+
+            <p class="sepa__bp-disclaimer">
+              Cassa = ricavi (autoconsumo + immissione) − rata Econocom. Payback =
+              valore impianto / ricavi annui, ignora la rata e indica in quanti anni
+              l'impianto si ripaga puramente con l'energia che produce.
+            </p>
           </div>
 
           {/* Card: produzione e autoconsumo */}
@@ -386,35 +441,40 @@ export default function SimulatoreEconocomPA() {
               </div>
 
               <div class="sepa__bp-prod-cell">
+                <span class="sepa__bp-prod-label">Autosufficienza</span>
+                <span class="sepa__bp-prod-value">{fmtPct(bilancio.autosufficienzaPerc)}</span>
+                <span class="sepa__bp-prod-hint">
+                  {bilancio.autosufficienzaPerc >= 0.95
+                    ? 'consumi azzerati'
+                    : 'aumenta l\'accumulo per arrivare al 100%'}
+                </span>
+              </div>
+
+              <div class="sepa__bp-prod-cell">
                 <span class="sepa__bp-prod-label">Autoconsumo</span>
                 <span class="sepa__bp-prod-value">{fmtPct(bilancio.autoconsumoPerc)}</span>
                 <span class="sepa__bp-prod-hint">{fmtKwh(bilancio.kwhAutoconsumo)}/anno</span>
               </div>
 
               <div class="sepa__bp-prod-cell">
-                <span class="sepa__bp-prod-label">Autosufficienza</span>
-                <span class="sepa__bp-prod-value">{fmtPct(bilancio.autosufficienzaPerc)}</span>
-                <span class="sepa__bp-prod-hint">copertura consumi</span>
-              </div>
-
-              <div class="sepa__bp-prod-cell">
-                <span class="sepa__bp-prod-label">Immissione in rete</span>
+                <span class="sepa__bp-prod-label">Vendita in rete</span>
                 <span class="sepa__bp-prod-value">{fmtKwh(bilancio.kwhImmissione)}</span>
-                <span class="sepa__bp-prod-hint">venduta al GSE</span>
+                <span class="sepa__bp-prod-hint">{fmtEUR0(bilancio.valoreImmissioneMensile * 12)}/anno al GSE</span>
               </div>
 
               <div class="sepa__bp-prod-cell">
-                <span class="sepa__bp-prod-label">Beneficio totale</span>
-                <span class="sepa__bp-prod-value">{fmtEUR0(bilancio.risparmioMensileTotale)}/mese</span>
-                <span class="sepa__bp-prod-hint">autoconsumo + immissione</span>
+                <span class="sepa__bp-prod-label">Ricavi totali</span>
+                <span class="sepa__bp-prod-value">{fmtEUR0(investimento.ricaviAnnui)}/anno</span>
+                <span class="sepa__bp-prod-hint">autoconsumo + vendita</span>
               </div>
             </div>
 
             <p class="sepa__bp-disclaimer">
-              Stime basate su irraggiamento PVGIS Sud Italia, prezzo medio di rete
-              0,28 €/kWh e ritiro dedicato GSE 0,13 €/kWh. Valori reali soggetti a
-              orientamento, inclinazione, ombreggiamenti e profilo di consumo effettivo
-              dell'ente.
+              Stime su irraggiamento PVGIS Sud Italia (1.425 kWh/kWp/anno), prezzo
+              medio di rete 0,28 €/kWh, ritiro dedicato GSE 0,13 €/kWh. Per ottenere
+              autosufficienza vicina al 100% serve un accumulo dimensionato sul
+              consumo notturno dell'ente. Valori reali soggetti a orientamento,
+              inclinazione, ombreggiamenti e profilo di consumo effettivo.
             </p>
           </div>
         </div>
@@ -422,7 +482,7 @@ export default function SimulatoreEconocomPA() {
 
       {modalitaBP && risultato && !bilancio && (
         <div class="sepa__bp-empty">
-          Inserisci potenza impianto e bolletta dell'ente per vedere il confronto.
+          Inserisci potenza impianto e bolletta dell'ente per vedere il conto economico dell'investimento.
         </div>
       )}
     </div>
