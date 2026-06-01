@@ -1,0 +1,616 @@
+---
+import Icon from '../../components/Icon.astro';
+/**
+ * Area Econocom Pubblica Amministrazione — /tools/econocom-pa
+ *
+ * Pagina protetta da password (password: `gianfranco`) destinata a Gianfranco di
+ * Arca Energia per le sue interlocuzioni con comuni, aziende ospedaliere e
+ * municipalizzate (parcheggi fotovoltaici, riqualificazione energetica, ecc.).
+ *
+ * Contiene:
+ *  - simulatore rata indicativa Econocom (solo 60 mesi, importo min 150.000 €).
+ *  - box vincoli operativi della Pubblica Amministrazione (cessione del contratto,
+ *    fuori codice degli appalti, accettazione condizioni generali) — paletti di Luca
+ *    Silvestrin (Econocom) da presentare al cliente prima di formulare un'offerta.
+ *  - form caricamento progetto: ente, tipo intervento, importo, conferma vincoli.
+ *
+ * Lead vanno a /api/submit-econocom-pa (mail dettagliata + Zapier).
+ */
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import SimulatoreEconocomPA from '../../components/tools/SimulatoreEconocomPA.tsx';
+---
+<ToolLayout
+  title="Area Econocom Pubblica Amministrazione | Mediocredito Facile"
+  description="Area riservata: simulatore rata noleggio operativo Econocom per Pubblica Amministrazione e caricamento progetti."
+  noindex={true}
+  breadcrumbs={[{ name: 'Area Econocom PA', href: '/tools/econocom-pa' }]}
+>
+  <!-- Gate password -->
+  <div id="gate" class="gate">
+    <div class="gate__card">
+      <div class="gate__logos">
+        <img src="/images/logo-mediocreditofacile.webp" alt="Mediocredito Facile" class="gate__logo" />
+        <span class="gate__x">&times;</span>
+        <span class="gate__partner-name">Arca Energia</span>
+      </div>
+      <div class="gate__divider"></div>
+      <p class="gate__label">Area Riservata Partner</p>
+      <p class="gate__desc">
+        Simulatore noleggio operativo Econocom per la Pubblica Amministrazione
+        e caricamento progetti su comuni, ASL, aziende ospedaliere e municipalizzate.
+      </p>
+      <div class="gate__form">
+        <input type="password" id="gate-pwd" class="gate__input" placeholder="Password" autocomplete="off" />
+        <button id="gate-btn" class="gate__btn">
+          <Icon name="lock_open" />
+          Accedi
+        </button>
+      </div>
+      <p id="gate-error" class="gate__error" hidden>Password non corretta</p>
+    </div>
+  </div>
+
+  <!-- Tool content (nascosto fino ad autenticazione) -->
+  <div id="tool" class="epa" style="display:none !important;">
+    <!-- Header co-branded -->
+    <div class="epa__header">
+      <div class="epa__header-brand">
+        <img src="/images/logo-mediocreditofacile.webp" alt="Mediocredito Facile" class="epa__logo" />
+        <div class="epa__header-sep"></div>
+        <div class="epa__partner-badge">
+          <Icon name="account_balance" class="epa__partner-icon" />
+          <span class="epa__partner-label">Arca Energia · Econocom PA</span>
+        </div>
+      </div>
+      <button id="logout-btn" class="epa__logout">
+        <Icon name="logout" />
+        Esci
+      </button>
+    </div>
+
+    <!-- Hero -->
+    <div class="epa__hero">
+      <div class="epa__hero-content">
+        <h1 class="epa__title">Noleggio operativo Econocom per la Pubblica Amministrazione</h1>
+        <p class="epa__sub">
+          Strumento per dare al sindaco o al direttore aziendale una rata indicativa
+          gia' nel primo incontro: parcheggi fotovoltaici, riqualificazione energetica,
+          illuminazione, impiantistica. Il preventivo definitivo arriva da Econocom
+          dopo analisi del progetto e dell'ente.
+        </p>
+      </div>
+      <div class="epa__hero-badges">
+        <div class="epa__badge">
+          <Icon name="calculate" />
+          <span>Rata in tempo reale</span>
+        </div>
+        <div class="epa__badge">
+          <Icon name="solar_power" />
+          <span>Operazioni 150k - 1M+</span>
+        </div>
+        <div class="epa__badge">
+          <Icon name="schedule" />
+          <span>Durata 60 mesi</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1. Vincoli operativi PA -->
+    <section class="epa__section">
+      <header class="epa__section-head">
+        <span class="epa__section-num">1</span>
+        <div>
+          <h2 class="epa__section-title">Prima di proporre l'offerta — i tre paletti della Pubblica Amministrazione</h2>
+          <p class="epa__section-sub">
+            Il noleggio operativo Econocom sulla PA e' un'operazione complessa.
+            Tre condizioni vanno chiarite con l'ente <strong>prima</strong> di formulare un preventivo,
+            altrimenti l'operazione non e' fattibile.
+          </p>
+        </div>
+      </header>
+
+      <div class="epa__vincoli">
+        <div class="epa__vincolo">
+          <div class="epa__vincolo-icon">
+            <Icon name="swap_horiz" />
+          </div>
+          <div class="epa__vincolo-body">
+            <h3 class="epa__vincolo-title">Cessione del contratto</h3>
+            <p class="epa__vincolo-text">
+              Econocom firma il contratto e poi lo cede a una societa' di locazione
+              partner. La PA deve accettare esplicitamente questa cessione: e' il
+              modello operativo standard di Econocom, non e' negoziabile.
+            </p>
+          </div>
+        </div>
+
+        <div class="epa__vincolo">
+          <div class="epa__vincolo-icon">
+            <Icon name="gavel" />
+          </div>
+          <div class="epa__vincolo-body">
+            <h3 class="epa__vincolo-title">Fuori dal codice degli appalti</h3>
+            <p class="epa__vincolo-text">
+              L'operazione <strong>non deve essere soggetta al codice degli appalti</strong>.
+              Comuni: difficilmente fattibili (gara obbligatoria). Aziende ospedaliere,
+              ASL, partecipate non 100% pubbliche, municipalizzate tipo Veritas o Asco
+              Piave: di norma fattibili — va verificato sulla singola gara.
+            </p>
+          </div>
+        </div>
+
+        <div class="epa__vincolo">
+          <div class="epa__vincolo-icon">
+            <Icon name="description" />
+          </div>
+          <div class="epa__vincolo-body">
+            <h3 class="epa__vincolo-title">Accettazione condizioni generali</h3>
+            <p class="epa__vincolo-text">
+              La PA deve accettare le condizioni generali della societa' di locazione
+              (incluse alcune clausole su recesso e durata). Per clienti strutturati
+              con ufficio legale interno si possono concordare modifiche puntuali,
+              ma il framework di base resta quello.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="epa__alert">
+        <Icon name="info" class="epa__alert-icon" />
+        <div>
+          <strong>Stima indicativa, non vincolante.</strong>
+          Ogni operazione viene quotata su misura da Econocom dopo analisi dell'ente
+          e del progetto. La rata definitiva puo' differire da quella mostrata in
+          base a rating, durata effettiva e configurazione tecnica.
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. Simulatore rata -->
+    <section class="epa__section">
+      <header class="epa__section-head">
+        <span class="epa__section-num">2</span>
+        <div>
+          <h2 class="epa__section-title">Simula la rata mensile</h2>
+          <p class="epa__section-sub">
+            Inserisci l'importo previsto dell'investimento. La rata si aggiorna in
+            tempo reale in base alla fascia di coefficiente Econocom 60 mesi.
+          </p>
+        </div>
+      </header>
+      <div class="epa__simulator">
+        <SimulatoreEconocomPA client:load />
+      </div>
+    </section>
+
+    <!-- 3. Carica progetto -->
+    <section class="epa__section">
+      <header class="epa__section-head">
+        <span class="epa__section-num">3</span>
+        <div>
+          <h2 class="epa__section-title">Manda il progetto in valutazione</h2>
+          <p class="epa__section-sub">
+            Quando l'ente conferma interesse, compila il modulo: lo inoltro a Luca
+            Silvestrin di Econocom per la valutazione di fattibilita' e la quotazione
+            su misura. Ti ricontatto al telefono indicato.
+          </p>
+        </div>
+      </header>
+
+      <form id="progetto-form" class="epa__form" novalidate>
+        <input type="text" name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;" aria-hidden="true" />
+
+        <div class="epa__form-block">
+          <h3 class="epa__form-block-title">Ente / Stazione appaltante</h3>
+          <div class="epa__grid">
+            <label class="epa__field epa__field--full">
+              <span class="epa__field-label">Denominazione ente *</span>
+              <input type="text" name="ente_nome" required placeholder="Es. Comune di Grottaglie / ASL Brindisi / Azienda Ospedaliera Perrino" />
+            </label>
+
+            <label class="epa__field">
+              <span class="epa__field-label">Tipologia *</span>
+              <select name="ente_tipo" required>
+                <option value="">Seleziona</option>
+                <option value="Azienda Ospedaliera">Azienda Ospedaliera</option>
+                <option value="ASL">ASL / Azienda Sanitaria</option>
+                <option value="Municipalizzata">Municipalizzata / Partecipata</option>
+                <option value="Comune">Comune</option>
+                <option value="Provincia / Regione">Provincia / Regione</option>
+                <option value="Universita' / Scuola">Universita' / Scuola</option>
+                <option value="Altro ente pubblico">Altro ente pubblico</option>
+              </select>
+            </label>
+
+            <label class="epa__field">
+              <span class="epa__field-label">Referente *</span>
+              <input type="text" name="referente" required placeholder="Nome e cognome" />
+            </label>
+
+            <label class="epa__field">
+              <span class="epa__field-label">Ruolo</span>
+              <input type="text" name="ruolo" placeholder="Es. Sindaco / Dir. Tecnico / RUP" />
+            </label>
+
+            <label class="epa__field">
+              <span class="epa__field-label">Telefono *</span>
+              <input type="tel" name="telefono" required placeholder="+39 333 1234567" />
+            </label>
+
+            <label class="epa__field">
+              <span class="epa__field-label">Email *</span>
+              <input type="email" name="email" required placeholder="referente@ente.it" />
+            </label>
+          </div>
+        </div>
+
+        <div class="epa__form-block">
+          <h3 class="epa__form-block-title">Progetto</h3>
+          <div class="epa__grid">
+            <label class="epa__field">
+              <span class="epa__field-label">Tipo intervento *</span>
+              <select name="tipo_intervento" required>
+                <option value="">Seleziona</option>
+                <option value="Parcheggio fotovoltaico">Parcheggio fotovoltaico</option>
+                <option value="Impianto fotovoltaico a terra/tetto">Impianto fotovoltaico a terra/tetto</option>
+                <option value="Riqualificazione energetica">Riqualificazione energetica</option>
+                <option value="Illuminazione pubblica LED">Illuminazione pubblica LED</option>
+                <option value="Impiantistica / efficientamento">Impiantistica / efficientamento</option>
+                <option value="Altro">Altro</option>
+              </select>
+            </label>
+
+            <label class="epa__field">
+              <span class="epa__field-label">Importo previsto (€) *</span>
+              <input type="number" name="importo" required min="150000" step="1000" placeholder="400000" />
+            </label>
+
+            <label class="epa__field epa__field--full">
+              <span class="epa__field-label">Descrizione del progetto</span>
+              <textarea name="descrizione" rows="4" placeholder="Contesto, stato di avanzamento, urgenze, dimensioni dell'impianto, eventuale offerta tecnica gia' formulata..."></textarea>
+            </label>
+          </div>
+        </div>
+
+        <div class="epa__form-block">
+          <h3 class="epa__form-block-title">Conferma di aver illustrato i vincoli all'ente</h3>
+          <p class="epa__form-block-sub">
+            Selezionando queste caselle confermi di aver chiarito con il referente
+            i tre paletti operativi qui sopra. Non sono impegni vincolanti, ma
+            servono a non sprecare tempo nella valutazione se gia' sappiamo che un
+            paletto e' insormontabile.
+          </p>
+
+          <label class="epa__check">
+            <input type="checkbox" name="vincolo_cessione" value="on" />
+            <span>L'ente <strong>accetta la cessione del contratto</strong> dalla societa' Econocom a una societa' di locazione partner.</span>
+          </label>
+
+          <label class="epa__check">
+            <input type="checkbox" name="vincolo_appalti" value="on" />
+            <span>L'operazione <strong>non e' soggetta al codice degli appalti</strong> (o ne esiste una procedura compatibile).</span>
+          </label>
+
+          <label class="epa__check">
+            <input type="checkbox" name="vincolo_condizioni" value="on" />
+            <span>L'ente e' disposto ad <strong>accettare le condizioni generali</strong> del contratto della societa' di locazione.</span>
+          </label>
+        </div>
+
+        <div class="epa__submit-row">
+          <button type="submit" class="epa__submit">
+            <Icon name="send" />
+            Invia progetto a MCF
+          </button>
+          <p class="epa__submit-hint">
+            Riceviamo il progetto in tempo reale. Lo inoltro a Luca Silvestrin
+            (Econocom) per la valutazione di fattibilita' e ti ricontatto al telefono
+            indicato per allineamento.
+          </p>
+        </div>
+
+        <div id="form-feedback" class="epa__feedback" hidden></div>
+      </form>
+    </section>
+  </div>
+</ToolLayout>
+
+<script>
+  const PASSWORD = 'gianfranco';
+  const KEY = 'mcf_econocompa_auth';
+
+  const gate = document.getElementById('gate')!;
+  const tool = document.getElementById('tool')!;
+  const gatePwd = document.getElementById('gate-pwd') as HTMLInputElement;
+  const gateBtn = document.getElementById('gate-btn')!;
+  const gateError = document.getElementById('gate-error')!;
+  const logoutBtn = document.getElementById('logout-btn')!;
+
+  function showTool() { gate.style.display = 'none'; tool.style.cssText = ''; }
+  function showGate() { gate.style.display = ''; tool.style.cssText = 'display:none !important;'; }
+
+  if (localStorage.getItem(KEY) === 'ok') showTool();
+
+  gateBtn.addEventListener('click', () => {
+    if (gatePwd.value.trim().toLowerCase() === PASSWORD) {
+      localStorage.setItem(KEY, 'ok');
+      showTool();
+      gateError.hidden = true;
+      gatePwd.classList.remove('gate__input--error');
+    } else {
+      gateError.hidden = false;
+      gatePwd.classList.add('gate__input--error');
+    }
+  });
+  gatePwd.addEventListener('keydown', (e) => { if (e.key === 'Enter') gateBtn.click(); });
+  logoutBtn.addEventListener('click', () => {
+    localStorage.removeItem(KEY); showGate(); gatePwd.value = ''; gateError.hidden = true;
+  });
+
+  // === Submit form ===
+  const form = document.getElementById('progetto-form') as HTMLFormElement;
+  const feedback = document.getElementById('form-feedback')!;
+  const submitBtn = form.querySelector<HTMLButtonElement>('.epa__submit')!;
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    feedback.hidden = true;
+    feedback.classList.remove('epa__feedback--ok', 'epa__feedback--err');
+
+    if (!form.reportValidity()) return;
+
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = 'Invio in corso...';
+
+    try {
+      const res = await fetch('/api/submit-econocom-pa', {
+        method: 'POST',
+        body: new FormData(form),
+      });
+      const json = await res.json();
+      if (res.ok && json.ok) {
+        feedback.textContent = 'Progetto ricevuto. Lo inoltro a Luca Silvestrin (Econocom) e ti ricontatto al telefono indicato.';
+        feedback.classList.add('epa__feedback--ok');
+        feedback.hidden = false;
+        form.reset();
+        submitBtn.innerHTML = '<span class="material-icons-outlined">check</span> Inviato';
+        setTimeout(() => {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<span class="material-icons-outlined">send</span> Invia progetto a MCF';
+        }, 3000);
+      } else {
+        throw new Error('server_error');
+      }
+    } catch (err) {
+      feedback.textContent = 'Invio non riuscito. Riprova tra qualche secondo o chiamami al 393 995 7840.';
+      feedback.classList.add('epa__feedback--err');
+      feedback.hidden = false;
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<span class="material-icons-outlined">send</span> Invia progetto a MCF';
+    }
+  });
+</script>
+
+<style>
+  /* === Gate password — palette blu istituzionale === */
+  .gate {
+    display: flex; justify-content: center; align-items: center;
+    min-height: 70vh; padding: 2rem 1.5rem;
+    background: linear-gradient(160deg, #eff6ff 0%, #f0f9ff 40%, #f5f3ff 100%);
+  }
+  .gate__card {
+    text-align: center; background: #ffffff;
+    border: 1px solid #c7d2fe; border-radius: 16px;
+    padding: 2.5rem 2.5rem 2rem; max-width: 460px; width: 100%;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06), 0 1px 4px rgba(30, 64, 175, 0.08);
+  }
+  .gate__logos { display: flex; align-items: center; justify-content: center; gap: 0.75rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+  .gate__logo { height: 40px; display: block; }
+  .gate__x { font-size: 1.2rem; font-weight: 300; color: #94a3b8; }
+  .gate__partner-name { font-size: 1.05rem; font-weight: 800; color: #059669; letter-spacing: -0.01em; }
+  .gate__divider { height: 1px; background: linear-gradient(90deg, transparent, #c7d2fe, transparent); margin-bottom: 1.25rem; }
+  .gate__label {
+    font-size: 0.82rem; font-weight: 700; color: #64748b;
+    text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.5rem;
+  }
+  .gate__desc { font-size: 0.85rem; color: #64748b; line-height: 1.5; margin-bottom: 1.5rem; max-width: 360px; margin-left: auto; margin-right: auto; }
+  .gate__form { display: flex; gap: 0.6rem; }
+  .gate__input {
+    flex: 1; padding: 0.8rem 1rem; border: 1.5px solid #e2e8f0; border-radius: 10px;
+    font-family: var(--font-family); font-size: 1rem; color: var(--color-text); background: #f8fafc;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .gate__input:focus { outline: none; border-color: #1e40af; box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.12); background: #fff; }
+  .gate__input--error { border-color: #ef4444; }
+  .gate__btn {
+    padding: 0.8rem 1.5rem;
+    background: linear-gradient(135deg, #1e40af, #6366f1);
+    color: #ffffff; font-family: var(--font-family); font-weight: 700; font-size: 0.92rem;
+    border: none; border-radius: 10px; cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.2s; white-space: nowrap;
+  }
+  .gate__btn:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(30, 64, 175, 0.28); }
+  .gate__error { color: #ef4444; font-size: 0.82rem; margin-top: 0.75rem; }
+
+  /* === Tool layout === */
+  .epa { max-width: var(--max-width); margin: 0 auto; padding: 0 1.5rem 4rem; }
+  .epa__header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.25rem 0; border-bottom: 1px solid #e2e8f0;
+  }
+  .epa__header-brand { display: flex; align-items: center; gap: 1rem; }
+  .epa__logo { height: 36px; flex-shrink: 0; }
+  .epa__header-sep { width: 1px; height: 28px; background: #e2e8f0; }
+  .epa__partner-badge {
+    display: flex; align-items: center; gap: 0.4rem;
+    background: linear-gradient(135deg, #eff6ff, #e0e7ff);
+    border: 1px solid #c7d2fe; border-radius: 8px; padding: 0.35rem 0.75rem;
+  }
+  .epa__partner-icon { font-size: 1.1rem; color: #1e40af; }
+  .epa__partner-label { font-size: 0.85rem; font-weight: 700; color: #1e40af; }
+  .epa__logout {
+    background: none; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.4rem 0.85rem;
+    font-family: var(--font-family); font-size: 0.82rem; font-weight: 600; color: #64748b;
+    cursor: pointer; transition: border-color 0.2s, color 0.2s;
+    display: flex; align-items: center; gap: 0.3rem;
+  }
+  .epa__logout:hover { border-color: #1e40af; color: #1e40af; }
+
+  /* Hero */
+  .epa__hero {
+    background: linear-gradient(135deg, #eff6ff 0%, #f0f9ff 50%, #f5f3ff 100%);
+    border: 1px solid #c7d2fe; border-radius: 16px;
+    padding: 2rem 2.5rem; margin: 1.5rem 0 2.5rem;
+    display: flex; align-items: flex-start; gap: 2rem;
+  }
+  .epa__hero-content { flex: 1; }
+  .epa__title { font-size: 1.75rem; font-weight: 800; color: #0F1020; line-height: 1.2; margin-bottom: 0.6rem; }
+  .epa__sub { font-size: 0.95rem; color: #444451; line-height: 1.65; max-width: 640px; }
+  .epa__hero-badges { display: flex; flex-direction: column; gap: 0.5rem; flex-shrink: 0; }
+  .epa__badge {
+    display: flex; align-items: center; gap: 0.5rem;
+    background: #ffffff; border: 1px solid #c7d2fe; border-radius: 8px;
+    padding: 0.5rem 0.85rem; font-size: 0.8rem; font-weight: 600; color: #334155; white-space: nowrap;
+  }
+  .epa__badge .mcf-icon { font-size: 1rem; color: #1e40af; }
+
+  /* Sezioni */
+  .epa__section { margin-bottom: 3rem; }
+  .epa__section-head { display: flex; gap: 1rem; align-items: flex-start; margin-bottom: 1.5rem; }
+  .epa__section-num {
+    flex-shrink: 0; width: 36px; height: 36px;
+    background: linear-gradient(135deg, #1e40af, #6366f1);
+    color: #ffffff; font-weight: 800; font-size: 1rem;
+    display: flex; align-items: center; justify-content: center; border-radius: 50%;
+  }
+  .epa__section-title { font-size: 1.2rem; font-weight: 800; color: #0F1020; margin: 0 0 0.3rem; line-height: 1.3; }
+  .epa__section-sub { font-size: 0.92rem; color: #444451; line-height: 1.6; margin: 0; max-width: 760px; }
+  .epa__section-sub strong { color: #0F1020; }
+
+  /* Vincoli operativi */
+  .epa__vincoli {
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;
+    margin-bottom: 1.25rem;
+  }
+  .epa__vincolo {
+    background: #ffffff; border: 1px solid #fde4d4; border-radius: 14px;
+    padding: 1.25rem; display: flex; flex-direction: column; gap: 0.85rem;
+    position: relative; overflow: hidden;
+  }
+  .epa__vincolo::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+    background: linear-gradient(90deg, #FE6F3A, #f59e0b);
+  }
+  .epa__vincolo-icon {
+    width: 42px; height: 42px; border-radius: 10px;
+    background: linear-gradient(135deg, #fff7f3, #fde4d4);
+    display: flex; align-items: center; justify-content: center; color: #FE6F3A;
+  }
+  .epa__vincolo-icon .mcf-icon { font-size: 1.4rem; }
+  .epa__vincolo-title { font-size: 1rem; font-weight: 800; color: #0F1020; margin: 0; line-height: 1.3; }
+  .epa__vincolo-text { font-size: 0.88rem; color: #444451; line-height: 1.6; margin: 0; }
+  .epa__vincolo-text strong { color: #b45309; }
+
+  .epa__alert {
+    display: flex; gap: 0.85rem; align-items: flex-start;
+    background: #fef3c7; border: 1px solid #fcd34d; border-radius: 10px;
+    padding: 0.95rem 1.15rem;
+    font-size: 0.88rem; color: #78350f; line-height: 1.55;
+  }
+  .epa__alert strong { color: #422006; }
+  .epa__alert-icon { font-size: 1.3rem; color: #b45309; flex-shrink: 0; margin-top: 0.05rem; }
+
+  /* Simulatore wrapper */
+  .epa__simulator { /* delega al componente */ }
+
+  /* Form */
+  .epa__form { display: flex; flex-direction: column; gap: 1.5rem; }
+  .epa__form-block {
+    background: #ffffff; border: 1px solid #E1DEE3; border-radius: 14px; padding: 1.5rem 1.75rem;
+  }
+  .epa__form-block-title {
+    font-size: 0.78rem; font-weight: 800; color: #1e40af;
+    text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 0.5rem;
+  }
+  .epa__form-block-sub {
+    font-size: 0.85rem; color: #475569; line-height: 1.55; margin: 0 0 1rem; max-width: 720px;
+  }
+  .epa__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 0.5rem; }
+  .epa__field { display: flex; flex-direction: column; gap: 0.35rem; }
+  .epa__field--full { grid-column: 1 / -1; }
+  .epa__field-label { font-size: 0.82rem; font-weight: 600; color: #444451; }
+  .epa__field input, .epa__field select, .epa__field textarea {
+    padding: 0.7rem 0.85rem; border: 1.5px solid #E1DEE3; border-radius: 10px;
+    font-family: var(--font-family); font-size: 0.95rem; color: #0F1020; background: #fafafa;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .epa__field input:focus, .epa__field select:focus, .epa__field textarea:focus {
+    outline: none; border-color: #1e40af; background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+  }
+  .epa__field textarea { resize: vertical; min-height: 90px; }
+
+  /* Checkbox vincoli */
+  .epa__check {
+    display: flex; gap: 0.7rem; align-items: flex-start;
+    padding: 0.85rem 1rem; margin-bottom: 0.6rem;
+    background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px;
+    cursor: pointer; font-size: 0.9rem; line-height: 1.5; color: #0F1020;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .epa__check:hover { background: #eff6ff; border-color: #c7d2fe; }
+  .epa__check input[type="checkbox"] {
+    margin-top: 0.2rem; flex-shrink: 0; width: 18px; height: 18px;
+    accent-color: #1e40af; cursor: pointer;
+  }
+  .epa__check span strong { color: #1e40af; }
+  .epa__check:last-child { margin-bottom: 0; }
+
+  /* Submit */
+  .epa__submit-row {
+    display: flex; align-items: center; gap: 1.25rem;
+    background: linear-gradient(135deg, #eff6ff, #f5f3ff);
+    border: 1px solid #c7d2fe; border-radius: 14px; padding: 1.25rem 1.5rem;
+    flex-wrap: wrap;
+  }
+  .epa__submit {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    background: linear-gradient(135deg, #1e40af, #6366f1); color: #ffffff;
+    font-family: var(--font-family); font-weight: 700; font-size: 0.95rem;
+    border: none; border-radius: 10px; padding: 0.85rem 1.6rem; cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.2s; white-space: nowrap;
+  }
+  .epa__submit:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(30, 64, 175, 0.28); }
+  .epa__submit:disabled { opacity: 0.6; cursor: wait; }
+  .epa__submit-hint { margin: 0; font-size: 0.85rem; color: #444451; line-height: 1.5; flex: 1; min-width: 260px; }
+
+  .epa__feedback {
+    padding: 0.9rem 1.1rem; border-radius: 10px; font-size: 0.9rem; line-height: 1.5;
+    border: 1px solid;
+  }
+  .epa__feedback--ok { background: #ecfdf5; border-color: #a7f3d0; color: #047857; }
+  .epa__feedback--err { background: #fef2f2; border-color: #fecaca; color: #b91c1c; }
+
+  /* Responsive */
+  @media (max-width: 860px) {
+    .epa__vincoli { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 768px) {
+    .gate__card { padding: 2rem 1.5rem 1.5rem; }
+    .gate__form { flex-direction: column; }
+    .gate__logos { gap: 0.5rem; }
+    .gate__logo { height: 32px; }
+
+    .epa__header-brand { gap: 0.65rem; }
+    .epa__logo { height: 28px; }
+    .epa__hero { flex-direction: column; padding: 1.5rem; gap: 1.25rem; }
+    .epa__title { font-size: 1.35rem; }
+    .epa__hero-badges { flex-direction: row; flex-wrap: wrap; }
+    .epa__badge { font-size: 0.75rem; padding: 0.4rem 0.65rem; }
+
+    .epa__form-block { padding: 1.25rem; }
+    .epa__grid { grid-template-columns: 1fr; gap: 0.85rem; }
+    .epa__submit-row { flex-direction: column; align-items: stretch; }
+    .epa__submit { justify-content: center; }
+  }
+</style>

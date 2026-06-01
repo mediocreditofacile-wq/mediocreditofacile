@@ -13,6 +13,14 @@ import {
   DIMENSIONE_LABELS,
   type DimensioneImpresa,
 } from '../../data/leasing';
+import {
+  ENERGY_PRICE_DEFAULT,
+  FEED_IN_PRICE,
+  IRRADIANCE,
+  ZONE_LABELS,
+  ATTIVITA_LABELS,
+  calcolaAutoconsumo,
+} from '../../data/bp-fotovoltaico';
 
 // Limiti costo impianto per modalita' finanziaria
 // Il noleggio operativo e' limitato dalle fasce dei coefficienti GRENKE (max 240k)
@@ -94,99 +102,9 @@ function getRiscatto(durata: number): number {
   return RISCATTO_PV[durata] ?? 0.03;
 }
 
-// Costanti energetiche
-const ENERGY_PRICE_DEFAULT = 0.28; // €/kWh prezzo medio PMI Italia (aprile 2026, conservativo)
-const FEED_IN_PRICE = 0.13;        // €/kWh valore immissione in rete (ritiro dedicato)
-
-// Irraggiamento medio per zona (kWh/kWp/anno — fonte PVGIS)
-const IRRADIANCE: Record<string, number> = {
-  nord: 1100,
-  centro: 1275,
-  sud: 1425,
-  isole: 1525,
-};
-
-const ZONE_LABELS: Record<string, string> = {
-  nord: 'Nord Italia',
-  centro: 'Centro Italia',
-  sud: 'Sud Italia',
-  isole: 'Sicilia / Sardegna',
-};
-
-// --- Modello autoconsumo dinamico ---
-// Fonti: HTW Berlin (Quaschning 2014), GSE Italia 2022-2024, validato su BP Le Pajare (MCF).
-// L'autoconsumo dipende dal rapporto produzione/consumo, non dalla tipologia di attivita'.
-// Il tipo attivita' influenza solo il load match (correlazione oraria produzione-consumo).
-
-// Load match: quota di consumo che avviene durante le ore di produzione FV (8-18)
-const LOAD_MATCH: Record<string, number> = {
-  industriale: 0.58,    // turno pieno 8-18, consumi concentrati
-  commerciale: 0.48,    // uffici/negozi 9-19
-  residenziale: 0.35,   // picco serale 18-22
-  ricettivo: 0.45,      // hotel/ristorante, consumo estivo alto
-};
-
-/**
- * Calcola la percentuale di autoconsumo in base al rapporto reale produzione/consumo.
- * Il consumo annuo e' derivato dalla bolletta mensile diviso il prezzo medio kWh.
- */
-function calcolaAutoconsumo(
-  produzioneAnnua: number,
-  consumoAnnuo: number,
-  capacitaAccumulo: number,
-  profiloConsumo: string,
-): { autoconsumoPerc: number; autosufficienzaPerc: number } {
-  if (consumoAnnuo <= 0 || produzioneAnnua <= 0) {
-    return { autoconsumoPerc: 0.50, autosufficienzaPerc: 0 };
-  }
-
-  const R = produzioneAnnua / consumoAnnuo;
-  const loadMatch = LOAD_MATCH[profiloConsumo] ?? 0.48;
-
-  // Autoconsumo diretto a R=1 (punto di calibrazione)
-  const scAtR1 = loadMatch + 0.10;
-
-  // Componente diretta (senza batteria)
-  let autoconsumoBase: number;
-  if (R <= 1.0) {
-    // Sotto-dimensionato: quasi tutto autoconsumato, ma limitato dal mismatch orario
-    autoconsumoBase = 1.0 - (1.0 - scAtR1) * Math.pow(R, 1.3);
-  } else {
-    // Sovra-dimensionato: cala con curva iperbolica
-    autoconsumoBase = scAtR1 * Math.pow(1 / R, 0.75);
-  }
-
-  // Componente accumulo
-  let bonusBatteria = 0;
-  if (capacitaAccumulo > 0) {
-    const efficienzaRT = 0.90;
-    const fattoreDisponibilita = 0.85; // non tutti i giorni ciclo pieno
-    const prodGiorno = produzioneAnnua / 365;
-    const consGiorno = consumoAnnuo / 365;
-
-    const eccedenza = prodGiorno * (1 - autoconsumoBase);
-    const consumoNotturno = consGiorno * (1 - loadMatch);
-    const cicli = Math.min(1.0, eccedenza / Math.max(1, capacitaAccumulo));
-    const catturata = capacitaAccumulo * cicli * fattoreDisponibilita;
-    const restituita = Math.min(catturata * efficienzaRT, consumoNotturno);
-
-    bonusBatteria = restituita / prodGiorno;
-    bonusBatteria = Math.min(bonusBatteria, 0.95 - autoconsumoBase);
-    bonusBatteria = Math.max(0, bonusBatteria);
-  }
-
-  const autoconsumoPerc = Math.max(0.15, Math.min(0.95, autoconsumoBase + bonusBatteria));
-  const autoconsumokWh = produzioneAnnua * autoconsumoPerc;
-  const autosufficienzaPerc = Math.min(1.0, autoconsumokWh / consumoAnnuo);
-
-  return { autoconsumoPerc, autosufficienzaPerc };
-}
-
-const ATTIVITA_LABELS: Record<string, string> = {
-  industriale: 'Industriale / Artigianale',
-  commerciale: 'Commerciale / Ufficio',
-  residenziale: 'Residenziale',
-};
+// Costanti energetiche, irraggiamento per zona, profili attivita' e modello
+// autoconsumo: vivono in `src/data/bp-fotovoltaico.ts` per essere condivisi
+// con il simulatore Econocom PA.
 
 const DURATE = [24, 36, 48, 60, 72, 84];
 

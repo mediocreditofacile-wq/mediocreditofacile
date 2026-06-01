@@ -1,0 +1,686 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import listino from '../../data/datron-listino.json';
+import coefficienti from '../../data/datron-coefficienti.json';
+
+// Tool dedicato Datron Italia: landing riservata con gate password,
+// simulatore noleggio operativo cantinette, form richiesta.
+// Pattern derivato da /tools/duplex, compattato in un singolo file.
+
+const title = 'Datron e-commerce - simulatore noleggio cantinette con listino integrato';
+const description = 'Tool riservato Datron Italia: variante con listino macchine integrato, pronta per essere incorporata sulle pagine prodotto del vostro e-commerce. Canone in tempo reale, IVA esclusa, deducibile 100%.';
+
+const REGIONI = [
+  'Abruzzo','Basilicata','Calabria','Campania','Emilia-Romagna','Friuli-Venezia Giulia',
+  'Lazio','Liguria','Lombardia','Marche','Molise','Piemonte','Puglia','Sardegna',
+  'Sicilia','Toscana','Trentino-Alto Adige','Umbria',"Valle d'Aosta",'Veneto',
+];
+
+const SETTORI = [
+  'Ristorante',
+  'Bar / Caffetteria',
+  'Hotel / Struttura ricettiva',
+  'Enoteca / Wine bar',
+  'GDO e retail alimentare',
+  'Catering / Banqueting',
+  'Altro',
+];
+---
+
+<Layout title={title} description={description} noindex={true}>
+  <!-- Gate password area riservata Datron -->
+  <div id="dt-gate" class="dt-gate">
+    <div class="dt-gate__card">
+      <p class="dt-gate__brand">DATRON ITALIA</p>
+      <p class="dt-gate__label">Area riservata - simulatore noleggio operativo</p>
+      <div class="dt-gate__form">
+        <input type="password" id="dt-gate-pwd" class="dt-gate__input" placeholder="Password" autocomplete="off" />
+        <button id="dt-gate-btn" type="button" class="dt-gate__btn">Accedi</button>
+      </div>
+      <p id="dt-gate-error" class="dt-gate__error" hidden>Password non corretta</p>
+    </div>
+  </div>
+
+  <!-- Tool sbloccato -->
+  <div id="dt-tool" class="datron-page" style="display:none !important;">
+    <button type="button" id="dt-logout" class="dt-logout" aria-label="Esci dall'area riservata">Esci</button>
+
+    <!-- Header -->
+    <header class="dt-header">
+      <div class="dt-header__inner">
+        <div class="dt-header__brand">
+          <span class="dt-header__brand-main">DATRON ITALIA</span>
+          <span class="dt-header__brand-sub">Versione e-commerce - con listino integrato</span>
+        </div>
+        <div class="dt-header__powered">
+          a cura di <a href="https://www.mediocreditofacile.it" target="_blank" rel="noopener">Mediocredito Facile</a>
+        </div>
+      </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="dt-hero">
+      <div class="dt-hero__inner">
+        <h1 class="dt-hero__title">Canone fisso, deducibile, condizioni uguali in tutta Italia.</h1>
+        <p class="dt-hero__lede">Il tuo cliente Horeca paga la cantinetta come un abbonamento mensile. Tu chiudi la vendita senza farla pesare sul cash flow del locale. Configura sotto, vedi il canone, manda la richiesta: ricevi conferma entro 24 ore lavorative.</p>
+        <div class="dt-hero__chips">
+          <span class="dt-hero__chip">IVA esclusa, deducibile 100%</span>
+          <span class="dt-hero__chip">Operatore primario Pagarent</span>
+          <span class="dt-hero__chip">Approvazione 24-48 ore</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Simulator -->
+    <section class="dt-sim" id="simulatore">
+      <div class="dt-sim__inner">
+        <h2 class="dt-sim__title">Calcola il canone</h2>
+        <p class="dt-sim__sub">Modello, durata, eventuali servizi. Il canone aggiorna in tempo reale.</p>
+
+        <div class="dt-sim__grid">
+          <div class="dt-sim__panel">
+            <div class="dt-sim__field">
+              <label class="dt-sim__label" for="dt-modello">Modello cantinetta</label>
+              <select id="dt-modello" class="dt-sim__select">
+                {listino.map((m) => (
+                  <option value={m.id} data-prezzo={m.prezzo} selected={m.highlight}>
+                    {m.label} - {new Intl.NumberFormat('it-IT', { maximumFractionDigits: 0 }).format(m.prezzo)} euro
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div class="dt-sim__field">
+              <label class="dt-sim__label" for="dt-prezzo-custom">Prezzo personalizzato (opzionale)</label>
+              <input type="number" id="dt-prezzo-custom" class="dt-sim__input" placeholder="Lascia vuoto per usare il listino" min="500" max="50000" step="100" />
+              <span class="dt-sim__hint">Se il modello a listino non corrisponde, inserisci il prezzo netto del bene.</span>
+            </div>
+
+            <div class="dt-sim__field">
+              <label class="dt-sim__label">Durata</label>
+              <div class="dt-sim__tabs" id="dt-durate" role="tablist">
+                <button type="button" class="dt-sim__tab" data-durata="24">24 mesi</button>
+                <button type="button" class="dt-sim__tab" data-durata="36">36 mesi</button>
+                <button type="button" class="dt-sim__tab dt-sim__tab--active" data-durata="48">48 mesi</button>
+                <button type="button" class="dt-sim__tab" data-durata="60">60 mesi</button>
+              </div>
+            </div>
+
+            <label class="dt-sim__toggle">
+              <input type="checkbox" id="dt-servizi" />
+              <span>Includi manutenzione e assicurazione</span>
+            </label>
+          </div>
+
+          <div class="dt-sim__results">
+            <div class="dt-sim__hero-out" aria-live="polite">
+              <p class="dt-sim__hero-label">Canone mensile</p>
+              <p class="dt-sim__hero-value" id="dt-canone">0 euro</p>
+              <p class="dt-sim__hero-note">IVA esclusa, deducibile 100%</p>
+            </div>
+
+            <div class="dt-sim__detail">
+              <h3 class="dt-sim__detail-h">Dettaglio operazione</h3>
+              <p class="dt-sim__detail-row"><strong>Bene:</strong> <span id="dt-out-modello">-</span></p>
+              <p class="dt-sim__detail-row"><strong>Prezzo netto:</strong> <span id="dt-out-prezzo">-</span></p>
+              <p class="dt-sim__detail-row"><strong>Durata:</strong> <span id="dt-out-durata">48 mesi</span></p>
+              <p class="dt-sim__detail-row"><strong>Pagamento:</strong> trimestrale anticipato (canone x 3)</p>
+              <p class="dt-sim__detail-row"><strong>Totale corrisposto:</strong> <span id="dt-out-totale">-</span></p>
+            </div>
+
+            <p class="dt-sim__disclaimer">
+              Stima indicativa basata sui coefficienti Pagarent (cliente Azienda, periodicita' Mensile, prodotto Generale). Istruttoria una tantum 100 euro, assicurazione opzionale fino al 3,47 percento. Condizioni finali soggette a delibera della societa' di locazione: convenzione Datron Italia in fase di attivazione, le pratiche in corso passano via operatori partner di Mediocredito Facile.
+            </p>
+
+            <button type="button" class="dt-sim__cta" id="dt-cta">Richiedi questa configurazione</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Come funziona -->
+    <section class="dt-how">
+      <div class="dt-how__inner">
+        <h2 class="dt-how__title">Come funziona</h2>
+        <ol class="dt-how__steps">
+          <li><strong>Configuri qui sopra</strong> il modello, la durata e gli eventuali servizi. Vedi subito il canone.</li>
+          <li><strong>Mandi la richiesta</strong> via form con i dati del cliente finale. La gestiamo noi con la societa' di locazione.</li>
+          <li><strong>Risposta in 24-48 ore</strong> dall'operatore. Tu ricevi conferma e procedi con la consegna.</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- Form -->
+    <section class="dt-form" id="contatti">
+      <div class="dt-form__inner">
+        <h2 class="dt-form__title">Manda la richiesta per il tuo cliente</h2>
+        <p class="dt-form__intro">Compila i campi qui sotto, ti rispondiamo entro 24 ore lavorative con la fattibilita' della pratica.</p>
+
+        <form class="dt-form__form" id="dt-form" action="/api/datron-submit" method="POST" novalidate>
+          <div class="dt-form__row">
+            <label class="dt-form__field">
+              <span class="dt-form__label">Ragione sociale cliente finale *</span>
+              <input class="dt-form__input" type="text" name="ragione_sociale" required autocomplete="organization" />
+            </label>
+            <label class="dt-form__field">
+              <span class="dt-form__label">Partita IVA *</span>
+              <input class="dt-form__input" type="text" name="partita_iva" required pattern="[0-9]{11}" inputmode="numeric" maxlength="11" placeholder="11 cifre" />
+            </label>
+          </div>
+
+          <label class="dt-form__field">
+            <span class="dt-form__label">Settore di attivita' *</span>
+            <select class="dt-form__input" name="settore" required>
+              <option value="">Seleziona...</option>
+              {SETTORI.map((s) => <option value={s}>{s}</option>)}
+            </select>
+          </label>
+
+          <div class="dt-form__row">
+            <label class="dt-form__field">
+              <span class="dt-form__label">Nome referente *</span>
+              <input class="dt-form__input" type="text" name="nome_referente" required autocomplete="name" />
+            </label>
+            <label class="dt-form__field">
+              <span class="dt-form__label">Regione *</span>
+              <select class="dt-form__input" name="regione" required>
+                <option value="">Seleziona...</option>
+                {REGIONI.map((r) => <option value={r}>{r}</option>)}
+              </select>
+            </label>
+          </div>
+
+          <div class="dt-form__row">
+            <label class="dt-form__field">
+              <span class="dt-form__label">Email *</span>
+              <input class="dt-form__input" type="email" name="email" required autocomplete="email" />
+            </label>
+            <label class="dt-form__field">
+              <span class="dt-form__label">Telefono *</span>
+              <input class="dt-form__input" type="tel" name="telefono" required autocomplete="tel" />
+            </label>
+          </div>
+
+          <label class="dt-form__field">
+            <span class="dt-form__label">Note</span>
+            <textarea class="dt-form__input dt-form__textarea" name="note" rows="3" placeholder="Modello richiesto, esigenze specifiche, tempi di consegna"></textarea>
+          </label>
+
+          <input type="hidden" name="configurazione" id="dt-form-config" value="" />
+          <input type="hidden" name="fonte" value="datron-ecommerce" />
+          <input type="text" name="website" class="dt-form__honeypot" tabindex="-1" autocomplete="off" />
+
+          <label class="dt-form__check">
+            <input type="checkbox" name="privacy" required />
+            <span>Ho letto l'<a href="/privacy" target="_blank" rel="noopener">informativa privacy</a> e acconsento al trattamento dei dati per essere ricontattato.</span>
+          </label>
+
+          <button class="dt-form__submit" type="submit" id="dt-form-submit">
+            Invia richiesta
+          </button>
+
+          <div class="dt-form__feedback" id="dt-form-feedback" role="status" aria-live="polite" hidden></div>
+        </form>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="dt-footer">
+      <div class="dt-footer__inner">
+        <p>Strumento riservato Datron Italia, gestito da <a href="https://www.mediocreditofacile.it" target="_blank" rel="noopener">Mediocredito Facile</a> - L'Officina del Credito.</p>
+        <p class="dt-footer__sub">Un punto di accesso, piu' soluzioni di credito: accesso a oltre 10 operatori di noleggio e leasing per PMI.</p>
+      </div>
+    </footer>
+  </div>
+</Layout>
+
+<script define:vars={{ listino, coefficienti }}>
+  // === GATE PASSWORD ===
+  const PASSWORD = 'cantinette';
+  const KEY = 'mcf_datron_auth';
+
+  const gate = document.getElementById('dt-gate');
+  const tool = document.getElementById('dt-tool');
+  const pwd = document.getElementById('dt-gate-pwd');
+  const btn = document.getElementById('dt-gate-btn');
+  const err = document.getElementById('dt-gate-error');
+  const logout = document.getElementById('dt-logout');
+
+  function showTool() {
+    if (gate) gate.style.display = 'none';
+    if (tool) tool.style.cssText = '';
+  }
+  function showGate() {
+    if (gate) gate.style.display = '';
+    if (tool) tool.style.cssText = 'display:none !important;';
+  }
+
+  if (localStorage.getItem(KEY) === 'ok') showTool();
+
+  if (btn && pwd && err) {
+    btn.addEventListener('click', () => {
+      if (pwd.value.trim().toLowerCase() === PASSWORD) {
+        localStorage.setItem(KEY, 'ok');
+        showTool();
+        err.hidden = true;
+      } else {
+        err.hidden = false;
+      }
+    });
+    pwd.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') btn.click();
+    });
+  }
+  if (logout) {
+    logout.addEventListener('click', () => {
+      localStorage.removeItem(KEY);
+      showGate();
+      if (pwd) pwd.value = '';
+      if (err) err.hidden = true;
+    });
+  }
+
+  // === SIMULATORE ===
+  const modelloEl = document.getElementById('dt-modello');
+  const prezzoCustomEl = document.getElementById('dt-prezzo-custom');
+  const durateBox = document.getElementById('dt-durate');
+  const serviziEl = document.getElementById('dt-servizi');
+  const canoneEl = document.getElementById('dt-canone');
+  const outModello = document.getElementById('dt-out-modello');
+  const outPrezzo = document.getElementById('dt-out-prezzo');
+  const outDurata = document.getElementById('dt-out-durata');
+  const outTotale = document.getElementById('dt-out-totale');
+  const formConfig = document.getElementById('dt-form-config');
+  const ctaBtn = document.getElementById('dt-cta');
+
+  let durataSelezionata = 48;
+
+  function formatEuro(n) {
+    return new Intl.NumberFormat('it-IT', { maximumFractionDigits: 0 }).format(Math.round(n));
+  }
+
+  function getPrezzoAttuale() {
+    const custom = parseFloat(prezzoCustomEl && prezzoCustomEl.value);
+    if (!isNaN(custom) && custom >= 500) return custom;
+    if (!modelloEl) return 0;
+    const opt = modelloEl.options[modelloEl.selectedIndex];
+    return parseFloat(opt.dataset.prezzo) || 0;
+  }
+
+  function getModelloLabel() {
+    const custom = parseFloat(prezzoCustomEl && prezzoCustomEl.value);
+    if (!isNaN(custom) && custom >= 500 && modelloEl) {
+      const opt = modelloEl.options[modelloEl.selectedIndex];
+      return opt.textContent.split(' - ')[0] + ' (prezzo personalizzato)';
+    }
+    if (!modelloEl) return '-';
+    return modelloEl.options[modelloEl.selectedIndex].textContent.split(' - ')[0];
+  }
+
+  function ricalcola() {
+    const prezzo = getPrezzoAttuale();
+    const servizi = serviziEl && serviziEl.checked;
+    const tabella = servizi ? coefficienti.con_servizi : coefficienti.senza_servizi;
+    const coef = tabella[String(durataSelezionata)] || 0;
+    const canone = prezzo * coef;
+    const totale = canone * durataSelezionata;
+
+    if (canoneEl) canoneEl.textContent = formatEuro(canone) + ' euro';
+    if (outModello) outModello.textContent = getModelloLabel();
+    if (outPrezzo) outPrezzo.textContent = formatEuro(prezzo) + ' euro';
+    if (outDurata) outDurata.textContent = durataSelezionata + ' mesi';
+    if (outTotale) outTotale.textContent = formatEuro(totale) + ' euro';
+
+    if (formConfig) {
+      formConfig.value = [
+        getModelloLabel(),
+        formatEuro(prezzo) + ' euro',
+        durataSelezionata + ' mesi',
+        servizi ? 'servizi inclusi' : 'senza servizi',
+        'canone ' + formatEuro(canone) + ' euro',
+      ].join(' - ');
+    }
+  }
+
+  if (modelloEl) modelloEl.addEventListener('change', ricalcola);
+  if (prezzoCustomEl) prezzoCustomEl.addEventListener('input', ricalcola);
+  if (serviziEl) serviziEl.addEventListener('change', ricalcola);
+  if (durateBox) {
+    durateBox.querySelectorAll('.dt-sim__tab').forEach((tab) => {
+      tab.addEventListener('click', () => {
+        durateBox.querySelectorAll('.dt-sim__tab').forEach((t) => t.classList.remove('dt-sim__tab--active'));
+        tab.classList.add('dt-sim__tab--active');
+        durataSelezionata = parseInt(tab.dataset.durata, 10);
+        ricalcola();
+      });
+    });
+  }
+  if (ctaBtn) {
+    ctaBtn.addEventListener('click', () => {
+      const target = document.getElementById('contatti');
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
+  ricalcola();
+
+  // === FORM ===
+  const form = document.getElementById('dt-form');
+  const feedback = document.getElementById('dt-form-feedback');
+  const submitBtn = document.getElementById('dt-form-submit');
+
+  if (form && feedback && submitBtn) {
+    form.addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Invio in corso...';
+      feedback.hidden = true;
+
+      try {
+        const data = new FormData(form);
+        const res = await fetch(form.action, { method: 'POST', body: data });
+        if (res.ok) {
+          feedback.className = 'dt-form__feedback dt-form__feedback--ok';
+          feedback.textContent = 'Richiesta ricevuta. Ti ricontattiamo entro 24 ore lavorative.';
+          feedback.hidden = false;
+          form.reset();
+          submitBtn.textContent = 'Inviato';
+        } else {
+          throw new Error('submit_failed');
+        }
+      } catch (_err) {
+        feedback.className = 'dt-form__feedback dt-form__feedback--err';
+        feedback.textContent = 'Qualcosa non ha funzionato. Riprova oppure scrivi a mediocreditofacile@gmail.com.';
+        feedback.hidden = false;
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Invia richiesta';
+      }
+    });
+  }
+</script>
+
+<style is:global>
+  .datron-page {
+    --dt-navy: #0E3A5F;
+    --dt-gold: #C9A961;
+    --dt-text: #1A1A1A;
+    --dt-bg: #FFFFFF;
+    --dt-bg-soft: #F7F5F0;
+    --dt-border: #E0DCD5;
+
+    background: var(--dt-bg);
+    color: var(--dt-text);
+    font-family: 'Manrope', system-ui, sans-serif;
+    position: relative;
+    min-height: 100vh;
+  }
+</style>
+
+<style>
+  /* === GATE === */
+  .dt-gate {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 20px;
+    background: #F7F5F0;
+    font-family: 'Manrope', system-ui, sans-serif;
+  }
+  .dt-gate__card {
+    background: #ffffff;
+    border: 1px solid #E0DCD5;
+    border-radius: 6px;
+    padding: 40px 32px;
+    max-width: 420px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 6px 24px rgba(14,58,95,0.06);
+  }
+  .dt-gate__brand {
+    font-weight: 800;
+    font-size: 24px;
+    letter-spacing: 0.16em;
+    color: #0E3A5F;
+    margin: 0 0 8px 0;
+  }
+  .dt-gate__label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #5a5a5a;
+    margin: 0 0 24px 0;
+  }
+  .dt-gate__form { display: flex; gap: 10px; }
+  .dt-gate__input {
+    flex: 1; padding: 12px 14px;
+    border: 1px solid #c9c8c5; border-radius: 4px;
+    font-family: inherit; font-size: 15px; color: #1A1A1A; background: #fff;
+  }
+  .dt-gate__input:focus { outline: 2px solid #0E3A5F; outline-offset: 1px; border-color: #0E3A5F; }
+  .dt-gate__btn {
+    padding: 12px 22px; background: #0E3A5F; color: #fff;
+    font-family: inherit; font-weight: 700; font-size: 15px;
+    border: 0; border-radius: 4px; cursor: pointer;
+    transition: background-color 120ms ease;
+  }
+  .dt-gate__btn:hover { background: #0a2c47; }
+  .dt-gate__error { color: #cc3333; font-size: 13px; margin: 12px 0 0 0; }
+  @media (max-width: 480px) { .dt-gate__form { flex-direction: column; } }
+
+  .dt-logout {
+    position: absolute; top: 14px; right: 20px; z-index: 60;
+    background: transparent; border: 1px solid #E0DCD5; border-radius: 4px;
+    padding: 6px 12px; font-family: 'Manrope', sans-serif;
+    font-size: 12px; font-weight: 600; color: #6a6a6a; cursor: pointer;
+  }
+  .dt-logout:hover { border-color: #0E3A5F; color: #0E3A5F; }
+
+  /* === HEADER === */
+  .dt-header {
+    background: #0E3A5F;
+    border-bottom: 3px solid #C9A961;
+  }
+  .dt-header__inner {
+    max-width: 1120px; margin: 0 auto;
+    padding: 18px 24px;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    flex-wrap: wrap;
+  }
+  .dt-header__brand { display: flex; flex-direction: column; }
+  .dt-header__brand-main {
+    font-weight: 800; font-size: 18px; letter-spacing: 0.18em; color: #fff;
+  }
+  .dt-header__brand-sub {
+    font-size: 12px; color: #C9A961; margin-top: 2px; letter-spacing: 0.04em;
+  }
+  .dt-header__powered { font-size: 12px; color: #b8c8d6; }
+  .dt-header__powered a { color: #C9A961; text-decoration: none; }
+  .dt-header__powered a:hover { text-decoration: underline; }
+
+  /* === HERO === */
+  .dt-hero {
+    background: linear-gradient(180deg, #0E3A5F 0%, #143F66 100%);
+    color: #fff;
+    padding: 56px 24px 64px;
+  }
+  .dt-hero__inner { max-width: 920px; margin: 0 auto; text-align: center; }
+  .dt-hero__title {
+    font-size: clamp(26px, 4.5vw, 38px); font-weight: 800;
+    margin: 0 0 16px 0; line-height: 1.2; color: #fff;
+  }
+  .dt-hero__lede {
+    font-size: clamp(15px, 2vw, 17px); line-height: 1.55;
+    color: #d6dfe7; margin: 0 0 24px 0;
+  }
+  .dt-hero__chips {
+    display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
+  }
+  .dt-hero__chip {
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(201,169,97,0.4);
+    color: #fff; font-size: 13px; font-weight: 600;
+    padding: 7px 14px; border-radius: 999px;
+  }
+
+  /* === SIMULATOR === */
+  .dt-sim { background: #fff; padding: 56px 24px; }
+  .dt-sim__inner { max-width: 1120px; margin: 0 auto; }
+  .dt-sim__title {
+    font-size: clamp(24px, 3.6vw, 32px); font-weight: 800;
+    color: #0E3A5F; margin: 0 0 6px 0;
+  }
+  .dt-sim__sub { color: #5a5a5a; font-size: 15px; margin: 0 0 32px 0; }
+  .dt-sim__grid { display: grid; grid-template-columns: 1fr; gap: 24px; }
+  @media (min-width: 860px) { .dt-sim__grid { grid-template-columns: 1fr 1fr; gap: 32px; } }
+
+  .dt-sim__panel {
+    background: #F7F5F0; border: 1px solid #E0DCD5; border-radius: 6px;
+    padding: 24px; display: flex; flex-direction: column; gap: 20px;
+  }
+  .dt-sim__field { display: flex; flex-direction: column; gap: 6px; }
+  .dt-sim__label { font-size: 13px; font-weight: 700; color: #0E3A5F; }
+  .dt-sim__hint { font-size: 12px; color: #7a7a7a; margin-top: 2px; }
+  .dt-sim__select, .dt-sim__input {
+    font-family: inherit; font-size: 15px;
+    padding: 11px 12px; border: 1px solid #c9c8c5;
+    border-radius: 4px; background: #fff; color: #1A1A1A;
+  }
+  .dt-sim__select:focus, .dt-sim__input:focus {
+    outline: 2px solid #0E3A5F; outline-offset: 1px; border-color: #0E3A5F;
+  }
+  .dt-sim__tabs { display: grid; grid-template-columns: repeat(4,1fr); gap: 6px; }
+  .dt-sim__tab {
+    padding: 10px 8px; border: 1px solid #c9c8c5;
+    border-radius: 4px; background: #fff; color: #5a5a5a;
+    font-family: inherit; font-weight: 600; font-size: 13px;
+    cursor: pointer; transition: all 120ms ease;
+  }
+  .dt-sim__tab:hover { border-color: #0E3A5F; color: #0E3A5F; }
+  .dt-sim__tab--active {
+    background: #0E3A5F; color: #fff; border-color: #0E3A5F;
+  }
+  .dt-sim__toggle {
+    display: flex; align-items: center; gap: 10px; cursor: pointer;
+    font-size: 14px; color: #1A1A1A;
+  }
+  .dt-sim__toggle input { width: 18px; height: 18px; accent-color: #0E3A5F; }
+
+  .dt-sim__results { display: flex; flex-direction: column; gap: 18px; }
+  .dt-sim__hero-out {
+    background: #0E3A5F; color: #fff;
+    border-radius: 6px; padding: 28px; text-align: center;
+  }
+  .dt-sim__hero-label {
+    font-size: 13px; color: #C9A961; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    margin: 0 0 8px 0;
+  }
+  .dt-sim__hero-value {
+    font-size: clamp(36px, 6vw, 48px); font-weight: 800;
+    color: #fff; margin: 0 0 6px 0; line-height: 1;
+  }
+  .dt-sim__hero-note { font-size: 12px; color: #b8c8d6; margin: 0; }
+
+  .dt-sim__detail {
+    background: #F7F5F0; border: 1px solid #E0DCD5;
+    border-radius: 6px; padding: 20px;
+  }
+  .dt-sim__detail-h {
+    font-size: 14px; font-weight: 700; color: #0E3A5F;
+    margin: 0 0 12px 0;
+  }
+  .dt-sim__detail-row {
+    font-size: 14px; color: #1A1A1A; margin: 6px 0; line-height: 1.5;
+  }
+  .dt-sim__detail-row strong { color: #5a5a5a; font-weight: 600; }
+
+  .dt-sim__disclaimer {
+    font-size: 12px; color: #7a7a7a; line-height: 1.5;
+    margin: 0; font-style: italic;
+  }
+  .dt-sim__cta {
+    background: #C9A961; color: #0E3A5F;
+    font-family: inherit; font-weight: 800; font-size: 16px;
+    border: 0; border-radius: 4px; padding: 16px 24px;
+    cursor: pointer; transition: background-color 120ms ease;
+  }
+  .dt-sim__cta:hover { background: #b8974d; }
+
+  /* === COME FUNZIONA === */
+  .dt-how { background: #F7F5F0; padding: 48px 24px; }
+  .dt-how__inner { max-width: 920px; margin: 0 auto; }
+  .dt-how__title {
+    font-size: clamp(22px, 3.4vw, 28px); font-weight: 800;
+    color: #0E3A5F; margin: 0 0 20px 0;
+  }
+  .dt-how__steps { padding-left: 20px; margin: 0; }
+  .dt-how__steps li {
+    font-size: 15px; color: #1A1A1A; line-height: 1.6;
+    margin-bottom: 10px;
+  }
+  .dt-how__steps li strong { color: #0E3A5F; }
+
+  /* === FORM === */
+  .dt-form { background: #fff; padding: 56px 24px; border-top: 1px solid #E0DCD5; }
+  .dt-form__inner { max-width: 760px; margin: 0 auto; }
+  .dt-form__title {
+    font-size: clamp(22px, 3.6vw, 30px); font-weight: 800;
+    color: #0E3A5F; margin: 0 0 8px 0;
+  }
+  .dt-form__intro { font-size: 15px; color: #1A1A1A; margin: 0 0 24px 0; }
+  .dt-form__form {
+    background: #F7F5F0; border: 1px solid #E0DCD5; border-radius: 6px;
+    padding: 24px; display: flex; flex-direction: column; gap: 14px;
+  }
+  .dt-form__row { display: grid; grid-template-columns: 1fr; gap: 14px; }
+  @media (min-width: 600px) { .dt-form__row { grid-template-columns: 1fr 1fr; } }
+  .dt-form__field { display: flex; flex-direction: column; gap: 6px; }
+  .dt-form__label { font-size: 13px; font-weight: 600; color: #1A1A1A; }
+  .dt-form__input, .dt-form__textarea {
+    font-family: inherit; font-size: 15px;
+    padding: 11px 12px; border: 1px solid #c9c8c5;
+    border-radius: 4px; background: #fff; color: #1A1A1A; width: 100%;
+  }
+  .dt-form__input:focus, .dt-form__textarea:focus {
+    outline: 2px solid #0E3A5F; outline-offset: 1px; border-color: #0E3A5F;
+  }
+  .dt-form__textarea { resize: vertical; min-height: 80px; }
+  .dt-form__honeypot {
+    position: absolute !important; left: -10000px !important;
+    width: 1px; height: 1px; opacity: 0;
+  }
+  .dt-form__check {
+    display: flex; align-items: flex-start; gap: 10px;
+    font-size: 13px; color: #3a3a3a; line-height: 1.45;
+  }
+  .dt-form__check input { margin-top: 3px; flex-shrink: 0; }
+  .dt-form__check a { color: #0E3A5F; text-decoration: underline; }
+  .dt-form__submit {
+    background: #C9A961; color: #0E3A5F;
+    font-family: inherit; font-weight: 800; font-size: 16px;
+    border: 0; border-radius: 4px; padding: 14px 22px;
+    cursor: pointer; margin-top: 6px;
+    transition: background-color 120ms ease;
+  }
+  .dt-form__submit:hover { background: #b8974d; }
+  .dt-form__submit:disabled { background: #999; cursor: default; }
+  .dt-form__feedback {
+    font-size: 14px; padding: 12px 14px; border-radius: 4px; margin-top: 4px;
+  }
+  .dt-form__feedback--ok {
+    background: #eaf3ec; color: #1f6033; border: 1px solid #c5dfca;
+  }
+  .dt-form__feedback--err {
+    background: #fbeaea; color: #8a2222; border: 1px solid #e2bcbc;
+  }
+
+  /* === FOOTER === */
+  .dt-footer { background: #0E3A5F; color: #b8c8d6; padding: 28px 24px; }
+  .dt-footer__inner { max-width: 1120px; margin: 0 auto; text-align: center; }
+  .dt-footer p { margin: 4px 0; font-size: 13px; }
+  .dt-footer a { color: #C9A961; text-decoration: none; }
+  .dt-footer a:hover { text-decoration: underline; }
+  .dt-footer__sub { font-size: 12px; color: #8aa0b3; }
+</style>

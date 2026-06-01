@@ -1,0 +1,8 @@
+[
+  { "id": "bar-50", "label": "Cantinetta bar 50 bottiglie", "prezzo": 1200, "highlight": false },
+  { "id": "pro-90", "label": "Cantinetta professionale 90 bottiglie", "prezzo": 2200, "highlight": true },
+  { "id": "incasso-60", "label": "Cantinetta da incasso 60 bottiglie", "prezzo": 2800, "highlight": false },
+  { "id": "doppia-150", "label": "Cantinetta doppia temperatura 150 bottiglie", "prezzo": 3800, "highlight": false },
+  { "id": "vetrina-200", "label": "Vetrina espositiva 200 bottiglie", "prezzo": 5500, "highlight": false },
+  { "id": "walkin-modulare", "label": "Cella walk-in modulare per cantina", "prezzo": 12000, "highlight": false }
+]
