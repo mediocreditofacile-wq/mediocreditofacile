@@ -479,6 +479,19 @@
   padding-right: 0.5rem;
 }
 
+.simlea__breakdown-lomartire td {
+  color: #5b21b6;
+  background: #f5f3ff;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  font-weight: 700;
+}
+
+.simlea__breakdown-lomartire td:first-child {
+  border-left: 3px solid #664CCD;
+  padding-left: 0.5rem;
+}
+
 .simlea__breakdown-total td {
   font-weight: 800;
   font-size: 0.98rem;
