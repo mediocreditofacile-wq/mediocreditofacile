@@ -1,15 +1,16 @@
 {
-  "_note": "Coefficienti noleggio operativo IFIS, categoria altri beni strumentali, target Horeca. Da affinare con conferma IFIS post-convenzione. Senza servizi = canone secco; con servizi = include manutenzione e assicurazione (placeholder, da concordare con Datron).",
+  "_note": "Coefficienti Pagarent rilevati dal calcolatore ufficiale dashboard.pagarent.com il 2026-06-01 (tipologia cliente: Azienda, periodicita': Mensile, prodotto: Generale, importo riferimento: 3500 EUR). I valori sono leggermente sensibili all'importo (la istruttoria fissa di 100 EUR e' spalmata sul canone) ma restano in un intervallo di +/- 3 percento. Per simulazioni veritiere su qualsiasi importo nel range cantinette Horeca (1.000-12.000 EUR).",
+  "_extra": "Pagarent applica: istruttoria 100 EUR una tantum, assicurazione opzionale fino al 3.47 percento sul canone. La voce con_servizi include una maggiorazione del 10 percento sul canone base per coprire manutenzione e assicurazione media.",
   "senza_servizi": {
-    "24": 0.047,
-    "36": 0.0325,
-    "48": 0.0255,
-    "60": 0.0225
+    "24": 0.05382,
+    "36": 0.03761,
+    "48": 0.02906,
+    "60": 0.02442
   },
   "con_servizi": {
-    "24": 0.051,
-    "36": 0.036,
-    "48": 0.0285,
-    "60": 0.0255
+    "24": 0.0592,
+    "36": 0.0414,
+    "48": 0.032,
+    "60": 0.0269
   }
 }
