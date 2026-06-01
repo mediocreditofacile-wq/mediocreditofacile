@@ -8,6 +8,9 @@ import {
   EURIBOR_3M_DATA,
   TIPOLOGIE_BENE,
   ALBA_EASY_LEASE,
+  COMPENSO_LOMARTIRE_PERC,
+  COMPENSO_LOMARTIRE_ALBA_PROMO_PERC,
+  compensoLoMartire,
   easyLeaseEligibile,
   getCondizioniPerDurata,
   getCondizioneFornitori,
@@ -32,6 +35,16 @@ interface SimulatoreLeasingProps {
    * - Aggiorna lo spread se cambia partner o durata, scegliendo la condizione giusta
    */
   varianteFornitori?: boolean;
+  /**
+   * Variante "Lo Martire": pagina dedicata all'intermediario Lorenzo Lo Martire (password gated).
+   * - Provvigioni al minimo per ogni partner (prima condizione del listino applicabile)
+   * - Spese istruttoria mostrate = spese partner + COMPENSO_LOMARTIRE_PERC × importo (sommate)
+   * - Per Alba in promo Easy Lease: spese partner = 0, markup Lo Martire = 1,20%
+   * - Breakdown in pagina mostra le due voci separate (per chiarezza interna)
+   * - PDF cliente mostra una voce unica "Spese istruttoria" con la somma
+   * - Nasconde provvigione, spread e tasso del piano come la variante fornitori
+   */
+  varianteLoMartire?: boolean;
 }
 
 const eur = (n: number) =>
@@ -40,7 +53,10 @@ const eurDec = (n: number) =>
   n.toLocaleString('it-IT', { style: 'currency', currency: 'EUR', minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const pct = (n: number) => `${n.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`;
 
-export default function SimulatoreLeasing({ varianteFornitori = false }: SimulatoreLeasingProps) {
+export default function SimulatoreLeasing({ varianteFornitori = false, varianteLoMartire = false }: SimulatoreLeasingProps) {
+  // "Locked" = niente scelta spread, niente riga provvigione/tasso visibili
+  // Sia la variante fornitori che quella Lo Martire sono "locked"
+  const lockedVariant = varianteFornitori || varianteLoMartire;
   // --- Stato simulazione ---
   const [partnerKey, setPartnerKey] = useState<'sella' | 'alba' | 'credem'>('sella');
   const [tipologia, setTipologia] = useState<TipologiaBene>('strumentale-generico');
@@ -84,8 +100,14 @@ export default function SimulatoreLeasing({ varianteFornitori = false }: Simulat
 
   // Quando cambia partner o durata, scegli la condizione giusta:
   // - Variante fornitori: spread medio commerciale fisso (PartnerLeasing.spreadFornitori)
+  // - Variante Lo Martire: spread MINIMO (prima condizione del listino → provvigione minima)
   // - Variante interna: se la condizione corrente non è più valida, fallback al primo della lista
   const condizioneEffettiva = useMemo(() => {
+    if (varianteLoMartire) {
+      const target = condizioniDisponibili[0]; // primo del listino = spread minimo
+      if (target && target.id !== condizioneId) setCondizioneId(target.id);
+      return target;
+    }
     if (varianteFornitori) {
       const target = getCondizioneFornitori(partner, durata);
       if (target.id !== condizioneId) setCondizioneId(target.id);
@@ -98,7 +120,7 @@ export default function SimulatoreLeasing({ varianteFornitori = false }: Simulat
       setCondizioneId(fallback.id);
     }
     return fallback;
-  }, [condizioniDisponibili, condizioneId, varianteFornitori, partner, durata]);
+  }, [condizioniDisponibili, condizioneId, varianteFornitori, varianteLoMartire, partner, durata]);
 
   // Riscatto max per durata corrente
   const riscattoMax = partner.riscattoMaxPerDurata[durata] ?? 20;
@@ -115,6 +137,12 @@ export default function SimulatoreLeasing({ varianteFornitori = false }: Simulat
   const anticipoEffettivo = easyLeaseAttiva ? ALBA_EASY_LEASE.override.anticipoPerc : anticipoPerc;
   const speseIstruttoriaOverride = easyLeaseAttiva ? ALBA_EASY_LEASE.override.speseIstruttoria : null;
 
+  // --- Compenso Lo Martire (solo variante dedicata) ---
+  // Si SOMMA alle spese istruttoria del partner. Percentuale dipende dalla promo Easy Lease.
+  const compensoLM = varianteLoMartire && importoValido
+    ? compensoLoMartire(partner, importo, tipologia)
+    : null;
+
   // --- Calcolo rata ---
   const risultato = useMemo(() => {
     if (!importoValido || !condizioneEffettiva) return null;
@@ -128,17 +156,26 @@ export default function SimulatoreLeasing({ varianteFornitori = false }: Simulat
       condizioneEffettiva.id,
     );
     // Override spese istruttoria per Easy Lease (la rata mensile non cambia, ma il totale dovuto sì)
+    let out = r;
     if (speseIstruttoriaOverride !== null) {
       const speseDelta = r.speseIstruttoria - speseIstruttoriaOverride;
-      return {
+      out = {
         ...r,
         speseIstruttoria: speseIstruttoriaOverride,
         totaleCanoni: r.totaleCanoni - speseDelta,
         costoComplessivo: r.costoComplessivo - speseDelta,
       };
     }
-    return r;
-  }, [partner, importo, durata, anticipoEffettivo, riscattoPerc, riscattoMax, condizioneEffettiva, importoValido, speseIstruttoriaOverride]);
+    // Aggiunta compenso Lo Martire alle spese istruttoria del totale dovuto
+    if (compensoLM) {
+      out = {
+        ...out,
+        totaleCanoni: out.totaleCanoni + compensoLM.euro,
+        costoComplessivo: out.costoComplessivo + compensoLM.euro,
+      };
+    }
+    return out;
+  }, [partner, importo, durata, anticipoEffettivo, riscattoPerc, riscattoMax, condizioneEffettiva, importoValido, speseIstruttoriaOverride, compensoLM]);
 
   // --- Calcolo agevolazioni ---
   // Regole di esclusione:
@@ -262,7 +299,7 @@ export default function SimulatoreLeasing({ varianteFornitori = false }: Simulat
           <table style="width:100%;border-collapse:collapse;font-size:12px;">
             <tr${easyLeaseAttiva ? ' style="background:#fff7ed"' : ''}><td>Anticipo / maxicanone (${anticipoEffettivo}%)${easyLeaseAttiva ? ' — promo' : ''}</td><td style="text-align:right">${eur(risultato.anticipo)}</td></tr>
             <tr><td>Riscatto finale (${riscattoPerc}%)</td><td style="text-align:right">${eur(risultato.riscatto)}</td></tr>
-            <tr${easyLeaseAttiva ? ' style="background:#fff7ed"' : ''}><td>Spese istruttoria${easyLeaseAttiva ? ' — promo' : ''}</td><td style="text-align:right">${eur(risultato.speseIstruttoria)}</td></tr>
+            <tr${easyLeaseAttiva ? ' style="background:#fff7ed"' : ''}><td>Spese istruttoria${easyLeaseAttiva ? ' — promo' : ''}</td><td style="text-align:right">${eur(risultato.speseIstruttoria + (compensoLM?.euro ?? 0))}</td></tr>
             <tr><td>Spese incasso rata</td><td style="text-align:right">${eur(risultato.speseIncassoRata)} × ${risultato.numRate}</td></tr>
             <tr style="border-top:1px solid #E1DEE3;font-weight:700"><td style="padding-top:8px">Totale dovuto</td><td style="text-align:right;padding-top:8px">${eur(risultato.totaleCanoni)}</td></tr>
           </table>
@@ -434,7 +471,7 @@ export default function SimulatoreLeasing({ varianteFornitori = false }: Simulat
             </label>
           </div>
 
-          {!varianteFornitori && (
+          {!lockedVariant && (
             <label class="simlea__field">
               <span class="simlea__field-label">
                 Condizione (spread)
@@ -458,7 +495,7 @@ export default function SimulatoreLeasing({ varianteFornitori = false }: Simulat
             </label>
           )}
 
-          {!varianteFornitori && (
+          {!lockedVariant && (
             <div class="simlea__euribor">
               Tasso piano = Spread + Euribor 3M ({pct(EURIBOR_3M)} • {EURIBOR_3M_DATA})
             </div>
@@ -617,14 +654,20 @@ export default function SimulatoreLeasing({ varianteFornitori = false }: Simulat
                 </tr>
                 <tr><td>Riscatto finale ({riscattoPerc}%)</td><td>{eur(risultato.riscatto)}</td></tr>
                 <tr class={easyLeaseAttiva ? 'simlea__breakdown-promo' : ''}>
-                  <td>Spese istruttoria{easyLeaseAttiva && ' — Promo Easy Lease'}</td>
+                  <td>Spese istruttoria{varianteLoMartire ? ' partner' : ''}{easyLeaseAttiva && ' — Promo Easy Lease'}</td>
                   <td>{eur(risultato.speseIstruttoria)}</td>
                 </tr>
+                {compensoLM && (
+                  <tr class="simlea__breakdown-lomartire">
+                    <td>Compenso intermediario ({compensoLM.perc.toLocaleString('it-IT', { minimumFractionDigits: 1 })}% sull'importo)</td>
+                    <td>{eur(compensoLM.euro)}</td>
+                  </tr>
+                )}
                 <tr><td>Spese incasso rata</td><td>{eur(risultato.speseIncassoRata)} × {risultato.numRate}</td></tr>
-                {!varianteFornitori && (
+                {!lockedVariant && (
                   <tr><td>Tasso del piano</td><td>{pct(risultato.tassoEffettivo)}</td></tr>
                 )}
-                {partner.modello === 'capitale-gonfiato' && !varianteFornitori && (
+                {partner.modello === 'capitale-gonfiato' && !lockedVariant && (
                   <tr class="simlea__breakdown-prov">
                     <td>Provvigione caricata sulla rata</td>
                     <td>{eur(risultato.provvigione)}</td>

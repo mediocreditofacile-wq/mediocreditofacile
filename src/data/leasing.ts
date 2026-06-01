@@ -307,13 +307,42 @@ export const ALBA_EASY_LEASE = {
   // Override delle condizioni standard ALBA quando la campagna si applica:
   override: {
     anticipoPerc: 0,        // canone anticipato 0
-    speseIstruttoria: 0,    // IST 0
+    speseIstruttoria: 0,    // IST 0 (la campagna le azzera lato partner)
     // NB: "spese di contratto (IMP)" sono spese di stipula una tantum NON modellate
     // nella nostra rata (la nostra somma è anticipo + N×rata + riscatto + istruttoria + N×incasso rata),
     // quindi non c'è nulla da azzerare oltre.
   },
   cumulabilita: 'Cumulabile con Nuova Sabatini, MCC – Fondo di Garanzia e Crediti d\'imposta.',
 };
+
+// ──────────────────────────────────────────────────────────────────────────
+// VARIANTE LO MARTIRE — markup intermediario sommato alle spese istruttoria
+// ──────────────────────────────────────────────────────────────────────────
+// Lorenzo Lo Martire e' l'intestatario delle pratiche raccolte tramite il
+// simulatore dedicato in /tools/simulatore-leasing-lomartire. Sopra le spese
+// istruttoria standard del partner viene SOMMATO un suo markup espresso in
+// percentuale sull'importo del bene.
+//
+// - Mandanti standard (Sella, Alba senza promo, Credem): markup 1,00%
+// - Mandante Alba in promo Easy Lease: markup 1,20% (Alba azzera l'istruttoria
+//   come parte della campagna, Lo Martire ne approfitta per applicare un
+//   markup leggermente piu' alto)
+export const COMPENSO_LOMARTIRE_PERC = 1.0;          // % sull'importo
+export const COMPENSO_LOMARTIRE_ALBA_PROMO_PERC = 1.2;
+
+/**
+ * Restituisce il markup Lo Martire (in €) per un dato partner+importo,
+ * tenendo conto della promo Easy Lease.
+ */
+export function compensoLoMartire(partner: PartnerLeasing, importo: number, tipologia: TipologiaBene): {
+  perc: number;
+  euro: number;
+} {
+  const perc = easyLeaseEligibile(partner, importo, tipologia)
+    ? COMPENSO_LOMARTIRE_ALBA_PROMO_PERC
+    : COMPENSO_LOMARTIRE_PERC;
+  return { perc, euro: importo * perc / 100 };
+}
 
 /**
  * Verifica se la campagna Easy Lease è applicabile a un dato partner+importo+tipologia.
