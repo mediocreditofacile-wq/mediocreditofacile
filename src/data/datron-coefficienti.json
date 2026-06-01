@@ -1,0 +1,15 @@
+{
+  "_note": "Coefficienti noleggio operativo IFIS, categoria altri beni strumentali, target Horeca. Da affinare con conferma IFIS post-convenzione. Senza servizi = canone secco; con servizi = include manutenzione e assicurazione (placeholder, da concordare con Datron).",
+  "senza_servizi": {
+    "24": 0.047,
+    "36": 0.0325,
+    "48": 0.0255,
+    "60": 0.0225
+  },
+  "con_servizi": {
+    "24": 0.051,
+    "36": 0.036,
+    "48": 0.0285,
+    "60": 0.0255
+  }
+}
