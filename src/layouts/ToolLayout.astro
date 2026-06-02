@@ -19,7 +19,9 @@ const {
   noindex = false,
 } = Astro.props;
 
-const siteUrl = 'https://mediocreditofacile.it';
+// Dominio canonico: sempre www (l'apex fa 308 verso www).
+// Allinea canonical, OG e breadcrumb alla sitemap, che usa www.
+const siteUrl = 'https://www.mediocreditofacile.it';
 const canonicalUrl = new URL(Astro.url.pathname, siteUrl).href;
 const ogImageUrl = new URL(ogImage, siteUrl).href;
 

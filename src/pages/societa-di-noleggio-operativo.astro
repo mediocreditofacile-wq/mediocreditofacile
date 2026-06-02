@@ -1,0 +1,311 @@
+---
+/**
+ * Società di noleggio operativo — /societa-di-noleggio-operativo
+ * Pagina prodotto SEO sul posizionamento hub multi-società.
+ * Intercetta "società di noleggio operativo" e "società finanziarie per noleggio operativo".
+ */
+import Icon from '../components/Icon.astro';
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import ContactForm from '../components/ContactForm.astro';
+
+const pageUrl = 'https://www.mediocreditofacile.it/societa-di-noleggio-operativo';
+
+const faqs = [
+  {
+    q: 'Qual è la migliore società di noleggio operativo?',
+    a: "Non esiste una società migliore in assoluto. La più conveniente dipende dal settore, dall'importo del bene e dal merito creditizio dell'azienda: la stessa pratica può avere coefficienti molto diversi da un operatore all'altro. Il vantaggio di passare da un broker è poter confrontare più società invece di firmare con la prima.",
+  },
+  {
+    q: 'Posso scegliere io la società di noleggio?',
+    a: "Sì. Noi proponiamo l'operatore più adatto alla tua pratica tra quelli della nostra rete e ti spieghiamo perché; la decisione resta tua. Lavoriamo con più di dodici società di noleggio e leasing, quindi la scelta non è mai vincolata a un solo canale.",
+  },
+  {
+    q: "Che differenza c'è tra società di noleggio e società di leasing?",
+    a: "La società di leasing finanzia l'acquisto di un bene che entra nel tuo attivo, di norma con un riscatto finale. La società di noleggio operativo resta proprietaria del bene e te lo concede in uso dietro canone: non immobilizzi capitale, deduci interamente il canone e a fine contratto puoi riscattare, restituire o rinnovare.",
+  },
+  {
+    q: 'Quanto costa rivolgersi a Mediocredito Facile?',
+    a: "La consulenza è gratuita e non ci sono costi di istruttoria a carico del cliente. Il nostro compenso arriva dalla società di noleggio che delibera la pratica. Le condizioni economiche del contratto sono tutte esplicitate nella proposta formale prima della firma.",
+  },
+  {
+    q: 'Cosa succede se una società rifiuta la pratica?',
+    a: "Un rifiuto da parte di un singolo operatore non chiude il discorso. Presentiamo la pratica su un altro canale della rete, con criteri di valutazione diversi. È la ragione per cui avere accesso a più di dodici società conta più che rivolgersi a una sola.",
+  },
+];
+
+const faqJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqs.map((f) => ({
+    '@type': 'Question',
+    name: f.q,
+    acceptedAnswer: { '@type': 'Answer', text: f.a },
+  })),
+};
+
+const serviceJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FinancialService',
+  name: 'Mediocredito Facile',
+  description:
+    'Accesso a più di dodici società di noleggio operativo e leasing per PMI da un unico interlocutore. Consulenza gratuita.',
+  url: pageUrl,
+  areaServed: { '@type': 'Country', name: 'IT' },
+  serviceType: 'Noleggio Operativo',
+  telephone: '+393939957840',
+};
+---
+
+<Layout
+  title="Società di Noleggio Operativo: come sceglierla | Mediocredito Facile"
+  description="Cos'è una società di noleggio operativo e come scegliere quella giusta. Mediocredito Facile ti dà accesso a oltre 12 società di noleggio e leasing da un unico interlocutore. Consulenza gratuita."
+>
+  <Header minimal={false} />
+
+  <!-- Hero -->
+  <section class="sno-hero">
+    <div class="sno-hero__inner">
+      <h1 class="sno-hero__title">Società di noleggio operativo</h1>
+      <p class="sno-hero__sub">
+        Dietro ogni canone c'è una società di locazione che compra il bene e te lo affitta.
+        Sceglierla bene cambia quanto paghi al mese. Mediocredito Facile ti dà accesso a più di
+        dodici società da un solo interlocutore.
+      </p>
+      <div class="sno-hero__cta">
+        <a href="#contatti" class="sno-btn sno-btn--primary">Parla con un consulente</a>
+        <a href="/tools/simulatore-noleggio-operativo" class="sno-btn sno-btn--ghost">
+          <Icon name="calculate" class="sno-btn__icon" /> Calcola il canone
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Cos'è -->
+  <section class="sno-section">
+    <div class="sno-section__inner">
+      <h2 class="sno-section__heading">Cos'è una società di noleggio operativo</h2>
+      <p class="sno-lead">
+        Una società di noleggio operativo acquista il bene strumentale che ti serve — un
+        macchinario, un mezzo, un impianto, hardware — e te lo concede in uso dietro un canone
+        mensile fisso. Il bene resta di sua proprietà per tutta la durata del contratto: tu paghi
+        solo l'utilizzo, deduci interamente il canone e a fine contratto decidi se riscattare,
+        restituire o rinnovare. È la differenza tra possedere un bene che invecchia e usarlo
+        finché ti serve davvero.
+      </p>
+    </div>
+  </section>
+
+  <!-- Una sola o dodici -->
+  <section class="sno-section sno-section--alt">
+    <div class="sno-section__inner">
+      <h2 class="sno-section__heading">Una società sola, o dodici?</h2>
+      <p class="sno-lead">
+        Rivolgersi a una singola società di noleggio significa accettare le sue condizioni e i suoi
+        paletti. Se quella società dice no, o applica un coefficiente alto sulla tua fascia di
+        importo, il discorso finisce lì. È come chiedere il preventivo a un solo fornitore e firmare
+        senza confrontare.
+      </p>
+      <p class="sno-lead">
+        Mediocredito Facile lavora come hub: un'unica interlocuzione che apre l'accesso a più di
+        dodici società di noleggio e leasing. Presentiamo la tua pratica all'operatore giusto per il
+        tuo settore, la tua dimensione e il tuo merito creditizio. Tu parli con una persona; dietro,
+        lavorano dodici canali.
+      </p>
+    </div>
+  </section>
+
+  <!-- Cosa puoi mettere in noleggio -->
+  <section class="sno-section">
+    <div class="sno-section__inner">
+      <h2 class="sno-section__heading">Cosa puoi mettere in noleggio operativo</h2>
+      <div class="sno-grid">
+        <div class="sno-card">
+          <Icon name="precision_manufacturing" class="sno-card__icon" />
+          <h3 class="sno-card__title">Macchinari e attrezzature</h3>
+          <p>Beni strumentali per produzione, officina, laboratorio, studio professionale.</p>
+        </div>
+        <div class="sno-card">
+          <Icon name="mezzi" class="sno-card__icon" />
+          <h3 class="sno-card__title">Mezzi e veicoli aziendali</h3>
+          <p>Furgoni, muletti, mezzi d'opera e veicoli commerciali a uso d'impresa.</p>
+        </div>
+        <div class="sno-card">
+          <Icon name="solar_power" class="sno-card__icon" />
+          <h3 class="sno-card__title">Impianti e tecnologia</h3>
+          <p>Impianti fotovoltaici, sistemi e tecnologia per la transizione energetica e 5.0.</p>
+        </div>
+        <div class="sno-card">
+          <Icon name="computer" class="sno-card__icon" />
+          <h3 class="sno-card__title">Hardware e strumentazione</h3>
+          <p>Computer, server, strumentazione elettronica e dotazioni informatiche.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Come funziona -->
+  <section class="sno-section sno-section--alt">
+    <div class="sno-section__inner">
+      <h2 class="sno-section__heading">Come funziona con Mediocredito Facile</h2>
+      <div class="sno-steps">
+        <div class="sno-step">
+          <span class="sno-step__num">1</span>
+          <p>Ci dici il bene e l'importo, oppure parti dal <a href="/tools/simulatore-noleggio-operativo">simulatore del canone</a>.</p>
+        </div>
+        <div class="sno-step">
+          <span class="sno-step__num">2</span>
+          <p>Selezioniamo la società di noleggio più adatta tra le oltre dodici della nostra rete.</p>
+        </div>
+        <div class="sno-step">
+          <span class="sno-step__num">3</span>
+          <p>Istruttoria e contratto. Il canone è deducibile e parte dal primo mese di decorrenza.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="sno-section sno-faq">
+    <div class="sno-section__inner">
+      <h2 class="sno-section__heading">Domande frequenti</h2>
+      <div class="sno-faq__list">
+        {faqs.map((f) => (
+          <details class="sno-faq__item">
+            <summary class="sno-faq__q">{f.q}</summary>
+            <p class="sno-faq__a">{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Dati strutturati -->
+  <script type="application/ld+json" set:html={JSON.stringify(faqJsonLd)} />
+  <script type="application/ld+json" set:html={JSON.stringify(serviceJsonLd)} />
+
+  <!-- Form -->
+  <ContactForm
+    fonte="societa-di-noleggio-operativo"
+    heading="Confronta le società di noleggio operativo"
+    subheading="Dicci cosa ti serve: selezioniamo l'operatore giusto tra oltre dodici. Consulenza gratuita, risposta entro 24 ore lavorative."
+    ctaText="Richiedi una consulenza gratuita"
+  />
+
+  <Footer />
+</Layout>
+
+<style>
+  .sno-hero {
+    padding: 4rem 1.5rem 3rem;
+    text-align: center;
+    background: var(--mcf-ghost);
+  }
+  .sno-hero__inner { max-width: 760px; margin: 0 auto; }
+  .sno-hero__title {
+    font-size: clamp(1.9rem, 5vw, 2.8rem);
+    font-weight: 800;
+    color: var(--mcf-accent);
+    letter-spacing: -0.02em;
+    margin-bottom: 1rem;
+  }
+  .sno-hero__sub {
+    font-size: 1.1rem;
+    color: var(--mcf-charcoal);
+    line-height: 1.65;
+    margin-bottom: 1.75rem;
+  }
+  .sno-hero__cta {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .sno-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.85rem 1.6rem;
+    border-radius: var(--radius);
+    font-weight: 700;
+    font-size: 1rem;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .sno-btn--primary { background: var(--mcf-primary); color: #fff; }
+  .sno-btn--primary:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(254,111,58,0.3); }
+  .sno-btn--ghost { background: #fff; color: var(--mcf-accent); border: 1px solid var(--mcf-platinum); }
+  .sno-btn--ghost:hover { border-color: var(--mcf-accent); }
+  .sno-btn__icon { font-size: 1.2rem; }
+
+  .sno-section { padding: 3.5rem 1.5rem; }
+  .sno-section--alt { background: var(--mcf-ghost); }
+  .sno-section__inner { max-width: var(--max-width); margin: 0 auto; }
+  .sno-section__heading {
+    font-size: clamp(1.5rem, 3.5vw, 2rem);
+    font-weight: 800;
+    color: var(--mcf-black);
+    margin-bottom: 1.25rem;
+    letter-spacing: -0.01em;
+  }
+  .sno-lead {
+    font-size: 1.05rem;
+    color: var(--mcf-charcoal);
+    line-height: 1.75;
+    max-width: 820px;
+    margin-bottom: 1rem;
+  }
+  .sno-lead a { color: var(--mcf-accent); font-weight: 600; text-decoration: underline; }
+
+  .sno-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.25rem;
+    margin-top: 1.5rem;
+  }
+  .sno-card {
+    background: #fff;
+    border: 1px solid var(--mcf-platinum);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+  }
+  .sno-card__icon { font-size: 2rem; color: var(--mcf-primary); margin-bottom: 0.6rem; }
+  .sno-card__title { font-size: 1.1rem; font-weight: 700; color: var(--mcf-black); margin-bottom: 0.4rem; }
+  .sno-card p { color: var(--mcf-charcoal); line-height: 1.6; }
+
+  .sno-steps { display: grid; gap: 1rem; margin-top: 1.5rem; }
+  .sno-step { display: flex; align-items: flex-start; gap: 1rem; }
+  .sno-step__num {
+    flex: none;
+    width: 2.25rem; height: 2.25rem;
+    display: grid; place-items: center;
+    background: var(--mcf-gradient);
+    color: #fff; font-weight: 800; border-radius: 50%;
+  }
+  .sno-step p { color: var(--mcf-charcoal); line-height: 1.65; padding-top: 0.3rem; }
+  .sno-step a { color: var(--mcf-accent); font-weight: 600; text-decoration: underline; }
+
+  .sno-faq__list { display: flex; flex-direction: column; gap: 0.75rem; max-width: 820px; margin-top: 1.5rem; }
+  .sno-faq__item {
+    background: #fff;
+    border: 1px solid var(--mcf-platinum);
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+  }
+  .sno-faq__q {
+    font-weight: 700;
+    color: var(--mcf-black);
+    cursor: pointer;
+    list-style: none;
+    position: relative;
+    padding-right: 1.75rem;
+  }
+  .sno-faq__q::-webkit-details-marker { display: none; }
+  .sno-faq__q::after {
+    content: '+';
+    position: absolute; right: 0; top: -0.1rem;
+    font-size: 1.4rem; font-weight: 400; color: var(--mcf-primary);
+  }
+  .sno-faq__item[open] .sno-faq__q::after { content: '−'; }
+  .sno-faq__a { margin-top: 0.75rem; color: var(--mcf-charcoal); line-height: 1.65; }
+</style>
