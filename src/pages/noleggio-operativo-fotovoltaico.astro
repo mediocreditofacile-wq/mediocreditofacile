@@ -1,0 +1,351 @@
+---
+/**
+ * Noleggio operativo fotovoltaico per aziende — /noleggio-operativo-fotovoltaico
+ * Pillar page organica. Consolida i sei vecchi angoli ads (zero anticipo,
+ * fuori bilancio, canone fisso, chiavi in mano, tetto in affitto, breve termine)
+ * in un'unica pagina profonda, l'unico bersaglio SEO per il fotovoltaico end-user.
+ * I vecchi slug noleggio-fotovoltaico-* fanno 301 qui (vercel.json).
+ */
+import Icon from '../components/Icon.astro';
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import ContactForm from '../components/ContactForm.astro';
+
+const pageUrl = 'https://www.mediocreditofacile.it/noleggio-operativo-fotovoltaico';
+
+const faqs = [
+  {
+    q: 'Come funziona il noleggio operativo di un impianto fotovoltaico?',
+    a: "Una società di noleggio operativo acquista e installa l'impianto sul tuo capannone o tetto e te lo concede in uso dietro un canone mensile fisso. L'impianto resta di sua proprietà per la durata del contratto: tu paghi il canone, l'energia che produci la consumi, e a fine contratto decidi se riscattare, restituire o rinnovare. Non immobilizzi capitale e non accendi un debito.",
+  },
+  {
+    q: 'Quanto costa al mese un impianto fotovoltaico in noleggio operativo?',
+    a: "Dipende dalla potenza, dal profilo di consumo e dalla durata. Per dare un ordine di grandezza: un impianto da 30 kW (circa 30.000 € di valore) può stare intorno ai 526 € al mese. È un esempio indicativo: il canone definitivo viene calcolato sulla tua situazione. Il punto è il confronto con la bolletta, non il canone in sé.",
+  },
+  {
+    q: 'Devo anticipare dei soldi o dare garanzie?',
+    a: "Nella formula a zero anticipo non c'è esborso iniziale, né fideiussioni o pegni. L'impianto parte al collaudo e il canone decorre dal mese successivo. La concedibilità e le condizioni dipendono dalla valutazione del merito creditizio dell'azienda.",
+  },
+  {
+    q: "Il noleggio dell'impianto entra in bilancio come debito?",
+    a: "No. Il canone del noleggio operativo è un costo d'esercizio interamente deducibile, non un investimento iscritto a debito. La cassa resta libera e il rating aziendale non viene appesantito da un nuovo finanziamento.",
+  },
+  {
+    q: 'Chi si occupa di manutenzione, assicurazione e pratiche GSE?',
+    a: "Nelle formule chiavi in mano manutenzione, assicurazione all-risk e gestione delle pratiche stanno dentro il canone. Tu usi l'impianto, del resto si occupa il contratto. Verifichiamo caso per caso cosa è incluso, perché cambia da operatore a operatore.",
+  },
+  {
+    q: "Posso riscattare l'impianto a fine contratto?",
+    a: "Dipende dalla formula. A fine durata puoi riscattare l'impianto a un valore concordato, restituirlo o rinnovare il contratto. Te lo chiariamo prima della firma, così sai dal primo giorno quali sono le opzioni.",
+  },
+];
+
+const faqJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqs.map((f) => ({
+    '@type': 'Question',
+    name: f.q,
+    acceptedAnswer: { '@type': 'Answer', text: f.a },
+  })),
+};
+
+const serviceJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  name: 'Noleggio operativo fotovoltaico per aziende',
+  serviceType: 'Noleggio operativo impianti fotovoltaici',
+  provider: {
+    '@type': 'FinancialService',
+    name: 'Mediocredito Facile',
+    url: 'https://www.mediocreditofacile.it',
+    telephone: '+393939957840',
+  },
+  areaServed: { '@type': 'Country', name: 'IT' },
+  description:
+    "Impianto fotovoltaico aziendale in noleggio operativo: zero anticipo, canone fisso deducibile, fuori bilancio. Mediocredito Facile confronta Grenke, Pagarent e altre società.",
+  url: pageUrl,
+};
+---
+
+<Layout
+  title="Noleggio Operativo Fotovoltaico per Aziende: zero anticipo | Mediocredito Facile"
+  description="Impianto fotovoltaico aziendale in noleggio operativo: zero anticipo, canone fisso deducibile, fuori bilancio. La bolletta risparmiata copre la rata. Stima su misura in 24 ore."
+  ogImage="/images/hero-fotovoltaico.webp"
+>
+  <Header minimal={false} />
+
+  <!-- Hero -->
+  <section class="fv-hero">
+    <div class="fv-hero__inner">
+      <h1 class="fv-hero__title">Noleggio operativo fotovoltaico per aziende</h1>
+      <p class="fv-hero__sub">
+        Metti l'impianto fotovoltaico sul tuo capannone senza tirare fuori capitale e senza accendere
+        debiti. Paghi un canone mensile fisso e deducibile, e la bolletta che risparmi lo copre dal
+        primo mese. Mediocredito Facile confronta Grenke, Pagarent e le altre società di noleggio per
+        trovarti la formula giusta.
+      </p>
+      <div class="fv-hero__cta">
+        <a href="#contatti" class="fv-btn fv-btn--primary">Richiedi una stima su misura</a>
+        <a href="/tools/simulatore-noleggio-fotovoltaico" class="fv-btn fv-btn--ghost">
+          <Icon name="calculate" class="fv-btn__icon" /> Calcola il canone
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Cos'è -->
+  <section class="fv-section">
+    <div class="fv-section__inner">
+      <h2 class="fv-section__heading">Cos'è il noleggio operativo del fotovoltaico</h2>
+      <p class="fv-lead">
+        Comprare un impianto fotovoltaico significa immobilizzare decine di migliaia di euro e
+        gestire installazione, assicurazione, manutenzione e pratiche. Il noleggio operativo ribalta
+        lo schema: una società di locazione acquista e installa l'impianto, tu lo usi dietro un
+        canone mensile fisso. L'energia che produci la consumi subito, abbattendo la bolletta; il
+        canone è un costo d'esercizio deducibile al cento per cento, non un investimento a debito.
+      </p>
+      <p class="fv-lead">
+        È come cambiare fornitore di luce, solo che il nuovo fornitore ti porta anche i pannelli,
+        l'inverter, l'assicurazione e la manutenzione dentro la stessa rata.
+      </p>
+    </div>
+  </section>
+
+  <!-- Bolletta vs rata -->
+  <section class="fv-section fv-section--alt">
+    <div class="fv-section__inner">
+      <h2 class="fv-section__heading">La rata si paga con la bolletta che risparmi</h2>
+      <p class="fv-lead">
+        Il senso del noleggio fotovoltaico non è il canone, è il confronto con quello che già spendi.
+        Se l'energia autoprodotta vale più del canone, il conto si chiude in attivo da subito.
+      </p>
+      <div class="fv-compare">
+        <div class="fv-compare__card">
+          <span class="fv-compare__num">526 €</span>
+          <span class="fv-compare__label">Canone mensile</span>
+        </div>
+        <div class="fv-compare__op">−</div>
+        <div class="fv-compare__card">
+          <span class="fv-compare__num">759 €</span>
+          <span class="fv-compare__label">Bolletta risparmiata</span>
+        </div>
+        <div class="fv-compare__op">=</div>
+        <div class="fv-compare__card fv-compare__card--win">
+          <span class="fv-compare__num">+233 €</span>
+          <span class="fv-compare__label">In attivo dal primo mese</span>
+        </div>
+      </div>
+      <p class="fv-note">
+        Esempio indicativo su impianto da 30 kW con consumo diurno allineato alla produzione. Canone,
+        risparmio e conto netto variano per potenza, profilo di consumo e durata: la stima la facciamo
+        sul tuo caso.
+      </p>
+    </div>
+  </section>
+
+  <!-- Vantaggi (assorbono i 6 angoli) -->
+  <section class="fv-section">
+    <div class="fv-section__inner">
+      <h2 class="fv-section__heading">Perché conviene rispetto all'acquisto</h2>
+      <div class="fv-grid">
+        <div class="fv-card">
+          <Icon name="savings" class="fv-card__icon" />
+          <h3 class="fv-card__title">Zero anticipo</h3>
+          <p>Nessun esborso iniziale, nessuna fideiussione, nessun pegno. L'impianto parte al collaudo, il canone il mese dopo.</p>
+        </div>
+        <div class="fv-card">
+          <Icon name="account_balance" class="fv-card__icon" />
+          <h3 class="fv-card__title">Fuori bilancio</h3>
+          <p>Il canone è un costo operativo, non un debito iscritto a bilancio. La cassa resta libera, il rating intatto.</p>
+        </div>
+        <div class="fv-card">
+          <Icon name="receipt" class="fv-card__icon" />
+          <h3 class="fv-card__title">Deducibile al 100%</h3>
+          <p>Vantaggio fiscale immediato: l'intero canone è deducibile come costo d'esercizio per la durata del contratto.</p>
+        </div>
+        <div class="fv-card">
+          <Icon name="build" class="fv-card__icon" />
+          <h3 class="fv-card__title">Chiavi in mano</h3>
+          <p>Assicurazione all-risk, manutenzione e pratiche GSE possono stare dentro il canone. Tu usi l'impianto e basta.</p>
+        </div>
+        <div class="fv-card">
+          <Icon name="calculate" class="fv-card__icon" />
+          <h3 class="fv-card__title">Canone fisso</h3>
+          <p>Rata costante per tutta la durata: pianifichi il costo dell'energia senza sorprese legate al mercato.</p>
+        </div>
+        <div class="fv-card">
+          <Icon name="solar_power" class="fv-card__icon" />
+          <h3 class="fv-card__title">Tetto che rende</h3>
+          <p>Un capannone con un tetto inutilizzato diventa una centrale che taglia la bolletta invece di restare fermo.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- A chi conviene -->
+  <section class="fv-section fv-section--alt">
+    <div class="fv-section__inner">
+      <h2 class="fv-section__heading">A chi conviene</h2>
+      <p class="fv-lead">
+        Funziona bene per aziende con consumi elettrici diurni e una superficie disponibile —
+        capannone, tetto, pensilina. Più il consumo è allineato alle ore di sole, più l'energia
+        autoprodotta sostituisce quella acquistata, e più il canone si ripaga da solo. Se vuoi
+        capire come si sceglie la società giusta, leggi
+        <a href="/societa-di-noleggio-operativo">come funziona una società di noleggio operativo</a>.
+      </p>
+    </div>
+  </section>
+
+  <!-- Come si attiva -->
+  <section class="fv-section">
+    <div class="fv-section__inner">
+      <h2 class="fv-section__heading">Come si attiva</h2>
+      <div class="fv-steps">
+        <div class="fv-step">
+          <span class="fv-step__num">1</span>
+          <p>Ci dici potenza indicativa e bolletta attuale, oppure parti dal <a href="/tools/simulatore-noleggio-fotovoltaico">simulatore del canone</a>.</p>
+        </div>
+        <div class="fv-step">
+          <span class="fv-step__num">2</span>
+          <p>Confrontiamo Grenke, Pagarent e le altre società e ti portiamo la formula più adatta al tuo profilo.</p>
+        </div>
+        <div class="fv-step">
+          <span class="fv-step__num">3</span>
+          <p>Sopralluogo, installazione e collaudo. Il canone deducibile parte dal mese successivo.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="fv-section fv-section--alt fv-faq">
+    <div class="fv-section__inner">
+      <h2 class="fv-section__heading">Domande frequenti</h2>
+      <div class="fv-faq__list">
+        {faqs.map((f) => (
+          <details class="fv-faq__item">
+            <summary class="fv-faq__q">{f.q}</summary>
+            <p class="fv-faq__a">{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Dati strutturati -->
+  <script type="application/ld+json" set:html={JSON.stringify(faqJsonLd)} />
+  <script type="application/ld+json" set:html={JSON.stringify(serviceJsonLd)} />
+
+  <!-- Form -->
+  <ContactForm
+    fonte="noleggio-operativo-fotovoltaico"
+    heading="Calcola il tuo canone e il risparmio"
+    subheading="Lascia i contatti: ti richiamiamo entro 24 ore lavorative con una stima su misura — canone, bolletta risparmiata e conto netto mese per mese."
+    ctaText="Richiedi la stima"
+  />
+
+  <Footer />
+</Layout>
+
+<style>
+  .fv-hero {
+    padding: 4rem 1.5rem 3rem;
+    text-align: center;
+    background: var(--mcf-ghost);
+  }
+  .fv-hero__inner { max-width: 820px; margin: 0 auto; }
+  .fv-hero__title {
+    font-size: clamp(1.9rem, 5vw, 2.8rem);
+    font-weight: 800;
+    color: var(--mcf-accent);
+    letter-spacing: -0.02em;
+    margin-bottom: 1rem;
+  }
+  .fv-hero__sub {
+    font-size: 1.1rem;
+    color: var(--mcf-charcoal);
+    line-height: 1.65;
+    margin-bottom: 1.75rem;
+  }
+  .fv-hero__cta { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
+  .fv-btn {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    padding: 0.85rem 1.6rem; border-radius: var(--radius);
+    font-weight: 700; font-size: 1rem;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .fv-btn--primary { background: var(--mcf-primary); color: #fff; }
+  .fv-btn--primary:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(254,111,58,0.3); }
+  .fv-btn--ghost { background: #fff; color: var(--mcf-accent); border: 1px solid var(--mcf-platinum); }
+  .fv-btn--ghost:hover { border-color: var(--mcf-accent); }
+  .fv-btn__icon { font-size: 1.2rem; }
+
+  .fv-section { padding: 3.5rem 1.5rem; }
+  .fv-section--alt { background: var(--mcf-ghost); }
+  .fv-section__inner { max-width: var(--max-width); margin: 0 auto; }
+  .fv-section__heading {
+    font-size: clamp(1.5rem, 3.5vw, 2rem);
+    font-weight: 800; color: var(--mcf-black);
+    margin-bottom: 1.25rem; letter-spacing: -0.01em;
+  }
+  .fv-lead {
+    font-size: 1.05rem; color: var(--mcf-charcoal); line-height: 1.75;
+    max-width: 820px; margin-bottom: 1rem;
+  }
+  .fv-lead a { color: var(--mcf-accent); font-weight: 600; text-decoration: underline; }
+  .fv-note { font-size: 0.9rem; color: var(--mcf-taupe); line-height: 1.6; margin-top: 1.25rem; max-width: 820px; }
+
+  /* Bolletta vs rata */
+  .fv-compare {
+    display: flex; align-items: stretch; justify-content: center;
+    gap: 0.75rem; flex-wrap: wrap; margin-top: 1.5rem;
+  }
+  .fv-compare__card {
+    background: #fff; border: 1px solid var(--mcf-platinum); border-radius: var(--radius);
+    padding: 1.25rem 1.5rem; text-align: center; min-width: 150px;
+  }
+  .fv-compare__card--win { border-color: var(--mcf-primary); background: #fff6f1; }
+  .fv-compare__num { display: block; font-size: 1.8rem; font-weight: 800; color: var(--mcf-black); }
+  .fv-compare__card--win .fv-compare__num { color: var(--mcf-primary); }
+  .fv-compare__label { font-size: 0.85rem; color: var(--mcf-taupe); }
+  .fv-compare__op { display: flex; align-items: center; font-size: 1.6rem; font-weight: 700; color: var(--mcf-taupe); }
+
+  .fv-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.25rem; margin-top: 1.5rem;
+  }
+  .fv-card { background: #fff; border: 1px solid var(--mcf-platinum); border-radius: var(--radius); padding: 1.5rem; }
+  .fv-card__icon { font-size: 2rem; color: var(--mcf-primary); margin-bottom: 0.6rem; }
+  .fv-card__title { font-size: 1.1rem; font-weight: 700; color: var(--mcf-black); margin-bottom: 0.4rem; }
+  .fv-card p { color: var(--mcf-charcoal); line-height: 1.6; }
+
+  .fv-steps { display: grid; gap: 1rem; margin-top: 1.5rem; }
+  .fv-step { display: flex; align-items: flex-start; gap: 1rem; }
+  .fv-step__num {
+    flex: none; width: 2.25rem; height: 2.25rem;
+    display: grid; place-items: center;
+    background: var(--mcf-gradient); color: #fff; font-weight: 800; border-radius: 50%;
+  }
+  .fv-step p { color: var(--mcf-charcoal); line-height: 1.65; padding-top: 0.3rem; }
+  .fv-step a { color: var(--mcf-accent); font-weight: 600; text-decoration: underline; }
+
+  .fv-faq__list { display: flex; flex-direction: column; gap: 0.75rem; max-width: 820px; margin-top: 1.5rem; }
+  .fv-faq__item { background: #fff; border: 1px solid var(--mcf-platinum); border-radius: var(--radius); padding: 1rem 1.25rem; }
+  .fv-faq__q {
+    font-weight: 700; color: var(--mcf-black); cursor: pointer;
+    list-style: none; position: relative; padding-right: 1.75rem;
+  }
+  .fv-faq__q::-webkit-details-marker { display: none; }
+  .fv-faq__q::after {
+    content: '+'; position: absolute; right: 0; top: -0.1rem;
+    font-size: 1.4rem; font-weight: 400; color: var(--mcf-primary);
+  }
+  .fv-faq__item[open] .fv-faq__q::after { content: '−'; }
+  .fv-faq__a { margin-top: 0.75rem; color: var(--mcf-charcoal); line-height: 1.65; }
+
+  @media (max-width: 640px) {
+    .fv-compare__op { transform: rotate(90deg); }
+  }
+</style>

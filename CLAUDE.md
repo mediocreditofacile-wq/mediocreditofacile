@@ -93,11 +93,19 @@ Le landing dinamiche si generano da landing-pages.json. Per creare una nuova lan
 - `valueTitle`, `valueText`, `valueText2` → personalizzano la sezione Value Proposition
 - `formHeading`, `formSubheading`, `formCta` → se tutti e tre valorizzati, il template aggiunge un secondo ContactForm dopo i Benefits (form intermedio) e personalizza anche il form finale con gli stessi valori. Serve per landing di conversione dove il CTA del Hero promette qualcosa di specifico (es. "Calcola il tuo canone") e il form ne è la porta di ingresso.
 
-Le 6 landing fotovoltaico (`noleggio-fotovoltaico-*`) usano tutti questi campi: sono landing di conversione con CTA/form allineati, ognuna con angolo distinto e numeri concreti (riferimento: impianto 30 kW, canone 526 €/mese, bolletta risparmiata 759 €/mese). Riscritte il 20 aprile 2026 nel voice profile di Alberto.
+Le 6 landing fotovoltaico (`noleggio-fotovoltaico-*`) sono state DISMESSE il 2 giugno 2026 e consolidate nel pillar organico `/noleggio-operativo-fotovoltaico` (vedi sotto). Erano landing di conversione per la campagna Ads fotovoltaico (ora spenta); in organico si cannibalizzavano (sei pagine quasi gemelle sulla stessa query) e Google non le indicizzava. I sei vecchi slug fanno 301 al pillar (vedi sezione Redirect). I numeri di riferimento del modello (impianto 30 kW, canone 526 €/mese, bolletta risparmiata 759 €/mese, +233 €/mese) vivono ora nel pillar.
 
-Le altre landing (noleggio-operativo, leasing-strumentale, finanziamenti-pmi, diventa-partner, finanza-veloce, noleggio-operativo-ristorazione) usano solo i campi base e mantengono il form generico in fondo pagina.
+Le altre landing da JSON (noleggio-operativo, leasing-strumentale, finanziamenti-pmi, diventa-partner, finanza-veloce, noleggio-operativo-ristorazione) usano solo i campi base e mantengono il form generico in fondo pagina.
 
 Le landing finanziamenti e agevolazioni sono pagine Astro dedicate (non da JSON) con CSS scoped e form custom.
+
+**Pagine SEO dedicate (giugno 2026, non da JSON).** Cluster organico costruito sui search terms reali dell'account Ads (non su Semrush). Tutte con `Layout`, navbar completa, FAQ + schema FAQPage, schema servizio, canonical www, campo `fonte`, ContactForm. Linkate dal footer.
+- `src/pages/societa-di-noleggio-operativo.astro` → `/societa-di-noleggio-operativo`. Pagina prodotto sul posizionamento hub multi-società (intercetta "società di noleggio operativo", "società finanziarie per noleggio operativo").
+- `src/pages/noleggio-operativo-grenke.astro` → `/noleggio-operativo-grenke`. Cattura la ricerca brand "noleggio operativo grenke" posizionando MCF come CANALE Grenke (broker indipendente), NON come alternativa: Grenke è partner. Niente pagine analoghe su Peac Solutions/Johix (decisione di Alberto: brand sensibili, non toccare).
+- `src/pages/noleggio-operativo-fotovoltaico.astro` → `/noleggio-operativo-fotovoltaico`. Pillar organico end-user che ha sostituito le 6 landing Ads: confronto bolletta vs rata, sei vantaggi (zero anticipo, fuori bilancio, canone fisso, chiavi in mano, tetto, deducibilità), FAQ. Linka al simulatore fotovoltaico e ai blog fotovoltaico (cluster da rinforzare).
+- Il simulatore `/tools/simulatore-noleggio-operativo` è stato rafforzato (FAQ + schema FAQPage e WebApplication, campo `fonte`).
+- Fix SEO globale: `ToolLayout.astro` ora ha canonical su www (era apex, in conflitto con sitemap).
+- Sitemap (`astro.config.mjs`): aggiunto `filter` che esclude dalla sitemap le pagine `noindex` (partner riservati `/tools/*` + thank-you page), prima ci finivano mandando segnali in conflitto.
 
 ## ContactForm — prop del componente
 Il componente `src/components/ContactForm.astro` accetta queste prop opzionali:
@@ -172,6 +180,12 @@ Mai nero puro #000000 — usare sempre #0F1020 o #444451
 ## Redirect (vercel.json)
 - `/agevolazioni/nuova-sabatini-2026` → 301 → `/finanziamenti/agevolazioni/nuova-sabatini-2026`
 - `/agevolazioni/fondo-garanzia-mcc` → 301 → `/finanziamenti/agevolazioni/fondo-garanzia-mcc`
+- `/noleggio-fotovoltaico-zero-anticipo` → 301 → `/noleggio-operativo-fotovoltaico`
+- `/noleggio-fotovoltaico-no-debito` → 301 → `/noleggio-operativo-fotovoltaico`
+- `/noleggio-fotovoltaico-canone-fisso` → 301 → `/noleggio-operativo-fotovoltaico`
+- `/noleggio-fotovoltaico-senza-burocrazia` → 301 → `/noleggio-operativo-fotovoltaico`
+- `/noleggio-fotovoltaico-breve-termine` → 301 → `/noleggio-operativo-fotovoltaico`
+- `/noleggio-fotovoltaico-tetto-affitto` → 301 → `/noleggio-operativo-fotovoltaico`
 
 ## Finanziamenti IFIS (aprile 2026)
 Campagna acquisizione lead per finanziamenti bancari IFIS. Struttura:
