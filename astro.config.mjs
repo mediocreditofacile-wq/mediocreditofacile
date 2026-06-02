@@ -19,6 +19,32 @@ export default defineConfig({
   integrations: [
     preact(),
     sitemap({
+      // Pagine noindex: vanno tenute FUORI dalla sitemap, altrimenti
+      // mandiamo a Google segnali in conflitto (sitemap "indicizzami" +
+      // meta robots "noindex"). Match esatto sul pathname cosi' /tools/datron
+      // non cattura /tools/datron-ecommerce.
+      filter(page) {
+        const noindexPaths = [
+          '/grazie',
+          '/grazie-agev',
+          '/grazie-fin',
+          '/design-system/icons',
+          '/tools/age-srl',
+          '/tools/arca-energia',
+          '/tools/datron',
+          '/tools/datron-ecommerce',
+          '/tools/duplex',
+          '/tools/econocom-pa',
+          '/tools/edilizia-gierre',
+          '/tools/energyteam',
+          '/tools/gruppo-barone',
+          '/tools/marotta',
+          '/tools/simulatore-leasing-fornitori',
+          '/tools/simulazione-leasing',
+        ];
+        const clean = new URL(page).pathname.replace(/\/$/, '');
+        return !noindexPaths.includes(clean);
+      },
       // lastmod su ogni entry: senza questo Google deprioritizza il crawl
       // e gli URL restano in stato "Rilevata, ma non indicizzata".
       serialize(item) {

@@ -6,6 +6,60 @@ import Icon from '../../components/Icon.astro';
  */
 import ToolLayout from '../../layouts/ToolLayout.astro';
 import SimulatoreNoleggio from '../../components/tools/SimulatoreNoleggio.tsx';
+
+const pageUrl = 'https://www.mediocreditofacile.it/tools/simulatore-noleggio-operativo';
+
+// FAQ: fonte unica per la sezione visibile e per lo schema FAQPage.
+// Domande costruite sulle ricerche reali (calcolo rata, beni strumentali,
+// riscatto, deducibilità, confronto col leasing). Nessuna promessa su tassi
+// o approvazioni: vincolo OAM.
+const faqs = [
+  {
+    q: 'Come si calcola il canone del noleggio operativo?',
+    a: "Il canone si ottiene moltiplicando il valore del bene per un coefficiente che dipende dalla durata del contratto e dalla fascia di importo: beni di valore più alto hanno coefficienti più bassi. Il simulatore applica i coefficienti ufficiali Grenke e restituisce un canone mensile indicativo. La cifra definitiva viene assegnata in base alla valutazione del merito creditizio dell'azienda.",
+  },
+  {
+    q: 'Si può fare il noleggio operativo di beni strumentali?',
+    a: 'Sì. Macchinari, attrezzature, mezzi, hardware e tecnologia a uso aziendale rientrano nel noleggio operativo di beni strumentali. L\'importo parte da poche migliaia di euro; sopra certe soglie cambiano i coefficienti e la documentazione richiesta. Il simulatore lavora su un\'ampia gamma di importi.',
+  },
+  {
+    q: 'Il noleggio operativo prevede il riscatto del bene?',
+    a: 'Dipende dal contratto. A fine durata puoi riscattare il bene a un valore concordato, restituirlo o rinnovare. Esistono formule di noleggio operativo con riscatto: nel simulatore vedi come cambia il canone a seconda dell\'opzione.',
+  },
+  {
+    q: 'Il canone del noleggio operativo è deducibile?',
+    a: 'Sì, il canone è un costo d\'esercizio interamente deducibile dal reddito d\'impresa per la durata del contratto, e l\'IVA segue le regole ordinarie di detrazione. Per il trattamento del tuo caso specifico conferma sempre con il tuo commercialista.',
+  },
+  {
+    q: 'Che differenza c\'è tra noleggio operativo e leasing?',
+    a: 'Nel leasing finanziario il bene entra nel tuo attivo e di norma c\'è un riscatto finale. Nel noleggio operativo paghi solo l\'uso del bene: il canone è interamente deducibile, non immobilizzi capitale e il rischio di obsolescenza resta al locatore. Per macchinari e tecnologia che invecchiano in fretta spesso conviene il noleggio.',
+  },
+];
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqs.map((f) => ({
+    '@type': 'Question',
+    name: f.q,
+    acceptedAnswer: { '@type': 'Answer', text: f.a },
+  })),
+};
+
+const appSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: 'Simulatore Noleggio Operativo',
+  url: pageUrl,
+  applicationCategory: 'FinanceApplication',
+  operatingSystem: 'All',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'EUR' },
+  provider: {
+    '@type': 'Organization',
+    name: 'Mediocredito Facile',
+    url: 'https://www.mediocreditofacile.it',
+  },
+};
 ---
 <ToolLayout
   title="Simulatore Noleggio Operativo — Calcola il Canone | Mediocredito Facile"
@@ -79,7 +133,8 @@ import SimulatoreNoleggio from '../../components/tools/SimulatoreNoleggio.tsx';
             Con l'acquisto diretto l'azienda immobilizza capitale. Con il noleggio operativo
             mantiene liquidità, ottiene la piena deducibilità del canone e trasferisce il rischio
             di obsolescenza al locatore. Per molte PMI è lo strumento più efficiente per dotarsi
-            di macchinari e tecnologia.
+            di macchinari e tecnologia. Scopri come scegliere la
+            <a href="/societa-di-noleggio-operativo">società di noleggio operativo</a> giusta.
           </p>
         </div>
       </div>
@@ -97,6 +152,25 @@ import SimulatoreNoleggio from '../../components/tools/SimulatoreNoleggio.tsx';
     </div>
   </section>
 
+  <!-- FAQ: intercetta le ricerche lunghe + alimenta lo schema FAQPage -->
+  <section class="tool-seo tool-faq">
+    <div class="tool-seo__inner">
+      <h2 class="tool-seo__heading">Domande frequenti sul noleggio operativo</h2>
+      <div class="tool-faq__list">
+        {faqs.map((f) => (
+          <details class="tool-faq__item">
+            <summary class="tool-faq__q">{f.q}</summary>
+            <p class="tool-faq__a">{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Dati strutturati: FAQ + applicazione web (risultati arricchiti) -->
+  <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
+  <script type="application/ld+json" set:html={JSON.stringify(appSchema)} />
+
   <!-- Form richiesta consulenza -->
   <section class="tool-form" id="contatti">
     <div class="tool-form__inner">
@@ -109,6 +183,9 @@ import SimulatoreNoleggio from '../../components/tools/SimulatoreNoleggio.tsx';
         <!-- Honeypot anti-spam -->
         <input name="website" type="text" tabindex="-1" autocomplete="off"
           style="position:absolute;opacity:0;pointer-events:none;height:0;overflow:hidden" aria-hidden="true" />
+
+        <!-- Fonte: attribuzione lead in Zapier/Pipedrive -->
+        <input type="hidden" name="fonte" value="simulatore-noleggio-operativo" />
 
         <div class="contact-form__field">
           <label for="nome">Nome e Cognome</label>
@@ -571,5 +648,57 @@ import SimulatoreNoleggio from '../../components/tools/SimulatoreNoleggio.tsx';
     .tool-form {
       padding: 3rem 1.25rem;
     }
+  }
+</style>
+
+<style>
+  /* --- FAQ accordion --- */
+  .tool-faq__list {
+    max-width: 760px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .tool-faq__item {
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+  }
+
+  .tool-faq__q {
+    font-weight: 700;
+    color: var(--color-heading);
+    cursor: pointer;
+    list-style: none;
+    position: relative;
+    padding-right: 1.75rem;
+  }
+
+  .tool-faq__q::-webkit-details-marker {
+    display: none;
+  }
+
+  .tool-faq__q::after {
+    content: '+';
+    position: absolute;
+    right: 0;
+    top: -0.1rem;
+    font-size: 1.4rem;
+    font-weight: 400;
+    color: var(--color-primary);
+    transition: transform 0.2s;
+  }
+
+  .tool-faq__item[open] .tool-faq__q::after {
+    content: '−';
+  }
+
+  .tool-faq__a {
+    margin-top: 0.75rem;
+    color: var(--color-text);
+    line-height: 1.65;
   }
 </style>

@@ -1,0 +1,274 @@
+---
+/**
+ * Noleggio operativo Grenke — /noleggio-operativo-grenke
+ * Pagina SEO che cattura la ricerca brand "noleggio operativo grenke".
+ * Posizionamento: MCF è canale Grenke (broker indipendente), non concorrente.
+ * Nessun confronto ostile, nessun uso del logo Grenke (solo riferimento testuale).
+ */
+import Icon from '../components/Icon.astro';
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import ContactForm from '../components/ContactForm.astro';
+
+const pageUrl = 'https://www.mediocreditofacile.it/noleggio-operativo-grenke';
+
+const faqs = [
+  {
+    q: 'Mediocredito Facile è Grenke?',
+    a: "No. Mediocredito Facile è un broker indipendente che lavora con Grenke e con altre società di noleggio e leasing. Non siamo Grenke: siamo il canale che presenta la tua pratica all'operatore giusto, Grenke compreso.",
+  },
+  {
+    q: 'Posso fare il noleggio operativo Grenke tramite voi?',
+    a: "Sì. Grenke è uno degli operatori della nostra rete. Quando è la scelta giusta per il tuo bene e il tuo profilo, presentiamo la pratica a Grenke; il simulatore del canone sul nostro sito usa proprio i coefficienti Grenke.",
+  },
+  {
+    q: 'Perché passare da voi invece che da Grenke diretta?',
+    a: "Con noi hai un unico interlocutore e, se Grenke non delibera o ha condizioni meno adatte alla tua fascia di importo, possiamo presentare la stessa pratica a un altro operatore tra gli oltre dodici della rete. Invece di un solo canale, ne hai dodici, senza dover bussare a ognuno.",
+  },
+  {
+    q: 'Cosa posso noleggiare in noleggio operativo Grenke?',
+    a: "Beni strumentali a uso aziendale: macchinari, attrezzature, hardware, strumentazione, tecnologia e impianti. Il canone è interamente deducibile e il bene resta della società di noleggio per la durata del contratto.",
+  },
+  {
+    q: 'Quanto costa rivolgersi a Mediocredito Facile?',
+    a: "La consulenza è gratuita e non ci sono costi di istruttoria a carico del cliente. Il nostro compenso arriva dalla società che delibera la pratica. Le condizioni del contratto sono esplicitate nella proposta formale prima della firma.",
+  },
+];
+
+const faqJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqs.map((f) => ({
+    '@type': 'Question',
+    name: f.q,
+    acceptedAnswer: { '@type': 'Answer', text: f.a },
+  })),
+};
+
+const serviceJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FinancialService',
+  name: 'Mediocredito Facile',
+  description:
+    'Canale per il noleggio operativo Grenke e di oltre dodici società di noleggio e leasing per PMI. Consulenza gratuita.',
+  url: pageUrl,
+  areaServed: { '@type': 'Country', name: 'IT' },
+  serviceType: 'Noleggio Operativo',
+  telephone: '+393939957840',
+};
+---
+
+<Layout
+  title="Noleggio Operativo Grenke: la pratica la gestiamo noi | Mediocredito Facile"
+  description="Cerchi il noleggio operativo Grenke? Mediocredito Facile è canale Grenke e di oltre 12 società: presentiamo la tua pratica all'operatore giusto. Simulatore con coefficienti Grenke e consulenza gratuita."
+>
+  <Header minimal={false} />
+
+  <!-- Hero -->
+  <section class="gk-hero">
+    <div class="gk-hero__inner">
+      <h1 class="gk-hero__title">Noleggio operativo Grenke</h1>
+      <p class="gk-hero__sub">
+        Cerchi il noleggio operativo Grenke per la tua azienda? Mediocredito Facile è il canale che
+        presenta la tua pratica a Grenke e ad altre dodici società di noleggio, da un solo
+        interlocutore. Tu spieghi cosa ti serve una volta, al resto pensiamo noi.
+      </p>
+      <div class="gk-hero__cta">
+        <a href="#contatti" class="gk-btn gk-btn--primary">Parla con un consulente</a>
+        <a href="/tools/simulatore-noleggio-operativo" class="gk-btn gk-btn--ghost">
+          <Icon name="calculate" class="gk-btn__icon" /> Calcola il canone (coefficienti Grenke)
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Chi siamo rispetto a Grenke -->
+  <section class="gk-section">
+    <div class="gk-section__inner">
+      <h2 class="gk-section__heading">Mediocredito Facile e Grenke</h2>
+      <p class="gk-lead">
+        Grenke è una delle società di noleggio operativo più note per le PMI italiane. Mediocredito
+        Facile non è Grenke: siamo un broker indipendente che con Grenke ci lavora. Significa che
+        quando Grenke è l'operatore giusto per il tuo bene e per la tua fascia di importo, ti
+        portiamo lì; il <a href="/tools/simulatore-noleggio-operativo">simulatore del canone</a> sul
+        nostro sito gira proprio sui coefficienti Grenke.
+      </p>
+      <p class="gk-lead">
+        Se invece per la tua pratica conviene un altro operatore, o se Grenke non delibera, abbiamo
+        altre undici società su cui presentarla. È la differenza tra avere un solo sportello e
+        averne dodici, con un'unica persona che li gestisce per te.
+      </p>
+    </div>
+  </section>
+
+  <!-- Cosa noleggiare -->
+  <section class="gk-section gk-section--alt">
+    <div class="gk-section__inner">
+      <h2 class="gk-section__heading">Cosa puoi mettere in noleggio operativo</h2>
+      <div class="gk-grid">
+        <div class="gk-card">
+          <Icon name="precision_manufacturing" class="gk-card__icon" />
+          <h3 class="gk-card__title">Macchinari e attrezzature</h3>
+          <p>Beni strumentali per produzione, officina, laboratorio, studio professionale.</p>
+        </div>
+        <div class="gk-card">
+          <Icon name="computer" class="gk-card__icon" />
+          <h3 class="gk-card__title">Hardware e tecnologia</h3>
+          <p>Computer, server, strumentazione elettronica e dotazioni informatiche.</p>
+        </div>
+        <div class="gk-card">
+          <Icon name="mezzi" class="gk-card__icon" />
+          <h3 class="gk-card__title">Mezzi e veicoli aziendali</h3>
+          <p>Furgoni, muletti, mezzi d'opera e veicoli commerciali a uso d'impresa.</p>
+        </div>
+        <div class="gk-card">
+          <Icon name="solar_power" class="gk-card__icon" />
+          <h3 class="gk-card__title">Impianti e transizione 5.0</h3>
+          <p>Impianti e tecnologia per efficienza energetica e ammodernamento.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Come funziona -->
+  <section class="gk-section">
+    <div class="gk-section__inner">
+      <h2 class="gk-section__heading">Come si attiva</h2>
+      <div class="gk-steps">
+        <div class="gk-step">
+          <span class="gk-step__num">1</span>
+          <p>Ci dici il bene e l'importo, o parti dal <a href="/tools/simulatore-noleggio-operativo">simulatore con coefficienti Grenke</a>.</p>
+        </div>
+        <div class="gk-step">
+          <span class="gk-step__num">2</span>
+          <p>Presentiamo la pratica a Grenke, o all'operatore più adatto tra gli oltre dodici della rete.</p>
+        </div>
+        <div class="gk-step">
+          <span class="gk-step__num">3</span>
+          <p>Istruttoria e contratto. Canone deducibile dal primo mese di decorrenza.</p>
+        </div>
+      </div>
+      <p class="gk-lead" style="margin-top:1.5rem;">
+        Vuoi capire prima come si sceglie l'operatore? Leggi
+        <a href="/societa-di-noleggio-operativo">come funziona una società di noleggio operativo</a>.
+      </p>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="gk-section gk-section--alt gk-faq">
+    <div class="gk-section__inner">
+      <h2 class="gk-section__heading">Domande frequenti</h2>
+      <div class="gk-faq__list">
+        {faqs.map((f) => (
+          <details class="gk-faq__item">
+            <summary class="gk-faq__q">{f.q}</summary>
+            <p class="gk-faq__a">{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Dati strutturati -->
+  <script type="application/ld+json" set:html={JSON.stringify(faqJsonLd)} />
+  <script type="application/ld+json" set:html={JSON.stringify(serviceJsonLd)} />
+
+  <!-- Form -->
+  <ContactForm
+    fonte="noleggio-operativo-grenke"
+    heading="Richiedi il tuo noleggio operativo"
+    subheading="Dicci cosa ti serve: presentiamo la pratica a Grenke o all'operatore giusto tra oltre dodici. Consulenza gratuita, risposta entro 24 ore lavorative."
+    ctaText="Richiedi una consulenza gratuita"
+  />
+
+  <Footer />
+</Layout>
+
+<style>
+  .gk-hero {
+    padding: 4rem 1.5rem 3rem;
+    text-align: center;
+    background: var(--mcf-ghost);
+  }
+  .gk-hero__inner { max-width: 760px; margin: 0 auto; }
+  .gk-hero__title {
+    font-size: clamp(1.9rem, 5vw, 2.8rem);
+    font-weight: 800;
+    color: var(--mcf-accent);
+    letter-spacing: -0.02em;
+    margin-bottom: 1rem;
+  }
+  .gk-hero__sub {
+    font-size: 1.1rem;
+    color: var(--mcf-charcoal);
+    line-height: 1.65;
+    margin-bottom: 1.75rem;
+  }
+  .gk-hero__cta { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
+  .gk-btn {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    padding: 0.85rem 1.6rem; border-radius: var(--radius);
+    font-weight: 700; font-size: 1rem;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .gk-btn--primary { background: var(--mcf-primary); color: #fff; }
+  .gk-btn--primary:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(254,111,58,0.3); }
+  .gk-btn--ghost { background: #fff; color: var(--mcf-accent); border: 1px solid var(--mcf-platinum); }
+  .gk-btn--ghost:hover { border-color: var(--mcf-accent); }
+  .gk-btn__icon { font-size: 1.2rem; }
+
+  .gk-section { padding: 3.5rem 1.5rem; }
+  .gk-section--alt { background: var(--mcf-ghost); }
+  .gk-section__inner { max-width: var(--max-width); margin: 0 auto; }
+  .gk-section__heading {
+    font-size: clamp(1.5rem, 3.5vw, 2rem);
+    font-weight: 800; color: var(--mcf-black);
+    margin-bottom: 1.25rem; letter-spacing: -0.01em;
+  }
+  .gk-lead {
+    font-size: 1.05rem; color: var(--mcf-charcoal); line-height: 1.75;
+    max-width: 820px; margin-bottom: 1rem;
+  }
+  .gk-lead a { color: var(--mcf-accent); font-weight: 600; text-decoration: underline; }
+
+  .gk-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.25rem; margin-top: 1.5rem;
+  }
+  .gk-card {
+    background: #fff; border: 1px solid var(--mcf-platinum);
+    border-radius: var(--radius); padding: 1.5rem;
+  }
+  .gk-card__icon { font-size: 2rem; color: var(--mcf-primary); margin-bottom: 0.6rem; }
+  .gk-card__title { font-size: 1.1rem; font-weight: 700; color: var(--mcf-black); margin-bottom: 0.4rem; }
+  .gk-card p { color: var(--mcf-charcoal); line-height: 1.6; }
+
+  .gk-steps { display: grid; gap: 1rem; margin-top: 1.5rem; }
+  .gk-step { display: flex; align-items: flex-start; gap: 1rem; }
+  .gk-step__num {
+    flex: none; width: 2.25rem; height: 2.25rem;
+    display: grid; place-items: center;
+    background: var(--mcf-gradient); color: #fff; font-weight: 800; border-radius: 50%;
+  }
+  .gk-step p { color: var(--mcf-charcoal); line-height: 1.65; padding-top: 0.3rem; }
+  .gk-step a { color: var(--mcf-accent); font-weight: 600; text-decoration: underline; }
+
+  .gk-faq__list { display: flex; flex-direction: column; gap: 0.75rem; max-width: 820px; margin-top: 1.5rem; }
+  .gk-faq__item {
+    background: #fff; border: 1px solid var(--mcf-platinum);
+    border-radius: var(--radius); padding: 1rem 1.25rem;
+  }
+  .gk-faq__q {
+    font-weight: 700; color: var(--mcf-black); cursor: pointer;
+    list-style: none; position: relative; padding-right: 1.75rem;
+  }
+  .gk-faq__q::-webkit-details-marker { display: none; }
+  .gk-faq__q::after {
+    content: '+'; position: absolute; right: 0; top: -0.1rem;
+    font-size: 1.4rem; font-weight: 400; color: var(--mcf-primary);
+  }
+  .gk-faq__item[open] .gk-faq__q::after { content: '−'; }
+  .gk-faq__a { margin-top: 0.75rem; color: var(--mcf-charcoal); line-height: 1.65; }
+</style>
