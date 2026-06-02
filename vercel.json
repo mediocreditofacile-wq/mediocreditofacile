@@ -104,6 +104,36 @@
       "source": "/agevolazioni-fiscali",
       "destination": "/finanziamenti/agevolazioni/",
       "permanent": true
+    },
+    {
+      "source": "/noleggio-fotovoltaico-zero-anticipo",
+      "destination": "/noleggio-operativo-fotovoltaico",
+      "permanent": true
+    },
+    {
+      "source": "/noleggio-fotovoltaico-no-debito",
+      "destination": "/noleggio-operativo-fotovoltaico",
+      "permanent": true
+    },
+    {
+      "source": "/noleggio-fotovoltaico-canone-fisso",
+      "destination": "/noleggio-operativo-fotovoltaico",
+      "permanent": true
+    },
+    {
+      "source": "/noleggio-fotovoltaico-senza-burocrazia",
+      "destination": "/noleggio-operativo-fotovoltaico",
+      "permanent": true
+    },
+    {
+      "source": "/noleggio-fotovoltaico-breve-termine",
+      "destination": "/noleggio-operativo-fotovoltaico",
+      "permanent": true
+    },
+    {
+      "source": "/noleggio-fotovoltaico-tetto-affitto",
+      "destination": "/noleggio-operativo-fotovoltaico",
+      "permanent": true
     }
   ]
 }
