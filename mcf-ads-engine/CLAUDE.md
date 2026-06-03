@@ -1,22 +1,30 @@
 # MCF Ads Engine — CLAUDE.md
 
 ## Setup
-- Python 3.9, venv in .venv/ → source .venv/bin/activate && pytest -v
-- Credenziali: google-ads.yaml (OAuth2), .env (ANTHROPIC_API_KEY, RESEND_API_KEY, NOTIFICATION_EMAIL)
+- Python 3.12.13 (aggiornato 2026-04-26 da 3.9, venv ricostruito), venv in .venv/ → source .venv/bin/activate && pytest -v
+- Credenziali: google-ads.yaml (OAuth2 Ads), gsc-config.json (OAuth2 Search Console — organico, gitignored), .env (ANTHROPIC_API_KEY, RESEND_API_KEY, NOTIFICATION_EMAIL)
 - Customer ID Google Ads: 5572178058 (senza trattini)
-- Dashboard FastAPI: http://127.0.0.1:5000
+- Search Console (organico): proprietà `sc-domain:mediocreditofacile.it`. Token via `setup_auth_gsc.py` (scope webmasters.readonly, stesso client OAuth degli Ads, app già "In produzione"). Search Console API abilitata sul progetto 99256408228 il 2026-06-02.
+- Dashboard FastAPI: http://127.0.0.1:5001
+- MCP server: server_mcp.py espone 8 tool (5 letture + 3 report) — registrato in ~/.claude.json sotto `mcpServers.mcf-ads`
 
 ## Comandi chiave
 - python main.py — run giornaliero (fetch 30gg + score + email report)
 - python main.py --weekly — run settimanale (search term analysis + negative proposals)
 - python generate_report.py — genera DOCX + invia email con analisi
 - python generate_report.py --no-email — solo DOCX locale
+- python gsc_audit.py [giorni] — audit visibilità ORGANICA (Search Console): query, impression, click, CTR, posizione media, occasioni pos 4-20. Default 90gg. Output HTML in ~/Desktop/_AI/output/report/. Modulo nuovo (2026-06-02): legge il pagato è l'engine Ads, il NON pagato è gsc_audit.py.
 - pytest -v — 66 test, tutti devono passare prima di ogni modifica
 
-## Gotcha Python 3.9
-- NO dict | None → usare Optional[dict] da typing
-- NO f-string con quote annidate → usare % formatting o variabile intermedia
+## Gotcha Python 3.12 (post-upgrade 2026-04-26)
+- dict | None ora va bene (PEP 604 nativo)
+- f-string con quote annidate ok in 3.12
 - GAQL: LAST_8_DAYS non è un literal valido → usare date esplicite
+- google-ads-python richiede ulimit -n alto al primo install (>10k file aperti). Se "Too many open files in system", lancia `ulimit -n 65536` prima di pip install.
+
+## Lezione di sicurezza (importante)
+Quando Claude Code (o altre CLI sopra Anthropic API) lancia un subprocess Python, passa `ANTHROPIC_API_KEY=''` (stringa vuota) per evitare leak della propria chiave. python-dotenv default NON sovrascrive env vars esistenti, anche se vuote. Risultato: il modulo non legge la chiave del .env.
+**Fix obbligatorio** in tutti i moduli che leggono ANTHROPIC_API_KEY dall'env: `load_dotenv(override=True)`. Già applicato a `main.py`, `dashboard/server.py`, `server_mcp.py` (2026-04-26).
 
 ## Dipendenze non ovvie
 - python-docx — non in pyproject.toml, installare con pip install python-docx
@@ -54,6 +62,7 @@ Moduli:
 - dashboard/server.py — FastAPI su porta 5001: approvazione pause/reward, negatives, landing, audit, budget update, raccomandazioni budget_advisor (`/api/recommendations/latest`, `/api/recommendations/approve` con auto-apply per budget_increase non aggressivo, `force_apply=True` obbligatorio per aumenti aggressivi, bid_increase/decrease mai auto-applicati — requires_manual=True)
 - dashboard/templates/index.html — UI Alpine.js con tab "Strategia" (prima tab, default all'apertura) che mostra la tabella raccomandazioni + dettaglio reason per ciascuna. Bottoni Approva/Rifiuta: Approva su alert_aggressive chiede conferma e manda force_apply=true; le azioni bid mostrano badge "approvata (manuale)" senza chiamare l'API write.
 - scheduler/ — LaunchAgent macOS (it.mediocreditofacile.adsengine.plist)
+- server_mcp.py — server MCP (Model Context Protocol) con FastMCP. Espone 8 tool: `mcf_ads_keyword_performance`, `mcf_ads_search_terms`, `mcf_ads_campaign_budgets`, `mcf_ads_auction_insights`, `mcf_ads_daily_metrics` (letture), `mcf_ads_daily_report`, `mcf_ads_weekly_report` (build report HTML), `mcf_ads_send_report` (con allowlist email). Trasporto stdio. Registrato in `~/.claude.json` sotto `mcpServers.mcf-ads`. Aggiunto 2026-04-26. Da fare in v2: aggiungere altri 5 tool (audit, detect_anomalies, suggest_negatives, generate_landing, generate_rsa_copy).
 
 Fasi di rollout:
 - Fase 1 (raggiunta): Analisi KW + email report giornaliero + anomaly detection
@@ -62,11 +71,11 @@ Fasi di rollout:
 - Fase 4 (da completare): Creazione campagne complete end-to-end
 
 Stato attuale:
-- Ultimo run daily: 2026-04-21. Ultimo run weekly (negatives): 2026-03-12.
+- Ultimo run daily: 2026-06-03. Ultimo run weekly (negatives): 2026-03-12.
 - LaunchAgent installato in ~/Library/LaunchAgents/ con path corretti e chiavi reali iniettate. Schedulato alle 08:00 ogni giorno. Il plist nel repo (scheduler/) resta con placeholder SOSTITUISCI per sicurezza.
 - Refresh token OAuth2 rigenerato il 2026-04-20 dopo revoca Google (OAuth consent screen in Testing mode → token scade ogni 7 giorni). Soluzione strutturale aperta: promuovere app a "In production" in Google Cloud Console per evitare scadenze ricorrenti.
-- Bug aperto: analyzer/suggester.py non legge ANTHROPIC_API_KEY correttamente, fallisce con "Could not resolve authentication method" su suggest_kw_variants. Gli altri moduli AI (anomaly, classifier) funzionano. Probabilmente manca load_dotenv() o il client Anthropic viene istanziato senza api_key esplicita.
-- 66 test (pytest), tutti passavano all'ultimo check
+- Bug ANTHROPIC_API_KEY RISOLTO 2026-04-26: il problema era `load_dotenv()` senza `override=True`. Quando Claude Code lancia subprocess, passa `ANTHROPIC_API_KEY=''` per sicurezza, e dotenv default non sovrascrive var esistenti. Fix: tutti i punti d'ingresso ora usano `load_dotenv(override=True)`. Vedi sezione "Lezione di sicurezza" sopra.
+- 66 test (pytest), tutti passavano all'ultimo check (verificare dopo upgrade Python 3.12)
 - La directory data/audits/ non esiste ancora (il campaign_audit è stato aggiunto ma mai eseguito con successo)
 - Dashboard FastAPI funzionante con template Jinja2
 - Python 3.9 con venv in .venv/
@@ -232,7 +241,7 @@ Ogni form del sito DEVE avere un campo nascosto `fonte` con lo slug della pagina
 - Sito MCF: Astro 5 (SSG) + Vercel. Le landing page sono definite in src/data/landing-pages.json. Un git push su main triggera il deploy.
 - CRM: Pipedrive (pipeline separate Diventa Partner e Finanza Veloce). Al momento non c'è integrazione diretta engine → Pipedrive.
 - Email: Resend API (piano gratuito). Template email HTML inline, no CSS esterno.
-- Claude AI: usato per classificazione search terms (6 categorie), suggerimento varianti keyword, generazione landing e copy. Modello: Claude Haiku per task veloci, Sonnet per generazione complessa.
+- Claude AI: usato per classificazione search terms (6 categorie), suggerimento varianti keyword, generazione landing e copy. **Modello attualmente in uso: claude-opus-4-7** (bumpato 2026-04-26 da 4-6) in tutti e 4 i moduli AI: `analyzer/search_terms.py`, `analyzer/suggester.py`, `generator/landing.py`, `generator/copy.py`. Per cambiare modello, modifica direttamente la stringa `model=` in quei file.
 - Google Ads API: OAuth2 con refresh token. Developer token attivo. Client library google-ads-python.
 
 ## OBIETTIVI APERTI (aggiornato 2026-04-21)
