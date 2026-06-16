@@ -134,6 +134,11 @@
       "source": "/noleggio-fotovoltaico-tetto-affitto",
       "destination": "/noleggio-operativo-fotovoltaico",
       "permanent": true
+    },
+    {
+      "source": "/tools/marotta",
+      "destination": "https://mcf-marotta.netlify.app",
+      "permanent": false
     }
   ]
 }
