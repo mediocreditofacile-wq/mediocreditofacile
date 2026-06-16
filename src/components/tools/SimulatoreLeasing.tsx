@@ -292,7 +292,7 @@ export default function SimulatoreLeasing({ varianteFornitori = false, varianteL
           ${easyLeaseAttiva ? `
             <div style="background:#fff7ed;border:1px solid #fdba74;border-radius:8px;padding:12px 16px;margin-bottom:14px;">
               <div style="font-size:10px;color:#9a3412;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Promo Easy Lease — fino al ${ALBA_EASY_LEASE.scadenzaLabel}</div>
-              <div style="font-size:12px;color:#7c2d12;line-height:1.4;">Canone anticipato <strong>0 €</strong> · Spese istruttoria <strong>0 €</strong> · Spese contratto <strong>0 €</strong>. ${ALBA_EASY_LEASE.cumulabilita}</div>
+              <div style="font-size:12px;color:#7c2d12;line-height:1.4;">Canone anticipato <strong>0 €</strong>${varianteLoMartire ? '' : ' · Spese istruttoria <strong>0 €</strong>'} · Spese contratto <strong>0 €</strong>. ${ALBA_EASY_LEASE.cumulabilita}</div>
             </div>
           ` : ''}
 
