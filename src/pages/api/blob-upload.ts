@@ -7,7 +7,7 @@ export const prerender = false;
 
 import { handleUpload, type HandleUploadBody } from '@vercel/blob/client';
 
-const PARTNER_KEY = 'arcaenergia'; // stessa password del gate della pagina
+const PARTNER_KEY = 'expoenergia'; // stessa password del gate della pagina
 const PATH_PREFIX = 'pratiche/expo-energia/';
 const MAX_FILE_BYTES = 25 * 1024 * 1024; // 25 MB per file
 

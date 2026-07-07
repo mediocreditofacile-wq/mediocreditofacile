@@ -8,7 +8,7 @@ export const prerender = false;
 
 import { list, get, put } from '@vercel/blob';
 
-const PARTNER_KEY = 'arcaenergia';
+const PARTNER_KEY = 'expoenergia';
 const PATH_PREFIX = 'pratiche/expo-energia/';
 
 export const STATI_PRATICA = ['Ricevuta', 'In lavorazione', 'In delibera', 'Approvata', 'Declinata'];
