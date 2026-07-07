@@ -62,6 +62,7 @@ import dice1 from 'lucide-static/icons/dice-1.svg?raw';
 import dice2 from 'lucide-static/icons/dice-2.svg?raw';
 import dice3 from 'lucide-static/icons/dice-3.svg?raw';
 import download from 'lucide-static/icons/download.svg?raw';
+import upload from 'lucide-static/icons/upload.svg?raw';
 import ear from 'lucide-static/icons/ear.svg?raw';
 import edit3 from 'lucide-static/icons/edit-3.svg?raw';
 import eye from 'lucide-static/icons/eye.svg?raw';
@@ -178,6 +179,7 @@ const atomicIcons: Record<string, string> = {
   'dice-2': dice2,
   'dice-3': dice3,
   'download': download,
+  'upload': upload,
   'ear': ear,
   'edit': edit3,
   'eye': eye,
@@ -301,6 +303,8 @@ export const materialAliases: Record<string, string> = {
   'chat': 'message-circle',
   'construction': 'construction',
   'download': 'download',
+  'upload_file': 'upload',
+  'refresh': 'refresh-cw',
   'gavel': 'gavel',
   'groups': 'users',
   'hearing': 'ear',
