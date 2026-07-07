@@ -7,7 +7,7 @@ export const prerender = false;
 
 import { get, BlobNotFoundError } from '@vercel/blob';
 
-const PARTNER_KEY = 'arcaenergia';
+const PARTNER_KEY = 'expoenergia';
 const PATH_PREFIX = 'pratiche/expo-energia/';
 
 export async function GET({ request }: { request: Request }) {
