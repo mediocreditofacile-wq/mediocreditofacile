@@ -1,0 +1,1017 @@
+---
+import Icon from '../../components/Icon.astro';
+/**
+ * Portale Partner Expo Energia Srl — /tools/expo-energia
+ * Replica in casa MCF del portale dealer ReteRent (reterent.difrently.com):
+ * - login con email + password (account dedicato a Massimo Palermo)
+ * - dashboard con card in stile ReteRent (Simulazioni / Pratiche)
+ * - simulatore doppio: dal prezzo di vendita ai canoni, dal canone al prezzo
+ *   (tabelle ESG fotovoltaico e Pioneer hardware, come da scheda censimento)
+ * - form di caricamento pratica con checklist documenti dinamica
+ * Lead vanno a /api/submit-expo-energia (mail dettagliata + Zapier).
+ *
+ * Ratio interna (non esposta in pagina): il censimento ReteRent/Grenke di
+ * Expo Energia e' in corso; nel frattempo le pratiche arrivano a MCF che le
+ * carica sui portali (ReteRent / PagaRent) in base al merito del cliente.
+ */
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import SimulatoreExpoEnergia from '../../components/tools/SimulatoreExpoEnergia.tsx';
+---
+<ToolLayout
+  title="Portale Expo Energia — Simulazioni e Pratiche | Mediocredito Facile"
+  description="Portale riservato Expo Energia Srl: simulazione canoni di noleggio operativo fotovoltaico e hardware, caricamento pratiche cliente."
+  noindex={true}
+  breadcrumbs={[{ name: 'Portale Expo Energia', href: '/tools/expo-energia' }]}
+>
+  <!-- Gate login -->
+  <div id="gate" class="gate">
+    <div class="gate__card">
+      <div class="gate__logos">
+        <img src="/images/logo-mediocreditofacile.webp" alt="Mediocredito Facile" class="gate__logo" />
+        <span class="gate__x">&times;</span>
+        <span class="gate__partner-name">Expo Energia Srl</span>
+      </div>
+      <div class="gate__divider"></div>
+      <p class="gate__label">Portale Riservato Partner</p>
+      <p class="gate__desc">Simulazione canoni di noleggio operativo (fotovoltaico e hardware) e caricamento pratiche cliente.</p>
+      <div class="gate__form">
+        <input type="email" id="gate-user" class="gate__input" placeholder="Email" autocomplete="username" />
+        <input type="password" id="gate-pwd" class="gate__input" placeholder="Password" autocomplete="current-password" />
+        <button id="gate-btn" class="gate__btn">
+          <Icon name="lock_open" />
+          Accedi
+        </button>
+      </div>
+      <p id="gate-error" class="gate__error" hidden>Email o password non corretti</p>
+    </div>
+  </div>
+
+  <!-- Portale (nascosto fino ad autenticazione) -->
+  <div id="tool" class="ee" style="display:none !important;">
+    <!-- Header co-branded -->
+    <div class="ee__header">
+      <div class="ee__header-brand">
+        <img src="/images/logo-mediocreditofacile.webp" alt="Mediocredito Facile" class="ee__logo" />
+        <div class="ee__header-sep"></div>
+        <div class="ee__partner-badge">
+          <Icon name="solar_power" class="ee__partner-icon" />
+          <span class="ee__partner-label">Expo Energia Srl</span>
+        </div>
+      </div>
+      <button id="logout-btn" class="ee__logout">
+        <Icon name="logout" />
+        Esci
+      </button>
+    </div>
+
+    <!-- Riga codice partner, come il "Codice Convenzione" ReteRent -->
+    <p class="ee__conv">Codice partner <strong>EXPOENERGIA</strong></p>
+
+    <!-- Dashboard card -->
+    <h1 class="ee__dash-title">Gestione offerte di noleggio</h1>
+    <div class="ee__cards">
+      <a href="#simulatore" class="ee__card">
+        <div class="ee__card-head"><Icon name="calculate" /> Simulazioni</div>
+        <p class="ee__card-desc">Calcola i canoni di noleggio a partire dal prezzo di vendita, oppure parti dal canone per ottenere il prezzo.</p>
+        <span class="ee__card-link">Nuova simulazione &raquo;</span>
+      </a>
+      <a href="#simulatore" class="ee__card">
+        <div class="ee__card-head"><Icon name="description" /> Preventivi</div>
+        <p class="ee__card-desc">Stampa la simulazione in versione pulita, pronta da consegnare o inviare al cliente.</p>
+        <span class="ee__card-link">Stampa simulazione &raquo;</span>
+      </a>
+      <div class="ee__card">
+        <div class="ee__card-head"><Icon name="send" /> Richieste</div>
+        <p class="ee__card-desc">Trasmetti la pratica con i documenti del cliente allegati e controlla lo stato di quelle già inviate.</p>
+        <span>
+          <a class="ee__card-link" href="#pratica">Carica una pratica &raquo;</a><br />
+          <a class="ee__card-link" href="#richieste">Lista richieste &raquo;</a>
+        </span>
+      </div>
+      <a href="#documenti" class="ee__card">
+        <div class="ee__card-head"><Icon name="checklist" /> Documenti</div>
+        <p class="ee__card-desc">La checklist dei documenti si aggiorna da sola in base a importo e forma giuridica del cliente.</p>
+        <span class="ee__card-link">Vedi checklist &raquo;</span>
+      </a>
+    </div>
+
+    <!-- 1. Simulatore -->
+    <section id="simulatore" class="ee__section">
+      <header class="ee__section-head">
+        <span class="ee__section-num">1</span>
+        <div>
+          <h2 class="ee__section-title">Simula i canoni</h2>
+          <p class="ee__section-sub">
+            Tabella ESG per il fotovoltaico, tabella Pioneer per la divisione hardware e casse automatiche.
+            Il canone definitivo viene confermato dopo la delibera della società di noleggio.
+          </p>
+        </div>
+      </header>
+      <SimulatoreExpoEnergia client:load />
+    </section>
+
+    <!-- 2. Carica pratica -->
+    <section id="pratica" class="ee__section">
+      <header class="ee__section-head">
+        <span class="ee__section-num">2</span>
+        <div>
+          <h2 class="ee__section-title">Carica una pratica</h2>
+          <p class="ee__section-sub">
+            Compila i dati del cliente finale e del bene. La checklist documenti qui sotto si aggiorna mentre scrivi:
+            chiede solo quello che serve per quell'importo e quella forma giuridica.
+          </p>
+        </div>
+      </header>
+
+      <form id="pratica-form" class="ee__form" novalidate>
+        <input type="text" name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;" aria-hidden="true" />
+
+        <div class="ee__form-block">
+          <h3 class="ee__form-block-title">Cliente finale</h3>
+          <div class="ee__grid">
+            <label class="ee__field ee__field--full">
+              <span class="ee__field-label">Ragione sociale / Nominativo *</span>
+              <input type="text" name="ragione_sociale" required placeholder="Es. Rossi Impianti SRL" />
+            </label>
+
+            <label class="ee__field">
+              <span class="ee__field-label">Forma giuridica *</span>
+              <select name="forma_giuridica" id="forma-giuridica" required>
+                <option value="">Seleziona</option>
+                <option value="Ditta Individuale">Ditta Individuale</option>
+                <option value="SRL">SRL</option>
+                <option value="SRLS">SRL Semplificata</option>
+                <option value="SPA">SPA</option>
+                <option value="SNC">SNC</option>
+                <option value="SAS">SAS</option>
+                <option value="Lavoratore Autonomo">Lavoratore Autonomo</option>
+                <option value="Cooperativa">Cooperativa</option>
+              </select>
+            </label>
+
+            <label class="ee__field">
+              <span class="ee__field-label">Partita IVA / CF</span>
+              <input type="text" name="piva" placeholder="11 cifre" inputmode="numeric" />
+            </label>
+
+            <label class="ee__field">
+              <span class="ee__field-label">Referente</span>
+              <input type="text" name="referente" placeholder="Nome e cognome" />
+            </label>
+
+            <label class="ee__field">
+              <span class="ee__field-label">Telefono *</span>
+              <input type="tel" name="telefono" required placeholder="+39 333 1234567" />
+            </label>
+
+            <label class="ee__field ee__field--full">
+              <span class="ee__field-label">Email *</span>
+              <input type="email" name="email" required placeholder="cliente@esempio.it" />
+            </label>
+          </div>
+        </div>
+
+        <div class="ee__form-block">
+          <h3 class="ee__form-block-title">Bene da noleggiare</h3>
+          <div class="ee__grid">
+            <label class="ee__field">
+              <span class="ee__field-label">Tipologia *</span>
+              <select name="tipologia" required>
+                <option value="Fotovoltaico" selected>Impianto fotovoltaico</option>
+                <option value="Hardware / casse">Hardware / casse automatiche / POS</option>
+                <option value="Altro">Altro bene strumentale</option>
+              </select>
+            </label>
+
+            <label class="ee__field">
+              <span class="ee__field-label">Importo bene (€) *</span>
+              <input type="number" name="importo" id="importo" required min="500" step="100" placeholder="25000" />
+            </label>
+
+            <label class="ee__field ee__field--full">
+              <span class="ee__field-label">Descrizione bene *</span>
+              <input type="text" name="bene_descrizione" required placeholder="Es. Impianto FV 20 kWp con accumulo 10 kWh" />
+            </label>
+
+            <label class="ee__field">
+              <span class="ee__field-label">Durata noleggio (mesi)</span>
+              <select name="durata">
+                <option value="24">24 mesi</option>
+                <option value="36">36 mesi</option>
+                <option value="48">48 mesi</option>
+                <option value="60" selected>60 mesi</option>
+                <option value="72">72 mesi</option>
+                <option value="84">84 mesi</option>
+              </select>
+            </label>
+
+            <label class="ee__field">
+              <span class="ee__field-label">Canone simulato (€/mese)</span>
+              <input type="number" name="canone_simulato" min="0" step="1" placeholder="Dal simulatore qui sopra" />
+            </label>
+
+            <label class="ee__field ee__field--full">
+              <span class="ee__field-label">Note (opzionale)</span>
+              <textarea name="note" rows="3" placeholder="Contesto del cliente, urgenza, dettagli dell'impianto..."></textarea>
+            </label>
+          </div>
+        </div>
+
+        <!-- Checklist documenti dinamica -->
+        <div id="documenti" class="ee__form-block">
+          <h3 class="ee__form-block-title">Documenti da raccogliere</h3>
+
+          <div id="checklist-banner" class="ee__banner ee__banner--base">
+            <Icon name="info" class="ee__banner-icon" />
+            <div>
+              <strong id="banner-title">Documenti base</strong>
+              <p id="banner-sub">Per importi fino a 10.000 € bastano i documenti standard. Sopra i 10.000 € la società di noleggio chiede anche i reddituali.</p>
+            </div>
+          </div>
+
+          <table class="ee__table">
+            <thead>
+              <tr>
+                <th>Documento</th>
+                <th class="ee__th-when">Quando serve</th>
+              </tr>
+            </thead>
+            <tbody id="checklist-body">
+              <tr><td>Visura camerale (o visura ditta individuale)</td><td>Sempre</td></tr>
+              <tr><td>Carta d'identita' del legale rappresentante / titolare</td><td>Sempre</td></tr>
+              <tr><td>Tessera sanitaria / codice fiscale</td><td>Sempre</td></tr>
+              <tr><td>Coordinate IBAN aziendali</td><td>Sempre</td></tr>
+              <tr><td>Email aziendale</td><td>Sempre</td></tr>
+              <tr><td>Cellulare del referente</td><td>Sempre</td></tr>
+              <tr><td>Preventivo del fornitore dell'impianto / del bene</td><td>Sempre</td></tr>
+              <tr class="ee__row-extra" data-extra="di" hidden>
+                <td>Ultime 2 dichiarazioni dei redditi (Modello Unico)</td>
+                <td>Solo Ditta Individuale, importo &gt; 10.000 €</td>
+              </tr>
+              <tr class="ee__row-extra" data-extra="di" hidden>
+                <td>Situazione contabile aggiornata 2025</td>
+                <td>Solo Ditta Individuale, importo &gt; 10.000 €</td>
+              </tr>
+              <tr class="ee__row-extra" data-extra="srl" hidden>
+                <td>Ultimi 2 bilanci depositati</td>
+                <td>Solo societa' di capitali, importo &gt; 10.000 €</td>
+              </tr>
+              <tr class="ee__row-extra" data-extra="srl" hidden>
+                <td>Bilancio definitivo 2025 (anche pre-deposito)</td>
+                <td>Solo societa' di capitali, importo &gt; 10.000 €</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Upload documenti -->
+        <div class="ee__form-block">
+          <h3 class="ee__form-block-title">Allega i documenti</h3>
+          <p class="ee__upload-hint">
+            PDF, immagini, visure firmate (.p7m), Word ed Excel — massimo 25 MB a file.
+            Puoi inviare la pratica anche senza documenti e integrarli in un secondo momento.
+          </p>
+          <label class="ee__upload-drop" for="file-input">
+            <Icon name="upload_file" class="ee__upload-icon" />
+            <span><strong>Scegli i file da allegare</strong> oppure trascinali qui</span>
+            <input type="file" id="file-input" multiple accept=".pdf,.jpg,.jpeg,.png,.heic,.p7m,.doc,.docx,.xls,.xlsx" hidden />
+          </label>
+          <ul id="file-list" class="ee__file-list"></ul>
+        </div>
+
+        <div class="ee__submit-row">
+          <button type="submit" class="ee__submit">
+            <Icon name="send" />
+            Invia pratica
+          </button>
+          <p class="ee__submit-hint">
+            Riceviamo pratica e documenti in tempo reale. Ti richiamiamo al telefono indicato per la conferma e vedi l'avanzamento nella lista richieste qui sotto.
+          </p>
+        </div>
+
+        <div id="form-feedback" class="ee__feedback" hidden></div>
+      </form>
+    </section>
+
+    <!-- 3. Le tue richieste -->
+    <section id="richieste" class="ee__section">
+      <header class="ee__section-head">
+        <span class="ee__section-num">3</span>
+        <div>
+          <h2 class="ee__section-title">Le tue richieste</h2>
+          <p class="ee__section-sub">
+            Tutte le pratiche trasmesse, con documenti e stato di avanzamento. Lo stato viene aggiornato da Mediocredito Facile man mano che la pratica avanza.
+          </p>
+        </div>
+      </header>
+
+      <div class="ee__richieste-bar">
+        <button type="button" id="refresh-richieste" class="ee__refresh">
+          <Icon name="refresh" />
+          Aggiorna
+        </button>
+        <span id="richieste-info" class="ee__richieste-info"></span>
+      </div>
+
+      <div id="richieste-wrap" class="ee__richieste-wrap">
+        <p class="ee__richieste-empty">Caricamento in corso...</p>
+      </div>
+    </section>
+  </div>
+</ToolLayout>
+
+<script>
+  import { upload } from '@vercel/blob/client';
+
+  // Due account sul gate:
+  //  - partner: Massimo Palermo (Expo Energia) — credenziali fisse
+  //  - admin: Alberto — email MCF + chiave admin, verificata SERVER-SIDE
+  //    contro la env var EXPO_PORTAL_ADMIN_KEY (la chiave non sta nel sorgente)
+  const USER_EMAIL = 'massimopalermo10@gmail.com';
+  const PASSWORD = 'arcaenergia';
+  const ADMIN_EMAIL = 'mediocreditofacile@gmail.com';
+  const KEY = 'mcf_expoenergia_auth';
+
+  type Session = { role: 'partner' | 'admin'; key: string };
+  let session: Session | null = null;
+
+  const gate = document.getElementById('gate')!;
+  const tool = document.getElementById('tool')!;
+  const gateUser = document.getElementById('gate-user') as HTMLInputElement;
+  const gatePwd = document.getElementById('gate-pwd') as HTMLInputElement;
+  const gateBtn = document.getElementById('gate-btn') as HTMLButtonElement;
+  const gateError = document.getElementById('gate-error')!;
+  const logoutBtn = document.getElementById('logout-btn')!;
+
+  function showTool() {
+    gate.style.display = 'none';
+    tool.style.cssText = '';
+    tool.classList.toggle('ee--admin', session?.role === 'admin');
+    // Deferita: al primo accesso lo script sta ancora valutando le const
+    // della sezione richieste (TDZ), quindi si aspetta il tick successivo
+    setTimeout(() => void loadRichieste(), 0);
+  }
+  function showGate() { gate.style.display = ''; tool.style.cssText = 'display:none !important;'; }
+
+  function loadSession(): Session | null {
+    const raw = localStorage.getItem(KEY);
+    if (!raw) return null;
+    if (raw === 'ok') return { role: 'partner', key: PASSWORD }; // retrocompatibilita'
+    try {
+      const s = JSON.parse(raw);
+      if (s && (s.role === 'partner' || s.role === 'admin') && typeof s.key === 'string') return s;
+    } catch { /* sessione corrotta: si rifa' il login */ }
+    return null;
+  }
+
+  session = loadSession();
+  if (session) showTool();
+
+  function gateFail(msg: string, userBad: boolean, pwdBad: boolean) {
+    gateError.textContent = msg;
+    gateError.hidden = false;
+    gateUser.classList.toggle('gate__input--error', userBad);
+    gatePwd.classList.toggle('gate__input--error', pwdBad);
+  }
+
+  gateBtn.addEventListener('click', async () => {
+    const email = gateUser.value.trim().toLowerCase();
+    const pwd = gatePwd.value.trim();
+
+    if (email === USER_EMAIL && pwd.toLowerCase() === PASSWORD) {
+      session = { role: 'partner', key: PASSWORD };
+    } else if (email === ADMIN_EMAIL && pwd) {
+      // Verifica della chiave admin lato server
+      gateBtn.disabled = true;
+      gateBtn.textContent = 'Verifica...';
+      try {
+        const res = await fetch('/api/pratiche-expo', { headers: { Authorization: `Bearer ${pwd}` } });
+        const json = await res.json();
+        if (res.ok && json.ok && json.ruolo === 'admin') {
+          session = { role: 'admin', key: pwd };
+        } else {
+          gateFail('Chiave admin non valida', false, true);
+        }
+      } catch {
+        gateFail('Verifica non riuscita, riprova', false, false);
+      }
+      gateBtn.disabled = false;
+      gateBtn.innerHTML = '<span class="material-icons-outlined">lock_open</span> Accedi';
+    } else {
+      gateFail('Email o password non corretti', email !== USER_EMAIL && email !== ADMIN_EMAIL, true);
+    }
+
+    if (session) {
+      localStorage.setItem(KEY, JSON.stringify(session));
+      gateError.hidden = true;
+      gateUser.classList.remove('gate__input--error');
+      gatePwd.classList.remove('gate__input--error');
+      showTool();
+    }
+  });
+  gateUser.addEventListener('keydown', (e) => { if (e.key === 'Enter') gateBtn.click(); });
+  gatePwd.addEventListener('keydown', (e) => { if (e.key === 'Enter') gateBtn.click(); });
+  logoutBtn.addEventListener('click', () => {
+    localStorage.removeItem(KEY); session = null; showGate();
+    gateUser.value = ''; gatePwd.value = ''; gateError.hidden = true;
+  });
+
+  // === Checklist dinamica (stessa logica dell'area Edilizia GIERRE) ===
+  const formaGiuridica = document.getElementById('forma-giuridica') as HTMLSelectElement;
+  const importoInput = document.getElementById('importo') as HTMLInputElement;
+  const banner = document.getElementById('checklist-banner')!;
+  const bannerTitle = document.getElementById('banner-title')!;
+  const bannerSub = document.getElementById('banner-sub')!;
+  const extraRows = document.querySelectorAll<HTMLTableRowElement>('.ee__row-extra');
+
+  const FORMA_DI = ['Ditta Individuale', 'Lavoratore Autonomo'];
+
+  function updateChecklist() {
+    const importo = parseFloat(importoInput.value) || 0;
+    const fg = formaGiuridica.value;
+    const sopraSoglia = importo > 10000;
+    const isDi = FORMA_DI.includes(fg);
+    const isSocieta = fg && !isDi;
+
+    extraRows.forEach((row) => {
+      const tag = row.dataset.extra;
+      let show = false;
+      if (sopraSoglia) {
+        if (tag === 'di' && isDi) show = true;
+        if (tag === 'srl' && isSocieta) show = true;
+      }
+      row.hidden = !show;
+    });
+
+    banner.classList.remove('ee__banner--base', 'ee__banner--full');
+    if (sopraSoglia && fg) {
+      banner.classList.add('ee__banner--full');
+      bannerTitle.textContent = `Documenti completi (${isDi ? 'Ditta Individuale' : 'Societa\' di capitali'})`;
+      bannerSub.textContent = isDi
+        ? 'Importo sopra 10.000 €: oltre ai documenti base servono le ultime 2 dichiarazioni dei redditi e la situazione contabile 2025.'
+        : 'Importo sopra 10.000 €: oltre ai documenti base servono gli ultimi 2 bilanci depositati e il bilancio definitivo 2025.';
+    } else if (sopraSoglia && !fg) {
+      banner.classList.add('ee__banner--base');
+      bannerTitle.textContent = 'Seleziona la forma giuridica';
+      bannerSub.textContent = 'Sopra 10.000 € la documentazione reddituale cambia tra Ditta Individuale e Societa\' di capitali. Scegli la forma giuridica per la lista esatta.';
+    } else {
+      banner.classList.add('ee__banner--base');
+      bannerTitle.textContent = 'Documenti base';
+      bannerSub.textContent = 'Per importi fino a 10.000 € bastano i documenti standard. Sopra i 10.000 € la società di noleggio chiede anche i reddituali.';
+    }
+  }
+
+  formaGiuridica.addEventListener('change', updateChecklist);
+  importoInput.addEventListener('input', updateChecklist);
+
+  // === Gestione file selezionati ===
+  const fileInput = document.getElementById('file-input') as HTMLInputElement;
+  const fileList = document.getElementById('file-list')!;
+  const MAX_FILE_BYTES = 25 * 1024 * 1024;
+  let selectedFiles: File[] = [];
+
+  function fmtSize(n: number): string {
+    return n > 1024 * 1024 ? `${(n / 1024 / 1024).toFixed(1)} MB` : `${Math.round(n / 1024)} KB`;
+  }
+
+  function renderFileList() {
+    fileList.innerHTML = '';
+    selectedFiles.forEach((f, i) => {
+      const li = document.createElement('li');
+      li.className = 'ee__file-item';
+      const name = document.createElement('span');
+      name.className = 'ee__file-name';
+      name.textContent = `${f.name} (${fmtSize(f.size)})`;
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'ee__file-remove';
+      btn.textContent = 'Rimuovi';
+      btn.addEventListener('click', () => { selectedFiles.splice(i, 1); renderFileList(); });
+      li.append(name, btn);
+      fileList.appendChild(li);
+    });
+  }
+
+  function addFiles(files: FileList | File[]) {
+    for (const f of Array.from(files)) {
+      if (f.size > MAX_FILE_BYTES) {
+        alert(`"${f.name}" supera i 25 MB e non puo' essere allegato.`);
+        continue;
+      }
+      if (!selectedFiles.some((s) => s.name === f.name && s.size === f.size)) selectedFiles.push(f);
+    }
+    renderFileList();
+  }
+
+  fileInput.addEventListener('change', () => { if (fileInput.files) { addFiles(fileInput.files); fileInput.value = ''; } });
+
+  // Drag & drop sull'area upload
+  const dropZone = document.querySelector<HTMLElement>('.ee__upload-drop')!;
+  ['dragover', 'dragenter'].forEach((ev) => dropZone.addEventListener(ev, (e) => { e.preventDefault(); dropZone.classList.add('ee__upload-drop--over'); }));
+  ['dragleave', 'drop'].forEach((ev) => dropZone.addEventListener(ev, (e) => { e.preventDefault(); dropZone.classList.remove('ee__upload-drop--over'); }));
+  dropZone.addEventListener('drop', (e) => {
+    const dt = (e as DragEvent).dataTransfer;
+    if (dt?.files?.length) addFiles(dt.files);
+  });
+
+  // === Submit form: prima i documenti su Blob, poi la pratica ===
+  const form = document.getElementById('pratica-form') as HTMLFormElement;
+  const feedback = document.getElementById('form-feedback')!;
+  const submitBtn = form.querySelector<HTMLButtonElement>('.ee__submit')!;
+
+  function resetSubmitBtn() {
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = '<span class="material-icons-outlined">send</span> Invia pratica';
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    feedback.hidden = true;
+    feedback.classList.remove('ee__feedback--ok', 'ee__feedback--err');
+
+    if (!form.reportValidity()) return;
+    if (!session) { showGate(); return; }
+
+    submitBtn.disabled = true;
+
+    // 1. Upload documenti direttamente su Blob (bypassa il limite 4,5 MB delle serverless)
+    const documenti: { nome: string; pathname: string; size: number }[] = [];
+    const batch = `${Date.now().toString(36)}`;
+    try {
+      for (let i = 0; i < selectedFiles.length; i++) {
+        const f = selectedFiles[i];
+        submitBtn.textContent = `Carico documento ${i + 1}/${selectedFiles.length}...`;
+        const safeName = f.name.replace(/[^\w.\- ]/g, '_');
+        const result = await upload(`pratiche/expo-energia/docs/${batch}/${safeName}`, f, {
+          access: 'private',
+          handleUploadUrl: '/api/blob-upload',
+          clientPayload: JSON.stringify({ auth: session.key }),
+        });
+        documenti.push({ nome: f.name, pathname: result.pathname, size: f.size });
+      }
+    } catch (err) {
+      feedback.textContent = 'Caricamento documenti non riuscito. Riprova, oppure invia la pratica senza allegati e mandiamo i documenti via email.';
+      feedback.classList.add('ee__feedback--err');
+      feedback.hidden = false;
+      resetSubmitBtn();
+      return;
+    }
+
+    // 2. Invio pratica con l'elenco dei documenti caricati
+    submitBtn.textContent = 'Invio pratica...';
+    try {
+      const fd = new FormData(form);
+      fd.set('documenti', JSON.stringify(documenti));
+      const res = await fetch('/api/submit-expo-energia', { method: 'POST', body: fd });
+      const json = await res.json();
+      if (res.ok && json.ok) {
+        feedback.textContent = `Pratica ${json.id ?? ''} ricevuta${documenti.length ? ` con ${documenti.length} documenti` : ''}. Ti richiamiamo al numero indicato; segui lo stato nella lista qui sotto.`;
+        feedback.classList.add('ee__feedback--ok');
+        feedback.hidden = false;
+        form.reset();
+        selectedFiles = [];
+        renderFileList();
+        updateChecklist();
+        void loadRichieste();
+        submitBtn.innerHTML = '<span class="material-icons-outlined">check</span> Inviata';
+        setTimeout(resetSubmitBtn, 3000);
+      } else {
+        throw new Error('server_error');
+      }
+    } catch (err) {
+      feedback.textContent = 'Invio non riuscito. Riprova tra qualche secondo o chiama il 393 995 7840.';
+      feedback.classList.add('ee__feedback--err');
+      feedback.hidden = false;
+      resetSubmitBtn();
+    }
+  });
+
+  // === Lista richieste ===
+  const richiesteWrap = document.getElementById('richieste-wrap')!;
+  const richiesteInfo = document.getElementById('richieste-info')!;
+  const refreshBtn = document.getElementById('refresh-richieste') as HTMLButtonElement;
+  const STATI = ['Ricevuta', 'In lavorazione', 'In delibera', 'Approvata', 'Declinata'];
+  const STATO_CLASS: Record<string, string> = {
+    'Ricevuta': 'ee__stato--ricevuta',
+    'In lavorazione': 'ee__stato--lavorazione',
+    'In delibera': 'ee__stato--delibera',
+    'Approvata': 'ee__stato--approvata',
+    'Declinata': 'ee__stato--declinata',
+  };
+
+  const eurFmt = (v: string) => {
+    const n = parseFloat(v);
+    return isNaN(n) ? '-' : n.toLocaleString('it-IT', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
+  };
+  const dataFmt = (iso: string) => {
+    const d = new Date(iso);
+    return isNaN(d.getTime()) ? '-' : d.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  };
+
+  // Download di un documento dallo store privato: fetch autenticata + objectURL
+  async function downloadDoc(pathname: string, nome: string) {
+    if (!session) return;
+    try {
+      const res = await fetch(`/api/pratica-doc?path=${encodeURIComponent(pathname)}`, {
+        headers: { Authorization: `Bearer ${session.key}` },
+      });
+      if (!res.ok) throw new Error('download_failed');
+      const blob = await res.blob();
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = nome;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    } catch {
+      alert('Download non riuscito. Riprova.');
+    }
+  }
+
+  async function aggiornaStato(id: string, stato: string, select: HTMLSelectElement) {
+    if (!session || session.role !== 'admin') return;
+    select.disabled = true;
+    try {
+      const res = await fetch('/api/pratiche-expo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.key}` },
+        body: JSON.stringify({ id, stato }),
+      });
+      const json = await res.json();
+      if (!res.ok || !json.ok) throw new Error('update_failed');
+      select.className = `ee__stato-select ${STATO_CLASS[stato] ?? ''}`;
+    } catch {
+      alert('Aggiornamento stato non riuscito. Riprova.');
+      void loadRichieste();
+    }
+    select.disabled = false;
+  }
+
+  async function loadRichieste() {
+    if (!session) return;
+    richiesteInfo.textContent = '';
+    try {
+      const res = await fetch('/api/pratiche-expo', { headers: { Authorization: `Bearer ${session.key}` } });
+      const json = await res.json();
+      if (res.status === 401) {
+        // Sessione non piu' valida (es. chiave admin cambiata): si rifa' il login
+        localStorage.removeItem(KEY); session = null; showGate();
+        return;
+      }
+      if (!res.ok || !json.ok) throw new Error(json.error || 'list_failed');
+      renderRichieste(json.pratiche ?? []);
+    } catch (err) {
+      richiesteWrap.innerHTML = '<p class="ee__richieste-empty">Impossibile caricare le richieste in questo momento. Premi Aggiorna per riprovare.</p>';
+    }
+  }
+
+  function renderRichieste(pratiche: any[]) {
+    if (!pratiche.length) {
+      richiesteWrap.innerHTML = '<p class="ee__richieste-empty">Nessuna richiesta inviata finora. La prima pratica che carichi comparira\' qui.</p>';
+      return;
+    }
+    richiesteInfo.textContent = `${pratiche.length} richieste`;
+
+    const isAdmin = session?.role === 'admin';
+    const table = document.createElement('table');
+    table.className = 'ee__table ee__table--richieste';
+    table.innerHTML = `
+      <thead>
+        <tr><th>Data</th><th>Pratica</th><th>Cliente</th><th>Bene</th><th>Importo</th><th>Documenti</th><th>Stato</th></tr>
+      </thead>`;
+    const tbody = document.createElement('tbody');
+
+    for (const p of pratiche) {
+      const tr = document.createElement('tr');
+
+      const docsCell = document.createElement('td');
+      const docs = Array.isArray(p.documenti) ? p.documenti : [];
+      if (!docs.length) {
+        docsCell.textContent = '—';
+      } else {
+        docs.forEach((d: any) => {
+          const a = document.createElement('a');
+          a.href = '#';
+          a.className = 'ee__doc-link';
+          a.textContent = d.nome;
+          a.addEventListener('click', (e) => { e.preventDefault(); void downloadDoc(d.pathname, d.nome); });
+          docsCell.appendChild(a);
+        });
+      }
+
+      const statoCell = document.createElement('td');
+      const stato = p.stato ?? 'Ricevuta';
+      if (isAdmin) {
+        const sel = document.createElement('select');
+        sel.className = `ee__stato-select ${STATO_CLASS[stato] ?? ''}`;
+        STATI.forEach((s) => {
+          const opt = document.createElement('option');
+          opt.value = s; opt.textContent = s; opt.selected = s === stato;
+          sel.appendChild(opt);
+        });
+        sel.addEventListener('change', () => void aggiornaStato(p.id, sel.value, sel));
+        statoCell.appendChild(sel);
+      } else {
+        const badge = document.createElement('span');
+        badge.className = `ee__stato ${STATO_CLASS[stato] ?? ''}`;
+        badge.textContent = stato;
+        statoCell.appendChild(badge);
+      }
+
+      const cells = [
+        dataFmt(p.creato),
+        p.id ?? '-',
+        p.cliente?.ragione_sociale ?? '-',
+        `${p.bene?.tipologia ?? '-'} — ${p.bene?.descrizione ?? ''}`.slice(0, 60),
+        `${eurFmt(p.bene?.importo ?? '')} / ${p.bene?.durata ?? '-'} mesi`,
+      ];
+      cells.forEach((c) => {
+        const td = document.createElement('td');
+        td.textContent = String(c);
+        tr.appendChild(td);
+      });
+      tr.append(docsCell, statoCell);
+      tbody.appendChild(tr);
+    }
+
+    table.appendChild(tbody);
+    richiesteWrap.innerHTML = '';
+    richiesteWrap.appendChild(table);
+  }
+
+  refreshBtn.addEventListener('click', () => void loadRichieste());
+</script>
+
+<style>
+  /* === Gate login === */
+  .gate {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 70vh;
+    padding: 2rem 1.5rem;
+    background: linear-gradient(160deg, #fff7f3 0%, #fef3ec 40%, #f5f3ff 100%);
+  }
+  .gate__card {
+    text-align: center;
+    background: #ffffff;
+    border: 1px solid #fde4d4;
+    border-radius: 16px;
+    padding: 2.5rem 2.5rem 2rem;
+    max-width: 460px;
+    width: 100%;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06), 0 1px 4px rgba(254, 111, 58, 0.08);
+  }
+  .gate__logos { display: flex; align-items: center; justify-content: center; gap: 0.75rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+  .gate__logo { height: 40px; display: block; }
+  .gate__x { font-size: 1.2rem; font-weight: 300; color: #94a3b8; }
+  .gate__partner-name { font-size: 1.05rem; font-weight: 800; color: #FE6F3A; letter-spacing: -0.01em; }
+  .gate__divider { height: 1px; background: linear-gradient(90deg, transparent, #fde4d4, transparent); margin-bottom: 1.25rem; }
+  .gate__label {
+    font-size: 0.82rem; font-weight: 700; color: #64748b;
+    text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.5rem;
+  }
+  .gate__desc { font-size: 0.85rem; color: #64748b; line-height: 1.5; margin-bottom: 1.5rem; max-width: 360px; margin-left: auto; margin-right: auto; }
+  .gate__form { display: flex; flex-direction: column; gap: 0.6rem; }
+  .gate__input {
+    padding: 0.8rem 1rem; border: 1.5px solid #e2e8f0; border-radius: 10px;
+    font-family: var(--font-family); font-size: 1rem; color: var(--color-text); background: #f8fafc;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .gate__input:focus { outline: none; border-color: #FE6F3A; box-shadow: 0 0 0 3px rgba(254, 111, 58, 0.12); background: #fff; }
+  .gate__input--error { border-color: #ef4444; }
+  .gate__btn {
+    padding: 0.8rem 1.5rem;
+    background: linear-gradient(135deg, #FE6F3A, #664CCD);
+    color: #ffffff; font-family: var(--font-family); font-weight: 700; font-size: 0.92rem;
+    border: none; border-radius: 10px; cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.2s; white-space: nowrap;
+    display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;
+  }
+  .gate__btn:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(254, 111, 58, 0.28); }
+  .gate__error { color: #ef4444; font-size: 0.82rem; margin-top: 0.75rem; }
+
+  /* === Portale === */
+  .ee { max-width: var(--max-width); margin: 0 auto; padding: 0 1.5rem 4rem; }
+  .ee__header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.25rem 0; border-bottom: 1px solid #e2e8f0;
+  }
+  .ee__header-brand { display: flex; align-items: center; gap: 1rem; }
+  .ee__logo { height: 36px; flex-shrink: 0; }
+  .ee__header-sep { width: 1px; height: 28px; background: #e2e8f0; }
+  .ee__partner-badge {
+    display: flex; align-items: center; gap: 0.4rem;
+    background: linear-gradient(135deg, #fff7f3, #fde4d4);
+    border: 1px solid #fbcfb0; border-radius: 8px; padding: 0.35rem 0.75rem;
+  }
+  .ee__partner-icon { font-size: 1.1rem; color: #FE6F3A; }
+  .ee__partner-label { font-size: 0.85rem; font-weight: 700; color: #D45A2E; }
+  .ee__logout {
+    background: none; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.4rem 0.85rem;
+    font-family: var(--font-family); font-size: 0.82rem; font-weight: 600; color: #64748b;
+    cursor: pointer; transition: border-color 0.2s, color 0.2s;
+    display: flex; align-items: center; gap: 0.3rem;
+  }
+  .ee__logout:hover { border-color: #FE6F3A; color: #FE6F3A; }
+
+  /* Codice partner + dashboard */
+  .ee__conv { font-size: 0.9rem; color: #787782; margin: 1.5rem 0 0.4rem; }
+  .ee__conv strong { color: #0F1020; letter-spacing: 0.04em; }
+  .ee__dash-title {
+    font-size: 1.35rem; font-weight: 800; color: #0F1020;
+    padding-bottom: 0.75rem; margin: 0 0 1.25rem; border-bottom: 1px solid #E1DEE3;
+  }
+  .ee__cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 3rem; }
+  .ee__card {
+    display: flex; flex-direction: column; gap: 0.6rem;
+    background: #F8F7FA; border: 1px solid #E1DEE3; border-bottom: 3px solid #293C5B;
+    border-radius: 10px; padding: 1.25rem; text-decoration: none;
+    transition: transform 0.15s, box-shadow 0.2s;
+  }
+  .ee__card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(15, 16, 32, 0.08); }
+  .ee__card-head {
+    display: flex; align-items: center; gap: 0.45rem;
+    font-size: 1rem; font-weight: 800; color: #293C5B;
+  }
+  .ee__card-head .mcf-icon { color: #FE6F3A; }
+  .ee__card-desc { font-size: 0.84rem; color: #444451; line-height: 1.5; margin: 0; flex: 1; }
+  .ee__card-link { font-size: 0.84rem; font-weight: 700; color: #664CCD; text-decoration: none; display: inline-block; margin-top: 0.1rem; }
+  .ee__card-link:hover { text-decoration: underline; }
+
+  /* Sezioni */
+  .ee__section { margin-bottom: 3rem; scroll-margin-top: 90px; }
+  .ee__section-head { display: flex; gap: 1rem; align-items: flex-start; margin-bottom: 1.25rem; }
+  .ee__section-num {
+    flex-shrink: 0; width: 36px; height: 36px;
+    background: linear-gradient(135deg, #FE6F3A, #664CCD);
+    color: #ffffff; font-weight: 800; font-size: 1rem;
+    display: flex; align-items: center; justify-content: center; border-radius: 50%;
+  }
+  .ee__section-title { font-size: 1.2rem; font-weight: 800; color: #0F1020; margin: 0 0 0.3rem; line-height: 1.3; }
+  .ee__section-sub { font-size: 0.9rem; color: #444451; line-height: 1.55; margin: 0; max-width: 720px; }
+
+  /* Form */
+  .ee__form { display: flex; flex-direction: column; gap: 1.5rem; }
+  .ee__form-block {
+    background: #ffffff; border: 1px solid #E1DEE3; border-radius: 14px; padding: 1.5rem 1.75rem;
+    scroll-margin-top: 90px;
+  }
+  .ee__form-block-title {
+    font-size: 0.78rem; font-weight: 800; color: #664CCD;
+    text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 1rem;
+  }
+  .ee__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .ee__field { display: flex; flex-direction: column; gap: 0.35rem; }
+  .ee__field--full { grid-column: 1 / -1; }
+  .ee__field-label { font-size: 0.82rem; font-weight: 600; color: #444451; }
+  .ee__field input, .ee__field select, .ee__field textarea {
+    padding: 0.7rem 0.85rem; border: 1.5px solid #E1DEE3; border-radius: 10px;
+    font-family: var(--font-family); font-size: 0.95rem; color: #0F1020; background: #fafafa;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .ee__field input:focus, .ee__field select:focus, .ee__field textarea:focus {
+    outline: none; border-color: #FE6F3A; background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(254, 111, 58, 0.1);
+  }
+  .ee__field textarea { resize: vertical; min-height: 80px; }
+
+  /* Banner checklist */
+  .ee__banner {
+    display: flex; gap: 0.85rem; align-items: flex-start;
+    border-radius: 10px; padding: 0.9rem 1.1rem; margin-bottom: 1rem;
+    border: 1px solid; transition: background 0.2s, border-color 0.2s;
+  }
+  .ee__banner-icon { font-size: 1.3rem; flex-shrink: 0; margin-top: 0.05rem; }
+  .ee__banner strong { display: block; font-size: 0.92rem; margin-bottom: 0.2rem; color: #0F1020; }
+  .ee__banner p { margin: 0; font-size: 0.85rem; color: #444451; line-height: 1.5; }
+  .ee__banner--base { background: #f8fafc; border-color: #E1DEE3; }
+  .ee__banner--base .ee__banner-icon { color: #664CCD; }
+  .ee__banner--full { background: #fff7f3; border-color: #fde4d4; }
+  .ee__banner--full .ee__banner-icon { color: #FE6F3A; }
+
+  /* Tabella documenti */
+  .ee__table {
+    width: 100%; border-collapse: collapse;
+    font-size: 0.9rem;
+    border: 1px solid #E1DEE3; border-radius: 10px; overflow: hidden;
+  }
+  .ee__table thead { background: #f8fafc; }
+  .ee__table th {
+    text-align: left; padding: 0.75rem 1rem;
+    font-size: 0.78rem; font-weight: 700; color: #444451;
+    text-transform: uppercase; letter-spacing: 0.05em;
+    border-bottom: 1px solid #E1DEE3;
+  }
+  .ee__th-when { width: 40%; }
+  .ee__table td {
+    padding: 0.75rem 1rem; border-bottom: 1px solid #f1f1f3;
+    color: #0F1020; line-height: 1.4;
+  }
+  .ee__table tbody tr:last-child td { border-bottom: none; }
+  .ee__table tbody tr:hover { background: #fafafa; }
+  .ee__row-extra td:last-child { color: #FE6F3A; font-weight: 600; font-size: 0.82rem; }
+
+  /* Submit */
+  .ee__submit-row {
+    display: flex; align-items: center; gap: 1.25rem;
+    background: linear-gradient(135deg, #fff7f3, #f5f3ff);
+    border: 1px solid #fde4d4; border-radius: 14px; padding: 1.25rem 1.5rem;
+    flex-wrap: wrap;
+  }
+  .ee__submit {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    background: linear-gradient(135deg, #FE6F3A, #664CCD); color: #ffffff;
+    font-family: var(--font-family); font-weight: 700; font-size: 0.95rem;
+    border: none; border-radius: 10px; padding: 0.85rem 1.6rem; cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.2s; white-space: nowrap;
+  }
+  .ee__submit:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(254, 111, 58, 0.28); }
+  .ee__submit:disabled { opacity: 0.6; cursor: wait; }
+  .ee__submit-hint { margin: 0; font-size: 0.85rem; color: #444451; line-height: 1.5; flex: 1; min-width: 240px; }
+
+  /* Upload documenti */
+  .ee__upload-hint { font-size: 0.85rem; color: #787782; line-height: 1.5; margin: 0 0 1rem; }
+  .ee__upload-drop {
+    display: flex; align-items: center; justify-content: center; gap: 0.6rem;
+    border: 2px dashed #E1DEE3; border-radius: 12px; padding: 1.5rem;
+    background: #fafafa; cursor: pointer; text-align: center;
+    font-size: 0.9rem; color: #444451;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .ee__upload-drop:hover, .ee__upload-drop--over { border-color: #FE6F3A; background: #fff7f3; }
+  .ee__upload-icon { font-size: 1.6rem; color: #664CCD; }
+  .ee__file-list { list-style: none; padding: 0; margin: 0.85rem 0 0; display: flex; flex-direction: column; gap: 0.4rem; }
+  .ee__file-item {
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    background: #ffffff; border: 1px solid #E1DEE3; border-radius: 8px;
+    padding: 0.5rem 0.85rem; font-size: 0.85rem; color: #0F1020;
+  }
+  .ee__file-remove {
+    background: none; border: none; color: #b91c1c; font-family: var(--font-family);
+    font-size: 0.78rem; font-weight: 600; cursor: pointer; white-space: nowrap;
+  }
+  .ee__file-remove:hover { text-decoration: underline; }
+
+  /* Lista richieste */
+  .ee__richieste-bar { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+  .ee__refresh {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    background: #ffffff; border: 1.5px solid #664CCD; border-radius: 10px;
+    color: #664CCD; font-family: var(--font-family); font-weight: 700; font-size: 0.85rem;
+    padding: 0.5rem 1rem; cursor: pointer; transition: box-shadow 0.2s;
+  }
+  .ee__refresh:hover { box-shadow: 0 4px 12px rgba(102, 76, 205, 0.18); }
+  .ee__richieste-info { font-size: 0.85rem; color: #787782; }
+  .ee__richieste-wrap { overflow-x: auto; }
+  .ee__richieste-empty {
+    background: #f8fafc; border: 1px solid #E1DEE3; border-radius: 10px;
+    padding: 1.25rem; font-size: 0.9rem; color: #64748b; margin: 0;
+  }
+  .ee__table--richieste { min-width: 760px; }
+  .ee__table--richieste td { vertical-align: top; }
+  .ee__doc-link { display: block; color: #664CCD; font-size: 0.83rem; text-decoration: underline; margin-bottom: 0.2rem; }
+
+  /* Badge stato */
+  .ee__stato {
+    display: inline-block; padding: 0.25rem 0.7rem; border-radius: 999px;
+    font-size: 0.76rem; font-weight: 700; white-space: nowrap;
+  }
+  .ee__stato-select {
+    padding: 0.35rem 0.5rem; border-radius: 8px; border: 1.5px solid #E1DEE3;
+    font-family: var(--font-family); font-size: 0.8rem; font-weight: 700; cursor: pointer;
+  }
+  .ee__stato--ricevuta { background: #f1f5f9; color: #475569; }
+  .ee__stato--lavorazione { background: #eff6ff; color: #1d4ed8; }
+  .ee__stato--delibera { background: #fffbeb; color: #b45309; }
+  .ee__stato--approvata { background: #ecfdf5; color: #047857; }
+  .ee__stato--declinata { background: #fef2f2; color: #b91c1c; }
+
+  /* Feedback */
+  .ee__feedback {
+    padding: 0.9rem 1.1rem; border-radius: 10px; font-size: 0.9rem; line-height: 1.5;
+    border: 1px solid;
+  }
+  .ee__feedback--ok { background: #ecfdf5; border-color: #a7f3d0; color: #047857; }
+  .ee__feedback--err { background: #fef2f2; border-color: #fecaca; color: #b91c1c; }
+
+  /* Responsive */
+  @media (max-width: 960px) {
+    .ee__cards { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 768px) {
+    .gate__card { padding: 2rem 1.5rem 1.5rem; }
+    .gate__logos { gap: 0.5rem; }
+    .gate__logo { height: 32px; }
+
+    .ee__header-brand { gap: 0.65rem; }
+    .ee__logo { height: 28px; }
+    .ee__cards { grid-template-columns: 1fr; }
+    .ee__form-block { padding: 1.25rem; }
+    .ee__grid { grid-template-columns: 1fr; gap: 0.85rem; }
+    .ee__table { font-size: 0.82rem; }
+    .ee__table th, .ee__table td { padding: 0.6rem 0.75rem; }
+    .ee__th-when { width: 45%; }
+    .ee__submit-row { flex-direction: column; align-items: stretch; }
+    .ee__submit { justify-content: center; }
+  }
+</style>

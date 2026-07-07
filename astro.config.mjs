@@ -37,6 +37,7 @@ export default defineConfig({
           '/tools/econocom-pa',
           '/tools/edilizia-gierre',
           '/tools/energyteam',
+          '/tools/expo-energia',
           '/tools/gruppo-barone',
           '/tools/marotta',
           '/tools/simulatore-leasing-fornitori',
