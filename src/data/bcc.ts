@@ -220,6 +220,22 @@ export function bccTassoZeroCostoFornitore(importo: number): number {
   return importo * BCC_TASSO_ZERO.contributoFornitore + BCC_TASSO_ZERO.speseIstruttoriaFornitore;
 }
 
+/**
+ * Il conto per il fornitore: BCC incassa le rate dal cliente e bonifica al
+ * fornitore l'imponibile al netto del contributo e delle spese di istruttoria.
+ */
+export function bccTassoZeroContoFornitore(importo: number) {
+  const contributo = importo * BCC_TASSO_ZERO.contributoFornitore;
+  const istruttoria = BCC_TASSO_ZERO.speseIstruttoriaFornitore;
+  return {
+    imponibile: importo,
+    contributo,
+    istruttoria,
+    totaleCosto: contributo + istruttoria,
+    nettoIncassato: importo - contributo - istruttoria,
+  };
+}
+
 /** Spese di istruttoria una tantum a carico cliente, per fascia (listino planner) */
 export function bccSpeseIstruttoria(importo: number): number {
   if (importo <= 5000) return 75;

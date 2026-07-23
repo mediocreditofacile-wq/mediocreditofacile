@@ -3,7 +3,7 @@ import { ESG_COEFFS, ESG_DURATE, getEsgCoeff, esgPrezzoDaCanone } from '../../da
 import { PIONEER_COEFFS, getPioneerCoeff, eur } from '../../data/grenke';
 import {
   BCC_DURATE, BCC_MIN, BCC_MAX, bccRata, bccPrezzoDaRata, bccSpeseIstruttoria,
-  bccImpostaFinanziamento, BCC_TASSO_ZERO, bccTassoZeroRata, bccTassoZeroCostoFornitore,
+  bccImpostaFinanziamento, BCC_TASSO_ZERO, bccTassoZeroRata, bccTassoZeroContoFornitore,
   type ClasseRischioBcc, type ProdottoBcc,
 } from '../../data/bcc';
 import './simulatore-portale.css';
@@ -133,9 +133,10 @@ export default function SimulatorePortale({
   const speseIstruttoria = prodottoBcc && !tassoZero && prezzoCalcolato > 0
     ? bccSpeseIstruttoria(prezzoCalcolato)
     : null;
-  // Sul tasso zero il costo e' del fornitore: contributo sull'imponibile + istruttoria
-  const costoFornitore = tassoZero && prezzoCalcolato > 0
-    ? bccTassoZeroCostoFornitore(prezzoCalcolato)
+  // Sul tasso zero il costo e' del fornitore: BCC bonifica l'imponibile al netto
+  // del contributo e dell'istruttoria. Serve a Paolo per decidere se proporla.
+  const contoFornitore = tassoZero && prezzoCalcolato > 0
+    ? bccTassoZeroContoFornitore(prezzoCalcolato)
     : null;
   // Sul finanziamento l'imposta dipende anche dalla durata: uso quella scelta, altrimenti la piu' lunga
   const imposta = prodottoBcc === 'ff' && prezzoCalcolato > 0
@@ -245,12 +246,37 @@ export default function SimulatorePortale({
                     </button>
                   ))}
                 </div>
+                {contoFornitore !== null && (
+                  <div class="sp__conto">
+                    <span class="sp__conto-title">Il conto per te, come fornitore</span>
+                    <div class="sp__conto-riga">
+                      <span>Prezzo di vendita al cliente</span>
+                      <span>{eur(contoFornitore.imponibile)}</span>
+                    </div>
+                    <div class="sp__conto-riga sp__conto-riga--meno">
+                      <span>Contributo campagna ({(BCC_TASSO_ZERO.contributoFornitore * 100).toLocaleString('it-IT')}%)</span>
+                      <span>− {eur(contoFornitore.contributo)}</span>
+                    </div>
+                    <div class="sp__conto-riga sp__conto-riga--meno">
+                      <span>Spese di istruttoria</span>
+                      <span>− {eur(contoFornitore.istruttoria)}</span>
+                    </div>
+                    <div class="sp__conto-riga sp__conto-riga--tot">
+                      <span>Quanto ti bonifica BCC</span>
+                      <span>{eur(contoFornitore.nettoIncassato)}</span>
+                    </div>
+                    <p class="sp__conto-nota">
+                      Il cliente paga {eur(contoFornitore.imponibile / BCC_TASSO_ZERO.durata)} al mese per {BCC_TASSO_ZERO.durata} mesi,
+                      senza interessi. A te resta {eur(contoFornitore.nettoIncassato)} sui {eur(contoFornitore.imponibile)} di vendita:
+                      il tasso zero al cliente ti costa {eur(contoFornitore.totaleCosto)}, da mettere in conto nel prezzo.
+                    </p>
+                  </div>
+                )}
+
                 <p class="sp__nota">
                   Canone mensile indicativo, imponibile IVA, salvo delibera della società di noleggio.
-                  {costoFornitore !== null && (
-                    <> Il cliente non paga interessi: la campagna ti costa <strong>{eur(costoFornitore)}</strong>
-                    {' '}({(BCC_TASSO_ZERO.contributoFornitore * 100).toLocaleString('it-IT')}% dell'imponibile
-                    piu' {eur(BCC_TASSO_ZERO.speseIstruttoriaFornitore)} di istruttoria), trattenuti da BCC sul bonifico.</>
+                  {contoFornitore !== null && (
+                    <> Il cliente non paga interessi: il costo della campagna e' a tuo carico, vedi il conto qui sotto.</>
                   )}
                   {speseIstruttoria !== null && (
                     <> Su questo importo le spese di istruttoria sono <strong>{eur(speseIstruttoria)}</strong> una tantum,
