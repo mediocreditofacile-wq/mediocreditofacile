@@ -102,16 +102,20 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
         <div>
           <h2 class="st__section-title">Simula i canoni</h2>
           <p class="st__section-sub">
-            Coefficienti per centralini telefonici, hardware di rete e apparati di telefonia.
-            Il canone definitivo viene confermato dopo la delibera della società di noleggio.
+            Due canali a confronto per centralini, hardware di rete e apparati di telefonia: scegli quello
+            che quota meglio la singola operazione. Il canone definitivo viene confermato dopo la delibera.
           </p>
         </div>
       </header>
       <SimulatorePortale
         client:load
-        tabelle={['pioneer']}
+        tabelle={['pioneer', 'bcc-lo']}
         partner="STILO S.R.L."
-        etichetteBene={{ pioneer: 'Centralino telefonico / hardware di rete' }}
+        classeBcc={3}
+        etichetteBene={{
+          pioneer: 'Centralino telefonico / hardware di rete',
+          'bcc-lo': 'Centralino telefonico / hardware di rete',
+        }}
       />
     </section>
 
