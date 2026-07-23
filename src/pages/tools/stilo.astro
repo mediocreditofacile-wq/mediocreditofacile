@@ -102,15 +102,16 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
         <div>
           <h2 class="st__section-title">Simula i canoni</h2>
           <p class="st__section-sub">
-            Quattro formule a confronto per centralini, hardware di rete e apparati di telefonia: noleggio
-            Grenke, locazione operativa, leasing e finanziamento BCC. Scegli il prodotto dal menu e confronta
-            la rata. L'importo definitivo viene confermato dopo la delibera.
+            Cinque formule a confronto per centralini, hardware di rete e apparati di telefonia: noleggio
+            Grenke, locazione operativa, leasing e finanziamento BCC, piu' la campagna a tasso zero in dieci
+            rate. Scegli il prodotto dal menu e confronta la rata. L'importo definitivo viene confermato
+            dopo la delibera.
           </p>
         </div>
       </header>
       <SimulatorePortale
         client:load
-        tabelle={['pioneer', 'bcc-lo', 'bcc-lf', 'bcc-ff']}
+        tabelle={['pioneer', 'bcc-lo', 'bcc-lf', 'bcc-ff', 'bcc-zero']}
         partner="STILO S.R.L."
         classeBcc={3}
         etichetteBene={{
@@ -118,6 +119,7 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
           'bcc-lo': 'Centralino telefonico / hardware di rete',
           'bcc-lf': 'Centralino telefonico / hardware di rete',
           'bcc-ff': 'Centralino telefonico / hardware di rete',
+          'bcc-zero': 'Centralino telefonico / hardware di rete',
         }}
       />
     </section>

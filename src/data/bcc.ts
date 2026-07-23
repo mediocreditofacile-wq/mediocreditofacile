@@ -192,6 +192,34 @@ export const BCC_CLASSI_BENE: { comparto: string; classe: ClasseRischioBcc; dura
   { comparto: 'Movimento terra, carrelli elevatori, vari edili', classe: 5, durataMax: 60 },
 ];
 
+/**
+ * Campagna BCC "tasso zero" (file `# BCCRL_NEWCAMPAIGN'260430.xlsx`, in vigore dal
+ * 01/04/2026). Finanziamento finalizzato con TAN azzerato per il cliente: la rata
+ * e' semplicemente importo / numero di rate. Il costo lo sostiene il FORNITORE, che
+ * riconosce a BCC un contributo sull'imponibile piu' le spese di istruttoria.
+ *
+ * Il planner della campagna e' impostato su 10 mesi: e' l'unica durata coperta.
+ * Per altre durate il contributo cambia e BCC non lo ha ancora comunicato.
+ * Verificato col planner: il contributo resta il 5,30% su qualsiasi importo.
+ */
+export const BCC_TASSO_ZERO = {
+  attiva: true,
+  durata: 10,
+  contributoFornitore: 0.053,      // 5,30% dell'imponibile, a carico del fornitore
+  speseIstruttoriaFornitore: 75,   // una tantum, a carico del fornitore
+  inVigoreDal: '2026-04-01',
+};
+
+/** Rata del tasso zero: nessun interesse, l'importo diviso per il numero di rate */
+export function bccTassoZeroRata(importo: number): number {
+  return importo / BCC_TASSO_ZERO.durata;
+}
+
+/** Quanto costa la campagna al fornitore: contributo sull'imponibile + istruttoria */
+export function bccTassoZeroCostoFornitore(importo: number): number {
+  return importo * BCC_TASSO_ZERO.contributoFornitore + BCC_TASSO_ZERO.speseIstruttoriaFornitore;
+}
+
 /** Spese di istruttoria una tantum a carico cliente, per fascia (listino planner) */
 export function bccSpeseIstruttoria(importo: number): number {
   if (importo <= 5000) return 75;
