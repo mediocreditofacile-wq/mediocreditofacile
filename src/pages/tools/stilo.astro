@@ -1,27 +1,27 @@
 ---
 import Icon from '../../components/Icon.astro';
 /**
- * Portale Partner Expo Energia Srl — /tools/expo-energia
- * Replica in casa MCF del portale dealer ReteRent (reterent.difrently.com):
- * - login con email + password (account dedicato a Massimo Palermo)
- * - dashboard con card in stile ReteRent (Simulazioni / Pratiche)
- * - simulatore doppio: dal prezzo di vendita ai canoni, dal canone al prezzo
- *   (tabelle ESG fotovoltaico e Pioneer hardware, come da scheda censimento)
- * - form di caricamento pratica con checklist documenti dinamica
- * Lead vanno a /api/submit-expo-energia (mail dettagliata + Zapier).
+ * Portale Partner STILO S.R.L. — /tools/stilo
+ * Stessa struttura del portale Expo Energia (stesso motore condiviso):
+ * - login con email + password (account del referente commerciale Paolo Bonardi)
+ * - dashboard con card in stile ReteRent (Simulazioni / Preventivi / Richieste)
+ * - simulatore su tabella Pioneer: centralini telefonici e hardware di rete
+ * - form di caricamento pratica con checklist documenti dinamica e upload allegati
+ * Lead vanno a /api/submit-stilo (mail dettagliata + Zapier).
  *
- * Ratio interna (non esposta in pagina): il censimento ReteRent/Grenke di
- * Expo Energia e' in corso; nel frattempo le pratiche arrivano a MCF che le
- * carica sui portali (ReteRent / PagaRent) in base al merito del cliente.
+ * Ratio interna (non esposta in pagina): STILO e' attivabile su due canali,
+ * BCC Rent & Lease (rapida su telefonia e server, esclude Horeca ed edilizia)
+ * e Grenke / ReteRent con tabella Pioneer. La rotazione la decide Alberto in
+ * base alla categoria del cliente finale e al merito creditizio.
  */
 import ToolLayout from '../../layouts/ToolLayout.astro';
 import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
 ---
 <ToolLayout
-  title="Portale Expo Energia — Simulazioni e Pratiche | Mediocredito Facile"
-  description="Portale riservato Expo Energia Srl: simulazione canoni di noleggio operativo fotovoltaico e hardware, caricamento pratiche cliente."
+  title="Portale STILO — Simulazioni e Pratiche | Mediocredito Facile"
+  description="Portale riservato STILO S.R.L.: simulazione canoni di noleggio operativo per centralini telefonici e hardware di rete, caricamento pratiche cliente."
   noindex={true}
-  breadcrumbs={[{ name: 'Portale Expo Energia', href: '/tools/expo-energia' }]}
+  breadcrumbs={[{ name: 'Portale STILO', href: '/tools/stilo' }]}
 >
   <!-- Gate login -->
   <div id="gate" class="gate">
@@ -29,11 +29,11 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
       <div class="gate__logos">
         <img src="/images/logo-mediocreditofacile.webp" alt="Mediocredito Facile" class="gate__logo" />
         <span class="gate__x">&times;</span>
-        <span class="gate__partner-name">Expo Energia Srl</span>
+        <span class="gate__partner-name">STILO S.R.L.</span>
       </div>
       <div class="gate__divider"></div>
       <p class="gate__label">Portale Riservato Partner</p>
-      <p class="gate__desc">Simulazione canoni di noleggio operativo (fotovoltaico e hardware) e caricamento pratiche cliente.</p>
+      <p class="gate__desc">Simulazione canoni di noleggio operativo per centralini telefonici e hardware di rete, e caricamento pratiche cliente.</p>
       <div class="gate__form">
         <input type="email" id="gate-user" class="gate__input" placeholder="Email" autocomplete="username" />
         <input type="password" id="gate-pwd" class="gate__input" placeholder="Password" autocomplete="current-password" />
@@ -47,100 +47,100 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
   </div>
 
   <!-- Portale (nascosto fino ad autenticazione) -->
-  <div id="tool" class="ee" style="display:none !important;">
+  <div id="tool" class="st" style="display:none !important;">
     <!-- Header co-branded -->
-    <div class="ee__header">
-      <div class="ee__header-brand">
-        <img src="/images/logo-mediocreditofacile.webp" alt="Mediocredito Facile" class="ee__logo" />
-        <div class="ee__header-sep"></div>
-        <div class="ee__partner-badge">
-          <Icon name="solar_power" class="ee__partner-icon" />
-          <span class="ee__partner-label">Expo Energia Srl</span>
+    <div class="st__header">
+      <div class="st__header-brand">
+        <img src="/images/logo-mediocreditofacile.webp" alt="Mediocredito Facile" class="st__logo" />
+        <div class="st__header-sep"></div>
+        <div class="st__partner-badge">
+          <Icon name="phone" class="st__partner-icon" />
+          <span class="st__partner-label">STILO S.R.L.</span>
         </div>
       </div>
-      <button id="logout-btn" class="ee__logout">
+      <button id="logout-btn" class="st__logout">
         <Icon name="logout" />
         Esci
       </button>
     </div>
 
     <!-- Riga codice partner, come il "Codice Convenzione" ReteRent -->
-    <p class="ee__conv">Codice partner <strong>EXPOENERGIA</strong></p>
+    <p class="st__conv">Codice partner <strong>STILO</strong></p>
 
     <!-- Dashboard card -->
-    <h1 class="ee__dash-title">Gestione offerte di noleggio</h1>
-    <div class="ee__cards">
-      <a href="#simulatore" class="ee__card">
-        <div class="ee__card-head"><Icon name="calculate" /> Simulazioni</div>
-        <p class="ee__card-desc">Calcola i canoni di noleggio a partire dal prezzo di vendita, oppure parti dal canone per ottenere il prezzo.</p>
-        <span class="ee__card-link">Nuova simulazione &raquo;</span>
+    <h1 class="st__dash-title">Gestione offerte di noleggio</h1>
+    <div class="st__cards">
+      <a href="#simulatore" class="st__card">
+        <div class="st__card-head"><Icon name="calculate" /> Simulazioni</div>
+        <p class="st__card-desc">Calcola i canoni di noleggio a partire dal prezzo di vendita, oppure parti dal canone per ottenere il prezzo.</p>
+        <span class="st__card-link">Nuova simulazione &raquo;</span>
       </a>
-      <a href="#simulatore" class="ee__card">
-        <div class="ee__card-head"><Icon name="description" /> Preventivi</div>
-        <p class="ee__card-desc">Stampa la simulazione in versione pulita, pronta da consegnare o inviare al cliente.</p>
-        <span class="ee__card-link">Stampa simulazione &raquo;</span>
+      <a href="#simulatore" class="st__card">
+        <div class="st__card-head"><Icon name="description" /> Preventivi</div>
+        <p class="st__card-desc">Stampa la simulazione in versione pulita, pronta da consegnare o inviare al cliente.</p>
+        <span class="st__card-link">Stampa simulazione &raquo;</span>
       </a>
-      <div class="ee__card">
-        <div class="ee__card-head"><Icon name="send" /> Richieste</div>
-        <p class="ee__card-desc">Trasmetti la pratica con i documenti del cliente allegati e controlla lo stato di quelle già inviate.</p>
+      <div class="st__card">
+        <div class="st__card-head"><Icon name="send" /> Richieste</div>
+        <p class="st__card-desc">Trasmetti la pratica con i documenti del cliente allegati e controlla lo stato di quelle già inviate.</p>
         <span>
-          <a class="ee__card-link" href="#pratica">Carica una pratica &raquo;</a><br />
-          <a class="ee__card-link" href="#richieste">Lista richieste &raquo;</a>
+          <a class="st__card-link" href="#pratica">Carica una pratica &raquo;</a><br />
+          <a class="st__card-link" href="#richieste">Lista richieste &raquo;</a>
         </span>
       </div>
-      <a href="#documenti" class="ee__card">
-        <div class="ee__card-head"><Icon name="checklist" /> Documenti</div>
-        <p class="ee__card-desc">La checklist dei documenti si aggiorna da sola in base a importo e forma giuridica del cliente.</p>
-        <span class="ee__card-link">Vedi checklist &raquo;</span>
+      <a href="#documenti" class="st__card">
+        <div class="st__card-head"><Icon name="checklist" /> Documenti</div>
+        <p class="st__card-desc">La checklist dei documenti si aggiorna da sola in base a importo e forma giuridica del cliente.</p>
+        <span class="st__card-link">Vedi checklist &raquo;</span>
       </a>
     </div>
 
     <!-- 1. Simulatore -->
-    <section id="simulatore" class="ee__section">
-      <header class="ee__section-head">
-        <span class="ee__section-num">1</span>
+    <section id="simulatore" class="st__section">
+      <header class="st__section-head">
+        <span class="st__section-num">1</span>
         <div>
-          <h2 class="ee__section-title">Simula i canoni</h2>
-          <p class="ee__section-sub">
-            Tabella ESG per il fotovoltaico, tabella Pioneer per la divisione hardware e casse automatiche.
+          <h2 class="st__section-title">Simula i canoni</h2>
+          <p class="st__section-sub">
+            Coefficienti per centralini telefonici, hardware di rete e apparati di telefonia.
             Il canone definitivo viene confermato dopo la delibera della società di noleggio.
           </p>
         </div>
       </header>
       <SimulatorePortale
         client:load
-        tabelle={['esg', 'pioneer']}
-        partner="Expo Energia Srl"
-        etichetteBene={{ esg: 'Impianto fotovoltaico', pioneer: 'Hardware / sistemi di cassa' }}
+        tabelle={['pioneer']}
+        partner="STILO S.R.L."
+        etichetteBene={{ pioneer: 'Centralino telefonico / hardware di rete' }}
       />
     </section>
 
     <!-- 2. Carica pratica -->
-    <section id="pratica" class="ee__section">
-      <header class="ee__section-head">
-        <span class="ee__section-num">2</span>
+    <section id="pratica" class="st__section">
+      <header class="st__section-head">
+        <span class="st__section-num">2</span>
         <div>
-          <h2 class="ee__section-title">Carica una pratica</h2>
-          <p class="ee__section-sub">
+          <h2 class="st__section-title">Carica una pratica</h2>
+          <p class="st__section-sub">
             Compila i dati del cliente finale e del bene. La checklist documenti qui sotto si aggiorna mentre scrivi:
             chiede solo quello che serve per quell'importo e quella forma giuridica.
           </p>
         </div>
       </header>
 
-      <form id="pratica-form" class="ee__form" novalidate>
+      <form id="pratica-form" class="st__form" novalidate>
         <input type="text" name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;" aria-hidden="true" />
 
-        <div class="ee__form-block">
-          <h3 class="ee__form-block-title">Cliente finale</h3>
-          <div class="ee__grid">
-            <label class="ee__field ee__field--full">
-              <span class="ee__field-label">Ragione sociale / Nominativo *</span>
-              <input type="text" name="ragione_sociale" required placeholder="Es. Rossi Impianti SRL" />
+        <div class="st__form-block">
+          <h3 class="st__form-block-title">Cliente finale</h3>
+          <div class="st__grid">
+            <label class="st__field st__field--full">
+              <span class="st__field-label">Ragione sociale / Nominativo *</span>
+              <input type="text" name="ragione_sociale" required placeholder="Es. Studio Rossi SRL" />
             </label>
 
-            <label class="ee__field">
-              <span class="ee__field-label">Forma giuridica *</span>
+            <label class="st__field">
+              <span class="st__field-label">Forma giuridica *</span>
               <select name="forma_giuridica" id="forma-giuridica" required>
                 <option value="">Seleziona</option>
                 <option value="Ditta Individuale">Ditta Individuale</option>
@@ -154,91 +154,91 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
               </select>
             </label>
 
-            <label class="ee__field">
-              <span class="ee__field-label">Partita IVA / CF</span>
+            <label class="st__field">
+              <span class="st__field-label">Partita IVA / CF</span>
               <input type="text" name="piva" placeholder="11 cifre" inputmode="numeric" />
             </label>
 
-            <label class="ee__field">
-              <span class="ee__field-label">Referente</span>
+            <label class="st__field">
+              <span class="st__field-label">Referente</span>
               <input type="text" name="referente" placeholder="Nome e cognome" />
             </label>
 
-            <label class="ee__field">
-              <span class="ee__field-label">Telefono *</span>
+            <label class="st__field">
+              <span class="st__field-label">Telefono *</span>
               <input type="tel" name="telefono" required placeholder="+39 333 1234567" />
             </label>
 
-            <label class="ee__field ee__field--full">
-              <span class="ee__field-label">Email *</span>
+            <label class="st__field st__field--full">
+              <span class="st__field-label">Email *</span>
               <input type="email" name="email" required placeholder="cliente@esempio.it" />
             </label>
           </div>
         </div>
 
-        <div class="ee__form-block">
-          <h3 class="ee__form-block-title">Bene da noleggiare</h3>
-          <div class="ee__grid">
-            <label class="ee__field">
-              <span class="ee__field-label">Tipologia *</span>
+        <div class="st__form-block">
+          <h3 class="st__form-block-title">Bene da noleggiare</h3>
+          <div class="st__grid">
+            <label class="st__field">
+              <span class="st__field-label">Tipologia *</span>
               <select name="tipologia" required>
-                <option value="Fotovoltaico" selected>Impianto fotovoltaico</option>
-                <option value="Hardware / casse">Hardware / casse automatiche / POS</option>
+                <option value="Centralino telefonico" selected>Centralino telefonico</option>
+                <option value="Hardware di rete">Hardware di rete (switch, router, access point)</option>
+                <option value="Telefoni e apparati">Telefoni e apparati VoIP</option>
                 <option value="Altro">Altro bene strumentale</option>
               </select>
             </label>
 
-            <label class="ee__field">
-              <span class="ee__field-label">Importo bene (€) *</span>
-              <input type="number" name="importo" id="importo" required min="500" step="100" placeholder="25000" />
+            <label class="st__field">
+              <span class="st__field-label">Importo bene (€) *</span>
+              <input type="number" name="importo" id="importo" required min="500" step="100" placeholder="12000" />
             </label>
 
-            <label class="ee__field ee__field--full">
-              <span class="ee__field-label">Descrizione bene *</span>
-              <input type="text" name="bene_descrizione" required placeholder="Es. Impianto FV 20 kWp con accumulo 10 kWh" />
+            <label class="st__field st__field--full">
+              <span class="st__field-label">Descrizione bene *</span>
+              <input type="text" name="bene_descrizione" required placeholder="Es. Centralino IP 32 interni + 12 telefoni VoIP + switch PoE" />
             </label>
 
-            <label class="ee__field">
-              <span class="ee__field-label">Durata noleggio (mesi)</span>
+            <label class="st__field">
+              <span class="st__field-label">Durata noleggio (mesi)</span>
               <select name="durata">
                 <option value="24">24 mesi</option>
+                <option value="30">30 mesi</option>
                 <option value="36">36 mesi</option>
                 <option value="48">48 mesi</option>
                 <option value="60" selected>60 mesi</option>
-                <option value="72">72 mesi</option>
-                <option value="84">84 mesi</option>
               </select>
             </label>
 
-            <label class="ee__field">
-              <span class="ee__field-label">Canone simulato (€/mese)</span>
+            <label class="st__field">
+              <span class="st__field-label">Canone simulato (€/mese)</span>
               <input type="number" name="canone_simulato" min="0" step="1" placeholder="Dal simulatore qui sopra" />
             </label>
 
-            <label class="ee__field ee__field--full">
-              <span class="ee__field-label">Note (opzionale)</span>
-              <textarea name="note" rows="3" placeholder="Contesto del cliente, urgenza, dettagli dell'impianto..."></textarea>
+            <label class="st__field st__field--full">
+              <span class="st__field-label">Note (opzionale)</span>
+              <textarea name="note" rows="3" placeholder="Contesto del cliente, urgenza, dettagli dell'installazione..."></textarea>
             </label>
           </div>
         </div>
 
         <!-- Checklist documenti dinamica -->
-        <div id="documenti" class="ee__form-block">
-          <h3 class="ee__form-block-title">Documenti da raccogliere</h3>
+        <div id="documenti" class="st__form-block">
+          <h3 class="st__form-block-title">Documenti da raccogliere</h3>
 
-          <div id="checklist-banner" class="ee__banner ee__banner--base">
-            <Icon name="info" class="ee__banner-icon" />
+          <div id="checklist-banner" class="st__banner st__banner--base">
+            <Icon name="info" class="st__banner-icon" />
             <div>
               <strong id="banner-title">Documenti base</strong>
               <p id="banner-sub">Per importi fino a 10.000 € bastano i documenti standard. Sopra i 10.000 € la società di noleggio chiede anche i reddituali.</p>
             </div>
           </div>
 
-          <table class="ee__table">
+          <table class="st__table">
             <thead>
               <tr>
                 <th>Documento</th>
-                <th class="ee__th-when">Quando serve</th>
+                <th class="st__th-when">Quando serve</th>
               </tr>
             </thead>
             <tbody id="checklist-body">
@@ -248,20 +248,20 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
               <tr><td>Coordinate IBAN aziendali</td><td>Sempre</td></tr>
               <tr><td>Email aziendale</td><td>Sempre</td></tr>
               <tr><td>Cellulare del referente</td><td>Sempre</td></tr>
-              <tr><td>Preventivo del fornitore dell'impianto / del bene</td><td>Sempre</td></tr>
-              <tr class="ee__row-extra" data-extra="di" hidden>
+              <tr><td>Offerta / preventivo al cliente finale</td><td>Sempre</td></tr>
+              <tr class="st__row-extra" data-extra="di" hidden>
                 <td>Ultime 2 dichiarazioni dei redditi (Modello Unico)</td>
                 <td>Solo Ditta Individuale, importo &gt; 10.000 €</td>
               </tr>
-              <tr class="ee__row-extra" data-extra="di" hidden>
+              <tr class="st__row-extra" data-extra="di" hidden>
                 <td>Situazione contabile aggiornata 2025</td>
                 <td>Solo Ditta Individuale, importo &gt; 10.000 €</td>
               </tr>
-              <tr class="ee__row-extra" data-extra="srl" hidden>
+              <tr class="st__row-extra" data-extra="srl" hidden>
                 <td>Ultimi 2 bilanci depositati</td>
                 <td>Solo societa' di capitali, importo &gt; 10.000 €</td>
               </tr>
-              <tr class="ee__row-extra" data-extra="srl" hidden>
+              <tr class="st__row-extra" data-extra="srl" hidden>
                 <td>Bilancio definitivo 2025 (anche pre-deposito)</td>
                 <td>Solo societa' di capitali, importo &gt; 10.000 €</td>
               </tr>
@@ -270,56 +270,56 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
         </div>
 
         <!-- Upload documenti -->
-        <div class="ee__form-block">
-          <h3 class="ee__form-block-title">Allega i documenti</h3>
-          <p class="ee__upload-hint">
+        <div class="st__form-block">
+          <h3 class="st__form-block-title">Allega i documenti</h3>
+          <p class="st__upload-hint">
             PDF, immagini, visure firmate (.p7m), Word ed Excel — massimo 25 MB a file.
             Puoi inviare la pratica anche senza documenti e integrarli in un secondo momento.
           </p>
-          <label class="ee__upload-drop" for="file-input">
-            <Icon name="upload_file" class="ee__upload-icon" />
+          <label class="st__upload-drop" for="file-input">
+            <Icon name="upload_file" class="st__upload-icon" />
             <span><strong>Scegli i file da allegare</strong> oppure trascinali qui</span>
             <input type="file" id="file-input" multiple accept=".pdf,.jpg,.jpeg,.png,.heic,.p7m,.doc,.docx,.xls,.xlsx" hidden />
           </label>
-          <ul id="file-list" class="ee__file-list"></ul>
+          <ul id="file-list" class="st__file-list"></ul>
         </div>
 
-        <div class="ee__submit-row">
-          <button type="submit" class="ee__submit">
+        <div class="st__submit-row">
+          <button type="submit" class="st__submit">
             <Icon name="send" />
             Invia pratica
           </button>
-          <p class="ee__submit-hint">
+          <p class="st__submit-hint">
             Riceviamo pratica e documenti in tempo reale. Ti richiamiamo al telefono indicato per la conferma e vedi l'avanzamento nella lista richieste qui sotto.
           </p>
         </div>
 
-        <div id="form-feedback" class="ee__feedback" hidden></div>
+        <div id="form-feedback" class="st__feedback" hidden></div>
       </form>
     </section>
 
     <!-- 3. Le tue richieste -->
-    <section id="richieste" class="ee__section">
-      <header class="ee__section-head">
-        <span class="ee__section-num">3</span>
+    <section id="richieste" class="st__section">
+      <header class="st__section-head">
+        <span class="st__section-num">3</span>
         <div>
-          <h2 class="ee__section-title">Le tue richieste</h2>
-          <p class="ee__section-sub">
+          <h2 class="st__section-title">Le tue richieste</h2>
+          <p class="st__section-sub">
             Tutte le pratiche trasmesse, con documenti e stato di avanzamento. Lo stato viene aggiornato da Mediocredito Facile man mano che la pratica avanza.
           </p>
         </div>
       </header>
 
-      <div class="ee__richieste-bar">
-        <button type="button" id="refresh-richieste" class="ee__refresh">
+      <div class="st__richieste-bar">
+        <button type="button" id="refresh-richieste" class="st__refresh">
           <Icon name="refresh" />
           Aggiorna
         </button>
-        <span id="richieste-info" class="ee__richieste-info"></span>
+        <span id="richieste-info" class="st__richieste-info"></span>
       </div>
 
-      <div id="richieste-wrap" class="ee__richieste-wrap">
-        <p class="ee__richieste-empty">Caricamento in corso...</p>
+      <div id="richieste-wrap" class="st__richieste-wrap">
+        <p class="st__richieste-empty">Caricamento in corso...</p>
       </div>
     </section>
   </div>
@@ -329,14 +329,14 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
   import { upload } from '@vercel/blob/client';
 
   // Due account sul gate:
-  //  - partner: Massimo Palermo (Expo Energia) — credenziali fisse
+  //  - partner: Paolo Bonardi (STILO) — credenziali fisse
   //  - admin: Alberto — email MCF + chiave admin, verificata SERVER-SIDE
   //    contro la env var EXPO_PORTAL_ADMIN_KEY (la chiave non sta nel sorgente)
-  const PARTNER = 'expo-energia';
-  const USER_EMAIL = 'massimopalermo10@gmail.com';
-  const PASSWORD = 'expoenergia';
+  const PARTNER = 'stilo';
+  const USER_EMAIL = 'bonardipaolo@gmail.com';
+  const PASSWORD = 'stilosrl';
   const ADMIN_EMAIL = 'mediocreditofacile@gmail.com';
-  const KEY = 'mcf_expoenergia_auth';
+  const KEY = 'mcf_stilo_auth';
 
   type Session = { role: 'partner' | 'admin'; key: string };
   let session: Session | null = null;
@@ -352,7 +352,7 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
   function showTool() {
     gate.style.display = 'none';
     tool.style.cssText = '';
-    tool.classList.toggle('ee--admin', session?.role === 'admin');
+    tool.classList.toggle('st--admin', session?.role === 'admin');
     // Deferita: al primo accesso lo script sta ancora valutando le const
     // della sezione richieste (TDZ), quindi si aspetta il tick successivo
     setTimeout(() => void loadRichieste(), 0);
@@ -428,7 +428,7 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
   const banner = document.getElementById('checklist-banner')!;
   const bannerTitle = document.getElementById('banner-title')!;
   const bannerSub = document.getElementById('banner-sub')!;
-  const extraRows = document.querySelectorAll<HTMLTableRowElement>('.ee__row-extra');
+  const extraRows = document.querySelectorAll<HTMLTableRowElement>('.st__row-extra');
 
   const FORMA_DI = ['Ditta Individuale', 'Lavoratore Autonomo'];
 
@@ -449,19 +449,19 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
       row.hidden = !show;
     });
 
-    banner.classList.remove('ee__banner--base', 'ee__banner--full');
+    banner.classList.remove('st__banner--base', 'st__banner--full');
     if (sopraSoglia && fg) {
-      banner.classList.add('ee__banner--full');
+      banner.classList.add('st__banner--full');
       bannerTitle.textContent = `Documenti completi (${isDi ? 'Ditta Individuale' : 'Societa\' di capitali'})`;
       bannerSub.textContent = isDi
         ? 'Importo sopra 10.000 €: oltre ai documenti base servono le ultime 2 dichiarazioni dei redditi e la situazione contabile 2025.'
         : 'Importo sopra 10.000 €: oltre ai documenti base servono gli ultimi 2 bilanci depositati e il bilancio definitivo 2025.';
     } else if (sopraSoglia && !fg) {
-      banner.classList.add('ee__banner--base');
+      banner.classList.add('st__banner--base');
       bannerTitle.textContent = 'Seleziona la forma giuridica';
       bannerSub.textContent = 'Sopra 10.000 € la documentazione reddituale cambia tra Ditta Individuale e Societa\' di capitali. Scegli la forma giuridica per la lista esatta.';
     } else {
-      banner.classList.add('ee__banner--base');
+      banner.classList.add('st__banner--base');
       bannerTitle.textContent = 'Documenti base';
       bannerSub.textContent = 'Per importi fino a 10.000 € bastano i documenti standard. Sopra i 10.000 € la società di noleggio chiede anche i reddituali.';
     }
@@ -484,13 +484,13 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
     fileList.innerHTML = '';
     selectedFiles.forEach((f, i) => {
       const li = document.createElement('li');
-      li.className = 'ee__file-item';
+      li.className = 'st__file-item';
       const name = document.createElement('span');
-      name.className = 'ee__file-name';
+      name.className = 'st__file-name';
       name.textContent = `${f.name} (${fmtSize(f.size)})`;
       const btn = document.createElement('button');
       btn.type = 'button';
-      btn.className = 'ee__file-remove';
+      btn.className = 'st__file-remove';
       btn.textContent = 'Rimuovi';
       btn.addEventListener('click', () => { selectedFiles.splice(i, 1); renderFileList(); });
       li.append(name, btn);
@@ -512,9 +512,9 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
   fileInput.addEventListener('change', () => { if (fileInput.files) { addFiles(fileInput.files); fileInput.value = ''; } });
 
   // Drag & drop sull'area upload
-  const dropZone = document.querySelector<HTMLElement>('.ee__upload-drop')!;
-  ['dragover', 'dragenter'].forEach((ev) => dropZone.addEventListener(ev, (e) => { e.preventDefault(); dropZone.classList.add('ee__upload-drop--over'); }));
-  ['dragleave', 'drop'].forEach((ev) => dropZone.addEventListener(ev, (e) => { e.preventDefault(); dropZone.classList.remove('ee__upload-drop--over'); }));
+  const dropZone = document.querySelector<HTMLElement>('.st__upload-drop')!;
+  ['dragover', 'dragenter'].forEach((ev) => dropZone.addEventListener(ev, (e) => { e.preventDefault(); dropZone.classList.add('st__upload-drop--over'); }));
+  ['dragleave', 'drop'].forEach((ev) => dropZone.addEventListener(ev, (e) => { e.preventDefault(); dropZone.classList.remove('st__upload-drop--over'); }));
   dropZone.addEventListener('drop', (e) => {
     const dt = (e as DragEvent).dataTransfer;
     if (dt?.files?.length) addFiles(dt.files);
@@ -523,7 +523,7 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
   // === Submit form: prima i documenti su Blob, poi la pratica ===
   const form = document.getElementById('pratica-form') as HTMLFormElement;
   const feedback = document.getElementById('form-feedback')!;
-  const submitBtn = form.querySelector<HTMLButtonElement>('.ee__submit')!;
+  const submitBtn = form.querySelector<HTMLButtonElement>('.st__submit')!;
 
   function resetSubmitBtn() {
     submitBtn.disabled = false;
@@ -533,7 +533,7 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     feedback.hidden = true;
-    feedback.classList.remove('ee__feedback--ok', 'ee__feedback--err');
+    feedback.classList.remove('st__feedback--ok', 'st__feedback--err');
 
     if (!form.reportValidity()) return;
     if (!session) { showGate(); return; }
@@ -557,7 +557,7 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
       }
     } catch (err) {
       feedback.textContent = 'Caricamento documenti non riuscito. Riprova, oppure invia la pratica senza allegati e mandiamo i documenti via email.';
-      feedback.classList.add('ee__feedback--err');
+      feedback.classList.add('st__feedback--err');
       feedback.hidden = false;
       resetSubmitBtn();
       return;
@@ -568,11 +568,11 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
     try {
       const fd = new FormData(form);
       fd.set('documenti', JSON.stringify(documenti));
-      const res = await fetch('/api/submit-expo-energia', { method: 'POST', body: fd });
+      const res = await fetch('/api/submit-stilo', { method: 'POST', body: fd });
       const json = await res.json();
       if (res.ok && json.ok) {
         feedback.textContent = `Pratica ${json.id ?? ''} ricevuta${documenti.length ? ` con ${documenti.length} documenti` : ''}. Ti richiamiamo al numero indicato; segui lo stato nella lista qui sotto.`;
-        feedback.classList.add('ee__feedback--ok');
+        feedback.classList.add('st__feedback--ok');
         feedback.hidden = false;
         form.reset();
         selectedFiles = [];
@@ -586,7 +586,7 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
       }
     } catch (err) {
       feedback.textContent = 'Invio non riuscito. Riprova tra qualche secondo o chiama il 393 995 7840.';
-      feedback.classList.add('ee__feedback--err');
+      feedback.classList.add('st__feedback--err');
       feedback.hidden = false;
       resetSubmitBtn();
     }
@@ -598,11 +598,11 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
   const refreshBtn = document.getElementById('refresh-richieste') as HTMLButtonElement;
   const STATI = ['Ricevuta', 'In lavorazione', 'In delibera', 'Approvata', 'Declinata'];
   const STATO_CLASS: Record<string, string> = {
-    'Ricevuta': 'ee__stato--ricevuta',
-    'In lavorazione': 'ee__stato--lavorazione',
-    'In delibera': 'ee__stato--delibera',
-    'Approvata': 'ee__stato--approvata',
-    'Declinata': 'ee__stato--declinata',
+    'Ricevuta': 'st__stato--ricevuta',
+    'In lavorazione': 'st__stato--lavorazione',
+    'In delibera': 'st__stato--delibera',
+    'Approvata': 'st__stato--approvata',
+    'Declinata': 'st__stato--declinata',
   };
 
   const eurFmt = (v: string) => {
@@ -644,7 +644,7 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
       });
       const json = await res.json();
       if (!res.ok || !json.ok) throw new Error('update_failed');
-      select.className = `ee__stato-select ${STATO_CLASS[stato] ?? ''}`;
+      select.className = `st__stato-select ${STATO_CLASS[stato] ?? ''}`;
     } catch {
       alert('Aggiornamento stato non riuscito. Riprova.');
       void loadRichieste();
@@ -666,20 +666,20 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
       if (!res.ok || !json.ok) throw new Error(json.error || 'list_failed');
       renderRichieste(json.pratiche ?? []);
     } catch (err) {
-      richiesteWrap.innerHTML = '<p class="ee__richieste-empty">Impossibile caricare le richieste in questo momento. Premi Aggiorna per riprovare.</p>';
+      richiesteWrap.innerHTML = '<p class="st__richieste-empty">Impossibile caricare le richieste in questo momento. Premi Aggiorna per riprovare.</p>';
     }
   }
 
   function renderRichieste(pratiche: any[]) {
     if (!pratiche.length) {
-      richiesteWrap.innerHTML = '<p class="ee__richieste-empty">Nessuna richiesta inviata finora. La prima pratica che carichi comparira\' qui.</p>';
+      richiesteWrap.innerHTML = '<p class="st__richieste-empty">Nessuna richiesta inviata finora. La prima pratica che carichi comparira\' qui.</p>';
       return;
     }
     richiesteInfo.textContent = `${pratiche.length} richieste`;
 
     const isAdmin = session?.role === 'admin';
     const table = document.createElement('table');
-    table.className = 'ee__table ee__table--richieste';
+    table.className = 'st__table st__table--richieste';
     table.innerHTML = `
       <thead>
         <tr><th>Data</th><th>Pratica</th><th>Cliente</th><th>Bene</th><th>Importo</th><th>Documenti</th><th>Stato</th></tr>
@@ -697,7 +697,7 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
         docs.forEach((d: any) => {
           const a = document.createElement('a');
           a.href = '#';
-          a.className = 'ee__doc-link';
+          a.className = 'st__doc-link';
           a.textContent = d.nome;
           a.addEventListener('click', (e) => { e.preventDefault(); void downloadDoc(d.pathname, d.nome); });
           docsCell.appendChild(a);
@@ -708,7 +708,7 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
       const stato = p.stato ?? 'Ricevuta';
       if (isAdmin) {
         const sel = document.createElement('select');
-        sel.className = `ee__stato-select ${STATO_CLASS[stato] ?? ''}`;
+        sel.className = `st__stato-select ${STATO_CLASS[stato] ?? ''}`;
         STATI.forEach((s) => {
           const opt = document.createElement('option');
           opt.value = s; opt.textContent = s; opt.selected = s === stato;
@@ -718,7 +718,7 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
         statoCell.appendChild(sel);
       } else {
         const badge = document.createElement('span');
-        badge.className = `ee__stato ${STATO_CLASS[stato] ?? ''}`;
+        badge.className = `st__stato ${STATO_CLASS[stato] ?? ''}`;
         badge.textContent = stato;
         statoCell.appendChild(badge);
       }
@@ -797,227 +797,227 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
   .gate__error { color: #ef4444; font-size: 0.82rem; margin-top: 0.75rem; }
 
   /* === Portale === */
-  .ee { max-width: var(--max-width); margin: 0 auto; padding: 0 1.5rem 4rem; }
-  .ee__header {
+  .st { max-width: var(--max-width); margin: 0 auto; padding: 0 1.5rem 4rem; }
+  .st__header {
     display: flex; align-items: center; justify-content: space-between;
     padding: 1.25rem 0; border-bottom: 1px solid #e2e8f0;
   }
-  .ee__header-brand { display: flex; align-items: center; gap: 1rem; }
-  .ee__logo { height: 36px; flex-shrink: 0; }
-  .ee__header-sep { width: 1px; height: 28px; background: #e2e8f0; }
-  .ee__partner-badge {
+  .st__header-brand { display: flex; align-items: center; gap: 1rem; }
+  .st__logo { height: 36px; flex-shrink: 0; }
+  .st__header-sep { width: 1px; height: 28px; background: #e2e8f0; }
+  .st__partner-badge {
     display: flex; align-items: center; gap: 0.4rem;
     background: linear-gradient(135deg, #fff7f3, #fde4d4);
     border: 1px solid #fbcfb0; border-radius: 8px; padding: 0.35rem 0.75rem;
   }
-  .ee__partner-icon { font-size: 1.1rem; color: #FE6F3A; }
-  .ee__partner-label { font-size: 0.85rem; font-weight: 700; color: #D45A2E; }
-  .ee__logout {
+  .st__partner-icon { font-size: 1.1rem; color: #FE6F3A; }
+  .st__partner-label { font-size: 0.85rem; font-weight: 700; color: #D45A2E; }
+  .st__logout {
     background: none; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.4rem 0.85rem;
     font-family: var(--font-family); font-size: 0.82rem; font-weight: 600; color: #64748b;
     cursor: pointer; transition: border-color 0.2s, color 0.2s;
     display: flex; align-items: center; gap: 0.3rem;
   }
-  .ee__logout:hover { border-color: #FE6F3A; color: #FE6F3A; }
+  .st__logout:hover { border-color: #FE6F3A; color: #FE6F3A; }
 
   /* Codice partner + dashboard */
-  .ee__conv { font-size: 0.9rem; color: #787782; margin: 1.5rem 0 0.4rem; }
-  .ee__conv strong { color: #0F1020; letter-spacing: 0.04em; }
-  .ee__dash-title {
+  .st__conv { font-size: 0.9rem; color: #787782; margin: 1.5rem 0 0.4rem; }
+  .st__conv strong { color: #0F1020; letter-spacing: 0.04em; }
+  .st__dash-title {
     font-size: 1.35rem; font-weight: 800; color: #0F1020;
     padding-bottom: 0.75rem; margin: 0 0 1.25rem; border-bottom: 1px solid #E1DEE3;
   }
-  .ee__cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 3rem; }
-  .ee__card {
+  .st__cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 3rem; }
+  .st__card {
     display: flex; flex-direction: column; gap: 0.6rem;
     background: #F8F7FA; border: 1px solid #E1DEE3; border-bottom: 3px solid #293C5B;
     border-radius: 10px; padding: 1.25rem; text-decoration: none;
     transition: transform 0.15s, box-shadow 0.2s;
   }
-  .ee__card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(15, 16, 32, 0.08); }
-  .ee__card-head {
+  .st__card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(15, 16, 32, 0.08); }
+  .st__card-head {
     display: flex; align-items: center; gap: 0.45rem;
     font-size: 1rem; font-weight: 800; color: #293C5B;
   }
-  .ee__card-head .mcf-icon { color: #FE6F3A; }
-  .ee__card-desc { font-size: 0.84rem; color: #444451; line-height: 1.5; margin: 0; flex: 1; }
-  .ee__card-link { font-size: 0.84rem; font-weight: 700; color: #664CCD; text-decoration: none; display: inline-block; margin-top: 0.1rem; }
-  .ee__card-link:hover { text-decoration: underline; }
+  .st__card-head .mcf-icon { color: #FE6F3A; }
+  .st__card-desc { font-size: 0.84rem; color: #444451; line-height: 1.5; margin: 0; flex: 1; }
+  .st__card-link { font-size: 0.84rem; font-weight: 700; color: #664CCD; text-decoration: none; display: inline-block; margin-top: 0.1rem; }
+  .st__card-link:hover { text-decoration: underline; }
 
   /* Sezioni */
-  .ee__section { margin-bottom: 3rem; scroll-margin-top: 90px; }
-  .ee__section-head { display: flex; gap: 1rem; align-items: flex-start; margin-bottom: 1.25rem; }
-  .ee__section-num {
+  .st__section { margin-bottom: 3rem; scroll-margin-top: 90px; }
+  .st__section-head { display: flex; gap: 1rem; align-items: flex-start; margin-bottom: 1.25rem; }
+  .st__section-num {
     flex-shrink: 0; width: 36px; height: 36px;
     background: linear-gradient(135deg, #FE6F3A, #664CCD);
     color: #ffffff; font-weight: 800; font-size: 1rem;
     display: flex; align-items: center; justify-content: center; border-radius: 50%;
   }
-  .ee__section-title { font-size: 1.2rem; font-weight: 800; color: #0F1020; margin: 0 0 0.3rem; line-height: 1.3; }
-  .ee__section-sub { font-size: 0.9rem; color: #444451; line-height: 1.55; margin: 0; max-width: 720px; }
+  .st__section-title { font-size: 1.2rem; font-weight: 800; color: #0F1020; margin: 0 0 0.3rem; line-height: 1.3; }
+  .st__section-sub { font-size: 0.9rem; color: #444451; line-height: 1.55; margin: 0; max-width: 720px; }
 
   /* Form */
-  .ee__form { display: flex; flex-direction: column; gap: 1.5rem; }
-  .ee__form-block {
+  .st__form { display: flex; flex-direction: column; gap: 1.5rem; }
+  .st__form-block {
     background: #ffffff; border: 1px solid #E1DEE3; border-radius: 14px; padding: 1.5rem 1.75rem;
     scroll-margin-top: 90px;
   }
-  .ee__form-block-title {
+  .st__form-block-title {
     font-size: 0.78rem; font-weight: 800; color: #664CCD;
     text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 1rem;
   }
-  .ee__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-  .ee__field { display: flex; flex-direction: column; gap: 0.35rem; }
-  .ee__field--full { grid-column: 1 / -1; }
-  .ee__field-label { font-size: 0.82rem; font-weight: 600; color: #444451; }
-  .ee__field input, .ee__field select, .ee__field textarea {
+  .st__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .st__field { display: flex; flex-direction: column; gap: 0.35rem; }
+  .st__field--full { grid-column: 1 / -1; }
+  .st__field-label { font-size: 0.82rem; font-weight: 600; color: #444451; }
+  .st__field input, .st__field select, .st__field textarea {
     padding: 0.7rem 0.85rem; border: 1.5px solid #E1DEE3; border-radius: 10px;
     font-family: var(--font-family); font-size: 0.95rem; color: #0F1020; background: #fafafa;
     transition: border-color 0.15s, background 0.15s;
   }
-  .ee__field input:focus, .ee__field select:focus, .ee__field textarea:focus {
+  .st__field input:focus, .st__field select:focus, .st__field textarea:focus {
     outline: none; border-color: #FE6F3A; background: #ffffff;
     box-shadow: 0 0 0 3px rgba(254, 111, 58, 0.1);
   }
-  .ee__field textarea { resize: vertical; min-height: 80px; }
+  .st__field textarea { resize: vertical; min-height: 80px; }
 
   /* Banner checklist */
-  .ee__banner {
+  .st__banner {
     display: flex; gap: 0.85rem; align-items: flex-start;
     border-radius: 10px; padding: 0.9rem 1.1rem; margin-bottom: 1rem;
     border: 1px solid; transition: background 0.2s, border-color 0.2s;
   }
-  .ee__banner-icon { font-size: 1.3rem; flex-shrink: 0; margin-top: 0.05rem; }
-  .ee__banner strong { display: block; font-size: 0.92rem; margin-bottom: 0.2rem; color: #0F1020; }
-  .ee__banner p { margin: 0; font-size: 0.85rem; color: #444451; line-height: 1.5; }
-  .ee__banner--base { background: #f8fafc; border-color: #E1DEE3; }
-  .ee__banner--base .ee__banner-icon { color: #664CCD; }
-  .ee__banner--full { background: #fff7f3; border-color: #fde4d4; }
-  .ee__banner--full .ee__banner-icon { color: #FE6F3A; }
+  .st__banner-icon { font-size: 1.3rem; flex-shrink: 0; margin-top: 0.05rem; }
+  .st__banner strong { display: block; font-size: 0.92rem; margin-bottom: 0.2rem; color: #0F1020; }
+  .st__banner p { margin: 0; font-size: 0.85rem; color: #444451; line-height: 1.5; }
+  .st__banner--base { background: #f8fafc; border-color: #E1DEE3; }
+  .st__banner--base .st__banner-icon { color: #664CCD; }
+  .st__banner--full { background: #fff7f3; border-color: #fde4d4; }
+  .st__banner--full .st__banner-icon { color: #FE6F3A; }
 
   /* Tabella documenti */
-  .ee__table {
+  .st__table {
     width: 100%; border-collapse: collapse;
     font-size: 0.9rem;
     border: 1px solid #E1DEE3; border-radius: 10px; overflow: hidden;
   }
-  .ee__table thead { background: #f8fafc; }
-  .ee__table th {
+  .st__table thead { background: #f8fafc; }
+  .st__table th {
     text-align: left; padding: 0.75rem 1rem;
     font-size: 0.78rem; font-weight: 700; color: #444451;
     text-transform: uppercase; letter-spacing: 0.05em;
     border-bottom: 1px solid #E1DEE3;
   }
-  .ee__th-when { width: 40%; }
-  .ee__table td {
+  .st__th-when { width: 40%; }
+  .st__table td {
     padding: 0.75rem 1rem; border-bottom: 1px solid #f1f1f3;
     color: #0F1020; line-height: 1.4;
   }
-  .ee__table tbody tr:last-child td { border-bottom: none; }
-  .ee__table tbody tr:hover { background: #fafafa; }
-  .ee__row-extra td:last-child { color: #FE6F3A; font-weight: 600; font-size: 0.82rem; }
+  .st__table tbody tr:last-child td { border-bottom: none; }
+  .st__table tbody tr:hover { background: #fafafa; }
+  .st__row-extra td:last-child { color: #FE6F3A; font-weight: 600; font-size: 0.82rem; }
 
   /* Submit */
-  .ee__submit-row {
+  .st__submit-row {
     display: flex; align-items: center; gap: 1.25rem;
     background: linear-gradient(135deg, #fff7f3, #f5f3ff);
     border: 1px solid #fde4d4; border-radius: 14px; padding: 1.25rem 1.5rem;
     flex-wrap: wrap;
   }
-  .ee__submit {
+  .st__submit {
     display: inline-flex; align-items: center; gap: 0.5rem;
     background: linear-gradient(135deg, #FE6F3A, #664CCD); color: #ffffff;
     font-family: var(--font-family); font-weight: 700; font-size: 0.95rem;
     border: none; border-radius: 10px; padding: 0.85rem 1.6rem; cursor: pointer;
     transition: transform 0.15s, box-shadow 0.2s; white-space: nowrap;
   }
-  .ee__submit:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(254, 111, 58, 0.28); }
-  .ee__submit:disabled { opacity: 0.6; cursor: wait; }
-  .ee__submit-hint { margin: 0; font-size: 0.85rem; color: #444451; line-height: 1.5; flex: 1; min-width: 240px; }
+  .st__submit:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(254, 111, 58, 0.28); }
+  .st__submit:disabled { opacity: 0.6; cursor: wait; }
+  .st__submit-hint { margin: 0; font-size: 0.85rem; color: #444451; line-height: 1.5; flex: 1; min-width: 240px; }
 
   /* Upload documenti */
-  .ee__upload-hint { font-size: 0.85rem; color: #787782; line-height: 1.5; margin: 0 0 1rem; }
-  .ee__upload-drop {
+  .st__upload-hint { font-size: 0.85rem; color: #787782; line-height: 1.5; margin: 0 0 1rem; }
+  .st__upload-drop {
     display: flex; align-items: center; justify-content: center; gap: 0.6rem;
     border: 2px dashed #E1DEE3; border-radius: 12px; padding: 1.5rem;
     background: #fafafa; cursor: pointer; text-align: center;
     font-size: 0.9rem; color: #444451;
     transition: border-color 0.15s, background 0.15s;
   }
-  .ee__upload-drop:hover, .ee__upload-drop--over { border-color: #FE6F3A; background: #fff7f3; }
-  .ee__upload-icon { font-size: 1.6rem; color: #664CCD; }
-  .ee__file-list { list-style: none; padding: 0; margin: 0.85rem 0 0; display: flex; flex-direction: column; gap: 0.4rem; }
-  .ee__file-item {
+  .st__upload-drop:hover, .st__upload-drop--over { border-color: #FE6F3A; background: #fff7f3; }
+  .st__upload-icon { font-size: 1.6rem; color: #664CCD; }
+  .st__file-list { list-style: none; padding: 0; margin: 0.85rem 0 0; display: flex; flex-direction: column; gap: 0.4rem; }
+  .st__file-item {
     display: flex; align-items: center; justify-content: space-between; gap: 1rem;
     background: #ffffff; border: 1px solid #E1DEE3; border-radius: 8px;
     padding: 0.5rem 0.85rem; font-size: 0.85rem; color: #0F1020;
   }
-  .ee__file-remove {
+  .st__file-remove {
     background: none; border: none; color: #b91c1c; font-family: var(--font-family);
     font-size: 0.78rem; font-weight: 600; cursor: pointer; white-space: nowrap;
   }
-  .ee__file-remove:hover { text-decoration: underline; }
+  .st__file-remove:hover { text-decoration: underline; }
 
   /* Lista richieste */
-  .ee__richieste-bar { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
-  .ee__refresh {
+  .st__richieste-bar { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+  .st__refresh {
     display: inline-flex; align-items: center; gap: 0.4rem;
     background: #ffffff; border: 1.5px solid #664CCD; border-radius: 10px;
     color: #664CCD; font-family: var(--font-family); font-weight: 700; font-size: 0.85rem;
     padding: 0.5rem 1rem; cursor: pointer; transition: box-shadow 0.2s;
   }
-  .ee__refresh:hover { box-shadow: 0 4px 12px rgba(102, 76, 205, 0.18); }
-  .ee__richieste-info { font-size: 0.85rem; color: #787782; }
-  .ee__richieste-wrap { overflow-x: auto; }
-  .ee__richieste-empty {
+  .st__refresh:hover { box-shadow: 0 4px 12px rgba(102, 76, 205, 0.18); }
+  .st__richieste-info { font-size: 0.85rem; color: #787782; }
+  .st__richieste-wrap { overflow-x: auto; }
+  .st__richieste-empty {
     background: #f8fafc; border: 1px solid #E1DEE3; border-radius: 10px;
     padding: 1.25rem; font-size: 0.9rem; color: #64748b; margin: 0;
   }
-  .ee__table--richieste { min-width: 760px; }
-  .ee__table--richieste td { vertical-align: top; }
-  .ee__doc-link { display: block; color: #664CCD; font-size: 0.83rem; text-decoration: underline; margin-bottom: 0.2rem; }
+  .st__table--richieste { min-width: 760px; }
+  .st__table--richieste td { vertical-align: top; }
+  .st__doc-link { display: block; color: #664CCD; font-size: 0.83rem; text-decoration: underline; margin-bottom: 0.2rem; }
 
   /* Badge stato */
-  .ee__stato {
+  .st__stato {
     display: inline-block; padding: 0.25rem 0.7rem; border-radius: 999px;
     font-size: 0.76rem; font-weight: 700; white-space: nowrap;
   }
-  .ee__stato-select {
+  .st__stato-select {
     padding: 0.35rem 0.5rem; border-radius: 8px; border: 1.5px solid #E1DEE3;
     font-family: var(--font-family); font-size: 0.8rem; font-weight: 700; cursor: pointer;
   }
-  .ee__stato--ricevuta { background: #f1f5f9; color: #475569; }
-  .ee__stato--lavorazione { background: #eff6ff; color: #1d4ed8; }
-  .ee__stato--delibera { background: #fffbeb; color: #b45309; }
-  .ee__stato--approvata { background: #ecfdf5; color: #047857; }
-  .ee__stato--declinata { background: #fef2f2; color: #b91c1c; }
+  .st__stato--ricevuta { background: #f1f5f9; color: #475569; }
+  .st__stato--lavorazione { background: #eff6ff; color: #1d4ed8; }
+  .st__stato--delibera { background: #fffbeb; color: #b45309; }
+  .st__stato--approvata { background: #ecfdf5; color: #047857; }
+  .st__stato--declinata { background: #fef2f2; color: #b91c1c; }
 
   /* Feedback */
-  .ee__feedback {
+  .st__feedback {
     padding: 0.9rem 1.1rem; border-radius: 10px; font-size: 0.9rem; line-height: 1.5;
     border: 1px solid;
   }
-  .ee__feedback--ok { background: #ecfdf5; border-color: #a7f3d0; color: #047857; }
-  .ee__feedback--err { background: #fef2f2; border-color: #fecaca; color: #b91c1c; }
+  .st__feedback--ok { background: #ecfdf5; border-color: #a7f3d0; color: #047857; }
+  .st__feedback--err { background: #fef2f2; border-color: #fecaca; color: #b91c1c; }
 
   /* Responsive */
   @media (max-width: 960px) {
-    .ee__cards { grid-template-columns: repeat(2, 1fr); }
+    .st__cards { grid-template-columns: repeat(2, 1fr); }
   }
   @media (max-width: 768px) {
     .gate__card { padding: 2rem 1.5rem 1.5rem; }
     .gate__logos { gap: 0.5rem; }
     .gate__logo { height: 32px; }
 
-    .ee__header-brand { gap: 0.65rem; }
-    .ee__logo { height: 28px; }
-    .ee__cards { grid-template-columns: 1fr; }
-    .ee__form-block { padding: 1.25rem; }
-    .ee__grid { grid-template-columns: 1fr; gap: 0.85rem; }
-    .ee__table { font-size: 0.82rem; }
-    .ee__table th, .ee__table td { padding: 0.6rem 0.75rem; }
-    .ee__th-when { width: 45%; }
-    .ee__submit-row { flex-direction: column; align-items: stretch; }
-    .ee__submit { justify-content: center; }
+    .st__header-brand { gap: 0.65rem; }
+    .st__logo { height: 28px; }
+    .st__cards { grid-template-columns: 1fr; }
+    .st__form-block { padding: 1.25rem; }
+    .st__grid { grid-template-columns: 1fr; gap: 0.85rem; }
+    .st__table { font-size: 0.82rem; }
+    .st__table th, .st__table td { padding: 0.6rem 0.75rem; }
+    .st__th-when { width: 45%; }
+    .st__submit-row { flex-direction: column; align-items: stretch; }
+    .st__submit { justify-content: center; }
   }
 </style>

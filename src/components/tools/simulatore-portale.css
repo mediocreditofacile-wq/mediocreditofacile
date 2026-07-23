@@ -1,0 +1,117 @@
+/* Simulatore Expo Energia — layout in stile ReteRent con palette MCF */
+
+.sp { display: flex; flex-direction: column; gap: 1.5rem; }
+
+/* Pannelli con barra titolo scura (richiamo al portale ReteRent) */
+.sp__panel { border: 1px solid #E1DEE3; border-radius: 12px; overflow: hidden; background: #ffffff; }
+.sp__panel-head {
+  background: #293C5B; color: #ffffff;
+  font-size: 0.82rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em;
+  padding: 0.8rem 1.25rem;
+}
+.sp__panel-body { padding: 1.25rem; }
+
+.sp__cols { display: grid; grid-template-columns: 1.4fr 1fr; gap: 1.5rem; align-items: start; }
+
+/* Scelta tabella */
+.sp__tabelle { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+.sp__tabella-btn {
+  padding: 0.65rem 1.1rem; border: 1.5px solid #E1DEE3; border-radius: 10px;
+  background: #fafafa; font-family: var(--font-family); font-size: 0.9rem; font-weight: 700;
+  color: #444451; cursor: pointer; transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+.sp__tabella-btn--active {
+  background: linear-gradient(135deg, #FE6F3A, #664CCD); color: #ffffff; border-color: transparent;
+}
+.sp__hint { margin: 0.85rem 0 0; font-size: 0.83rem; color: #787782; line-height: 1.5; }
+
+/* Input e bottoni */
+.sp__label { display: block; font-size: 0.82rem; font-weight: 600; color: #444451; margin-bottom: 0.35rem; }
+.sp__input-row { display: flex; gap: 0.6rem; }
+.sp__input, .sp__select {
+  padding: 0.7rem 0.85rem; border: 1.5px solid #E1DEE3; border-radius: 10px;
+  font-family: var(--font-family); font-size: 0.95rem; color: #0F1020; background: #fafafa;
+  width: 100%; transition: border-color 0.15s, background 0.15s;
+}
+.sp__input:focus, .sp__select:focus {
+  outline: none; border-color: #FE6F3A; background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(254, 111, 58, 0.1);
+}
+.sp__btn {
+  padding: 0.7rem 1.3rem; background: linear-gradient(135deg, #FE6F3A, #664CCD);
+  color: #ffffff; font-family: var(--font-family); font-weight: 700; font-size: 0.9rem;
+  border: none; border-radius: 10px; cursor: pointer; white-space: nowrap;
+  transition: transform 0.15s, box-shadow 0.2s;
+}
+.sp__btn:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(254, 111, 58, 0.28); }
+.sp__btn--full { width: 100%; margin-top: 1rem; }
+.sp__btn--ghost {
+  background: #ffffff; color: #664CCD; border: 1.5px solid #664CCD;
+}
+.sp__btn--ghost:hover { box-shadow: 0 6px 16px rgba(102, 76, 205, 0.18); }
+
+/* Griglia canoni per durata */
+.sp__grid-title { font-size: 0.82rem; font-weight: 700; color: #664CCD; text-transform: uppercase; letter-spacing: 0.08em; margin: 1.4rem 0 0.7rem; }
+.sp__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 0.6rem; }
+.sp__cell {
+  display: flex; flex-direction: column; gap: 0.25rem; align-items: center;
+  padding: 0.75rem 0.5rem; border: 1.5px solid #E1DEE3; border-radius: 10px;
+  background: #fafafa; cursor: pointer; font-family: var(--font-family);
+  transition: border-color 0.15s, background 0.15s, transform 0.15s;
+}
+.sp__cell:hover:not(:disabled) { border-color: #FE6F3A; transform: translateY(-1px); }
+.sp__cell--active { border-color: #FE6F3A; background: #fff7f3; box-shadow: 0 0 0 3px rgba(254, 111, 58, 0.12); }
+.sp__cell--na { opacity: 0.45; cursor: not-allowed; }
+.sp__cell-durata { font-size: 0.75rem; font-weight: 700; color: #787782; text-transform: uppercase; letter-spacing: 0.05em; }
+.sp__cell-canone { font-size: 1.05rem; font-weight: 800; color: #0F1020; }
+
+.sp__nota { margin: 0.9rem 0 0; font-size: 0.8rem; color: #787782; line-height: 1.5; }
+.sp__warn {
+  margin: 1rem 0 0; font-size: 0.85rem; color: #b45309; line-height: 1.5;
+  background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; padding: 0.75rem 1rem;
+}
+
+/* Dal canone al prezzo */
+.sp__canone-row { display: grid; grid-template-columns: 1.4fr 1fr; gap: 0.75rem; }
+.sp__prezzo-card {
+  margin-top: 1.25rem; display: flex; flex-direction: column; gap: 0.3rem; align-items: center;
+  padding: 1.1rem; border-radius: 12px;
+  background: linear-gradient(135deg, #fff7f3, #f5f3ff); border: 1px solid #fde4d4;
+}
+.sp__prezzo-value { font-size: 1.5rem; font-weight: 800; color: #664CCD; }
+
+/* Azioni */
+.sp__actions { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.sp__actions-hint { font-size: 0.83rem; color: #787782; }
+
+/* Area stampa: nascosta a schermo, unica cosa visibile in stampa */
+.sp__print { display: none; }
+
+@media print {
+  body * { visibility: hidden; }
+  .sp__print, .sp__print * { visibility: visible; display: block; }
+  .sp__print { position: absolute; left: 0; top: 0; width: 100%; padding: 2rem; font-family: 'Manrope', system-ui, sans-serif; color: #0F1020; }
+  .sp__print-head { display: flex !important; align-items: baseline; gap: 0.75rem; border-bottom: 2px solid #664CCD; padding-bottom: 0.6rem; margin-bottom: 1.2rem; }
+  .sp__print-logo { font-size: 1.3rem; letter-spacing: -0.01em; }
+  .sp__print-logo b { color: #664CCD; font-weight: 700; }
+  .sp__print-logo em { color: #FE6F3A; font-style: normal; font-weight: 800; }
+  .sp__print-claim { font-size: 0.65rem; letter-spacing: 3.5px; color: #664CCD; }
+  .sp__print h2 { font-size: 1.15rem; margin: 0 0 0.5rem; }
+  .sp__print p { font-size: 0.9rem; margin: 0 0 1rem; }
+  .sp__print table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; display: table; }
+  .sp__print thead { display: table-header-group; }
+  .sp__print tbody { display: table-row-group; }
+  .sp__print tr { display: table-row; }
+  .sp__print th, .sp__print td { display: table-cell; text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #E1DEE3; font-size: 0.9rem; }
+  .sp__print th { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: #444451; }
+  .sp__print-sel td { font-weight: 800; color: #664CCD; }
+  .sp__print-note { font-size: 0.78rem !important; color: #787782 !important; }
+  .sp__print-footer { font-size: 0.75rem !important; color: #787782 !important; border-top: 1px solid #E1DEE3; padding-top: 0.6rem; }
+}
+
+/* Responsive */
+@media (max-width: 860px) {
+  .sp__cols { grid-template-columns: 1fr; }
+  .sp__input-row { flex-direction: column; }
+  .sp__canone-row { grid-template-columns: 1fr; }
+}

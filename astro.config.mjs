@@ -42,6 +42,7 @@ export default defineConfig({
           '/tools/marotta',
           '/tools/simulatore-leasing-fornitori',
           '/tools/simulazione-leasing',
+          '/tools/stilo',
         ];
         const clean = new URL(page).pathname.replace(/\/$/, '');
         return !noindexPaths.includes(clean);
