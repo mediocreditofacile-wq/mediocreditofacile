@@ -176,6 +176,22 @@ export const BCC_FF: GrigliaBcc = {
 
 export const BCC_GRIGLIE: Record<ProdottoBcc, GrigliaBcc> = { lo: BCC_LO, lf: BCC_LF, ff: BCC_FF };
 
+/**
+ * L'assicurazione all risk sul bene e' GIA' DENTRO il canone BCC: nel planner
+ * (foglio Servizi) e' una quota mensile sull'imponibile, 0,05% sulla locazione
+ * operativa e 0,03468% sulla finanziaria. Verificato: la differenza tra canone
+ * "con servizi" e canone finanziario netto del planner (1.540,06 contro 1.502,56
+ * su 75.000 a 60 mesi) e' esattamente lo 0,05% mensile.
+ * E' il vantaggio da giocarsi contro Grenke, dove l'assicurazione e' esclusa dai
+ * coefficienti e si aggiunge a parte.
+ */
+export const BCC_ASSICURAZIONE_MENSILE = { lo: 0.0005, lf: 0.0003468, ff: 0 };
+
+/** Quota di assicurazione compresa nella rata, in euro al mese */
+export function bccQuotaAssicurazione(prodotto: ProdottoBcc, importo: number): number {
+  return importo * (BCC_ASSICURAZIONE_MENSILE[prodotto] ?? 0);
+}
+
 export const BCC_MIN = 3000;
 export const BCC_MAX = 200000;
 export const BCC_VR_PERC = 0.01; // riscatto su locazione operativa e finanziaria
@@ -205,8 +221,10 @@ export const BCC_CLASSI_BENE: { comparto: string; classe: ClasseRischioBcc; dura
 export const BCC_TASSO_ZERO = {
   attiva: true,
   durata: 10,
-  contributoFornitore: 0.053,      // 5,30% dell'imponibile, a carico del fornitore
-  speseIstruttoriaFornitore: 75,   // una tantum, a carico del fornitore
+  contributoFornitore: 0.053,   // 5,30% dell'imponibile: e' l'unico costo del fornitore
+  speseIstruttoria: 75,         // una tantum, a carico del CLIENTE
+  bollo: 16,                    // imposta di registro, durata sotto i 18 mesi
+  speseIncassoRata: 4,          // RID, per ogni rata, a carico del cliente
   inVigoreDal: '2026-04-01',
 };
 
@@ -215,24 +233,36 @@ export function bccTassoZeroRata(importo: number): number {
   return importo / BCC_TASSO_ZERO.durata;
 }
 
-/** Quanto costa la campagna al fornitore: contributo sull'imponibile + istruttoria */
-export function bccTassoZeroCostoFornitore(importo: number): number {
-  return importo * BCC_TASSO_ZERO.contributoFornitore + BCC_TASSO_ZERO.speseIstruttoriaFornitore;
-}
-
 /**
- * Il conto per il fornitore: BCC incassa le rate dal cliente e bonifica al
- * fornitore l'imponibile al netto del contributo e delle spese di istruttoria.
+ * Il conto per il fornitore: l'unico costo e' il contributo che azzera il tasso
+ * al cliente. BCC lo trattiene sul bonifico dell'imponibile.
  */
 export function bccTassoZeroContoFornitore(importo: number) {
   const contributo = importo * BCC_TASSO_ZERO.contributoFornitore;
-  const istruttoria = BCC_TASSO_ZERO.speseIstruttoriaFornitore;
   return {
     imponibile: importo,
     contributo,
-    istruttoria,
-    totaleCosto: contributo + istruttoria,
-    nettoIncassato: importo - contributo - istruttoria,
+    totaleCosto: contributo,
+    nettoIncassato: importo - contributo,
+  };
+}
+
+/**
+ * Il conto per il cliente: rate senza interessi, piu' gli oneri a suo carico
+ * (istruttoria, bollo e spese di incasso RID su ogni rata).
+ */
+export function bccTassoZeroContoCliente(importo: number) {
+  const rata = importo / BCC_TASSO_ZERO.durata;
+  const incassoTotale = BCC_TASSO_ZERO.speseIncassoRata * BCC_TASSO_ZERO.durata;
+  const unaTantum = BCC_TASSO_ZERO.speseIstruttoria + BCC_TASSO_ZERO.bollo;
+  return {
+    rata,
+    rataConIncasso: rata + BCC_TASSO_ZERO.speseIncassoRata,
+    istruttoria: BCC_TASSO_ZERO.speseIstruttoria,
+    bollo: BCC_TASSO_ZERO.bollo,
+    incassoPerRata: BCC_TASSO_ZERO.speseIncassoRata,
+    unaTantum,
+    totalePagato: importo + incassoTotale + unaTantum,
   };
 }
 

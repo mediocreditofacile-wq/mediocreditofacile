@@ -4,6 +4,7 @@ import { PIONEER_COEFFS, getPioneerCoeff, eur } from '../../data/grenke';
 import {
   BCC_DURATE, BCC_MIN, BCC_MAX, bccRata, bccPrezzoDaRata, bccSpeseIstruttoria,
   bccImpostaFinanziamento, BCC_TASSO_ZERO, bccTassoZeroRata, bccTassoZeroContoFornitore,
+  bccTassoZeroContoCliente, bccQuotaAssicurazione,
   type ClasseRischioBcc, type ProdottoBcc,
 } from '../../data/bcc';
 import './simulatore-portale.css';
@@ -34,28 +35,28 @@ const TABELLE: Record<Tabella, { label: string; hint: string; min: number; max: 
   },
   pioneer: {
     label: 'Pioneer — Hardware e tecnologia',
-    hint: 'Centralini telefonici, hardware di rete, casse automatiche, POS e software. Canone mensile con fatturazione trimestrale anticipata.',
+    hint: 'Centralini telefonici, hardware di rete, casse automatiche, POS e software. Canone mensile con fatturazione trimestrale anticipata. Attenzione: l\'assicurazione non e\' compresa e si aggiunge a parte, a differenza di BCC.',
     min: 500,
     max: 100000,
     durate: PIONEER_DURATE,
   },
   'bcc-lo': {
     label: 'BCC — Locazione operativa',
-    hint: 'Noleggio puro: il canone e\' un costo pieno, riscatto finale 1%. Spese di incasso gia\' comprese nel canone, istruttoria una tantum a parte.',
+    hint: 'Noleggio puro: il canone e\' un costo pieno, riscatto finale 1%. Il canone comprende gia\' l\'assicurazione all risk sul bene e le spese di incasso; l\'istruttoria e\' una tantum a parte.',
     min: BCC_MIN,
     max: BCC_MAX,
     durate: BCC_DURATE,
   },
   'bcc-lf': {
     label: 'BCC — Locazione finanziaria (leasing)',
-    hint: 'Leasing: a fine contratto il cliente riscatta il bene all\'1% e ne diventa proprietario. Conviene sugli importi alti.',
+    hint: 'Leasing: a fine contratto il cliente riscatta il bene all\'1% e ne diventa proprietario. Rata comprensiva di assicurazione all risk. Conviene sugli importi alti.',
     min: BCC_MIN,
     max: BCC_MAX,
     durate: BCC_DURATE,
   },
   'bcc-zero': {
     label: `BCC — Tasso zero ${BCC_TASSO_ZERO.durata} mesi (campagna)`,
-    hint: `Campagna a tasso zero: il cliente paga l'importo in ${BCC_TASSO_ZERO.durata} rate senza un euro di interessi. Il costo lo sostieni tu come fornitore, con un contributo sull'imponibile. Unica durata prevista dalla campagna.`,
+    hint: `Campagna a tasso zero: il cliente paga l'importo in ${BCC_TASSO_ZERO.durata} rate senza un euro di interessi, con a suo carico istruttoria, bollo e spese di incasso. A te resta il contributo che azzera il tasso. Unica durata prevista dalla campagna.`,
     min: BCC_MIN,
     max: BCC_MAX,
     durate: [BCC_TASSO_ZERO.durata],
@@ -137,6 +138,13 @@ export default function SimulatorePortale({
   // del contributo e dell'istruttoria. Serve a Paolo per decidere se proporla.
   const contoFornitore = tassoZero && prezzoCalcolato > 0
     ? bccTassoZeroContoFornitore(prezzoCalcolato)
+    : null;
+  const contoCliente = tassoZero && prezzoCalcolato > 0
+    ? bccTassoZeroContoCliente(prezzoCalcolato)
+    : null;
+  // Quota di assicurazione gia' compresa nella rata BCC (su Grenke va aggiunta a parte)
+  const quotaAssicurazione = prodottoBcc && prodottoBcc !== 'ff' && prezzoCalcolato > 0
+    ? bccQuotaAssicurazione(prodottoBcc, prezzoCalcolato)
     : null;
   // Sul finanziamento l'imposta dipende anche dalla durata: uso quella scelta, altrimenti la piu' lunga
   const imposta = prodottoBcc === 'ff' && prezzoCalcolato > 0
@@ -257,19 +265,36 @@ export default function SimulatorePortale({
                       <span>Contributo campagna ({(BCC_TASSO_ZERO.contributoFornitore * 100).toLocaleString('it-IT')}%)</span>
                       <span>− {eur(contoFornitore.contributo)}</span>
                     </div>
-                    <div class="sp__conto-riga sp__conto-riga--meno">
-                      <span>Spese di istruttoria</span>
-                      <span>− {eur(contoFornitore.istruttoria)}</span>
-                    </div>
                     <div class="sp__conto-riga sp__conto-riga--tot">
                       <span>Quanto ti bonifica BCC</span>
                       <span>{eur(contoFornitore.nettoIncassato)}</span>
                     </div>
                     <p class="sp__conto-nota">
-                      Il cliente paga {eur(contoFornitore.imponibile / BCC_TASSO_ZERO.durata)} al mese per {BCC_TASSO_ZERO.durata} mesi,
-                      senza interessi. A te resta {eur(contoFornitore.nettoIncassato)} sui {eur(contoFornitore.imponibile)} di vendita:
-                      il tasso zero al cliente ti costa {eur(contoFornitore.totaleCosto)}, da mettere in conto nel prezzo.
+                      Azzerare gli interessi al cliente ti costa {eur(contoFornitore.totaleCosto)} sui {eur(contoFornitore.imponibile)} di
+                      vendita: mettilo in conto nel prezzo. Istruttoria, bollo e spese di incasso restano a carico del cliente.
                     </p>
+                  </div>
+                )}
+
+                {contoCliente !== null && (
+                  <div class="sp__conto sp__conto--cliente">
+                    <span class="sp__conto-title">Cosa paga il cliente</span>
+                    <div class="sp__conto-riga">
+                      <span>Rata mensile ({BCC_TASSO_ZERO.durata} rate, zero interessi)</span>
+                      <span>{eur(contoCliente.rata)}</span>
+                    </div>
+                    <div class="sp__conto-riga">
+                      <span>Spese di incasso RID, su ogni rata</span>
+                      <span>+ {eur(contoCliente.incassoPerRata)}</span>
+                    </div>
+                    <div class="sp__conto-riga sp__conto-riga--tot">
+                      <span>Rata tutto compreso</span>
+                      <span>{eur(contoCliente.rataConIncasso)}</span>
+                    </div>
+                    <div class="sp__conto-riga">
+                      <span>Una tantum alla firma: istruttoria {eur(contoCliente.istruttoria)} + bollo {eur(contoCliente.bollo)}</span>
+                      <span>{eur(contoCliente.unaTantum)}</span>
+                    </div>
                   </div>
                 )}
 
@@ -284,6 +309,10 @@ export default function SimulatorePortale({
                     {prodottoBcc === 'ff'
                       ? <> Il bene e' subito di proprieta' del cliente, nessun riscatto finale{imposta ? <>, piu' l'imposta sostitutiva di {eur(imposta)}</> : null}.</>
                       : <> Riscatto finale 1%.</>}
+                    {quotaAssicurazione !== null && (
+                      <> La rata comprende gia' l'assicurazione all risk sul bene ({eur(quotaAssicurazione)} al mese):
+                      con BCC non si aggiunge a parte.</>
+                    )}
                     </>
                   )}
                 </p>
