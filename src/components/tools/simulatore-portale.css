@@ -13,16 +13,9 @@
 
 .sp__cols { display: grid; grid-template-columns: 1.4fr 1fr; gap: 1.5rem; align-items: start; }
 
-/* Scelta tabella */
-.sp__tabelle { display: flex; gap: 0.6rem; flex-wrap: wrap; }
-.sp__tabella-btn {
-  padding: 0.65rem 1.1rem; border: 1.5px solid #E1DEE3; border-radius: 10px;
-  background: #fafafa; font-family: var(--font-family); font-size: 0.9rem; font-weight: 700;
-  color: #444451; cursor: pointer; transition: border-color 0.15s, background 0.15s, color 0.15s;
-}
-.sp__tabella-btn--active {
-  background: linear-gradient(135deg, #FE6F3A, #664CCD); color: #ffffff; border-color: transparent;
-}
+/* Scelta prodotto / canale */
+.sp__canale { max-width: 420px; }
+.sp__select--canale { font-weight: 700; }
 .sp__hint { margin: 0.85rem 0 0; font-size: 0.83rem; color: #787782; line-height: 1.5; }
 
 /* Input e bottoni */
