@@ -1,14 +1,13 @@
 export const prerender = false;
 
 // Genera i token per l'upload client-side dei documenti pratica su Vercel Blob
-// (store privato "mcf-pratiche"). Usato dal portale partner Expo Energia:
+// (store privato "mcf-pratiche"). Usato dai portali partner (Expo Energia, Stilo):
 // i file salgono direttamente dal browser allo storage, senza passare dalla
 // serverless function (che ha un limite di 4,5 MB sul body).
 
 import { handleUpload, type HandleUploadBody } from '@vercel/blob/client';
+import { getPartner, pathPrefix, ruoloDaChiave } from '../../data/portali-partner';
 
-const PARTNER_KEY = 'expoenergia'; // stessa password del gate della pagina
-const PATH_PREFIX = 'pratiche/expo-energia/';
 const MAX_FILE_BYTES = 25 * 1024 * 1024; // 25 MB per file
 
 export async function POST({ request }: { request: Request }) {
@@ -30,16 +29,22 @@ export async function POST({ request }: { request: Request }) {
       request,
       token,
       onBeforeGenerateToken: async (pathname, clientPayload) => {
-        // Autorizzazione: il client manda la chiave nel payload
+        // Il client manda chiave e partner nel payload
         let auth = '';
+        let slug: string | undefined;
         try {
-          auth = clientPayload ? (JSON.parse(clientPayload).auth ?? '') : '';
+          const parsed = clientPayload ? JSON.parse(clientPayload) : {};
+          auth = parsed.auth ?? '';
+          slug = parsed.partner;
         } catch {
           auth = '';
         }
-        const authorized = auth === PARTNER_KEY || (adminKey && auth === adminKey);
-        if (!authorized) throw new Error('unauthorized');
-        if (!pathname.startsWith(PATH_PREFIX)) throw new Error('invalid_path');
+
+        const partner = getPartner(slug);
+        if (!partner) throw new Error('unknown_partner');
+        if (!ruoloDaChiave(auth, partner, adminKey)) throw new Error('unauthorized');
+        // Ogni partner puo' scrivere solo nella propria cartella
+        if (!pathname.startsWith(pathPrefix(partner.slug))) throw new Error('invalid_path');
 
         return {
           allowedContentTypes: [
@@ -59,7 +64,7 @@ export async function POST({ request }: { request: Request }) {
         };
       },
       // Nessun onUploadCompleted: il client raccoglie gli URL e li manda
-      // insieme al form a /api/submit-expo-energia.
+      // insieme al form all'endpoint submit del partner.
     });
 
     return new Response(JSON.stringify(jsonResponse), {
@@ -68,7 +73,7 @@ export async function POST({ request }: { request: Request }) {
     });
   } catch (e) {
     const msg = e instanceof Error ? e.message : 'unknown';
-    console.warn(JSON.stringify({ event: 'blob_upload_rejected', fonte: 'expo-energia', error: msg }));
+    console.warn(JSON.stringify({ event: 'blob_upload_rejected', error: msg }));
     return new Response(JSON.stringify({ error: msg }), {
       status: msg === 'unauthorized' ? 401 : 400,
       headers: { 'Content-Type': 'application/json' },
