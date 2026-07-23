@@ -3,7 +3,8 @@ import { ESG_COEFFS, ESG_DURATE, getEsgCoeff, esgPrezzoDaCanone } from '../../da
 import { PIONEER_COEFFS, getPioneerCoeff, eur } from '../../data/grenke';
 import {
   BCC_DURATE, BCC_MIN, BCC_MAX, bccRata, bccPrezzoDaRata, bccSpeseIstruttoria,
-  bccImpostaFinanziamento, type ClasseRischioBcc, type ProdottoBcc,
+  bccImpostaFinanziamento, BCC_TASSO_ZERO, bccTassoZeroRata, bccTassoZeroCostoFornitore,
+  type ClasseRischioBcc, type ProdottoBcc,
 } from '../../data/bcc';
 import './simulatore-portale.css';
 
@@ -16,7 +17,7 @@ import './simulatore-portale.css';
 // Grenke (coefficiente per fascia e durata), 'bcc-lo' e' la locazione operativa
 // BCC Rent&Lease, che quota anche per classe di rischio del bene.
 
-export type Tabella = 'esg' | 'pioneer' | 'bcc-lo' | 'bcc-lf' | 'bcc-ff';
+export type Tabella = 'esg' | 'pioneer' | 'bcc-lo' | 'bcc-lf' | 'bcc-ff' | 'bcc-zero';
 
 // Quale prodotto BCC sta dietro a ciascun canale
 const PRODOTTO_BCC: Partial<Record<Tabella, ProdottoBcc>> = { 'bcc-lo': 'lo', 'bcc-lf': 'lf', 'bcc-ff': 'ff' };
@@ -51,6 +52,13 @@ const TABELLE: Record<Tabella, { label: string; hint: string; min: number; max: 
     min: BCC_MIN,
     max: BCC_MAX,
     durate: BCC_DURATE,
+  },
+  'bcc-zero': {
+    label: `BCC — Tasso zero ${BCC_TASSO_ZERO.durata} mesi (campagna)`,
+    hint: `Campagna a tasso zero: il cliente paga l'importo in ${BCC_TASSO_ZERO.durata} rate senza un euro di interessi. Il costo lo sostieni tu come fornitore, con un contributo sull'imponibile. Unica durata prevista dalla campagna.`,
+    min: BCC_MIN,
+    max: BCC_MAX,
+    durate: [BCC_TASSO_ZERO.durata],
   },
   'bcc-ff': {
     label: 'BCC — Finanziamento finalizzato',
@@ -107,7 +115,9 @@ export default function SimulatorePortale({
 
   // Canone mensile per la tabella attiva
   const prodottoBcc = PRODOTTO_BCC[tabella];
+  const tassoZero = tabella === 'bcc-zero';
   const canonePer = (importo: number, durata: number): number | null => {
+    if (tassoZero) return bccTassoZeroRata(importo);
     if (prodottoBcc) return bccRata(prodottoBcc, importo, durata, classeBcc);
     const c = tabella === 'esg' ? getEsgCoeff(importo, durata) : getPioneerCoeff(importo, durata);
     return c ? (importo * c) / 100 : null;
@@ -120,8 +130,12 @@ export default function SimulatorePortale({
   }, [prezzoCalcolato, tabella, classeBcc]);
 
   // Spese istruttoria una tantum: su BCC si pagano a parte, non sono nel canone
-  const speseIstruttoria = prodottoBcc && prezzoCalcolato > 0
+  const speseIstruttoria = prodottoBcc && !tassoZero && prezzoCalcolato > 0
     ? bccSpeseIstruttoria(prezzoCalcolato)
+    : null;
+  // Sul tasso zero il costo e' del fornitore: contributo sull'imponibile + istruttoria
+  const costoFornitore = tassoZero && prezzoCalcolato > 0
+    ? bccTassoZeroCostoFornitore(prezzoCalcolato)
     : null;
   // Sul finanziamento l'imposta dipende anche dalla durata: uso quella scelta, altrimenti la piu' lunga
   const imposta = prodottoBcc === 'ff' && prezzoCalcolato > 0
@@ -153,7 +167,9 @@ export default function SimulatorePortale({
     const num = parseFloat(canoneInput.replace(',', '.'));
     if (isNaN(num) || num <= 0) return;
     setCanoneCalcolato(num);
-    const prezzo = prodottoBcc
+    const prezzo = tassoZero
+      ? num * BCC_TASSO_ZERO.durata
+      : prodottoBcc
       ? bccPrezzoDaRata(prodottoBcc, num, durataCanone, classeBcc)
       : tabella === 'esg'
         ? esgPrezzoDaCanone(num, durataCanone)
@@ -231,6 +247,11 @@ export default function SimulatorePortale({
                 </div>
                 <p class="sp__nota">
                   Canone mensile indicativo, imponibile IVA, salvo delibera della società di noleggio.
+                  {costoFornitore !== null && (
+                    <> Il cliente non paga interessi: la campagna ti costa <strong>{eur(costoFornitore)}</strong>
+                    {' '}({(BCC_TASSO_ZERO.contributoFornitore * 100).toLocaleString('it-IT')}% dell'imponibile
+                    piu' {eur(BCC_TASSO_ZERO.speseIstruttoriaFornitore)} di istruttoria), trattenuti da BCC sul bonifico.</>
+                  )}
                   {speseIstruttoria !== null && (
                     <> Su questo importo le spese di istruttoria sono <strong>{eur(speseIstruttoria)}</strong> una tantum,
                     a carico del cliente: non sono comprese nella rata.
@@ -320,6 +341,7 @@ export default function SimulatorePortale({
             </tbody>
           </table>
           <p class="sp__print-note">
+            {tassoZero && 'Finanziamento a tasso zero: nessun interesse a carico del cliente. '}
             Canoni mensili indicativi, imponibili IVA, salvo approvazione della società di noleggio.
             {speseIstruttoria !== null && ` Spese di istruttoria ${eur(speseIstruttoria)} una tantum, non comprese nella rata.${prodottoBcc === 'ff' ? ` Nessun riscatto finale: il bene e' subito di proprieta'.${imposta ? ` Imposta sostitutiva ${eur(imposta)}.` : ''}` : ' Riscatto finale 1% del prezzo di vendita.'}`}
             {' '}La proposta definitiva viene confermata dopo l'esame della documentazione del cliente.
