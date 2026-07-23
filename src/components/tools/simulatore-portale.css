@@ -59,6 +59,27 @@
 .sp__cell-canone { font-size: 1.05rem; font-weight: 800; color: #0F1020; }
 
 .sp__nota { margin: 0.9rem 0 0; font-size: 0.8rem; color: #787782; line-height: 1.5; }
+
+/* Conto per il fornitore (campagna tasso zero): quanto incassa davvero */
+.sp__conto {
+  margin-top: 1.25rem; padding: 1.1rem 1.25rem; border-radius: 12px;
+  background: #F8F7FA; border: 1px solid #E1DEE3; border-left: 4px solid #664CCD;
+}
+.sp__conto-title {
+  display: block; font-size: 0.78rem; font-weight: 800; color: #664CCD;
+  text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.75rem;
+}
+.sp__conto-riga {
+  display: flex; justify-content: space-between; gap: 1rem;
+  font-size: 0.9rem; color: #0F1020; padding: 0.35rem 0;
+}
+.sp__conto-riga--meno { color: #b45309; }
+.sp__conto-riga--tot {
+  border-top: 1px solid #E1DEE3; margin-top: 0.35rem; padding-top: 0.6rem;
+  font-weight: 800; font-size: 1.05rem; color: #664CCD;
+}
+.sp__conto-nota { margin: 0.75rem 0 0; font-size: 0.82rem; color: #444451; line-height: 1.55; }
+
 .sp__warn {
   margin: 1rem 0 0; font-size: 0.85rem; color: #b45309; line-height: 1.5;
   background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; padding: 0.75rem 1rem;
