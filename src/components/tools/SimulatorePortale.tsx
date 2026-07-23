@@ -2,8 +2,8 @@ import { useState, useMemo } from 'preact/hooks';
 import { ESG_COEFFS, ESG_DURATE, getEsgCoeff, esgPrezzoDaCanone } from '../../data/esg';
 import { PIONEER_COEFFS, getPioneerCoeff, eur } from '../../data/grenke';
 import {
-  BCC_LO_DURATE, BCC_LO_MIN, BCC_LO_MAX, bccLoCanone, bccLoPrezzoDaCanone,
-  bccSpeseIstruttoria, getBccLoCoeff, type ClasseRischioBcc,
+  BCC_DURATE, BCC_MIN, BCC_MAX, bccRata, bccPrezzoDaRata, bccSpeseIstruttoria,
+  bccImpostaFinanziamento, type ClasseRischioBcc, type ProdottoBcc,
 } from '../../data/bcc';
 import './simulatore-portale.css';
 
@@ -16,7 +16,10 @@ import './simulatore-portale.css';
 // Grenke (coefficiente per fascia e durata), 'bcc-lo' e' la locazione operativa
 // BCC Rent&Lease, che quota anche per classe di rischio del bene.
 
-export type Tabella = 'esg' | 'pioneer' | 'bcc-lo';
+export type Tabella = 'esg' | 'pioneer' | 'bcc-lo' | 'bcc-lf' | 'bcc-ff';
+
+// Quale prodotto BCC sta dietro a ciascun canale
+const PRODOTTO_BCC: Partial<Record<Tabella, ProdottoBcc>> = { 'bcc-lo': 'lo', 'bcc-lf': 'lf', 'bcc-ff': 'ff' };
 
 const PIONEER_DURATE = [24, 30, 36, 48, 60];
 
@@ -37,10 +40,24 @@ const TABELLE: Record<Tabella, { label: string; hint: string; min: number; max: 
   },
   'bcc-lo': {
     label: 'BCC — Locazione operativa',
-    hint: 'Locazione operativa BCC Rent&Lease: canone mensile fisso, riscatto 1%, spese di incasso gia\' comprese nel canone. Le spese di istruttoria sono una tantum e si pagano a parte.',
-    min: BCC_LO_MIN,
-    max: BCC_LO_MAX,
-    durate: BCC_LO_DURATE,
+    hint: 'Noleggio puro: il canone e\' un costo pieno, riscatto finale 1%. Spese di incasso gia\' comprese nel canone, istruttoria una tantum a parte.',
+    min: BCC_MIN,
+    max: BCC_MAX,
+    durate: BCC_DURATE,
+  },
+  'bcc-lf': {
+    label: 'BCC — Locazione finanziaria (leasing)',
+    hint: 'Leasing: a fine contratto il cliente riscatta il bene all\'1% e ne diventa proprietario. Conviene sugli importi alti.',
+    min: BCC_MIN,
+    max: BCC_MAX,
+    durate: BCC_DURATE,
+  },
+  'bcc-ff': {
+    label: 'BCC — Finanziamento finalizzato',
+    hint: 'Il bene e\' subito di proprieta\' del cliente e si finanzia l\'acquisto: nessun riscatto finale. Oltre i 18 mesi si aggiunge l\'imposta sostitutiva del 2,5 per mille.',
+    min: BCC_MIN,
+    max: BCC_MAX,
+    durate: BCC_DURATE,
   },
 };
 
@@ -89,8 +106,9 @@ export default function SimulatorePortale({
   const cfg = TABELLE[tabella];
 
   // Canone mensile per la tabella attiva
+  const prodottoBcc = PRODOTTO_BCC[tabella];
   const canonePer = (importo: number, durata: number): number | null => {
-    if (tabella === 'bcc-lo') return bccLoCanone(importo, durata, classeBcc);
+    if (prodottoBcc) return bccRata(prodottoBcc, importo, durata, classeBcc);
     const c = tabella === 'esg' ? getEsgCoeff(importo, durata) : getPioneerCoeff(importo, durata);
     return c ? (importo * c) / 100 : null;
   };
@@ -102,8 +120,12 @@ export default function SimulatorePortale({
   }, [prezzoCalcolato, tabella, classeBcc]);
 
   // Spese istruttoria una tantum: su BCC si pagano a parte, non sono nel canone
-  const speseIstruttoria = tabella === 'bcc-lo' && prezzoCalcolato > 0
+  const speseIstruttoria = prodottoBcc && prezzoCalcolato > 0
     ? bccSpeseIstruttoria(prezzoCalcolato)
+    : null;
+  // Sul finanziamento l'imposta dipende anche dalla durata: uso quella scelta, altrimenti la piu' lunga
+  const imposta = prodottoBcc === 'ff' && prezzoCalcolato > 0
+    ? bccImpostaFinanziamento(prezzoCalcolato, durataScelta ?? 60)
     : null;
 
   const handleCambioTabella = (t: Tabella) => {
@@ -131,10 +153,10 @@ export default function SimulatorePortale({
     const num = parseFloat(canoneInput.replace(',', '.'));
     if (isNaN(num) || num <= 0) return;
     setCanoneCalcolato(num);
-    const prezzo = tabella === 'esg'
-      ? esgPrezzoDaCanone(num, durataCanone)
-      : tabella === 'bcc-lo'
-        ? bccLoPrezzoDaCanone(num, durataCanone, classeBcc)
+    const prezzo = prodottoBcc
+      ? bccPrezzoDaRata(prodottoBcc, num, durataCanone, classeBcc)
+      : tabella === 'esg'
+        ? esgPrezzoDaCanone(num, durataCanone)
         : pioneerPrezzoDaCanone(num, durataCanone);
     setPrezzoRicavato(prezzo);
   };
@@ -149,17 +171,18 @@ export default function SimulatorePortale({
       <div class="sp__panel">
         <div class="sp__panel-head">Parametri dell'offerta</div>
         <div class="sp__panel-body">
-          <div class="sp__tabelle" hidden={disponibili.length < 2}>
-            {disponibili.map((t) => (
-              <button
-                key={t}
-                type="button"
-                class={`sp__tabella-btn ${tabella === t ? 'sp__tabella-btn--active' : ''}`}
-                onClick={() => handleCambioTabella(t)}
-              >
-                {TABELLE[t].label}
-              </button>
-            ))}
+          <div class="sp__canale" hidden={disponibili.length < 2}>
+            <label class="sp__label" for="sp-canale">Prodotto</label>
+            <select
+              id="sp-canale"
+              class="sp__select sp__select--canale"
+              value={tabella}
+              onChange={(e) => handleCambioTabella((e.target as HTMLSelectElement).value as Tabella)}
+            >
+              {disponibili.map((t) => (
+                <option key={t} value={t}>{TABELLE[t].label}</option>
+              ))}
+            </select>
           </div>
           <p class="sp__hint">{cfg.hint} Importi da {eur(cfg.min)} a {eur(cfg.max)}, imponibili IVA.</p>
         </div>
@@ -210,7 +233,11 @@ export default function SimulatorePortale({
                   Canone mensile indicativo, imponibile IVA, salvo delibera della società di noleggio.
                   {speseIstruttoria !== null && (
                     <> Su questo importo le spese di istruttoria sono <strong>{eur(speseIstruttoria)}</strong> una tantum,
-                    a carico del cliente: non sono comprese nel canone. Riscatto finale 1%.</>
+                    a carico del cliente: non sono comprese nella rata.
+                    {prodottoBcc === 'ff'
+                      ? <> Il bene e' subito di proprieta' del cliente, nessun riscatto finale{imposta ? <>, piu' l'imposta sostitutiva di {eur(imposta)}</> : null}.</>
+                      : <> Riscatto finale 1%.</>}
+                    </>
                   )}
                 </p>
               </>
@@ -294,7 +321,7 @@ export default function SimulatorePortale({
           </table>
           <p class="sp__print-note">
             Canoni mensili indicativi, imponibili IVA, salvo approvazione della società di noleggio.
-            {speseIstruttoria !== null && ` Spese di istruttoria ${eur(speseIstruttoria)} una tantum, non comprese nel canone. Riscatto finale 1% del prezzo di vendita.`}
+            {speseIstruttoria !== null && ` Spese di istruttoria ${eur(speseIstruttoria)} una tantum, non comprese nella rata.${prodottoBcc === 'ff' ? ` Nessun riscatto finale: il bene e' subito di proprieta'.${imposta ? ` Imposta sostitutiva ${eur(imposta)}.` : ''}` : ' Riscatto finale 1% del prezzo di vendita.'}`}
             {' '}La proposta definitiva viene confermata dopo l'esame della documentazione del cliente.
           </p>
           <p class="sp__print-footer">
