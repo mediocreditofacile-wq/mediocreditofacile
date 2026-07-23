@@ -79,6 +79,9 @@
   font-weight: 800; font-size: 1.05rem; color: #664CCD;
 }
 .sp__conto-nota { margin: 0.75rem 0 0; font-size: 0.82rem; color: #444451; line-height: 1.55; }
+.sp__conto--cliente { border-left-color: #FE6F3A; background: #fff7f3; border-color: #fde4d4; }
+.sp__conto--cliente .sp__conto-title { color: #D45A2E; }
+.sp__conto--cliente .sp__conto-riga--tot { color: #D45A2E; border-top-color: #fde4d4; }
 
 .sp__warn {
   margin: 1rem 0 0; font-size: 0.85rem; color: #b45309; line-height: 1.5;
