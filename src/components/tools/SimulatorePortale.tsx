@@ -1,14 +1,22 @@
 import { useState, useMemo } from 'preact/hooks';
 import { ESG_COEFFS, ESG_DURATE, getEsgCoeff, esgPrezzoDaCanone } from '../../data/esg';
 import { PIONEER_COEFFS, getPioneerCoeff, eur } from '../../data/grenke';
+import {
+  BCC_LO_DURATE, BCC_LO_MIN, BCC_LO_MAX, bccLoCanone, bccLoPrezzoDaCanone,
+  bccSpeseIstruttoria, getBccLoCoeff, type ClasseRischioBcc,
+} from '../../data/bcc';
 import './simulatore-portale.css';
 
 // Simulatore in stile ReteRent per i portali partner (Expo Energia, Stilo):
 // una o piu' tabelle coefficienti e doppio calcolo, dal prezzo di vendita ai
 // canoni su tutte le durate e dal canone al prezzo.
 // Le tabelle da mostrare arrivano dalla pagina con la prop `tabelle`.
+//
+// Ogni tabella e' un canale di quotazione: 'esg' e 'pioneer' sono le tabelle
+// Grenke (coefficiente per fascia e durata), 'bcc-lo' e' la locazione operativa
+// BCC Rent&Lease, che quota anche per classe di rischio del bene.
 
-export type Tabella = 'esg' | 'pioneer';
+export type Tabella = 'esg' | 'pioneer' | 'bcc-lo';
 
 const PIONEER_DURATE = [24, 30, 36, 48, 60];
 
@@ -27,6 +35,13 @@ const TABELLE: Record<Tabella, { label: string; hint: string; min: number; max: 
     max: 100000,
     durate: PIONEER_DURATE,
   },
+  'bcc-lo': {
+    label: 'BCC — Locazione operativa',
+    hint: 'Locazione operativa BCC Rent&Lease: canone mensile fisso, riscatto 1%, spese di incasso gia\' comprese nel canone. Le spese di istruttoria sono una tantum e si pagano a parte.',
+    min: BCC_LO_MIN,
+    max: BCC_LO_MAX,
+    durate: BCC_LO_DURATE,
+  },
 };
 
 interface Props {
@@ -36,11 +51,8 @@ interface Props {
   partner?: string;
   /** Etichetta del bene nella stampa (es. "Impianto fotovoltaico") per tabella */
   etichetteBene?: Partial<Record<Tabella, string>>;
-}
-
-// Coefficiente per la tabella attiva
-function getCoeff(tabella: Tabella, importo: number, durata: number): number | null {
-  return tabella === 'esg' ? getEsgCoeff(importo, durata) : getPioneerCoeff(importo, durata);
+  /** Classe di rischio BCC del bene trattato dal partner (3 = telecomunicazioni) */
+  classeBcc?: ClasseRischioBcc;
 }
 
 // Inverso Pioneer: dal canone al prezzo, provando ogni fascia
@@ -58,6 +70,7 @@ export default function SimulatorePortale({
   tabelle = ['esg', 'pioneer'],
   partner = '',
   etichetteBene = {},
+  classeBcc = 3,
 }: Props) {
   const disponibili = tabelle.length ? tabelle : (['esg', 'pioneer'] as Tabella[]);
   const [tabella, setTabella] = useState<Tabella>(disponibili[0]);
@@ -75,14 +88,23 @@ export default function SimulatorePortale({
 
   const cfg = TABELLE[tabella];
 
+  // Canone mensile per la tabella attiva
+  const canonePer = (importo: number, durata: number): number | null => {
+    if (tabella === 'bcc-lo') return bccLoCanone(importo, durata, classeBcc);
+    const c = tabella === 'esg' ? getEsgCoeff(importo, durata) : getPioneerCoeff(importo, durata);
+    return c ? (importo * c) / 100 : null;
+  };
+
   // Griglia canoni per tutte le durate della tabella attiva
   const canoni = useMemo(() => {
     if (prezzoCalcolato < cfg.min || prezzoCalcolato > cfg.max) return null;
-    return cfg.durate.map((d) => {
-      const c = getCoeff(tabella, prezzoCalcolato, d);
-      return { durata: d, canone: c ? (prezzoCalcolato * c) / 100 : null };
-    });
-  }, [prezzoCalcolato, tabella]);
+    return cfg.durate.map((d) => ({ durata: d, canone: canonePer(prezzoCalcolato, d) }));
+  }, [prezzoCalcolato, tabella, classeBcc]);
+
+  // Spese istruttoria una tantum: su BCC si pagano a parte, non sono nel canone
+  const speseIstruttoria = tabella === 'bcc-lo' && prezzoCalcolato > 0
+    ? bccSpeseIstruttoria(prezzoCalcolato)
+    : null;
 
   const handleCambioTabella = (t: Tabella) => {
     setTabella(t);
@@ -90,7 +112,9 @@ export default function SimulatorePortale({
     setDurataScelta(null);
     setPrezzoRicavato(null);
     setCanoneCalcolato(0);
-    if (t === 'pioneer' && !PIONEER_DURATE.includes(durataCanone)) setDurataCanone(60);
+    // Se la durata scelta non esiste nel nuovo canale, torno alla piu' lunga disponibile
+    const durate = TABELLE[t].durate;
+    if (!durate.includes(durataCanone)) setDurataCanone(durate.includes(60) ? 60 : durate[durate.length - 1]);
   };
 
   const handleCalcolaCanoni = () => {
@@ -109,7 +133,9 @@ export default function SimulatorePortale({
     setCanoneCalcolato(num);
     const prezzo = tabella === 'esg'
       ? esgPrezzoDaCanone(num, durataCanone)
-      : pioneerPrezzoDaCanone(num, durataCanone);
+      : tabella === 'bcc-lo'
+        ? bccLoPrezzoDaCanone(num, durataCanone, classeBcc)
+        : pioneerPrezzoDaCanone(num, durataCanone);
     setPrezzoRicavato(prezzo);
   };
 
@@ -180,7 +206,13 @@ export default function SimulatorePortale({
                     </button>
                   ))}
                 </div>
-                <p class="sp__nota">Canone mensile indicativo, imponibile IVA, salvo delibera della società di noleggio.</p>
+                <p class="sp__nota">
+                  Canone mensile indicativo, imponibile IVA, salvo delibera della società di noleggio.
+                  {speseIstruttoria !== null && (
+                    <> Su questo importo le spese di istruttoria sono <strong>{eur(speseIstruttoria)}</strong> una tantum,
+                    a carico del cliente: non sono comprese nel canone. Riscatto finale 1%.</>
+                  )}
+                </p>
               </>
             )}
           </div>
@@ -262,7 +294,8 @@ export default function SimulatorePortale({
           </table>
           <p class="sp__print-note">
             Canoni mensili indicativi, imponibili IVA, salvo approvazione della società di noleggio.
-            La proposta definitiva viene confermata dopo l'esame della documentazione del cliente.
+            {speseIstruttoria !== null && ` Spese di istruttoria ${eur(speseIstruttoria)} una tantum, non comprese nel canone. Riscatto finale 1% del prezzo di vendita.`}
+            {' '}La proposta definitiva viene confermata dopo l'esame della documentazione del cliente.
           </p>
           <p class="sp__print-footer">
             Mediocredito Facile — mediocreditofacile.it — +39 393 995 7840{partner ? ` — in collaborazione con ${partner}` : ''}
