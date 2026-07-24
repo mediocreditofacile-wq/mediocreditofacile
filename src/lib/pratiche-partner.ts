@@ -19,6 +19,13 @@ export interface DocumentoPratica {
   size: number;
 }
 
+// Riga della distinta beni: una pratica = un contratto con uno o piu' beni.
+export interface BeneRiga {
+  tipologia: string;
+  descrizione: string;
+  importo: string;
+}
+
 export interface PraticaLead {
   ragione_sociale: string;
   forma_giuridica: string;
@@ -26,12 +33,16 @@ export interface PraticaLead {
   referente: string;
   telefono: string;
   email: string;
+  // Campi flat = riepilogo del contratto: tipologia sintetica, descrizione
+  // unita e importo TOTALE (somma delle righe). Guidano checklist e Pipedrive.
   tipologia: string;
   bene_descrizione: string;
   importo: string;
   durata: string;
   canone_simulato: string;
   note: string;
+  // Distinta dei beni del contratto (almeno una riga)
+  beni: BeneRiga[];
 }
 
 export interface OpzioniPratica {
@@ -111,6 +122,8 @@ async function savePraticaRecord(
       telefono: lead.telefono,
       email: lead.email,
     },
+    // Riepilogo del contratto (importo = totale): la lista richieste dei
+    // portali legge da qui e resta compatibile coi record a bene singolo.
     bene: {
       tipologia: lead.tipologia,
       descrizione: lead.bene_descrizione,
@@ -118,6 +131,8 @@ async function savePraticaRecord(
       durata: lead.durata,
       canone_simulato: lead.canone_simulato,
     },
+    // Distinta completa dei beni del contratto
+    beni: lead.beni,
     note: lead.note,
     documenti,
   };
@@ -199,12 +214,35 @@ async function sendResendEmail(
           <tr><td style="padding:4px 12px 4px 0"><strong>Email</strong></td><td>${escapeHtml(lead.email || '-')}</td></tr>
         </table>
 
-        <h3 style="color:#0F1020;font-size:15px;margin:20px 0 8px">Bene da noleggiare</h3>
+        <h3 style="color:#0F1020;font-size:15px;margin:20px 0 8px">Beni da noleggiare${lead.beni.length > 1 ? ` (${lead.beni.length})` : ''}</h3>
         <table style="font-size:14px;border-collapse:collapse;width:100%">
-          <tr><td style="padding:4px 12px 4px 0;width:170px"><strong>Tipologia</strong></td><td>${escapeHtml(lead.tipologia || '-')}</td></tr>
-          <tr><td style="padding:4px 12px 4px 0"><strong>Descrizione</strong></td><td>${escapeHtml(lead.bene_descrizione || '-')}</td></tr>
-          <tr><td style="padding:4px 12px 4px 0"><strong>Importo bene</strong></td><td>${escapeHtml(importoFmt)}</td></tr>
-          <tr><td style="padding:4px 12px 4px 0"><strong>Durata noleggio</strong></td><td>${escapeHtml(lead.durata || '-')} mesi</td></tr>
+          <thead>
+            <tr>
+              <th style="text-align:left;padding:4px 12px 6px 0;border-bottom:1px solid #E1DEE3;font-size:12px;color:#787782;text-transform:uppercase;letter-spacing:0.05em">Tipologia</th>
+              <th style="text-align:left;padding:4px 12px 6px 0;border-bottom:1px solid #E1DEE3;font-size:12px;color:#787782;text-transform:uppercase;letter-spacing:0.05em">Descrizione</th>
+              <th style="text-align:right;padding:4px 0 6px 12px;border-bottom:1px solid #E1DEE3;font-size:12px;color:#787782;text-transform:uppercase;letter-spacing:0.05em">Importo</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${lead.beni.map((b) => {
+              const impFmt = b.importo
+                ? new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(parseFloat(b.importo) || 0)
+                : '-';
+              return `<tr>
+                <td style="padding:6px 12px 6px 0;border-bottom:1px solid #f1f1f3;vertical-align:top">${escapeHtml(b.tipologia || '-')}</td>
+                <td style="padding:6px 12px 6px 0;border-bottom:1px solid #f1f1f3;vertical-align:top">${escapeHtml(b.descrizione || '-')}</td>
+                <td style="padding:6px 0 6px 12px;border-bottom:1px solid #f1f1f3;text-align:right;white-space:nowrap;vertical-align:top">${escapeHtml(impFmt)}</td>
+              </tr>`;
+            }).join('')}
+            <tr>
+              <td colspan="2" style="padding:8px 12px 4px 0;text-align:right"><strong>Totale imponibile</strong></td>
+              <td style="padding:8px 0 4px 12px;text-align:right;white-space:nowrap"><strong>${escapeHtml(importoFmt)}</strong></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <table style="font-size:14px;border-collapse:collapse;width:100%;margin-top:8px">
+          <tr><td style="padding:4px 12px 4px 0;width:170px"><strong>Durata noleggio</strong></td><td>${escapeHtml(lead.durata || '-')} mesi</td></tr>
           <tr><td style="padding:4px 12px 4px 0"><strong>Canone simulato</strong></td><td>${escapeHtml(canoneFmt)}</td></tr>
         </table>
 
@@ -292,7 +330,39 @@ export async function gestisciPratica(
     durata: campo('durata'),
     canone_simulato: campo('canone_simulato'),
     note: campo('note'),
+    beni: [],
   };
+
+  // Distinta beni: il browser manda un JSON in `beni`. Fallback a riga singola
+  // dai campi flat per retrocompatibilita' coi bundle gia' in cache dei partner.
+  let beni: BeneRiga[] = [];
+  try {
+    const parsed = JSON.parse((data.get('beni') as string | null) ?? '[]');
+    if (Array.isArray(parsed)) {
+      beni = parsed
+        .map((b) => ({
+          tipologia: String(b?.tipologia ?? '').trim(),
+          descrizione: String(b?.descrizione ?? '').trim(),
+          importo: String(b?.importo ?? '').trim(),
+        }))
+        .filter((b) => b.descrizione || b.importo)
+        .slice(0, 30);
+    }
+  } catch {
+    beni = [];
+  }
+  if (!beni.length) {
+    beni = [{ tipologia: lead.tipologia, descrizione: lead.bene_descrizione, importo: lead.importo }];
+  }
+
+  // Riepilogo del contratto coerente con la distinta: importo = totale,
+  // descrizione = elenco unito, tipologia sintetica. Usati da checklist,
+  // record summary e titolo Pipedrive.
+  const totaleImporto = beni.reduce((s, b) => s + (parseFloat(b.importo) || 0), 0);
+  lead.beni = beni;
+  lead.importo = totaleImporto > 0 ? String(totaleImporto) : lead.importo;
+  lead.bene_descrizione = beni.map((b) => b.descrizione).filter(Boolean).join('; ') || lead.bene_descrizione;
+  lead.tipologia = beni.length > 1 ? `Piu' beni (${beni.length})` : (beni[0].tipologia || lead.tipologia);
 
   // Validazione minima: serve almeno ragione sociale + un canale di contatto.
   if (!lead.ragione_sociale || (!lead.telefono && !lead.email)) {

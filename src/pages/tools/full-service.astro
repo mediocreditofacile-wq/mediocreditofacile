@@ -188,29 +188,44 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
         </div>
 
         <div class="fs__form-block">
-          <h3 class="fs__form-block-title">Bene da noleggiare</h3>
-          <div class="fs__grid">
-            <label class="fs__field">
-              <span class="fs__field-label">Tipologia *</span>
-              <select name="tipologia" required>
-                <option value="Hardware IT" selected>Hardware IT (PC, server, monitor)</option>
-                <option value="Stampa e copia">Stampa e copia (stampanti, multifunzione)</option>
-                <option value="Attrezzatura">Attrezzatura strumentale</option>
-                <option value="Software e licenze">Software e licenze</option>
-                <option value="Altro">Altro bene strumentale</option>
-              </select>
-            </label>
+          <h3 class="fs__form-block-title">Beni da noleggiare</h3>
+          <p class="fs__beni-hint">Aggiungi tutti i beni del contratto: il canone si calcola sul totale imponibile.</p>
 
-            <label class="fs__field">
-              <span class="fs__field-label">Importo bene (€) *</span>
-              <input type="number" name="importo" id="importo" required min="500" step="100" placeholder="12000" />
-            </label>
+          <div id="beni-rows" class="fs__beni">
+            <div class="bene-row fs__bene-row">
+              <label class="fs__field">
+                <span class="fs__field-label">Tipologia</span>
+                <select data-bene="tipologia">
+                  <option value="Hardware IT" selected>Hardware IT (PC, server, monitor)</option>
+                  <option value="Stampa e copia">Stampa e copia (stampanti, multifunzione)</option>
+                  <option value="Attrezzatura">Attrezzatura strumentale</option>
+                  <option value="Software e licenze">Software e licenze</option>
+                  <option value="Altro">Altro bene strumentale</option>
+                </select>
+              </label>
+              <label class="fs__field fs__field--grow">
+                <span class="fs__field-label">Descrizione bene *</span>
+                <input type="text" data-bene="descrizione" required placeholder="Es. 10 postazioni PC + server NAS" />
+              </label>
+              <label class="fs__field fs__field--importo">
+                <span class="fs__field-label">Importo (€) *</span>
+                <input type="number" data-bene="importo" required min="0" step="100" placeholder="12000" />
+              </label>
+              <button type="button" class="fs__bene-remove" data-bene-remove aria-label="Rimuovi bene">&times;</button>
+            </div>
+          </div>
 
-            <label class="fs__field fs__field--full">
-              <span class="fs__field-label">Descrizione bene *</span>
-              <input type="text" name="bene_descrizione" required placeholder="Es. 10 postazioni PC + server NAS + gruppo di continuità" />
-            </label>
+          <div class="fs__beni-bar">
+            <button type="button" id="beni-add" class="fs__beni-add">
+              <Icon name="add" /> Aggiungi bene
+            </button>
+            <div class="fs__beni-total-wrap">Totale imponibile <strong id="beni-total">0,00 €</strong></div>
+          </div>
 
+          <input type="hidden" name="beni" id="beni-json" />
+          <input type="hidden" name="importo" id="importo" />
+
+          <div class="fs__grid fs__grid--contratto">
             <label class="fs__field">
               <span class="fs__field-label">Durata noleggio (mesi)</span>
               <select name="durata">
@@ -339,6 +354,7 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
 
 <script>
   import { upload } from '@vercel/blob/client';
+  import { initBeniRows } from '../../scripts/beni-rows';
 
   // Due account sul gate:
   //  - partner: Maria Orsola Corcione (FULL SERVICE) — credenziali fisse
@@ -481,6 +497,10 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
 
   formaGiuridica.addEventListener('change', updateChecklist);
   importoInput.addEventListener('input', updateChecklist);
+
+  // === Distinta beni (una pratica = un contratto con piu' beni) ===
+  // Popola il campo importo (totale) e fa scattare la checklist qui sopra.
+  initBeniRows();
 
   // === Gestione file selezionati ===
   const fileInput = document.getElementById('file-input') as HTMLInputElement;
@@ -893,6 +913,37 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
   }
   .fs__field textarea { resize: vertical; min-height: 80px; }
 
+  /* Distinta beni */
+  .fs__beni-hint { font-size: 0.85rem; color: #787782; line-height: 1.5; margin: 0 0 1rem; }
+  .fs__beni { display: flex; flex-direction: column; gap: 0.75rem; }
+  .fs__bene-row {
+    display: grid;
+    grid-template-columns: minmax(150px, 0.8fr) minmax(0, 2fr) 130px 34px;
+    gap: 0.75rem; align-items: end;
+  }
+  .fs__field--grow { min-width: 0; }
+  .fs__bene-remove {
+    height: 42px; width: 34px; align-self: end;
+    border: 1.5px solid #E1DEE3; border-radius: 8px; background: #ffffff;
+    color: #b91c1c; font-size: 1.3rem; line-height: 1; cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .fs__bene-remove:hover { border-color: #ef4444; background: #fef2f2; }
+  .fs__beni-bar {
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    margin: 1rem 0 0; flex-wrap: wrap;
+  }
+  .fs__beni-add {
+    display: inline-flex; align-items: center; gap: 0.35rem;
+    background: #ffffff; border: 1.5px dashed #664CCD; border-radius: 10px;
+    color: #664CCD; font-family: var(--font-family); font-weight: 700; font-size: 0.85rem;
+    padding: 0.5rem 1rem; cursor: pointer; transition: background 0.15s;
+  }
+  .fs__beni-add:hover { background: #f5f3ff; }
+  .fs__beni-total-wrap { font-size: 0.95rem; color: #444451; }
+  .fs__beni-total-wrap strong { color: #0F1020; font-size: 1.05rem; margin-left: 0.35rem; }
+  .fs__grid--contratto { margin-top: 1.25rem; }
+
   /* Banner checklist */
   .fs__banner {
     display: flex; gap: 0.85rem; align-items: flex-start;
@@ -1026,6 +1077,9 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
     .fs__cards { grid-template-columns: 1fr; }
     .fs__form-block { padding: 1.25rem; }
     .fs__grid { grid-template-columns: 1fr; gap: 0.85rem; }
+    .fs__bene-row { grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+    .fs__field--grow { grid-column: 1 / -1; }
+    .fs__bene-remove { grid-column: 1 / -1; width: 100%; }
     .fs__table { font-size: 0.82rem; }
     .fs__table th, .fs__table td { padding: 0.6rem 0.75rem; }
     .fs__th-when { width: 45%; }
