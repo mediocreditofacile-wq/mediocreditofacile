@@ -38,6 +38,7 @@ export default defineConfig({
           '/tools/edilizia-gierre',
           '/tools/energyteam',
           '/tools/expo-energia',
+          '/tools/full-service',
           '/tools/gruppo-barone',
           '/tools/marotta',
           '/tools/simulatore-leasing-fornitori',
