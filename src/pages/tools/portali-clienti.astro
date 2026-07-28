@@ -1,0 +1,433 @@
+---
+/**
+ * Indice dei portali pratiche partner — /tools/portali-clienti
+ *
+ * Pagina PUBBLICA (nessun gate) ma noindex: si condivide via WhatsApp o email
+ * ai partner perche' raggiungano il proprio portale senza ricordare lo slug.
+ * NON espone credenziali: ogni partner ha le sue, consegnate da MCF.
+ *
+ * Elenca solo i portali costruiti sul motore condiviso (src/lib/pratiche-partner.ts):
+ * login email+password, simulatore, caricamento pratica con documenti, lista
+ * richieste con stato. Le aree partner col solo simulatore restano fuori.
+ *
+ * Per aggiungere un portale: una voce in PORTALI qui sotto (oltre al resto della
+ * procedura descritta in CLAUDE.md).
+ */
+import Icon from '../../components/Icon.astro';
+import ToolLayout from '../../layouts/ToolLayout.astro';
+
+interface PortaleCard {
+  nome: string;
+  href: string;
+  icona: string;
+  settore: string;
+  descrizione: string;
+}
+
+const PORTALI: PortaleCard[] = [
+  {
+    nome: 'Expo Energia',
+    href: '/tools/expo-energia',
+    icona: 'solar_power',
+    settore: 'Fotovoltaico e hardware',
+    descrizione:
+      'Simulazione canoni su tabella ESG per il fotovoltaico e Pioneer per hardware e casse, dal prezzo di vendita alla griglia canoni su tutte le durate o dal canone al prezzo.',
+  },
+  {
+    nome: 'STILO',
+    href: '/tools/stilo',
+    icona: 'phone',
+    settore: 'Telefonia e reti',
+    descrizione:
+      'Quattro prodotti a confronto per centralini e hardware di rete: noleggio Grenke Pioneer, locazione operativa, leasing e finanziamento BCC, più la campagna tasso zero a 10 mesi.',
+  },
+  {
+    nome: 'Full Service',
+    href: '/tools/full-service',
+    icona: 'ict-digital',
+    settore: 'IT e attrezzature',
+    descrizione:
+      'Tabelle BCC Rent&Lease su PC, server e attrezzature: locazione operativa, leasing, finanziamento finalizzato e campagna tasso zero. Assicurazione all risk già compresa nella rata.',
+  },
+];
+---
+
+<ToolLayout
+  title="Portali Clienti — Aree Riservate Partner | Mediocredito Facile"
+  description="L'elenco dei portali riservati ai partner Mediocredito Facile: simulazione canoni, caricamento pratiche con documenti e stato di avanzamento in tempo reale."
+  noindex={true}
+  breadcrumbs={[{ name: 'Portali clienti', href: '/tools/portali-clienti' }]}
+>
+  <!-- HERO -->
+  <section class="pc-hero">
+    <div class="pc-hero__inner">
+      <span class="pc-hero__eyebrow">Aree riservate</span>
+      <h1 class="pc-hero__title">Portali clienti</h1>
+      <p class="pc-hero__sub">
+        Ogni partner ha il suo portale: le tabelle giuste per i beni che vende, il caricamento della pratica
+        con i documenti e la lista delle richieste con lo stato aggiornato. Qui trovi l'accesso a tutti.
+      </p>
+    </div>
+  </section>
+
+  <!-- ELENCO PORTALI -->
+  <section class="pc-list">
+    <div class="pc-list__inner">
+      <div class="pc-list__grid">
+        {
+          PORTALI.map((p) => (
+            <a href={p.href} class="pc-card">
+              <span class="pc-card__badge">Riservato</span>
+              <Icon name={p.icona} class="pc-card__icon" />
+              <span class="pc-card__settore">{p.settore}</span>
+              <h2 class="pc-card__title">{p.nome}</h2>
+              <p class="pc-card__desc">{p.descrizione}</p>
+              <span class="pc-card__link">
+                Apri il portale
+                <Icon name="arrow_forward" />
+              </span>
+            </a>
+          ))
+        }
+      </div>
+
+      <p class="pc-list__note">
+        <Icon name="lock" />
+        Ogni portale si apre con le credenziali che ti abbiamo consegnato. Se le hai perse, scrivici e te le
+        rimandiamo.
+      </p>
+    </div>
+  </section>
+
+  <!-- COME FUNZIONA -->
+  <section class="pc-how">
+    <div class="pc-how__inner">
+      <span class="pc-how__eyebrow">Cosa ci fai dentro</span>
+      <h2 class="pc-how__title">Dal preventivo alla delibera, senza passaggi intermedi</h2>
+      <div class="pc-how__steps">
+        <div class="pc-how__step">
+          <span class="pc-how__num">1</span>
+          <h3 class="pc-how__step-title">Simuli il canone</h3>
+          <p class="pc-how__step-text">
+            Inserisci il prezzo di vendita e vedi la rata su tutte le durate disponibili, con i coefficienti
+            reali della società che finanzia quel bene. Oppure parti dal canone e scopri quanto puoi far
+            costare l'impianto.
+          </p>
+        </div>
+        <div class="pc-how__step">
+          <span class="pc-how__num">2</span>
+          <h3 class="pc-how__step-title">Stampi il preventivo</h3>
+          <p class="pc-how__step-text">
+            La stampa è brandizzata Mediocredito Facile e non contiene riferimenti alla società finanziaria né
+            ai tuoi margini. La mandi al cliente finale così com'è.
+          </p>
+        </div>
+        <div class="pc-how__step">
+          <span class="pc-how__num">3</span>
+          <h3 class="pc-how__step-title">Carichi la pratica</h3>
+          <p class="pc-how__step-text">
+            Un contratto può contenere più beni: aggiungi le righe della distinta e il totale si aggiorna da
+            solo. La checklist dei documenti cambia in base all'importo e alla forma giuridica del cliente, e i
+            file li carichi direttamente dal browser.
+          </p>
+        </div>
+        <div class="pc-how__step">
+          <span class="pc-how__num">4</span>
+          <h3 class="pc-how__step-title">Segui lo stato</h3>
+          <p class="pc-how__step-text">
+            Ricevuta, in lavorazione, in delibera, approvata. Lo stato lo aggiorniamo noi man mano che la
+            pratica avanza, e lo vedi nella lista delle tue richieste senza dover telefonare.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="pc-cta">
+    <div class="pc-cta__inner">
+      <h2 class="pc-cta__title">Vendi beni strumentali e non hai ancora il tuo portale?</h2>
+      <p class="pc-cta__text">
+        Lo costruiamo sulle tabelle che servono a te, con i tuoi beni e le tue durate. Ai tuoi clienti arriva un
+        preventivo pronto, a te arriva una pratica già completa dei documenti.
+      </p>
+      <a href="/contatti" class="pc-cta__btn">Parliamone</a>
+    </div>
+  </section>
+</ToolLayout>
+
+<style>
+  /* HERO */
+  .pc-hero {
+    background: linear-gradient(135deg, #1e1b3a 0%, #2d2556 50%, #1a1640 100%);
+    color: #fff;
+    padding: 5.5rem 1.5rem 5rem;
+    text-align: center;
+  }
+
+  .pc-hero__inner {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  .pc-hero__eyebrow {
+    display: inline-block;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--color-accent);
+    margin-bottom: 1rem;
+  }
+
+  .pc-hero__title {
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    margin-bottom: 1.25rem;
+  }
+
+  .pc-hero__sub {
+    font-size: clamp(1rem, 2.5vw, 1.15rem);
+    line-height: 1.65;
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  /* ELENCO */
+  .pc-list {
+    padding: 4.5rem 1.5rem 4rem;
+  }
+
+  .pc-list__inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+
+  .pc-list__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+  }
+
+  .pc-card {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    background: #ffffff;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 2rem 1.75rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .pc-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(102, 76, 205, 0.1);
+  }
+
+  .pc-card__badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: var(--color-primary);
+    color: #ffffff;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+
+  .pc-card__icon {
+    font-size: 2.5rem;
+    color: var(--color-primary);
+    margin-bottom: 1rem;
+  }
+
+  .pc-card__settore {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-accent);
+    margin-bottom: 0.35rem;
+  }
+
+  .pc-card__title {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--color-primary);
+    margin-bottom: 0.6rem;
+    letter-spacing: -0.01em;
+  }
+
+  .pc-card__desc {
+    font-size: 0.95rem;
+    color: var(--color-text-light);
+    line-height: 1.6;
+    flex: 1;
+  }
+
+  .pc-card__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin-top: 1.25rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--color-accent);
+  }
+
+  .pc-card__link .mcf-icon {
+    font-size: 1rem;
+  }
+
+  .pc-list__note {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 2.5rem;
+    font-size: 0.95rem;
+    color: var(--color-text-light);
+    text-align: center;
+  }
+
+  .pc-list__note .mcf-icon {
+    font-size: 1.1rem;
+    color: var(--color-accent);
+    flex-shrink: 0;
+  }
+
+  /* COME FUNZIONA */
+  .pc-how {
+    padding: 4.5rem 1.5rem;
+    background: var(--color-bg-alt);
+  }
+
+  .pc-how__inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+
+  .pc-how__eyebrow {
+    display: inline-block;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--color-accent);
+    margin-bottom: 0.75rem;
+  }
+
+  .pc-how__title {
+    font-size: clamp(1.5rem, 3.5vw, 2rem);
+    font-weight: 800;
+    color: var(--color-primary);
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    margin-bottom: 2.5rem;
+  }
+
+  .pc-how__steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 2rem;
+  }
+
+  .pc-how__num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    background: var(--color-accent);
+    color: #ffffff;
+    font-weight: 800;
+    font-size: 1rem;
+    margin-bottom: 0.9rem;
+  }
+
+  .pc-how__step-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    margin-bottom: 0.5rem;
+  }
+
+  .pc-how__step-text {
+    font-size: 0.95rem;
+    color: var(--color-text);
+    line-height: 1.65;
+  }
+
+  /* CTA */
+  .pc-cta {
+    padding: 4.5rem 1.5rem;
+    text-align: center;
+  }
+
+  .pc-cta__inner {
+    max-width: 640px;
+    margin: 0 auto;
+  }
+
+  .pc-cta__title {
+    font-size: clamp(1.5rem, 3.5vw, 2rem);
+    font-weight: 800;
+    color: var(--color-primary);
+    margin-bottom: 1rem;
+    letter-spacing: -0.02em;
+  }
+
+  .pc-cta__text {
+    font-size: 1.05rem;
+    color: var(--color-text);
+    line-height: 1.65;
+    margin-bottom: 2rem;
+  }
+
+  .pc-cta__btn {
+    display: inline-flex;
+    align-items: center;
+    background: var(--color-accent);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 1rem;
+    padding: 0.9rem 2rem;
+    border-radius: 8px;
+    transition: background 0.2s, transform 0.15s;
+  }
+
+  .pc-cta__btn:hover {
+    background: var(--color-accent-hover);
+    transform: translateY(-1px);
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    .pc-hero {
+      padding: 4rem 1.25rem 3.5rem;
+    }
+
+    .pc-list {
+      padding: 3rem 1.25rem;
+    }
+
+    .pc-list__grid {
+      grid-template-columns: 1fr;
+    }
+
+    .pc-how {
+      padding: 3rem 1.25rem;
+    }
+
+    .pc-cta {
+      padding: 3rem 1.25rem;
+    }
+  }
+</style>

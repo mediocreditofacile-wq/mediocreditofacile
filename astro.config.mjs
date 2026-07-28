@@ -41,6 +41,7 @@ export default defineConfig({
           '/tools/full-service',
           '/tools/gruppo-barone',
           '/tools/marotta',
+          '/tools/portali-clienti',
           '/tools/simulatore-leasing-fornitori',
           '/tools/simulazione-leasing',
           '/tools/stilo',
