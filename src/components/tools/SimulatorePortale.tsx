@@ -7,6 +7,10 @@ import {
   bccTassoZeroContoCliente, bccQuotaAssicurazione,
   type ClasseRischioBcc, type ProdottoBcc,
 } from '../../data/bcc';
+import {
+  PAGARENT_DURATE, PAGARENT_MIN, PAGARENT_MAX, PAGARENT_ISTRUTTORIA,
+  PAGARENT_ASSICURAZIONE_MAX_PERC, pagarentRata, pagarentPrezzoDaRata,
+} from '../../data/pagarent';
 import './simulatore-portale.css';
 
 // Simulatore in stile ReteRent per i portali partner (Expo Energia, Stilo):
@@ -18,7 +22,7 @@ import './simulatore-portale.css';
 // Grenke (coefficiente per fascia e durata), 'bcc-lo' e' la locazione operativa
 // BCC Rent&Lease, che quota anche per classe di rischio del bene.
 
-export type Tabella = 'esg' | 'pioneer' | 'bcc-lo' | 'bcc-lf' | 'bcc-ff' | 'bcc-zero';
+export type Tabella = 'esg' | 'pioneer' | 'pagarent' | 'bcc-lo' | 'bcc-lf' | 'bcc-ff' | 'bcc-zero';
 
 // Quale prodotto BCC sta dietro a ciascun canale
 const PRODOTTO_BCC: Partial<Record<Tabella, ProdottoBcc>> = { 'bcc-lo': 'lo', 'bcc-lf': 'lf', 'bcc-ff': 'ff' };
@@ -35,10 +39,17 @@ const TABELLE: Record<Tabella, { label: string; hint: string; min: number; max: 
   },
   pioneer: {
     label: 'Pioneer — Hardware e tecnologia',
-    hint: 'Centralini telefonici, hardware di rete, casse automatiche, POS e software. Canone mensile con fatturazione trimestrale anticipata. Attenzione: l\'assicurazione non e\' compresa e si aggiunge a parte, a differenza di BCC.',
+    hint: 'Centralini telefonici, hardware di rete, ledwall e display, casse automatiche, POS e software. Canone mensile con fatturazione trimestrale anticipata. Attenzione: l\'assicurazione non e\' compresa nel canone e si aggiunge a parte.',
     min: 500,
     max: 100000,
     durate: PIONEER_DURATE,
+  },
+  pagarent: {
+    label: 'PagaRent — Noleggio operativo',
+    hint: 'Beni strumentali in genere: ledwall e display, hardware, attrezzature. Canone mensile. Istruttoria 100 € una tantum a carico del cliente e assicurazione all risk facoltativa (fino al 3,47%), entrambe fuori dal canone.',
+    min: PAGARENT_MIN,
+    max: PAGARENT_MAX,
+    durate: [...PAGARENT_DURATE],
   },
   'bcc-lo': {
     label: 'BCC — Locazione operativa',
@@ -120,6 +131,7 @@ export default function SimulatorePortale({
   const canonePer = (importo: number, durata: number): number | null => {
     if (tassoZero) return bccTassoZeroRata(importo);
     if (prodottoBcc) return bccRata(prodottoBcc, importo, durata, classeBcc);
+    if (tabella === 'pagarent') return pagarentRata(importo, durata);
     const c = tabella === 'esg' ? getEsgCoeff(importo, durata) : getPioneerCoeff(importo, durata);
     return c ? (importo * c) / 100 : null;
   };
@@ -180,6 +192,8 @@ export default function SimulatorePortale({
       ? num * BCC_TASSO_ZERO.durata
       : prodottoBcc
       ? bccPrezzoDaRata(prodottoBcc, num, durataCanone, classeBcc)
+      : tabella === 'pagarent'
+      ? pagarentPrezzoDaRata(num, durataCanone)
       : tabella === 'esg'
         ? esgPrezzoDaCanone(num, durataCanone)
         : pioneerPrezzoDaCanone(num, durataCanone);
@@ -300,6 +314,11 @@ export default function SimulatorePortale({
 
                 <p class="sp__nota">
                   Canone mensile indicativo, imponibile IVA, salvo delibera della società di noleggio.
+                  {tabella === 'pagarent' && (
+                    <> Fuori dal canone restano l'istruttoria di <strong>{eur(PAGARENT_ISTRUTTORIA)}</strong> una
+                    tantum a carico del cliente e l'assicurazione all risk, facoltativa, fino
+                    al {PAGARENT_ASSICURAZIONE_MAX_PERC.toLocaleString('it-IT')}% del canone.</>
+                  )}
                   {contoFornitore !== null && (
                     <> Il cliente non paga interessi: il costo della campagna e' a tuo carico, vedi il conto qui sotto.</>
                   )}
@@ -398,6 +417,7 @@ export default function SimulatorePortale({
           <p class="sp__print-note">
             {tassoZero && 'Finanziamento a tasso zero: nessun interesse a carico del cliente. '}
             Canoni mensili indicativi, imponibili IVA, salvo approvazione della società di noleggio.
+            {tabella === 'pagarent' && ` Spese di istruttoria ${eur(PAGARENT_ISTRUTTORIA)} una tantum, non comprese nel canone. Assicurazione all risk sul bene facoltativa.`}
             {speseIstruttoria !== null && ` Spese di istruttoria ${eur(speseIstruttoria)} una tantum, non comprese nella rata.${prodottoBcc === 'ff' ? ` Nessun riscatto finale: il bene e' subito di proprieta'.${imposta ? ` Imposta sostitutiva ${eur(imposta)}.` : ''}` : ' Riscatto finale 1% del prezzo di vendita.'}`}
             {' '}La proposta definitiva viene confermata dopo l'esame della documentazione del cliente.
           </p>
