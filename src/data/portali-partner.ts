@@ -14,7 +14,7 @@ export interface PortalePartner {
   nome: string;
   /** Password del gate partner, usata anche come bearer per le API */
   password: string;
-  /** Prefisso della pratica: EE- per Expo Energia, ST- per Stilo, FS- per Full Service */
+  /** Prefisso della pratica: EE- Expo Energia, ST- Stilo, FS- Full Service, UD- Unidima */
   prefissoPratica: string;
 }
 
@@ -36,6 +36,12 @@ export const PORTALI_PARTNER: Record<string, PortalePartner> = {
     nome: 'FULL SERVICE S.R.L.',
     password: 'fullservice',
     prefissoPratica: 'FS',
+  },
+  unidima: {
+    slug: 'unidima',
+    nome: 'UNIDIMA SRL',
+    password: 'unidima',
+    prefissoPratica: 'UD',
   },
 };
 
