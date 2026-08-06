@@ -1,0 +1,2625 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="theme-color" content="#003A5C">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Marotta">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="152x152" href="icon-152.png">
+<link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Marotta Evolution — Strumento Finanziario MCF</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f9f8f6;
+    --surface: #ffffff;
+    --border: #e8e4de;
+    --border-strong: #ccc8c0;
+    --text: #1a1a18;
+    --text-muted: #6b6760;
+    --text-hint: #a09d98;
+    --green: #1D9E75;
+    --green-bg: #E1F5EE;
+    --green-text: #0F6E56;
+    --amber: #BA7517;
+    --amber-bg: #FAEEDA;
+    --amber-text: #854F0B;
+    --blue: #185FA5;
+    --blue-bg: #E6F1FB;
+    --blue-text: #0C447C;
+    --red: #D85A30;
+    --red-bg: #FAECE7;
+    --red-text: #993C1D;
+    --radius: 10px;
+    --radius-sm: 6px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+    padding: 0 0 60px;
+  }
+
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    box-shadow: var(--shadow);
+  }
+
+  .topbar img { height: 32px; }
+
+  .topbar-title {
+    font-size: 13px;
+    color: var(--text-muted);
+    border-left: 1px solid var(--border);
+    padding-left: 16px;
+    margin-left: 4px;
+  }
+
+  .topbar-exit {
+    border: 1px solid var(--border-strong);
+    background: var(--surface);
+    color: var(--text-muted);
+    font-size: 11px;
+    padding: 4px 12px;
+    border-radius: 99px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .topbar-exit:hover { background: var(--bg); color: var(--text); }
+  .topbar-badge {
+    margin-left: auto;
+    font-size: 11px;
+    background: var(--green-bg);
+    color: var(--green-text);
+    padding: 3px 10px;
+    border-radius: 99px;
+    font-weight: 500;
+  }
+
+  .main { max-width: 760px; margin: 0 auto; padding: 32px 20px 0; }
+
+  .search-section { margin-bottom: 28px; }
+
+  .search-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-hint);
+    margin-bottom: 10px;
+  }
+
+  .search-row { display: flex; gap: 10px; }
+
+  .piva-input {
+    flex: 1;
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    padding: 14px 18px;
+    border: 1.5px solid var(--border-strong);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text);
+    font-family: "SF Mono", "Fira Code", monospace;
+    transition: border-color 0.15s;
+    outline: none;
+  }
+
+  .piva-input:focus { border-color: var(--text); }
+  .piva-input.valid { border-color: var(--green); }
+  .piva-input.invalid { border-color: var(--red); }
+
+  .btn {
+    padding: 14px 28px;
+    border-radius: var(--radius);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .btn-primary { background: var(--text); color: #fff; }
+  .btn-primary:hover { opacity: 0.85; }
+  .btn-primary:disabled { background: var(--border-strong); color: var(--text-hint); cursor: default; }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--text-muted);
+    border: 1px solid var(--border-strong);
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+  .btn-ghost:hover { background: var(--bg); }
+
+  .error-box {
+    background: var(--red-bg);
+    color: var(--red-text);
+    padding: 10px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    margin-top: 8px;
+    display: none;
+  }
+
+  .loading-msg {
+    color: var(--text-hint);
+    font-size: 13px;
+    padding: 16px 0;
+    display: none;
+    font-style: italic;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-bottom: 14px;
+    box-shadow: var(--shadow);
+  }
+
+  .card-title {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-hint);
+    margin-bottom: 14px;
+  }
+
+  .company-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+
+  .company-initial {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: var(--blue-bg);
+    color: var(--blue-text);
+    font-size: 18px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .company-name { font-size: 18px; font-weight: 700; margin-bottom: 2px; }
+  .company-piva { font-size: 13px; color: var(--text-muted); font-family: monospace; }
+
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .metric {
+    background: var(--bg);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+  }
+
+  .metric-label { font-size: 11px; color: var(--text-hint); margin-bottom: 4px; font-weight: 500; }
+  .metric-value { font-size: 19px; font-weight: 700; color: var(--text); }
+
+  .badges { display: flex; flex-wrap: wrap; gap: 6px; }
+
+  .badge {
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 12px;
+    border-radius: 99px;
+  }
+
+  .badge-green { background: var(--green-bg); color: var(--green-text); }
+  .badge-blue { background: var(--blue-bg); color: var(--blue-text); }
+  .badge-amber { background: var(--amber-bg); color: var(--amber-text); }
+  .badge-purple { background: #EDE7F6; color: #5E35B1; }
+  .badge-red { background: #FFEBEE; color: #C62828; }
+
+  .divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+
+  .machine-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .machine-row:last-of-type { border-bottom: none; }
+  .machine-name { font-size: 14px; font-weight: 500; flex: 1; }
+  .machine-price { font-size: 13px; color: var(--text-muted); }
+  .machine-tag {
+    font-size: 11px;
+    padding: 3px 9px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 99px;
+    color: var(--text-muted);
+  }
+
+  .select-styled {
+    width: 100%;
+    padding: 10px 14px;
+    font-size: 14px;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--text);
+    margin-bottom: 14px;
+    outline: none;
+  }
+
+  .canone-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .canone-table th {
+    text-align: left;
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--text-hint);
+    padding: 6px 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .canone-table td { padding: 10px 10px; border-bottom: 1px solid var(--border); color: var(--text); }
+  .canone-table tr:last-child td { border-bottom: none; }
+  .canone-table tr { cursor: pointer; transition: background 0.15s; }
+  .canone-table tr:hover td { background: var(--bg); }
+  .canone-table tr.selected td { background: var(--blue-bg); font-weight: 600; }
+
+  .note-small { font-size: 11px; color: var(--text-hint); margin-top: 8px; line-height: 1.5; }
+
+  .slider-block { margin-bottom: 14px; }
+  .slider-row { display: flex; align-items: center; gap: 12px; }
+  .slider-label { font-size: 13px; color: var(--text-muted); min-width: 160px; }
+  .slider-row input[type=range] {
+    flex: 1;
+    accent-color: var(--text);
+    height: 4px;
+    cursor: pointer;
+  }
+  .slider-val { font-size: 14px; font-weight: 600; min-width: 64px; text-align: right; }
+
+  .funnel-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 14px;
+  }
+
+  .funnel-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+  }
+  .funnel-card.accent {
+    background: var(--green-bg);
+    border-color: #9FE1CB;
+  }
+
+  .funnel-label { font-size: 11px; color: var(--text-hint); margin-bottom: 4px; font-weight: 500; }
+  .funnel-card.accent .funnel-label { color: var(--green-text); }
+  .funnel-value { font-size: 20px; font-weight: 700; color: var(--text); }
+  .funnel-card.accent .funnel-value { color: var(--green-text); }
+
+  .sustain-pill {
+    display: inline-block;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    margin-top: 12px;
+  }
+  .sustain-yes { background: var(--green-bg); color: var(--green-text); }
+  .sustain-no { background: var(--red-bg); color: var(--red-text); }
+
+  .doc-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+    color: var(--text-muted);
+  }
+  .doc-item:last-child { border-bottom: none; }
+  .doc-check { color: var(--green); font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+  .doc-toggle { display:flex; gap:8px; margin-bottom:14px; }
+  .doc-tab {
+    flex:1; padding:9px 12px; font-size:13px; font-weight:600;
+    border:1px solid var(--border-strong); background:var(--surface);
+    color:var(--text-muted); border-radius:var(--radius-sm); cursor:pointer;
+  }
+  .doc-tab.active { background:var(--blue-bg); border-color:var(--blue); color:var(--blue-text); }
+  .doc-check-item {
+    display:flex; align-items:flex-start; gap:10px; padding:9px 0;
+    border-bottom:1px solid var(--border); font-size:14px; cursor:pointer;
+  }
+  .doc-check-item:last-child { border-bottom:none; }
+  .doc-check-item input { width:18px; height:18px; margin-top:1px; accent-color:var(--green); cursor:pointer; flex-shrink:0; }
+
+  .manual-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-bottom: 14px;
+    display: none;
+  }
+
+  .manual-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+
+  .field-label { font-size: 12px; font-weight: 600; color: var(--text-hint); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  .field-input {
+    width: 100%;
+    padding: 10px 14px;
+    font-size: 14px;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--text);
+    outline: none;
+  }
+  .field-input:focus { border-color: var(--text); }
+
+  /* --- Configuratore offerta --- */
+  .price-row { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+  .price-step {
+    width:42px; height:42px; flex-shrink:0; border:1px solid var(--border-strong);
+    background:var(--surface); color:var(--text); font-size:20px; font-weight:600;
+    border-radius:var(--radius-sm); cursor:pointer; line-height:1;
+  }
+  .price-step:hover { background:var(--bg); }
+  .price-input {
+    flex:1; padding:10px 14px; font-size:18px; font-weight:700; text-align:center;
+    border:1px solid var(--border-strong); border-radius:var(--radius-sm);
+    background:var(--surface); color:var(--text); outline:none;
+    font-family:"SF Mono","Fira Code",monospace;
+  }
+  .price-input:focus { border-color:var(--text); }
+  .acc-item {
+    display:flex; align-items:center; gap:10px; padding:10px 12px; margin-bottom:6px;
+    border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--bg);
+    cursor:pointer; font-size:14px;
+  }
+  .acc-item input { width:18px; height:18px; accent-color:var(--blue); cursor:pointer; }
+  .acc-name { flex:1; font-weight:500; }
+  .acc-price { color:var(--text-muted); font-weight:600; font-size:13px; }
+  .altro-row { display:flex; gap:8px; margin-bottom:8px; align-items:center; }
+  .altro-row .altro-desc { flex:1; }
+  .altro-row .altro-prezzo { width:120px; flex-shrink:0; }
+  .altro-del {
+    width:38px; height:38px; flex-shrink:0; border:1px solid var(--border-strong);
+    background:var(--surface); color:var(--red); border-radius:var(--radius-sm);
+    cursor:pointer; font-size:14px;
+  }
+  .altro-del:hover { background:var(--red-bg); }
+  .cgs-badge {
+    display:inline-block; margin-top:10px; font-size:13px; font-weight:600;
+    padding:6px 12px; border-radius:99px;
+  }
+  .cgs-green { background:var(--green-bg); color:var(--green-text); }
+  .cgs-amber { background:var(--amber-bg); color:var(--amber-text); }
+  .cgs-red { background:var(--red-bg); color:var(--red-text); }
+
+  /* --- Confronto soluzioni --- */
+  .scenari-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:14px; }
+  @media (max-width:640px){ .scenari-grid { grid-template-columns:1fr; } }
+  .scenario { border:1px solid var(--border); border-radius:var(--radius-sm); padding:14px; background:var(--bg); }
+  .scenario-label {
+    width:100%; padding:8px 10px; font-size:14px; font-weight:600; margin-bottom:10px;
+    border:1px solid var(--border-strong); border-radius:var(--radius-sm); background:var(--surface); color:var(--text); outline:none;
+  }
+  .scenario-row { display:flex; gap:8px; margin-bottom:10px; }
+  .scenario-row select { flex:1; padding:8px 10px; font-size:13px; border:1px solid var(--border-strong); border-radius:var(--radius-sm); background:var(--surface); color:var(--text); }
+  .scenario-field { flex:1; }
+  .scenario-field label { display:block; font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-hint); margin-bottom:4px; }
+  .scenario-field input { width:100%; padding:7px 9px; font-size:13px; border:1px solid var(--border-strong); border-radius:var(--radius-sm); background:var(--surface); color:var(--text); outline:none; }
+  .scenario-out { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm); padding:10px 12px; }
+  .scenario-out-row { display:flex; justify-content:space-between; font-size:13px; padding:3px 0; color:var(--text-muted); }
+  .scenario-out-row strong { color:var(--text); }
+  .scenario-pdf { display:flex; align-items:center; gap:8px; font-size:13px; margin-top:10px; cursor:pointer; }
+  .scenario-pdf input { width:16px; height:16px; accent-color:var(--blue); }
+  .plafond-row { display:grid; grid-template-columns:1fr 1fr 1fr auto; gap:10px; align-items:end; padding:10px 0; border-bottom:1px solid var(--border); }
+  .plafond-row:last-child { border-bottom:none; }
+  .plafond-canale { font-weight:700; font-size:14px; align-self:center; }
+  .plafond-imp { font-size:11px; color:var(--text-hint); text-align:right; align-self:center; }
+  .plafond-imp span { font-size:14px; font-weight:700; color:var(--text); }
+  @media (max-width:640px){ .plafond-row { grid-template-columns:1fr 1fr; } .plafond-canale { grid-column:1/-1; } }
+
+  /* --- Funnel / analisi risparmio --- */
+  .funnel-num {
+    width:96px; flex-shrink:0; padding:8px 10px; font-size:14px; font-weight:600;
+    text-align:right; border:1px solid var(--border-strong); border-radius:var(--radius-sm);
+    background:var(--surface); color:var(--text); outline:none;
+  }
+  .funnel-num:focus { border-color:var(--text); }
+  .funnel-inputs { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .risparmio-box {
+    margin-top:14px; padding:14px 16px; border:1px solid #9FE1CB;
+    background:var(--green-bg); border-radius:var(--radius-sm); font-size:14px; line-height:1.8;
+  }
+  .risparmio-box strong { color:var(--green-text); }
+  @media (max-width:640px){ .funnel-inputs { grid-template-columns:1fr; } }
+
+  /* Stampa: solo la card analisi */
+  @media print {
+    body * { visibility:hidden; }
+    #funnelCard, #funnelCard * { visibility:visible; }
+    #funnelCard { position:absolute; left:0; top:0; width:100%; box-shadow:none; border:none; }
+    #funnelToggle, #funnelCard .btn-ghost { display:none !important; }
+  }
+
+  .demo-bar {
+    background: var(--amber-bg);
+    border: 1px solid #FAC775;
+    border-radius: var(--radius-sm);
+    padding: 10px 16px;
+    font-size: 12px;
+    color: var(--amber-text);
+    margin-bottom: 16px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .demo-piva {
+    font-family: monospace;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: underline;
+    font-size: 13px;
+  }
+
+  #results { display: none; }
+  #manualForm { display: none; }
+
+  /* --- Gate PIN --- */
+  .gate {
+    position:fixed; inset:0; z-index:9999; display:flex; align-items:center; justify-content:center;
+    background:var(--bg); padding:24px;
+  }
+  .gate-box {
+    width:100%; max-width:360px; background:var(--surface); border:1px solid var(--border);
+    border-radius:var(--radius); padding:28px 24px; text-align:center; box-shadow:0 4px 24px rgba(0,0,0,0.08);
+  }
+  .gate-title { font-size:16px; font-weight:700; color:var(--text); margin-bottom:6px; }
+  .gate-sub { font-size:13px; color:var(--text-muted); margin-bottom:20px; line-height:1.5; }
+  .gate-pin {
+    width:100%; padding:14px; font-size:28px; font-weight:700; text-align:center; letter-spacing:12px;
+    text-indent:12px; border:1px solid var(--border-strong); border-radius:var(--radius-sm);
+    background:var(--surface); color:var(--text); outline:none;
+    font-family:"SF Mono","Fira Code",monospace;
+  }
+  .gate-pin:focus { border-color:var(--text); }
+  .gate-pin.shake { border-color:#D32F2F; animation:gateShake 0.3s; }
+  @keyframes gateShake { 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+  .gate-err { font-size:12px; color:#D32F2F; margin-top:10px; min-height:16px; }
+  .gate .btn { width:100%; margin-top:14px; }
+  /* finché il gate è chiuso il tool non si vede nemmeno per un istante */
+  body.locked .topbar, body.locked .main { display:none; }
+
+  /* --- Scheda cliente --- */
+  .scheda-toggle {
+    display: flex; align-items: center; gap: 8px;
+    cursor: pointer; font-size: 13px; font-weight: 600;
+    color: var(--text-muted); margin-top: 12px; padding: 8px 0;
+    border: none; background: none; width: 100%;
+  }
+  .scheda-toggle:hover { color: var(--text); }
+  .scheda-toggle__arrow { transition: transform 0.2s; font-size: 12px; }
+  .scheda-toggle__arrow.open { transform: rotate(90deg); }
+  .scheda-body { display: none; margin-top: 10px; }
+  .scheda-body.open { display: block; }
+  .scheda-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+  }
+  .scheda-item {
+    padding: 10px 12px; background: var(--bg);
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+  }
+  .scheda-item--full { grid-column: 1 / -1; }
+  .scheda-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-hint); margin-bottom: 3px; }
+  .scheda-value { font-size: 14px; font-weight: 600; color: var(--text); word-break: break-all; }
+  .scheda-value a { color: var(--blue); text-decoration: underline; }
+
+  @media (max-width: 640px) {
+    .scheda-grid { grid-template-columns: 1fr; }
+  }
+
+  /* --- Credit Policy --- */
+  .semaphore {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px;
+    border-radius: var(--radius);
+    margin-bottom: 16px;
+  }
+  .semaphore--verde { background: var(--green-bg); border: 1px solid #9FE1CB; }
+  .semaphore--giallo { background: var(--amber-bg); border: 1px solid #FAC775; }
+  .semaphore--rosso { background: var(--red-bg); border: 1px solid #F5B8A8; }
+
+  .semaphore__dot {
+    width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0;
+    box-shadow: 0 0 8px rgba(0,0,0,0.15);
+  }
+  .semaphore--verde .semaphore__dot { background: var(--green); }
+  .semaphore--giallo .semaphore__dot { background: var(--amber); }
+  .semaphore--rosso .semaphore__dot { background: var(--red); }
+
+  .semaphore__label { font-weight: 700; font-size: 15px; }
+  .semaphore--verde .semaphore__label { color: var(--green-text); }
+  .semaphore--giallo .semaphore__label { color: var(--amber-text); }
+  .semaphore--rosso .semaphore__label { color: var(--red-text); }
+
+  .semaphore__sub { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+
+  .credit-detail {
+    font-size: 13px;
+    line-height: 1.8;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+  }
+  .credit-detail strong { color: var(--text); font-weight: 600; }
+
+  .ai-memo {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    margin-bottom: 14px;
+    display: none;
+  }
+  .ai-memo__title {
+    font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 1px; color: var(--text-hint); margin-bottom: 10px;
+  }
+  .ai-memo__body {
+    font-size: 13px; line-height: 1.7; color: var(--text);
+    white-space: pre-line;
+  }
+  .ai-memo__loading {
+    font-size: 13px; color: var(--text-hint); font-style: italic;
+  }
+
+  .override-section { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+  .override-title {
+    font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 1px; color: var(--text-hint); margin-bottom: 12px;
+  }
+  .override-row {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 10px;
+  }
+  .override-label { font-size: 13px; color: var(--text-muted); min-width: 140px; }
+  .override-val { font-size: 14px; font-weight: 600; min-width: 80px; text-align: right; }
+  .override-row select {
+    flex: 1; padding: 8px 12px; font-size: 13px;
+    border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
+    background: var(--surface); color: var(--text);
+  }
+  .override-note {
+    width: 100%; padding: 10px 14px; font-size: 13px;
+    border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
+    background: var(--surface); color: var(--text); resize: vertical;
+    font-family: inherit; min-height: 60px; margin-top: 8px;
+  }
+
+  /* --- Preventivo PDF --- */
+  .prev-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+  .prev-grid--full { grid-template-columns: 1fr; }
+  .btn-pdf {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: #003A5C; color: #fff; padding: 14px 28px;
+    border-radius: var(--radius); font-size: 14px; font-weight: 600;
+    cursor: pointer; border: none; transition: opacity 0.15s; margin-top: 8px;
+  }
+  .btn-pdf:hover { opacity: 0.85; }
+  .prev-summary {
+    background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 14px; margin-bottom: 14px; font-size: 13px; line-height: 1.8;
+  }
+  .prev-summary strong { color: var(--text); }
+
+  /* --- Responsive mobile --- */
+  @media (max-width: 640px) {
+    .topbar { padding: 10px 14px; gap: 10px; }
+    .topbar img { height: 26px; }
+    .topbar-title { font-size: 11px; padding-left: 10px; }
+    .topbar-badge { font-size: 10px; padding: 2px 8px; }
+
+    .main { padding: 16px 14px 0; }
+
+    .demo-bar {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
+      font-size: 11px;
+    }
+    .demo-bar span[style] { margin-left: 0 !important; margin-top: 4px; }
+
+    .piva-input { font-size: 16px; letter-spacing: 2px; padding: 12px 14px; }
+    .btn { padding: 12px 18px; font-size: 13px; }
+
+    .metrics { grid-template-columns: 1fr; gap: 8px; }
+    .metric-value { font-size: 16px; }
+
+    .badges { gap: 4px; }
+    .badge { font-size: 11px; padding: 3px 10px; }
+
+    .machine-row { flex-wrap: wrap; gap: 6px; }
+    .machine-name { min-width: 100%; }
+
+    /* Tabella canone: scroll orizzontale */
+    .canone-table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .canone-table thead,
+    .canone-table tbody { min-width: 520px; display: table; width: 100%; }
+    .canone-table th { font-size: 10px; padding: 6px 8px; white-space: nowrap; }
+    .canone-table td { padding: 8px 8px; font-size: 12px; white-space: nowrap; }
+
+    .slider-label { min-width: 120px; font-size: 12px; }
+    .slider-val { min-width: 50px; font-size: 13px; }
+
+    .funnel-grid { grid-template-columns: 1fr; gap: 8px; }
+    .funnel-value { font-size: 17px; }
+
+    .manual-grid { grid-template-columns: 1fr; gap: 8px; }
+
+    .card { padding: 16px; }
+    .company-name { font-size: 16px; }
+  }
+</style>
+</head>
+<body class="locked">
+
+<div class="gate" id="gate">
+  <div class="gate-box">
+    <div class="gate-title">Strumento finanziario MCF</div>
+    <div class="gate-sub">Rete commerciale Marotta Evolution.<br>Inserisci il PIN di accesso.</div>
+    <input class="gate-pin" id="gatePin" type="password" inputmode="numeric" maxlength="4"
+           autocomplete="off" placeholder="····" autofocus
+           oninput="onGateInput(this)" onkeydown="if(event.key==='Enter')verificaPin()">
+    <div class="gate-err" id="gateErr"></div>
+    <button class="btn btn-primary" onclick="verificaPin()">Entra</button>
+  </div>
+</div>
+
+<script>
+// Sblocco immediato se il PIN è già stato inserito su questo dispositivo.
+// Sta qui e non in fondo alla pagina per non far comparire il tool nemmeno per un istante.
+(function(){
+  try{
+    if(localStorage.getItem('mcf_marotta_auth')==='1'){
+      document.body.classList.remove('locked');
+      document.getElementById('gate').style.display='none';
+    }
+  }catch(e){}
+})();
+</script>
+
+<div class="topbar">
+  <img src="https://marottaevolution.it/wp-content/uploads/2020/09/logo-marotta-tricolore.png" alt="Marotta Evolution" onerror="this.style.display='none'">
+  <div class="topbar-title">Strumento finanziario MCF</div>
+  <div class="topbar-badge">Uso interno — riservato</div>
+  <button type="button" class="topbar-exit" onclick="esciTool()">Esci</button>
+</div>
+
+<div class="main">
+
+  <div class="demo-bar">
+    <span>P.IVA demo:</span>
+    <span class="demo-piva" onclick="setDemo('01234567897')">01234567897</span> piccolo &nbsp;·&nbsp;
+    <span class="demo-piva" onclick="setDemo('12345678903')">12345678903</span> medio &nbsp;·&nbsp;
+    <span class="demo-piva" onclick="setDemo('98765432103')">98765432103</span> strutturato &nbsp;·&nbsp;
+    <span class="demo-piva" onclick="setDemo('11111111115')">11111111115</span> giallo &nbsp;·&nbsp;
+    <span class="demo-piva" onclick="setDemo('22222222220')">22222222220</span> rosso
+    <span style="margin-left:auto; opacity:0.7;">Cerved API attiva per P.IVA reali</span>
+  </div>
+
+  <div class="search-section">
+    <div class="search-label">Ricerca caseificio per P.IVA</div>
+    <div class="search-row">
+      <input class="piva-input" id="pivaInput" type="text" maxlength="11" placeholder="00000000000" oninput="onPivaInput(this)">
+      <button class="btn btn-primary" id="searchBtn" onclick="cerca()" disabled>Analizza</button>
+    </div>
+    <div class="error-box" id="pivaError"></div>
+    <div class="loading-msg" id="loading">Interrogazione registro imprese...</div>
+  </div>
+
+  <div class="manual-card" id="manualForm">
+    <div class="card-title">Dati non disponibili — inserimento manuale</div>
+    <div class="manual-grid">
+      <div>
+        <div class="field-label">Ragione sociale</div>
+        <input class="field-input" id="manRs" type="text" placeholder="Nome azienda">
+      </div>
+      <div>
+        <div class="field-label">Fatturato annuo (€)</div>
+        <input class="field-input" id="manFat" type="number" placeholder="es. 800000">
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="elaboraManuale()">Elabora</button>
+  </div>
+
+  <div id="results">
+
+    <div class="card">
+      <div class="company-header">
+        <div class="company-initial" id="companyInitial">?</div>
+        <div>
+          <div class="company-name" id="companyName"></div>
+          <div class="company-piva" id="companyPiva"></div>
+        </div>
+      </div>
+      <div class="metrics" id="metricsBox"></div>
+      <div class="badges" id="badgesBox"></div>
+
+      <!-- Scheda cliente espandibile -->
+      <div id="schedaContainer" style="display:none;">
+        <button class="scheda-toggle" onclick="toggleScheda()">
+          <span class="scheda-toggle__arrow" id="schedaArrow">▶</span>
+          Scheda cliente completa (dati Cerved)
+        </button>
+        <div class="scheda-body" id="schedaBody">
+          <div class="scheda-grid" id="schedaGrid"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Configura l'offerta</div>
+
+      <div class="field-label" style="margin-bottom:8px;">Macchina principale</div>
+      <select class="select-styled" id="machineSelect" onchange="onCambioPrincipale()"></select>
+
+      <div class="field-label" style="margin-bottom:8px;">Prezzo macchina (IVA esclusa)</div>
+      <div class="price-row">
+        <button type="button" class="price-step" onclick="stepPrezzo(-500)" title="-500 €">&minus;</button>
+        <input class="price-input" id="prezzoInput" type="text" inputmode="numeric" oninput="onPrezzoInput(this)">
+        <button type="button" class="price-step" onclick="stepPrezzo(500)" title="+500 €">+</button>
+      </div>
+      <div class="note-small" id="prezzoHint"></div>
+      <div class="note-small" id="maxFinHint"></div>
+
+      <div id="accessoriBlock">
+        <div class="field-label" style="margin:16px 0 8px;">Accessori / kit</div>
+        <div id="accessoriList"></div>
+      </div>
+
+      <div class="field-label" style="margin:16px 0 8px;">Altri macchinari (fuori catalogo Marotta)</div>
+      <div id="altriMacchinariList"></div>
+      <button type="button" class="btn-ghost" onclick="aggiungiAltroMacchinario()" style="margin-top:4px;">+ Aggiungi macchinario</button>
+
+      <div class="prev-summary" id="totaleConfig" style="margin-top:16px;"></div>
+
+      <hr class="divider">
+
+      <div class="card-title">Simulatore canone Grenke — locazione operativa</div>
+      <table class="canone-table">
+        <thead>
+          <tr><th>Durata</th><th>Importo</th><th>Canone/mese</th><th>Riscatto</th><th>Pagamento</th></tr>
+        </thead>
+        <tbody id="canoneBody"></tbody>
+      </table>
+      <div class="note-small">Pagamento trimestrale anticipato standard. Mensile disponibile sopra €12.000 di canone con maggiorazione +5%. Riscatto secondo tabella Grenke (categoria Altri Beni Strumentali). Assicurazione obbligatoria non inclusa nei coefficienti.</div>
+
+      <hr class="divider">
+
+      <div class="card-title">Preventivatore inverso — dal canone al prezzo</div>
+      <div class="note-small" style="margin-top:0;">Quando il cliente ragiona a rata e non a prezzo: inserisci il canone che è disposto a pagare e ottieni il massimo importo di macchine finanziabile su quella durata.</div>
+      <div class="prev-grid" style="margin-top:12px;">
+        <div>
+          <div class="field-label">Canone obiettivo (€/mese)</div>
+          <input class="field-input" id="invCanone" type="number" step="100" placeholder="es. 6000" oninput="aggiornaInverso()">
+        </div>
+        <div>
+          <div class="field-label">Durata</div>
+          <select class="select-styled" id="invDurata" onchange="aggiornaInverso()">
+            <option value="24">24 mesi</option>
+            <option value="36">36 mesi</option>
+            <option value="48">48 mesi</option>
+            <option value="60" selected>60 mesi</option>
+          </select>
+        </div>
+      </div>
+      <div class="prev-summary" id="invResult" style="display:none;"></div>
+      <button type="button" class="btn-ghost" id="invApply" style="margin-top:10px;display:none;" onclick="applicaPrezzoInverso()">Porta questo importo nella configurazione</button>
+    </div>
+
+    <!-- Credit Policy -->
+    <div class="card" id="creditPolicyCard" style="display:none;">
+      <div class="card-title">Valutazione creditizia</div>
+      <div id="semaforoBox"></div>
+      <div class="credit-detail" id="creditDetail"></div>
+      <div class="ai-memo" id="aiMemo">
+        <div class="ai-memo__title">Analisi AI — caso borderline</div>
+        <div class="ai-memo__body" id="aiMemoBody"></div>
+      </div>
+
+      <div class="override-section">
+        <div class="override-title">Override manuale (Carmine)</div>
+        <div class="override-row">
+          <span class="override-label">Anticipo richiesto</span>
+          <input type="range" id="slAnticipo" min="0" max="30" step="5" value="0" oninput="aggiornaOverride()">
+          <span class="override-val" id="outAnticipo">0%</span>
+        </div>
+        <div class="override-row">
+          <span class="override-label">Markup canone</span>
+          <select id="selMarkup" onchange="aggiornaOverride()">
+            <option value="0">Nessuno (0%)</option>
+            <option value="0.3">+0.3%</option>
+            <option value="0.5">+0.5%</option>
+            <option value="1">+1.0%</option>
+          </select>
+        </div>
+        <textarea class="override-note" id="creditNote" placeholder="Note interne (non appaiono nel preventivo)..."></textarea>
+      </div>
+    </div>
+
+    <div class="card" id="funnelCard">
+      <div class="card-title">Analisi di pareggio e risparmio</div>
+      <label class="acc-item">
+        <input type="checkbox" id="funnelToggle" onchange="toggleFunnel()">
+        <span class="acc-name">Mostra analisi di pareggio e confronto risparmio (a mano vs con macchina)</span>
+      </label>
+
+      <div id="funnelBody" style="display:none;">
+        <div class="field-label" style="margin:16px 0 8px;">Produzione</div>
+        <div class="slider-block">
+          <div class="slider-row">
+            <span class="slider-label">Pezzi/ora (macchina)</span>
+            <input type="range" id="slPezzi" min="100" max="3000" step="50" value="400" oninput="onSlider('Pezzi')">
+            <input type="number" class="funnel-num" id="numPezzi" value="400" oninput="aggiornaFunnel()">
+          </div>
+        </div>
+        <div class="slider-block">
+          <div class="slider-row">
+            <span class="slider-label">Ore lavorate/giorno</span>
+            <input type="range" id="slOre" min="1" max="16" step="1" value="8" oninput="onSlider('Ore')">
+            <input type="number" class="funnel-num" id="numOre" value="8" oninput="aggiornaFunnel()">
+          </div>
+        </div>
+        <div class="slider-block">
+          <div class="slider-row">
+            <span class="slider-label">Giorni lavorativi/mese</span>
+            <input type="range" id="slGiorni" min="1" max="31" step="1" value="22" oninput="onSlider('Giorni')">
+            <input type="number" class="funnel-num" id="numGiorni" value="22" oninput="aggiornaFunnel()">
+          </div>
+        </div>
+
+        <div class="field-label" style="margin:16px 0 8px;">Grammature per burrata (g/pezzo)</div>
+        <div class="funnel-inputs">
+          <div><div class="field-label">Mozzarella a mano</div><input type="number" class="field-input" id="gMozzMano" value="130" oninput="aggiornaFunnel()"></div>
+          <div><div class="field-label">Stracciatella a mano</div><input type="number" class="field-input" id="gStrMano" value="70" oninput="aggiornaFunnel()"></div>
+          <div><div class="field-label">Mozzarella con macchina</div><input type="number" class="field-input" id="gMozzMacc" value="120" oninput="aggiornaFunnel()"></div>
+          <div><div class="field-label">Stracciatella con macchina</div><input type="number" class="field-input" id="gStrMacc" value="60" oninput="aggiornaFunnel()"></div>
+        </div>
+
+        <div class="field-label" style="margin:16px 0 8px;">Costi e margine</div>
+        <div class="funnel-inputs">
+          <div><div class="field-label">Materia prima €/kg</div><input type="number" step="0.1" class="field-input" id="costoMP" value="8" oninput="aggiornaFunnel()"></div>
+          <div><div class="field-label">Costo operaio €/anno</div><input type="number" step="500" class="field-input" id="costoOperaio" value="30000" oninput="aggiornaFunnel()"></div>
+          <div><div class="field-label">Operai a mano</div><input type="number" class="field-input" id="operaiMano" value="3" oninput="aggiornaFunnel()"></div>
+          <div><div class="field-label">Operai con macchina</div><input type="number" class="field-input" id="operaiMacc" value="1" oninput="aggiornaFunnel()"></div>
+          <div><div class="field-label">Margine €/kg burrata</div><input type="number" step="0.1" class="field-input" id="margineKg" value="1.50" oninput="aggiornaFunnel()"></div>
+        </div>
+
+        <div class="funnel-grid" id="funnelResult" style="margin-top:16px;"></div>
+        <div id="selfSustain"></div>
+        <div id="risparmioBox"></div>
+
+        <button type="button" class="btn-ghost" onclick="stampaAnalisi()" style="margin-top:14px;">Stampa analisi</button>
+      </div>
+    </div>
+
+    <!-- Confronto soluzioni -->
+    <div class="card" id="confrontoCard">
+      <div class="card-title">Confronto soluzioni</div>
+      <div class="note-small">Quattro scenari finanziari sulla stessa configurazione (€<span id="confrontoImporto"></span>). Spunta quelli da includere nel preventivo PDF.</div>
+      <div class="scenari-grid" id="scenariGrid"></div>
+    </div>
+
+    <!-- Partner estero: area Schengen (Grenke/Econocom) vs extra-Schengen (SACE) -->
+    <div class="card" id="esteroCard">
+      <div class="card-title">Partner estero</div>
+      <label class="acc-item">
+        <input type="checkbox" id="esteroToggle" onchange="toggleEstero()">
+        <span class="acc-name">Il cliente finale è fuori Italia</span>
+      </label>
+
+      <div id="esteroBody" style="display:none;">
+        <div class="prev-grid" style="margin-top:16px;">
+          <div>
+            <div class="field-label">Area</div>
+            <select class="select-styled" id="esteroArea" onchange="aggiornaEstero()">
+              <option value="schengen">Area Schengen / SEPA</option>
+              <option value="extra">Extra-Schengen (con assicurazione crediti)</option>
+            </select>
+          </div>
+          <div>
+            <div class="field-label">Paese</div>
+            <input class="field-input" id="esteroPaese" type="text" placeholder="Es. Spagna, Brasile, India">
+          </div>
+        </div>
+
+        <div id="esteroSchengenBox" style="display:none;">
+          <table class="canone-table">
+            <thead>
+              <tr><th>Canale</th><th>Durata</th><th>Rata/mese</th><th>Nota</th></tr>
+            </thead>
+            <tbody id="esteroSchengenBody"></tbody>
+          </table>
+          <div class="note-small">Grenke opera dove è presente con propria sede, quindi in area Schengen e senza rischio cambio, con limite di €200.000 per operazione. Sopra quella soglia si passa a Econocom oppure al finanziamento in cui la proprietà del bene resta al cliente, il fornitore viene pagato subito e il cliente rimborsa in 60 mesi. Coefficienti Econocom 60 mesi da tabella Luca Silvestrin del 26/05/2026: rata indicativa, l'operazione viene valutata caso per caso.</div>
+        </div>
+
+        <div id="esteroExtraBox" style="display:none;">
+          <div class="prev-grid">
+            <div>
+              <div class="field-label">Valore beni e servizi (€)</div>
+              <input class="field-input" id="saceValore" type="number" step="1000" oninput="onSaceValore()">
+            </div>
+            <div>
+              <div class="field-label">Bank fees (€)</div>
+              <input class="field-input" id="saceBank" type="number" step="100" value="3000" oninput="renderSace()">
+            </div>
+          </div>
+          <div class="prev-grid">
+            <div>
+              <div class="field-label">Anticipo (%)</div>
+              <input class="field-input" id="saceAnticipo" type="number" step="1" value="15" oninput="renderSace()">
+            </div>
+            <div>
+              <div class="field-label">Security deposit (%)</div>
+              <input class="field-input" id="saceDeposito" type="number" step="1" value="5" oninput="renderSace()">
+            </div>
+          </div>
+          <table class="canone-table">
+            <thead>
+              <tr><th>Voce</th><th>12 mesi</th><th>24 mesi</th><th>60 mesi</th></tr>
+            </thead>
+            <tbody id="saceBody"></tbody>
+          </table>
+          <div class="note-small">Fuori area Schengen l'operazione passa solo con copertura assicurativa sul credito. Il modello riproduce la quotazione reale su €400.000: premio SACE in percentuale sul valore dei beni, anticipo e rata calcolati sul totale credito. Le colonne 12 e 24 mesi sono quotate, i 60 mesi sono una stima ottenuta estendendo il premio in proporzione alla durata: prima di usarli in offerta vanno confermati. Il security deposit del 5% rientra a fine contratto e non è un costo. Restano fuori perimetro le società di nuova costituzione, in Italia come all'estero.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Preventivo PDF -->
+    <div class="card" id="preventivoCard">
+      <div class="card-title">Genera preventivo</div>
+      <div class="prev-summary" id="prevSummary"></div>
+      <div class="prev-grid">
+        <div>
+          <div class="field-label">Commerciale MCF</div>
+          <input class="field-input" id="prevNome" type="text" value="Alberto Amà">
+        </div>
+        <div>
+          <div class="field-label">Validità offerta (giorni)</div>
+          <input class="field-input" id="prevValidita" type="number" value="30" min="7" max="90">
+        </div>
+      </div>
+      <div class="prev-grid">
+        <div>
+          <div class="field-label">Alla cortese attenzione di (titolare / caseificio)</div>
+          <input class="field-input" id="prevTitolare" type="text" placeholder="Es. Sig. Mario Rossi — Caseificio Rossi">
+        </div>
+        <div>
+          <div class="field-label">Logo cliente (opzionale)</div>
+          <input class="field-input" id="prevLogo" type="file" accept="image/*" onchange="caricaLogoCliente(this)">
+          <div id="logoClientePreview" style="margin-top:8px;"></div>
+        </div>
+      </div>
+      <div class="prev-grid prev-grid--full">
+        <div>
+          <div class="field-label">Note personalizzate (opzionale)</div>
+          <textarea class="override-note" id="prevNote" placeholder="Es. consegna prevista entro 45gg, formazione inclusa..."></textarea>
+        </div>
+      </div>
+      <button class="btn-pdf" onclick="generaPDF()">
+        <span style="font-size:18px;">&#128196;</span> Scarica preventivo PDF
+      </button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Checklist documenti</div>
+      <div class="doc-toggle">
+        <button type="button" id="docTabNoleggio" class="doc-tab" onclick="setCanaleDoc('noleggio')">Noleggio operativo</button>
+        <button type="button" id="docTabLeasing" class="doc-tab" onclick="setCanaleDoc('leasing')">Leasing bancario</button>
+      </div>
+      <div id="docList"></div>
+    </div>
+
+    <!-- Vista interna Marotta: plafond attivi (mai nel PDF) -->
+    <div class="card" id="plafondCard">
+      <button class="scheda-toggle" onclick="togglePlafond()">
+        <span class="scheda-toggle__arrow" id="plafondArrow">▶</span>
+        Vista interna Marotta — Plafond attivi
+      </button>
+      <div class="scheda-body" id="plafondBody">
+        <div class="note-small">Plafond per canale e residuo disponibile. Dato interno (non compare mai nel preventivo). Aggiornabile a mano.</div>
+        <div id="plafondList"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// Catalogo allineato al tool Marotta (Joker Store): 3 macchine principali + 4 accessori.
+// I prezzi sono quelli del listino corrente. prezzoMin/prezzoMax = range per le frecce ±500 (step 2).
+// TODO: confermare range Fast/Mevo6 e prezzi accessori con Martina (ufficio tecnico Marotta).
+const MACCHINE = [
+  // --- Macchine principali (formatrici, scelta unica) ---
+  {id:"plus", nome:"Mevo Plus", prezzo:145000, prezzoMin:145000, prezzoMax:155000, pezziOra:400,  tipo:"principale"},
+  {id:"fast", nome:"Mevo Fast", prezzo:185000, prezzoMin:185000, prezzoMax:195000, pezziOra:1200, tipo:"principale"},
+  {id:"mevo6",nome:"Mevo 6",    prezzo:280000, prezzoMin:280000, prezzoMax:290000, pezziOra:2400, tipo:"principale"},
+  // --- Accessori / kit (configurabili dopo la scelta della principale) ---
+  {id:"evotella",   nome:"Evotella",     prezzo:45000, pezziOra:0, tipo:"accessorio", compatibile:["plus","fast","mevo6"]},
+  {id:"evomixer",   nome:"Evo Mixer",    prezzo:35000, pezziOra:0, tipo:"accessorio", compatibile:["plus","fast","mevo6"]},
+  {id:"evotransfer",nome:"Evo Transfer", prezzo:28000, pezziOra:0, tipo:"accessorio", compatibile:["plus","fast","mevo6"]},
+  {id:"evoclean",   nome:"Evo Clean",    prezzo:38000, pezziOra:0, tipo:"accessorio", compatibile:["plus","fast","mevo6"]},
+];
+
+// Solo le 3 principali sono selezionabili come macchina base
+const PRINCIPALI = MACCHINE.filter(m=>m.tipo==="principale");
+
+// Coefficienti Grenke (tabella Sputnik++++, fonte ReteRent / src/data/grenke.ts MCF).
+// Durate: 24/36/48/60 (i 30 mesi sono stati rimossi su indicazione Andrea).
+const GRENKE=[
+  {mesi:24,bands:[{da:500,a:2500,c:5.014},{da:2501,a:5000,c:5.011},{da:5001,a:12000,c:4.967},{da:12001,a:25000,c:4.959},{da:25001,a:50000,c:4.882},{da:50001,a:500000,c:4.820}]},
+  {mesi:36,bands:[{da:500,a:2500,c:3.634},{da:2501,a:5000,c:3.541},{da:5001,a:12000,c:3.472},{da:12001,a:25000,c:3.448},{da:25001,a:50000,c:3.410},{da:50001,a:500000,c:3.406}]},
+  {mesi:48,bands:[{da:500,a:2500,c:3.069},{da:2501,a:5000,c:2.742},{da:5001,a:12000,c:2.712},{da:12001,a:25000,c:2.679},{da:25001,a:50000,c:2.677},{da:50001,a:500000,c:2.674}]},
+  {mesi:60,bands:[{da:500,a:2500,c:2.672},{da:2501,a:5000,c:2.315},{da:5001,a:12000,c:2.277},{da:12001,a:25000,c:2.246},{da:25001,a:50000,c:2.212},{da:50001,a:500000,c:2.149}]},
+];
+
+// Checklist documenti differenziata noleggio operativo vs leasing bancario (brief 3.10).
+const DOCS={
+  // Noleggio operativo (Grenke / Pagarent)
+  noleggio:[
+    "Visura camerale (entro 3 mesi)",
+    "Carta d'identità legale rappresentante",
+    "Codice fiscale legale rappresentante",
+    "IBAN aziendale per addebito SDD",
+    "Bilanci 2023 e 2024 depositati",
+    "Bilancio provvisorio 2025 (se disponibile)",
+    "Cellulare ed email per OTP firma",
+  ],
+  // Aggiuntivi per leasing bancario (Alba / Credem / Sella)
+  leasingExtra:[
+    "Modulo antiriciclaggio compilato",
+    "Modulo adeguata verifica clientela",
+    "Dichiarazione titolarità effettiva",
+    "Estratti conto bancari ultimi 6 mesi (per importi sopra 150k)",
+    "Centrale Rischi Banca d'Italia",
+  ],
+};
+
+const DEMO={
+  "01234567897":{rs:"Caseificio Demo SRL",fat:350000},
+  "12345678903":{rs:"Latteria Centrale Srl",fat:1200000},
+  "98765432103":{rs:"Caseificio Industriale SpA",fat:4500000},
+  "11111111115":{rs:"Caseificio Vesuvio Srl",fat:480000},
+  "22222222220":{rs:"Formaggi Del Sud Srl",fat:290000},
+};
+
+let stato={fat:0,rs:"",piva:"",canale:"grenke",macchina:null,cerved:null,durataSelezionata:36,
+  prezzoPrincipale:0,accessori:[],altriMacchinari:[],prezzoTotale:0,funnelAttivo:false,funnel:null,
+  canaleDoc:null,docSpuntati:{},scenari:null,plafond:null,
+  inverso:null,estero:{attivo:false,valoreManuale:false}};
+
+// --- Gate PIN ---------------------------------------------------------------
+// Stesso PIN del tool Joker Store, così Andrea e Carmine non devono impararne un altro.
+// È una protezione lato client: tiene fuori chi capita sull'URL, non è una barriera
+// crittografica. Il tool mostra plafond, override e coefficienti: se il PIN gira,
+// si cambia qui e si ridistribuisce.
+const GATE_PIN="9999";
+const GATE_KEY="mcf_marotta_auth";
+
+function onGateInput(el){
+  el.value=el.value.replace(/\D/g,'').slice(0,4);
+  document.getElementById('gateErr').textContent='';
+  el.classList.remove('shake');
+  if(el.value.length===4) verificaPin();
+}
+
+function verificaPin(){
+  const el=document.getElementById('gatePin');
+  if(el.value!==GATE_PIN){
+    document.getElementById('gateErr').textContent='PIN errato.';
+    el.classList.add('shake');
+    el.value='';
+    setTimeout(()=>{el.classList.remove('shake');el.focus();},400);
+    return;
+  }
+  try{ localStorage.setItem(GATE_KEY,'1'); }catch(e){}
+  document.body.classList.remove('locked');
+  document.getElementById('gate').style.display='none';
+}
+
+function esciTool(){
+  try{ localStorage.removeItem(GATE_KEY); }catch(e){}
+  location.reload();
+}
+
+function setDemo(p){
+  document.getElementById("pivaInput").value=p;
+  onPivaInput(document.getElementById("pivaInput"));
+  setTimeout(cerca,100);
+}
+
+function validaPiva(p){
+  if(!/^\d{11}$/.test(p))return false;
+  let s=0;
+  for(let i=0;i<10;i++){let d=parseInt(p[i]);s+=(i%2===0)?d:(d*2>9?d*2-9:d*2);}
+  return(10-s%10)%10===parseInt(p[10]);
+}
+
+function onPivaInput(el){
+  const v=el.value.replace(/\D/g,"").slice(0,11);
+  el.value=v;
+  const btn=document.getElementById("searchBtn");
+  const err=document.getElementById("pivaError");
+  if(v.length===11){
+    if(validaPiva(v)){el.className="piva-input valid";btn.disabled=false;err.style.display="none";}
+    else{el.className="piva-input invalid";btn.disabled=true;err.textContent="Partita IVA non valida — controlla il codice di controllo.";err.style.display="block";}
+  }else{el.className="piva-input";btn.disabled=true;err.style.display="none";}
+}
+
+async function cerca(){
+  const piva=document.getElementById("pivaInput").value;
+  stato.piva=piva;
+  stato.cerved=null;
+  document.getElementById("loading").style.display="block";
+  document.getElementById("results").style.display="none";
+  document.getElementById("manualForm").style.display="none";
+
+  // Prova Cerved API (via proxy Vercel)
+  try{
+    const res=await fetch(`https://www.mediocreditofacile.it/api/cerved?piva=${piva}`);
+    const data=await res.json();
+    if(data.found){
+      stato.rs=data.ragioneSociale;
+      stato.fat=data.fatturato||0;
+      stato.cerved=data;
+      document.getElementById("loading").style.display="none";
+      elabora();
+      return;
+    }
+  }catch(e){console.warn("Cerved API non raggiungibile, fallback locale",e);}
+
+  // Fallback: dati DEMO o form manuale
+  document.getElementById("loading").style.display="none";
+  if(DEMO[piva]){stato.rs=DEMO[piva].rs;stato.fat=DEMO[piva].fat;elabora();}
+  else{document.getElementById("manualForm").style.display="block";}
+}
+
+function elaboraManuale(){
+  const rs=document.getElementById("manRs").value.trim();
+  const fat=parseInt(document.getElementById("manFat").value);
+  if(!rs||!fat)return;
+  stato.rs=rs;stato.fat=fat;
+  document.getElementById("manualForm").style.display="none";
+  elabora();
+}
+
+function classifica(fat){
+  if(fat<500000)return{label:"Piccolo",fascia:"small",canale:"grenke",canaleLabel:"Grenke / Pagarent",incentivi:false};
+  if(fat<=2000000)return{label:"Medio",fascia:"medium",canale:"grenke_alba",canaleLabel:"Grenke / Pagarent · Alba / Credem",incentivi:true};
+  return{label:"Strutturato",fascia:"large",canale:"sella",canaleLabel:"Sella Leasing",incentivi:true};
+}
+
+function getCoeff(prezzo,mesi){
+  const row=GRENKE.find(r=>r.mesi===mesi);
+  if(!row)return null;
+  const b=row.bands.find(b=>prezzo>=b.da&&prezzo<=b.a)||row.bands[row.bands.length-1];
+  return b.c;
+}
+
+function calcCanone(prezzo,mesi){
+  const c=getCoeff(prezzo,mesi);
+  return c?Math.round(prezzo*c/100):null;
+}
+
+// Riscatto Grenke per durata — categoria "Altri Beni Strumentali" (fonte: src/data/grenke.ts MCF)
+const RISCATTO={24:10,36:6,48:4,60:3};
+
+// --- Preventivatore inverso: dal canone al prezzo ---
+// Il coefficiente dipende dalla fascia di prezzo, quindi non basta dividere: si cerca
+// la fascia in cui la soluzione prezzo = canone / coefficiente ricade davvero.
+// Se la soluzione cade in un buco fra due fasce si tiene la fascia inferiore (prezzo
+// più basso, quindi mai un importo promesso al cliente che poi non regge).
+function prezzoDaCanone(canone,mesi){
+  const row=GRENKE.find(r=>r.mesi===mesi);
+  if(!row||!(canone>0))return null;
+  const ultima=row.bands.length-1;
+  let fallback=null;
+  for(let i=0;i<row.bands.length;i++){
+    const b=row.bands[i];
+    // l'ultima fascia è aperta verso l'alto: getCoeff() applica quel coefficiente
+    // anche sopra i 500.000, quindi qui va trattata allo stesso modo
+    const tetto=i===ultima?Infinity:b.a;
+    const p=canone*100/b.c;
+    if(p>=b.da&&p<=tetto) return {prezzo:Math.floor(p),coeff:b.c,esatto:true};
+    if(p>tetto) fallback={prezzo:b.a,coeff:b.c,esatto:false};
+  }
+  return fallback;
+}
+
+function aggiornaInverso(){
+  const canone=num('invCanone');
+  const mesi=parseInt(document.getElementById('invDurata').value);
+  const box=document.getElementById('invResult');
+  const btn=document.getElementById('invApply');
+  if(!(canone>0)){box.style.display='none';btn.style.display='none';return;}
+
+  const r=prezzoDaCanone(canone,mesi);
+  if(!r){box.style.display='block';btn.style.display='none';box.innerHTML='Canone fuori dalle fasce Grenke per questa durata.';return;}
+
+  const canoneReale=calcCanone(r.prezzo,mesi)||0;
+  const riscPerc=RISCATTO[mesi]||0;
+  const riscVal=Math.round(r.prezzo*riscPerc/100);
+  let html=`<strong>Importo massimo finanziabile: €${fmt(r.prezzo)}</strong>`;
+  html+=`<br>Canone effettivo su quell'importo: €${fmt(canoneReale)}/mese × ${mesi} mesi`;
+  html+=`<br>Riscatto finale ${riscPerc}%: €${fmt(riscVal)}`;
+  if(!r.esatto) html+=`<br><span style="color:var(--amber-text)">Con quel canone si esce dalla fascia: importo limitato al tetto della fascia applicabile.</span>`;
+  box.innerHTML=html;
+  box.style.display='block';
+  btn.style.display='inline-flex';
+  stato.inverso={prezzo:r.prezzo,mesi};
+}
+
+// Porta l'importo trovato nella configurazione: gli accessori e i macchinari fuori
+// catalogo restano dove sono, si aggiusta solo il prezzo della macchina principale.
+function applicaPrezzoInverso(){
+  if(!stato.inverso)return;
+  let extra=0;
+  (stato.accessori||[]).forEach(id=>{const a=MACCHINE.find(x=>x.id===id); if(a)extra+=a.prezzo;});
+  (stato.altriMacchinari||[]).forEach(x=>{extra+=parseInt(x.prezzo)||0;});
+  const nuovo=stato.inverso.prezzo-extra;
+  if(nuovo<=0){
+    document.getElementById('invResult').innerHTML+=`<br><span style="color:var(--amber-text)">Accessori e altri macchinari (€${fmt(extra)}) superano già l'importo: togli qualcosa prima di applicarlo.</span>`;
+    return;
+  }
+  stato.prezzoPrincipale=nuovo;
+  document.getElementById('prezzoInput').value=nuovo;
+  selezionaDurata(stato.inverso.mesi);
+  ricalcola();
+}
+
+// --- Leasing Sella (per il confronto soluzioni) — modello "capitale-gonfiato" da src/data/leasing.ts MCF ---
+// Tasso effettivo = spread + Euribor 3M; la provvigione è caricata nel capitale finanziato.
+// Spread = medio commerciale 2,75% (stesso usato nella variante fornitori). Provvigione 1%.
+const EURIBOR_3M=2.23;          // % annuo (da aggiornare manualmente)
+const SELLA_LEASING={spread:2.75,provvigionePerc:1,istruttoria:380,incassoRata:6,durate:[24,36,48,60,72,84]};
+
+// Calcola la rata leasing Sella. preMesi = mesi di preammortamento (solo interessi).
+function calcLeasingSella(importo,durata,anticipoPerc,riscattoPerc,preMesi){
+  const anticipo=importo*(anticipoPerc/100);
+  const riscatto=importo*(riscattoPerc/100);
+  const numRate=durata-1;                       // il primo mese è l'anticipo
+  const provvigione=importo*(SELLA_LEASING.provvigionePerc/100);
+  const tassoEff=SELLA_LEASING.spread+EURIBOR_3M;
+  const r=tassoEff/100/12;
+  const capitaleAmm=(importo-anticipo)+provvigione;   // capitale gonfiato della provvigione
+  const pvRiscatto=riscatto/Math.pow(1+r,numRate);
+  const capitaleFin=capitaleAmm-pvRiscatto;
+  const rata=capitaleFin*(r*Math.pow(1+r,numRate))/(Math.pow(1+r,numRate)-1);
+  const preRata=preMesi>0?capitaleAmm*r:0;            // preammortamento: sola quota interessi
+  const totale=anticipo+preMesi*preRata+numRate*rata+riscatto+SELLA_LEASING.istruttoria+numRate*SELLA_LEASING.incassoRata;
+  return {rata:Math.round(rata),anticipo:Math.round(anticipo),riscatto:Math.round(riscatto),preRata:Math.round(preRata),totale:Math.round(totale),tasso:tassoEff};
+}
+
+// useGrouping:'always' perché l'italiano di default non separa le migliaia sotto le
+// cinque cifre (scriverebbe 6000 invece di 6.000)
+function fmt(n){return (n||0).toLocaleString("it-IT",{useGrouping:"always"});}
+
+// Formatta importo in €Xk o €XM
+function fmtEuro(n){
+  if(n==null)return "n.d.";
+  if(Math.abs(n)>=1000000)return "€"+(n/1000000).toFixed(1).replace(".",",")+"M";
+  if(Math.abs(n)>=1000)return "€"+fmt(Math.round(n/1000))+"k";
+  return "€"+fmt(n);
+}
+
+// Badge CGS colorato (inline nella metrica)
+function cgsBadge(cgs){
+  if(cgs<=3)return `<span style="color:var(--green)">${cgs} — Basso</span>`;
+  if(cgs<=6)return `<span style="color:var(--amber)">${cgs} — Medio</span>`;
+  return `<span style="color:var(--red,#D32F2F)">${cgs} — Elevato</span>`;
+}
+
+// Badge CGS tag (nella sezione badges)
+function cgsBadgeTag(cgs){
+  if(cgs<=3)return `<span class="badge badge-green">CGS ${cgs} — Rischio basso</span>`;
+  if(cgs<=6)return `<span class="badge badge-amber">CGS ${cgs} — Rischio medio</span>`;
+  return `<span class="badge badge-red">CGS ${cgs} — Rischio elevato</span>`;
+}
+
+// --- Scheda cliente ---
+function toggleScheda(){
+  const body=document.getElementById("schedaBody");
+  const arrow=document.getElementById("schedaArrow");
+  body.classList.toggle("open");
+  arrow.classList.toggle("open");
+}
+
+function renderScheda(){
+  const c=stato.cerved;
+  if(!c){document.getElementById("schedaContainer").style.display="none";return;}
+  document.getElementById("schedaContainer").style.display="block";
+
+  // Calcola anni attività
+  let anniAttivita=null;
+  if(c.dataCostituzione){
+    const parts=c.dataCostituzione.split('-');
+    if(parts.length===3){
+      const annoCostituzione=parseInt(parts[2].length===4?parts[2]:parts[0]);
+      anniAttivita=new Date().getFullYear()-annoCostituzione;
+    }
+  }
+
+  const items=[];
+  const add=(label,value,full)=>{if(value!=null&&value!=='')items.push({label,value,full:!!full});};
+
+  add('Ragione sociale',c.ragioneSociale,true);
+  add('Forma giuridica',c.formaGiuridica);
+  add('P.IVA / C.F.',stato.piva);
+  add('Sede legale',c.indirizzo,true);
+  if(c.regione)add('Regione',c.regione);
+  if(c.telefono)add('Telefono',`<a href="tel:${c.telefono}">${c.telefono}</a>`);
+  if(c.pec)add('PEC',`<a href="mailto:${c.pec}">${c.pec.toLowerCase()}</a>`);
+  if(c.sitoWeb)add('Sito web',`<a href="https://${c.sitoWeb.toLowerCase()}" target="_blank">${c.sitoWeb.toLowerCase()}</a>`);
+  if(c.ateco)add('Codice ATECO',c.ateco,true);
+  if(c.macrosettore)add('Macrosettore',c.macrosettore);
+  if(c.dataCostituzione)add('Data costituzione',c.dataCostituzione+(anniAttivita!=null?` (${anniAttivita} anni)`:''));
+  if(c.fatturato!=null)add('Fatturato',`€${fmt(c.fatturato)}`);
+  if(c.patrimonioNetto!=null)add('Patrimonio netto',`€${fmt(c.patrimonioNetto)}`);
+  if(c.utile!=null)add('Utile esercizio',`€${fmt(c.utile)}`);
+  if(c.mol!=null)add('MOL',`€${fmt(c.mol)}`);
+  if(c.attivo!=null)add('Attivo',`€${fmt(c.attivo)}`);
+  if(c.capitaleSociale!=null)add('Capitale sociale versato',`€${fmt(c.capitaleSociale)}`);
+  if(c.dipendenti!=null)add('Dipendenti',c.dipendenti);
+  if(c.annoUltimoBilancio!=null)add('Anno ultimo bilancio',c.annoUltimoBilancio);
+
+  document.getElementById("schedaGrid").innerHTML=items.map(i=>
+    `<div class="scheda-item${i.full?' scheda-item--full':''}">
+      <div class="scheda-label">${i.label}</div>
+      <div class="scheda-value">${i.value}</div>
+    </div>`
+  ).join('');
+}
+
+// --- Credit Policy ---
+const ATECO_CASEARIO=['10.51'];
+const ATECO_ALIMENTARE=['10.','01.4','01.5'];
+
+// Mapping CGS Cerved (1-9) → giudizio MCF e % approvazione (brief 4.3).
+// Il numero più basso è il migliore. 8-9 = blocco con alert (valutazione personalizzata).
+const CGS_MAP={
+  1:{et:'Sicurezza',                giud:'Probabilità certa',          perc:100},
+  2:{et:'Solvibilità',              giud:'Probabilità certa',          perc:100},
+  3:{et:'Affidabilità',             giud:'Probabilità alta',           perc:90},
+  4:{et:'Vulnerabilità',            giud:'Probabilità alta',           perc:90},
+  5:{et:'Sostenibilità economica',  giud:'Probabilità media',          perc:75},
+  6:{et:'Vulnerabilità elevata',    giud:'Probabilità media',          perc:50},
+  7:{et:'Rischio elevato',          giud:'Probabilità bassa',          perc:25},
+  8:{et:'Pre-default',              giud:'Valutazione personalizzata', perc:null, blocco:true},
+  9:{et:'Sofferenza / default',     giud:'Valutazione personalizzata', perc:null, blocco:true},
+};
+
+function classificaAteco(atecoStr){
+  if(!atecoStr)return 'sconosciuto';
+  const code=atecoStr.split(' ')[0].split('-')[0].trim();
+  if(ATECO_CASEARIO.some(a=>code.startsWith(a)))return 'caseario';
+  if(ATECO_ALIMENTARE.some(a=>code.startsWith(a)))return 'alimentare';
+  return 'altro';
+}
+
+function valutaCreditPolicy(){
+  const fat=stato.fat;
+  const m=stato.macchina;
+  if(!m)return;
+  const prezzo=stato.prezzoTotale||0;
+
+  // Dati Cerved (se disponibili)
+  const pn=stato.cerved?.patrimonioNetto;  // patrimonio netto
+  const utile=stato.cerved?.utile;         // utile
+
+  let semaforo='verde';
+  let anticipo=0;
+  let markup=0;
+  let criteriGiallo=[];
+  let motivo=[];
+  let criteri=[];
+
+  // --- Criterio 1: Prezzo macchina ≤ 20% del fatturato ---
+  const ratioPrezzo=fat>0?(prezzo/fat*100):999;
+  if(ratioPrezzo<=20){
+    criteri.push({nome:'Rapporto prezzo/fatturato',valore:`${ratioPrezzo.toFixed(1)}% (≤20%)`,ok:true});
+  }else if(ratioPrezzo<=30){
+    // Tra 20% e 30%: giallo → anticipo proporzionale
+    semaforo='giallo';
+    anticipo=Math.round((ratioPrezzo-20)*2); // 20%→0%, 25%→10%, 30%→20%
+    criteriGiallo.push(`Prezzo macchina = ${ratioPrezzo.toFixed(1)}% del fatturato (soglia 20%) → anticipo ${anticipo}%`);
+    criteri.push({nome:'Rapporto prezzo/fatturato',valore:`${ratioPrezzo.toFixed(1)}% (>20%)`,ok:false});
+  }else{
+    // Oltre 30%: rosso
+    semaforo='rosso';
+    motivo.push(`Prezzo macchina = ${ratioPrezzo.toFixed(1)}% del fatturato (massimo 20%)`);
+    criteri.push({nome:'Rapporto prezzo/fatturato',valore:`${ratioPrezzo.toFixed(1)}% (>20%)`,ok:false});
+  }
+
+  // --- Criterio 2: Patrimonio netto ≥ 75% del prezzo macchina ---
+  if(pn!=null){
+    const ratioPn=prezzo>0?(pn/prezzo*100):0;
+    if(ratioPn>=75){
+      criteri.push({nome:'Patrimonio netto / prezzo',valore:`${ratioPn.toFixed(0)}% (≥75%)`,ok:true});
+    }else if(ratioPn>=50){
+      if(semaforo!=='rosso')semaforo='giallo';
+      const markupPn=ratioPn<60?0.5:0.3;
+      markup=Math.max(markup,markupPn);
+      criteriGiallo.push(`Patrimonio netto = ${ratioPn.toFixed(0)}% del prezzo macchina (soglia 75%) → markup +${markupPn}%`);
+      criteri.push({nome:'Patrimonio netto / prezzo',valore:`${ratioPn.toFixed(0)}% (<75%)`,ok:false});
+    }else{
+      semaforo='rosso';
+      motivo.push(`Patrimonio netto = €${fmt(pn)} (${ratioPn.toFixed(0)}% del prezzo, minimo 75%)`);
+      criteri.push({nome:'Patrimonio netto / prezzo',valore:`${ratioPn.toFixed(0)}% (<75%)`,ok:false});
+    }
+  }else{
+    criteri.push({nome:'Patrimonio netto / prezzo',valore:'Dato non disponibile',ok:null});
+  }
+
+  // --- Criterio 3: Utile > 0 ---
+  if(utile!=null){
+    if(utile>0){
+      criteri.push({nome:'Utile d\'esercizio',valore:`€${fmt(utile)} (positivo)`,ok:true});
+    }else if(utile===0){
+      if(semaforo!=='rosso')semaforo='giallo';
+      criteriGiallo.push('Utile d\'esercizio pari a zero → anticipo 10%');
+      anticipo=Math.max(anticipo,10);
+      criteri.push({nome:'Utile d\'esercizio',valore:'€0 (pareggio)',ok:false});
+    }else{
+      semaforo='rosso';
+      motivo.push(`Utile d'esercizio negativo: €${fmt(utile)}`);
+      criteri.push({nome:'Utile d\'esercizio',valore:`€${fmt(utile)} (in perdita)`,ok:false});
+    }
+  }else{
+    criteri.push({nome:'Utile d\'esercizio',valore:'Dato non disponibile',ok:null});
+  }
+
+  // --- Criterio 4: Anni di attività (da data costituzione Cerved) ---
+  if(stato.cerved?.dataCostituzione){
+    const parts=stato.cerved.dataCostituzione.split('-');
+    const annoC=parseInt(parts[2]?.length===4?parts[2]:parts[0]);
+    const anniAtt=new Date().getFullYear()-annoC;
+    if(anniAtt>=3){
+      criteri.push({nome:'Anni di attività',valore:`${anniAtt} anni (≥3)`,ok:true});
+    }else if(anniAtt>=1){
+      if(semaforo!=='rosso')semaforo='giallo';
+      anticipo=Math.max(anticipo,20);
+      criteriGiallo.push(`Attività da ${anniAtt} anni (soglia 3) → anticipo 20%`);
+      criteri.push({nome:'Anni di attività',valore:`${anniAtt} anni (<3)`,ok:false});
+    }else{
+      semaforo='rosso';
+      motivo.push(`Azienda costituita da meno di 1 anno`);
+      criteri.push({nome:'Anni di attività',valore:`${anniAtt} anni (<1)`,ok:false});
+    }
+  }
+
+  // --- Massimale finanziabile Grenke: min(20% fatturato, patrimonio netto) (brief 4.2) ---
+  const cap20=fat>0?fat*0.20:null;
+  let maxFin=null;
+  if(cap20!=null&&pn!=null) maxFin=Math.min(cap20,pn);
+  else if(cap20!=null) maxFin=cap20;
+  else if(pn!=null) maxFin=pn;
+  if(maxFin!=null){
+    if(prezzo>maxFin){
+      semaforo='rosso';
+      motivo.push(`Importo €${fmt(prezzo)} oltre il massimale finanziabile Grenke €${fmt(Math.round(maxFin))} (min 20% fatturato / patrimonio netto)`);
+      criteri.push({nome:'Massimale finanziabile Grenke',valore:`€${fmt(Math.round(maxFin))} — importo oltre soglia`,ok:false});
+    }else{
+      criteri.push({nome:'Massimale finanziabile Grenke',valore:`€${fmt(Math.round(maxFin))} — importo entro soglia`,ok:true});
+    }
+  }
+
+  // --- CGS Cerved → % approvazione (brief 4.3) ---
+  const cgs=stato.cerved?.cgs;
+  const cgsInfo=(cgs!=null&&CGS_MAP[cgs])?CGS_MAP[cgs]:null;
+  if(cgsInfo&&cgsInfo.blocco){
+    semaforo='rosso';
+    motivo.push(`CGS Cerved ${cgs} (${cgsInfo.et}) — valutazione personalizzata: pratica da bloccare e verificare manualmente`);
+  }
+  // % approvazione stimata: base da CGS, dimezzata se importo oltre massimale
+  let approvazione=cgsInfo?cgsInfo.perc:null;
+  if(approvazione!=null&&maxFin!=null&&prezzo>maxFin) approvazione=Math.round(approvazione/2);
+
+  // Salva nello stato
+  stato.creditPolicy={semaforo,anticipo,markup,criteriGiallo,motivo,criteri,maxFin,cgs,cgsInfo,approvazione,aiMemo:null,overrideAnticipo:anticipo,overrideMarkup:markup,overrideNote:''};
+
+  renderCreditPolicy();
+
+  // Se giallo con 2+ criteri → chiama AI (debounce: il prezzo è editabile a ogni tasto)
+  if(semaforo==='giallo'&&criteriGiallo.length>=2){
+    clearTimeout(window._aiTimer);
+    window._aiTimer=setTimeout(chiamaCreditAI,700);
+  }
+}
+
+function renderCreditPolicy(){
+  const cp=stato.creditPolicy;
+  if(!cp)return;
+
+  const card=document.getElementById("creditPolicyCard");
+  card.style.display="block";
+
+  // Semaforo
+  const labels={verde:'Condizioni standard',giallo:'Condizioni con aggiustamento',rosso:'Non finanziabile — valutazione interna richiesta'};
+  const subs={verde:'Tutti i criteri soddisfatti. Zero anticipo, canone base.',giallo:'Uno o più criteri richiedono garanzie aggiuntive. Rimandare a Carmine Marotta per una decisione finale.',rosso:'Profilo fuori parametri. Rimandare a Carmine Marotta per una decisione finale.'};
+
+  // Badge CGS / approvazione stimata (rosso in cascata se il semaforo è rosso — brief 4.3/4.1)
+  let badge='';
+  if(cp.cgsInfo){
+    const col=cp.semaforo==='rosso'?'red':(cp.cgs<=4?'green':cp.cgs<=6?'amber':'red');
+    const perc=cp.approvazione!=null?` · ${cp.approvazione}% approvazione`:'';
+    badge=`<div class="cgs-badge cgs-${col}" title="CGS Cerved ${cp.cgs} — ${cp.cgsInfo.et} · ${cp.cgsInfo.giud}">CGS ${cp.cgs} · ${cp.cgsInfo.giud}${perc}</div>`;
+  }else if(cp.approvazione!=null){
+    badge=`<div class="cgs-badge cgs-${cp.semaforo==='rosso'?'red':'amber'}">Approvazione stimata ${cp.approvazione}%</div>`;
+  }
+
+  document.getElementById("semaforoBox").innerHTML=`
+    <div class="semaphore semaphore--${cp.semaforo}">
+      <div class="semaphore__dot"></div>
+      <div>
+        <div class="semaphore__label">${labels[cp.semaforo]}</div>
+        <div class="semaphore__sub">${subs[cp.semaforo]}</div>
+      </div>
+    </div>${badge}`;
+
+  // Massimale finanziabile Grenke accanto al prezzo (brief 4.2)
+  const mh=document.getElementById("maxFinHint");
+  if(mh){
+    if(cp.maxFin!=null){
+      const ok=(stato.prezzoTotale||0)<=cp.maxFin;
+      mh.innerHTML=`Massimale finanziabile Grenke: <strong>€${fmt(Math.round(cp.maxFin))}</strong> (min 20% fatturato · patrimonio netto). Importo offerta €${fmt(stato.prezzoTotale||0)} — <span style="color:var(--${ok?'green':'red'});font-weight:600">${ok?'entro soglia':'oltre soglia'}</span>.`;
+    }else{ mh.textContent=''; }
+  }
+
+  // Dettaglio criteri con check/cross — in cascata rosso se il semaforo è rosso (brief 4.1)
+  let detail='';
+  if(cp.criteri&&cp.criteri.length>0){
+    detail=cp.criteri.map(c=>{
+      let icon;
+      if(cp.semaforo==='rosso') icon='<span style="color:var(--red)">✗</span>';
+      else icon=c.ok===true?'<span style="color:var(--green)">✓</span>':c.ok===false?'<span style="color:var(--red)">✗</span>':'<span style="color:var(--text-hint)">—</span>';
+      return `${icon} <strong>${c.nome}:</strong> ${c.valore}`;
+    }).join('<br>');
+  }
+
+  if(cp.semaforo==='rosso'&&cp.motivo.length>0){
+    detail+='<br><br>'+cp.motivo.map(m=>`<span style="color:var(--red)">⚠</span> ${m}`).join('<br>');
+  }else if(cp.semaforo==='giallo'){
+    if(cp.criteriGiallo.length>0) detail+='<br><br>'+cp.criteriGiallo.join('<br>');
+    const m=stato.macchina;
+    if(m&&cp.overrideAnticipo>0){
+      const importoAnticipo=Math.round((stato.prezzoTotale||0)*cp.overrideAnticipo/100);
+      detail+=`<br><br><strong>Anticipo suggerito:</strong> €${fmt(importoAnticipo)} (${cp.overrideAnticipo}%)`;
+    }
+    if(cp.overrideMarkup>0){
+      detail+=`<br><strong>Markup canone:</strong> +${cp.overrideMarkup}%`;
+    }
+  }
+  document.getElementById("creditDetail").innerHTML=detail;
+
+  // Imposta slider/select override ai valori correnti
+  document.getElementById("slAnticipo").value=cp.overrideAnticipo;
+  document.getElementById("outAnticipo").textContent=cp.overrideAnticipo+'%';
+  document.getElementById("selMarkup").value=cp.overrideMarkup.toString();
+}
+
+function aggiornaOverride(){
+  if(!stato.creditPolicy)return;
+  stato.creditPolicy.overrideAnticipo=parseInt(document.getElementById("slAnticipo").value);
+  stato.creditPolicy.overrideMarkup=parseFloat(document.getElementById("selMarkup").value);
+  document.getElementById("outAnticipo").textContent=stato.creditPolicy.overrideAnticipo+'%';
+  renderCreditPolicy();
+}
+
+async function chiamaCreditAI(){
+  const memo=document.getElementById("aiMemo");
+  const body=document.getElementById("aiMemoBody");
+  memo.style.display="block";
+  body.innerHTML='<span class="ai-memo__loading">Analisi in corso...</span>';
+
+  const m=stato.macchina;
+  const canoneMese=calcCanone(stato.prezzoTotale||0,36)||0;
+  const percCanone=stato.fat>0?((canoneMese*12)/stato.fat*100).toFixed(1):'n.d.';
+
+  const profilo={
+    ragioneSociale:stato.rs,
+    fatturato:stato.fat,
+    ateco:stato.cerved?.ateco||'non disponibile',
+    regione:stato.cerved?.indirizzo||'non disponibile',
+    macchina:m?m.nome:'non selezionata',
+    prezzoMacchina:stato.prezzoTotale||0,
+    percCanone:percCanone,
+    criteriGiallo:stato.creditPolicy.criteriGiallo
+  };
+
+  try{
+    const res=await fetch('https://www.mediocreditofacile.it/api/credit-ai',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(profilo)
+    });
+    const data=await res.json();
+    if(data.memo){
+      stato.creditPolicy.aiMemo=data.memo;
+      body.textContent=data.memo;
+    }else{
+      body.textContent='Analisi non disponibile.';
+    }
+  }catch(e){
+    body.textContent='Errore di connessione. Analisi AI non disponibile.';
+    console.warn('Credit AI error:',e);
+  }
+}
+
+function elabora(){
+  const cl=classifica(stato.fat);
+  stato.canale=cl.canale;
+
+  // Selezione manuale dal catalogo: si mostrano le 3 macchine principali (niente più suggerimento per fascia).
+  const macchineLista=PRINCIPALI;
+  stato.macchina=macchineLista[0];
+
+  document.getElementById("companyInitial").textContent=stato.rs.charAt(0).toUpperCase();
+  document.getElementById("companyName").textContent=stato.rs;
+
+  // Sotto il nome: P.IVA + dati Cerved extra (indirizzo, forma giuridica)
+  let subtitleHtml="P.IVA "+stato.piva;
+  if(stato.cerved){
+    const c=stato.cerved;
+    if(c.formaGiuridica) subtitleHtml+=` · ${c.formaGiuridica}`;
+    if(c.indirizzo) subtitleHtml+=`<br><span style="font-size:12px;color:var(--text-hint)">${c.indirizzo}</span>`;
+  }
+  document.getElementById("companyPiva").innerHTML=subtitleHtml;
+
+  // Metriche: estese se Cerved, base se manuale/DEMO
+  let metricsHtml=`
+    <div class="metric"><div class="metric-label">Fatturato</div><div class="metric-value">${fmtEuro(stato.fat)}</div></div>
+    <div class="metric"><div class="metric-label">Fascia cliente</div><div class="metric-value">${cl.label}</div></div>
+    <div class="metric"><div class="metric-label">Canale primario</div><div class="metric-value" style="font-size:14px;">${cl.canaleLabel.split("·")[0].trim()}</div></div>
+  `;
+  if(stato.cerved){
+    const c=stato.cerved;
+    if(c.patrimonioNetto!=null) metricsHtml+=`<div class="metric"><div class="metric-label">Patrimonio netto</div><div class="metric-value">${fmtEuro(c.patrimonioNetto)}</div></div>`;
+    if(c.utile!=null) metricsHtml+=`<div class="metric"><div class="metric-label">Utile</div><div class="metric-value">${fmtEuro(c.utile)}</div></div>`;
+    if(c.cgs!=null) metricsHtml+=`<div class="metric"><div class="metric-label">CGS</div><div class="metric-value">${cgsBadge(c.cgs)}</div></div>`;
+  }
+  document.getElementById("metricsBox").innerHTML=metricsHtml;
+
+  // Badges: canale + incentivi + ATECO (se Cerved)
+  let badgesHtml=`<span class="badge badge-blue">${cl.canaleLabel}</span>`;
+  if(cl.incentivi) badgesHtml+=`<span class="badge badge-amber">Sabatini · Iperammortamento disponibili</span>`;
+  if(stato.cerved?.ateco) badgesHtml+=`<span class="badge badge-purple">${stato.cerved.ateco}</span>`;
+  if(stato.cerved?.cgs!=null) badgesHtml+=cgsBadgeTag(stato.cerved.cgs);
+  document.getElementById("badgesBox").innerHTML=badgesHtml;
+
+  document.getElementById("machineSelect").innerHTML=macchineLista.map(m=>
+    `<option value="${m.id}">${m.nome} — €${fmt(m.prezzo)}</option>`
+  ).join("");
+  document.getElementById("machineSelect").value=macchineLista[0].id;
+
+  // Reset configurazione e imposta la macchina principale di default
+  stato.accessori=[];
+  stato.altriMacchinari=[];
+  stato.inverso=null;
+  stato.estero={attivo:false,valoreManuale:false};
+  document.getElementById("esteroToggle").checked=false;
+  document.getElementById("esteroBody").style.display="none";
+  document.getElementById("invResult").style.display="none";
+  document.getElementById("invApply").style.display="none";
+  document.getElementById("invCanone").value="";
+  renderAltriMacchinari();
+  onCambioPrincipale(); // imposta principale, prezzo, accessori e ricalcola tutto
+
+  aggiornaDoc();
+  renderScheda();
+  renderScenari();
+  renderPlafond();
+  document.getElementById("results").style.display="block";
+}
+
+// --- Configuratore offerta (principale + accessori + altri macchinari) ---
+function onCambioPrincipale(){
+  const id=document.getElementById("machineSelect").value;
+  const m=MACCHINE.find(x=>x.id===id);
+  if(!m)return;
+  stato.macchina=m;
+  stato.prezzoPrincipale=m.prezzo;
+  document.getElementById("prezzoInput").value=m.prezzo;
+  document.getElementById("prezzoHint").textContent=
+    `Listino ${m.nome}: €${fmt(m.prezzo)}. Usa ±500 € o digita direttamente il prezzo trattato.`;
+  // Produzione di base dalla macchina principale (per il funnel)
+  const slP=document.getElementById("slPezzi"), numP=document.getElementById("numPezzi");
+  if(numP) numP.value=m.pezziOra;
+  if(slP) slP.value=m.pezziOra;
+  renderAccessori();
+  ricalcola();
+}
+
+function onPrezzoInput(el){
+  const v=el.value.replace(/[^0-9]/g,'');
+  el.value=v;
+  stato.prezzoPrincipale=parseInt(v)||0;
+  ricalcola();
+}
+
+function stepPrezzo(delta){
+  stato.prezzoPrincipale=Math.max(0,(stato.prezzoPrincipale||0)+delta);
+  document.getElementById("prezzoInput").value=stato.prezzoPrincipale;
+  ricalcola();
+}
+
+function renderAccessori(){
+  const princ=stato.macchina?stato.macchina.id:null;
+  const list=MACCHINE.filter(m=>m.tipo==="accessorio" && (!m.compatibile||m.compatibile.includes(princ)));
+  document.getElementById("accessoriList").innerHTML=list.map(a=>{
+    const checked=stato.accessori.includes(a.id)?"checked":"";
+    return `<label class="acc-item">
+      <input type="checkbox" ${checked} onchange="toggleAccessorio('${a.id}')">
+      <span class="acc-name">${a.nome}</span>
+      <span class="acc-price">+€${fmt(a.prezzo)}</span>
+    </label>`;
+  }).join("");
+}
+
+function toggleAccessorio(id){
+  const i=stato.accessori.indexOf(id);
+  if(i>=0)stato.accessori.splice(i,1); else stato.accessori.push(id);
+  ricalcola();
+}
+
+function renderAltriMacchinari(){
+  const box=document.getElementById("altriMacchinariList");
+  if(!box)return;
+  box.innerHTML=stato.altriMacchinari.map((x,i)=>`
+    <div class="altro-row">
+      <input class="field-input altro-desc" type="text" placeholder="Descrizione (es. confezionatrice)" value="${(x.descrizione||'').replace(/"/g,'&quot;')}" oninput="updateAltro(${i},'descrizione',this.value)">
+      <input class="field-input altro-prezzo" type="text" inputmode="numeric" placeholder="Prezzo €" value="${x.prezzo!=null?x.prezzo:''}" oninput="updateAltro(${i},'prezzo',this.value,this)">
+      <button type="button" class="altro-del" onclick="rimuoviAltro(${i})" title="Rimuovi">&#10005;</button>
+    </div>`).join("");
+}
+
+function aggiungiAltroMacchinario(){
+  stato.altriMacchinari.push({descrizione:'',prezzo:''});
+  renderAltriMacchinari();
+}
+
+function updateAltro(i,campo,val,el){
+  if(campo==='prezzo'){ val=val.replace(/[^0-9]/g,''); if(el)el.value=val; }
+  if(stato.altriMacchinari[i]) stato.altriMacchinari[i][campo]=val;
+  ricalcola();
+}
+
+function rimuoviAltro(i){
+  stato.altriMacchinari.splice(i,1);
+  renderAltriMacchinari();
+  ricalcola();
+}
+
+function calcPrezzoTotale(){
+  let tot=stato.prezzoPrincipale||0;
+  (stato.accessori||[]).forEach(id=>{const a=MACCHINE.find(x=>x.id===id); if(a)tot+=a.prezzo;});
+  (stato.altriMacchinari||[]).forEach(x=>{tot+=parseInt(x.prezzo)||0;});
+  return tot;
+}
+
+function renderTotale(){
+  const acc=stato.accessori.map(id=>MACCHINE.find(x=>x.id===id)).filter(Boolean);
+  const altri=stato.altriMacchinari.filter(x=>(parseInt(x.prezzo)||0)>0);
+  let html=`<strong>${stato.macchina?stato.macchina.nome:''}</strong> — €${fmt(stato.prezzoPrincipale||0)}`;
+  acc.forEach(a=>{html+=`<br>+ ${a.nome} — €${fmt(a.prezzo)}`;});
+  altri.forEach(x=>{html+=`<br>+ ${(x.descrizione||'Macchinario').trim()||'Macchinario'} — €${fmt(parseInt(x.prezzo)||0)}`;});
+  html+=`<br><strong>Totale offerta: €${fmt(stato.prezzoTotale)}</strong>`;
+  document.getElementById("totaleConfig").innerHTML=html;
+}
+
+// Ricalcola il totale e aggiorna le sezioni dipendenti (non ridisegna gli input)
+function ricalcola(){
+  stato.prezzoTotale=calcPrezzoTotale();
+  renderTotale();
+  aggiornaCanone();      // tabella canone (su prezzoTotale) + prev summary
+  valutaCreditPolicy();  // semafori sul totale finanziato
+  aggiornaFunnel();      // canone nel funnel
+  refreshScenari();      // aggiorna i canoni del confronto sulla nuova configurazione
+  aggiornaEstero();      // Schengen/SACE lavorano sullo stesso totale offerta
+}
+
+function aggiornaCanone(){
+  const prezzo=stato.prezzoTotale||0;
+  const durate=[24,36,48,60];
+  document.getElementById("canoneBody").innerHTML=durate.map(d=>{
+    const c=calcCanone(prezzo,d);
+    const riscPerc=RISCATTO[d]||0;
+    const riscVal=Math.round(prezzo*riscPerc/100);
+    const freq=c>12000?"Mensile (+5%) o trim.":"Trimestrale";
+    const sel=d===stato.durataSelezionata;
+    return `<tr class="${sel?"selected":""}" onclick="selezionaDurata(${d})">
+      <td>${d} mesi</td>
+      <td>€${fmt(prezzo)}</td>
+      <td>€${fmt(c)}/mese</td>
+      <td>€${fmt(riscVal)}</td>
+      <td>${freq}</td>
+    </tr>`;
+  }).join("");
+  aggiornaPrevSummary();
+}
+
+// Lettura numerica robusta di un input
+function num(id){ const el=document.getElementById(id); return el?(parseFloat(el.value)||0):0; }
+
+// Slider → input numerico gemello, poi ricalcola
+function onSlider(id){
+  const sl=document.getElementById('sl'+id), n=document.getElementById('num'+id);
+  if(sl&&n) n.value=sl.value;
+  aggiornaFunnel();
+}
+
+function toggleFunnel(){
+  stato.funnelAttivo=document.getElementById('funnelToggle').checked;
+  document.getElementById('funnelBody').style.display=stato.funnelAttivo?'block':'none';
+  if(stato.funnelAttivo) aggiornaFunnel();
+}
+
+function stampaAnalisi(){ window.print(); }
+
+function aggiornaFunnel(){
+  // Allinea gli slider ai campi numerici (la fonte è il campo numerico)
+  ['Pezzi','Ore','Giorni'].forEach(id=>{const s=document.getElementById('sl'+id),n=document.getElementById('num'+id); if(s&&n)s.value=n.value;});
+
+  const pezziOra=num('numPezzi'), ore=num('numOre'), giorni=num('numGiorni');
+  const gMozzMano=num('gMozzMano'), gStrMano=num('gStrMano');
+  const gMozzMacc=num('gMozzMacc'), gStrMacc=num('gStrMacc');
+  const costoMP=num('costoMP'), costoOperaio=num('costoOperaio');
+  const operaiMano=num('operaiMano'), operaiMacc=num('operaiMacc');
+  const margineKg=num('margineKg');
+
+  const pezziGiorno=pezziOra*ore;
+  const pezziMese=pezziGiorno*giorni;
+  const gMacc=gMozzMacc+gStrMacc;     // grammi/pezzo con macchina
+  const gMano=gMozzMano+gStrMano;     // grammi/pezzo a mano
+  const kgGiornoMacc=pezziGiorno*gMacc/1000;
+  const kgMeseMacc=pezziMese*gMacc/1000;
+
+  const margMese=Math.round(kgMeseMacc*margineKg);
+  const canoneMese=calcCanone(stato.prezzoTotale||0,36)||0;
+  const residuo=margMese-canoneMese;
+  const perc=margMese>0?Math.round(canoneMese/margMese*100):0;
+
+  // --- Confronto risparmio: a mano vs con macchina ---
+  const mpManoMese=(pezziMese*gMano/1000)*costoMP;   // costo materia prima/mese a mano
+  const mpMaccMese=(pezziMese*gMacc/1000)*costoMP;   // con macchina
+  const rispMP=Math.round(mpManoMese-mpMaccMese);
+  const moManoMese=operaiMano*costoOperaio/12;        // manodopera/mese a mano
+  const moMaccMese=operaiMacc*costoOperaio/12;        // con macchina
+  const rispMO=Math.round(moManoMese-moMaccMese);
+  const rispTot=rispMP+rispMO;
+
+  // Salva per il PDF
+  stato.funnel={pezziMese,kgMeseMacc,margMese,canoneMese,rispMP,rispMO,rispTot};
+
+  document.getElementById("funnelResult").innerHTML=`
+    <div class="funnel-card"><div class="funnel-label">Kg burrata/giorno</div><div class="funnel-value">${fmt(Math.round(kgGiornoMacc))} kg</div></div>
+    <div class="funnel-card"><div class="funnel-label">Pezzi/mese</div><div class="funnel-value">${fmt(Math.round(pezziMese))}</div></div>
+    <div class="funnel-card"><div class="funnel-label">Margine lordo/mese</div><div class="funnel-value">€${fmt(margMese)}</div></div>
+    <div class="funnel-card accent"><div class="funnel-label">Margine residuo (dopo canone)</div><div class="funnel-value">€${fmt(residuo)}/mese</div></div>
+  `;
+
+  const ok=perc>0&&perc<50;
+  document.getElementById("selfSustain").innerHTML=
+    `<div class="sustain-pill ${ok?"sustain-yes":"sustain-no"}">Canone = ${perc}% del margine generato${ok?" — la macchina si sostiene da sola":""}</div>`;
+
+  const copre=rispTot>=canoneMese&&canoneMese>0;
+  document.getElementById("risparmioBox").innerHTML=`
+    <div class="risparmio-box">
+      <strong>Risparmio con la macchina</strong> (rispetto alla lavorazione a mano):<br>
+      Materia prima: <strong>€${fmt(rispMP)}/mese</strong> · Manodopera: <strong>€${fmt(rispMO)}/mese</strong><br>
+      Totale risparmio: <strong>€${fmt(rispTot)}/mese</strong> (€${fmt(rispTot*12)}/anno)<br>
+      Canone: €${fmt(canoneMese)}/mese — ${copre?'<strong>il solo risparmio copre il canone</strong>':'il canone eccede il risparmio di €'+fmt(canoneMese-rispTot)+'/mese'}
+    </div>`;
+}
+
+function setCanaleDoc(c){ stato.canaleDoc=c; aggiornaDoc(); }
+
+function toggleDoc(el){
+  const d=el.dataset.doc;
+  if(el.checked) stato.docSpuntati[d]=true; else delete stato.docSpuntati[d];
+}
+
+function aggiornaDoc(){
+  if(!stato.canaleDoc) stato.canaleDoc='noleggio';
+  if(!stato.docSpuntati) stato.docSpuntati={};
+  const c=stato.canaleDoc;
+  document.getElementById("docTabNoleggio").classList.toggle("active",c==='noleggio');
+  document.getElementById("docTabLeasing").classList.toggle("active",c==='leasing');
+
+  let docs=[...DOCS.noleggio];
+  if(c==='leasing') docs=docs.concat(DOCS.leasingExtra);
+  document.getElementById("docList").innerHTML=docs.map(d=>{
+    const checked=stato.docSpuntati[d]?'checked':'';
+    return `<label class="doc-check-item">
+      <input type="checkbox" data-doc="${d}" ${checked} onchange="toggleDoc(this)">
+      <span>${d}</span>
+    </label>`;
+  }).join("");
+}
+
+// --- Confronto soluzioni (4 scenari sulla stessa configurazione) ---
+function defaultScenari(){
+  return [
+    {label:"Noleggio 60 mesi",       prodotto:"noleggio",durata:60,anticipo:0, preammortamento:0,riscattoPerc:3,includiPdf:true},
+    {label:"Noleggio 48 mesi",       prodotto:"noleggio",durata:48,anticipo:0, preammortamento:0,riscattoPerc:4,includiPdf:false},
+    {label:"Leasing 60 Sella",       prodotto:"leasing", durata:60,anticipo:0, preammortamento:0,riscattoPerc:1,includiPdf:false},
+    {label:"Leasing 48 Sella + 10%", prodotto:"leasing", durata:48,anticipo:10,preammortamento:0,riscattoPerc:1,includiPdf:false},
+  ];
+}
+
+function calcScenario(s){
+  const prezzo=stato.prezzoTotale||0;
+  if(s.prodotto==='leasing'){
+    const r=calcLeasingSella(prezzo,s.durata,s.anticipo||0,s.riscattoPerc||0,s.preammortamento||0);
+    return {canone:r.rata,riscattoEuro:r.riscatto,anticipoEuro:r.anticipo,preRata:r.preRata,totale:r.totale};
+  }
+  // Noleggio operativo Grenke: riscatto da tabella, nessun anticipo
+  const canone=calcCanone(prezzo,s.durata)||0;
+  const riscPerc=RISCATTO[s.durata]||0;
+  const riscattoEuro=Math.round(prezzo*riscPerc/100);
+  return {canone,riscattoEuro,anticipoEuro:0,preRata:0,totale:canone*s.durata+riscattoEuro};
+}
+
+function updateScenarioLabel(i,val){ if(stato.scenari[i]) stato.scenari[i].label=val; }
+
+// Cambi strutturali (prodotto/durata) → re-render completo. includiPdf → solo stato.
+function updateScenario(i,campo,val){
+  const s=stato.scenari[i]; if(!s)return;
+  if(campo==='includiPdf'){ s.includiPdf=val; return; }
+  if(campo==='prodotto'){ s.prodotto=val; if(val==='noleggio'&&s.durata>60)s.durata=60; }
+  else if(campo==='durata') s.durata=parseInt(val);
+  renderScenari();
+}
+
+// Campi numerici (anticipo/preammortamento/riscatto) → aggiorna solo gli output (niente perdita di focus)
+function updateScenarioNum(i,campo,val){
+  const s=stato.scenari[i]; if(!s)return;
+  s[campo]=parseFloat(val)||0;
+  refreshScenari();
+}
+
+function buildScenarioOut(s){
+  const c=calcScenario(s);
+  const antRow=(s.prodotto==='leasing'&&c.anticipoEuro>0)?`<div class="scenario-out-row"><span>Anticipo</span><strong>€${fmt(c.anticipoEuro)}</strong></div>`:'';
+  const preRow=(s.prodotto==='leasing'&&s.preammortamento>0)?`<div class="scenario-out-row"><span>Preammortamento</span><strong>€${fmt(c.preRata)}/mese × ${s.preammortamento}</strong></div>`:'';
+  return `<div class="scenario-out-row"><span>Canone</span><strong>€${fmt(c.canone)}/mese</strong></div>
+    ${antRow}${preRow}
+    <div class="scenario-out-row"><span>Riscatto</span><strong>€${fmt(c.riscattoEuro)}</strong></div>
+    <div class="scenario-out-row"><span>Totale</span><strong>€${fmt(c.totale)}</strong></div>`;
+}
+
+// Refresh leggero: solo importo + box output di ciascuno scenario
+function refreshScenari(){
+  const imp=document.getElementById("confrontoImporto");
+  if(imp) imp.textContent=fmt(stato.prezzoTotale||0);
+  (stato.scenari||[]).forEach((s,i)=>{
+    const out=document.getElementById('scenarioOut'+i);
+    if(out) out.innerHTML=buildScenarioOut(s);
+  });
+}
+
+function renderScenari(){
+  if(!stato.scenari) stato.scenari=defaultScenari();
+  const imp=document.getElementById("confrontoImporto");
+  if(imp) imp.textContent=fmt(stato.prezzoTotale||0);
+  const grid=document.getElementById("scenariGrid");
+  if(!grid)return;
+  const durateNol=[24,36,48,60], durateLea=SELLA_LEASING.durate;
+  grid.innerHTML=stato.scenari.map((s,i)=>{
+    const durate=s.prodotto==='leasing'?durateLea:durateNol;
+    const optD=durate.map(d=>`<option value="${d}" ${d===s.durata?'selected':''}>${d} mesi</option>`).join('');
+    const leasingFields=s.prodotto==='leasing'?`<div class="scenario-row">
+      <div class="scenario-field"><label>Anticipo %</label><input type="number" value="${s.anticipo}" oninput="updateScenarioNum(${i},'anticipo',this.value)"></div>
+      <div class="scenario-field"><label>Preammort. mesi</label><input type="number" value="${s.preammortamento}" oninput="updateScenarioNum(${i},'preammortamento',this.value)"></div>
+      <div class="scenario-field"><label>Riscatto %</label><input type="number" step="0.1" value="${s.riscattoPerc}" oninput="updateScenarioNum(${i},'riscattoPerc',this.value)"></div>
+    </div>`:'';
+    return `<div class="scenario">
+      <input class="scenario-label" value="${(s.label||'').replace(/"/g,'&quot;')}" oninput="updateScenarioLabel(${i},this.value)">
+      <div class="scenario-row">
+        <select onchange="updateScenario(${i},'prodotto',this.value)">
+          <option value="noleggio" ${s.prodotto==='noleggio'?'selected':''}>Noleggio Grenke</option>
+          <option value="leasing" ${s.prodotto==='leasing'?'selected':''}>Leasing Sella</option>
+        </select>
+        <select onchange="updateScenario(${i},'durata',this.value)">${optD}</select>
+      </div>
+      ${leasingFields}
+      <div class="scenario-out" id="scenarioOut${i}">${buildScenarioOut(s)}</div>
+      <label class="scenario-pdf"><input type="checkbox" ${s.includiPdf?'checked':''} onchange="updateScenario(${i},'includiPdf',this.checked)"> Includi nel PDF</label>
+    </div>`;
+  }).join('');
+}
+
+// --- Partner estero -------------------------------------------------------
+// Regole operative dette da Alberto ad Andrea (call 12/06/2026): il noleggio operativo
+// si fa in area Schengen, senza rischio cambio, con Grenke fino a 200.000 € per operazione.
+// Sopra quella soglia si passa a Econocom o al finanziamento con proprietà al cliente.
+// Fuori Schengen si va solo con copertura assicurativa sul credito (Cofas / SACE).
+// Le newco restano fuori perimetro ovunque.
+const GRENKE_LIMITE_ESTERO=200000;
+
+// Econocom, tabella 60 mesi (Luca Silvestrin, 26/05/2026 — stessa di src/data/econocom-pa.ts MCF).
+// rata = importo × coefficiente di fascia. Sotto i 150.000 € l'operazione è fuori target.
+const ECONOCOM_MIN=150000;
+const ECONOCOM_60M=[
+  {da:150000,a:300000,c:0.0202,label:"fascia 150–300k"},
+  {da:300000,a:500000,c:0.0200,label:"fascia 300–500k"},
+  {da:500000,a:700000,c:0.0199,label:"fascia 500–700k"},
+  {da:700000,a:null,  c:0.0197,label:"oltre 700k"},
+];
+function rataEconocom(importo){
+  if(!(importo>=ECONOCOM_MIN))return null;
+  const f=ECONOCOM_60M.find(f=>importo>=f.da&&(f.a===null||importo<f.a));
+  return f?{rata:Math.round(importo*f.c),fascia:f}:null;
+}
+
+// Struttura extra-Schengen con assicurazione crediti SACE.
+// Coefficienti ricavati dalla quotazione reale su 400.000 € (vedi tabella fornita da Andrea):
+//   premio SACE  = % sul valore dei beni e servizi
+//   rata mensile = % sull'importo finanziato (totale credito al netto dell'anticipo)
+// 12 e 24 mesi sono quotati. I 60 mesi sono una STIMA: il premio scala in proporzione
+// esatta alla durata fra 24 e 60 (0,06717%/mese), il 12 mesi invece è più caro del
+// proporzionale, quindi il 60 va confermato prima di usarlo in offerta.
+const SACE_DURATE=[
+  {mesi:12,premioPerc:0.849715,coeffRata:0.0854290553,stima:false},
+  {mesi:24,premioPerc:1.612000,coeffRata:0.0436971096,stima:false},
+  {mesi:60,premioPerc:4.030000,coeffRata:0.0189216622,stima:true},
+];
+function calcSace(valore,bankFees,anticipoPerc,depositoPerc,d){
+  const premio=valore*d.premioPerc/100;
+  const totCredito=valore+bankFees+premio;
+  const anticipo=totCredito*anticipoPerc/100;
+  const finanziato=totCredito-anticipo;
+  const deposito=valore*depositoPerc/100;
+  const rata=finanziato*d.coeffRata;
+  return {premio,totCredito,anticipo,finanziato,deposito,rata,totale:anticipo+rata*d.mesi+deposito};
+}
+
+// Importi a due decimali: la quotazione SACE ragiona al centesimo
+function fmt2(n){return (n||0).toLocaleString("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:"always"});}
+
+function toggleEstero(){
+  stato.estero.attivo=document.getElementById('esteroToggle').checked;
+  document.getElementById('esteroBody').style.display=stato.estero.attivo?'block':'none';
+  if(stato.estero.attivo) aggiornaEstero();
+}
+
+function aggiornaEstero(){
+  if(!stato.estero.attivo)return;
+  const area=document.getElementById('esteroArea').value;
+  document.getElementById('esteroSchengenBox').style.display=area==='schengen'?'block':'none';
+  document.getElementById('esteroExtraBox').style.display=area==='extra'?'block':'none';
+  if(area==='schengen') renderSchengen();
+  else {
+    // il valore beni parte dal totale offerta finché il commerciale non lo forza a mano
+    if(!stato.estero.valoreManuale) document.getElementById('saceValore').value=stato.prezzoTotale||0;
+    renderSace();
+  }
+}
+
+function onSaceValore(){ stato.estero.valoreManuale=true; renderSace(); }
+
+function renderSchengen(){
+  const p=stato.prezzoTotale||0;
+  const righe=[];
+
+  const entroLimite=p>0&&p<=GRENKE_LIMITE_ESTERO;
+  const cG=entroLimite?calcCanone(p,60):null;
+  righe.push(`<tr>
+    <td>Grenke — noleggio operativo</td>
+    <td>60 mesi</td>
+    <td>${cG?'€'+fmt(cG)+'/mese':'—'}</td>
+    <td>${entroLimite?'Entro il limite di €200.000':'Sopra €200.000: fuori perimetro Grenke'}</td>
+  </tr>`);
+
+  const e=rataEconocom(p);
+  righe.push(`<tr>
+    <td>Econocom — noleggio operativo</td>
+    <td>60 mesi</td>
+    <td>${e?'€'+fmt(e.rata)+'/mese':'—'}</td>
+    <td>${e?e.fascia.label:'Sotto €'+fmt(ECONOCOM_MIN)+': fuori target Econocom'}</td>
+  </tr>`);
+
+  document.getElementById('esteroSchengenBody').innerHTML=righe.join('');
+}
+
+function renderSace(){
+  const valore=num('saceValore'), bank=num('saceBank');
+  const antP=num('saceAnticipo'), depP=num('saceDeposito');
+  const calc=SACE_DURATE.map(d=>({d,r:calcSace(valore,bank,antP,depP,d)}));
+  const riga=(label,pick,bold)=>`<tr${bold?' style="font-weight:700"':''}>
+    <td>${label}</td>${calc.map(x=>`<td>€${fmt2(pick(x.r))}</td>`).join('')}</tr>`;
+
+  let html='';
+  html+=riga('Valore beni e servizi',r=>valore);
+  html+=riga('Bank fees',r=>bank);
+  html+=riga('Premio assicurazione SACE',r=>r.premio);
+  html+=riga('Totale credito',r=>r.totCredito,true);
+  html+=`<tr><td>Anticipo (${fmt(antP)}%)</td>${calc.map(x=>`<td>€${fmt2(x.r.anticipo)}</td>`).join('')}</tr>`;
+  html+=riga('Importo finanziato',r=>r.finanziato);
+  html+=`<tr><td>Durata</td>${calc.map(x=>`<td>${x.d.mesi} mesi${x.d.stima?' (stima)':''}</td>`).join('')}</tr>`;
+  html+=`<tr><td>Security deposit (${fmt(depP)}%)</td>${calc.map(x=>`<td>€${fmt2(x.r.deposito)}</td>`).join('')}</tr>`;
+  html+=riga('Canone mensile',r=>r.rata,true);
+  html+=riga('Costo totale operazione',r=>r.totale,true);
+  document.getElementById('saceBody').innerHTML=html;
+}
+
+// --- Vista interna: plafond attivi per canale (mai nel PDF) ---
+function defaultPlafond(){
+  return [
+    {canale:'Econocom', totale:550000, residuo:550000},
+    {canale:'Grenke',   totale:0,      residuo:0},
+    {canale:'Alba',     totale:0,      residuo:0},
+  ];
+}
+function togglePlafond(){
+  document.getElementById('plafondBody').classList.toggle('open');
+  document.getElementById('plafondArrow').classList.toggle('open');
+}
+function updatePlafond(i,campo,val){
+  if(!stato.plafond[i])return;
+  stato.plafond[i][campo]=parseInt((''+val).replace(/[^0-9]/g,''))||0;
+  const imp=document.getElementById('plafondImp'+i);
+  if(imp) imp.textContent='€'+fmt(Math.max(0,(stato.plafond[i].totale||0)-(stato.plafond[i].residuo||0)));
+}
+function renderPlafond(){
+  if(!stato.plafond) stato.plafond=defaultPlafond();
+  const box=document.getElementById('plafondList');
+  if(!box)return;
+  box.innerHTML=stato.plafond.map((p,i)=>`
+    <div class="plafond-row">
+      <div class="plafond-canale">${p.canale}</div>
+      <div class="scenario-field"><label>Plafond totale €</label><input type="text" inputmode="numeric" value="${p.totale}" oninput="updatePlafond(${i},'totale',this.value)"></div>
+      <div class="scenario-field"><label>Residuo €</label><input type="text" inputmode="numeric" value="${p.residuo}" oninput="updatePlafond(${i},'residuo',this.value)"></div>
+      <div class="plafond-imp">Impegnato<br><span id="plafondImp${i}">€${fmt(Math.max(0,(p.totale||0)-(p.residuo||0)))}</span></div>
+    </div>`).join('');
+}
+
+// --- Selezione durata ---
+function selezionaDurata(d){
+  stato.durataSelezionata=d;
+  aggiornaCanone();
+}
+
+// --- Riepilogo preventivo ---
+function aggiornaPrevSummary(){
+  const m=stato.macchina;
+  if(!m)return;
+  const prezzo=stato.prezzoTotale||0;
+  const d=stato.durataSelezionata;
+  const canone=calcCanone(prezzo,d);
+  const riscPerc=RISCATTO[d]||0;
+  const riscVal=Math.round(prezzo*riscPerc/100);
+  const totale=canone*d+riscVal;
+
+  // Applica override credit policy
+  const cp=stato.creditPolicy;
+  const anticipo=cp?cp.overrideAnticipo:0;
+  const importoAnticipo=Math.round(prezzo*anticipo/100);
+
+  // Configurazione (principale + accessori + altri macchinari)
+  const acc=stato.accessori.map(id=>MACCHINE.find(x=>x.id===id)).filter(Boolean);
+  const altri=stato.altriMacchinari.filter(x=>(parseInt(x.prezzo)||0)>0);
+  let config=m.nome;
+  acc.forEach(a=>config+=` + ${a.nome}`);
+  altri.forEach(x=>config+=` + ${(x.descrizione||'macchinario').trim()||'macchinario'}`);
+
+  let html=`<strong>${config}</strong> — €${fmt(prezzo)}<br>`;
+  html+=`Durata: <strong>${d} mesi</strong> · Canone: <strong>€${fmt(canone)}/mese</strong><br>`;
+  html+=`Riscatto finale: €${fmt(riscVal)} · Totale contratto: €${fmt(totale)}`;
+  if(anticipo>0) html+=`<br>Anticipo: <strong>€${fmt(importoAnticipo)}</strong> (${anticipo}%)`;
+  document.getElementById("prevSummary").innerHTML=html;
+}
+
+// --- Precarica logo Marotta per il PDF ---
+let logoMarottaBase64=null;
+(function(){
+  const img=new Image();
+  img.crossOrigin='anonymous';
+  img.onload=function(){
+    const c=document.createElement('canvas');
+    c.width=img.naturalWidth;c.height=img.naturalHeight;
+    c.getContext('2d').drawImage(img,0,0);
+    logoMarottaBase64=c.toDataURL('image/png');
+  };
+  img.src='https://marottaevolution.it/wp-content/uploads/2020/09/logo-marotta-tricolore.png';
+})();
+
+// --- Logo cliente (upload, per il PDF) ---
+function caricaLogoCliente(input){
+  const file=input.files&&input.files[0];
+  const prev=document.getElementById("logoClientePreview");
+  if(!file){ stato.logoCliente=null; if(prev)prev.innerHTML=''; return; }
+  const reader=new FileReader();
+  reader.onload=function(e){
+    const img=new Image();
+    img.onload=function(){
+      stato.logoCliente=e.target.result;
+      stato.logoClienteW=img.naturalWidth;
+      stato.logoClienteH=img.naturalHeight;
+      if(prev)prev.innerHTML=`<img src="${e.target.result}" style="max-height:40px;max-width:150px;border:1px solid var(--border);border-radius:6px;padding:4px;background:#fff">`;
+    };
+    img.src=e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+// --- Generazione PDF ---
+function generaPDF(){
+  const{jsPDF}=window.jspdf;
+  const doc=new jsPDF({unit:'mm',format:'a4'});
+  const m=stato.macchina;
+  if(!m)return;
+
+  const d=stato.durataSelezionata;
+  const prezzo=stato.prezzoTotale||0;
+  const canone=calcCanone(prezzo,d);
+  const riscPerc=RISCATTO[d]||0;
+  const riscVal=Math.round(prezzo*riscPerc/100);
+  const totale=canone*d+riscVal;
+  const cp=stato.creditPolicy;
+  const anticipo=cp?cp.overrideAnticipo:0;
+  const importoAnticipo=Math.round(prezzo*anticipo/100);
+  const nomeComm=document.getElementById("prevNome").value||'Alberto Amà';
+  const validita=parseInt(document.getElementById("prevValidita").value)||30;
+  const note=document.getElementById("prevNote").value.trim();
+  const titolare=document.getElementById("prevTitolare").value.trim();
+  const numProposta='MCF-'+Date.now().toString(36).toUpperCase();
+  const oggi=new Date();
+  const dataOggi=oggi.toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'});
+  const scadenza=new Date(oggi.getTime()+validita*86400000).toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'});
+
+  const W=210;
+  const H=297;
+  const mL=20; // margine sinistro
+  const mR=20; // margine destro
+  const cW=W-mL-mR; // larghezza contenuto
+  let y=0;
+
+  // Colori brand Marotta
+  const navy=[14,0,96];    // #0e0060
+  const teal=[0,105,158];  // #00699E
+  const dark=[7,18,21];    // #071215
+
+  // ========== HEADER ==========
+  // Banda navy piena
+  doc.setFillColor(...navy);
+  doc.rect(0,0,W,48,'F');
+  // Sottobanda teal
+  doc.setFillColor(...teal);
+  doc.rect(0,48,W,3,'F');
+
+  // Logo Marotta (se caricato)
+  if(logoMarottaBase64){
+    doc.addImage(logoMarottaBase64,'PNG',mL,10,50,18);
+  }else{
+    doc.setTextColor(255,255,255);
+    doc.setFontSize(16);
+    doc.setFont('helvetica','bold');
+    doc.text('MAROTTA EVOLUTION',mL,22);
+  }
+
+  // Logo cliente accanto a quello Marotta (su chip bianco per leggibilità)
+  if(stato.logoCliente&&stato.logoClienteW>0){
+    const maxW=30,maxH=14;
+    const ratio=Math.min(maxW/stato.logoClienteW,maxH/stato.logoClienteH);
+    const dw=stato.logoClienteW*ratio, dh=stato.logoClienteH*ratio;
+    const chipX=78, chipY=9;
+    doc.setFillColor(255,255,255);
+    doc.roundedRect(chipX,chipY,dw+6,dh+6,2,2,'F');
+    const fmtImg=stato.logoCliente.indexOf('image/png')>=0?'PNG':'JPEG';
+    try{ doc.addImage(stato.logoCliente,fmtImg,chipX+3,chipY+3,dw,dh); }catch(e){ console.warn('Logo cliente non aggiunto',e); }
+  }
+
+  // Testo header a destra
+  doc.setTextColor(255,255,255);
+  doc.setFontSize(9);
+  doc.setFont('helvetica','normal');
+  doc.text('in partnership con',W-mR,14,{align:'right'});
+  doc.setFontSize(11);
+  doc.setFont('helvetica','bold');
+  doc.text('MEDIOCREDITO FACILE',W-mR,20,{align:'right'});
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(8);
+  doc.setTextColor(180,200,220);
+  doc.text(`${numProposta}  ·  ${dataOggi}`,W-mR,28,{align:'right'});
+
+  // Titolo proposta centrato
+  doc.setTextColor(255,255,255);
+  doc.setFontSize(14);
+  doc.setFont('helvetica','bold');
+  doc.text('PROPOSTA DI NOLEGGIO OPERATIVO',W/2,42,{align:'center'});
+
+  y=60;
+  doc.setTextColor(0,0,0);
+
+  // ========== SEZIONE 1: DATI CLIENTE ==========
+  const boxH=titolare?29:22;
+  doc.setFillColor(244,246,248);
+  doc.roundedRect(mL,y-6,cW,boxH,2,2,'F');
+  doc.setFontSize(8);
+  doc.setTextColor(...teal);
+  doc.setFont('helvetica','bold');
+  doc.text('DATI CLIENTE',mL+5,y);
+  y+=7;
+  if(titolare){
+    doc.setFontSize(9);
+    doc.setFont('helvetica','italic');
+    doc.setTextColor(90,90,90);
+    doc.text(`Alla cortese attenzione di ${titolare}`,mL+5,y);
+    y+=6;
+  }
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(12);
+  doc.setTextColor(20,20,20);
+  doc.text(stato.rs,mL+5,y);
+  y+=6;
+  doc.setFontSize(10);
+  doc.setFont('helvetica','normal');
+  doc.setTextColor(80,80,80);
+  doc.text('P.IVA '+stato.piva,mL+5,y);
+  if(stato.cerved?.indirizzo){
+    doc.text(stato.cerved.indirizzo,W-mR-5,y,{align:'right'});
+  }
+  y+=titolare?20:18;
+
+  // ========== SEZIONE 2: BENE / CONFIGURAZIONE ==========
+  const voci=[{nome:m.nome,prezzo:stato.prezzoPrincipale||0}];
+  stato.accessori.forEach(id=>{const a=MACCHINE.find(x=>x.id===id); if(a)voci.push({nome:a.nome,prezzo:a.prezzo});});
+  stato.altriMacchinari.forEach(x=>{const p=parseInt(x.prezzo)||0; if(p>0)voci.push({nome:(x.descrizione||'Macchinario').trim()||'Macchinario',prezzo:p});});
+  const multiVoce=voci.length>1;
+  const beneH=11+voci.length*6+(multiVoce?7:0);
+  doc.setFillColor(244,246,248);
+  doc.roundedRect(mL,y-6,cW,beneH,2,2,'F');
+  doc.setFontSize(8);
+  doc.setTextColor(...teal);
+  doc.setFont('helvetica','bold');
+  doc.text('BENE OGGETTO DEL CONTRATTO',mL+5,y);
+  y+=7;
+  voci.forEach(v=>{
+    doc.setFontSize(10);
+    doc.setFont('helvetica','normal');
+    doc.setTextColor(20,20,20);
+    doc.text(v.nome,mL+5,y);
+    doc.setTextColor(80,80,80);
+    doc.text(`\u20AC${fmt(v.prezzo)}`,W-mR-5,y,{align:'right'});
+    y+=6;
+  });
+  if(multiVoce){
+    doc.setFontSize(10);
+    doc.setFont('helvetica','bold');
+    doc.setTextColor(20,20,20);
+    doc.text('Totale beni (IVA esclusa)',mL+5,y);
+    doc.text(`\u20AC${fmt(prezzo)}`,W-mR-5,y,{align:'right'});
+    y+=7;
+  }
+  y+=10;
+
+  // ========== SEZIONE 3: CONDIZIONI FINANZIARIE ==========
+  doc.setFillColor(...navy);
+  doc.roundedRect(mL,y-6,cW,10,2,2,'F');
+  doc.setFontSize(8);
+  doc.setTextColor(255,255,255);
+  doc.setFont('helvetica','bold');
+  doc.text('CONDIZIONI FINANZIARIE',mL+5,y);
+  y+=10;
+
+  const righe=[
+    ['Durata contratto',`${d} mesi`],
+    ['Canone mensile (IVA esclusa)',`\u20AC${fmt(canone)}`],
+    ['Modalit\u00e0 pagamento','Trimestrale anticipato'],
+    ['Valore riscatto finale',`\u20AC${fmt(riscVal)} (${riscPerc}%)`],
+    ['Totale complessivo contratto',`\u20AC${fmt(totale)}`],
+    ['Assicurazione','Obbligatoria, non inclusa nel canone'],
+  ];
+  if(anticipo>0){
+    righe.splice(2,0,['Acconto richiesto',`\u20AC${fmt(importoAnticipo)} (${anticipo}%)`]);
+  }
+
+  doc.setFontSize(10);
+  righe.forEach((r,i)=>{
+    if(i%2===0){doc.setFillColor(248,249,251);doc.rect(mL,y-4,cW,9,'F');}
+    doc.setFont('helvetica','normal');
+    doc.setTextColor(90,90,90);
+    doc.text(r[0],mL+5,y);
+    doc.setFont('helvetica','bold');
+    doc.setTextColor(20,20,20);
+    doc.text(r[1],W-mR-5,y,{align:'right'});
+    y+=9;
+  });
+  y+=10;
+
+  // ========== SEZIONE 4: VANTAGGI ==========
+  // Linea teal decorativa
+  doc.setDrawColor(...teal);
+  doc.setLineWidth(0.5);
+  doc.line(mL,y-4,mL+30,y-4);
+  doc.setFontSize(8);
+  doc.setTextColor(...teal);
+  doc.setFont('helvetica','bold');
+  doc.text('VANTAGGI DEL NOLEGGIO OPERATIVO',mL,y+2);
+  y+=9;
+  doc.setFontSize(10);
+  doc.setTextColor(40,40,40);
+  doc.setFont('helvetica','normal');
+  const vantaggi=[
+    'Canone 100% deducibile come costo d\'esercizio',
+    'Nessuna immobilizzazione di capitale',
+    'Manutenzione e obsolescenza a carico del locatore',
+  ];
+  vantaggi.forEach(v=>{
+    doc.setTextColor(...teal);
+    doc.text('\u2022',mL+3,y);
+    doc.setTextColor(40,40,40);
+    doc.text(v,mL+9,y);
+    y+=7;
+  });
+  y+=6;
+
+  // ========== SEZIONE 5: STIMA PRODUTTIVA E RISPARMIO (opzionale) ==========
+  const f=stato.funnel;
+  if(stato.funnelAttivo&&f&&f.margMese>0){
+    doc.setDrawColor(...teal);
+    doc.line(mL,y-4,mL+30,y-4);
+    doc.setFontSize(8);
+    doc.setTextColor(...teal);
+    doc.setFont('helvetica','bold');
+    doc.text('STIMA PRODUTTIVA E RISPARMIO',mL,y+2);
+    y+=9;
+    doc.setFontSize(10);
+    doc.setTextColor(40,40,40);
+    doc.setFont('helvetica','normal');
+    const funnelText=`Produzione stimata: ${fmt(Math.round(f.pezziMese))} pezzi/mese (${fmt(Math.round(f.kgMeseMacc))} kg/mese), per un margine lordo di \u20AC${fmt(f.margMese)}/mese a fronte di un canone di \u20AC${fmt(canone)}/mese. Rispetto alla lavorazione a mano, la macchina genera un risparmio stimato di \u20AC${fmt(f.rispTot)}/mese (materia prima \u20AC${fmt(f.rispMP)} + manodopera \u20AC${fmt(f.rispMO)}), pari a \u20AC${fmt(f.rispTot*12)}/anno.`;
+    const lines=doc.splitTextToSize(funnelText,cW-10);
+    doc.text(lines,mL+5,y);
+    y+=lines.length*6+8;
+  }
+
+  // ========== NOTE ==========
+  if(note){
+    doc.setFontSize(8);
+    doc.setTextColor(...teal);
+    doc.setFont('helvetica','bold');
+    doc.text('NOTE',mL,y);
+    y+=6;
+    doc.setFontSize(10);
+    doc.setTextColor(40,40,40);
+    doc.setFont('helvetica','normal');
+    const noteLines=doc.splitTextToSize(note,cW-10);
+    doc.text(noteLines,mL+5,y);
+    y+=noteLines.length*6+6;
+  }
+
+  // Condizioni personalizzate
+  if(cp&&(cp.overrideAnticipo!==cp.anticipo||cp.overrideMarkup!==cp.markup)){
+    doc.setFontSize(8);
+    doc.setTextColor(120,120,120);
+    doc.setFont('helvetica','italic');
+    doc.text(`Condizioni personalizzate \u2014 approvate da ${nomeComm}`,mL+5,y);
+    doc.setFont('helvetica','normal');
+    y+=8;
+  }
+
+  // ========== CONFRONTO SOLUZIONI (scenari selezionati) ==========
+  const scenariPdf=(stato.scenari||[]).filter(s=>s.includiPdf);
+  if(scenariPdf.length){
+    const needed=20+scenariPdf.length*8+34;
+    if(y>H-needed){ doc.addPage(); y=24; }
+    doc.setDrawColor(...teal); doc.setLineWidth(0.5); doc.line(mL,y-4,mL+30,y-4);
+    doc.setFontSize(8); doc.setTextColor(...teal); doc.setFont('helvetica','bold');
+    doc.text('CONFRONTO SOLUZIONI',mL,y+2); y+=9;
+    const colX=[mL+2,mL+78,mL+108,mL+138,W-mR-2];
+    doc.setFontSize(8); doc.setTextColor(120,120,120); doc.setFont('helvetica','bold');
+    doc.text('Soluzione',colX[0],y);
+    doc.text('Durata',colX[1],y,{align:'right'});
+    doc.text('Canone',colX[2],y,{align:'right'});
+    doc.text('Riscatto',colX[3],y,{align:'right'});
+    doc.text('Totale',colX[4],y,{align:'right'});
+    y+=2; doc.setDrawColor(220,220,220); doc.setLineWidth(0.2); doc.line(mL,y,W-mR,y); y+=5;
+    doc.setFont('helvetica','normal'); doc.setFontSize(9);
+    scenariPdf.forEach((s,idx)=>{
+      const c=calcScenario(s);
+      if(idx%2===0){ doc.setFillColor(248,249,251); doc.rect(mL,y-4,cW,8,'F'); }
+      doc.setTextColor(20,20,20);
+      const labelTxt=doc.splitTextToSize(s.label||(s.prodotto==='leasing'?'Leasing':'Noleggio'),72)[0];
+      doc.text(labelTxt,colX[0],y);
+      doc.setTextColor(60,60,60);
+      doc.text(`${s.durata} m`,colX[1],y,{align:'right'});
+      doc.text(`\u20ac${fmt(c.canone)}`,colX[2],y,{align:'right'});
+      doc.text(`\u20ac${fmt(c.riscattoEuro)}`,colX[3],y,{align:'right'});
+      doc.setTextColor(20,20,20); doc.setFont('helvetica','bold');
+      doc.text(`\u20ac${fmt(c.totale)}`,colX[4],y,{align:'right'});
+      doc.setFont('helvetica','normal');
+      y+=8;
+    });
+    y+=4;
+  }
+
+  // ========== FOOTER ==========
+  // Banda footer
+  doc.setFillColor(...dark);
+  doc.rect(0,H-28,W,28,'F');
+  doc.setFillColor(...teal);
+  doc.rect(0,H-28,W,1.5,'F');
+
+  doc.setFontSize(9);
+  doc.setTextColor(220,220,220);
+  doc.setFont('helvetica','bold');
+  doc.text(`Proposta preparata da: ${nomeComm}`,mL,H-19);
+  doc.setFont('helvetica','normal');
+  doc.setTextColor(160,170,180);
+  doc.text('mediocreditofacile.it  |  +39 393 995 7840  |  mediocreditofacile@gmail.com',mL,H-13);
+
+  doc.setTextColor(220,220,220);
+  doc.setFont('helvetica','bold');
+  doc.text(`Valida fino al ${scadenza}`,W-mR,H-19,{align:'right'});
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(7);
+  doc.setTextColor(130,140,150);
+  doc.text('I dati produttivi sono stime indicative. Il canone \u00e8 soggetto a delibera finale di Grenke Italia SpA.',mL,H-6);
+
+  // Salva
+  const fileName=`Preventivo_${stato.rs.replace(/[^a-zA-Z0-9]/g,'_')}_${numProposta}.pdf`;
+  doc.save(fileName);
+}
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js')
+      .then(r => console.log('SW registrato:', r.scope))
+      .catch(e => console.log('SW errore:', e));
+  });
+}
+</script>
+</body>
+</html>
