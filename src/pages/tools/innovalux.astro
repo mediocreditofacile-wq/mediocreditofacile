@@ -452,9 +452,16 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
         </tr>`)
       .join('');
 
+    // Quando nessuna durata regge, la consigliata e' semplicemente la piu' lunga:
+    // dirlo evita di far passare per "coperto" un canone che coperto non e'.
+    const durateOrdinate = Object.keys(n.canoni).map(Number).sort((a, b) => a - b);
+    const nessunaCoperta = n.margineMese < 0 && n.durataConsigliata === durateOrdinate[durateOrdinate.length - 1];
+
     const notaDurata = n.durataForzata
-      ? `Durata impostata a ${n.durata} mesi. Quella consigliata su questo impianto sarebbe ${n.durataConsigliata}.`
-      : `Durata consigliata: ${n.durata} mesi, la più corta in cui il canone al netto della deducibilità è coperto dal risparmio in bolletta.`;
+      ? `Durata impostata a ${n.durata} mesi. Quella proposta su questo impianto sarebbe ${n.durataConsigliata}.`
+      : nessunaCoperta
+        ? `Durata proposta: ${n.durata} mesi, la più lunga disponibile. Su questo impianto il risparmio in bolletta non copre il canone su nessuna durata, nemmeno considerando la deducibilità.`
+        : `Durata consigliata: ${n.durata} mesi, la più corta in cui il canone al netto della deducibilità è coperto dal risparmio in bolletta.`;
 
     const pdfBlocco = res.pdfPronti
       ? `<div class="il__pdf-row">${res.documenti.map((d: any) => linkDoc(d.pathname, d.nome)).join('')}</div>`
