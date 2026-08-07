@@ -1,0 +1,31 @@
+{
+  "date": "2026-04-23",
+  "recommendations": [
+    {
+      "campaign": "Noleggio Operativo Fotovoltaico",
+      "trigger": "cost_over_target",
+      "action_type": "bid_decrease",
+      "current_budget": 25.0,
+      "recommended_budget": 25.0,
+      "bid_change_pct": -0.15,
+      "pillar_adgroup": "Fotovoltaico – Tetto in Affitto",
+      "reason": "CPL 172.02 EUR sopra target massimo 50 EUR. Riduci bid -15% o metti in pausa le worst keyword prima di alzare budget. Lost budget 79%, lost rank 6%.",
+      "priority": 1,
+      "status": "pending",
+      "campaign_budget_resource_name": "customers/5572178058/campaignBudgets/15420856280"
+    },
+    {
+      "campaign": "Diventa Partner — Vendor",
+      "trigger": "lost_rank_high",
+      "action_type": "bid_increase",
+      "current_budget": 20.0,
+      "recommended_budget": 20.0,
+      "bid_change_pct": 0.3,
+      "pillar_adgroup": "Vendi a Rate",
+      "reason": "Lost rank 49%, CPC 3.27 EUR, CTR 10.0%. Aumento bid +30% sull'ad group pilastro 'Vendi a Rate' per migliorare il posizionamento in asta. CPL atteso post-aumento 25.6-38.4 EUR. Valutare il budget in seconda battuta.",
+      "priority": 2,
+      "status": "pending",
+      "campaign_budget_resource_name": "customers/5572178058/campaignBudgets/15353946391"
+    }
+  ]
+}

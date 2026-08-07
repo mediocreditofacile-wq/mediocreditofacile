@@ -11,6 +11,7 @@ import {
   SABATINI_DEFAULT_PERC,
   ZES_REGIONI,
   DIMENSIONE_LABELS,
+  agevolazioneAttiva,
   type DimensioneImpresa,
 } from '../../data/leasing';
 import {
@@ -222,8 +223,14 @@ export default function SimulatoreFotovoltaico({
 
   // Modalita' finanziaria effettiva (leasing solo se abilitato)
   const isLeasing = abilitaLeasing && modalitaFin === 'leasing';
-  // Agevolazioni visibili con leasing — indipendenti dal business plan
-  const mostraAgevolazioni = abilitaAgevolazioni && isLeasing;
+  // Disponibilità agevolazioni dal registro centrale (leasing.ts): un'agevolazione
+  // chiusa o scaduta non viene mostrata. Vedi AGEVOLAZIONI_STATO / agevolazioneAttiva.
+  const iperDisponibile = agevolazioneAttiva('iperammortamento');
+  const sabatiniDisponibile = agevolazioneAttiva('sabatini');
+  const zesDisponibile = agevolazioneAttiva('zes');
+  // Agevolazioni visibili con leasing — indipendenti dal business plan, solo se ce n'è almeno una attiva
+  const mostraAgevolazioni = abilitaAgevolazioni && isLeasing
+    && (iperDisponibile || sabatiniDisponibile || zesDisponibile);
   // Limite massimo costo impianto: 500M in leasing, 240k in noleggio
   const maxCosto = isLeasing ? MAX_COSTO_LEASING : MAX_COSTO_NOLEGGIO;
   // ZES attivabile solo sopra €200.000
@@ -347,17 +354,17 @@ export default function SimulatoreFotovoltaico({
 
     // Agevolazioni fiscali: calcolate sempre che si e' in leasing, indipendenti dal business plan
     let beneficioAgevolazioni = 0;
-    if (isLeasing && includiIper) {
+    if (isLeasing && iperDisponibile && includiIper) {
       const iper = calcolaIperammortamento(costo);
       res.iperBeneficioMensile = iper.beneficioMensile;
       beneficioAgevolazioni += iper.beneficioMensile;
     }
-    if (isLeasing && includiSabatini && !includiZES) {
+    if (isLeasing && sabatiniDisponibile && includiSabatini && !includiZES) {
       const sab = calcolaSabatini(costo, sabatiniPerc);
       res.sabatiniBeneficioMensile = sab.contributoMensile;
       beneficioAgevolazioni += sab.contributoMensile;
     }
-    if (isLeasing && includiZES) {
+    if (isLeasing && zesDisponibile && includiZES) {
       const zes = calcolaZES(costo, zesRegione, zesDimensione);
       res.zesBeneficioMensile = zes.creditoMensile;
       beneficioAgevolazioni += zes.creditoMensile;
@@ -1105,6 +1112,7 @@ export default function SimulatoreFotovoltaico({
             </p>
 
             {/* Toggle iperammortamento */}
+            {iperDisponibile && (
             <label class={`simpv__toggle-card simpv__toggle-card--small ${includiIper ? 'simpv__toggle-card--active' : ''}`}>
               <span class="material-icons-outlined simpv__toggle-icon" aria-hidden="true">
                 {includiIper ? 'check_circle' : 'trending_up'}
@@ -1124,8 +1132,10 @@ export default function SimulatoreFotovoltaico({
               />
               <span class="simpv__toggle-switch" />
             </label>
+            )}
 
             {/* Toggle Sabatini 4.0 — disabilitato se ZES attiva */}
+            {sabatiniDisponibile && (<>
             <label class={`simpv__toggle-card simpv__toggle-card--small ${includiSabatini ? 'simpv__toggle-card--active' : ''} ${includiZES ? 'simpv__toggle-card--disabled' : ''}`}>
               <span class="material-icons-outlined simpv__toggle-icon" aria-hidden="true">
                 {includiSabatini ? 'check_circle' : 'savings'}
@@ -1165,8 +1175,10 @@ export default function SimulatoreFotovoltaico({
                 <span class="simpv__hint">Default ~10% dell'investimento. Il calcolo esatto dipende dalla delibera MISE.</span>
               </div>
             )}
+            </>)}
 
-            {/* Toggle ZES Unica — disabilita Sabatini quando attivo, richiede costo >= 200k */}
+            {/* Toggle ZES Unica — mostrata solo se attiva nel registro agevolazioni (oggi chiusa) */}
+            {zesDisponibile && (<>
             <label class={`simpv__toggle-card simpv__toggle-card--small ${includiZES ? 'simpv__toggle-card--active simpv__toggle-card--zes' : ''} ${!zesSogliaOk ? 'simpv__toggle-card--disabled' : ''}`}>
               <span class="material-icons-outlined simpv__toggle-icon" aria-hidden="true">
                 {includiZES ? 'check_circle' : 'south'}
@@ -1227,6 +1239,7 @@ export default function SimulatoreFotovoltaico({
                 <p class="simpv__hint" style="margin-top:0.25rem;">Investimento minimo €200.000. Non cumulabile con Sabatini. Importo soggetto a riparto proporzionale AdE.</p>
               </div>
             )}
+            </>)}
           </div>
         )}
 

@@ -61,7 +61,7 @@ def validate_landing(landing: dict) -> None:
 def generate_landing(input_text: str, existing_slugs: list[str], api_key: str) -> dict:
     client = anthropic.Anthropic(api_key=api_key)
     message = client.messages.create(
-        model="claude-opus-4-6",
+        model="claude-opus-4-7",
         max_tokens=1024,
         messages=[{
             "role": "user",

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  LaunchAgent: giro pratiche portali 3 volte al giorno.
+  Installazione (da confermare con Alberto):
+    cp scripts/com.mcf.pratiche-portali.plist ~/Library/LaunchAgents/
+    launchctl load ~/Library/LaunchAgents/com.mcf.pratiche-portali.plist
+  Disinstallazione:
+    launchctl unload ~/Library/LaunchAgents/com.mcf.pratiche-portali.plist
+  Gira solo quando il Mac e' acceso; se e' spento all'orario, riparte al giro dopo.
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.mcf.pratiche-portali</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>/Users/alberto/dev/mediocreditofacile/scripts/pratiche-portali-cron.sh</string>
+  </array>
+
+  <key>StartCalendarInterval</key>
+  <array>
+    <dict><key>Hour</key><integer>8</integer><key>Minute</key><integer>30</integer></dict>
+    <dict><key>Hour</key><integer>13</integer><key>Minute</key><integer>30</integer></dict>
+    <dict><key>Hour</key><integer>18</integer><key>Minute</key><integer>30</integer></dict>
+  </array>
+
+  <key>StandardOutPath</key>
+  <string>/Users/alberto/Desktop/PROGETTI/Clienti/.pratiche-portali-launchd.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/alberto/Desktop/PROGETTI/Clienti/.pratiche-portali-launchd.err.log</string>
+
+  <key>RunAtLoad</key>
+  <false/>
+</dict>
+</plist>

@@ -11,7 +11,7 @@ import Icon from '../../components/Icon.astro';
  *    provvigione caricata sulla rata (mostrata in pagina, NASCOSTA nel PDF cliente)
  *  - Modello ALBA "standard": tasso = spread lordo + Euribor, provvigione esterna al calcolo cliente
  *  - Agevolazioni: Nuova Sabatini ord/4.0 (formula MISE su VAN interessi),
- *    iperammortamento 4.0 parametrizzato per tipologia bene, ZES Unica per regione/dimensione.
+ *    iperammortamento 4.0 parametrizzato per tipologia bene.
  *
  * Output PDF brandizzato MCF, neutro (nessun riferimento al partner finanziario,
  * nessuna provvigione). Toggle "Mostra tasso del piano" opzionale: il tasso compare
@@ -24,7 +24,7 @@ import SimulatoreLeasing from '../../components/tools/SimulatoreLeasing.tsx';
 ---
 <ToolLayout
   title="Simulazione Leasing | Mediocredito Facile"
-  description="Strumento interno MCF — simulatore leasing finanziario Sella, Alba e Credem con agevolazioni Sabatini, iperammortamento 4.0 e ZES Unica."
+  description="Strumento interno MCF — simulatore leasing finanziario Sella, Alba e Credem con agevolazioni Sabatini e iperammortamento 4.0."
   noindex={true}
   breadcrumbs={[{ name: 'Simulazione Leasing', href: '/tools/simulazione-leasing' }]}
 >
@@ -37,7 +37,7 @@ import SimulatoreLeasing from '../../components/tools/SimulatoreLeasing.tsx';
       <div class="gate__divider"></div>
       <p class="gate__label">Strumento Interno MCF</p>
       <h1 class="gate__title">Simulazione Leasing</h1>
-      <p class="gate__desc">Simulatore canone leasing strumentale con scelta partner (Sella, Alba, Credem), agevolazioni Sabatini, iperammortamento 4.0, ZES Unica. PDF brandizzato MCF per il cliente.</p>
+      <p class="gate__desc">Simulatore canone leasing strumentale con scelta partner (Sella, Alba, Credem), agevolazioni Sabatini e iperammortamento 4.0. PDF brandizzato MCF per il cliente.</p>
       <div class="gate__form">
         <input type="password" id="gate-pwd" class="gate__input" placeholder="Password" autocomplete="off" />
         <button id="gate-btn" class="gate__btn">
@@ -73,8 +73,8 @@ import SimulatoreLeasing from '../../components/tools/SimulatoreLeasing.tsx';
         <h1 class="lea__title">Simulazione Leasing Strumentale</h1>
         <p class="lea__sub">
           Strumento interno MCF: confronta Sella, Alba e Credem sui beni strumentali generici.
-          Lo spread va scelto in base al merito creditizio del cliente; le agevolazioni Sabatini, iperammortamento 4.0
-          e ZES Unica si attivano qui sotto e abbattono il costo netto mensile.
+          Lo spread va scelto in base al merito creditizio del cliente; le agevolazioni Sabatini e iperammortamento 4.0
+          si attivano qui sotto e abbattono il costo netto mensile.
           Il PDF brandizzato MCF è pulito (nessun riferimento al partner finanziario, nessuna provvigione)
           e include il tasso del piano solo se vuoi esporlo al cliente.
         </p>
@@ -86,7 +86,7 @@ import SimulatoreLeasing from '../../components/tools/SimulatoreLeasing.tsx';
         </div>
         <div class="lea__badge">
           <Icon name="trending_up" />
-          <span>Sabatini + Iper + ZES</span>
+          <span>Sabatini + Iper</span>
         </div>
         <div class="lea__badge">
           <Icon name="picture_as_pdf" />

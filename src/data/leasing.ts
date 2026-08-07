@@ -158,6 +158,57 @@ export function calcolaZES(
 
 
 // ═══════════════════════════════════════════════════════════════════════════
+// STATO AGEVOLAZIONI — check automatico apertura/chiusura
+// ═══════════════════════════════════════════════════════════════════════════
+// Registro centrale dello stato di ogni agevolazione mostrata nei simulatori
+// (leasing multi-partner e modalità leasing del simulatore fotovoltaico).
+// Ogni voce ha un flag `attiva` e una `scadenza` opzionale in formato 'YYYY-MM-DD'.
+//
+// Il simulatore mostra il toggle di un'agevolazione SOLO se agevolazioneAttiva()
+// ritorna true, cioè se attiva === true E (nessuna scadenza OPPURE scadenza non
+// ancora superata). Il controllo sulla scadenza gira nel browser a ogni visita:
+// quando la data passa, l'agevolazione sparisce da tutti i simulatori senza
+// altri interventi sul codice.
+//
+// Per chiudere un'agevolazione: metti `attiva: false` (chiusura immediata) oppure
+// imposta `scadenza` (chiusura automatica alla data). Per riaprirla: rimetti true.
+export type AgevolazioneKey = 'iperammortamento' | 'sabatini' | 'zes';
+
+export interface StatoAgevolazione {
+  attiva: boolean;
+  scadenza?: string; // 'YYYY-MM-DD' — oltre questa data l'agevolazione sparisce dai simulatori
+  nota?: string;     // promemoria interno: riferimento normativo o motivo della chiusura
+}
+
+export const AGEVOLAZIONI_STATO: Record<AgevolazioneKey, StatoAgevolazione> = {
+  iperammortamento: {
+    attiva: true,
+    nota: 'Iperammortamento beni 4.0 — finestra aperta',
+  },
+  sabatini: {
+    attiva: true,
+    nota: 'Nuova Sabatini — capitolo di spesa MISE aperto',
+  },
+  zes: {
+    attiva: false,
+    nota: "ZES Unica: finestra credito d'imposta chiusa (fondo esaurito). Rimettere attiva:true se riapre la comunicazione AdE.",
+  },
+};
+
+// Ritorna true se l'agevolazione è offerta oggi nei simulatori.
+export function agevolazioneAttiva(key: AgevolazioneKey): boolean {
+  const stato = AGEVOLAZIONI_STATO[key];
+  if (!stato || !stato.attiva) return false;
+  if (stato.scadenza) {
+    // La data di scadenza è inclusa fino a fine giornata
+    const scad = new Date(`${stato.scadenza}T23:59:59`);
+    if (new Date() > scad) return false;
+  }
+  return true;
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════
 // SIMULATORE LEASING MULTI-PARTNER (SELLA, ALBA)
 // Reverse engineering quotatore Lease for Business — Affida (maggio 2026)
 // ═══════════════════════════════════════════════════════════════════════════

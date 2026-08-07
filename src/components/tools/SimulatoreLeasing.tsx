@@ -20,6 +20,7 @@ import {
   calcolaZES,
   ZES_REGIONI,
   DIMENSIONE_LABELS,
+  agevolazioneAttiva,
   type PartnerLeasing,
   type TipologiaBene,
   type TipoSabatini,
@@ -70,6 +71,13 @@ export default function SimulatoreLeasing({ varianteFornitori = false, varianteL
   const [condizioneId, setCondizioneId] = useState<number>(initialCondizione);
 
   // --- Agevolazioni ---
+  // Disponibilità da registro centrale (leasing.ts): un'agevolazione chiusa o scaduta
+  // non viene nemmeno mostrata. Vedi AGEVOLAZIONI_STATO / agevolazioneAttiva.
+  const sabatiniDisponibile = agevolazioneAttiva('sabatini');
+  const iperDisponibile = agevolazioneAttiva('iperammortamento');
+  const zesDisponibile = agevolazioneAttiva('zes');
+  const almenoUnaAgevolazione = sabatiniDisponibile || iperDisponibile || zesDisponibile;
+
   const [sabatiniAttiva, setSabatiniAttiva] = useState<boolean>(false);
   const [sabatiniTipo, setSabatiniTipo] = useState<TipoSabatini>('ordinaria');
   const [iperAttivo, setIperAttivo] = useState<boolean>(false);
@@ -186,20 +194,20 @@ export default function SimulatoreLeasing({ varianteFornitori = false, varianteL
   const zesIncompatibileSabatini = zesAttiva && sabatiniAttiva;
 
   const sabatiniRis = useMemo(() => {
-    if (!sabatiniAttiva || !risultato) return null;
+    if (!sabatiniDisponibile || !sabatiniAttiva || !risultato) return null;
     if (zesIncompatibileSabatini) return null; // disattivata per cumulabilità
     return calcolaSabatiniMise(importo, sabatiniTipo);
-  }, [sabatiniAttiva, sabatiniTipo, importo, risultato, zesIncompatibileSabatini]);
+  }, [sabatiniDisponibile, sabatiniAttiva, sabatiniTipo, importo, risultato, zesIncompatibileSabatini]);
 
   const iperRis = useMemo(() => {
-    if (!iperAttivo || !risultato) return null;
+    if (!iperDisponibile || !iperAttivo || !risultato) return null;
     return calcolaIperammortamentoBene(importo, tipologia);
-  }, [iperAttivo, importo, tipologia, risultato]);
+  }, [iperDisponibile, iperAttivo, importo, tipologia, risultato]);
 
   const zesRis = useMemo(() => {
-    if (!zesAttiva || !risultato) return null;
+    if (!zesDisponibile || !zesAttiva || !risultato) return null;
     return calcolaZES(importo, zesRegione, zesDimensione);
-  }, [zesAttiva, importo, zesRegione, zesDimensione, risultato]);
+  }, [zesDisponibile, zesAttiva, importo, zesRegione, zesDimensione, risultato]);
 
   // Beneficio mensile equivalente (somma agevolazioni distribuite mensilmente sulla durata leasing)
   const beneficioMensileTotale = useMemo(() => {
@@ -503,10 +511,13 @@ export default function SimulatoreLeasing({ varianteFornitori = false, varianteL
         </div>
 
         {/* === Pannello agevolazioni === */}
+        {/* Ogni blocco è mostrato solo se l'agevolazione è attiva nel registro (leasing.ts) */}
+        {almenoUnaAgevolazione && (
         <div class="simlea__panel simlea__panel--agev">
           <h3 class="simlea__panel-title">Agevolazioni cumulabili</h3>
 
           {/* Sabatini */}
+          {sabatiniDisponibile && (
           <div class="simlea__agev">
             <label class="simlea__agev-toggle">
               <input
@@ -552,8 +563,10 @@ export default function SimulatoreLeasing({ varianteFornitori = false, varianteL
               </div>
             )}
           </div>
+          )}
 
           {/* Iperammortamento */}
+          {iperDisponibile && (
           <div class="simlea__agev">
             <label class="simlea__agev-toggle">
               <input
@@ -575,8 +588,10 @@ export default function SimulatoreLeasing({ varianteFornitori = false, varianteL
               </div>
             )}
           </div>
+          )}
 
-          {/* ZES Unica */}
+          {/* ZES Unica — mostrata solo se attiva nel registro agevolazioni (oggi chiusa) */}
+          {zesDisponibile && (
           <div class="simlea__agev">
             <label class="simlea__agev-toggle">
               <input
@@ -623,7 +638,9 @@ export default function SimulatoreLeasing({ varianteFornitori = false, varianteL
               </div>
             )}
           </div>
+          )}
         </div>
+        )}
       </div>
 
       {/* === Riepilogo risultati === */}

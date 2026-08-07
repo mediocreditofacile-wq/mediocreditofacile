@@ -1,0 +1,20 @@
+{
+  "date": "2026-06-05",
+  "recommendations": [
+    {
+      "campaign": "Diventa Partner — Vendor",
+      "trigger": "cost_over_target",
+      "action_type": "search_terms_review",
+      "current_budget": 25.0,
+      "recommended_budget": 25.0,
+      "bid_change_pct": 0.0,
+      "pillar_adgroup": "NOLEGGIO OPERATIVO FORNITORI (SOLUTION-AWARE)",
+      "bidding_strategy_type": "MAXIMIZE_CONVERSIONS",
+      "requires_manual": true,
+      "reason": "CPL 46.36 EUR sopra target massimo 40 EUR. Riduci bid -15% o metti in pausa le worst keyword prima di alzare budget. Lost budget 33%, lost rank 35%. NOTA: campagna su MAXIMIZE_CONVERSIONS, bid manuali non applicabili. Azione: revisione search term, aggiunta negative, controllo qualita landing.",
+      "priority": 1,
+      "status": "pending",
+      "campaign_budget_resource_name": "customers/5572178058/campaignBudgets/15353946391"
+    }
+  ]
+}

@@ -19,7 +19,7 @@ from collector.google_ads import fetch_campaign_budgets
 from notifier.email import send_daily_report, send_anomaly_alert, send_weekly_search_terms_report, send_weekly_audit
 from utils.claude_md import update_last_run
 
-load_dotenv()
+load_dotenv(override=True)  # override=True: sovrascrive env vars vuote ereditate dalla shell
 
 
 def load_config(path: str = "config.yaml") -> dict:

@@ -21,6 +21,7 @@
 - f-string con quote annidate ok in 3.12
 - GAQL: LAST_8_DAYS non è un literal valido → usare date esplicite
 - google-ads-python richiede ulimit -n alto al primo install (>10k file aperti). Se "Too many open files in system", lancia `ulimit -n 65536` prima di pip install.
+- Starlette 1.0 (dashboard FastAPI): la firma di `TemplateResponse` è cambiata — `request` è il PRIMO argomento: `templates.TemplateResponse(request, "index.html")`. La vecchia forma `TemplateResponse("index.html", {"request": request})` dà `TypeError: unhashable type: 'dict'` (500). Fix applicato a dashboard/server.py (2026-06-03).
 
 ## Lezione di sicurezza (importante)
 Quando Claude Code (o altre CLI sopra Anthropic API) lancia un subprocess Python, passa `ANTHROPIC_API_KEY=''` (stringa vuota) per evitare leak della propria chiave. python-dotenv default NON sovrascrive env vars esistenti, anche se vuote. Risultato: il modulo non legge la chiave del .env.
@@ -71,7 +72,7 @@ Fasi di rollout:
 - Fase 4 (da completare): Creazione campagne complete end-to-end
 
 Stato attuale:
-- Ultimo run daily: 2026-06-03. Ultimo run weekly (negatives): 2026-03-12.
+- Ultimo run daily: 2026-06-09. Ultimo run weekly (negatives): 2026-03-12.
 - LaunchAgent installato in ~/Library/LaunchAgents/ con path corretti e chiavi reali iniettate. Schedulato alle 08:00 ogni giorno. Il plist nel repo (scheduler/) resta con placeholder SOSTITUISCI per sicurezza.
 - Refresh token OAuth2 rigenerato il 2026-04-20 dopo revoca Google (OAuth consent screen in Testing mode → token scade ogni 7 giorni). Soluzione strutturale aperta: promuovere app a "In production" in Google Cloud Console per evitare scadenze ricorrenti.
 - Bug ANTHROPIC_API_KEY RISOLTO 2026-04-26: il problema era `load_dotenv()` senza `override=True`. Quando Claude Code lancia subprocess, passa `ANTHROPIC_API_KEY=''` per sicurezza, e dotenv default non sovrascrive var esistenti. Fix: tutti i punti d'ingresso ora usano `load_dotenv(override=True)`. Vedi sezione "Lezione di sicurezza" sopra.
