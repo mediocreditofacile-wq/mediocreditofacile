@@ -1,6 +1,14 @@
 // Test di accettazione del motore prospetti PV.
-// I valori attesi vengono dai due prospetti gia' emessi e validati a mano:
-// B Service (9 luglio 2026) e Giaccio Cesare (3 agosto 2026).
+//
+// Dal 07/08/2026 la griglia e' quella PagaRent (durate 24-60). I canoni attesi
+// sono verificati contro pagarentRata(), che e' la funzione gia' in uso nel
+// portale UNIDIMA e rilevata dal calcolatore ufficiale: se qualcuno tocca la
+// tabella, questi test cadono.
+//
+// I tre casi sono impianti reali: B Service, Giaccio Cesare, Nuova Era.
+// Nota storica: fino al 07/08/2026 si usava la griglia Rete Rent-Grenke e a 60
+// mesi Giaccio dava 945,24. Con PagaRent da' 1.063,20: i due prospetti gia'
+// consegnati non sono piu' riproducibili, ed e' voluto.
 //
 // Girano con: npm test
 
@@ -9,44 +17,38 @@ import {
   autoconsumoStimato,
   buildPayloadPdf,
   calcolaPreventivo,
-  fasciaDi,
+  coefficientiPerImporto,
+  importoQuotabile,
   zonaDaProvincia,
   type InputPreventivo,
 } from './prospetti-pv';
+import { DURATE, IMPORTO_MAX, IMPORTO_MIN, RISCATTO } from './prospetti-pv-coefficienti';
+import { pagarentRata } from '../data/pagarent';
 
 const r2 = (v: number) => Math.round(v * 100) / 100;
 
-const B_SERVICE: InputPreventivo = {
-  cliente: 'B Service SRL',
+const base = {
   comune: 'Baronissi',
   provincia: 'SA',
   forma_giuridica: 'societa-capitali',
   rif_preventivo: 'Preventivo InnovaLux',
-  kwp: 20,
-  kwh_accumulo: 10,
-  importo: 24980,
   installazione: 'tetto',
-  durata: 60,
-};
+} as const;
 
-const GIACCIO: InputPreventivo = {
-  cliente: 'Giaccio Cesare',
-  comune: 'Baronissi',
-  provincia: 'SA',
-  forma_giuridica: 'societa-capitali',
-  rif_preventivo: 'Preventivo InnovaLux del 30/07/2026',
-  kwp: 30,
-  kwh_accumulo: 30,
-  importo: 46980,
-  installazione: 'tetto',
-  durata: 60,
-};
+const B_SERVICE: InputPreventivo = { ...base, cliente: 'B Service SRL', kwp: 20, kwh_accumulo: 10, importo: 24980, durata: 60 };
+const GIACCIO: InputPreventivo = { ...base, cliente: 'Giaccio Cesare', kwp: 30, kwh_accumulo: 30, importo: 46980, durata: 60 };
+const NUOVA_ERA: InputPreventivo = { ...base, cliente: 'Nuova Era', kwp: 55, kwh_accumulo: 50, importo: 87980, durata: 60 };
+
+describe('durate quotate', () => {
+  it('sono le quattro di PagaRent, senza i 72 mesi', () => {
+    expect(DURATE).toEqual([24, 36, 48, 60]);
+  });
+});
 
 describe('caso B Service (20 kWp, 10 kWh, 24.980 euro, Campania)', () => {
   const c = calcolaPreventivo(B_SERVICE);
 
-  it('cade nella fascia e nella zona attese', () => {
-    expect(c.fascia).toBe('f3');
+  it('cade nella zona attesa', () => {
     expect(c.zona).toBe('sud');
     expect(c.irraggiamento).toBe(1450);
   });
@@ -56,11 +58,11 @@ describe('caso B Service (20 kWp, 10 kWh, 24.980 euro, Campania)', () => {
   });
 
   it('calcola i canoni su tutte le durate', () => {
-    expect(c.canoni[36]).toBe(791.12);
-    expect(c.canoni[48]).toBe(613.26);
-    expect(c.canoni[60]).toBe(507.59);
-    expect(c.canoni[72]).toBe(437.9);
-    expect(c.canone).toBe(507.59);
+    expect(c.canoni[24]).toBe(1298.3);
+    expect(c.canoni[36]).toBe(899.96);
+    expect(c.canoni[48]).toBe(687.69);
+    expect(c.canoni[60]).toBe(567.11);
+    expect(c.canone).toBe(567.11);
   });
 
   it('calcola il riscatto a 60 mesi', () => {
@@ -75,7 +77,7 @@ describe('caso B Service (20 kWp, 10 kWh, 24.980 euro, Campania)', () => {
   });
 
   it('calcola il risparmio fiscale su 60 mesi', () => {
-    expect(r2(c.fiscoNol)).toBe(8497.06);
+    expect(r2(c.fiscoNol)).toBe(9493.42);
   });
 
   it('calcola la rata leasing al 6 per cento e gli interessi', () => {
@@ -87,61 +89,92 @@ describe('caso B Service (20 kWp, 10 kWh, 24.980 euro, Campania)', () => {
     expect(r2(c.sabatini)).toBe(2517.98);
     expect(r2(c.iresIper)).toBe(10791.36);
   });
+
+  it('resta in attivo dopo la deducibilita', () => {
+    expect(Math.round(c.coperturaCanone * 100)).toBe(81);
+    expect(Math.round(c.margineMese)).toBe(50);
+  });
 });
 
 describe('caso Giaccio Cesare (30 kWp, 30 kWh, 46.980 euro)', () => {
   const c = calcolaPreventivo(GIACCIO);
-
-  it('cade nella fascia oltre 40.000', () => {
-    expect(c.fascia).toBe('f4');
-  });
 
   it('stima l autoconsumo al 65 per cento (1,0 kWh per kWp)', () => {
     expect(c.autoconsumoQuota).toBeCloseTo(0.65, 10);
   });
 
   it('calcola canone, beneficio e rata leasing', () => {
-    expect(c.canone).toBe(945.24);
+    expect(c.canone).toBe(1063.2);
     expect(r2(c.beneficioAnno)).toBe(8591.25);
     expect(c.rataLeasing).toBe(901.52);
   });
 
-  it('riproduce copertura e margine dei testi del prospetto emesso', () => {
-    // "copre circa il 76 per cento del canone", "in attivo di circa 34 euro al mese"
-    expect(Math.round(c.coperturaCanone * 100)).toBe(76);
-    expect(Math.round(c.margineMese)).toBe(34);
-    // "A 72 mesi ... 814,16 euro ... circa 129 euro mensili"
-    expect(c.canoni[72]).toBe(814.16);
+  it('con PagaRent il canone non e piu coperto dal risparmio', () => {
+    expect(Math.round(c.coperturaCanone * 100)).toBe(67);
+    expect(Math.round(c.margineMese)).toBe(-51);
+  });
+});
+
+describe('caso Nuova Era (55 kWp, 50 kWh, 87.980 euro)', () => {
+  const c = calcolaPreventivo(NUOVA_ERA);
+
+  it('calcola canone, beneficio e rata leasing', () => {
+    expect(c.canone).toBe(1991.07);
+    expect(r2(c.beneficioAnno)).toBe(15641.88);
+    expect(c.rataLeasing).toBe(1688.29);
+  });
+});
+
+describe('coerenza con la tabella PagaRent', () => {
+  it('i canoni coincidono con pagarentRata su ogni caso e ogni durata', () => {
+    for (const input of [B_SERVICE, GIACCIO, NUOVA_ERA]) {
+      const c = calcolaPreventivo(input);
+      for (const m of DURATE) {
+        expect(c.canoni[m]).toBe(r2(pagarentRata(input.importo, m)!));
+      }
+    }
   });
 
-  it('consiglia 60 mesi, la piu corta coperta dal beneficio', () => {
-    expect(c.durataConsigliata).toBe(60);
+  it('i coefficienti risolti per importo coprono tutte le durate', () => {
+    const mappa = coefficientiPerImporto(46980);
+    expect(Object.keys(mappa).map(Number).sort((a, b) => a - b)).toEqual(DURATE);
+  });
+});
+
+describe('range quotabile', () => {
+  it('accetta gli importi dentro il range verificato', () => {
+    expect(importoQuotabile(IMPORTO_MIN)).toBe(true);
+    expect(importoQuotabile(IMPORTO_MAX)).toBe(true);
+    expect(importoQuotabile(46980)).toBe(true);
+  });
+
+  it('rifiuta quelli fuori, invece di inventare un canone', () => {
+    expect(importoQuotabile(IMPORTO_MIN - 1)).toBe(false);
+    expect(importoQuotabile(IMPORTO_MAX + 1)).toBe(false);
+    expect(() => calcolaPreventivo({ ...GIACCIO, importo: 250000 })).toThrow(/fuori_range/);
+  });
+});
+
+describe('riscatti', () => {
+  it('coprono tutte le durate quotate', () => {
+    for (const m of DURATE) expect(typeof RISCATTO[m]).toBe('number');
+  });
+
+  it('il 24 mesi riusa il valore del 36, in mancanza del dato PagaRent', () => {
+    expect(RISCATTO[24]).toBe(RISCATTO[36]);
   });
 });
 
 describe('durata consigliata', () => {
   it('sceglie la piu corta in cui il canone netto e coperto', () => {
-    // B Service: a 48 mesi 613,26 x 0,721 = 442,16 < 459,17 beneficio mensile
-    const c = calcolaPreventivo({ ...B_SERVICE, durata: null });
-    expect(c.durataConsigliata).toBe(48);
-    expect(c.durata).toBe(48);
+    // Impianto generoso rispetto all'importo: la copertura arriva presto
+    const c = calcolaPreventivo({ ...B_SERVICE, kwp: 60, kwh_accumulo: 60, durata: null });
+    expect(c.durataConsigliata).toBeLessThan(60);
   });
 
-  it('ripiega su 72 mesi quando nessuna durata e coperta', () => {
-    // Impianto sovradimensionato rispetto al beneficio: nessuna copertura
+  it('ripiega sulla durata piu lunga quando nessuna e coperta', () => {
     const c = calcolaPreventivo({ ...B_SERVICE, kwp: 5, kwh_accumulo: 0, importo: 60000, durata: null });
-    expect(c.durataConsigliata).toBe(72);
-  });
-});
-
-describe('fasce di importo', () => {
-  it('rispetta gli scaglioni', () => {
-    expect(fasciaDi(8000)).toBe('f1');
-    expect(fasciaDi(8001)).toBe('f2');
-    expect(fasciaDi(20000)).toBe('f2');
-    expect(fasciaDi(20001)).toBe('f3');
-    expect(fasciaDi(40000)).toBe('f3');
-    expect(fasciaDi(40001)).toBe('f4');
+    expect(c.durataConsigliata).toBe(60);
   });
 });
 
@@ -151,7 +184,6 @@ describe('irraggiamento per provincia', () => {
     expect(zonaDaProvincia('fi')).toBe('centro');
     expect(zonaDaProvincia('SA')).toBe('sud');
     expect(zonaDaProvincia('CA')).toBe('sud');
-    // provincia sconosciuta: default centro
     expect(zonaDaProvincia('XX')).toBe('centro');
   });
 });
@@ -167,7 +199,6 @@ describe('autoconsumo', () => {
   });
 
   it('e limitato dal consumo reale quando dichiarato', () => {
-    // 29.000 kWh prodotti, 60% sarebbe 17.400: con 10.000 kWh di consumo si ferma li'
     const c = calcolaPreventivo({ ...B_SERVICE, consumo_annuo: 10000 });
     expect(c.autoKwh).toBe(10000);
     expect(c.autoconsumoCappatoDaConsumi).toBe(true);
@@ -195,17 +226,17 @@ describe('payload per il microservizio PDF', () => {
     expect(Object.keys(payload).sort()).toEqual(attese.sort());
   });
 
-  it('non fa trapelare coefficienti o fascia', () => {
+  it('non fa trapelare coefficienti', () => {
     const dump = JSON.stringify(payload);
-    expect(dump).not.toContain('2.012');
-    expect(dump).not.toContain('ESG');
+    expect(dump).not.toContain('2.26309');
+    expect(dump).not.toContain('PagaRent');
     expect(dump).not.toMatch(/fascia/i);
   });
 
   it('genera i testi narrativi dai numeri reali', () => {
-    expect(payload.testo_copertura).toContain('76 per cento del canone');
-    expect(payload.testo_copertura).toContain('34 euro al mese');
-    expect(payload.testo_copertura).toContain('814,16');
+    expect(payload.testo_copertura).toContain('67 per cento del canone');
+    // Canone scoperto: il testo lo dice invece di millantare un attivo
+    expect(payload.testo_copertura).toContain('resta a carico del cliente');
     expect(payload.testo_ipotesi).toContain('1.450 kWh per kWp');
     expect(payload.testo_ipotesi).toContain('in assenza dei dati di consumo reali');
     expect(payload.slug).toBe('Giaccio_Cesare');

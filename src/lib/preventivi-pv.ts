@@ -18,7 +18,9 @@ import { pathPreventivi, ruoloDaChiave, type PortalePartner } from '../data/port
 import {
   buildPayloadPdf,
   calcolaPreventivo,
+  coefficientiPerImporto,
   euro,
+  importoQuotabile,
   slugCliente,
   type Calcolo,
   type FormaGiuridica,
@@ -26,7 +28,7 @@ import {
   type InputPreventivo,
   type Profilo,
 } from './prospetti-pv';
-import { COEFFICIENTI, DURATE, RISCATTO } from './prospetti-pv-coefficienti';
+import { DURATE, IMPORTO_MAX, IMPORTO_MIN, RISCATTO } from './prospetti-pv-coefficienti';
 
 const DESTINATARIO = 'mediocreditofacile@gmail.com';
 /** Oltre questo tempo si degrada e si consegnano i soli numeri */
@@ -107,7 +109,13 @@ async function generaPdf(payload: Record<string, unknown>): Promise<RispostaPdf>
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body: JSON.stringify({
         dati: payload,
-        tabella: { coefficienti: COEFFICIENTI, riscatto: RISCATTO },
+        // Coefficienti gia' risolti per questo importo: gli scaglioni li legge
+        // solo il portale, il motore riceve una riga per durata.
+        tabella: {
+          durate: DURATE,
+          coefficienti: { unica: coefficientiPerImporto(payload.importo as number) },
+          riscatto: RISCATTO,
+        },
       }),
       signal: AbortSignal.timeout(TIMEOUT_PDF_MS),
     });
@@ -358,6 +366,15 @@ export async function gestisciPreventivo(request: Request, partner: PortalePartn
   const input = leggiInput((body.input ?? {}) as Record<string, unknown>);
   if (!input.cliente || input.kwp <= 0 || input.importo <= 0) {
     return rispondi({ ok: false, error: 'dati_incompleti' }, 400);
+  }
+  // Fuori dal range quotabile non si inventa un canone: si dice perche'.
+  if (!importoQuotabile(input.importo)) {
+    return rispondi({
+      ok: false,
+      error: 'importo_fuori_range',
+      min: IMPORTO_MIN,
+      max: IMPORTO_MAX,
+    }, 400);
   }
 
   const c = calcolaPreventivo(input);
