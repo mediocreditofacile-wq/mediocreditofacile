@@ -14,10 +14,10 @@ import {
   ACCUMULO_PUNTI,
   AUTOCONSUMO_BASE,
   AUTOCONSUMO_MAX,
-  COEFFICIENTI,
   DETRAZIONE_PRIVATI,
   DURATE,
-  FASCE,
+  IMPORTO_MAX,
+  IMPORTO_MIN,
   IPER_COSTO_GESTIONE,
   IPER_PCT,
   IRAP,
@@ -31,6 +31,7 @@ import {
   RISCATTO,
   SABATINI_COSTO_GESTIONE,
   SABATINI_PCT,
+  coefficiente,
 } from './prospetti-pv-coefficienti';
 
 export type FormaGiuridica = 'societa-capitali' | 'ditta-individuale' | 'privato';
@@ -60,7 +61,6 @@ export interface InputPreventivo {
 }
 
 export interface Calcolo {
-  fascia: string;
   zona: string;
   irraggiamento: number;
   canoni: Record<number, number>;
@@ -122,8 +122,23 @@ export function euro(v: number, dec = 2): string {
   });
 }
 
-export function fasciaDi(importo: number): string {
-  return (FASCE.find((f) => importo <= f.fino) ?? FASCE[FASCE.length - 1]).fascia;
+/** L'importo cade nel range che l'operatore quota davvero? */
+export function importoQuotabile(importo: number): boolean {
+  return importo >= IMPORTO_MIN && importo <= IMPORTO_MAX && DURATE.every((m) => coefficiente(importo, m) !== null);
+}
+
+/**
+ * Coefficienti risolti per un dato importo, una voce per durata. E' quello che
+ * viaggia verso il microservizio PDF: gli scaglioni li legge solo questo lato,
+ * perche' cambiano da un operatore all'altro e perfino tra durate.
+ */
+export function coefficientiPerImporto(importo: number): Record<number, number> {
+  const mappa: Record<number, number> = {};
+  for (const m of DURATE) {
+    const c = coefficiente(importo, m);
+    if (c !== null) mappa[m] = c;
+  }
+  return mappa;
 }
 
 export function zonaDaProvincia(provincia: string): string {
@@ -153,14 +168,17 @@ export function autoconsumoStimato(kwp: number, kwhAccumulo: number, profilo: Pr
 
 export function calcolaPreventivo(input: InputPreventivo): Calcolo {
   const imp = input.importo;
-  const fascia = fasciaDi(imp);
-  const co = COEFFICIENTI[fascia];
+  if (!importoQuotabile(imp)) {
+    throw new Error(
+      `importo_fuori_range: ${imp} euro, quotabili da ${IMPORTO_MIN} a ${IMPORTO_MAX}`,
+    );
+  }
 
   const canoni: Record<number, number> = {};
   const totali: Record<number, number> = {};
   const riscatti: Record<number, number> = {};
   for (const m of DURATE) {
-    canoni[m] = r2((imp * co[m]) / 100);
+    canoni[m] = r2((imp * coefficiente(imp, m)!) / 100);
     totali[m] = r2(canoni[m] * m);
     riscatti[m] = r2((imp * RISCATTO[m]) / 100);
   }
@@ -189,7 +207,8 @@ export function calcolaPreventivo(input: InputPreventivo): Calcolo {
   // === Durata consigliata: la piu' corta in cui il canone al netto della
   // deducibilita' e' coperto dal beneficio energetico. Nessuna: 72 mesi. ===
   const netto = (canone: number) => canone * (1 - IRES - IRAP);
-  const durataConsigliata = DURATE.find((m) => netto(canoni[m]) <= beneficioMese) ?? 72;
+  // Nessuna durata coperta: si propone la piu' lunga disponibile
+  const durataConsigliata = DURATE.find((m) => netto(canoni[m]) <= beneficioMese) ?? DURATE[DURATE.length - 1];
   const durataForzata = Boolean(input.durata && input.durata !== durataConsigliata);
   const durata = input.durata && DURATE.includes(input.durata) ? input.durata : durataConsigliata;
 
@@ -220,7 +239,6 @@ export function calcolaPreventivo(input: InputPreventivo): Calcolo {
   const esborsoLeasing = totLeasing + SABATINI_COSTO_GESTIONE + IPER_COSTO_GESTIONE;
 
   return {
-    fascia,
     zona,
     irraggiamento,
     canoni,

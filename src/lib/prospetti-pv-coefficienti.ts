@@ -1,49 +1,46 @@
-// Coefficienti e parametri dei prospetti fotovoltaico (portale InnovaLux).
+// Parametri dei prospetti fotovoltaico (portale InnovaLux).
 //
 // ATTENZIONE — FILE SERVER-ONLY. Vive in src/lib/ e non deve MAI essere importato
-// da un componente .tsx montato come isola: finirebbe nel bundle pubblico. I
-// coefficienti sono dati commerciali riservati, in output esce solo il canone.
-// Il gemello src/data/esg.ts (tabella ESG++++ del portale Expo Energia) e' invece
-// gia' client-side: sono due tabelle DIVERSE, non allinearle senza verifica.
+// da un componente .tsx montato come isola.
 //
-// Fonte: Guida Operativa Rete Rent-Grenke, ultimo aggiornamento marzo 2026.
-// E' la griglia che ha prodotto i prospetti validati a mano (B Service 09/07/2026,
-// Giaccio Cesare 03/08/2026): cambiarla cambia ogni canone gia' comunicato.
+// CANALE: PagaRent, noleggio operativo (indicazione Alberto, 07/08/2026).
+// I coefficienti NON sono duplicati qui: arrivano da src/data/pagarent.ts, che
+// li ha rilevati dal calcolatore ufficiale ed e' gia' la fonte di verita' per il
+// portale UNIDIMA. Aggiornarli in quel file aggiorna anche i prospetti.
 //
-// DA CHIARIRE (03/08/2026): Alberto ha indicato PagaRent come canale su cui
-// lavorare i noleggi InnovaLux. La tabella PagaRent pero' e' un'altra cosa
-// (src/data/pagarent.ts, durate 24-60, a 60 mesi 2,346% contro 2,012% di qui:
-// su 24.980 euro fanno 586 euro di canone invece di 507,59) e non riprodurrebbe
-// i prospetti gia' emessi. Finche' non e' chiarito si resta su questa griglia.
-// Per passare a PagaRent basta sostituire COEFFICIENTI, FASCE e DURATE qui:
-// il resto del motore non conosce la provenienza dei numeri.
-//
-// Il canale non compare mai in output, ne' qui ne' nei PDF.
-//
-// Per aggiornare i coefficienti: si tocca solo questo file. Il microservizio PDF
-// li riceve nel payload, quindi non serve ridistribuirlo.
+// STORICO: fino al 07/08/2026 si usava la griglia Rete Rent-Grenke a quattro
+// fasce (36/48/60/72 mesi, a 60 mesi 2,012%). E' quella che ha prodotto i
+// prospetti consegnati a B Service il 09/07/2026 e a Giaccio Cesare il
+// 03/08/2026: quei due documenti non sono piu' riproducibili dal portale, i
+// canoni PagaRent sono piu' alti di circa il 15 per cento.
 
-/** Canone mensile = importo netto x coefficiente / 100 */
-export const COEFFICIENTI: Record<string, Record<number, number>> = {
-  f1: { 36: 3.227, 48: 2.527, 60: 2.103, 72: 1.824 },
-  f2: { 36: 3.188, 48: 2.486, 60: 2.063, 72: 1.784 },
-  f3: { 36: 3.167, 48: 2.455, 60: 2.032, 72: 1.753 },
-  f4: { 36: 3.147, 48: 2.434, 60: 2.012, 72: 1.733 },
-};
+import { PAGARENT_MAX, PAGARENT_MIN, getPagarentCoeff } from '../data/pagarent';
 
-/** Soglie delle fasce di importo (imponibile in euro) */
-export const FASCE: { fino: number; fascia: string }[] = [
-  { fino: 8000, fascia: 'f1' },
-  { fino: 20000, fascia: 'f2' },
-  { fino: 40000, fascia: 'f3' },
-  { fino: Infinity, fascia: 'f4' },
-];
+/** Durate esposte nei prospetti. PagaRent quota 24-60: i 72 mesi non esistono. */
+export const DURATE: number[] = [24, 36, 48, 60];
 
-/** Riscatto finale fotovoltaico, in % dell'imponibile. Valori medi indicativi:
- *  il prezzo effettivo si definisce a fine contratto sullo stato del bene. */
-export const RISCATTO: Record<number, number> = { 36: 6, 48: 4, 60: 3, 72: 3 };
+/** Importi entro cui PagaRent e' stato verificato sul calcolatore */
+export const IMPORTO_MIN = PAGARENT_MIN;
+export const IMPORTO_MAX = PAGARENT_MAX;
 
-export const DURATE: number[] = [36, 48, 60, 72];
+/**
+ * Coefficiente della durata per un dato importo: canone = importo x c / 100.
+ * Null se l'importo cade fuori dal range quotabile.
+ */
+export function coefficiente(importo: number, durata: number): number | null {
+  return getPagarentCoeff(importo, durata);
+}
+
+/**
+ * Riscatto finale, in % dell'imponibile. Valori medi indicativi: il prezzo
+ * effettivo si definisce a fine contratto sullo stato del bene.
+ *
+ * ATTENZIONE: sono i valori della vecchia griglia Grenke, tenuti su indicazione
+ * di Alberto in mancanza dei riscatti PagaRent. Il 24 mesi non esisteva e riusa
+ * il valore del 36: e' l'unico numero di questo file senza una fonte, da
+ * correggere appena PagaRent comunica i suoi.
+ */
+export const RISCATTO: Record<number, number> = { 24: 6, 36: 6, 48: 4, 60: 3 };
 
 // === Fiscalita' ===
 export const IRES = 0.24;

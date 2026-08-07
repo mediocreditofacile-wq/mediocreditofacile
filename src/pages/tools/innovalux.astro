@@ -195,10 +195,10 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
               <label class="il__field-label" for="durata">Durata del noleggio</label>
               <select id="durata" name="durata">
                 <option value="">Consigliata (automatica)</option>
+                <option value="24">24 mesi</option>
                 <option value="36">36 mesi</option>
                 <option value="48">48 mesi</option>
                 <option value="60">60 mesi</option>
-                <option value="72">72 mesi</option>
               </select>
             </div>
           </div>
@@ -442,7 +442,8 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
 
   function renderRisultato(res: any) {
     const n = res.numeri;
-    const durateRighe = [36, 48, 60, 72]
+    // le durate arrivano dal server: le quota l'operatore, non la pagina
+    const durateRighe = Object.keys(n.canoni).map(Number).sort((a, b) => a - b)
       .map((m) => `
         <tr class="${m === n.durata ? 'il__riga-scelta' : ''}">
           <td>${m} mesi</td>
