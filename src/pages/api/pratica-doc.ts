@@ -9,7 +9,7 @@ export const prerender = false;
 // apre solo i documenti della sua cartella, quella admin apre tutto.
 
 import { get, BlobNotFoundError } from '@vercel/blob';
-import { PORTALI_PARTNER, pathPrefix, ruoloDaChiave } from '../../data/portali-partner';
+import { PORTALI_PARTNER, pathPrefix, pathPreventivi, ruoloDaChiave } from '../../data/portali-partner';
 
 export async function GET({ request }: { request: Request }) {
   const token = import.meta.env.BLOB_READ_WRITE_TOKEN as string | undefined;
@@ -21,9 +21,12 @@ export async function GET({ request }: { request: Request }) {
   const k = url.searchParams.get('k') ?? '';
   const chiave = (request.headers.get('authorization') ?? '').replace(/^Bearer\s+/i, '').trim() || k;
 
-  // Niente path traversal, e il documento deve stare nella cartella di un partner noto
+  // Niente path traversal, e il documento deve stare nella cartella di un partner
+  // noto: documenti di pratica (pratiche/) o prospetti generati (preventivi/).
   if (path.includes('..')) return new Response('Percorso non valido', { status: 400 });
-  const partner = Object.values(PORTALI_PARTNER).find((p) => path.startsWith(pathPrefix(p.slug)));
+  const partner = Object.values(PORTALI_PARTNER).find(
+    (p) => path.startsWith(pathPrefix(p.slug)) || path.startsWith(pathPreventivi(p.slug)),
+  );
   if (!partner) return new Response('Percorso non valido', { status: 400 });
 
   if (!ruoloDaChiave(chiave, partner, adminKey)) {
