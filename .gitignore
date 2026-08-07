@@ -29,3 +29,6 @@ firebase-debug.log
 # backup local di immagini originali pre-ricompressione
 .image-archive/
 .env*
+
+# Worktree temporanei di Claude Code: sono copie della repo, 1,7 GB
+.claude/worktrees/
