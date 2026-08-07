@@ -1,0 +1,128 @@
+{
+  "date": "2026-04-24",
+  "recommendations": [
+    {
+      "campaign": "Noleggio Operativo Fotovoltaico",
+      "trigger": "cost_over_target",
+      "action_type": "bid_decrease",
+      "current_budget": 25.0,
+      "recommended_budget": 25.0,
+      "bid_change_pct": -0.15,
+      "pillar_adgroup": "Fotovoltaico – Tetto in Affitto",
+      "reason": "CPL 365.67 EUR sopra target massimo 50 EUR. Riduci bid -15% o metti in pausa le worst keyword prima di alzare budget. Lost budget 80%, lost rank 6%.",
+      "priority": 1,
+      "status": "superseded_by_manual_action",
+      "campaign_budget_resource_name": "customers/5572178058/campaignBudgets/15420856280",
+      "decision_at": "2026-04-24T15:18:45Z",
+      "decision_note": "Non applicato bid -15% uniforme. Al suo posto pausate 3 keyword worst (fotovoltaico tetto in affitto, quanto costa noleggio fotovoltaico, simulatore rata fotovoltaico) che da sole bruciavano 267 EUR in 30gg. Rivalutare fra 7 giorni con dati GTM v18 puliti."
+    },
+    {
+      "campaign": "Diventa Partner — Vendor",
+      "trigger": "lost_rank_high",
+      "action_type": "bid_increase",
+      "current_budget": 20.0,
+      "recommended_budget": 20.0,
+      "bid_change_pct": 0.3,
+      "pillar_adgroup": "Vendi a Rate",
+      "reason": "Lost rank 49%, CPC 3.29 EUR, CTR 9.8%. Aumento bid +30% sull'ad group pilastro 'Vendi a Rate' per migliorare il posizionamento in asta. CPL atteso post-aumento 26.5-39.7 EUR. Valutare il budget in seconda battuta.",
+      "priority": 2,
+      "status": "rejected",
+      "campaign_budget_resource_name": "customers/5572178058/campaignBudgets/15353946391",
+      "decision_at": "2026-04-24T15:18:45Z",
+      "decision_note": "Rifiutata: 1) config.yaml pillar_adgroup 'Vendi a Rate' obsoleto (0 click in 30gg), il pilastro reale è 'NOLEGGIO OPERATIVO FORNITORI (SOLUTION-AWARE)'. 2) Campagna in MAXIMIZE_CONVERSIONS, bid manuali non applicabili. Azione alternativa applicata: budget 20 -> 25 EUR/giorno per ridurre lost rank 49%."
+    }
+  ],
+  "manual_actions": [
+    {
+      "campaign": "Diventa Partner — Vendor",
+      "trigger": "manual_decision",
+      "action_type": "budget_increase",
+      "previous_budget": 20.0,
+      "new_budget": 25.0,
+      "reason": "Lost rank 49% + budget saturo (spesa 22 EUR/die su tetto 20). Alzato a 25 EUR per recuperare quota aste. CPL a 32 EUR dentro target 8-40.",
+      "status": "applied",
+      "applied_at": "2026-04-24T15:18:45Z",
+      "applied_by": "alberto_via_claude",
+      "campaign_budget_resource_name": "customers/5572178058/campaignBudgets/15353946391"
+    },
+    {
+      "action_type": "gtm_tracking_verification",
+      "target": "Tag TechSol fotovoltaico (6 PAGE_VIEW)",
+      "test_landing": "noleggio-fotovoltaico-tetto-affitto",
+      "result": "PASS",
+      "evidence": "Hit conversione pagead2/conversion/16800748626/ con label=0zliCLnx_pQcENKonMs- rilevato via network inspection su /grazie. Referrer header contiene esattamente lo slug della landing, nessun typo nel trigger GTM. Tag fired.",
+      "tested_tag_label": "TechSol - noleggio-fotovoltaico-tetto-affitto 5555",
+      "verified_at": "2026-04-24T15:35:49Z",
+      "verified_by": "claude_in_chrome_agent_via_alberto",
+      "note": "Verifica eseguita via network inspection perchè Tag Assistant UI non gestiva handshake con preview (tab cross-context). Network hit è prova definitiva equivalente. Ragionevole assumere pass anche per gli altri 5 tag TechSol (stesso pattern GTM).",
+      "side_observation": "Prima submit test non ha effettuato POST, probabilmente validazione client-side silenziosa. Da verificare su ContactForm.astro."
+    },
+    {
+      "action_type": "campaign_negative_keywords",
+      "campaign": "Noleggio Operativo Fotovoltaico",
+      "negatives_added": [
+        {
+          "keyword": "simulatore",
+          "match_type": "PHRASE"
+        },
+        {
+          "keyword": "calcolatore",
+          "match_type": "PHRASE"
+        },
+        {
+          "keyword": "simulazione",
+          "match_type": "PHRASE"
+        },
+        {
+          "keyword": "calcolo",
+          "match_type": "PHRASE"
+        },
+        {
+          "keyword": "privati",
+          "match_type": "PHRASE"
+        },
+        {
+          "keyword": "affitto tetto",
+          "match_type": "PHRASE"
+        },
+        {
+          "keyword": "affittare tetto",
+          "match_type": "PHRASE"
+        },
+        {
+          "keyword": "lastrico solare",
+          "match_type": "PHRASE"
+        }
+      ],
+      "reason": "Analisi search term 7gg (18-24/4): 41 click 80 EUR zero conv. Cluster 'simulatore/calcolo' (25% spesa, utenti in cerca di strumento gratuito, non convertibili), 'affitto tetto' (13% spesa, intent invertito rispetto al prodotto), 'privati' (segmento B2C incompatibile con noleggio operativo). Risparmio stimato 4-5 EUR/giorno.",
+      "campaign_resource_name": "customers/5572178058/campaigns/23645736659",
+      "status": "applied",
+      "applied_at": "2026-04-24T16:19:10Z",
+      "applied_by": "alberto_via_claude"
+    },
+    {
+      "action_type": "adgroup_pause",
+      "campaign": "Noleggio Operativo Fotovoltaico",
+      "ad_group": "FV – Simulatore Calcolo",
+      "ad_group_resource_name": "customers/5572178058/adGroups/197767245249",
+      "reason": "Ad group raccoglieva il cluster 'simulatore/calcolo': 17 click zero conv in 7gg. Intent strutturalmente non convertibile (utenti cercano strumento gratuito online, non un broker noleggio). Pausato per riallocare budget sugli altri 5 ad group target.",
+      "status": "applied",
+      "applied_at": "2026-04-24T16:19:10Z",
+      "applied_by": "alberto_via_claude"
+    },
+    {
+      "action_type": "landing_copy_rewrite",
+      "landing_slug": "noleggio-fotovoltaico-tetto-affitto",
+      "fields_changed": [
+        "heroTitle",
+        "heroSubtitle",
+        "metaDescription"
+      ],
+      "reason": "Il titolo 'Il Tetto Non È Tuo, il Risparmio Sì' attirava traffico con intent invertito. Nuovo heroTitle 'Il Capannone È in Affitto: Il Fotovoltaico Lo Paghi Col Risparmio' identifica target PMI affittuaria ed esclude chi cerca di affittare il proprio tetto.",
+      "git_commit": "66ca91f",
+      "status": "deployed",
+      "applied_at": "2026-04-24T16:19:10Z",
+      "applied_by": "alberto_via_claude"
+    }
+  ]
+}

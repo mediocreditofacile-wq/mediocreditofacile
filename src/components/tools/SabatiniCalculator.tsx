@@ -1,11 +1,16 @@
 import { useState, useMemo } from 'preact/hooks';
 import './sabatini-calculator.css';
 
-// Tassi convenzionali Nuova Sabatini (DM MISE)
+// Tassi convenzionali Nuova Sabatini (DM MISE / MIMIT)
 // - Beni ordinari: 2,75% annuo
-// - Beni 4.0 (industria 4.0): 3,575% annuo (contributo maggiorato del 30%)
+// - Beni 4.0 (Industria 4.0, allegati 6/A e 6/B circ. 14036): 3,575% annuo (+30%)
+// - Investimenti green (beni a basso impatto ambientale, domande dal 01/01/2023):
+//   3,575% annuo (+30%), STESSA maggiorazione del 4.0. Differenza normativa, non
+//   di calcolo: il green richiede la certificazione ambientale di processo/prodotto
+//   (DM 22/04/2022), il 4.0 richiede i beni tecnologici degli allegati.
 const TASSO_ORDINARIO = 0.0275;
 const TASSO_4_0 = 0.03575;
+const TASSO_GREEN = 0.03575;
 
 // Durata fissa del finanziamento convenzionale per il calcolo del contributo
 const DURATA_ANNI = 5;
@@ -17,13 +22,15 @@ const INV_MIN = 20000;
 const INV_MAX = 4000000;
 
 // Tipologia bene
-type TipoBene = 'ordinario' | '4.0';
+type TipoBene = 'ordinario' | '4.0' | 'green';
 
 // Calcolo del contributo MISE
 // Si calcola la quota interessi totale di un finanziamento di pari importo
 // con piano francese a 5 anni e rate semestrali al tasso convenzionale.
 function calcolaContributo(importo: number, tipo: TipoBene): number {
-  const tassoAnnuo = tipo === '4.0' ? TASSO_4_0 : TASSO_ORDINARIO;
+  // 4.0 e green condividono lo stesso tasso convenzionale maggiorato (3,575%)
+  const tassoAnnuo =
+    tipo === '4.0' ? TASSO_4_0 : tipo === 'green' ? TASSO_GREEN : TASSO_ORDINARIO;
   const tassoPeriodico = tassoAnnuo / RATE_PER_ANNO;
 
   // Rata costante (formula francese)
@@ -190,7 +197,7 @@ export default function SabatiniCalculator() {
 
         <div class="sab-calc__field">
           <label class="sab-calc__label">Tipologia bene</label>
-          <div class="sab-calc__toggle">
+          <div class="sab-calc__toggle sab-calc__toggle--tre">
             <button
               type="button"
               class={`sab-calc__toggle-btn ${tipoBene === 'ordinario' ? 'is-active' : ''}`}
@@ -205,9 +212,25 @@ export default function SabatiniCalculator() {
               onClick={() => handleTipoChange('4.0')}
             >
               Bene 4.0
-              <span class="sab-calc__toggle-hint">Tasso 3,575% — contributo +30%</span>
+              <span class="sab-calc__toggle-hint">Tasso 3,575% — +30%</span>
+            </button>
+            <button
+              type="button"
+              class={`sab-calc__toggle-btn ${tipoBene === 'green' ? 'is-active' : ''}`}
+              onClick={() => handleTipoChange('green')}
+            >
+              Bene green
+              <span class="sab-calc__toggle-hint">Tasso 3,575% — +30%</span>
             </button>
           </div>
+
+          {tipoBene === 'green' && (
+            <p class="sab-calc__note">
+              Stesso contributo maggiorato del 4.0 (+30%), ma per beni a basso impatto
+              ambientale. Richiede una certificazione ambientale di processo o di prodotto
+              (o autodichiarazione del produttore) ai sensi del DM 22/04/2022.
+            </p>
+          )}
         </div>
 
         <button

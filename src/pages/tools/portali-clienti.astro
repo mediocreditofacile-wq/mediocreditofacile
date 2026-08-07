@@ -6,12 +6,14 @@
  * ai partner perche' raggiungano il proprio portale senza ricordare lo slug.
  * NON espone credenziali: ogni partner ha le sue, consegnate da MCF.
  *
- * Elenca solo i portali costruiti sul motore condiviso (src/lib/pratiche-partner.ts):
- * login email+password, simulatore, caricamento pratica con documenti, lista
- * richieste con stato. Le aree partner col solo simulatore restano fuori.
+ * Due blocchi:
+ *  - PORTALI_PRATICHE: costruiti sul motore condiviso (src/lib/pratiche-partner.ts),
+ *    login email+password, simulatore, caricamento pratica con documenti, stato richieste.
+ *  - AREE_PARTNER: aree riservate col simulatore dedicato (fotovoltaico) e il tool
+ *    della rete commerciale Marotta.
  *
- * Per aggiungere un portale: una voce in PORTALI qui sotto (oltre al resto della
- * procedura descritta in CLAUDE.md).
+ * Per aggiungere una voce: un oggetto nell'array giusto qui sotto (oltre al resto
+ * della procedura descritta in CLAUDE.md).
  */
 import Icon from '../../components/Icon.astro';
 import ToolLayout from '../../layouts/ToolLayout.astro';
@@ -22,9 +24,11 @@ interface PortaleCard {
   icona: string;
   settore: string;
   descrizione: string;
+  /** true per i link fuori dal dominio MCF (oggi nessuno: il tool Marotta e' passato in casa) */
+  esterno?: boolean;
 }
 
-const PORTALI: PortaleCard[] = [
+const PORTALI_PRATICHE: PortaleCard[] = [
   {
     nome: 'Expo Energia',
     href: '/tools/expo-energia',
@@ -49,6 +53,65 @@ const PORTALI: PortaleCard[] = [
     descrizione:
       'Tabelle BCC Rent&Lease su PC, server e attrezzature: locazione operativa, leasing, finanziamento finalizzato e campagna tasso zero. Assicurazione all risk già compresa nella rata.',
   },
+  {
+    nome: 'UNIDIMA',
+    href: '/tools/unidima',
+    icona: 'ict-digital',
+    settore: 'Ledwall e display LED',
+    descrizione:
+      'Noleggio operativo su ledwall indoor e outdoor, totem e monitor professionali: due tabelle a confronto, PagaRent e Grenke Pioneer, dal prezzo di vendita alla griglia canoni da 24 a 60 mesi o dal canone al prezzo.',
+  },
+  {
+    nome: 'InnovaLux',
+    href: '/tools/innovalux',
+    icona: 'solar_power',
+    settore: 'Fotovoltaico con accumulo',
+    descrizione:
+      'Genera i due prospetti dell\'impianto: canone su tutte le durate, confronto tra la rata e il risparmio in bolletta, deducibilità e alternativa leasing con Sabatini e iperammortamento. I PDF escono pronti per il cliente finale.',
+  },
+];
+
+const AREE_PARTNER: PortaleCard[] = [
+  {
+    nome: 'Marotta Evolution',
+    href: '/tools/marotta/',
+    icona: 'precision_manufacturing',
+    settore: 'Rete commerciale',
+    descrizione:
+      'Lookup della partita IVA, configuratore offerta, simulatore canone, credit policy a semaforo e preventivo PDF per la rete commerciale Marotta.',
+  },
+  {
+    nome: 'Arca Energia',
+    href: '/tools/arca-energia',
+    icona: 'solar_power',
+    settore: 'Fotovoltaico',
+    descrizione:
+      'Simulatore fotovoltaico con switch noleggio o leasing, coefficienti Sud Italia, assicurazione opzionale e agevolazioni: iperammortamento 4.0 e Nuova Sabatini.',
+  },
+  {
+    nome: 'AGE SRL',
+    href: '/tools/age-srl',
+    icona: 'solar_power',
+    settore: 'Fotovoltaico',
+    descrizione:
+      'Stessa impostazione di Arca Energia, noleggio o leasing con agevolazioni, più il download del preventivo PDF brandizzato Mediocredito Facile da mandare al cliente finale.',
+  },
+  {
+    nome: 'EnergyTeam',
+    href: '/tools/energyteam',
+    icona: 'solar_power',
+    settore: 'Fotovoltaico',
+    descrizione:
+      'Simulatore noleggio fotovoltaico con assicurazione opzionale, coefficiente Sud Italia e invio della richiesta pratica con la checklist dei documenti.',
+  },
+  {
+    nome: 'Econocom — Pubblica Amministrazione',
+    href: '/tools/econocom-pa',
+    icona: 'account_balance',
+    settore: 'Fotovoltaico per enti pubblici',
+    descrizione:
+      'Noleggio operativo Econocom per comuni, ASL e municipalizzate: parcheggi fotovoltaici, riqualificazione energetica e illuminazione, da 150.000 euro, con business plan che confronta la rata con la bolletta dell’ente.',
+  },
 ];
 ---
 
@@ -64,8 +127,8 @@ const PORTALI: PortaleCard[] = [
       <span class="pc-hero__eyebrow">Aree riservate</span>
       <h1 class="pc-hero__title">Portali clienti</h1>
       <p class="pc-hero__sub">
-        Ogni partner ha il suo portale: le tabelle giuste per i beni che vende, il caricamento della pratica
-        con i documenti e la lista delle richieste con lo stato aggiornato. Qui trovi l'accesso a tutti.
+        Ogni partner ha la sua area: le tabelle giuste per i beni che vende, il preventivo pronto da mandare al
+        cliente e la pratica che parte da lì. Qui trovi l'accesso a tutte.
       </p>
     </div>
   </section>
@@ -73,14 +136,24 @@ const PORTALI: PortaleCard[] = [
   <!-- ELENCO PORTALI -->
   <section class="pc-list">
     <div class="pc-list__inner">
+      <div class="pc-list__head">
+        <h2 class="pc-list__title">Portali pratiche</h2>
+        <p class="pc-list__intro">
+          Simulazione, preventivo, caricamento della pratica con i documenti e stato di avanzamento: tutto
+          dentro la stessa area.
+        </p>
+      </div>
+
       <div class="pc-list__grid">
         {
-          PORTALI.map((p) => (
+          PORTALI_PRATICHE.map((p) => (
             <a href={p.href} class="pc-card">
               <span class="pc-card__badge">Riservato</span>
-              <Icon name={p.icona} class="pc-card__icon" />
+              <span class="pc-card__icon">
+                <Icon name={p.icona} size={40} />
+              </span>
               <span class="pc-card__settore">{p.settore}</span>
-              <h2 class="pc-card__title">{p.nome}</h2>
+              <h3 class="pc-card__title">{p.nome}</h3>
               <p class="pc-card__desc">{p.descrizione}</p>
               <span class="pc-card__link">
                 Apri il portale
@@ -91,8 +164,40 @@ const PORTALI: PortaleCard[] = [
         }
       </div>
 
+      <div class="pc-list__head pc-list__head--spaced">
+        <h2 class="pc-list__title">Aree riservate</h2>
+        <p class="pc-list__intro">
+          Il simulatore dedicato di ogni partner, con le tabelle e le agevolazioni che servono al suo settore.
+        </p>
+      </div>
+
+      <div class="pc-list__grid">
+        {
+          AREE_PARTNER.map((p) => (
+            <a
+              href={p.href}
+              class="pc-card"
+              target={p.esterno ? '_blank' : undefined}
+              rel={p.esterno ? 'noopener' : undefined}
+            >
+              <span class="pc-card__badge">Riservato</span>
+              <span class="pc-card__icon">
+                <Icon name={p.icona} size={40} />
+              </span>
+              <span class="pc-card__settore">{p.settore}</span>
+              <h3 class="pc-card__title">{p.nome}</h3>
+              <p class="pc-card__desc">{p.descrizione}</p>
+              <span class="pc-card__link">
+                {p.esterno ? 'Apri il tool' : 'Apri l’area'}
+                <Icon name="arrow_forward" />
+              </span>
+            </a>
+          ))
+        }
+      </div>
+
       <p class="pc-list__note">
-        <Icon name="lock" />
+        <Icon name="lock" size={18} color="var(--color-accent)" />
         Ogni portale si apre con le credenziali che ti abbiamo consegnato. Se le hai perse, scrivici e te le
         rimandiamo.
       </p>
@@ -104,6 +209,10 @@ const PORTALI: PortaleCard[] = [
     <div class="pc-how__inner">
       <span class="pc-how__eyebrow">Cosa ci fai dentro</span>
       <h2 class="pc-how__title">Dal preventivo alla delibera, senza passaggi intermedi</h2>
+      <p class="pc-how__lead">
+        Il giro completo è quello dei portali pratiche. Nelle aree riservate col solo simulatore i primi due
+        passi sono identici, la pratica invece ce la mandi con il form in fondo alla pagina.
+      </p>
       <div class="pc-how__steps">
         <div class="pc-how__step">
           <span class="pc-how__num">1</span>
@@ -204,6 +313,31 @@ const PORTALI: PortaleCard[] = [
     margin: 0 auto;
   }
 
+  .pc-list__head {
+    margin-bottom: 2rem;
+  }
+
+  .pc-list__head--spaced {
+    margin-top: 4rem;
+    padding-top: 3rem;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .pc-list__title {
+    font-size: clamp(1.35rem, 3vw, 1.75rem);
+    font-weight: 800;
+    color: var(--color-primary);
+    letter-spacing: -0.02em;
+    margin-bottom: 0.5rem;
+  }
+
+  .pc-list__intro {
+    font-size: 1rem;
+    color: var(--color-text-light);
+    line-height: 1.65;
+    max-width: 60ch;
+  }
+
   .pc-list__grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -241,8 +375,10 @@ const PORTALI: PortaleCard[] = [
     text-transform: uppercase;
   }
 
+  /* Le icone stanno dentro uno span wrapper: lo stile scoped della pagina non
+     raggiunge lo span interno del componente Icon (ha il suo scope). */
   .pc-card__icon {
-    font-size: 2.5rem;
+    display: inline-flex;
     color: var(--color-primary);
     margin-bottom: 1rem;
   }
@@ -296,11 +432,6 @@ const PORTALI: PortaleCard[] = [
     text-align: center;
   }
 
-  .pc-list__note .mcf-icon {
-    font-size: 1.1rem;
-    color: var(--color-accent);
-    flex-shrink: 0;
-  }
 
   /* COME FUNZIONA */
   .pc-how {
@@ -329,6 +460,14 @@ const PORTALI: PortaleCard[] = [
     color: var(--color-primary);
     letter-spacing: -0.02em;
     line-height: 1.2;
+    margin-bottom: 1rem;
+  }
+
+  .pc-how__lead {
+    font-size: 1rem;
+    color: var(--color-text-light);
+    line-height: 1.65;
+    max-width: 68ch;
     margin-bottom: 2.5rem;
   }
 

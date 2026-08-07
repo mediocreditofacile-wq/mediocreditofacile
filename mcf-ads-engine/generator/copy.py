@@ -56,7 +56,7 @@ def validate_rsa_copy(copy: dict) -> None:
 def generate_rsa_copy(landing_slug: str, hero_title: str, keywords: list[str], api_key: str) -> dict:
     client = anthropic.Anthropic(api_key=api_key)
     message = client.messages.create(
-        model="claude-opus-4-6",
+        model="claude-opus-4-7",
         max_tokens=1024,
         messages=[{
             "role": "user",

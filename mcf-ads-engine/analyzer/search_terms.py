@@ -41,7 +41,7 @@ def _classify_batch(batch: list, client) -> dict:
     )
     prompt = CLASSIFY_PROMPT.format(terms_list=terms_list)
     message = client.messages.create(
-        model="claude-opus-4-6",
+        model="claude-opus-4-7",
         max_tokens=4096,
         messages=[{"role": "user", "content": prompt}],
     )

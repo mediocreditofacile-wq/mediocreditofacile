@@ -1,0 +1,86 @@
+{
+  "date": "2026-04-25",
+  "recommendations": [
+    {
+      "campaign": "Noleggio Operativo Fotovoltaico",
+      "trigger": "cost_over_target",
+      "action_type": "bid_decrease",
+      "current_budget": 25.0,
+      "recommended_budget": 25.0,
+      "bid_change_pct": -0.15,
+      "pillar_adgroup": "Fotovoltaico – Tetto in Affitto",
+      "reason": "CPL 82.12 EUR sopra target massimo 50 EUR. Riduci bid -15% o metti in pausa le worst keyword prima di alzare budget. Lost budget 81%, lost rank 5%.",
+      "priority": 1,
+      "status": "under_observation",
+      "campaign_budget_resource_name": "customers/5572178058/campaignBudgets/15420856280",
+      "status_note": "In osservazione 48h. CPL proxy migliorato 172->82 EUR per effetto delle pause kw del 24/4 (CPC pillar 17->8 EUR). Tracking ancora rotto: il CPL reale non e' misurabile finche' non si sblocca GTM. Nessuna azione fino a domani.",
+      "status_updated_at": "2026-04-25T13:02:07Z"
+    },
+    {
+      "campaign": "Diventa Partner — Vendor",
+      "trigger": "lost_rank_high",
+      "action_type": "bid_increase",
+      "current_budget": 25.0,
+      "recommended_budget": 25.0,
+      "bid_change_pct": 0.3,
+      "pillar_adgroup": "Vendi a Rate",
+      "reason": "Lost rank 51%, CPC 3.28 EUR, CTR 9.5%. Aumento bid +30% sull'ad group pilastro 'Vendi a Rate' per migliorare il posizionamento in asta. CPL atteso post-aumento 29.4-44.1 EUR. Valutare il budget in seconda battuta.",
+      "priority": 2,
+      "status": "rejected",
+      "campaign_budget_resource_name": "customers/5572178058/campaignBudgets/15353946391",
+      "status_note": "Rec basata su pilastro obsoleto ('Vendi a Rate', 0 click 30gg) per bug case-mismatch nel merge config (commit 352ee05). Inoltre campagna su MAXIMIZE_CONVERSIONS, bid manuale non applicabile. Patch applicata: dal prossimo run l'engine convertira' bid_increase in budget_increase +25% sulle campagne auto-bidding.",
+      "status_updated_at": "2026-04-25T13:02:07Z"
+    }
+  ],
+  "manual_actions": [
+    {
+      "action_type": "keyword_pause",
+      "count": 6,
+      "keywords_paused": [
+        "fotovoltaico senza finanziamento (PHRASE) | FV - No Debito | 26.65 EUR/30gg",
+        "calcolatore noleggio (BROAD) | DP SIMULATORE | 47.57 EUR/30gg",
+        "preventivo noleggio operativo (PHRASE) | DP SIMULATORE | 53.01 EUR/30gg",
+        "quanto costa noleggio operativo (PHRASE) | DP SIMULATORE | 11.70 EUR/30gg",
+        "noleggio fotovoltaico canone (PHRASE) | FV Canone Fisso | 29.86 EUR/30gg",
+        "noleggio operativo fornitori (PHRASE) | DP NOL.OP.FORNITORI | 166.62 EUR/30gg (ex pilastro, PHRASE pulita verso EXACT in futuro)"
+      ],
+      "status": "applied",
+      "applied_at": "2026-04-25T13:02:07Z",
+      "applied_by": "alberto_via_claude"
+    },
+    {
+      "action_type": "campaign_negative_keywords",
+      "campaign": "Diventa Partner — Vendor",
+      "campaign_resource_name": "customers/5572178058/campaigns/23543309692",
+      "count": 10,
+      "negatives_added": [
+        "grenke (PHRASE)",
+        "dll (PHRASE)",
+        "de lage landen (PHRASE)",
+        "domorental (PHRASE)",
+        "euroconsult (PHRASE)",
+        "compra business (EXACT)",
+        "acquisire aziende (EXACT)",
+        "aprire un azienda (EXACT)",
+        "agevolazioni aziende (PHRASE)",
+        "bonus aziende (PHRASE)"
+      ],
+      "reason": "Search term analysis su kw 'noleggio operativo fornitori' PHRASE (50 search term in 30gg) ha mostrato 5 competitor diretti + 5 cluster M&A/startup/agevolazioni. Negative protettive sull'intera campagna.",
+      "status": "applied",
+      "applied_at": "2026-04-25T13:02:07Z",
+      "applied_by": "alberto_via_claude"
+    },
+    {
+      "action_type": "code_patch",
+      "files": [
+        "mcf-ads-engine/collector/google_ads.py",
+        "mcf-ads-engine/analyzer/budget_advisor.py"
+      ],
+      "git_commit": "352ee05",
+      "summary": "Fix bug pillar_adgroups (case mismatch merge default+config) + supporto strategie auto-bidding (MAX_CONVERSIONS/TARGET_CPA: bid_increase convertito in budget_increase +25%, bid_decrease in search_terms_review). Test 120/120 passing.",
+      "status": "deployed",
+      "applied_at": "2026-04-25T13:02:07Z",
+      "applied_by": "alberto_via_claude"
+    }
+  ]
+}

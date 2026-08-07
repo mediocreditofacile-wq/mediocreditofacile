@@ -71,7 +71,7 @@ import ToolCard from '../../components/tools/ToolCard.astro';
 
         <a href="/tools/gruppo-barone" class="tool-card tool-card--reserved">
           <span class="tool-card__badge">Riservato</span>
-          <Icon name="construction" class="tool-card__icon" />
+          <span class="tool-card__icon"><Icon name="construction" size={40} /></span>
           <h2 class="tool-card__title">Gruppo Barone — Strumenti Finanziari</h2>
           <p class="tool-card__desc">Simulatore ISI Inail, noleggio Grenke, finanziamento e BCC Tasso Zero per la rete Gruppo Barone.</p>
           <span class="tool-card__link">
@@ -80,44 +80,11 @@ import ToolCard from '../../components/tools/ToolCard.astro';
           </span>
         </a>
 
-        <a href="https://mcf-marotta.netlify.app" target="_blank" rel="noopener" class="tool-card tool-card--reserved">
-          <span class="tool-card__badge">Riservato</span>
-          <Icon name="precision_manufacturing" class="tool-card__icon" />
-          <h2 class="tool-card__title">Marotta Evolution — Tool Finanziario</h2>
-          <p class="tool-card__desc">Lookup P.IVA, configuratore offerta, simulatore canone, credit policy e confronto soluzioni per la rete commerciale Marotta.</p>
-          <span class="tool-card__link">
-            Apri il tool
-            <Icon name="arrow_forward" />
-          </span>
-        </a>
-
-        <a href="/tools/energyteam" class="tool-card tool-card--reserved">
-          <span class="tool-card__badge">Riservato</span>
-          <Icon name="solar_power" class="tool-card__icon" />
-          <h2 class="tool-card__title">EnergyTeam — Simulatore Fotovoltaico</h2>
-          <p class="tool-card__desc">Simulatore noleggio fotovoltaico dedicato alla rete EnergyTeam: assicurazione opzionale, coefficiente Sud Italia e invio richiesta pratica con checklist documenti.</p>
-          <span class="tool-card__link">
-            Apri il tool
-            <Icon name="arrow_forward" />
-          </span>
-        </a>
-
-        <a href="/tools/econocom-pa" class="tool-card tool-card--reserved">
-          <span class="tool-card__badge">Riservato</span>
-          <Icon name="account_balance" class="tool-card__icon" />
-          <h2 class="tool-card__title">Econocom — Pubblica Amministrazione</h2>
-          <p class="tool-card__desc">Noleggio operativo Econocom per parcheggi fotovoltaici, riqualificazione energetica e illuminazione di comuni, ASL, aziende ospedaliere e municipalizzate. Rata indicativa + business plan con confronto bolletta.</p>
-          <span class="tool-card__link">
-            Apri il tool
-            <Icon name="arrow_forward" />
-          </span>
-        </a>
-
-        <!-- I portali pratiche partner (Expo Energia, STILO, Full Service) stanno
-             tutti nell'indice /tools/portali-clienti: una sola card qui. -->
+        <!-- Le aree partner (portali pratiche, fotovoltaico, Marotta) stanno tutte
+             nell'indice /tools/portali-clienti: una sola card qui. -->
         <a href="/tools/portali-clienti" class="tool-card tool-card--reserved">
           <span class="tool-card__badge">Riservato</span>
-          <Icon name="lock" class="tool-card__icon" />
+          <span class="tool-card__icon"><Icon name="lock" size={40} /></span>
           <h2 class="tool-card__title">Portali Clienti</h2>
           <p class="tool-card__desc">Le aree riservate dei partner: simulazione canoni sulle tabelle del proprio settore, caricamento pratiche con documenti allegati e lista richieste con stato di avanzamento.</p>
           <span class="tool-card__link">
@@ -284,8 +251,10 @@ import ToolCard from '../../components/tools/ToolCard.astro';
     text-transform: uppercase;
   }
 
+  /* Wrapper attorno a <Icon>: lo stile scoped della pagina non raggiunge lo span
+     interno del componente (ha il suo scope), quindi la dimensione va passata via prop. */
   .tool-card__icon {
-    font-size: 2.5rem;
+    display: inline-flex;
     color: var(--color-primary);
     margin-bottom: 1rem;
   }

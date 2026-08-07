@@ -1,0 +1,33 @@
+{
+  "date": "2026-04-27",
+  "recommendations": [
+    {
+      "campaign": "Noleggio Operativo Fotovoltaico",
+      "trigger": "cost_over_target",
+      "action_type": "bid_decrease",
+      "current_budget": 25.0,
+      "recommended_budget": 25.0,
+      "bid_change_pct": -0.15,
+      "pillar_adgroup": "Fotovoltaico – Tetto in Affitto",
+      "bidding_strategy_type": "MANUAL_CPC",
+      "reason": "CPL 55.32 EUR sopra target massimo 50 EUR. Riduci bid -15% o metti in pausa le worst keyword prima di alzare budget. Lost budget 82%, lost rank 5%.",
+      "priority": 1,
+      "status": "pending",
+      "campaign_budget_resource_name": "customers/5572178058/campaignBudgets/15420856280"
+    },
+    {
+      "campaign": "Diventa Partner — Vendor",
+      "trigger": "lost_rank_high",
+      "action_type": "budget_increase",
+      "current_budget": 25.0,
+      "recommended_budget": 31.25,
+      "bid_change_pct": 0.0,
+      "pillar_adgroup": "NOLEGGIO OPERATIVO FORNITORI (SOLUTION-AWARE)",
+      "bidding_strategy_type": "MAXIMIZE_CONVERSIONS",
+      "reason": "Lost rank 46%, CPC 4.53 EUR, CTR 11.0%. Aumento bid +30% sull'ad group pilastro 'NOLEGGIO OPERATIVO FORNITORI (SOLUTION-AWARE)' per migliorare il posizionamento in asta. CPL atteso post-aumento 12.2-18.3 EUR. Valutare il budget in seconda battuta. NOTA: campagna su MAXIMIZE_CONVERSIONS, convertito bid_increase in budget_increase moderato (+25%): e la leva equivalente per dare a Google piu spazio nelle aste.",
+      "priority": 2,
+      "status": "pending",
+      "campaign_budget_resource_name": "customers/5572178058/campaignBudgets/15353946391"
+    }
+  ]
+}

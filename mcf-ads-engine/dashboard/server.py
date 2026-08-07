@@ -6,6 +6,13 @@ from datetime import datetime
 from pathlib import Path
 from typing import Literal
 
+# Carica .env del progetto (ANTHROPIC_API_KEY, RESEND_API_KEY).
+# override=True sovrascrive env vars vuote ereditate dalla shell — necessario perche'
+# alcune CLI (es. Claude Code) passano ANTHROPIC_API_KEY='' ai sottoprocessi per
+# evitare leak della propria key, ma blocca dotenv default che non sovrascrive.
+from dotenv import load_dotenv
+load_dotenv(Path(__file__).resolve().parent.parent / ".env", override=True)
+
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse, PlainTextResponse
 from fastapi.templating import Jinja2Templates
@@ -82,7 +89,8 @@ def latest_date() -> str:
 
 @app.get("/", response_class=HTMLResponse)
 async def dashboard(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    # Starlette 1.0: request è il primo argomento di TemplateResponse
+    return templates.TemplateResponse(request, "index.html")
 
 
 @app.get("/api/proposals/latest")
@@ -280,7 +288,8 @@ def latest_audit_date() -> str:
 
 @app.get("/audit", response_class=HTMLResponse)
 async def audit_page(request: Request):
-    return templates.TemplateResponse("audit.html", {"request": request})
+    # Starlette 1.0: request è il primo argomento di TemplateResponse
+    return templates.TemplateResponse(request, "audit.html")
 
 
 @app.get("/api/audit/latest")

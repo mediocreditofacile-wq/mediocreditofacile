@@ -31,7 +31,7 @@ def parse_variants_response(raw: str) -> list[str]:
 def suggest_kw_variants(keyword: str, campaign: str, api_key: str) -> list[str]:
     client = anthropic.Anthropic(api_key=api_key)
     message = client.messages.create(
-        model="claude-opus-4-6",
+        model="claude-opus-4-7",
         max_tokens=512,
         messages=[{
             "role": "user",

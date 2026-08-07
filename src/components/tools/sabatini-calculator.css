@@ -83,6 +83,23 @@
   gap: 0.5rem;
 }
 
+/* Variante a tre tab (ordinario / 4.0 / green) */
+.sab-calc__toggle--tre {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+/* Nota contestuale (es. requisito certificazione per il green) */
+.sab-calc__note {
+  margin-top: 0.75rem;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--mcf-charcoal);
+  background: rgba(102, 76, 205, 0.06);
+  border-left: 3px solid var(--mcf-accent);
+  border-radius: 6px;
+  padding: 0.65rem 0.85rem;
+}
+
 .sab-calc__toggle-btn {
   display: flex;
   flex-direction: column;
@@ -412,7 +429,8 @@
     grid-template-columns: 1fr;
   }
 
-  .sab-calc__toggle {
+  .sab-calc__toggle,
+  .sab-calc__toggle--tre {
     grid-template-columns: 1fr;
   }
 }
