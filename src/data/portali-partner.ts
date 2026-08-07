@@ -43,6 +43,16 @@ export const PORTALI_PARTNER: Record<string, PortalePartner> = {
     password: 'unidima',
     prefissoPratica: 'UD',
   },
+  // InnovaLux e' un portale di PREVENTIVI, non di pratiche: il fornitore genera
+  // da solo i prospetti fotovoltaico. I record vivono sotto preventivi/innovalux/
+  // (vedi pathPreventivi), non sotto pratiche/. Sta comunque in questo registro
+  // perche' autenticazione e download documenti sono gli stessi.
+  innovalux: {
+    slug: 'innovalux',
+    nome: 'InnovaLux S.r.l.',
+    password: 'innovalux',
+    prefissoPratica: 'IL',
+  },
 };
 
 /** Partner di default: le chiamate senza parametro restano compatibili con Expo Energia */
@@ -55,6 +65,11 @@ export function getPartner(slug: string | null | undefined): PortalePartner | nu
 /** Cartella dei documenti e dei record pratica di un partner sullo store Blob */
 export function pathPrefix(slug: string): string {
   return `pratiche/${slug}/`;
+}
+
+/** Cartella dei preventivi generati dal partner (prospetti PDF + record) */
+export function pathPreventivi(slug: string): string {
+  return `preventivi/${slug}/`;
 }
 
 /**

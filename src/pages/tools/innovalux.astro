@@ -1,0 +1,853 @@
+---
+import Icon from '../../components/Icon.astro';
+/**
+ * Portale fornitore InnovaLux S.r.l. — /tools/innovalux
+ *
+ * Diverso dagli altri portali partner: qui non si caricano pratiche, si generano
+ * preventivi. Il fornitore inserisce i dati dell'impianto e ottiene i due
+ * prospetti PDF (analitico e infografico) che finora produceva Alberto a mano.
+ *
+ * - login con email + password (referente Antonia)
+ * - form cliente / impianto / consumi (opzionali) / durata
+ * - riepilogo numeri a schermo + download dei due PDF
+ * - storico dei preventivi generati
+ *
+ * Tutto il calcolo gira server-side (/api/preventivo-innovalux): i coefficienti
+ * non entrano nel bundle. Se il microservizio PDF non risponde, i numeri restano
+ * a schermo e il portale lo dice, senza far fallire il preventivo.
+ *
+ * Ratio interna (NON esposta in pagina): InnovaLux (Milano, P.IVA 13991550966)
+ * fornisce e installa impianti fotovoltaici chiavi in mano. Il ciclo prima era
+ * mail di Antonia -> calcolo di Alberto -> due PDF: il portale lo ribalta sul
+ * fornitore, lasciando ad Alberto la notifica e lo storico.
+ */
+import ToolLayout from '../../layouts/ToolLayout.astro';
+---
+<ToolLayout
+  title="Portale InnovaLux — Preventivi fotovoltaico | Mediocredito Facile"
+  description="Portale riservato InnovaLux S.r.l.: generazione dei prospetti di noleggio operativo e leasing per impianti fotovoltaici con accumulo."
+  noindex={true}
+  breadcrumbs={[{ name: 'Portale InnovaLux', href: '/tools/innovalux' }]}
+>
+  <!-- Gate login -->
+  <div id="gate" class="gate">
+    <div class="gate__card">
+      <div class="gate__logos">
+        <img src="/images/logo-mediocreditofacile.webp" alt="Mediocredito Facile" class="gate__logo" />
+        <span class="gate__x">&times;</span>
+        <span class="gate__partner-name">InnovaLux S.r.l.</span>
+      </div>
+      <div class="gate__divider"></div>
+      <p class="gate__label">Portale Riservato Fornitore</p>
+      <p class="gate__desc">Genera i prospetti di noleggio operativo e il confronto con il leasing per i tuoi impianti fotovoltaici.</p>
+      <div class="gate__form">
+        <input type="email" id="gate-user" class="gate__input" placeholder="Email" autocomplete="username" />
+        <input type="password" id="gate-pwd" class="gate__input" placeholder="Password" autocomplete="current-password" />
+        <button id="gate-btn" class="gate__btn">
+          <Icon name="lock_open" />
+          Accedi
+        </button>
+      </div>
+      <p id="gate-error" class="gate__error" hidden>Email o password non corretti</p>
+    </div>
+  </div>
+
+  <!-- Portale (nascosto fino ad autenticazione) -->
+  <div id="tool" class="il" style="display:none !important;">
+    <div class="il__header">
+      <div class="il__header-brand">
+        <img src="/images/logo-mediocreditofacile.webp" alt="Mediocredito Facile" class="il__logo" />
+        <div class="il__header-sep"></div>
+        <div class="il__partner-badge">
+          <span class="il__partner-icon"><Icon name="solar_power" size={18} /></span>
+          <span class="il__partner-label">InnovaLux S.r.l.</span>
+        </div>
+      </div>
+      <button id="logout-btn" class="il__logout">
+        <Icon name="logout" />
+        Esci
+      </button>
+    </div>
+
+    <p class="il__conv">Codice fornitore <strong>INNOVALUX</strong></p>
+
+    <h1 class="il__dash-title">Prospetti impianti fotovoltaici</h1>
+    <div class="il__cards">
+      <a href="#preventivo" class="il__card">
+        <div class="il__card-head"><Icon name="calculate" /> Nuovo prospetto</div>
+        <p class="il__card-desc">Inserisci impianto e importo: canone su tutte le durate, bilancio energetico e confronto con il leasing.</p>
+        <span class="il__card-link">Compila i dati &raquo;</span>
+      </a>
+      <a href="#risultato" class="il__card">
+        <div class="il__card-head"><Icon name="description" /> I due documenti</div>
+        <p class="il__card-desc">Prospetto analitico e prospetto infografico, brandizzati e pronti da consegnare al cliente finale.</p>
+        <span class="il__card-link">Vai al risultato &raquo;</span>
+      </a>
+      <a href="#storico" class="il__card">
+        <div class="il__card-head"><Icon name="receipt_long" /> Storico</div>
+        <p class="il__card-desc">Tutti i prospetti generati, con i numeri e i PDF sempre riscaricabili.</p>
+        <span class="il__card-link">Vedi lo storico &raquo;</span>
+      </a>
+    </div>
+
+    <!-- 1. Dati del preventivo -->
+    <section id="preventivo" class="il__section">
+      <header class="il__section-head">
+        <span class="il__section-num">1</span>
+        <div>
+          <h2 class="il__section-title">I dati dell'impianto</h2>
+          <p class="il__section-sub">
+            I campi sui consumi sono facoltativi. Se li compili con i dati della bolletta del cliente il
+            calcolo usa quelli; se li lasci vuoti si applicano le ipotesi standard per la zona, e i
+            prospetti lo dichiarano. La durata si può lasciare su automatica: viene proposta la più corta
+            in cui il canone, al netto della deducibilità, è coperto dal risparmio in bolletta.
+          </p>
+        </div>
+      </header>
+
+      <form id="preventivo-form" class="il__form" novalidate>
+        <div class="il__form-block">
+          <p class="il__form-block-title">Cliente finale</p>
+          <div class="il__grid">
+            <div class="il__field il__field--full">
+              <label class="il__field-label" for="cliente">Ragione sociale o nome *</label>
+              <input type="text" id="cliente" name="cliente" required placeholder="Es. B Service SRL" />
+            </div>
+            <div class="il__field">
+              <label class="il__field-label" for="comune">Comune di installazione</label>
+              <input type="text" id="comune" name="comune" placeholder="Es. Baronissi" />
+            </div>
+            <div class="il__field">
+              <label class="il__field-label" for="provincia">Provincia (sigla)</label>
+              <input type="text" id="provincia" name="provincia" maxlength="2" placeholder="SA" style="text-transform:uppercase" />
+            </div>
+            <div class="il__field">
+              <label class="il__field-label" for="forma-giuridica">Forma giuridica *</label>
+              <select id="forma-giuridica" name="forma_giuridica" required>
+                <option value="societa-capitali">Società di capitali (SRL, SPA, SAPA)</option>
+                <option value="ditta-individuale">Ditta individuale / persona fisica con P.IVA</option>
+                <option value="privato">Privato senza partita IVA</option>
+              </select>
+            </div>
+            <div class="il__field">
+              <label class="il__field-label" for="rif-preventivo">Riferimento preventivo InnovaLux</label>
+              <input type="text" id="rif-preventivo" name="rif_preventivo" placeholder="Es. Preventivo del 30/07/2026" />
+            </div>
+          </div>
+          <div id="avviso-forma" class="il__avviso" hidden>
+            <span class="il__avviso-icon"><Icon name="warning" size={22} /></span>
+            <div>
+              <strong id="avviso-titolo"></strong>
+              <p id="avviso-testo"></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="il__form-block">
+          <p class="il__form-block-title">Impianto</p>
+          <div class="il__grid">
+            <div class="il__field">
+              <label class="il__field-label" for="kwp">Potenza fotovoltaico (kWp) *</label>
+              <input type="number" id="kwp" name="kwp" min="1" step="0.1" required placeholder="20" />
+            </div>
+            <div class="il__field">
+              <label class="il__field-label" for="kwh-accumulo">Capacità accumulo (kWh)</label>
+              <input type="number" id="kwh-accumulo" name="kwh_accumulo" min="0" step="0.1" placeholder="10" />
+            </div>
+            <div class="il__field">
+              <label class="il__field-label" for="importo">Importo chiavi in mano, IVA esclusa (€) *</label>
+              <input type="number" id="importo" name="importo" min="1000" step="10" required placeholder="24980" />
+            </div>
+            <div class="il__field">
+              <label class="il__field-label" for="installazione">Tipo di installazione</label>
+              <select id="installazione" name="installazione">
+                <option value="tetto">Tetto / lastrico solare</option>
+                <option value="pensilina">Pensilina / tettoia</option>
+                <option value="terra">A terra</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="il__form-block">
+          <p class="il__form-block-title">Consumi del cliente (facoltativi)</p>
+          <p class="il__hint">
+            Li trovi sulla bolletta. Senza questi dati il prospetto resta una stima per cliente tipo e lo
+            scrive nero su bianco.
+          </p>
+          <div class="il__grid">
+            <div class="il__field">
+              <label class="il__field-label" for="consumo-annuo">Consumo annuo (kWh)</label>
+              <input type="number" id="consumo-annuo" name="consumo_annuo" min="0" step="100" placeholder="Es. 35000" />
+            </div>
+            <div class="il__field">
+              <label class="il__field-label" for="prezzo-kwh">Prezzo energia (€/kWh)</label>
+              <input type="number" id="prezzo-kwh" name="prezzo_kwh" min="0" step="0.01" placeholder="Es. 0,28" />
+            </div>
+            <div class="il__field">
+              <label class="il__field-label" for="profilo">Profilo di consumo</label>
+              <select id="profilo" name="profilo">
+                <option value="diurno">Prevalentemente diurno</option>
+                <option value="h24">Attività continua, h24</option>
+              </select>
+            </div>
+            <div class="il__field">
+              <label class="il__field-label" for="durata">Durata del noleggio</label>
+              <select id="durata" name="durata">
+                <option value="">Consigliata (automatica)</option>
+                <option value="36">36 mesi</option>
+                <option value="48">48 mesi</option>
+                <option value="60">60 mesi</option>
+                <option value="72">72 mesi</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="il__submit-row">
+          <button type="submit" id="submit-btn" class="il__submit">
+            <Icon name="calculate" />
+            Genera i prospetti
+          </button>
+          <p class="il__submit-hint">
+            I due PDF vengono generati subito e restano nello storico. Alberto riceve una copia via email.
+          </p>
+        </div>
+        <div id="form-feedback" class="il__feedback" hidden></div>
+      </form>
+    </section>
+
+    <!-- 2. Risultato -->
+    <section id="risultato" class="il__section" hidden>
+      <header class="il__section-head">
+        <span class="il__section-num">2</span>
+        <div>
+          <h2 class="il__section-title">Il prospetto</h2>
+          <p class="il__section-sub" id="risultato-sub"></p>
+        </div>
+      </header>
+      <div id="risultato-body"></div>
+    </section>
+
+    <!-- 3. Storico -->
+    <section id="storico" class="il__section">
+      <header class="il__section-head">
+        <span class="il__section-num">3</span>
+        <div>
+          <h2 class="il__section-title">I prospetti già generati</h2>
+          <p class="il__section-sub">
+            Restano qui con i loro numeri e i PDF riscaricabili. Quando arriva la documentazione del
+            cliente, il riferimento del prospetto è quello che serve per aprire la pratica.
+          </p>
+        </div>
+      </header>
+      <div class="il__storico-bar">
+        <button type="button" id="refresh-storico" class="il__refresh">
+          <Icon name="refresh" />
+          Aggiorna
+        </button>
+        <span id="storico-info" class="il__storico-info"></span>
+      </div>
+      <div id="storico-wrap" class="il__storico-wrap"></div>
+    </section>
+
+    <p class="il__disclaimer">
+      I valori dei prospetti sono stimati e a scopo illustrativo: non costituiscono offerta vincolante né
+      promessa di approvazione o di condizioni economiche. Ogni operazione è soggetta a valutazione e
+      delibera degli istituti eroganti. Alberto Amà, intermediario del credito.
+    </p>
+  </div>
+</ToolLayout>
+
+<script>
+  // Due account sul gate:
+  //  - fornitore: Antonia (InnovaLux) — credenziali fisse
+  //  - admin: Alberto — email MCF + chiave admin, verificata SERVER-SIDE
+  //    contro EXPO_PORTAL_ADMIN_KEY (la chiave non sta nel sorgente)
+  const PARTNER = 'innovalux';
+  const USER_EMAIL = 'contratti@innovalux.net';
+  const PASSWORD = 'innovalux';
+  const ADMIN_EMAIL = 'mediocreditofacile@gmail.com';
+  const KEY = 'mcf_innovalux_auth';
+
+  type Session = { role: 'partner' | 'admin'; key: string };
+  let session: Session | null = null;
+
+  const gate = document.getElementById('gate')!;
+  const tool = document.getElementById('tool')!;
+  const gateUser = document.getElementById('gate-user') as HTMLInputElement;
+  const gatePwd = document.getElementById('gate-pwd') as HTMLInputElement;
+  const gateBtn = document.getElementById('gate-btn') as HTMLButtonElement;
+  const gateError = document.getElementById('gate-error')!;
+  const logoutBtn = document.getElementById('logout-btn')!;
+
+  function showTool() {
+    gate.style.display = 'none';
+    tool.style.cssText = '';
+    setTimeout(() => void loadStorico(), 0);
+  }
+  function showGate() { gate.style.display = ''; tool.style.cssText = 'display:none !important;'; }
+
+  function loadSession(): Session | null {
+    const raw = localStorage.getItem(KEY);
+    if (!raw) return null;
+    try {
+      const s = JSON.parse(raw);
+      if (s && (s.role === 'partner' || s.role === 'admin') && typeof s.key === 'string') return s;
+    } catch { /* sessione corrotta: si rifa' il login */ }
+    return null;
+  }
+
+  session = loadSession();
+  if (session) showTool();
+
+  function gateFail(msg: string, userBad: boolean, pwdBad: boolean) {
+    gateError.textContent = msg;
+    gateError.hidden = false;
+    gateUser.classList.toggle('gate__input--error', userBad);
+    gatePwd.classList.toggle('gate__input--error', pwdBad);
+  }
+
+  gateBtn.addEventListener('click', async () => {
+    const email = gateUser.value.trim().toLowerCase();
+    const pwd = gatePwd.value.trim();
+
+    if (email === USER_EMAIL && pwd.toLowerCase() === PASSWORD) {
+      session = { role: 'partner', key: PASSWORD };
+    } else if (email === ADMIN_EMAIL && pwd) {
+      gateBtn.disabled = true;
+      gateBtn.textContent = 'Verifica...';
+      try {
+        const res = await fetch(`/api/preventivi-pv?partner=${PARTNER}`, { headers: { Authorization: `Bearer ${pwd}` } });
+        const json = await res.json();
+        if (res.ok && json.ok && json.ruolo === 'admin') session = { role: 'admin', key: pwd };
+        else gateFail('Chiave admin non valida', false, true);
+      } catch {
+        gateFail('Verifica non riuscita, riprova', false, false);
+      }
+      gateBtn.disabled = false;
+      gateBtn.textContent = 'Accedi';
+    } else {
+      gateFail('Email o password non corretti', email !== USER_EMAIL && email !== ADMIN_EMAIL, true);
+    }
+
+    if (session) {
+      localStorage.setItem(KEY, JSON.stringify(session));
+      gateError.hidden = true;
+      gateUser.classList.remove('gate__input--error');
+      gatePwd.classList.remove('gate__input--error');
+      showTool();
+    }
+  });
+  gateUser.addEventListener('keydown', (e) => { if (e.key === 'Enter') gateBtn.click(); });
+  gatePwd.addEventListener('keydown', (e) => { if (e.key === 'Enter') gateBtn.click(); });
+  logoutBtn.addEventListener('click', () => {
+    localStorage.removeItem(KEY); session = null; showGate();
+    gateUser.value = ''; gatePwd.value = ''; gateError.hidden = true;
+  });
+
+  // === Avviso sulla forma giuridica ===
+  // Sta solo qui, non finisce mai nei PDF: e' un controllo per chi compila.
+  const AVVISI: Record<string, { titolo: string; testo: string; grave: boolean }> = {
+    privato: {
+      titolo: 'Il noleggio operativo non è percorribile',
+      testo: 'Per un privato senza partita IVA la strada è la detrazione fiscale del 50 per cento in dieci quote annuali. Il prospetto si può comunque generare come confronto, ma la pratica di noleggio non si apre.',
+      grave: true,
+    },
+    'ditta-individuale': {
+      titolo: 'Da verificare prima di procedere',
+      testo: 'Servono partita IVA attiva e destinazione strumentale dell\'impianto. Occhio all\'utenza: un impianto su immobile a uso abitativo con utenza domestica non regge una pratica intestata a un\'attività.',
+      grave: false,
+    },
+  };
+
+  const formaGiuridica = document.getElementById('forma-giuridica') as HTMLSelectElement;
+  const avviso = document.getElementById('avviso-forma')!;
+  const avvisoTitolo = document.getElementById('avviso-titolo')!;
+  const avvisoTesto = document.getElementById('avviso-testo')!;
+
+  function aggiornaAvviso() {
+    const a = AVVISI[formaGiuridica.value];
+    if (!a) { avviso.hidden = true; return; }
+    avvisoTitolo.textContent = a.titolo;
+    avvisoTesto.textContent = a.testo;
+    avviso.classList.toggle('il__avviso--grave', a.grave);
+    avviso.hidden = false;
+  }
+  formaGiuridica.addEventListener('change', aggiornaAvviso);
+  aggiornaAvviso();
+
+  // === Formattazione ===
+  const eur = (v: number, dec = 0) =>
+    v.toLocaleString('it-IT', { minimumFractionDigits: dec, maximumFractionDigits: dec, useGrouping: 'always' }) + ' €';
+  const num = (v: number, dec = 0) =>
+    v.toLocaleString('it-IT', { minimumFractionDigits: dec, maximumFractionDigits: dec, useGrouping: 'always' });
+  const pct = (v: number) => `${Math.round(v * 100)}%`;
+
+  // === Generazione preventivo ===
+  const form = document.getElementById('preventivo-form') as HTMLFormElement;
+  const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement;
+  const feedback = document.getElementById('form-feedback')!;
+  const sezioneRisultato = document.getElementById('risultato') as HTMLElement;
+  const risultatoSub = document.getElementById('risultato-sub')!;
+  const risultatoBody = document.getElementById('risultato-body')!;
+
+  function mostraFeedback(testo: string, ok: boolean) {
+    feedback.textContent = testo;
+    feedback.className = `il__feedback il__feedback--${ok ? 'ok' : 'err'}`;
+    feedback.hidden = false;
+  }
+
+  // I PDF stanno su uno store privato: il download passa da una fetch con il
+  // bearer di sessione, non da un <a download> (che l'header non lo manda).
+  function linkDoc(pathname: string, nome: string): string {
+    const etichetta = nome.includes('Infografico') ? 'Prospetto infografico' : 'Prospetto analitico';
+    return `<button type="button" class="il__pdf" data-doc="${encodeURIComponent(pathname)}" data-nome="${nome.replace(/"/g, '')}">${etichetta}</button>`;
+  }
+
+  async function scaricaDoc(pathname: string, nome: string, bottone: HTMLButtonElement) {
+    if (!session) return;
+    const originale = bottone.textContent;
+    bottone.disabled = true;
+    bottone.textContent = 'Scarico...';
+    try {
+      const res = await fetch(`/api/pratica-doc?path=${encodeURIComponent(pathname)}`, {
+        headers: { Authorization: `Bearer ${session.key}` },
+      });
+      if (!res.ok) throw new Error(String(res.status));
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = nome;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch {
+      bottone.textContent = 'Download non riuscito';
+      setTimeout(() => { bottone.textContent = originale; }, 2500);
+      bottone.disabled = false;
+      return;
+    }
+    bottone.textContent = originale;
+    bottone.disabled = false;
+  }
+
+  document.addEventListener('click', (e) => {
+    const bottone = (e.target as HTMLElement)?.closest?.('[data-doc]') as HTMLButtonElement | null;
+    if (!bottone) return;
+    void scaricaDoc(decodeURIComponent(bottone.dataset.doc!), bottone.dataset.nome ?? 'prospetto.pdf', bottone);
+  });
+
+  function renderRisultato(res: any) {
+    const n = res.numeri;
+    const durateRighe = [36, 48, 60, 72]
+      .map((m) => `
+        <tr class="${m === n.durata ? 'il__riga-scelta' : ''}">
+          <td>${m} mesi</td>
+          <td>${eur(n.canoni[m], 2)}</td>
+          <td>${eur(n.riscatti[m], 2)}</td>
+        </tr>`)
+      .join('');
+
+    const notaDurata = n.durataForzata
+      ? `Durata impostata a ${n.durata} mesi. Quella consigliata su questo impianto sarebbe ${n.durataConsigliata}.`
+      : `Durata consigliata: ${n.durata} mesi, la più corta in cui il canone al netto della deducibilità è coperto dal risparmio in bolletta.`;
+
+    const pdfBlocco = res.pdfPronti
+      ? `<div class="il__pdf-row">${res.documenti.map((d: any) => linkDoc(d.pathname, d.nome)).join('')}</div>`
+      : `<p class="il__feedback il__feedback--err" style="margin-top:1rem">
+           I numeri qui sopra sono validi, ma i PDF non sono ancora pronti: il servizio di generazione non
+           ha risposto. Riprova tra qualche minuto, il preventivo resta salvato nello storico.
+         </p>`;
+
+    risultatoSub.textContent = notaDurata;
+    risultatoBody.innerHTML = `
+      <div class="il__kpi">
+        <div class="il__kpi-card">
+          <span class="il__kpi-num">${eur(n.canone, 2)}</span>
+          <span class="il__kpi-label">canone mensile, ${n.durata} mesi</span>
+        </div>
+        <div class="il__kpi-card">
+          <span class="il__kpi-num">${eur(n.beneficioMese, 0)}</span>
+          <span class="il__kpi-label">risparmio in bolletta al mese</span>
+        </div>
+        <div class="il__kpi-card">
+          <span class="il__kpi-num">${pct(n.coperturaCanone)}</span>
+          <span class="il__kpi-label">del canone coperto dal sole</span>
+        </div>
+        <div class="il__kpi-card ${n.margineMese >= 0 ? 'il__kpi-card--ok' : ''}">
+          <span class="il__kpi-num">${n.margineMese >= 0 ? '+' : ''}${eur(n.margineMese, 0)}</span>
+          <span class="il__kpi-label">al mese dopo la deducibilità</span>
+        </div>
+      </div>
+
+      <div class="il__due-col">
+        <div class="il__box">
+          <p class="il__box-title">Canoni per durata</p>
+          <table class="il__table">
+            <thead><tr><th>Durata</th><th>Canone mensile</th><th>Riscatto indicativo</th></tr></thead>
+            <tbody>${durateRighe}</tbody>
+          </table>
+        </div>
+        <div class="il__box">
+          <p class="il__box-title">Energia e fisco</p>
+          <table class="il__table">
+            <tbody>
+              <tr><td>Produzione stimata</td><td>${num(n.produzione)} kWh/anno</td></tr>
+              <tr><td>Autoconsumo</td><td>${num(n.autoKwh)} kWh (${pct(n.autoconsumoQuota)})</td></tr>
+              <tr><td>Ceduta in rete</td><td>${num(n.cedKwh)} kWh</td></tr>
+              <tr><td>Beneficio energetico</td><td>${eur(n.beneficioAnno)}/anno</td></tr>
+              <tr><td>Risparmio fiscale sul canone</td><td>${eur(n.fiscoNol)}</td></tr>
+              <tr><td>Costo netto del noleggio</td><td>${eur(n.costoNettoNol)}</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="il__box">
+          <p class="il__box-title">Confronto con il leasing</p>
+          <table class="il__table">
+            <tbody>
+              <tr><td>Rata leasing, ${n.durata} mesi</td><td>${eur(n.rataLeasing, 2)}</td></tr>
+              <tr><td>Interessi</td><td>${eur(n.interessi)}</td></tr>
+              <tr><td>Contributo Nuova Sabatini Green</td><td>${eur(n.sabatini)}</td></tr>
+              <tr><td>Risparmio IRES da iperammortamento</td><td>${eur(n.iresIper)}</td></tr>
+              <tr><td>Costo netto del leasing agevolato</td><td>${eur(n.costoNettoLeasing)}</td></tr>
+            </tbody>
+          </table>
+          <p class="il__box-nota">
+            Sabatini e iperammortamento valgono solo sul leasing: sul noleggio operativo non si applicano.
+          </p>
+        </div>
+      </div>
+
+      ${pdfBlocco}
+    `;
+    sezioneRisultato.hidden = false;
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!session) return;
+
+    const dati = Object.fromEntries(new FormData(form).entries());
+    if (!dati.cliente || !dati.kwp || !dati.importo) {
+      mostraFeedback('Servono almeno cliente, potenza e importo.', false);
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Genero i prospetti...';
+    feedback.hidden = true;
+
+    try {
+      const res = await fetch('/api/preventivo-innovalux', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.key}` },
+        body: JSON.stringify({ input: dati }),
+      });
+      const json = await res.json();
+      if (!res.ok || !json.ok) {
+        mostraFeedback('Generazione non riuscita. Controlla i dati e riprova.', false);
+      } else {
+        renderRisultato(json);
+        mostraFeedback(
+          json.pdfPronti
+            ? `Prospetti generati (${json.id}). Li trovi qui sotto e nello storico.`
+            : `Numeri calcolati (${json.id}), PDF in ritardo: il preventivo è salvato, riprova tra poco.`,
+          json.pdfPronti,
+        );
+        void loadStorico();
+        document.getElementById('risultato')?.scrollIntoView({ behavior: 'smooth' });
+      }
+    } catch {
+      mostraFeedback('Connessione non riuscita. Riprova.', false);
+    }
+
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Genera i prospetti';
+  });
+
+  // === Storico ===
+  const storicoWrap = document.getElementById('storico-wrap')!;
+  const storicoInfo = document.getElementById('storico-info')!;
+  document.getElementById('refresh-storico')!.addEventListener('click', () => void loadStorico());
+
+  async function loadStorico() {
+    if (!session) return;
+    storicoInfo.textContent = 'Carico...';
+    try {
+      const res = await fetch(`/api/preventivi-pv?partner=${PARTNER}`, {
+        headers: { Authorization: `Bearer ${session.key}` },
+      });
+      const json = await res.json();
+      if (!res.ok || !json.ok) {
+        storicoInfo.textContent = 'Storico non disponibile';
+        return;
+      }
+
+      const lista = json.preventivi ?? [];
+      storicoInfo.textContent = lista.length === 1 ? '1 prospetto' : `${lista.length} prospetti`;
+
+      if (!lista.length) {
+        storicoWrap.innerHTML = '<p class="il__storico-empty">Nessun prospetto generato finora.</p>';
+        return;
+      }
+
+      storicoWrap.innerHTML = `
+        <table class="il__table il__table--storico">
+          <thead>
+            <tr><th>Data</th><th>Cliente</th><th>Impianto</th><th>Canone</th><th>Documenti</th></tr>
+          </thead>
+          <tbody>
+            ${lista.map((p: any) => {
+              const data = new Date(p.creato).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' });
+              const doc = (p.documenti ?? []).map((d: any) => linkDoc(d.pathname, d.nome)).join('');
+              return `
+                <tr>
+                  <td>${data}<br><span class="il__id">${p.id}</span></td>
+                  <td>${p.cliente?.nome ?? '-'}<br><span class="il__id">${[p.cliente?.comune, p.cliente?.provincia].filter(Boolean).join(' ')}</span></td>
+                  <td>${num(p.impianto?.kwp ?? 0, 0)} kWp${p.impianto?.kwh_accumulo ? ` + ${num(p.impianto.kwh_accumulo, 0)} kWh` : ''}<br><span class="il__id">${eur(p.impianto?.importo ?? 0)}</span></td>
+                  <td>${eur(p.numeri?.canone ?? 0, 2)}<br><span class="il__id">${p.numeri?.durata ?? '-'} mesi</span></td>
+                  <td>${doc || '<span class="il__id">PDF non generati</span>'}</td>
+                </tr>`;
+            }).join('')}
+          </tbody>
+        </table>`;
+    } catch {
+      storicoInfo.textContent = 'Storico non disponibile';
+    }
+  }
+</script>
+
+<style>
+  /* === Gate login === */
+  .gate {
+    display: flex; justify-content: center; align-items: center;
+    min-height: 70vh; padding: 2rem 1.5rem;
+    background: linear-gradient(160deg, #fff7f3 0%, #fef3ec 40%, #f5f3ff 100%);
+  }
+  .gate__card {
+    text-align: center; background: #ffffff; border: 1px solid #fde4d4;
+    border-radius: 16px; padding: 2.5rem 2.5rem 2rem; max-width: 460px; width: 100%;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06), 0 1px 4px rgba(254, 111, 58, 0.08);
+  }
+  .gate__logos { display: flex; align-items: center; justify-content: center; gap: 0.75rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+  .gate__logo { height: 40px; display: block; }
+  .gate__x { font-size: 1.2rem; font-weight: 300; color: #94a3b8; }
+  .gate__partner-name { font-size: 1.05rem; font-weight: 800; color: #FE6F3A; letter-spacing: -0.01em; }
+  .gate__divider { height: 1px; background: linear-gradient(90deg, transparent, #fde4d4, transparent); margin-bottom: 1.25rem; }
+  .gate__label { font-size: 0.82rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.5rem; }
+  .gate__desc { font-size: 0.85rem; color: #64748b; line-height: 1.5; margin-bottom: 1.5rem; max-width: 360px; margin-left: auto; margin-right: auto; }
+  .gate__form { display: flex; flex-direction: column; gap: 0.6rem; }
+  .gate__input {
+    padding: 0.8rem 1rem; border: 1.5px solid #e2e8f0; border-radius: 10px;
+    font-family: var(--font-family); font-size: 1rem; color: var(--color-text); background: #f8fafc;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .gate__input:focus { outline: none; border-color: #FE6F3A; box-shadow: 0 0 0 3px rgba(254, 111, 58, 0.12); background: #fff; }
+  .gate__input--error { border-color: #ef4444; }
+  .gate__btn {
+    padding: 0.8rem 1.5rem; background: linear-gradient(135deg, #FE6F3A, #664CCD);
+    color: #ffffff; font-family: var(--font-family); font-weight: 700; font-size: 0.92rem;
+    border: none; border-radius: 10px; cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.2s; white-space: nowrap;
+    display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;
+  }
+  .gate__btn:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(254, 111, 58, 0.28); }
+  .gate__error { color: #ef4444; font-size: 0.82rem; margin-top: 0.75rem; }
+
+  /* === Portale === */
+  .il { max-width: var(--max-width); margin: 0 auto; padding: 0 1.5rem 4rem; }
+  .il__header { display: flex; align-items: center; justify-content: space-between; padding: 1.25rem 0; border-bottom: 1px solid #e2e8f0; }
+  .il__header-brand { display: flex; align-items: center; gap: 1rem; }
+  .il__logo { height: 36px; flex-shrink: 0; }
+  .il__header-sep { width: 1px; height: 28px; background: #e2e8f0; }
+  .il__partner-badge {
+    display: flex; align-items: center; gap: 0.4rem;
+    background: linear-gradient(135deg, #fff7f3, #fde4d4);
+    border: 1px solid #fbcfb0; border-radius: 8px; padding: 0.35rem 0.75rem;
+  }
+  .il__partner-icon { color: #FE6F3A; display: inline-flex; }
+  .il__partner-label { font-size: 0.85rem; font-weight: 700; color: #D45A2E; }
+  .il__logout {
+    background: none; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.4rem 0.85rem;
+    font-family: var(--font-family); font-size: 0.82rem; font-weight: 600; color: #64748b;
+    cursor: pointer; transition: border-color 0.2s, color 0.2s; display: flex; align-items: center; gap: 0.3rem;
+  }
+  .il__logout:hover { border-color: #FE6F3A; color: #FE6F3A; }
+
+  .il__conv { font-size: 0.9rem; color: #787782; margin: 1.5rem 0 0.4rem; }
+  .il__conv strong { color: #0F1020; letter-spacing: 0.04em; }
+  .il__dash-title { font-size: 1.35rem; font-weight: 800; color: #0F1020; padding-bottom: 0.75rem; margin: 0 0 1.25rem; border-bottom: 1px solid #E1DEE3; }
+  .il__cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 3rem; }
+  .il__card {
+    display: flex; flex-direction: column; gap: 0.6rem;
+    background: #F8F7FA; border: 1px solid #E1DEE3; border-bottom: 3px solid #293C5B;
+    border-radius: 10px; padding: 1.25rem; text-decoration: none;
+    transition: transform 0.15s, box-shadow 0.2s;
+  }
+  .il__card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(15, 16, 32, 0.08); }
+  .il__card-head { display: flex; align-items: center; gap: 0.45rem; font-size: 1rem; font-weight: 800; color: #293C5B; }
+  .il__card-head .mcf-icon { color: #FE6F3A; }
+  .il__card-desc { font-size: 0.84rem; color: #444451; line-height: 1.5; margin: 0; flex: 1; }
+  .il__card-link { font-size: 0.84rem; font-weight: 700; color: #664CCD; text-decoration: none; }
+  .il__card-link:hover { text-decoration: underline; }
+
+  /* Sezioni */
+  .il__section { margin-bottom: 3rem; scroll-margin-top: 90px; }
+  .il__section-head { display: flex; gap: 1rem; align-items: flex-start; margin-bottom: 1.25rem; }
+  .il__section-num {
+    flex-shrink: 0; width: 36px; height: 36px;
+    background: linear-gradient(135deg, #FE6F3A, #664CCD);
+    color: #ffffff; font-weight: 800; font-size: 1rem;
+    display: flex; align-items: center; justify-content: center; border-radius: 50%;
+  }
+  .il__section-title { font-size: 1.2rem; font-weight: 800; color: #0F1020; margin: 0 0 0.3rem; line-height: 1.3; }
+  .il__section-sub { font-size: 0.9rem; color: #444451; line-height: 1.55; margin: 0; max-width: 720px; }
+
+  /* Form */
+  .il__form { display: flex; flex-direction: column; gap: 1.5rem; }
+  .il__form-block { background: #ffffff; border: 1px solid #E1DEE3; border-radius: 14px; padding: 1.5rem 1.75rem; }
+  .il__form-block-title { font-size: 0.78rem; font-weight: 800; color: #664CCD; text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 1rem; }
+  .il__hint { font-size: 0.85rem; color: #787782; line-height: 1.5; margin: 0 0 1rem; }
+  .il__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .il__field { display: flex; flex-direction: column; gap: 0.35rem; }
+  .il__field--full { grid-column: 1 / -1; }
+  .il__field-label { font-size: 0.82rem; font-weight: 600; color: #444451; }
+  .il__field input, .il__field select {
+    padding: 0.7rem 0.85rem; border: 1.5px solid #E1DEE3; border-radius: 10px;
+    font-family: var(--font-family); font-size: 0.95rem; color: #0F1020; background: #fafafa;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .il__field input:focus, .il__field select:focus {
+    outline: none; border-color: #FE6F3A; background: #ffffff; box-shadow: 0 0 0 3px rgba(254, 111, 58, 0.1);
+  }
+
+  /* Avviso forma giuridica */
+  .il__avviso {
+    display: flex; gap: 0.85rem; align-items: flex-start;
+    border-radius: 10px; padding: 0.9rem 1.1rem; margin-top: 1rem;
+    background: #fffbeb; border: 1px solid #fde68a;
+  }
+  .il__avviso--grave { background: #fef2f2; border-color: #fecaca; }
+  .il__avviso-icon { color: #b45309; flex-shrink: 0; display: inline-flex; }
+  .il__avviso--grave .il__avviso-icon { color: #b91c1c; }
+  .il__avviso strong { display: block; font-size: 0.92rem; margin-bottom: 0.2rem; color: #0F1020; }
+  .il__avviso p { margin: 0; font-size: 0.85rem; color: #444451; line-height: 1.5; }
+
+  /* Submit */
+  .il__submit-row {
+    display: flex; align-items: center; gap: 1.25rem;
+    background: linear-gradient(135deg, #fff7f3, #f5f3ff);
+    border: 1px solid #fde4d4; border-radius: 14px; padding: 1.25rem 1.5rem; flex-wrap: wrap;
+  }
+  .il__submit {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    background: linear-gradient(135deg, #FE6F3A, #664CCD); color: #ffffff;
+    font-family: var(--font-family); font-weight: 700; font-size: 0.95rem;
+    border: none; border-radius: 10px; padding: 0.85rem 1.6rem; cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.2s; white-space: nowrap;
+  }
+  .il__submit:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(254, 111, 58, 0.28); }
+  .il__submit:disabled { opacity: 0.6; cursor: wait; }
+  .il__submit-hint { margin: 0; font-size: 0.85rem; color: #444451; line-height: 1.5; flex: 1; min-width: 240px; }
+
+  /* Storico */
+  .il__storico-bar { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+  .il__refresh {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    background: #ffffff; border: 1.5px solid #664CCD; border-radius: 10px;
+    color: #664CCD; font-family: var(--font-family); font-weight: 700; font-size: 0.85rem;
+    padding: 0.5rem 1rem; cursor: pointer; transition: box-shadow 0.2s;
+  }
+  .il__refresh:hover { box-shadow: 0 4px 12px rgba(102, 76, 205, 0.18); }
+  .il__storico-info { font-size: 0.85rem; color: #787782; }
+  .il__storico-wrap { overflow-x: auto; }
+  /* Disclaimer (il feedback sta nel blocco globale: classe assegnata a runtime) */
+  .il__disclaimer { font-size: 0.78rem; color: #787782; line-height: 1.5; border-top: 1px solid #E1DEE3; padding-top: 1rem; margin: 0; }
+
+  /* Responsive */
+  @media (max-width: 960px) {
+    .il__cards { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 768px) {
+    .gate__card { padding: 2rem 1.5rem 1.5rem; }
+    .gate__logo { height: 32px; }
+    .il__logo { height: 28px; }
+    .il__form-block { padding: 1.25rem; }
+    .il__grid { grid-template-columns: 1fr; gap: 0.85rem; }
+    .il__submit-row { flex-direction: column; align-items: stretch; }
+    .il__submit { justify-content: center; }
+  }
+</style>
+
+<!--
+  Le regole qui sotto vestono il markup che lo script inietta con innerHTML
+  (riepilogo numeri, tabelle, storico, download PDF). Devono stare in un blocco
+  is:global: lo scoping di Astro passa da un attributo data-astro-cid che gli
+  elementi creati a runtime non hanno, quindi le stesse regole nel blocco scoped
+  qui sopra non li raggiungerebbero. Restano contenute dal prefisso .il.
+-->
+<style is:global>
+  /* Risultato (markup dinamico) */
+  .il .il__kpi { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+  .il .il__kpi-card {
+    background: #F8F7FA; border: 1px solid #E1DEE3; border-radius: 12px;
+    padding: 1.1rem 1.25rem; display: flex; flex-direction: column; gap: 0.3rem;
+  }
+  .il .il__kpi-card--ok { background: #ecfdf5; border-color: #a7f3d0; }
+  .il .il__kpi-num { font-size: 1.5rem; font-weight: 800; color: #0F1020; line-height: 1.1; }
+  .il .il__kpi-label { font-size: 0.8rem; color: #444451; line-height: 1.4; }
+  .il .il__due-col { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1rem; }
+  .il .il__box { background: #ffffff; border: 1px solid #E1DEE3; border-radius: 12px; padding: 1.25rem 1.4rem; }
+  .il .il__box-title { font-size: 0.78rem; font-weight: 800; color: #664CCD; text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 0.85rem; }
+  .il .il__box-nota { font-size: 0.8rem; color: #787782; line-height: 1.45; margin: 0.85rem 0 0; }
+
+  /* Tabelle */
+  .il .il__table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+  .il .il__table th {
+    text-align: left; padding: 0.5rem 0.6rem 0.5rem 0;
+    font-size: 0.74rem; font-weight: 700; color: #787782;
+    text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #E1DEE3;
+  }
+  .il .il__table td { padding: 0.55rem 0.6rem 0.55rem 0; border-bottom: 1px solid #f1f1f3; color: #0F1020; line-height: 1.4; }
+  .il .il__table td:last-child, .il .il__table th:last-child { text-align: right; padding-right: 0; }
+  /* gli importi non vanno mai spezzati su due righe */
+  .il .il__table td:last-child { white-space: nowrap; }
+  .il .il__table--storico td:last-child { white-space: normal; }
+  .il .il__table tbody tr:last-child td { border-bottom: none; }
+  .il .il__riga-scelta td { background: #fff7f3; font-weight: 700; }
+
+  /* PDF */
+  .il .il__pdf-row { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 1.5rem; }
+  .il .il__pdf {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    background: #ffffff; border: 1.5px solid #664CCD; border-radius: 10px;
+    color: #664CCD; font-family: var(--font-family); font-weight: 700; font-size: 0.88rem;
+    padding: 0.6rem 1.1rem; cursor: pointer; transition: box-shadow 0.2s;
+  }
+  .il .il__pdf:hover:not(:disabled) { box-shadow: 0 4px 12px rgba(102, 76, 205, 0.18); }
+  .il .il__pdf:disabled { opacity: 0.6; cursor: wait; }
+
+
+  /* Storico (markup dinamico) */
+  .il .il__storico-empty { background: #f8fafc; border: 1px solid #E1DEE3; border-radius: 10px; padding: 1.25rem; font-size: 0.9rem; color: #64748b; margin: 0; }
+  .il .il__table--storico { min-width: 760px; }
+  .il .il__table--storico td { vertical-align: top; }
+  .il .il__table--storico .il__pdf { padding: 0.3rem 0.6rem; font-size: 0.78rem; margin: 0 0.3rem 0.3rem 0; }
+  .il .il__id { font-size: 0.76rem; color: #787782; }
+
+
+  /* Feedback: la classe viene assegnata a runtime */
+  .il .il__feedback { padding: 0.9rem 1.1rem; border-radius: 10px; font-size: 0.9rem; line-height: 1.5; border: 1px solid; }
+  .il .il__feedback--ok { background: #ecfdf5; border-color: #a7f3d0; color: #047857; }
+  .il .il__feedback--err { background: #fef2f2; border-color: #fecaca; color: #b91c1c; }
+
+  @media (max-width: 960px) {
+    .il .il__kpi { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 768px) {
+    .il .il__kpi { grid-template-columns: 1fr; }
+  }
+</style>

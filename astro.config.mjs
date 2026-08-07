@@ -40,6 +40,7 @@ export default defineConfig({
           '/tools/expo-energia',
           '/tools/full-service',
           '/tools/gruppo-barone',
+          '/tools/innovalux',
           '/tools/marotta',
           '/tools/portali-clienti',
           '/tools/simulatore-leasing-fornitori',
