@@ -47,6 +47,7 @@ export default defineConfig({
           '/tools/simulazione-leasing',
           '/tools/stilo',
           '/tools/unidima',
+          '/tools/valutazione',
         ];
         const clean = new URL(page).pathname.replace(/\/$/, '');
         return !noindexPaths.includes(clean);
