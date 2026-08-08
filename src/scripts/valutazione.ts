@@ -1,0 +1,327 @@
+// Client dello strumento di valutazione interno MCF.
+// Rende la scheda che arriva da /api/azienda e gestisce le verifiche a richiesta.
+// I dizionari (etichette, ruoli, valori, codici di bilancio) arrivano dalla pagina
+// su window.__VAL__: sono dati generati, non vanno riscritti a mano.
+
+type Dizionari = {
+  CODICI: Record<string, string>;
+  ETICHETTE: Record<string, string>;
+  RUOLI: Record<string, string>;
+  VALORI: Record<string, string>;
+};
+
+const CHIAVE_LS = 'mcf_valutazione_key';
+const SCALA = ['A1', 'A2', 'A3', 'B1', 'B2', 'B3', 'C1', 'C2', 'C3'];
+const COLORI = ['#0F7B34', '#2E9E43', '#66B72F', '#A8C61C', '#E3C400', '#F0A000', '#EE6B1F', '#DC3220', '#A31515'];
+const PREZZI = { neg: 0.45, rep: 3.6 };
+
+let D: Dizionari;
+let chiave = '';
+
+const $ = (id: string) => document.getElementById(id) as HTMLElement;
+const esc = (s: unknown) =>
+  String(s ?? '').replace(/[<>&"]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' }[c] as string));
+
+// --- formattazione -----------------------------------------------------------
+
+/** Le date arrivano come mezzanotte italiana espressa in UTC: 1883-05-23T22:00
+    e' il 24 maggio. Senza correzione si legge sempre il giorno prima. */
+function dataIt(v: string): string | null {
+  const m = /^(\d{4})-(\d{2})-(\d{2})(?:T(\d{2}))?/.exec(v);
+  if (!m) return null;
+  const d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
+  if (m[4] && +m[4] >= 22) d.setUTCDate(d.getUTCDate() + 1);
+  return `${String(d.getUTCDate()).padStart(2, '0')}/${String(d.getUTCMonth() + 1).padStart(2, '0')}/${d.getUTCFullYear()}`;
+}
+
+const nf = (n: number, dec = 0) => n.toLocaleString('it-IT', { minimumFractionDigits: dec, maximumFractionDigits: dec, useGrouping: 'always' });
+const euro = (v: unknown) => (v == null || v === '' ? '—' : `${nf(Number(v))} €`);
+
+function val(v: unknown): string {
+  if (v == null || v === '') return '<span class="vuoto">—</span>';
+  if (typeof v === 'boolean') return v ? 'sì' : 'no';
+  if (typeof v === 'number') return Number.isInteger(v) ? nf(v) : nf(v, 2);
+  const s = String(v);
+  const d = dataIt(s);
+  if (d) return d;
+  return esc(D.VALORI[s.trim()] ?? s);
+}
+
+const umano = (k: string) =>
+  D.ETICHETTE[k] ?? D.ETICHETTE[k.trim()] ?? (k.replace(/(?!^)([A-Z])/g, ' $1').replace(/_/g, ' ').replace(/^./, (c) => c.toUpperCase()));
+
+/** Un blocco {codice, descrizione} si legge per la descrizione: il codice interno non dice niente. */
+function piattoDict(v: Record<string, unknown>): string {
+  if (v.description != null && v.description !== '') {
+    const altri = Object.entries(v).filter(([k]) => k !== 'code' && k !== 'description');
+    let s = val(v.description);
+    if (altri.length) s += ' · ' + altri.map(([k, x]) => `${umano(k).toLowerCase()}: ${val(x)}`).join(' · ');
+    return s;
+  }
+  const resto = Object.entries(v).filter(([, x]) => x != null && x !== '');
+  if (!resto.length) return '<span class="vuoto">—</span>';
+  if (resto.length === 1 && resto[0][0] === 'code') return val(resto[0][1]);
+  return resto.map(([k, x]) => `${umano(k).toLowerCase()}: ${val(x)}`).join(' · ');
+}
+
+function righe(d: Record<string, any>): string {
+  return Object.entries(d)
+    .map(([k, v]) => {
+      if (v && typeof v === 'object' && !Array.isArray(v)) {
+        const piatto = Object.values(v).every((x) => x == null || typeof x !== 'object');
+        return piatto
+          ? `<tr><td>${umano(k)}</td><td class="num">${piattoDict(v)}</td></tr>`
+          : `<tr class="sub"><td colspan="2">${umano(k)}</td></tr>${righe(v)}`;
+      }
+      if (Array.isArray(v)) return `<tr><td>${umano(k)}</td><td class="num">${v.length} voci</td></tr>`;
+      return `<tr><td>${umano(k)}</td><td class="num">${val(v)}</td></tr>`;
+    })
+    .join('');
+}
+
+const tabVoci = (lista: any[]) =>
+  lista
+    .filter((x) => x && typeof x === 'object')
+    .map((x) => {
+      const desc = D.CODICI[x.code] || `<span class="vuoto">codice ${esc(x.code)} non in legenda</span>`;
+      return `<tr><td>${desc}</td><td class="num">${val(x.value)}</td></tr>`;
+    })
+    .join('');
+
+// --- tachimetro --------------------------------------------------------------
+function tachimetro(idx: number): string {
+  const n = 9, cx = 150, cy = 130, r0 = 78, r1 = 118;
+  let out = '';
+  for (let i = 0; i < n; i++) {
+    const a0 = Math.PI + (i * Math.PI) / n, a1 = Math.PI + ((i + 1) * Math.PI) / n;
+    const p = (r: number, a: number) => `${(cx + r * Math.cos(a)).toFixed(1)},${(cy + r * Math.sin(a)).toFixed(1)}`;
+    out += `<path d="M${p(r1, a0)} A${r1},${r1} 0 0 1 ${p(r1, a1)} L${p(r0, a1)} A${r0},${r0} 0 0 0 ${p(r0, a0)} Z" fill="${COLORI[i]}" opacity="${i === idx ? 1 : 0.3}"/>`;
+    const am = (a0 + a1) / 2;
+    out += `<text x="${(cx + 136 * Math.cos(am)).toFixed(1)}" y="${(cy + 136 * Math.sin(am) + 4).toFixed(1)}" text-anchor="middle" class="lbl${i === idx ? ' on' : ''}">${SCALA[i]}</text>`;
+  }
+  const am = Math.PI + ((idx + 0.5) * Math.PI) / n;
+  out += `<line x1="${cx}" y1="${cy}" x2="${(cx + 96 * Math.cos(am)).toFixed(1)}" y2="${(cy + 96 * Math.sin(am)).toFixed(1)}" stroke="#0F1020" stroke-width="3.5" stroke-linecap="round"/>`;
+  out += `<circle cx="${cx}" cy="${cy}" r="7" fill="#0F1020"/>`;
+  out += '<text x="30" y="152" class="cap">rischio minimo</text><text x="270" y="152" text-anchor="end" class="cap">rischio massimo</text>';
+  return `<svg viewBox="0 0 300 160" class="gauge">${out}</svg>`;
+}
+
+// --- rendering della scheda --------------------------------------------------
+const SEZ_ANAG = ['companyDetails', 'address', 'contacts', 'mail', 'companyStatus', 'companyDates', 'legalForm', 'detailedLegalForm', 'atecoClassification', 'internationalClassification', 'rae', 'sae', 'branches', 'corporateGroups', 'webAndSocial', 'innovativeSmeAndSu', 'soaCertification', 'artisanBusinessRegistry', 'marketable', 'development'];
+const SEZ_ECON = ['ecofin', 'operatingResults', 'profitability', 'financialStatementKpi', 'indebtedness', 'leverageRatios', 'coverageRatios', 'liquidityRatios', 'structureRatios', 'financialStability', 'financialBurden', 'financialCycle', 'efficiency', 'employees', 'employeesStatistic', 'foreignTrade'];
+const SEZ_COD = ['assetsAggregateValues', 'liabilitiesAggregateValues', 'incomeStatementAggregateValues', 'annualResult', 'productionValue', 'productionCosts', 'netWorth', 'debts', 'credits', 'inventory', 'tangibleFixedAssets', 'intangibleFixedAssets', 'financialFixedAssets', 'financialAssets', 'cashEquivalents', 'riskProvisions', 'revenuesFinancialCharges', 'creditsToShareholders', 'adjustments'];
+
+function barraAzione(gruppo: string, azioni: [string, string, number][]): string {
+  const b = azioni
+    .map(([k, t, pz], i) => `<button type="button" class="val-btn${i ? ' val-btn--2' : ''}" data-gruppo="${gruppo}" data-azione="${k}" data-prezzo="${pz}" disabled>${t}</button>`)
+    .join('');
+  return `<div class="azione" data-gruppo="${gruppo}">${b}<span class="costo-sel" data-gruppo="${gruppo}">nessuno selezionato</span></div>`;
+}
+
+const rigaSel = (gruppo: string, cf: string, nome: string, celle: string) =>
+  `<tr><td class="ck"><input type="checkbox" class="pick" data-gruppo="${gruppo}" data-cf="${esc(cf)}" data-nome="${esc(nome)}"></td>${celle}<td class="num esito" data-cf="${esc(cf)}"><span class="vuoto">non richiesto</span></td></tr>`;
+
+export function rendiScheda(s: any): string {
+  const F = s.full ?? {}, A = s.advanced ?? {}, CS = s.score ?? {};
+  const det = F.companyDetails ?? {};
+  const nome = det.companyName ?? A.companyName ?? '';
+  const piva = det.vatCode ?? A.vatCode ?? s.piva;
+  const eco = F.ecofin ?? {}, op = F.operatingResults ?? {}, prof = F.profitability ?? {};
+  const ann: Record<string, number> = {};
+  (F.annualResult ?? []).forEach((x: any) => { if (x?.code) ann[x.code] = x.value; });
+  const sede = F.address?.registeredOffice ?? {};
+  const ate = A.atecoClassification?.ateco ?? {};
+  const idx = Math.max(0, SCALA.indexOf(CS.rating ?? 'B2'));
+  const sev = Number(CS.risk_severity ?? 0);
+
+  let h = `<div class="scheda"><div class="scheda-head">
+    <div class="scheda-rs">${esc(nome)}</div>
+    <div class="scheda-meta">P.IVA ${esc(piva)} · ${esc(F.legalForm?.description ? val(F.legalForm.description) : '')} · attiva dal ${dataIt(String(A.startDate ?? '')) ?? '—'}<br>
+    ${esc(sede.streetName ?? '')} — ${esc(sede.town ?? '')} · ATECO ${esc(ate.code ?? '')} ${esc(ate.description ?? '')}</div>
+  </div><div class="scheda-body">`;
+
+  // rating
+  h += `<div class="blocco"><div class="blocco-tit">Posizionamento del rating</div><div class="testa">
+    <div>${tachimetro(idx)}</div>
+    <div><div class="rat">${esc(CS.rating ?? '—')}<small>${esc(CS.risk_score_description ?? '')} · classe ${idx + 1} di 9</small></div>
+      <div class="riga">
+        <div><span>Punteggio di rischio</span><strong>${esc(CS.risk_score ?? '—')}</strong></div>
+        <div><span>Severità</span><strong>${sev} su 990</strong></div>
+        <div><span>Linea di credito consigliata</span><strong>${euro(CS.operational_credit_limit)}</strong></div>
+      </div>
+      <div class="sev"><div class="sev-bar"><div class="sev-mark" style="left:${Math.max(0.4, Math.min(100, (sev / 990) * 100)).toFixed(2)}%"></div></div>
+      <div class="sev-lab"><span>1 — rischio minimo</span><span>990 — rischio massimo</span></div></div>
+    </div></div></div>`;
+
+  // riassunto
+  h += `<div class="blocco"><div class="blocco-tit">Riassunto</div><div class="tre">
+    <div class="voce"><div class="etichetta">Ricavi delle vendite</div><div class="cifra">${euro(eco.turnover)}</div><div class="delta">${val(eco.turnoverTrend)}% sull'anno prima · esercizio ${val(eco.turnoverYear)}</div></div>
+    <div class="voce"><div class="etichetta">Utile d'esercizio</div><div class="cifra">${euro(ann.IIC179)}</div><div class="delta">voce 21 del conto economico</div></div>
+    <div class="voce"><div class="etichetta">Patrimonio netto</div><div class="cifra">${euro(eco.netWorth)}</div><div class="delta">capitale sociale ${euro(eco.shareCapital)}</div></div>
+  </div><div class="riga">
+    <div><span>EBITDA</span><strong>${euro(op.ebitda)}</strong></div>
+    <div><span>EBIT</span><strong>${euro(op.ebit)}</strong></div>
+    <div><span>Flusso di cassa</span><strong>${euro(op.cashFlow)}</strong></div>
+    <div><span>ROE</span><strong>${val(prof.roe)}</strong></div>
+    <div><span>ROI</span><strong>${val(prof.roi)}</strong></div>
+    <div><span>Dipendenti</span><strong>${val(F.employees?.employee)}</strong></div>
+  </div></div>`;
+
+  // eventi negativi azienda (asincroni: si riempiono da soli)
+  h += `<div class="blocco"><div class="blocco-tit">Eventi negativi sull'azienda</div>
+    <div id="negAzienda" data-id="${esc(s.negativitaId ?? '')}"><span class="attesa">verifica in corso…</span></div></div>`;
+
+  // soci
+  const soci = s.soci ?? [];
+  h += `<div class="blocco"><div class="blocco-tit">Soci (${soci.length})</div>`;
+  if (!soci.length) {
+    h += `<p class="val-msg" style="margin:0">Nessun socio in elenco: è il caso delle cooperative, che non hanno una compagine con quote.</p>`;
+  } else {
+    h += '<table class="sel"><thead><tr><th class="ck"></th><th>Socio</th><th class="num">Quota</th><th class="num">Eventi negativi</th></tr></thead><tbody>';
+    soci.forEach((x: any) => {
+      const n = x.companyName || `${x.name ?? ''} ${x.surname ?? ''}`.trim();
+      h += rigaSel('soci', x.taxCode ?? '', n, `<td><strong>${esc(n)}</strong><br><span class="cf">${esc(x.taxCode ?? '')}</span></td><td class="num">${val(x.percentShare)}%</td>`);
+    });
+    h += '</tbody></table>' + barraAzione('soci', [['neg', 'Verifica eventi negativi', PREZZI.neg]]);
+  }
+  h += '</div>';
+
+  // amministratori
+  const mg = F.managers ?? [];
+  if (mg.length) {
+    h += `<div class="blocco"><div class="blocco-tit">Amministratori (${mg.length})</div>
+      <table class="sel"><thead><tr><th class="ck"></th><th>Nome</th><th>Ruolo</th><th class="num">Età</th><th class="num">Nato a</th><th class="num">Eventi negativi</th></tr></thead><tbody>`;
+    mg.forEach((m: any) => {
+      const n = `${m.name ?? ''} ${m.surname ?? ''}`.trim().replace(/\b\w+/g, (w: string) => w[0] + w.slice(1).toLowerCase());
+      const ruoli = (m.roles ?? []).map((r: any) => D.RUOLI[r?.role?.code] ?? val(r?.role?.description)).filter(Boolean);
+      let ruolo = ruoli.join(' · ') || '—';
+      if (m.isLegalRepresentative) ruolo += ' <strong>(legale rappresentante)</strong>';
+      h += rigaSel('amm', m.taxCode ?? '', n,
+        `<td><strong>${esc(n)}</strong><br><span class="cf">${esc(m.taxCode ?? '')}</span></td><td>${ruolo}</td><td class="num">${val(m.age)}</td><td class="num">${val(m.birthTown)}</td>`);
+    });
+    h += '</tbody></table>' + barraAzione('amm', [['neg', 'Verifica eventi negativi', PREZZI.neg], ['rep', 'Report completo: cariche, partecipazioni, immobili', PREZZI.rep]]);
+    h += '</div>';
+  }
+
+  // anagrafica e indici
+  const blocco = (tit: string, chiavi: string[]) => {
+    let c = '<table><tbody>';
+    chiavi.forEach((k) => { const v = F[k]; if (v && typeof v === 'object' && !Array.isArray(v) && Object.keys(v).length) c += `<tr class="sub"><td colspan="2">${umano(k)}</td></tr>${righe(v)}`; });
+    if (tit.startsWith('Anagrafica')) c += `<tr><td>PEC</td><td class="num">${val(F.pec)}</td></tr>`;
+    return `<div class="blocco"><div class="blocco-tit">${tit}</div>${c}</tbody></table></div>`;
+  };
+  h += blocco('Anagrafica e inquadramento', SEZ_ANAG);
+  h += blocco('Indici e aggregati economici', SEZ_ECON);
+
+  // bilancio
+  let bil = '';
+  SEZ_COD.forEach((k) => {
+    const v = F[k];
+    if (Array.isArray(v) && v.length) bil += `<h4>${umano(k)} <span class="n">${v.length} voci</span></h4><table class="voci"><tbody>${tabVoci(v)}</tbody></table>`;
+  });
+  if (bil) h += `<div class="blocco"><div class="blocco-tit">Bilancio riclassificato</div>${bil}</div>`;
+
+  return h + '</div></div>';
+}
+
+// --- interazione -------------------------------------------------------------
+async function api(path: string, init?: RequestInit) {
+  const r = await fetch(path, { ...init, headers: { Authorization: `Bearer ${chiave}`, 'Content-Type': 'application/json', ...(init?.headers ?? {}) } });
+  if (r.status === 401) { localStorage.removeItem(CHIAVE_LS); location.reload(); throw new Error('non autorizzato'); }
+  return r.json();
+}
+
+function aggiornaCosto(gruppo: string) {
+  const n = document.querySelectorAll(`.pick[data-gruppo="${gruppo}"]:checked`).length;
+  const lab = document.querySelector(`.costo-sel[data-gruppo="${gruppo}"]`) as HTMLElement;
+  const btns = document.querySelectorAll<HTMLButtonElement>(`.val-btn[data-gruppo="${gruppo}"]`);
+  btns.forEach((b) => (b.disabled = n === 0));
+  if (!lab) return;
+  lab.textContent = n === 0 ? 'nessuno selezionato'
+    : `${n} ${n === 1 ? 'selezionato' : 'selezionati'} · ${[...btns].map((b) => `${nf(n * Number(b.dataset.prezzo), 2)} €`).join(' oppure ')} + IVA`;
+}
+
+/** Ripassa a chiedere l'esito: la negativita' ci mette oltre un minuto. */
+function attendi(id: string, tipo: 'negativita' | 'report', mostra: (d: any) => void, tentativi = 40) {
+  const giro = async () => {
+    const r = await api(`/api/verifica?tipo=${tipo}&id=${encodeURIComponent(id)}`).catch(() => null);
+    if (r?.pronto) return mostra(r.dati);
+    if (--tentativi > 0) setTimeout(giro, 6000);
+    else mostra(null);
+  };
+  setTimeout(giro, 6000);
+}
+
+const esitoNeg = (d: any) => {
+  if (!d) return '<span class="vuoto">nessuna risposta</span>';
+  const v = [d.presenzaProtesti && 'protesti', d.presenzaPregiudizievoli && 'pregiudizievoli', d.presenzaProcedure && 'procedure'].filter(Boolean);
+  return v.length ? `<span class="esito-si">${v.join(', ')}</span>` : '<span class="esito-no">nessun evento</span>';
+};
+
+function collega() {
+  document.querySelectorAll<HTMLInputElement>('.pick').forEach((c) =>
+    c.addEventListener('change', () => aggiornaCosto(c.dataset.gruppo!)));
+
+  document.querySelectorAll<HTMLButtonElement>('.val-btn[data-gruppo]').forEach((b) =>
+    b.addEventListener('click', async () => {
+      const g = b.dataset.gruppo!, azione = b.dataset.azione!;
+      const scelti = [...document.querySelectorAll<HTMLInputElement>(`.pick[data-gruppo="${g}"]:checked`)];
+      document.querySelectorAll<HTMLButtonElement>(`.val-btn[data-gruppo="${g}"]`).forEach((x) => (x.disabled = true));
+      for (const c of scelti) {
+        const cf = c.dataset.cf!, td = document.querySelector(`td.esito[data-cf="${cf}"]`) as HTMLElement;
+        if (td) td.innerHTML = '<span class="attesa">richiesta inviata…</span>';
+        if (azione === 'neg') {
+          const r = await api('/api/verifica', { method: 'POST', body: JSON.stringify({ tipo: 'negativita', cf }) });
+          if (r?.id) attendi(r.id, 'negativita', (d) => { if (td) td.innerHTML = esitoNeg(d); });
+          else if (td) td.innerHTML = `<span class="vuoto">${esc(r?.errore ?? 'non avviata')}</span>`;
+        } else {
+          const nome = (c.dataset.nome ?? '').split(' ');
+          const r = await api('/api/verifica', { method: 'POST', body: JSON.stringify({ tipo: 'report', nome: nome[0] ?? '', cognome: nome.slice(1).join(' '), cf }) });
+          if (r?.id) attendi(r.id, 'report', () => { if (td) td.innerHTML = '<span class="esito-no">report pronto</span>'; });
+          else if (td) td.innerHTML = `<span class="vuoto">${esc(r?.errore ?? 'non avviato')}</span>`;
+        }
+      }
+    }));
+}
+
+export function montaValutazione() {
+  D = (window as any).__VAL__;
+  chiave = localStorage.getItem(CHIAVE_LS) ?? '';
+  const gate = $('gate'), app = $('app');
+  if (chiave) { gate.style.display = 'none'; app.style.display = 'block'; }
+
+  const entra = () => {
+    const v = ($('chiave') as HTMLInputElement).value.trim();
+    if (!v) return;
+    chiave = v;
+    localStorage.setItem(CHIAVE_LS, v);
+    gate.style.display = 'none';
+    app.style.display = 'block';
+  };
+  $('entra').addEventListener('click', entra);
+  $('chiave').addEventListener('keydown', (e) => { if ((e as KeyboardEvent).key === 'Enter') entra(); });
+  $('esci').addEventListener('click', () => { localStorage.removeItem(CHIAVE_LS); location.reload(); });
+
+  const piva = $('piva') as HTMLInputElement, cerca = $('cerca') as HTMLButtonElement;
+  piva.addEventListener('input', () => {
+    piva.value = piva.value.replace(/\D/g, '').slice(0, 11);
+    cerca.disabled = piva.value.length !== 11;
+  });
+
+  const avvia = async () => {
+    $('msg').textContent = 'Interrogazione in corso…';
+    $('scheda').innerHTML = '';
+    const r = await api(`/api/azienda?piva=${piva.value}`).catch((e) => ({ errore: String(e) }));
+    if (r?.errore) { $('msg').textContent = `Errore: ${r.errore}`; return; }
+    if (r?.trovata === false) { $('msg').textContent = 'Partita IVA non trovata.'; return; }
+    $('msg').textContent = r.daCache ? 'Dati da cache, nessun costo.' : '';
+    $('scheda').innerHTML = rendiScheda(r);
+    collega();
+    if (r.spesa) $('spesa').innerHTML = `spesa di ${esc(r.spesa.mese)}<strong>${nf(r.spesa.totale, 2)} €</strong>${r.spesa.chiamate} chiamate`;
+    const na = $('negAzienda');
+    if (na?.dataset.id) attendi(na.dataset.id, 'negativita', (d) => { na.innerHTML = esitoNeg(d); });
+    else if (na) na.innerHTML = '<span class="vuoto">non avviata</span>';
+  };
+  cerca.addEventListener('click', avvia);
+  piva.addEventListener('keydown', (e) => { if ((e as KeyboardEvent).key === 'Enter' && !cerca.disabled) avvia(); });
+}

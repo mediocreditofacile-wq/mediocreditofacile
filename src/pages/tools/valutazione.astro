@@ -1,0 +1,143 @@
+---
+/**
+ * Strumento di valutazione interno MCF — /tools/valutazione
+ *
+ * Inserisci una partita IVA e ottieni la scheda completa dell'azienda:
+ * anagrafica, bilancio riclassificato, indici, punteggio di rischio, soci,
+ * amministratori. Le verifiche che costano (eventi negativi, report persona)
+ * partono solo su richiesta esplicita, soggetto per soggetto.
+ *
+ * Gate: la password digitata E' la chiave che autentica le API (VALUTAZIONE_KEY),
+ * quindi nel sorgente non c'e' nessun segreto. Resta in localStorage dopo il primo
+ * ingresso. Se le API rispondono 401 la chiave viene buttata e si torna al gate.
+ *
+ * ATTENZIONE: il markup della scheda e' iniettato via innerHTML, quindi il suo CSS
+ * deve stare nel blocco <style is:global> e non in quello scoped: lo scoping di
+ * Astro passa da un attributo che gli elementi creati a runtime non hanno.
+ */
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import CODICI from '../../data/codici-bilancio.json';
+import { ETICHETTE, RUOLI, VALORI } from '../../data/openapi-etichette';
+
+const datiClient = { CODICI, ETICHETTE, RUOLI, VALORI };
+---
+
+<ToolLayout title="Valutazione aziende — MCF" description="Strumento interno di valutazione del merito creditizio" noindex={true}>
+  <div class="val">
+    <div class="val-gate" id="gate">
+      <div class="val-gate__box">
+        <div class="val-gate__tit">Valutazione aziende</div>
+        <p class="val-gate__sub">Strumento interno Mediocredito Facile.<br>Inserisci la chiave di accesso.</p>
+        <input class="val-gate__pin" id="chiave" type="password" autocomplete="off" placeholder="chiave">
+        <div class="val-gate__err" id="gateErr"></div>
+        <button class="val-btn" id="entra">Entra</button>
+      </div>
+    </div>
+
+    <div id="app" style="display:none;">
+      <div class="val-head">
+        <div>
+          <h1>Valutazione aziende</h1>
+          <p class="val-sub">Anagrafica, bilancio, rischio e soci. Le verifiche a pagamento partono solo se le chiedi.</p>
+        </div>
+        <div class="val-spesa" id="spesa"></div>
+      </div>
+
+      <div class="val-cerca">
+        <input class="val-piva" id="piva" type="text" inputmode="numeric" maxlength="11" placeholder="Partita IVA (11 cifre)">
+        <button class="val-btn" id="cerca" disabled>Analizza</button>
+        <button class="val-btn val-btn--ghost" id="esci">Esci</button>
+      </div>
+      <div class="val-msg" id="msg"></div>
+
+      <div id="scheda"></div>
+    </div>
+  </div>
+</ToolLayout>
+
+<script define:vars={{ datiClient }} is:inline>
+  window.__VAL__ = datiClient;
+</script>
+
+<script>
+  import { montaValutazione } from '../../scripts/valutazione';
+  montaValutazione();
+</script>
+
+<style is:global>
+  /* --- Gate e cornice --- */
+  .val { max-width: 1200px; margin: 0 auto; padding: 32px 24px 64px; }
+  .val-gate { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; background: #fff; padding: 24px; }
+  .val-gate__box { width: 100%; max-width: 360px; border: 1px solid var(--mcf-platinum, #E1DEE3); border-radius: 16px; padding: 28px 24px; text-align: center; }
+  .val-gate__tit { font-size: 1.125rem; font-weight: 700; color: #0F1020; margin-bottom: 6px; }
+  .val-gate__sub { font-size: .875rem; color: #787782; margin-bottom: 20px; line-height: 1.5; }
+  .val-gate__pin { width: 100%; padding: 12px 14px; font-size: 1rem; text-align: center; border: 1px solid #E1DEE3; border-radius: 6px; outline: none; font-family: inherit; }
+  .val-gate__pin:focus { border-color: #FE6F3A; }
+  .val-gate__err { font-size: .8125rem; color: #A31515; min-height: 18px; margin-top: 8px; }
+
+  .val-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; flex-wrap: wrap; margin-bottom: 24px; }
+  .val h1 { font-size: 2rem; font-weight: 800; color: #FE6F3A; letter-spacing: -.02em; line-height: 1.15; }
+  .val-sub { font-size: 1rem; color: #444451; margin-top: 4px; }
+  .val-spesa { font-size: .8125rem; color: #787782; text-align: right; }
+  .val-spesa strong { display: block; font-size: 1.25rem; color: #0F1020; font-variant-numeric: tabular-nums; }
+
+  .val-cerca { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  .val-piva { flex: 1; min-width: 220px; padding: 12px 16px; font-size: 1.125rem; letter-spacing: 2px; border: 1px solid #E1DEE3; border-radius: 6px; outline: none; font-family: ui-monospace, "SF Mono", monospace; }
+  .val-piva:focus { border-color: #FE6F3A; }
+  .val-btn { font-family: inherit; font-size: .9375rem; font-weight: 600; color: #fff; background: #FE6F3A; border: none; border-radius: 10px; padding: 12px 24px; cursor: pointer; }
+  .val-btn:disabled { background: #E1DEE3; color: #787782; cursor: not-allowed; }
+  .val-btn--ghost { background: transparent; color: #664CCD; border: 1.5px solid #E1DEE3; }
+  .val-btn--2 { background: transparent; color: #FE6F3A; border: 1.5px solid #FE6F3A; }
+  .val-btn--2:disabled { background: transparent; border-color: #E1DEE3; color: #787782; }
+  .val-msg { font-size: .9375rem; color: #787782; margin-top: 16px; min-height: 22px; }
+
+  /* --- Scheda --- */
+  .val .scheda { border: 1px solid #E1DEE3; border-radius: 16px; overflow: hidden; margin: 24px 0; }
+  .val .scheda-head { padding: 24px; border-bottom: 1px solid #E1DEE3; }
+  .val .scheda-rs { font-size: 1.5rem; font-weight: 700; color: #0F1020; letter-spacing: -.01em; }
+  .val .scheda-meta { font-size: .875rem; color: #787782; margin-top: 8px; }
+  .val .scheda-body { padding: 24px; }
+  .val .blocco { padding: 24px 0; border-top: 1px solid #E1DEE3; }
+  .val .blocco:first-child { border-top: none; padding-top: 0; }
+  .val .blocco-tit { font-size: .75rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: #664CCD; margin-bottom: 16px; }
+  .val h4 { font-size: .9375rem; font-weight: 600; color: #0F1020; margin: 28px 0 8px; }
+  .val h4 .n { font-weight: 400; color: #787782; font-size: .8125rem; }
+  .val table { width: 100%; border-collapse: collapse; font-size: .9375rem; }
+  .val thead th { background: #FE6F3A; color: #fff; font-weight: 600; font-size: .75rem; text-transform: uppercase; letter-spacing: .06em; text-align: left; padding: 12px 16px; }
+  .val th.num, .val td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .val tbody td { padding: 10px 16px; border-bottom: 1px solid #E1DEE3; vertical-align: top; }
+  .val tbody tr:nth-child(even) td { background: #F5F3F6; }
+  .val tr.sub td { background: #fff !important; font-weight: 600; color: #0F1020; padding-top: 22px; border-bottom: 1.5px solid #664CCD; }
+  .val table.voci td { padding: 7px 16px; }
+  .val .vuoto { color: #787782; }
+  .val .cf { font-family: ui-monospace, monospace; font-size: .75rem; color: #787782; }
+  .val table.sel td.ck, .val table.sel th.ck { width: 34px; padding-left: 16px; }
+  .val table.sel input[type=checkbox] { width: 16px; height: 16px; accent-color: #FE6F3A; cursor: pointer; }
+  .val .azione { display: flex; align-items: center; gap: 16px; margin-top: 16px; flex-wrap: wrap; }
+  .val .costo-sel { font-size: .875rem; color: #787782; }
+  .val .attesa { color: #664CCD; font-weight: 600; }
+  .val .esito-si { color: #A31515; font-weight: 700; }
+  .val .esito-no { color: #0F7B34; font-weight: 600; }
+
+  /* --- Tachimetro --- */
+  .val .testa { display: grid; grid-template-columns: 340px 1fr; gap: 32px; align-items: center; }
+  @media (max-width: 760px) { .val .testa { grid-template-columns: 1fr; } }
+  .val .gauge { width: 100%; max-width: 340px; display: block; }
+  .val .gauge .lbl { font: 600 11px Manrope, sans-serif; fill: #787782; }
+  .val .gauge .lbl.on { fill: #0F1020; font-size: 13.5px; }
+  .val .gauge .cap { font: 500 9.5px Manrope, sans-serif; fill: #787782; }
+  .val .rat { font-size: 3rem; font-weight: 800; color: #0F1020; line-height: 1; font-variant-numeric: tabular-nums; }
+  .val .rat small { font-size: 1rem; font-weight: 600; color: #787782; display: block; margin-top: 4px; }
+  .val .sev { margin-top: 18px; max-width: 460px; }
+  .val .sev-bar { position: relative; height: 9px; border-radius: 999px; background: linear-gradient(90deg, #0F7B34, #A8C61C, #E3C400, #EE6B1F, #A31515); }
+  .val .sev-mark { position: absolute; top: -5px; width: 3px; height: 19px; background: #0F1020; border-radius: 2px; transform: translateX(-50%); }
+  .val .sev-lab { display: flex; justify-content: space-between; font-size: .75rem; color: #787782; margin-top: 6px; }
+  .val .tre { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; }
+  .val .tre .voce { border: 1.5px solid #FE6F3A; border-radius: 10px; padding: 16px 24px; }
+  .val .tre .etichetta { font-size: .8125rem; color: #787782; }
+  .val .tre .cifra { font-size: 1.75rem; font-weight: 800; color: #0F1020; font-variant-numeric: tabular-nums; line-height: 1.2; margin: 8px 0; }
+  .val .tre .delta { font-size: .8125rem; font-weight: 600; color: #664CCD; }
+  .val .riga { display: flex; gap: 32px; flex-wrap: wrap; margin-top: 20px; }
+  .val .riga div span { display: block; font-size: .8125rem; color: #787782; }
+  .val .riga div strong { font-size: 1.125rem; color: #0F1020; font-variant-numeric: tabular-nums; }
+</style>
