@@ -129,14 +129,18 @@ export function rendiScheda(s: any): string {
   const eco = F.ecofin ?? {}, op = F.operatingResults ?? {}, prof = F.profitability ?? {};
   const ann: Record<string, number> = {};
   (F.annualResult ?? []).forEach((x: any) => { if (x?.code) ann[x.code] = x.value; });
-  const sede = F.address?.registeredOffice ?? {};
+  // La struttura cambia da azienda ad azienda: indirizzo a volte annidato sotto
+  // registeredOffice, a volte piatto. La forma giuridica in italiano sta in advanced.
+  const sede = F.address?.registeredOffice ?? A.address?.registeredOffice ?? F.address ?? {};
+  const forma = A.detailedLegalForm?.description ?? F.legalForm?.detailedLegalForm?.description
+    ?? F.legalForm?.legalForm?.description ?? F.legalForm?.description ?? '';
   const ate = A.atecoClassification?.ateco ?? {};
   const idx = Math.max(0, SCALA.indexOf(CS.rating ?? 'B2'));
   const sev = Number(CS.risk_severity ?? 0);
 
   let h = `<div class="scheda"><div class="scheda-head">
     <div class="scheda-rs">${esc(nome)}</div>
-    <div class="scheda-meta">P.IVA ${esc(piva)} · ${esc(F.legalForm?.description ? val(F.legalForm.description) : '')} · attiva dal ${dataIt(String(A.startDate ?? '')) ?? '—'}<br>
+    <div class="scheda-meta">P.IVA ${esc(piva)} · ${forma ? val(forma) : ''} · attiva dal ${dataIt(String(A.startDate ?? '')) ?? '—'}<br>
     ${esc(sede.streetName ?? '')} — ${esc(sede.town ?? '')} · ATECO ${esc(ate.code ?? '')} ${esc(ate.description ?? '')}</div>
   </div><div class="scheda-body">`;
 
