@@ -88,7 +88,7 @@ export async function getToken(): Promise<string> {
   return body.data.token;
 }
 
-async function chiama(url: string, servizio: Servizio, init?: RequestInit) {
+async function chiama(url: string, servizio: Servizio, init?: RequestInit, ritenta = true): Promise<any> {
   const token = await getToken();
   const res = await fetch(url, {
     ...init,
@@ -97,6 +97,14 @@ async function chiama(url: string, servizio: Servizio, init?: RequestInit) {
   // 204 = nessun risultato: partita IVA inesistente o non trovata
   if (res.status === 204) return { trovato: false, dati: null };
   const body = await res.json().catch(() => null);
+  // Un token appena creato impiega qualche secondo a diventare operativo: la
+  // prima chiamata dopo un avvio a freddo puo' tornare "Wrong Token". Si aspetta
+  // e si riprova una volta sola, altrimenti l'utente vede un errore fantasma.
+  if (ritenta && /wrong token/i.test(String(body?.message ?? ''))) {
+    tokenCache = null;
+    await new Promise((r) => setTimeout(r, 4000));
+    return chiama(url, servizio, init, false);
+  }
   if (!res.ok || body?.success === false) {
     throw new Error(`${servizio}: ${body?.message ?? res.status}`);
   }
