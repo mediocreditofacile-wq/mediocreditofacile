@@ -305,6 +305,9 @@ export function montaValutazione() {
   $('entra').addEventListener('click', entra);
   $('chiave').addEventListener('keydown', (e) => { if ((e as KeyboardEvent).key === 'Enter') entra(); });
   $('esci').addEventListener('click', () => { localStorage.removeItem(CHIAVE_LS); location.reload(); });
+  // Stampa del browser: da lì si sceglie "Salva come PDF". Nessuna dipendenza,
+  // e il PDF esce identico a quello che vedi, con il tachimetro a colori.
+  $('pdf').addEventListener('click', () => window.print());
 
   const piva = $('piva') as HTMLInputElement, cerca = $('cerca') as HTMLButtonElement;
   piva.addEventListener('input', () => {
@@ -321,6 +324,11 @@ export function montaValutazione() {
     $('msg').textContent = r.daCache ? 'Dati da cache, nessun costo.' : '';
     $('scheda').innerHTML = rendiScheda(r);
     collega();
+    // Il browser propone il titolo del documento come nome del PDF salvato
+    const rs = (r.full?.companyDetails?.companyName ?? r.advanced?.companyName ?? 'scheda').trim();
+    document.title = `Scheda ${rs} - ${piva.value}`;
+    const btnPdf = $('pdf');
+    if (btnPdf) btnPdf.style.display = 'inline-flex';
     if (r.spesa) $('spesa').innerHTML = `spesa di ${esc(r.spesa.mese)}<strong>${nf(r.spesa.totale, 2)} €</strong>${r.spesa.chiamate} chiamate`;
     const na = $('negAzienda');
     if (na?.dataset.id) attendi(na.dataset.id, 'negativita', (d) => { na.innerHTML = esitoNeg(d); });

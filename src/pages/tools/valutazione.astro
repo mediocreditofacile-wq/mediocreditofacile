@@ -46,6 +46,7 @@ const datiClient = { CODICI, ETICHETTE, RUOLI, VALORI };
       <div class="val-cerca">
         <input class="val-piva" id="piva" type="text" inputmode="numeric" maxlength="11" placeholder="Partita IVA (11 cifre)">
         <button class="val-btn" id="cerca" disabled>Analizza</button>
+        <button class="val-btn val-btn--2" id="pdf" style="display:none;">Scarica la scheda in PDF</button>
         <button class="val-btn val-btn--ghost" id="esci">Esci</button>
       </div>
       <div class="val-msg" id="msg"></div>
@@ -140,4 +141,26 @@ const datiClient = { CODICI, ETICHETTE, RUOLI, VALORI };
   .val .riga { display: flex; gap: 32px; flex-wrap: wrap; margin-top: 20px; }
   .val .riga div span { display: block; font-size: .8125rem; color: #787782; }
   .val .riga div strong { font-size: 1.125rem; color: #0F1020; font-variant-numeric: tabular-nums; }
+
+  /* --- Stampa: si salva in PDF dal dialogo del browser --- */
+  @media print {
+    /* senza questo il tachimetro esce grigio e le testate bianche */
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    /* del sito resta solo la scheda: via header, footer, ricerca e comandi */
+    body > *:not(main), .val-head, .val-cerca, .val-msg, .val-gate,
+    header, footer, nav, .tool-breadcrumb { display: none !important; }
+    .val { padding: 0; max-width: none; }
+    .val .scheda { border: none; border-radius: 0; margin: 0; }
+    .val .scheda-body { padding: 0; }
+    /* i comandi delle verifiche non hanno senso su carta, l'esito si' */
+    .val .azione, .val table.sel td.ck, .val table.sel th.ck { display: none !important; }
+    .val .blocco { break-inside: auto; padding: 16px 0; }
+    .val .blocco-tit, .val h4 { break-after: avoid; }
+    .val table { break-inside: auto; font-size: 8.5pt; }
+    .val tr { break-inside: avoid; }
+    .val thead { display: table-header-group; }
+    .val .testa { grid-template-columns: 300px 1fr; }
+    .val .gauge { max-width: 300px; }
+    @page { margin: 14mm 12mm; }
+  }
 </style>
