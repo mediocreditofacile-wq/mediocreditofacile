@@ -74,7 +74,9 @@ function righe(d: Record<string, any>): string {
           : `<tr class="sub"><td colspan="2">${umano(k)}</td></tr>${righe(v)}`;
       }
       if (Array.isArray(v)) return `<tr><td>${umano(k)}</td><td class="num">${v.length} voci</td></tr>`;
-      return `<tr><td>${umano(k)}</td><td class="num">${val(v)}</td></tr>`;
+      // gli anni sono numeri ma non importi: 2024, non 2.024
+      const cella = /year|anno/i.test(k) && typeof v === 'number' && v > 1900 && v < 2100 ? String(v) : val(v);
+      return `<tr><td>${umano(k)}</td><td class="num">${cella}</td></tr>`;
     })
     .join('');
 }
@@ -89,7 +91,7 @@ const tabVoci = (lista: any[]) =>
     .join('');
 
 // --- tachimetro --------------------------------------------------------------
-function tachimetro(idx: number): string {
+function tachimetro(idx: number | null): string {
   const n = 9, cx = 150, cy = 130, r0 = 78, r1 = 118;
   let out = '';
   for (let i = 0; i < n; i++) {
@@ -99,15 +101,20 @@ function tachimetro(idx: number): string {
     const am = (a0 + a1) / 2;
     out += `<text x="${(cx + 136 * Math.cos(am)).toFixed(1)}" y="${(cy + 136 * Math.sin(am) + 4).toFixed(1)}" text-anchor="middle" class="lbl${i === idx ? ' on' : ''}">${SCALA[i]}</text>`;
   }
-  const am = Math.PI + ((idx + 0.5) * Math.PI) / n;
-  out += `<line x1="${cx}" y1="${cy}" x2="${(cx + 96 * Math.cos(am)).toFixed(1)}" y2="${(cy + 96 * Math.sin(am)).toFixed(1)}" stroke="#0F1020" stroke-width="3.5" stroke-linecap="round"/>`;
-  out += `<circle cx="${cx}" cy="${cy}" r="7" fill="#0F1020"/>`;
+  // Senza rating non si punta niente: una lancetta inventata è peggio di nessuna lancetta
+  if (idx != null) {
+    const am = Math.PI + ((idx + 0.5) * Math.PI) / n;
+    out += `<line x1="${cx}" y1="${cy}" x2="${(cx + 96 * Math.cos(am)).toFixed(1)}" y2="${(cy + 96 * Math.sin(am)).toFixed(1)}" stroke="#0F1020" stroke-width="3.5" stroke-linecap="round"/>`;
+    out += `<circle cx="${cx}" cy="${cy}" r="7" fill="#0F1020"/>`;
+  }
   out += '<text x="30" y="152" class="cap">rischio minimo</text><text x="270" y="152" text-anchor="end" class="cap">rischio massimo</text>';
   return `<svg viewBox="0 0 300 160" class="gauge">${out}</svg>`;
 }
 
 // --- rendering della scheda --------------------------------------------------
-const SEZ_ANAG = ['companyDetails', 'address', 'contacts', 'mail', 'companyStatus', 'companyDates', 'legalForm', 'detailedLegalForm', 'atecoClassification', 'internationalClassification', 'rae', 'sae', 'branches', 'corporateGroups', 'webAndSocial', 'innovativeSmeAndSu', 'soaCertification', 'artisanBusinessRegistry', 'marketable', 'development'];
+// internationalClassification (NACE, SIC) resta fuori: sono classificazioni estere
+// che arrivano solo in inglese e non aggiungono niente a chi legge la scheda.
+const SEZ_ANAG = ['companyDetails', 'address', 'contacts', 'mail', 'companyStatus', 'companyDates', 'detailedLegalForm', 'atecoClassification', 'rae', 'sae', 'branches', 'corporateGroups', 'webAndSocial', 'innovativeSmeAndSu', 'soaCertification', 'artisanBusinessRegistry', 'marketable', 'development'];
 const SEZ_ECON = ['ecofin', 'operatingResults', 'profitability', 'financialStatementKpi', 'indebtedness', 'leverageRatios', 'coverageRatios', 'liquidityRatios', 'structureRatios', 'financialStability', 'financialBurden', 'financialCycle', 'efficiency', 'employees', 'employeesStatistic', 'foreignTrade'];
 const SEZ_COD = ['assetsAggregateValues', 'liabilitiesAggregateValues', 'incomeStatementAggregateValues', 'annualResult', 'productionValue', 'productionCosts', 'netWorth', 'debts', 'credits', 'inventory', 'tangibleFixedAssets', 'intangibleFixedAssets', 'financialFixedAssets', 'financialAssets', 'cashEquivalents', 'riskProvisions', 'revenuesFinancialCharges', 'creditsToShareholders', 'adjustments'];
 
@@ -135,7 +142,8 @@ export function rendiScheda(s: any): string {
   const forma = A.detailedLegalForm?.description ?? F.legalForm?.detailedLegalForm?.description
     ?? F.legalForm?.legalForm?.description ?? F.legalForm?.description ?? '';
   const ate = A.atecoClassification?.ateco ?? {};
-  const idx = Math.max(0, SCALA.indexOf(CS.rating ?? 'B2'));
+  // rating assente (azienda troppo giovane per essere classificata): niente classe finta
+  const idx = SCALA.indexOf(CS.rating ?? '') >= 0 ? SCALA.indexOf(CS.rating) : null;
   const sev = Number(CS.risk_severity ?? 0);
 
   let h = `<div class="scheda"><div class="scheda-head">
@@ -159,7 +167,7 @@ export function rendiScheda(s: any): string {
 
   // riassunto
   h += `<div class="blocco"><div class="blocco-tit">Riassunto</div><div class="tre">
-    <div class="voce"><div class="etichetta">Ricavi delle vendite</div><div class="cifra">${euro(eco.turnover)}</div><div class="delta">${val(eco.turnoverTrend)}% sull'anno prima · esercizio ${val(eco.turnoverYear)}</div></div>
+    <div class="voce"><div class="etichetta">Ricavi delle vendite</div><div class="cifra">${euro(eco.turnover)}</div><div class="delta">${val(eco.turnoverTrend)}% sull'anno prima · esercizio ${eco.turnoverYear ?? '—'}</div></div>
     <div class="voce"><div class="etichetta">Utile d'esercizio</div><div class="cifra">${euro(ann.IIC179)}</div><div class="delta">voce 21 del conto economico</div></div>
     <div class="voce"><div class="etichetta">Patrimonio netto</div><div class="cifra">${euro(eco.netWorth)}</div><div class="delta">capitale sociale ${euro(eco.shareCapital)}</div></div>
   </div><div class="riga">
@@ -208,10 +216,18 @@ export function rendiScheda(s: any): string {
   }
 
   // anagrafica e indici
+  // Dove IT-advanced ha la versione italiana dello stesso blocco, si usa quella:
+  // le descrizioni di IT-full sono tradotte a macchina e a volte sbagliate
+  // (per una S.r.l. la forma giuridica generica usciva "Joint stock business").
+  const ITALIANO = ['atecoClassification', 'detailedLegalForm'];
+  const fonte = (k: string) => (ITALIANO.includes(k) && A[k] ? A[k] : F[k]);
   const blocco = (tit: string, chiavi: string[]) => {
     let c = '<table><tbody>';
-    chiavi.forEach((k) => { const v = F[k]; if (v && typeof v === 'object' && !Array.isArray(v) && Object.keys(v).length) c += `<tr class="sub"><td colspan="2">${umano(k)}</td></tr>${righe(v)}`; });
-    if (tit.startsWith('Anagrafica')) c += `<tr><td>PEC</td><td class="num">${val(F.pec)}</td></tr>`;
+    chiavi.forEach((k) => { const v = fonte(k); if (v && typeof v === 'object' && !Array.isArray(v) && Object.keys(v).length) c += `<tr class="sub"><td colspan="2">${umano(k)}</td></tr>${righe(v)}`; });
+    if (tit.startsWith('Anagrafica')) {
+      if (forma) c += `<tr><td>Forma giuridica</td><td class="num">${val(forma)}</td></tr>`;
+      c += `<tr><td>PEC</td><td class="num">${val(F.pec)}</td></tr>`;
+    }
     return `<div class="blocco"><div class="blocco-tit">${tit}</div>${c}</tbody></table></div>`;
   };
   h += blocco('Anagrafica e inquadramento', SEZ_ANAG);
