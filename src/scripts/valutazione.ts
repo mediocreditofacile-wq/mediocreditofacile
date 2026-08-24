@@ -155,7 +155,7 @@ export function rendiScheda(s: any): string {
   // rating
   h += `<div class="blocco"><div class="blocco-tit">Posizionamento del rating</div><div class="testa">
     <div>${tachimetro(idx)}</div>
-    <div><div class="rat">${esc(CS.rating ?? '—')}<small>${esc(CS.risk_score_description ?? '')} · classe ${idx + 1} di 9</small></div>
+    <div><div class="rat">${esc(CS.rating ?? 'n.d.')}<small>${esc(CS.risk_score_description ?? '')}${idx != null ? ` · classe ${idx + 1} di 9` : ' · nessuna classe assegnata'}</small></div>
       <div class="riga">
         <div><span>Punteggio di rischio</span><strong>${esc(CS.risk_score ?? '—')}</strong></div>
         <div><span>Severità</span><strong>${sev} su 990</strong></div>
