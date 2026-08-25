@@ -17,6 +17,7 @@ const PREZZI = { neg: 0.45, rep: 3.6 };
 
 let D: Dizionari;
 let chiave = '';
+let schedaCorrente: any = null;   // ultima scheda caricata, serve al PDF
 
 const $ = (id: string) => document.getElementById(id) as HTMLElement;
 const esc = (s: unknown) =>
@@ -321,9 +322,24 @@ export function montaValutazione() {
   $('entra').addEventListener('click', entra);
   $('chiave').addEventListener('keydown', (e) => { if ((e as KeyboardEvent).key === 'Enter') entra(); });
   $('esci').addEventListener('click', () => { localStorage.removeItem(CHIAVE_LS); location.reload(); });
-  // Stampa del browser: da lì si sceglie "Salva come PDF". Nessuna dipendenza,
-  // e il PDF esce identico a quello che vedi, con il tachimetro a colori.
-  $('pdf').addEventListener('click', () => window.print());
+  // Il file scende direttamente: niente dialogo di stampa. Il PDF e' costruito
+  // con jsPDF, quindi il testo resta selezionabile e il file pesa poco.
+  $('pdf').addEventListener('click', async () => {
+    if (!schedaCorrente) return;
+    const b = $('pdf') as HTMLButtonElement;
+    const testo = b.textContent;
+    b.disabled = true; b.textContent = 'Preparo il PDF…';
+    try {
+      const { creaPdfScheda } = await import('./valutazione-pdf');
+      const doc = await creaPdfScheda(schedaCorrente, D);
+      const rs = (schedaCorrente.full?.companyDetails?.companyName ?? 'scheda').replace(/[^\w\s-]/g, '').trim();
+      doc.save(`Scheda ${rs} - ${schedaCorrente.piva}.pdf`);
+    } catch (e) {
+      $('msg').textContent = 'Non sono riuscito a creare il PDF: ' + (e as Error).message;
+    } finally {
+      b.disabled = false; b.textContent = testo;
+    }
+  });
 
   const piva = $('piva') as HTMLInputElement, cerca = $('cerca') as HTMLButtonElement;
   piva.addEventListener('input', () => {
@@ -338,6 +354,7 @@ export function montaValutazione() {
     if (r?.errore) { $('msg').textContent = `Errore: ${r.errore}`; return; }
     if (r?.trovata === false) { $('msg').textContent = 'Partita IVA non trovata.'; return; }
     $('msg').textContent = r.daCache ? 'Dati da cache, nessun costo.' : '';
+    schedaCorrente = r;
     $('scheda').innerHTML = rendiScheda(r);
     collega();
     // Il browser propone il titolo del documento come nome del PDF salvato
@@ -347,7 +364,7 @@ export function montaValutazione() {
     if (btnPdf) btnPdf.style.display = 'inline-flex';
     if (r.spesa) $('spesa').innerHTML = `spesa di ${esc(r.spesa.mese)}<strong>${nf(r.spesa.totale, 2)} €</strong>${r.spesa.chiamate} chiamate`;
     const na = $('negAzienda');
-    if (na?.dataset.id) attendi(na.dataset.id, 'negativita', (d) => { na.innerHTML = esitoNeg(d); });
+    if (na?.dataset.id) attendi(na.dataset.id, 'negativita', (d) => { na.innerHTML = esitoNeg(d); if (schedaCorrente) schedaCorrente.negativita = d; });
     else if (na) na.innerHTML = '<span class="vuoto">non avviata</span>';
   };
   cerca.addEventListener('click', avvia);
