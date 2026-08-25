@@ -39,6 +39,9 @@ const datiClient = { CODICI, ETICHETTE, RUOLI, VALORI };
         <div>
           <h1>Valutazione aziende</h1>
           <p class="val-sub">Anagrafica, bilancio, rischio e soci. Le verifiche a pagamento partono solo se le chiedi.</p>
+          <p class="val-sub val-sub--link">
+            <a href="/tools/credenziali">Accessi ai portali</a> — username e password di tutte le aree riservate
+          </p>
         </div>
         <div class="val-spesa" id="spesa"></div>
       </div>
@@ -79,6 +82,8 @@ const datiClient = { CODICI, ETICHETTE, RUOLI, VALORI };
   .val-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; flex-wrap: wrap; margin-bottom: 24px; }
   .val h1 { font-size: 2rem; font-weight: 800; color: #FE6F3A; letter-spacing: -.02em; line-height: 1.15; }
   .val-sub { font-size: 1rem; color: #444451; margin-top: 4px; }
+  .val-sub--link { font-size: .875rem; color: #787782; margin-top: 10px; }
+  .val-sub--link a { color: #664CCD; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
   .val-spesa { font-size: .8125rem; color: #787782; text-align: right; }
   .val-spesa strong { display: block; font-size: 1.25rem; color: #0F1020; font-variant-numeric: tabular-nums; }
 
