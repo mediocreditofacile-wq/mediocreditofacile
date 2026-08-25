@@ -31,6 +31,7 @@ export default defineConfig({
           '/design-system/icons',
           '/tools/age-srl',
           '/tools/arca-energia',
+          '/tools/credenziali',
           '/tools/datron',
           '/tools/datron-ecommerce',
           '/tools/duplex',

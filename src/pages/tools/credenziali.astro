@@ -1,0 +1,103 @@
+---
+/**
+ * Accessi ai portali — /tools/credenziali
+ *
+ * Pagina interna: elenca username e password di tutti i portali partner.
+ *
+ * Le credenziali NON sono nel sorgente. La pagina serve solo il guscio; la
+ * lista arriva da /api/credenziali, che risponde soltanto a chi presenta la
+ * chiave (la stessa dello strumento di valutazione), verificata server-side.
+ * Chi apre il sorgente senza chiave non trova niente.
+ */
+import ToolLayout from '../../layouts/ToolLayout.astro';
+---
+
+<ToolLayout title="Accessi ai portali — MCF" description="Credenziali dei portali partner" noindex={true}>
+  <div class="cred">
+    <div class="cred-gate" id="gate">
+      <div class="cred-gate__box">
+        <div class="cred-gate__tit">Accessi ai portali</div>
+        <p class="cred-gate__sub">Elenco riservato.<br>Inserisci la chiave di accesso.</p>
+        <input class="cred-gate__pin" id="chiave" type="password" autocomplete="off" placeholder="chiave">
+        <div class="cred-gate__err" id="err"></div>
+        <button class="cred-btn" id="entra">Entra</button>
+      </div>
+    </div>
+
+    <div id="app" style="display:none;">
+      <h1>Accessi ai portali</h1>
+      <p class="cred-sub">Username e password di tutte le aree riservate. Clicca su una password per copiarla.</p>
+      <div id="lista"></div>
+      <button class="cred-btn cred-btn--ghost" id="esci">Esci</button>
+    </div>
+  </div>
+</ToolLayout>
+
+<script>
+  const CH = 'mcf_valutazione_key';
+  const $ = (id: string) => document.getElementById(id) as HTMLElement;
+  const esc = (s: unknown) => String(s ?? '').replace(/[<>&"]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' }[c] as string));
+
+  async function carica(chiave: string) {
+    const r = await fetch('/api/credenziali', { headers: { Authorization: `Bearer ${chiave}` } });
+    if (r.status === 401) { localStorage.removeItem(CH); $('err').textContent = 'Chiave errata.'; return false; }
+    const d = await r.json();
+    const gruppi: [string, string][] = [['partner', 'Portali partner'], ['interno', 'Strumenti interni MCF']];
+    $('lista').innerHTML = gruppi.map(([tipo, titolo]) => {
+      const righe = (d.credenziali ?? []).filter((c: any) => c.tipo === tipo);
+      if (!righe.length) return '';
+      return `<h2>${titolo}</h2><table><thead><tr><th>Portale</th><th>Utente</th><th>Password</th></tr></thead><tbody>` +
+        righe.map((c: any) => `<tr>
+          <td><a href="${esc(c.percorso)}" target="_blank" rel="noopener">${esc(c.nome)}</a>
+              ${c.nota ? `<br><span class="nota">${esc(c.nota)}</span>` : ''}</td>
+          <td>${c.utente ? `<code class="copia" data-v="${esc(c.utente)}">${esc(c.utente)}</code>` : '<span class="nota">solo password</span>'}</td>
+          <td><code class="copia" data-v="${esc(c.password)}">${esc(c.password)}</code></td>
+        </tr>`).join('') + '</tbody></table>';
+    }).join('');
+    document.querySelectorAll<HTMLElement>('.copia').forEach((el) =>
+      el.addEventListener('click', () => {
+        navigator.clipboard.writeText(el.dataset.v ?? '');
+        const p = el.textContent; el.textContent = 'copiato';
+        setTimeout(() => { el.textContent = p; }, 900);
+      }));
+    return true;
+  }
+
+  const entra = async () => {
+    const v = ($('chiave') as HTMLInputElement).value.trim();
+    if (!v) return;
+    if (await carica(v)) { localStorage.setItem(CH, v); $('gate').style.display = 'none'; $('app').style.display = 'block'; }
+  };
+  $('entra').addEventListener('click', entra);
+  $('chiave').addEventListener('keydown', (e) => { if ((e as KeyboardEvent).key === 'Enter') entra(); });
+  $('esci').addEventListener('click', () => { localStorage.removeItem(CH); location.reload(); });
+
+  const salvata = localStorage.getItem(CH);
+  if (salvata) carica(salvata).then((ok) => { if (ok) { $('gate').style.display = 'none'; $('app').style.display = 'block'; } });
+</script>
+
+<style is:global>
+  .cred { max-width: 1000px; margin: 0 auto; padding: 32px 24px 64px; }
+  .cred h1 { font-size: 2rem; font-weight: 800; color: #FE6F3A; letter-spacing: -.02em; }
+  .cred h2 { font-size: 1.25rem; font-weight: 700; color: #664CCD; margin: 32px 0 12px; }
+  .cred-sub { font-size: 1rem; color: #444451; margin: 4px 0 8px; }
+  .cred table { width: 100%; border-collapse: collapse; font-size: .9375rem; }
+  .cred thead th { background: #FE6F3A; color: #fff; font-weight: 600; font-size: .75rem; text-transform: uppercase; letter-spacing: .06em; text-align: left; padding: 12px 16px; }
+  .cred tbody td { padding: 12px 16px; border-bottom: 1px solid #E1DEE3; vertical-align: top; }
+  .cred tbody tr:nth-child(even) td { background: #F5F3F6; }
+  .cred a { color: #664CCD; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+  .cred .nota { font-size: .8125rem; color: #787782; }
+  .cred code.copia { font-family: ui-monospace, "SF Mono", monospace; font-size: .875rem; background: #fff; border: 1px solid #E1DEE3; border-radius: 6px; padding: 4px 10px; cursor: pointer; display: inline-block; }
+  .cred code.copia:hover { border-color: #FE6F3A; }
+  .cred-btn { font-family: inherit; font-size: .9375rem; font-weight: 600; color: #fff; background: #FE6F3A; border: none; border-radius: 10px; padding: 12px 24px; cursor: pointer; margin-top: 32px; }
+  .cred-btn--ghost { background: transparent; color: #664CCD; border: 1.5px solid #E1DEE3; }
+  .cred-gate { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; background: #fff; padding: 24px; }
+  .cred-gate__box { width: 100%; max-width: 360px; border: 1px solid #E1DEE3; border-radius: 16px; padding: 28px 24px; text-align: center; }
+  .cred-gate__tit { font-size: 1.125rem; font-weight: 700; color: #0F1020; margin-bottom: 6px; }
+  .cred-gate__sub { font-size: .875rem; color: #787782; margin-bottom: 20px; line-height: 1.5; }
+  .cred-gate__pin { width: 100%; padding: 12px 14px; font-size: 1rem; text-align: center; border: 1px solid #E1DEE3; border-radius: 6px; outline: none; font-family: inherit; }
+  .cred-gate__pin:focus { border-color: #FE6F3A; }
+  .cred-gate__err { font-size: .8125rem; color: #A31515; min-height: 18px; margin-top: 8px; }
+  .cred-gate .cred-btn { width: 100%; margin-top: 14px; }
+  @media print { .cred { display: none; } }
+</style>
