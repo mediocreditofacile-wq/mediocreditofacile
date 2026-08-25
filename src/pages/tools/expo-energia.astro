@@ -88,6 +88,11 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
           <a class="ee__card-link" href="#richieste">Lista richieste &raquo;</a>
         </span>
       </div>
+      <a href="/tools/simulatore-leasing-fornitori" target="_blank" rel="noopener" class="ee__card ee__card--esterna">
+        <div class="ee__card-head"><Icon name="account_balance" /> Leasing strumentale</div>
+        <p class="ee__card-desc">Quando il cliente preferisce acquistare invece di noleggiare: simulatore leasing su impianti fotovoltaici e beni strumentali, con Nuova Sabatini e iperammortamento. Si apre in una scheda a parte.</p>
+        <span class="ee__card-link">Apri il simulatore leasing &raquo;</span>
+      </a>
       <a href="#documenti" class="ee__card">
         <div class="ee__card-head"><Icon name="checklist" /> Documenti</div>
         <p class="ee__card-desc">La checklist dei documenti si aggiorna da sola in base a importo e forma giuridica del cliente.</p>
@@ -946,6 +951,9 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
   .ee__banner--full .ee__banner-icon { color: #FE6F3A; }
 
   /* Tabella documenti */
+  .ee__card--esterna { border-style: dashed; }
+  .ee__card--esterna .ee__card-link::after { content: ' \2197'; }
+
   .ee__table {
     width: 100%; border-collapse: collapse;
     font-size: 0.9rem;
@@ -1067,7 +1075,10 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
     .ee__bene-row { grid-template-columns: 1fr 1fr; gap: 0.75rem; }
     .ee__field--grow { grid-column: 1 / -1; }
     .ee__bene-remove { grid-column: 1 / -1; width: 100%; }
-    .ee__table { font-size: 0.82rem; }
+    .ee__card--esterna { border-style: dashed; }
+  .ee__card--esterna .ee__card-link::after { content: ' \2197'; }
+
+  .ee__table { font-size: 0.82rem; }
     .ee__table th, .ee__table td { padding: 0.6rem 0.75rem; }
     .ee__th-when { width: 45%; }
     .ee__submit-row { flex-direction: column; align-items: stretch; }
