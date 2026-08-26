@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<meta name="googlebot" content="noindex, nofollow">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.png" sizes="any">
+<title>Sorteggio Fantamicucci</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&family=Barlow+Semi+Condensed:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --paper:#EFF2F0; --card:#FFFFFF; --ink:#10251C; --ink2:#4A6157; --line:#D6DEDA;
+  --accent:#B5811C; --accent-soft:#F5EAD3; --casa:#16593C; --fuori:#6B7C74;
+  --ok:#1C7048; --ko:#A33A18; --ombra:0 1px 2px rgba(16,37,28,.06);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#0D1512; --card:#151F1B; --ink:#E7EEE9; --ink2:#90A69B; --line:#25322D;
+    --accent:#DFA83B; --accent-soft:#2A2517; --casa:#54C08D; --fuori:#8CA096;
+    --ok:#54C08D; --ko:#E2764C; --ombra:none;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0D1512; --card:#151F1B; --ink:#E7EEE9; --ink2:#90A69B; --line:#25322D;
+  --accent:#DFA83B; --accent-soft:#2A2517; --casa:#54C08D; --fuori:#8CA096;
+  --ok:#54C08D; --ko:#E2764C; --ombra:none;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font-family:Archivo,"Helvetica Neue",Arial,sans-serif;font-size:15px;line-height:1.55;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:1120px;margin:0 auto;padding:28px 20px 72px;display:flex;flex-direction:column;gap:20px}
+h1{font-size:clamp(28px,4.4vw,44px);font-weight:800;letter-spacing:-.02em;margin:0;text-wrap:balance;line-height:1.05}
+.occhiello{font-family:"Barlow Semi Condensed",Arial,sans-serif;font-weight:600;font-size:12px;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin:0 0 6px}
+.sotto{margin:10px 0 0;max-width:64ch;color:var(--ink2);font-size:15px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;box-shadow:var(--ombra)}
+.card>h2{margin:0;padding:11px 16px;border-bottom:1px solid var(--line);
+  font-family:"Barlow Semi Condensed",Arial,sans-serif;font-weight:700;font-size:13px;
+  letter-spacing:.13em;text-transform:uppercase;color:var(--ink2)}
+.bd{padding:16px}
+.due{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:860px){.due{grid-template-columns:1fr}}
+label{display:block;font-family:"Barlow Semi Condensed",Arial,sans-serif;font-size:12px;font-weight:600;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--ink2);margin-bottom:5px}
+input,select,textarea,button{font:inherit;color:inherit}
+input[type=text],input[type=number],select,textarea{width:100%;background:var(--paper);color:var(--ink);
+  border:1px solid var(--line);border-radius:7px;padding:7px 9px;font-family:"Barlow Semi Condensed",Arial,sans-serif;font-size:15px}
+textarea{min-height:96px;resize:vertical;line-height:1.5}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.sq{display:grid;grid-template-columns:34px 1fr;gap:8px;align-items:center;margin-bottom:7px}
+.cod{font-family:"Barlow Semi Condensed",Arial,sans-serif;font-weight:700;font-size:13px;text-align:center;
+  background:var(--accent-soft);color:var(--accent);border-radius:6px;padding:6px 0;letter-spacing:.06em}
+.acc{display:grid;grid-template-columns:1fr 26px 1fr 44px;gap:7px;align-items:center;margin-bottom:7px}
+.vs{text-align:center;font-family:"Barlow Semi Condensed",Arial,sans-serif;font-size:12px;color:var(--ink2);letter-spacing:.08em}
+.inv{background:none;border:1px solid var(--line);border-radius:6px;cursor:pointer;padding:6px 0;
+  font-family:"Barlow Semi Condensed",Arial,sans-serif;font-size:12px;color:var(--ink2)}
+.inv:hover{border-color:var(--accent);color:var(--accent)}
+.barra{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end}
+.barra .campo{width:132px}
+button.p{background:var(--casa);color:#fff;border:0;border-radius:8px;padding:11px 22px;font-weight:600;
+  cursor:pointer;letter-spacing:.01em}
+button.p:hover{filter:brightness(1.08)}
+button.s{background:none;border:1px solid var(--line);border-radius:8px;padding:9px 15px;cursor:pointer;
+  font-family:"Barlow Semi Condensed",Arial,sans-serif;font-size:14px;color:var(--ink2)}
+button.s:hover{border-color:var(--accent);color:var(--accent)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:2px}
+.tab{background:none;border:1px solid var(--line);border-radius:999px;padding:6px 15px;cursor:pointer;
+  font-family:"Barlow Semi Condensed",Arial,sans-serif;font-size:14px;font-weight:600;color:var(--ink2)}
+.tab[aria-selected=true]{background:var(--casa);border-color:var(--casa);color:#fff}
+.griglia{display:grid;grid-template-columns:repeat(auto-fill,minmax(268px,1fr));gap:12px}
+.gio{border:1px solid var(--line);border-radius:9px;overflow:hidden;background:var(--card)}
+.gio.uno{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.gioh{display:flex;justify-content:space-between;align-items:baseline;padding:6px 11px;background:var(--paper);
+  border-bottom:1px solid var(--line);font-family:"Barlow Semi Condensed",Arial,sans-serif}
+.gioh b{font-size:15px;font-weight:700;letter-spacing:.04em}
+.gioh span{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink2)}
+.gio.uno .gioh span{color:var(--accent)}
+.mt{display:grid;grid-template-columns:1fr 16px 1fr;gap:5px;padding:4px 11px;align-items:center;
+  font-family:"Barlow Semi Condensed",Arial,sans-serif;font-size:13.5px;border-top:1px solid var(--line)}
+.mt:first-of-type{border-top:0}
+.mt .c{font-weight:600;color:var(--ink)}
+.mt .f{color:var(--ink2);text-align:right}
+.mt .d{text-align:center;color:var(--line)}
+.tab-sq{width:100%;border-collapse:collapse;font-family:"Barlow Semi Condensed",Arial,sans-serif;font-size:13.5px}
+.tab-sq th{text-align:left;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink2);
+  padding:5px 8px;border-bottom:1px solid var(--line);font-weight:600}
+.tab-sq td{padding:4px 8px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+.tab-sq td.n{text-align:right;color:var(--ink2);width:38px}
+.pill{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.08em;padding:1px 6px;border-radius:4px}
+.pill.C{background:var(--accent-soft);color:var(--accent)}
+.pill.T{background:transparent;color:var(--fuori);border:1px solid var(--line)}
+.scroll{overflow-x:auto}
+.chk{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-top:1px solid var(--line)}
+.chk:first-child{border-top:0}
+.chk .ic{font-weight:800;font-size:15px;line-height:1.4;width:18px;flex:none}
+.chk.si .ic{color:var(--ok)} .chk.no .ic{color:var(--ko)}
+.chk b{display:block;font-size:14px} .chk span{color:var(--ink2);font-size:13.5px}
+.nota{font-size:13px;color:var(--ink2);margin:12px 0 0;max-width:70ch}
+.uscita{width:100%;min-height:180px;font-family:"Barlow Semi Condensed",monospace;font-size:12.5px;white-space:pre;overflow:auto}
+.avviso{background:var(--accent-soft);border-left:3px solid var(--accent);padding:9px 12px;border-radius:0 7px 7px 0;
+  font-size:13.5px;color:var(--ink)}
+footer{color:var(--ink2);font-size:12.5px;border-top:1px solid var(--line);padding-top:14px}
+@media print{body{background:#fff}.card>h2,.tabs,.barra,#setup,footer{display:none!important}.gio{break-inside:avoid}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+ <header>
+  <p class="occhiello">Fantamicucci 2026/27 · dieci squadre · trentasei giornate</p>
+  <h1>Sorteggio del calendario asimmetrico</h1>
+  <p class="sotto">Fantapazz genera solo calendari simmetrici: quattro gironi che ripetono sempre la stessa
+  sequenza di avversari. Qui i quattro gironi hanno ordini diversi, e l'unica cosa che resta fissa è la prima
+  giornata, che decidi tu. Ogni squadra affronta ogni altra quattro volte, due in casa e due fuori.</p>
+ </header>
+
+ <div id="setup" class="due">
+  <section class="card">
+   <h2>Le dieci squadre</h2>
+   <div class="bd"><div id="squadre"></div>
+    <p class="nota">La sigla si ricava dal nome ed è solo per leggere più in fretta la griglia.</p></div>
+  </section>
+
+  <section class="card">
+   <h2>La prima giornata</h2>
+   <div class="bd">
+    <div id="accoppiamenti"></div>
+    <p class="nota" style="margin-bottom:10px">A sinistra chi gioca in casa. Il tasto <b>⇄</b> inverte il campo.</p>
+    <label for="incolla">Oppure incollala da Fantapazz</label>
+    <textarea id="incolla" placeholder="Una partita per riga, per esempio:&#10;Diamantina - New Team&#10;ANDERSTELLA - Kitty Sinqula"></textarea>
+    <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+      <button class="s" id="leggi">Leggi le righe incollate</button>
+      <button class="s" id="casuale">Prima giornata a caso</button>
+    </div>
+    <p class="nota" id="esitoIncolla"></p>
+   </div>
+  </section>
+ </div>
+
+ <section class="card">
+  <h2>Sorteggio</h2>
+  <div class="bd">
+   <div class="barra">
+    <div class="campo"><label for="ngio">Giornate</label>
+      <select id="ngio"><option value="36" selected>36 — quattro gironi</option>
+        <option value="27">27 — tre gironi</option><option value="18">18 — due gironi</option></select></div>
+    <div class="campo"><label for="seme">Seme</label><input type="number" id="seme" value="1" min="1" step="1"></div>
+    <button class="p" id="via">Sorteggia</button>
+    <button class="s" id="nuovoSeme">Cambia seme e risorteggia</button>
+   </div>
+   <p class="nota">Il seme è il numero da cui parte il caso: con lo stesso seme e le stesse squadre esce
+   sempre lo stesso calendario. Segnatelo se vuoi poterlo rifare identico davanti agli altri.</p>
+   <div id="allarme" style="margin-top:12px"></div>
+  </div>
+ </section>
+
+ <section class="card" id="risultato" hidden>
+  <h2>Il calendario</h2>
+  <div class="bd">
+   <div class="tabs" role="tablist">
+    <button class="tab" role="tab" aria-selected="true" data-v="gio">Per giornata</button>
+    <button class="tab" role="tab" aria-selected="false" data-v="sq">Per squadra</button>
+    <button class="tab" role="tab" aria-selected="false" data-v="ctrl">Controlli</button>
+    <button class="tab" role="tab" aria-selected="false" data-v="testo">Da copiare</button>
+   </div>
+   <div id="vista" style="margin-top:14px"></div>
+  </div>
+ </section>
+
+ <footer>Il primo girone parte dalla giornata che hai fissato; gli altri hanno ordine e campo diversi.
+ Nessuna squadra rigioca contro la stessa nella giornata successiva, e nessuna fa più di tre trasferte
+ o tre partite in casa di fila.</footer>
+</div>
+
+<script>
+const SQUADRE = ["Il Signore è il mio Pastore","ANDERSTELLA","WC TROMBA UNITED","New Team","Diamantina",
+                 "F.C. TRIUMPH","RemigioDaVaragine F.C.","Kitty Sinqula","AC Magna Melocco","GARIBALDINA"];
+let nomi = SQUADRE.slice();
+let prima = [[0,1],[2,3],[4,5],[6,7],[8,9]];   // [casa, fuori] per indice squadra
+let cal = null, vista = "gio";
+
+const norm = s => s.normalize("NFKD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z0-9]/g," ").replace(/\s+/g," ").trim();
+function sigla(n){
+  const p = norm(n).split(" ").filter(w=>!["il","la","lo","i","gli","le","di","da","de","del","fc","f c","ac","a c","wc","w c"].includes(w));
+  if(!p.length) return norm(n).slice(0,2).toUpperCase();
+  return (p.length>1 ? p[0][0]+p[1][0] : p[0].slice(0,2)).toUpperCase();
+}
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);
+  t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function mescola(v,r){const a=v.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+const chiave = (x,y) => x<y ? x+"-"+y : y+"-"+x;
+
+/* Metodo del girone all'italiana: la squadra in posizione 9 sta ferma, le altre ruotano.
+   Alla giornata r si affrontano (9,r) e le coppie simmetriche rispetto a r. */
+function girone(lab){
+  const G=[];
+  for(let r=0;r<9;r++){
+    const g=[[lab[9],lab[r]]];
+    for(let k=1;k<=4;k++) g.push([lab[(r+k)%9], lab[(r-k+9)%9]]);
+    G.push(g.map(([x,y])=>x<y?[x,y]:[y,x]));
+  }
+  return G;
+}
+/* Etichettatura costruita all'indietro dalla prima giornata: le cinque partite che hai fissato
+   finiscono nelle cinque posizioni che il metodo accoppia alla giornata zero. */
+function labDaPrima(pp,r){
+  const posti=[[9,0],[1,8],[2,7],[3,6],[4,5]];
+  const ordine=mescola([0,1,2,3,4],r), lab=new Array(10);
+  ordine.forEach((pi,si)=>{ let [a,b]=pp[pi]; if(r()<.5)[a,b]=[b,a];
+    lab[posti[si][0]]=a; lab[posti[si][1]]=b; });
+  return lab;
+}
+function labCasuale(r){ return mescola([0,1,2,3,4,5,6,7,8,9],r); }
+
+function costruisci(nGironi, seme){
+  const r = mulberry32(seme>>>0 || 1);
+  const cicli=[];
+  for(let c=0;c<nGironi;c++){
+    let G = c===0 ? girone(labDaPrima(prima,r)) : girone(labCasuale(r));
+    if(c===0){ const [g0,...resto]=G; G=[g0,...mescola(resto,r)]; }
+    else {
+      for(let tent=0;tent<60;tent++){
+        G=mescola(G,r);
+        const ult=new Set(cicli[c-1][cicli[c-1].length-1].map(([x,y])=>chiave(x,y)));
+        if(!G[0].some(([x,y])=>ult.has(chiave(x,y)))) break;
+      }
+    }
+    cicli.push(G);
+  }
+  /* Campo: i gironi vanno a coppie, il secondo rovescia il primo. Così ogni incontro
+     si gioca due volte in casa e due fuori, e ogni squadra ha metà partite in casa. */
+  const bloccate={}; prima.forEach(([c,f])=>{ bloccate[chiave(c,f)] = c<f; });
+  const o={}; // orientamento del girone dispari: true = il minore gioca in casa
+  cicli[0].flat().forEach(([x,y])=>{ const k=chiave(x,y); o[k] = k in bloccate ? bloccate[k] : r()<.5; });
+  const o3={};
+  if(nGironi>2) cicli[2].flat().forEach(([x,y])=>{ o3[chiave(x,y)]=r()<.5; });
+
+  function partite(){
+    const out=[];
+    cicli.forEach((G,c)=>{ G.forEach(g=>{
+      out.push(g.map(([x,y])=>{
+        const k=chiave(x,y);
+        let casaMinore = c===0 ? o[k] : c===1 ? !o[k] : c===2 ? o3[k] : !o3[k];
+        return casaMinore ? [x,y] : [y,x];
+      }));
+    });});
+    return out;
+  }
+  /* Nessuno deve fare più di tre partite di fila sullo stesso campo: si aggiusta girando
+     l'orientamento di una coppia (e del suo specchio, così l'equilibrio resta). */
+  const minScarto = nGironi%2 ? 1 : 0;   // con un numero dispari di gironi il pari non esiste
+  function violazioni(P){
+    let v=0;
+    const casa=new Array(10).fill(0), fuori=new Array(10).fill(0);
+    for(let t=0;t<10;t++){
+      let run=0, seg=null;
+      P.forEach(g=>{ const m=g.find(([c,f])=>c===t||f===t); const s=m[0]===t?"C":"T";
+        if(s==="C") casa[t]++; else fuori[t]++;
+        run = s===seg ? run+1 : 1; seg=s; if(run>3) v++; });
+    }
+    for(let t=0;t<10;t++) v += 2*Math.max(0, Math.abs(casa[t]-fuori[t]) - minScarto);
+    return v;
+  }
+  let P=partite(), v=violazioni(P);
+  const modificabili = Object.keys(o).filter(k=>!(k in bloccate));
+  for(let i=0;i<8000 && v>0;i++){
+    const usaTre = nGironi>2 && r()<.5;
+    const pool = usaTre ? Object.keys(o3) : modificabili;
+    if(!pool.length) break;
+    const k = pool[Math.floor(r()*pool.length)];
+    (usaTre?o3:o)[k] = !(usaTre?o3:o)[k];
+    const P2=partite(), v2=violazioni(P2);
+    if(v2<=v){ P=P2; v=v2; } else { (usaTre?o3:o)[k] = !(usaTre?o3:o)[k]; }
+  }
+  return {partite:P, seme, nGironi};
+}
+
+/* ---------- controlli ---------- */
+function controlla(P){
+  const inc={}, casa=new Array(10).fill(0), fuori=new Array(10).fill(0);
+  P.forEach(g=>g.forEach(([c,f])=>{ const k=chiave(c,f); (inc[k]=inc[k]||[]).push(c); casa[c]++; fuori[f]++; }));
+  const atteso=P.length/9;
+  const scontriOk = Object.values(inc).every(v=>v.length===atteso);
+  const campoOk = Object.entries(inc).every(([k,v])=>{ const [a]=k.split("-").map(Number);
+    const inCasa=v.filter(c=>c===a).length; return Math.abs(inCasa - v.length/2) <= (v.length%2?0.5:0); });
+  let rivincite=0;
+  for(let i=1;i<P.length;i++){ const pre=new Set(P[i-1].map(([c,f])=>chiave(c,f)));
+    P[i].forEach(([c,f])=>{ if(pre.has(chiave(c,f))) rivincite++; }); }
+  let serieMax=0, chiSerie="";
+  for(let t=0;t<10;t++){ let run=0,seg=null;
+    P.forEach(g=>{ const m=g.find(([c,f])=>c===t||f===t); const s=m[0]===t?"C":"T";
+      run = s===seg?run+1:1; seg=s; if(run>serieMax){serieMax=run;chiSerie=nomi[t]} }); }
+  const primaOk = P[0].length===prima.length &&
+    prima.every(([c,f])=>P[0].some(([x,y])=>x===c&&y===f));
+  const squilibrio = Math.max(...casa.map((c,i)=>Math.abs(c-fuori[i])));
+  const pari = atteso%2===0;
+  return {scontriOk, campoOk, rivincite, serieMax, chiSerie, primaOk, atteso, squilibrio, casa, fuori, pari};
+}
+
+/* ---------- disegno ---------- */
+const el = id => document.getElementById(id);
+function disegnaSetup(){
+  el("squadre").innerHTML = nomi.map((n,i)=>
+    `<div class="sq"><div class="cod" id="cod${i}">${sigla(n)}</div>
+     <input type="text" data-sq="${i}" value="${n.replace(/"/g,"&quot;")}" aria-label="Squadra ${i+1}"></div>`).join("");
+  el("squadre").querySelectorAll("[data-sq]").forEach(inp=>inp.oninput=()=>{
+    const i=+inp.dataset.sq; nomi[i]=inp.value||("Squadra "+(i+1));
+    el("cod"+i).textContent=sigla(nomi[i]); disegnaAcc(); if(cal) mostra();
+  });
+  disegnaAcc();
+}
+function opzioni(sel){ return nomi.map((n,i)=>`<option value="${i}"${i===sel?" selected":""}>${n}</option>`).join(""); }
+function disegnaAcc(){
+  el("accoppiamenti").innerHTML = prima.map(([c,f],i)=>
+    `<div class="acc"><select data-p="${i}" data-lato="0">${opzioni(c)}</select>
+      <div class="vs">in casa</div>
+      <select data-p="${i}" data-lato="1">${opzioni(f)}</select>
+      <button class="inv" data-inv="${i}" title="inverti il campo">⇄</button></div>`).join("");
+  el("accoppiamenti").querySelectorAll("select").forEach(s=>s.onchange=()=>{
+    prima[+s.dataset.p][+s.dataset.lato]=+s.value; validaPrima();
+  });
+  el("accoppiamenti").querySelectorAll("[data-inv]").forEach(b=>b.onclick=()=>{
+    const i=+b.dataset.inv; prima[i]=[prima[i][1],prima[i][0]]; disegnaAcc(); validaPrima();
+  });
+  validaPrima();
+}
+function validaPrima(){
+  const usate=prima.flat(), set=new Set(usate);
+  const ok = set.size===10;
+  el("allarme").innerHTML = ok ? "" :
+    `<div class="avviso"><b>La prima giornata non sta in piedi.</b> Ogni squadra deve comparire una volta
+     sola: adesso ${[...new Set(usate.filter((v,i)=>usate.indexOf(v)!==i))].map(i=>nomi[i]).join(", ")}
+     compare due volte e ${nomi.filter((n,i)=>!set.has(i)).join(", ")} non compare.</div>`;
+  el("via").disabled = !ok;
+  el("via").style.opacity = ok ? 1 : .45;
+  return ok;
+}
+function mostra(){
+  el("risultato").hidden = false;
+  const P = cal.partite, C = controlla(P);
+  const v = el("vista");
+  if(vista==="gio"){
+    v.innerHTML = `<div class="griglia">` + P.map((g,i)=>
+      `<div class="gio${i===0?" uno":""}"><div class="gioh"><b>Giornata ${i+1}</b>
+        <span>${i===0?"fissata da te":"girone "+(Math.floor(i/9)+1)}</span></div>` +
+      g.map(([c,f])=>`<div class="mt"><div class="c">${nomi[c]}</div><div class="d">–</div>
+        <div class="f">${nomi[f]}</div></div>`).join("") + `</div>`).join("") + `</div>`;
+  } else if(vista==="sq"){
+    v.innerHTML = `<div class="griglia" style="grid-template-columns:repeat(auto-fill,minmax(300px,1fr))">` +
+      nomi.map((n,t)=>{
+        const righe = P.map((g,i)=>{ const m=g.find(([c,f])=>c===t||f===t);
+          const casa = m[0]===t, avv = casa?m[1]:m[0];
+          return `<tr><td class="n">${i+1}</td><td>${nomi[avv]}</td>
+            <td style="width:34px"><span class="pill ${casa?"C":"T"}">${casa?"CASA":"FUORI"}</span></td></tr>`;
+        }).join("");
+        return `<div class="gio"><div class="gioh"><b>${n}</b><span>${C.casa[t]} casa · ${C.fuori[t]} fuori</span></div>
+          <div class="scroll"><table class="tab-sq"><thead><tr><th class="n">G</th><th>Avversario</th><th>Campo</th></tr></thead>
+          <tbody>${righe}</tbody></table></div></div>`;
+      }).join("") + `</div>`;
+  } else if(vista==="ctrl"){
+    const r = (ok,t,d)=>`<div class="chk ${ok?"si":"no"}"><div class="ic">${ok?"✓":"✕"}</div>
+      <div><b>${t}</b><span>${d}</span></div></div>`;
+    v.innerHTML =
+      r(C.primaOk,"La prima giornata è quella che hai fissato","Squadre e campo identici a quello che hai scritto sopra.") +
+      r(C.scontriOk,`Ogni squadra affronta ogni altra ${C.atteso} volte`,"Nessun accoppiamento in più o in meno.") +
+      (C.pari
+        ? r(C.campoOk && C.squilibrio===0,"Campo diviso a metà su ogni accoppiamento",
+            `Metà partite in casa e metà fuori con ciascun avversario. Scarto casa/fuori per squadra: ${C.squilibrio}.`)
+        : r(C.campoOk && C.squilibrio<=1,"Campo il più equilibrato che si possa",
+            `Con ${C.atteso} incontri per coppia il campo non si divide a metà: ${Math.ceil(C.atteso/2)} da una parte e ${Math.floor(C.atteso/2)} dall'altra. Scarto casa/fuori per squadra: ${C.squilibrio} (meno di così non si può).`)) +
+      r(C.rivincite===0,"Nessuna rivincita immediata",C.rivincite===0?"Nessuno rigioca contro la stessa squadra nella giornata dopo.":`${C.rivincite} casi di rivincita nella giornata successiva: cambia seme.`) +
+      r(C.serieMax<=3,"Nessuna serie lunga sullo stesso campo",`La serie più lunga è ${C.serieMax} partite di fila per ${C.chiSerie}.`) +
+      `<p class="nota">I gironi dal secondo in poi hanno ordine delle giornate e campo diversi dal primo:
+       è questo che rende il calendario asimmetrico. Se un controllo esce rosso, cambia seme e risorteggia —
+       non è un difetto del metodo, è il caso che quella volta è andato storto.</p>`;
+  } else {
+    const testo = P.map((g,i)=>`GIORNATA ${i+1}\n`+g.map(([c,f])=>`${nomi[c]} - ${nomi[f]}`).join("\n")).join("\n\n");
+    const csv = "giornata,casa,fuori\n" + P.map((g,i)=>g.map(([c,f])=>
+      `${i+1},"${nomi[c].replace(/"/g,'""')}","${nomi[f].replace(/"/g,'""')}"`).join("\n")).join("\n");
+    v.innerHTML = `<div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+        <button class="s" data-copia="t">Copia il calendario</button>
+        <button class="s" data-copia="c">Copia in formato CSV</button>
+        <button class="s" onclick="window.print()">Stampa</button></div>
+      <textarea class="uscita" id="uscita" readonly>${testo.replace(/</g,"&lt;")}</textarea>
+      <p class="nota">Se il tasto copia non funziona, il testo qui sopra è già selezionabile.
+      Seme <b>${cal.seme}</b>: con questo numero e queste squadre il sorteggio si rifà identico.</p>`;
+    v.querySelectorAll("[data-copia]").forEach(b=>b.onclick=()=>{
+      const t = b.dataset.copia==="t" ? testo : csv;
+      el("uscita").value = t;
+      el("uscita").select();
+      try{ document.execCommand("copy"); b.textContent="Copiato"; setTimeout(()=>b.textContent = b.dataset.copia==="t"?"Copia il calendario":"Copia in formato CSV",1400);}catch(e){}
+    });
+  }
+}
+/* ---------- eventi ---------- */
+el("via").onclick = ()=>{ if(!validaPrima()) return;
+  cal = costruisci(+el("ngio").value/9, +el("seme").value||1); mostra();
+  el("risultato").scrollIntoView({behavior:"smooth",block:"start"}); };
+el("nuovoSeme").onclick = ()=>{ el("seme").value = Math.floor(Math.random()*99999)+1; el("via").click(); };
+el("casuale").onclick = ()=>{ const r=mulberry32(Math.floor(Math.random()*1e9));
+  const m=mescola([0,1,2,3,4,5,6,7,8,9],r); prima=[0,1,2,3,4].map(i=>[m[i*2],m[i*2+1]]);
+  disegnaAcc(); el("esitoIncolla").textContent="Prima giornata estratta a caso."; };
+el("leggi").onclick = ()=>{
+  const righe = el("incolla").value.split("\n").map(s=>s.trim()).filter(Boolean);
+  const trova = s => { const n=norm(s); let best=-1,pt=0;
+    nomi.forEach((x,i)=>{ const nx=norm(x); let p=0;
+      if(nx===n) p=100; else if(nx.startsWith(n)||n.startsWith(nx)) p=70;
+      else if(nx.includes(n)||n.includes(nx)) p=40;
+      if(p>pt){pt=p;best=i} }); return pt?best:-1; };
+  /* La riga può arrivare in mille modi: "A - B", "A-B", "A vs B", con o senza spazi.
+     Invece di indovinare il separatore, cerco il nome di squadra che apre la riga
+     e quello che la chiude: i nomi li conosco, il separatore no. */
+  const coppia = rg => {
+    const n = norm(rg);
+    let a=-1, b=-1, la=0, lb=0;
+    nomi.forEach((x,i)=>{ const nx=norm(x); if(!nx) return;
+      if(n.startsWith(nx) && nx.length>la){ a=i; la=nx.length; }
+      if(n.endsWith(nx)   && nx.length>lb){ b=i; lb=nx.length; } });
+    if(a>=0 && b>=0 && a!==b && la+lb<=n.length) return [a,b];
+    const parti = rg.split(/\s*[-–—]\s*|\s+vs\.?\s+/i).filter(x=>x.trim());
+    if(parti.length===2){ const x=trova(parti[0]), y=trova(parti[1]); if(x>=0&&y>=0&&x!==y) return [x,y]; }
+    return null;
+  };
+  const nuove=[], usati=new Set(); const problemi=[];
+  righe.forEach(rg=>{
+    const c = coppia(rg);
+    if(!c){ problemi.push(rg); return; }
+    const [a,b]=c;
+    if(a<0||b<0||usati.has(a)||usati.has(b)){ problemi.push(rg); return; }
+    usati.add(a); usati.add(b); nuove.push([a,b]);
+  });
+  if(nuove.length===5 && usati.size===10){
+    prima=nuove; disegnaAcc();
+    el("esitoIncolla").textContent="Letta: cinque partite, dieci squadre, tutto a posto.";
+  } else {
+    el("esitoIncolla").textContent = `Ne ho lette ${nuove.length} su cinque.` +
+      (problemi.length?` Non ho capito: ${problemi.slice(0,3).join(" · ")}.`:"") +
+      " Controlla che i nomi siano quelli delle squadre qui a fianco, una partita per riga.";
+  }
+};
+document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{
+  vista=b.dataset.v;
+  document.querySelectorAll(".tab").forEach(x=>x.setAttribute("aria-selected", x===b));
+  mostra();
+});
+disegnaSetup();
+</script>
+</body>
+</html>
