@@ -47,6 +47,7 @@ const datiClient = { CODICI, ETICHETTE, RUOLI, VALORI };
       </div>
 
       <div class="val-cerca">
+        <select class="val-paese" id="paese"></select>
         <input class="val-piva" id="piva" type="text" inputmode="numeric" maxlength="11" placeholder="Partita IVA (11 cifre)">
         <button class="val-btn" id="cerca" disabled>Analizza</button>
         <button class="val-btn val-btn--2" id="pdf" style="display:none;">Scarica la scheda in PDF</button>
@@ -88,6 +89,8 @@ const datiClient = { CODICI, ETICHETTE, RUOLI, VALORI };
   .val-spesa strong { display: block; font-size: 1.25rem; color: #0F1020; font-variant-numeric: tabular-nums; }
 
   .val-cerca { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  .val-paese { padding: 12px 14px; font-size: .9375rem; font-family: inherit; border: 1px solid #E1DEE3; border-radius: 6px; background: #fff; color: #0F1020; max-width: 200px; }
+  .val-paese:focus { border-color: #FE6F3A; outline: none; }
   .val-piva { flex: 1; min-width: 220px; padding: 12px 16px; font-size: 1.125rem; letter-spacing: 2px; border: 1px solid #E1DEE3; border-radius: 6px; outline: none; font-family: ui-monospace, "SF Mono", monospace; }
   .val-piva:focus { border-color: #FE6F3A; }
   .val-btn { font-family: inherit; font-size: .9375rem; font-weight: 600; color: #fff; background: #FE6F3A; border: none; border-radius: 10px; padding: 12px 24px; cursor: pointer; }
