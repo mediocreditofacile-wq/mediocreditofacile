@@ -745,12 +745,13 @@
     <span class="demo-piva" onclick="setDemo('98765432103')">98765432103</span> strutturato &nbsp;·&nbsp;
     <span class="demo-piva" onclick="setDemo('11111111115')">11111111115</span> giallo &nbsp;·&nbsp;
     <span class="demo-piva" onclick="setDemo('22222222220')">22222222220</span> rosso
-    <span style="margin-left:auto; opacity:0.7;">Cerved API attiva per P.IVA reali</span>
+    <span style="margin-left:auto; opacity:0.7;">Registro imprese attivo per P.IVA reali</span>
   </div>
 
   <div class="search-section">
     <div class="search-label">Ricerca caseificio per P.IVA</div>
     <div class="search-row">
+      <select class="select-styled" id="paeseSelect" onchange="onPaeseCambio()" style="max-width:190px;"></select>
       <input class="piva-input" id="pivaInput" type="text" maxlength="11" placeholder="00000000000" oninput="onPivaInput(this)">
       <button class="btn btn-primary" id="searchBtn" onclick="cerca()" disabled>Analizza</button>
     </div>
@@ -759,7 +760,7 @@
   </div>
 
   <div class="manual-card" id="manualForm">
-    <div class="card-title">Dati non disponibili — inserimento manuale</div>
+    <div class="card-title" id="manualTitle">Dati non disponibili — inserimento manuale</div>
     <div class="manual-grid">
       <div>
         <div class="field-label">Ragione sociale</div>
@@ -790,7 +791,7 @@
       <div id="schedaContainer" style="display:none;">
         <button class="scheda-toggle" onclick="toggleScheda()">
           <span class="scheda-toggle__arrow" id="schedaArrow">▶</span>
-          Scheda cliente completa (dati Cerved)
+          Scheda cliente completa (registro imprese)
         </button>
         <div class="scheda-body" id="schedaBody">
           <div class="scheda-grid" id="schedaGrid"></div>
@@ -960,6 +961,7 @@
       </label>
 
       <div id="esteroBody" style="display:none;">
+        <div id="controparteBox"></div>
         <div class="prev-grid" style="margin-top:16px;">
           <div>
             <div class="field-label">Area</div>
@@ -1134,10 +1136,11 @@ const DEMO={
   "22222222220":{rs:"Formaggi Del Sud Srl",fat:290000},
 };
 
-let stato={fat:0,rs:"",piva:"",canale:"grenke",macchina:null,cerved:null,durataSelezionata:36,
+let stato={fat:0,rs:"",piva:"",canale:"grenke",macchina:null,azienda:null,durataSelezionata:36,
   prezzoPrincipale:0,accessori:[],altriMacchinari:[],prezzoTotale:0,funnelAttivo:false,funnel:null,
   canaleDoc:null,docSpuntati:{},scenari:null,plafond:null,
-  inverso:null,estero:{attivo:false,valoreManuale:false}};
+  inverso:null,estero:{attivo:false,valoreManuale:false},
+  paeseControparte:null,idControparte:null,export:null,newco:null};
 
 // --- Gate PIN ---------------------------------------------------------------
 // Stesso PIN del tool Joker Store, così Andrea e Carmine non devono impararne un altro.
@@ -1179,6 +1182,155 @@ function setDemo(p){
   setTimeout(cerca,100);
 }
 
+// --- Controparte estera -----------------------------------------------------
+// La ricerca estera passa da /api/azienda-estera, che risponde con gli stessi nomi
+// di campo di quella italiana: da elabora() in giu' non cambia niente. In piu'
+// torna il verdetto sul canale (Econocom sopra i 2 milioni di volumi o patrimonio
+// netto, altrimenti percorso assicurato), che il server calcola una volta sola
+// cosi' la scheda a schermo e il PDF non possono dire due cose diverse.
+const PAESI_SEPA=[
+  ["IT","Italia"],["DE","Germania"],["FR","Francia"],["ES","Spagna"],["PT","Portogallo"],
+  ["AT","Austria"],["BE","Belgio"],["NL","Paesi Bassi"],["IE","Irlanda"],["GR","Grecia"],
+  ["HR","Croazia"],["SI","Slovenia"],["SK","Slovacchia"],["CZ","Cechia"],["HU","Ungheria"],
+  ["PL","Polonia"],["RO","Romania"],["BG","Bulgaria"],["SE","Svezia"],["DK","Danimarca"],
+  ["FI","Finlandia"],["NO","Norvegia"],["CH","Svizzera"],
+];
+const PAESI_MONDO=[
+  ["GB","Regno Unito"],["US","Stati Uniti"],["CA","Canada"],["BR","Brasile"],["MX","Messico"],
+  ["AR","Argentina"],["TR","Turchia"],["AE","Emirati Arabi Uniti"],["SA","Arabia Saudita"],
+  ["MA","Marocco"],["TN","Tunisia"],["EG","Egitto"],["ZA","Sudafrica"],["IN","India"],
+  ["CN","Cina"],["JP","Giappone"],["AU","Australia"],
+];
+// Cosa si digita nel campo, paese per paese: gli identificativi esteri non si
+// somigliano fra loro e senza un esempio Andrea non puo' indovinare.
+const FORMATO_ID={
+  DE:"Partita IVA, es. DE129274202", FR:"SIREN o SIRET, es. 552032534",
+  ES:"CIF, es. A15075062", BR:"CNPJ, es. 33.592.510/0001-54",
+  GB:"Company number", PT:"NIPC", AT:"Firmenbuchnummer o P.IVA", CH:"IDE/UID",
+};
+// Il canale mostrato in testa alla scheda: sull'italiano e' la fascia di fatturato,
+// sull'estero e' il verdetto della regola export calcolata dal server.
+function canalePrimario(cl){
+  const e=stato.azienda?.esito;
+  if(!e) return cl.canaleLabel.split("·")[0].trim();
+  return {econocom:"Econocom",grenke:"Grenke — noleggio operativo",
+          sace:"Percorso assicurato SACE",incerto:"Da definire sull'importo"}[e.canale]||"—";
+}
+
+function nomePaese(iso){
+  const t=[...PAESI_SEPA,...PAESI_MONDO].find(x=>x[0]===iso);
+  return t?t[1]:iso;
+}
+function paeseSelezionato(){
+  const el=document.getElementById("paeseSelect");
+  return el?el.value:"IT";
+}
+function riempiPaesi(){
+  const el=document.getElementById("paeseSelect");
+  if(!el)return;
+  const opt=(l)=>l.map(([c,n])=>`<option value="${c}">${c} — ${n}</option>`).join("");
+  el.innerHTML=`<optgroup label="Area Schengen / SEPA">${opt(PAESI_SEPA)}</optgroup>`+
+               `<optgroup label="Resto del mondo">${opt(PAESI_MONDO)}</optgroup>`;
+  el.value="IT";
+}
+
+function onPaeseCambio(){
+  const iso=paeseSelezionato();
+  const inp=document.getElementById("pivaInput");
+  inp.value="";
+  inp.className="piva-input";
+  if(iso==="IT"){
+    inp.maxLength=11;
+    inp.placeholder="00000000000";
+    document.getElementById("pivaError").style.display="none";
+  }else{
+    inp.maxLength=32;
+    inp.placeholder=FORMATO_ID[iso]||"Partita IVA o codice del registro imprese";
+    document.getElementById("pivaError").style.display="none";
+  }
+  document.getElementById("searchBtn").disabled=true;
+}
+
+async function cercaEstero(iso,id){
+  const q=new URLSearchParams({paese:iso,id:id});
+  if(stato.prezzoTotale>0)q.set("importo",String(stato.prezzoTotale));
+  const res=await fetch(`https://www.mediocreditofacile.it/api/azienda-estera?${q}`);
+  return res.json();
+}
+
+// Accende la sezione Partner estero e la imposta sui dati appena trovati.
+// Va chiamata DOPO elabora(), che azzera lo stato estero per ripartire pulito.
+function attivaPartnerEstero(data){
+  stato.paeseControparte=data.paese;
+  stato.export=data.esito;
+  stato.newco=data.nuovaCostituzione;
+  const toggle=document.getElementById("esteroToggle");
+  toggle.checked=true;
+  document.getElementById("esteroPaese").value=nomePaese(data.paese);
+  document.getElementById("esteroArea").value=data.esito.area==="schengen"?"schengen":"extra";
+  toggleEstero();
+}
+
+function renderControparte(){
+  const box=document.getElementById("controparteBox");
+  if(!box)return;
+  const e=stato.export;
+  if(!e||!stato.paeseControparte){ box.innerHTML=""; return; }
+
+  const etichetta={econocom:"Econocom",grenke:"Grenke — noleggio operativo",sace:"Percorso assicurato SACE",incerto:"Serve l'importo"}[e.canale];
+  const colore={econocom:"green",grenke:"green",sace:"amber",incerto:"amber"}[e.canale];
+  const rata=e.rataIndicativa
+    ? `<div class="metric"><div class="metric-label">Rata indicativa Econocom</div><div class="metric-value">€${fmt(Math.round(e.rataIndicativa.rataMensile))}/mese</div></div>`
+    : "";
+  const sogliaTxt=e.soglia.superata===null?"importo non ancora definito"
+    :(e.soglia.superata?"operazione sopra €"+fmt(e.soglia.valore):"operazione entro €"+fmt(e.soglia.valore));
+
+  const avvisi=(e.avvisi||[]).map(a=>`<li>${a}</li>`).join("");
+  const passi=(e.prossimiPassi||[]).map(a=>`<li>${a}</li>`).join("");
+  const newco=stato.newco===true
+    ? `<div class="note-small" style="border-left:3px solid var(--red,#D32F2F);padding-left:10px;margin-top:10px;"><strong>Societa' di nuova costituzione.</strong> Le newco restano fuori perimetro ovunque, in Italia come all'estero.</div>`
+    : "";
+
+  box.innerHTML=`
+    <div class="cgs-badge cgs-${colore}" style="margin-bottom:12px;">Canale suggerito: ${etichetta} · ${sogliaTxt}</div>
+    <div class="note-small" style="margin-bottom:12px;">${e.motivo}</div>
+    <div class="metrics">
+      <div class="metric"><div class="metric-label">Paese</div><div class="metric-value" style="font-size:14px;">${nomePaese(stato.paeseControparte)}</div></div>
+      <div class="metric"><div class="metric-label">Area</div><div class="metric-value" style="font-size:14px;">${e.area==="schengen"?"Schengen / SEPA":"Extra-Schengen"}</div></div>
+      ${rata}
+    </div>
+    ${newco}
+    ${avvisi?`<div class="note-small" style="margin-top:10px;"><strong>Da tenere presente</strong><ul style="margin:6px 0 0 18px;">${avvisi}</ul></div>`:""}
+    ${passi?`<div class="note-small" style="margin-top:10px;"><strong>Come si porta avanti</strong><ul style="margin:6px 0 0 18px;">${passi}</ul></div>`:""}
+    <button class="btn-pdf" style="margin-top:14px;" onclick="generaProspettoEstero()">Scarica il prospetto export</button>
+  `;
+}
+
+// Il verdetto dipende anche dall'importo dell'operazione, che Andrea sceglie dopo
+// la ricerca: quando il prezzo cambia si richiede al server. La seconda chiamata
+// sulla stessa azienda esce dalla cache, quindi non tocca il portafoglio.
+function aggiornaProspettoEstero(){
+  if(!stato.paeseControparte)return;
+  clearTimeout(window._espTimer);
+  window._espTimer=setTimeout(async()=>{
+    try{
+      const d=await cercaEstero(stato.paeseControparte,stato.idControparte);
+      if(d&&d.found){
+        stato.export=d.esito;
+        if(stato.azienda) stato.azienda.esito=d.esito;
+        renderControparte();
+        // Il canale mostrato in testa alla scheda dipende dall'importo, quindi va
+        // riscritto qui: elabora() gira una volta sola, alla ricerca.
+        const et=canalePrimario(classifica(stato.fat));
+        const box=document.getElementById('canalePrimarioBox');
+        const bdg=document.getElementById('canaleBadge');
+        if(box) box.textContent=et;
+        if(bdg) bdg.textContent=et;
+      }
+    }catch(e){ console.warn("Prospetto export non aggiornato",e); }
+  },700);
+}
+
 function validaPiva(p){
   if(!/^\d{11}$/.test(p))return false;
   let s=0;
@@ -1187,10 +1339,22 @@ function validaPiva(p){
 }
 
 function onPivaInput(el){
-  const v=el.value.replace(/\D/g,"").slice(0,11);
-  el.value=v;
   const btn=document.getElementById("searchBtn");
   const err=document.getElementById("pivaError");
+
+  // Fuori Italia non esiste un codice di controllo comune: si accetta quello che
+  // il registro del paese usa, e a dire se esiste ci pensa la ricerca.
+  if(paeseSelezionato()!=="IT"){
+    const raw=el.value.replace(/[^A-Za-z0-9./\- ]/g,"").slice(0,32);
+    el.value=raw;
+    el.className="piva-input";
+    btn.disabled=raw.trim().length<4;
+    err.style.display="none";
+    return;
+  }
+
+  const v=el.value.replace(/\D/g,"").slice(0,11);
+  el.value=v;
   if(v.length===11){
     if(validaPiva(v)){el.className="piva-input valid";btn.disabled=false;err.style.display="none";}
     else{el.className="piva-input invalid";btn.disabled=true;err.textContent="Partita IVA non valida — controlla il codice di controllo.";err.style.display="block";}
@@ -1198,31 +1362,79 @@ function onPivaInput(el){
 }
 
 async function cerca(){
-  const piva=document.getElementById("pivaInput").value;
+  const piva=document.getElementById("pivaInput").value.trim();
   stato.piva=piva;
-  stato.cerved=null;
+  stato.azienda=null;
+  stato.paeseControparte=null;stato.idControparte=null;stato.export=null;stato.newco=null;
   document.getElementById("loading").style.display="block";
   document.getElementById("results").style.display="none";
   document.getElementById("manualForm").style.display="none";
 
-  // Prova Cerved API (via proxy Vercel)
+  // --- controparte estera ---
+  const iso=paeseSelezionato();
+  if(iso!=="IT"){
+    try{
+      const data=await cercaEstero(iso,piva);
+      document.getElementById("loading").style.display="none";
+      if(data.found){
+        stato.rs=data.ragioneSociale;
+        stato.fat=data.fatturato||0;
+        stato.azienda=data;
+        stato.idControparte=piva;
+        elabora();                 // stessa pipeline dell'italiano: i campi hanno gli stessi nomi
+        attivaPartnerEstero(data); // va dopo: elabora() azzera lo stato estero
+        return;
+      }
+      const man=document.getElementById("manualForm");
+      document.getElementById("manRs").value=data.ragioneSociale||"";
+      document.getElementById("manualTitle").textContent=data.error||"Controparte non trovata — inserimento manuale";
+      man.style.display="block";
+    }catch(e){
+      console.warn("Ricerca estera non riuscita",e);
+      document.getElementById("loading").style.display="none";
+      document.getElementById("manualForm").style.display="block";
+    }
+    return;
+  }
+
+  // Registro imprese via Openapi (proxy MCF). Ha preso il posto di Cerved, fermo
+  // da agosto 2026. La forma della risposta e' la stessa, il tool non se ne accorge:
+  // arrivano ragione sociale, fatturato, utile, ATECO, indirizzo e data di inizio
+  // attivita'. Patrimonio netto e punteggio di rischio no: quelli costano e stanno
+  // nell'approfondimento, che parte solo su richiesta.
+  let anagrafica=null;
   try{
-    const res=await fetch(`https://www.mediocreditofacile.it/api/cerved?piva=${piva}`);
+    const res=await fetch(`https://www.mediocreditofacile.it/api/azienda-base?piva=${piva}`);
     const data=await res.json();
+    anagrafica=data;
     if(data.found){
       stato.rs=data.ragioneSociale;
       stato.fat=data.fatturato||0;
-      stato.cerved=data;
+      stato.azienda=data;
       document.getElementById("loading").style.display="none";
       elabora();
       return;
     }
-  }catch(e){console.warn("Cerved API non raggiungibile, fallback locale",e);}
+  }catch(e){console.warn("Registro imprese non raggiungibile, fallback locale",e);}
 
   // Fallback: dati DEMO o form manuale
   document.getElementById("loading").style.display="none";
-  if(DEMO[piva]){stato.rs=DEMO[piva].rs;stato.fat=DEMO[piva].fat;elabora();}
-  else{document.getElementById("manualForm").style.display="block";}
+  if(DEMO[piva]){stato.rs=DEMO[piva].rs;stato.fat=DEMO[piva].fat;elabora();return;}
+
+  // Se l'azienda esiste ma non ha un bilancio depositato (ditte individuali,
+  // societa' appena nate) la ragione sociale ce l'abbiamo lo stesso: si compila
+  // da sola e ad Andrea resta da digitare il solo fatturato.
+  const man=document.getElementById("manualForm");
+  const tit=document.getElementById("manualTitle");
+  if(anagrafica&&anagrafica.ragioneSociale){
+    document.getElementById("manRs").value=anagrafica.ragioneSociale;
+    tit.textContent="Bilancio non depositato — inserisci il fatturato";
+    setTimeout(()=>document.getElementById("manFat").focus(),50);
+  }else{
+    document.getElementById("manRs").value="";
+    tit.textContent="Dati non disponibili — inserimento manuale";
+  }
+  man.style.display="block";
 }
 
 function elaboraManuale(){
@@ -1376,7 +1588,7 @@ function toggleScheda(){
 }
 
 function renderScheda(){
-  const c=stato.cerved;
+  const c=stato.azienda;
   if(!c){document.getElementById("schedaContainer").style.display="none";return;}
   document.getElementById("schedaContainer").style.display="block";
 
@@ -1453,9 +1665,9 @@ function valutaCreditPolicy(){
   if(!m)return;
   const prezzo=stato.prezzoTotale||0;
 
-  // Dati Cerved (se disponibili)
-  const pn=stato.cerved?.patrimonioNetto;  // patrimonio netto
-  const utile=stato.cerved?.utile;         // utile
+  // Dati di bilancio, se il registro imprese li ha dati
+  const pn=stato.azienda?.patrimonioNetto;  // patrimonio netto
+  const utile=stato.azienda?.utile;         // utile
 
   let semaforo='verde';
   let anticipo=0;
@@ -1519,9 +1731,9 @@ function valutaCreditPolicy(){
     criteri.push({nome:'Utile d\'esercizio',valore:'Dato non disponibile',ok:null});
   }
 
-  // --- Criterio 4: Anni di attività (da data costituzione Cerved) ---
-  if(stato.cerved?.dataCostituzione){
-    const parts=stato.cerved.dataCostituzione.split('-');
+  // --- Criterio 4: Anni di attività (da data di inizio attività) ---
+  if(stato.azienda?.dataCostituzione){
+    const parts=stato.azienda.dataCostituzione.split('-');
     const annoC=parseInt(parts[2]?.length===4?parts[2]:parts[0]);
     const anniAtt=new Date().getFullYear()-annoC;
     if(anniAtt>=3){
@@ -1555,7 +1767,7 @@ function valutaCreditPolicy(){
   }
 
   // --- CGS Cerved → % approvazione (brief 4.3) ---
-  const cgs=stato.cerved?.cgs;
+  const cgs=stato.azienda?.cgs;
   const cgsInfo=(cgs!=null&&CGS_MAP[cgs])?CGS_MAP[cgs]:null;
   if(cgsInfo&&cgsInfo.blocco){
     semaforo='rosso';
@@ -1669,8 +1881,8 @@ async function chiamaCreditAI(){
   const profilo={
     ragioneSociale:stato.rs,
     fatturato:stato.fat,
-    ateco:stato.cerved?.ateco||'non disponibile',
-    regione:stato.cerved?.indirizzo||'non disponibile',
+    ateco:stato.azienda?.ateco||'non disponibile',
+    regione:stato.azienda?.indirizzo||'non disponibile',
     macchina:m?m.nome:'non selezionata',
     prezzoMacchina:stato.prezzoTotale||0,
     percCanone:percCanone,
@@ -1707,34 +1919,38 @@ function elabora(){
   document.getElementById("companyInitial").textContent=stato.rs.charAt(0).toUpperCase();
   document.getElementById("companyName").textContent=stato.rs;
 
-  // Sotto il nome: P.IVA + dati Cerved extra (indirizzo, forma giuridica)
-  let subtitleHtml="P.IVA "+stato.piva;
-  if(stato.cerved){
-    const c=stato.cerved;
+  // Sotto il nome: identificativo + anagrafica (indirizzo, forma giuridica).
+  // Su una controparte estera non e' una partita IVA: e' il codice del registro
+  // del suo paese, e chiamarlo P.IVA confonde e basta.
+  const paeseCp=stato.azienda?.paese||null;
+  let subtitleHtml=paeseCp?`${nomePaese(paeseCp)} · ${stato.piva}`:"P.IVA "+stato.piva;
+  if(stato.azienda){
+    const c=stato.azienda;
     if(c.formaGiuridica) subtitleHtml+=` · ${c.formaGiuridica}`;
     if(c.indirizzo) subtitleHtml+=`<br><span style="font-size:12px;color:var(--text-hint)">${c.indirizzo}</span>`;
   }
   document.getElementById("companyPiva").innerHTML=subtitleHtml;
 
-  // Metriche: estese se Cerved, base se manuale/DEMO
+  // Metriche: estese se arrivano dal registro imprese, base se manuale/DEMO
   let metricsHtml=`
     <div class="metric"><div class="metric-label">Fatturato</div><div class="metric-value">${fmtEuro(stato.fat)}</div></div>
     <div class="metric"><div class="metric-label">Fascia cliente</div><div class="metric-value">${cl.label}</div></div>
-    <div class="metric"><div class="metric-label">Canale primario</div><div class="metric-value" style="font-size:14px;">${cl.canaleLabel.split("·")[0].trim()}</div></div>
+    <div class="metric"><div class="metric-label">Canale primario</div><div class="metric-value" id="canalePrimarioBox" style="font-size:14px;">${canalePrimario(cl)}</div></div>
   `;
-  if(stato.cerved){
-    const c=stato.cerved;
+  if(stato.azienda){
+    const c=stato.azienda;
     if(c.patrimonioNetto!=null) metricsHtml+=`<div class="metric"><div class="metric-label">Patrimonio netto</div><div class="metric-value">${fmtEuro(c.patrimonioNetto)}</div></div>`;
     if(c.utile!=null) metricsHtml+=`<div class="metric"><div class="metric-label">Utile</div><div class="metric-value">${fmtEuro(c.utile)}</div></div>`;
     if(c.cgs!=null) metricsHtml+=`<div class="metric"><div class="metric-label">CGS</div><div class="metric-value">${cgsBadge(c.cgs)}</div></div>`;
   }
   document.getElementById("metricsBox").innerHTML=metricsHtml;
 
-  // Badges: canale + incentivi + ATECO (se Cerved)
-  let badgesHtml=`<span class="badge badge-blue">${cl.canaleLabel}</span>`;
-  if(cl.incentivi) badgesHtml+=`<span class="badge badge-amber">Sabatini · Iperammortamento disponibili</span>`;
-  if(stato.cerved?.ateco) badgesHtml+=`<span class="badge badge-purple">${stato.cerved.ateco}</span>`;
-  if(stato.cerved?.cgs!=null) badgesHtml+=cgsBadgeTag(stato.cerved.cgs);
+  // Badges: canale + incentivi + ATECO (se disponibile). Sull'estero niente
+  // Sabatini e iperammortamento: sono agevolazioni italiane.
+  let badgesHtml=`<span class="badge badge-blue" id="canaleBadge">${paeseCp?canalePrimario(cl):cl.canaleLabel}</span>`;
+  if(cl.incentivi&&!paeseCp) badgesHtml+=`<span class="badge badge-amber">Sabatini · Iperammortamento disponibili</span>`;
+  if(stato.azienda?.ateco) badgesHtml+=`<span class="badge badge-purple">${stato.azienda.ateco}</span>`;
+  if(stato.azienda?.cgs!=null) badgesHtml+=cgsBadgeTag(stato.azienda.cgs);
   document.getElementById("badgesBox").innerHTML=badgesHtml;
 
   document.getElementById("machineSelect").innerHTML=macchineLista.map(m=>
@@ -1866,6 +2082,7 @@ function ricalcola(){
   aggiornaFunnel();      // canone nel funnel
   refreshScenari();      // aggiorna i canoni del confronto sulla nuova configurazione
   aggiornaEstero();      // Schengen/SACE lavorano sullo stesso totale offerta
+  aggiornaProspettoEstero(); // la rata Econocom dipende dall'importo, che cambia qui
 }
 
 function aggiornaCanone(){
@@ -2135,6 +2352,7 @@ function toggleEstero(){
 
 function aggiornaEstero(){
   if(!stato.estero.attivo)return;
+  renderControparte();
   const area=document.getElementById('esteroArea').value;
   document.getElementById('esteroSchengenBox').style.display=area==='schengen'?'block':'none';
   document.getElementById('esteroExtraBox').style.display=area==='extra'?'block':'none';
@@ -2407,8 +2625,8 @@ function generaPDF(){
   doc.setFont('helvetica','normal');
   doc.setTextColor(80,80,80);
   doc.text('P.IVA '+stato.piva,mL+5,y);
-  if(stato.cerved?.indirizzo){
-    doc.text(stato.cerved.indirizzo,W-mR-5,y,{align:'right'});
+  if(stato.azienda?.indirizzo){
+    doc.text(stato.azienda.indirizzo,W-mR-5,y,{align:'right'});
   }
   y+=titolare?20:18;
 
@@ -2611,6 +2829,124 @@ function generaPDF(){
   const fileName=`Preventivo_${stato.rs.replace(/[^a-zA-Z0-9]/g,'_')}_${numProposta}.pdf`;
   doc.save(fileName);
 }
+
+// --- Prospetto operazione estero -------------------------------------------
+// Documento di una pagina che mette insieme la controparte, i suoi numeri e il
+// canale suggerito. I contenuti arrivano tutti da stato.export, cioe' dal
+// verdetto calcolato dal server: qui non si ricalcola niente, si impagina.
+function generaProspettoEstero(){
+  const e=stato.export;
+  if(!e||!stato.paeseControparte){ alert("Prima cerca una controparte estera."); return; }
+  const{jsPDF}=window.jspdf;
+  const doc=new jsPDF({unit:'mm',format:'a4'});
+  const c=stato.azienda||{};
+
+  const W=210,H=297,mL=20,mR=20,cW=W-mL-mR;
+  const navy=[14,0,96],teal=[0,105,158];
+  const numProposta='MCF-EX-'+Date.now().toString(36).toUpperCase();
+  const dataOggi=new Date().toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'});
+  let y=0;
+
+  // Header
+  doc.setFillColor(...navy); doc.rect(0,0,W,44,'F');
+  doc.setFillColor(...teal);  doc.rect(0,44,W,3,'F');
+  if(logoMarottaBase64){ doc.addImage(logoMarottaBase64,'PNG',mL,9,50,18); }
+  else{ doc.setTextColor(255,255,255); doc.setFontSize(15); doc.setFont('helvetica','bold'); doc.text('MAROTTA EVOLUTION',mL,21); }
+  doc.setTextColor(255,255,255); doc.setFontSize(9); doc.setFont('helvetica','normal');
+  doc.text('in partnership con',W-mR,13,{align:'right'});
+  doc.setFontSize(11); doc.setFont('helvetica','bold');
+  doc.text('MEDIOCREDITO FACILE',W-mR,19,{align:'right'});
+  doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(180,200,220);
+  doc.text(`${numProposta}  ·  ${dataOggi}`,W-mR,26,{align:'right'});
+  doc.setTextColor(255,255,255); doc.setFontSize(13); doc.setFont('helvetica','bold');
+  doc.text('PROSPETTO OPERAZIONE CON CONTROPARTE ESTERA',W/2,38,{align:'center'});
+
+  y=57; doc.setTextColor(0,0,0);
+
+  const titolo=(t)=>{
+    doc.setFontSize(8); doc.setTextColor(...teal); doc.setFont('helvetica','bold');
+    doc.text(t.toUpperCase(),mL,y); y+=5;
+    doc.setDrawColor(220,225,230); doc.line(mL,y-2,W-mR,y-2);
+    doc.setTextColor(30,30,30); doc.setFont('helvetica','normal'); doc.setFontSize(9);
+  };
+  const riga=(etichetta,valore)=>{
+    if(valore==null||valore===''||valore==='—')return;
+    doc.setFont('helvetica','normal'); doc.setTextColor(110,115,120);
+    doc.text(etichetta,mL,y);
+    doc.setTextColor(20,20,20); doc.setFont('helvetica','bold');
+    const testo=doc.splitTextToSize(String(valore),cW-58);
+    doc.text(testo,mL+58,y);
+    y+=Math.max(5.5,testo.length*4.6);
+  };
+  const paragrafo=(t,colore)=>{
+    doc.setFont('helvetica','normal'); doc.setFontSize(8.5);
+    doc.setTextColor(...(colore||[70,75,80]));
+    const testo=doc.splitTextToSize(t,cW);
+    doc.text(testo,mL,y); y+=testo.length*4+2;
+    doc.setFontSize(9);
+  };
+  const elenco=(voci)=>{
+    doc.setFontSize(8.5); doc.setTextColor(70,75,80); doc.setFont('helvetica','normal');
+    voci.forEach(v=>{
+      const testo=doc.splitTextToSize(v,cW-5);
+      doc.setTextColor(...teal); doc.text('•',mL,y);
+      doc.setTextColor(70,75,80); doc.text(testo,mL+4,y);
+      y+=testo.length*4+1.5;
+    });
+    y+=1; doc.setFontSize(9);
+  };
+
+  // Controparte
+  titolo('Controparte');
+  riga('Ragione sociale',c.ragioneSociale||stato.rs);
+  riga('Paese',nomePaese(stato.paeseControparte)+(e.area==='schengen'?'  ·  area Schengen / SEPA':'  ·  extra-Schengen'));
+  riga('Identificativo',stato.idControparte);
+  if(c.formaGiuridica)riga('Forma giuridica',c.formaGiuridica);
+  if(c.indirizzo)riga('Sede',c.indirizzo);
+  if(c.ateco)riga('Attivita',c.ateco);
+  if(c.dataCostituzione)riga('Attiva dal',c.dataCostituzione);
+  if(c.stato)riga('Stato',c.stato);
+  y+=3;
+
+  // Numeri
+  titolo(c.annoBilancio?`Bilancio ${c.annoBilancio}`:'Bilancio');
+  riga('Fatturato',c.fatturato!=null?'€ '+fmt(Math.round(c.fatturato)):'non disponibile');
+  riga('Patrimonio netto',c.patrimonioNetto!=null?'€ '+fmt(Math.round(c.patrimonioNetto)):'non pubblicato da questo registro');
+  if(c.utile!=null)riga('Utile d\'esercizio','€ '+fmt(Math.round(c.utile)));
+  if(c.totaleAttivo!=null)riga('Totale attivo','€ '+fmt(Math.round(c.totaleAttivo)));
+  if(c.dipendenti!=null)riga('Dipendenti',String(c.dipendenti));
+  y+=3;
+
+  // Verdetto
+  const etichetta={econocom:'ECONOCOM',grenke:'GRENKE — NOLEGGIO OPERATIVO',sace:'PERCORSO ASSICURATO SACE',incerto:'SERVE L\'IMPORTO DELL\'OPERAZIONE'}[e.canale];
+  titolo('Canale suggerito');
+  doc.setFillColor(244,246,248); doc.roundedRect(mL,y-5,cW,e.rataIndicativa?21:14,2,2,'F');
+  doc.setFontSize(12); doc.setFont('helvetica','bold'); doc.setTextColor(...navy);
+  doc.text(etichetta,mL+5,y+1.5);
+  if(e.rataIndicativa){
+    doc.setFontSize(10); doc.setTextColor(...teal);
+    doc.text(`Rata indicativa € ${fmt(Math.round(e.rataIndicativa.rataMensile))}/mese su ${e.rataIndicativa.durataMesi} mesi`,mL+5,y+9);
+  }
+  y+=e.rataIndicativa?21:16;
+  doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor(30,30,30);
+  paragrafo(e.motivo);
+  if(stato.newco===true){ paragrafo('Societa\' di nuova costituzione: le newco restano fuori perimetro ovunque, in Italia come all\'estero.',[160,40,40]); }
+  y+=2;
+
+  if((e.avvisi||[]).length){ titolo('Da tenere presente'); elenco(e.avvisi); }
+  if((e.prossimiPassi||[]).length){ titolo('Come si porta avanti'); elenco(e.prossimiPassi); }
+
+  // Footer
+  doc.setFillColor(...navy); doc.rect(0,H-16,W,16,'F');
+  doc.setTextColor(255,255,255); doc.setFontSize(8); doc.setFont('helvetica','bold');
+  doc.text('Mediocredito Facile  ·  mediocreditofacile.it  ·  +39 393 995 7840',mL,H-9);
+  doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(180,195,215);
+  doc.text('Prospetto indicativo su dati di registro imprese. Non e\' un\'offerta: ogni operazione viene valutata caso per caso.',mL,H-4);
+
+  doc.save(`Prospetto_export_${(c.ragioneSociale||'controparte').replace(/[^a-zA-Z0-9]/g,'_')}_${numProposta}.pdf`);
+}
+
+riempiPaesi();
 </script>
 <script>
 if ('serviceWorker' in navigator) {

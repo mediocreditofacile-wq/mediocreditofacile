@@ -29,6 +29,19 @@ export const COSTI = {
   'IT-start': 0.0,         // entro le 30/mese incluse
   'IT-shareholders': 0.0,  // entro le 30/mese incluse
   'IT-creditscore-advanced': 0.51,
+  // Estero: nessuna franchigia mensile, si paga dalla prima chiamata.
+  // Listino pay-per-use 0,11 € + IVA, scende con i volumi.
+  'AT-advanced': 0.11,
+  'BE-advanced': 0.11,
+  'CH-advanced': 0.11,
+  'DE-advanced': 0.11,
+  'ES-advanced': 0.11,
+  'FR-advanced': 0.11,
+  'GB-advanced': 0.11,
+  'PL-advanced': 0.11,
+  'PT-advanced': 0.11,
+  'WW-advanced': 0.11,
+  'EU-start': 0.03,
   'IT-negativita': 0.45,
   'IT-negativita-dettaglio': 0.75,
   'IT-report-persona': 3.60,
@@ -41,6 +54,19 @@ const SCOPES = [
   'GET:company.openapi.com/IT-full',
   'GET:company.openapi.com/IT-search',
   'GET:company.openapi.com/IT-shareholders',
+  'GET:company.openapi.com/EU-start',
+  'GET:company.openapi.com/AT-advanced',
+  'GET:company.openapi.com/BE-advanced',
+  'GET:company.openapi.com/CH-advanced',
+  'GET:company.openapi.com/DE-advanced',
+  'GET:company.openapi.com/ES-advanced',
+  'GET:company.openapi.com/FR-advanced',
+  'GET:company.openapi.com/FR-search',
+  'GET:company.openapi.com/GB-advanced',
+  'GET:company.openapi.com/PL-advanced',
+  'GET:company.openapi.com/PT-advanced',
+  'GET:company.openapi.com/WW-start',
+  'GET:company.openapi.com/WW-advanced',
   'GET:risk.openapi.com/IT-creditscore-advanced',
   'POST:risk.openapi.com/IT-negativita',
   'GET:risk.openapi.com/IT-negativita',
@@ -59,6 +85,19 @@ function credenziali() {
 // quindi in pratica lo si crea una volta ogni tanto, non a ogni ricerca.
 let tokenCache: { token: string; scade: number } | null = null;
 
+// Il nome del token porta dentro l'impronta degli scope. Serve perche' il token
+// esistente viene riusato finche' e' valido: se si aggiunge un servizio (per dire
+// la Germania) senza cambiare nome, per giorni si continuerebbe a usare il vecchio
+// token, che quel permesso non ce l'ha, e le chiamate fallirebbero con un errore
+// che non spiega niente. Cambiando la lista degli scope cambia il nome, e il token
+// nuovo nasce da solo alla prima chiamata.
+function improntaScope(): string {
+  let h = 0;
+  for (const c of SCOPES.join('|')) h = (Math.imul(31, h) + c.charCodeAt(0)) | 0;
+  return (h >>> 0).toString(36);
+}
+const NOME_TOKEN = `mcf-runtime-${improntaScope()}`;
+
 export async function getToken(): Promise<string> {
   if (tokenCache && Date.now() < tokenCache.scade - 60_000) return tokenCache.token;
 
@@ -68,7 +107,7 @@ export async function getToken(): Promise<string> {
     .then((r) => r.json())
     .catch(() => null);
   const esistente = (lista?.data ?? []).find(
-    (t: any) => t?.name === 'mcf-runtime' && new Date(t?.expireAt ?? 0).getTime() > Date.now() + 3600_000,
+    (t: any) => t?.name === NOME_TOKEN && new Date(t?.expireAt ?? 0).getTime() > Date.now() + 3600_000,
   );
   if (esistente?.token) {
     tokenCache = { token: esistente.token, scade: new Date(esistente.expireAt).getTime() };
@@ -78,7 +117,7 @@ export async function getToken(): Promise<string> {
   const res = await fetch(`${OAUTH}/tokens`, {
     method: 'POST',
     headers: { Authorization: auth, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name: 'mcf-runtime', scopes: SCOPES }),
+    body: JSON.stringify({ name: NOME_TOKEN, scopes: SCOPES }),
   });
   const body = await res.json();
   if (!body?.success || !body?.data?.token) {
@@ -130,21 +169,81 @@ async function registraCosto(servizio: Servizio) {
   }
 }
 
-export async function spesaDelMese(mese?: string): Promise<{ mese: string; chiamate: number; totale: number }> {
+export interface Consumo {
+  mese: string;
+  chiamate: number;
+  totale: number;
+  /** Quante chiamate per ciascun servizio: serve al tetto sulla ricerca gratuita */
+  perServizio: Record<string, number>;
+}
+
+// Il conteggio si legge elencando i blob del mese: una list() a ogni ricerca
+// sarebbe uno spreco, quindi il risultato resta caldo un minuto. Il tetto e' una
+// barriera contro l'abuso, non un contatore contabile: un minuto di ritardo va bene.
+let consumoCache: { chiave: string; dato: Consumo; quando: number } | null = null;
+
+export async function spesaDelMese(mese?: string): Promise<Consumo> {
   const ora = new Date();
   const m = mese ?? `${ora.getFullYear()}-${String(ora.getMonth() + 1).padStart(2, '0')}`;
+  if (consumoCache && consumoCache.chiave === m && Date.now() - consumoCache.quando < 60_000) {
+    return consumoCache.dato;
+  }
   try {
     const { blobs } = await list({ prefix: `openapi/costi/${m}/`, limit: 1000, token: blobToken() });
     let totale = 0;
+    const perServizio: Record<string, number> = {};
     for (const b of blobs) {
       const nome = b.pathname.split('/').pop() ?? '';
       const servizio = nome.replace(/^\d+-/, '').replace(/-[a-zA-Z0-9]+\.json$/, '.json').replace(/\.json$/, '');
       totale += (COSTI as Record<string, number>)[servizio] ?? 0;
+      perServizio[servizio] = (perServizio[servizio] ?? 0) + 1;
     }
-    return { mese: m, chiamate: blobs.length, totale: Math.round(totale * 100) / 100 };
+    const dato: Consumo = { mese: m, chiamate: blobs.length, totale: Math.round(totale * 100) / 100, perServizio };
+    consumoCache = { chiave: m, dato, quando: Date.now() };
+    return dato;
   } catch {
-    return { mese: m, chiamate: 0, totale: 0 };
+    return { mese: m, chiamate: 0, totale: 0, perServizio: {} };
   }
+}
+
+// --- tetto di spesa ----------------------------------------------------------
+// Gli endpoint aperti al tool Marotta spendono soldi veri: senza un tetto, un
+// abuso si accorge solo il wallet. Il tetto e' server-side e si configura da env,
+// cosi' si stringe o si allarga senza toccare il codice.
+//
+//   OPENAPI_TETTO_MESE      euro di spesa a pagamento nel mese (default 30)
+//   OPENAPI_TETTO_RICERCHE  chiamate IT-advanced nel mese (default 400)
+//
+// IT-advanced ha 30 chiamate al mese incluse e poi costa pochi centesimi: il suo
+// tetto e' sul numero di chiamate, non sugli euro, altrimenti non si fermerebbe mai.
+const numeroEnv = (chiave: string, difetto: number): number => {
+  const v = Number(import.meta.env[chiave as keyof ImportMetaEnv]);
+  return Number.isFinite(v) && v > 0 ? v : difetto;
+};
+
+export interface EsitoTetto {
+  ok: boolean;
+  motivo?: string;
+  /** Consumo del mese al momento del controllo, per i log e per la UI */
+  consumo: Consumo;
+}
+
+/** Controlla se c'e' ancora budget per una chiamata a un dato servizio. */
+export async function entroIlTetto(servizio: Servizio): Promise<EsitoTetto> {
+  const consumo = await spesaDelMese();
+  if (COSTI[servizio] === 0) {
+    const tetto = numeroEnv('OPENAPI_TETTO_RICERCHE', 400);
+    const fatte = consumo.perServizio[servizio] ?? 0;
+    if (fatte >= tetto) {
+      return { ok: false, motivo: `tetto ricerche del mese raggiunto (${fatte}/${tetto})`, consumo };
+    }
+    return { ok: true, consumo };
+  }
+  const tetto = numeroEnv('OPENAPI_TETTO_MESE', 30);
+  if (consumo.totale >= tetto) {
+    return { ok: false, motivo: `tetto di spesa del mese raggiunto (${consumo.totale} / ${tetto} euro)`, consumo };
+  }
+  return { ok: true, consumo };
 }
 
 // --- cache anagrafica --------------------------------------------------------
@@ -273,4 +372,309 @@ export async function esitoReportPersona(id: string): Promise<{ pronto: boolean;
     return { pronto: true, dati: body.data };
   }
   return { pronto: false };
+}
+
+// --- ricerca base (IT-advanced) ----------------------------------------------
+// Serve al tool Marotta, che prima leggeva Cerved. E' la meta' gratuita del
+// flusso a due tempi: qui c'e' tutto quello che non costa, l'approfondimento
+// (patrimonio netto vero e punteggio di rischio) resta una chiamata a parte.
+//
+// ATTENZIONE al campo netWorth di IT-advanced: NON e' il patrimonio netto, e'
+// l'utile d'esercizio dell'anno indicato. Verificato su quattro aziende contro il
+// bilancio completo: su Latteria di Soligo advanced dice 22.946, che nel bilancio
+// e' l'utile (IIC179), mentre il patrimonio netto vero e' 11.342.637. Su Officina
+// Creativa advanced (2023) dice 1.489, che nel bilancio 2024 e' l'utile del 2023
+// portato a nuovo. E' un difetto loro, ma e' costante: qui lo trattiamo per
+// quello che e', cioe' l'utile.
+
+const TTL_RICERCA = 30 * 24 * 60 * 60 * 1000;
+
+export interface RicercaBase {
+  trovata: boolean;
+  piva: string;
+  /** 'openapi' chiamata fresca, 'cache' gia' vista, 'scheda' derivata da una scheda completa gia' pagata */
+  fonte: 'openapi' | 'cache' | 'scheda';
+  ragioneSociale: string | null;
+  formaGiuridica: string | null;
+  stato: string | null;
+  ateco: string | null;
+  indirizzo: string | null;
+  provincia: string | null;
+  pec: string | null;
+  inizioAttivita: string | null;
+  iscrizioneRegistro: string | null;
+  annoBilancio: number | null;
+  fatturato: number | null;
+  /** Utile d'esercizio: e' il netWorth di IT-advanced, vedi nota sopra */
+  utile: number | null;
+  dipendenti: number | null;
+  capitaleSociale: number | null;
+  totaleAttivo: number | null;
+  /** Solo se la scheda completa era gia' in cache: patrimonio netto vero e rating */
+  patrimonioNetto: number | null;
+  punteggio: { rating: string | null; classe: string | null; descrizione: string | null } | null;
+  storico: { anno: number; fatturato: number | null; utile: number | null }[];
+}
+
+/** "10512" -> "10.51.2", "822" -> "82.2". Il tool Marotta confronta prefissi puntati. */
+function atecoPuntato(code: string): string {
+  if (code.length < 3) return code;
+  const testa = code.slice(0, 2) + '.' + code.slice(2, 4);
+  return code.length > 4 ? `${testa}.${code.slice(4)}` : testa;
+}
+
+function componiAteco(A: any): string | null {
+  const a = A?.atecoClassification ?? {};
+  const scelta = a.ateco ?? a.ateco2007 ?? a.ateco2022;
+  if (!scelta?.code) return null;
+  const desc = String(scelta.description ?? '').trim();
+  return desc ? `${atecoPuntato(String(scelta.code))} - ${desc}` : atecoPuntato(String(scelta.code));
+}
+
+function componiIndirizzo(A: any): { indirizzo: string | null; provincia: string | null } {
+  // A volte annidato sotto registeredOffice, a volte piatto: servono i fallback
+  const s = A?.address?.registeredOffice ?? A?.address ?? {};
+  const via = s.streetName ?? [s.toponym, s.street, s.streetNumber].filter(Boolean).join(' ');
+  const testo = [via, s.zipCode, s.town, s.province ? `(${s.province})` : '']
+    .map((x: any) => String(x ?? '').trim())
+    .filter(Boolean)
+    .join(' ')
+    .trim();
+  return { indirizzo: testo || null, provincia: s.province ?? null };
+}
+
+const num = (v: any): number | null => (typeof v === 'number' && Number.isFinite(v) ? v : null);
+
+function normalizza(A: any, piva: string, fonte: RicercaBase['fonte']): RicercaBase {
+  const b = A?.balanceSheets?.last ?? {};
+  // Un bilancio con ricavi, utile e attivo tutti a zero non e' un pareggio: e' un
+  // bilancio non depositato o vuoto. Passarlo come "utile = 0" farebbe scattare
+  // nel tool il criterio "pareggio", cioe' un giudizio su un dato che non esiste.
+  const vuoto = !num(b.turnover) && !num(b.netWorth) && !num(b.totalAssets);
+  const { indirizzo, provincia } = componiIndirizzo(A);
+  return {
+    trovata: true,
+    piva,
+    fonte,
+    ragioneSociale: A?.companyName ?? null,
+    formaGiuridica: A?.detailedLegalForm?.description ?? null,
+    stato: A?.activityStatus ?? null,
+    ateco: componiAteco(A),
+    indirizzo,
+    provincia,
+    pec: A?.pec ?? null,
+    inizioAttivita: A?.startDate ?? null,
+    iscrizioneRegistro: A?.registrationDate ?? null,
+    annoBilancio: vuoto ? null : num(b.year),
+    fatturato: vuoto ? null : num(b.turnover),
+    utile: vuoto ? null : num(b.netWorth),
+    dipendenti: num(b.employees),
+    capitaleSociale: num(b.shareCapital),
+    totaleAttivo: vuoto ? null : num(b.totalAssets),
+    patrimonioNetto: null,
+    punteggio: null,
+    // Le annate senza niente dentro (tutti zeri) sono bilanci non depositati:
+    // tenerle darebbe l'impressione di un fatturato a zero, che e' un'altra cosa.
+    storico: (A?.balanceSheets?.all ?? [])
+      .filter((r: any) => num(r?.year) && ((num(r?.turnover) ?? 0) > 0 || (num(r?.netWorth) ?? 0) !== 0))
+      .map((r: any) => ({ anno: r.year, fatturato: num(r.turnover), utile: num(r.netWorth) })),
+  };
+}
+
+async function ricercaDallaCache(piva: string): Promise<RicercaBase | null> {
+  try {
+    const { blobs } = await list({ prefix: `openapi/ricerche/${piva}.json`, limit: 1, token: blobToken() });
+    if (!blobs.length) return null;
+    if (Date.now() - new Date(blobs[0].uploadedAt).getTime() > TTL_RICERCA) return null;
+    const b = await get(blobs[0].pathname, { access: 'private', token: blobToken() });
+    if (!b) return null;
+    return { ...JSON.parse(await new Response(b.stream).text()), fonte: 'cache' as const };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Anagrafica e ultimo bilancio sintetico. Costa una chiamata IT-advanced, che ha
+ * 30 pezzi al mese inclusi e poi vale pochi centesimi.
+ *
+ * Se la scheda completa della stessa azienda e' gia' in cache (qualcuno l'ha
+ * analizzata da /tools/valutazione), la ricerca non chiama nessuno e restituisce
+ * in piu' il patrimonio netto vero e il punteggio di rischio: sono dati gia'
+ * pagati, tenerli nascosti non farebbe risparmiare niente.
+ */
+export async function ricercaBase(piva: string): Promise<RicercaBase> {
+  const scheda = await dallaCache(piva);
+  if (scheda?.advanced) {
+    const r = normalizza(scheda.advanced, piva, 'scheda');
+    const eco = scheda.full?.ecofin ?? {};
+    r.patrimonioNetto = num(eco.netWorth);
+    if (scheda.score) {
+      r.punteggio = {
+        rating: scheda.score.rating ?? null,
+        classe: scheda.score.risk_score ?? null,
+        descrizione: scheda.score.risk_score_description ?? null,
+      };
+    }
+    return r;
+  }
+
+  const inCache = await ricercaDallaCache(piva);
+  if (inCache) return inCache;
+
+  const res = await chiama(`${COMPANY}/IT-advanced/${piva}`, 'IT-advanced');
+  if (!res.trovato || !res.dati) {
+    return {
+      trovata: false, piva, fonte: 'openapi', ragioneSociale: null, formaGiuridica: null, stato: null,
+      ateco: null, indirizzo: null, provincia: null, pec: null, inizioAttivita: null, iscrizioneRegistro: null,
+      annoBilancio: null, fatturato: null, utile: null, dipendenti: null, capitaleSociale: null,
+      totaleAttivo: null, patrimonioNetto: null, punteggio: null, storico: [],
+    };
+  }
+  const r = normalizza(res.dati, piva, 'openapi');
+  try {
+    await put(`openapi/ricerche/${piva}.json`, JSON.stringify(r), {
+      access: 'private', addRandomSuffix: false, allowOverwrite: true,
+      contentType: 'application/json', cacheControlMaxAge: 60, token: blobToken(),
+    });
+  } catch {
+    /* la cache che non scrive non e' un errore bloccante */
+  }
+  return r;
+}
+
+// --- ricerca estera (WW-advanced) --------------------------------------------
+// Un endpoint solo per tutti i paesi: `WW-advanced/{paese}/{identificativo}`.
+// Verificato che su una stessa azienda risponde identico all'endpoint del singolo
+// paese (Siemens su WW-advanced/DE e su DE-advanced tornano cifra per cifra
+// uguali), quindi non servono nove integrazioni.
+//
+// ATTENZIONE: lo schema cambia da paese a paese, perche' il canale worldwide
+// instrada al dataset nazionale. Germania, Spagna e Brasile rispondono con
+// `operatingRevenue` / `equity` / `totalAssets`; la Francia con `turnover` /
+// `ebitda` e SENZA `equity`. Da qui i fallback qui sotto.
+//
+// E il campo `netWorth` fa lo stesso scherzo dell'Italia: e' l'utile d'esercizio,
+// non il patrimonio netto. Su Siemens netWorth vale 9,6 miliardi e equity 68,4;
+// su Vale 4,7 contro 33,2; su Banco Santander 13,7 contro 107,3. Il patrimonio
+// netto si legge da `equity` e da nessun altro posto.
+
+export interface RicercaEstera {
+  trovata: boolean;
+  paese: string;
+  identificativo: string;
+  fonte: 'openapi' | 'cache';
+  ragioneSociale: string | null;
+  formaGiuridica: string | null;
+  stato: string | null;
+  classificazione: string | null;
+  indirizzo: string | null;
+  inizioAttivita: string | null;
+  annoBilancio: number | null;
+  fatturato: number | null;
+  /** Patrimonio netto vero: solo da `equity`, mai da `netWorth` */
+  patrimonioNetto: number | null;
+  /** Utile d'esercizio: e' il campo `netWorth` di Openapi, vedi nota sopra */
+  utile: number | null;
+  totaleAttivo: number | null;
+  dipendenti: number | null;
+  /** Indicatore di solvibilita', dove il paese lo pubblica (Francia) */
+  solvibile: boolean | null;
+  storico: { anno: number; fatturato: number | null; utile: number | null }[];
+}
+
+function classificazioneEstera(d: any): string | null {
+  const c = d?.internationalClassification ?? {};
+  const scelta = c.nace ?? c.naf ?? c.naics ?? c.sic;
+  if (!scelta?.code) return null;
+  const desc = String(scelta.description ?? '').trim();
+  return desc ? `${scelta.code} - ${desc}` : String(scelta.code);
+}
+
+function indirizzoEstero(d: any): string | null {
+  const s = d?.address?.registeredOffice ?? d?.address ?? {};
+  const via = s.streetName ?? [s.street, s.streetNumber].filter(Boolean).join(' ');
+  const testo = [via, s.zipCode, s.town, s.country ? `(${s.country})` : '']
+    .map((x: any) => String(x ?? '').trim())
+    .filter(Boolean)
+    .join(' ')
+    .trim();
+  return testo || null;
+}
+
+function normalizzaEstera(d: any, paese: string, id: string, fonte: RicercaEstera['fonte']): RicercaEstera {
+  const b = d?.balanceSheets?.last ?? {};
+  const fatturato = num(b.turnover) ?? num(b.operatingRevenue);
+  const vuoto = !fatturato && !num(b.equity) && !num(b.totalAssets) && !num(b.netWorth);
+  const data = d?.incorporationDate ?? d?.registrationDate ?? null;
+  return {
+    trovata: true,
+    paese,
+    identificativo: id,
+    fonte,
+    ragioneSociale: d?.companyName ?? null,
+    formaGiuridica: d?.detailedLegalForm?.description ?? d?.detailedLegalForm?.code ?? null,
+    stato: d?.activityStatus ?? null,
+    classificazione: classificazioneEstera(d),
+    indirizzo: indirizzoEstero(d),
+    inizioAttivita: typeof data === 'string' ? data.slice(0, 10) : null,
+    annoBilancio: vuoto ? null : num(b.year),
+    fatturato: vuoto ? null : fatturato,
+    patrimonioNetto: vuoto ? null : num(b.equity),
+    utile: vuoto ? null : num(b.netWorth),
+    totaleAttivo: vuoto ? null : num(b.totalAssets),
+    dipendenti: num(b.employees),
+    solvibile: d?.creditWorthy == null ? null : Boolean(d.creditWorthy),
+    storico: (d?.balanceSheets?.all ?? [])
+      .filter((r: any) => num(r?.year) && ((num(r?.turnover) ?? num(r?.operatingRevenue) ?? 0) > 0 || (num(r?.netWorth) ?? 0) !== 0))
+      .map((r: any) => ({
+        anno: r.year,
+        fatturato: num(r.turnover) ?? num(r.operatingRevenue),
+        utile: num(r.netWorth),
+      })),
+  };
+}
+
+/** Chiave di cache: l'identificativo puo' contenere punti e barre (il CNPJ brasiliano) */
+const chiaveEstera = (paese: string, id: string) =>
+  `openapi/estero/${paese.toUpperCase()}-${id.replace(/[^A-Za-z0-9]/g, '')}.json`;
+
+/**
+ * Anagrafica e bilancio di una controparte estera. Costa una chiamata WW-advanced,
+ * 0,11 EUR di listino: all'estero non c'e' la franchigia mensile che c'e' sull'Italia,
+ * quindi si paga dal primo pezzo. Cache 30 giorni come sull'italiano.
+ */
+export async function ricercaEstera(paese: string, id: string): Promise<RicercaEstera> {
+  const P = paese.toUpperCase();
+  const chiave = chiaveEstera(P, id);
+
+  try {
+    const { blobs } = await list({ prefix: chiave, limit: 1, token: blobToken() });
+    if (blobs.length && Date.now() - new Date(blobs[0].uploadedAt).getTime() <= TTL_RICERCA) {
+      const b = await get(blobs[0].pathname, { access: 'private', token: blobToken() });
+      if (b) return { ...JSON.parse(await new Response(b.stream).text()), fonte: 'cache' as const };
+    }
+  } catch {
+    /* cache assente o illeggibile: si prosegue con la chiamata */
+  }
+
+  const res = await chiama(`${COMPANY}/WW-advanced/${P}/${encodeURIComponent(id)}`, 'WW-advanced');
+  if (!res.trovato || !res.dati) {
+    return {
+      trovata: false, paese: P, identificativo: id, fonte: 'openapi', ragioneSociale: null,
+      formaGiuridica: null, stato: null, classificazione: null, indirizzo: null, inizioAttivita: null,
+      annoBilancio: null, fatturato: null, patrimonioNetto: null, utile: null, totaleAttivo: null,
+      dipendenti: null, solvibile: null, storico: [],
+    };
+  }
+  const r = normalizzaEstera(res.dati, P, id, 'openapi');
+  try {
+    await put(chiave, JSON.stringify(r), {
+      access: 'private', addRandomSuffix: false, allowOverwrite: true,
+      contentType: 'application/json', cacheControlMaxAge: 60, token: blobToken(),
+    });
+  } catch {
+    /* la cache che non scrive non e' un errore bloccante */
+  }
+  return r;
 }

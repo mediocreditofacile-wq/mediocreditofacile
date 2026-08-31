@@ -3,6 +3,8 @@
 // I dizionari (etichette, ruoli, valori, codici di bilancio) arrivano dalla pagina
 // su window.__VAL__: sono dati generati, non vanno riscritti a mano.
 
+import { PAESI_SEPA, PAESI_MONDO, FORMATO_ID, nomePaese } from '../data/paesi';
+
 type Dizionari = {
   CODICI: Record<string, string>;
   ETICHETTE: Record<string, string>;
@@ -305,6 +307,72 @@ function collega() {
     }));
 }
 
+/**
+ * Scheda compatta per una controparte estera.
+ *
+ * All'estero c'e' molto meno che sull'Italia: nessun punteggio di rischio (la
+ * Risk API di Openapi e' tutta italiana), nessun bilancio riclassificato, nessun
+ * elenco soci. Quello che c'e' e' l'anagrafica e il bilancio sintetico, e in piu'
+ * il patrimonio netto vero, che sull'italiano costa una scheda intera.
+ */
+function rendiSchedaEstera(d: any): string {
+  const e = d.esito ?? {};
+  const voce = (etichetta: string, cifra: string, nota = '') =>
+    `<div class="voce"><div class="etichetta">${esc(etichetta)}</div><div class="cifra">${cifra}</div>${nota ? `<div class="delta">${esc(nota)}</div>` : ''}</div>`;
+  const soldi = (v: number | null) => (v == null ? '<span class="vuoto">&mdash;</span>' : `${nf(v, 0)} &euro;`);
+
+  const storico = (d.storico ?? []).length
+    ? `<table><thead><tr><th>Esercizio</th><th class="num">Fatturato</th><th class="num">Utile</th></tr></thead><tbody>${
+        (d.storico as any[]).map((r) => `<tr><td>${esc(String(r.anno))}</td><td class="num">${soldi(r.fatturato)}</td><td class="num">${soldi(r.utile)}</td></tr>`).join('')
+      }</tbody></table>`
+    : '<p class="vuoto">Nessuno storico pubblicato.</p>';
+
+  const avvisi = (e.avvisi ?? []).length
+    ? `<ul>${(e.avvisi as string[]).map((a) => `<li>${esc(a)}</li>`).join('')}</ul>`
+    : '';
+
+  const etichettaCanale: Record<string, string> = {
+    econocom: 'Econocom',
+    grenke: 'Grenke &mdash; noleggio operativo',
+    sace: 'Percorso assicurato SACE',
+    incerto: "Serve l'importo dell'operazione",
+  };
+
+  return `<div class="scheda">
+    <div class="scheda-head">
+      <div class="scheda-rs">${esc(d.ragioneSociale ?? '—')}</div>
+      <div class="scheda-meta">${esc(nomePaese(d.paese))} · ${esc(d.identificativoMostrato ?? '')}${d.formaGiuridica ? ' · ' + esc(d.formaGiuridica) : ''}${d.dataCostituzione ? ' · attiva dal ' + (dataIt(String(d.dataCostituzione)) ?? '—') : ''}<br>
+        ${esc(d.indirizzo ?? '')}${d.stato ? ' · ' + esc(d.stato) : ''}</div>
+    </div>
+    <div class="scheda-body">
+      <div class="blocco">
+        <div class="blocco-tit">Bilancio${d.annoBilancio ? ' ' + esc(String(d.annoBilancio)) : ''}</div>
+        <div class="tre">
+          ${voce('Fatturato', soldi(d.fatturato))}
+          ${voce('Patrimonio netto', soldi(d.patrimonioNetto), d.patrimonioNetto == null ? 'non pubblicato da questo registro' : '')}
+          ${voce("Utile d'esercizio", soldi(d.utile))}
+        </div>
+        <div class="tre" style="margin-top:16px;">
+          ${voce('Totale attivo', soldi(d.totaleAttivo))}
+          ${voce('Dipendenti', d.dipendenti == null ? '<span class="vuoto">&mdash;</span>' : String(d.dipendenti))}
+          ${voce('Solvibilita', d.solvibile == null ? '<span class="vuoto">non rilevata</span>' : (d.solvibile ? 'positiva' : 'negativa'), d.solvibile == null ? 'indicatore non pubblicato' : 'indicatore del registro locale')}
+        </div>
+      </div>
+      <div class="blocco">
+        <div class="blocco-tit">Storico</div>
+        ${storico}
+      </div>
+      <div class="blocco">
+        <div class="blocco-tit">Canale suggerito</div>
+        <h4>${esc(etichettaCanale[e.canale] ?? '—')}</h4>
+        <p>${esc(e.motivo ?? '')}</p>
+        ${avvisi}
+        <p class="vuoto">All'estero Openapi non offre punteggio di rischio: la Risk API e' solo italiana.</p>
+      </div>
+    </div>
+  </div>`;
+}
+
 export function montaValutazione() {
   D = (window as any).__VAL__;
   chiave = localStorage.getItem(CHIAVE_LS) ?? '';
@@ -342,12 +410,59 @@ export function montaValutazione() {
   });
 
   const piva = $('piva') as HTMLInputElement, cerca = $('cerca') as HTMLButtonElement;
+  const paese = $('paese') as HTMLSelectElement;
+
+  // Menu dei paesi: Italia in cima, poi area Schengen/SEPA e resto del mondo
+  const opzioni = (l: [string, string][]) => l.map(([c, n]) => `<option value="${c}">${c} — ${n}</option>`).join('');
+  paese.innerHTML =
+    '<option value="IT">IT — Italia</option>' +
+    `<optgroup label="Area Schengen / SEPA">${opzioni(PAESI_SEPA)}</optgroup>` +
+    `<optgroup label="Resto del mondo">${opzioni(PAESI_MONDO)}</optgroup>`;
+  paese.value = 'IT';
+
+  const estero = () => paese.value !== 'IT';
+
+  paese.addEventListener('change', () => {
+    piva.value = '';
+    cerca.disabled = true;
+    piva.maxLength = estero() ? 32 : 11;
+    piva.placeholder = estero()
+      ? (FORMATO_ID[paese.value] ?? 'Partita IVA o codice del registro imprese')
+      : 'Partita IVA (11 cifre)';
+    $('msg').textContent = '';
+  });
+
   piva.addEventListener('input', () => {
+    if (estero()) {
+      // Fuori Italia non c'e' un codice di controllo comune: ogni registro ha il suo formato
+      piva.value = piva.value.replace(/[^A-Za-z0-9./\- ]/g, '').slice(0, 32);
+      cerca.disabled = piva.value.trim().length < 4;
+      return;
+    }
     piva.value = piva.value.replace(/\D/g, '').slice(0, 11);
     cerca.disabled = piva.value.length !== 11;
   });
 
+  const avviaEstero = async () => {
+    $('msg').textContent = 'Interrogazione in corso…';
+    $('scheda').innerHTML = '';
+    const id = piva.value.trim();
+    const r = await api(`/api/azienda-estera?paese=${encodeURIComponent(paese.value)}&id=${encodeURIComponent(id)}`)
+      .catch((e) => ({ error: String(e) }));
+    if (r?.found === false || r?.error) {
+      $('msg').textContent = r?.error ? `Errore: ${r.error}` : 'Controparte non trovata.';
+      return;
+    }
+    $('msg').textContent = r.fonte === 'cache' ? 'Dati da cache, nessun costo.' : '';
+    schedaCorrente = null;                        // il PDF sa impaginare la sola scheda italiana
+    const btnPdfEstero = $('pdf');
+    if (btnPdfEstero) btnPdfEstero.style.display = 'none';
+    $('scheda').innerHTML = rendiSchedaEstera({ ...r, identificativoMostrato: id });
+    document.title = `Scheda ${(r.ragioneSociale ?? 'estera').trim()} - ${id}`;
+  };
+
   const avvia = async () => {
+    if (estero()) return avviaEstero();
     $('msg').textContent = 'Interrogazione in corso…';
     $('scheda').innerHTML = '';
     const r = await api(`/api/azienda?piva=${piva.value}`).catch((e) => ({ errore: String(e) }));
