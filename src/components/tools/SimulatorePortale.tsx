@@ -90,6 +90,8 @@ interface Props {
   etichetteBene?: Partial<Record<Tabella, string>>;
   /** Classe di rischio BCC del bene trattato dal partner (3 = telecomunicazioni) */
   classeBcc?: ClasseRischioBcc;
+  /** Aggiunge il download del preventivo in PDF brandizzato MCF, oltre alla stampa */
+  pdfPreventivo?: boolean;
 }
 
 // Inverso Pioneer: dal canone al prezzo, provando ogni fascia
@@ -108,6 +110,7 @@ export default function SimulatorePortale({
   partner = '',
   etichetteBene = {},
   classeBcc = 3,
+  pdfPreventivo = false,
 }: Props) {
   const disponibili = tabelle.length ? tabelle : (['esg', 'pioneer'] as Tabella[]);
   const [tabella, setTabella] = useState<Tabella>(disponibili[0]);
@@ -122,6 +125,11 @@ export default function SimulatorePortale({
   const [durataCanone, setDurataCanone] = useState(TABELLE[disponibili[0]].durate.includes(60) ? 60 : TABELLE[disponibili[0]].durate[0]);
   const [prezzoRicavato, setPrezzoRicavato] = useState<number | null>(null);
   const [canoneCalcolato, setCanoneCalcolato] = useState(0);
+
+  // Intestatario del preventivo PDF: facoltativo, serve solo a scrivere in testa
+  // al documento il nome del cliente finale
+  const [intestatario, setIntestatario] = useState('');
+  const [pdfInCorso, setPdfInCorso] = useState(false);
 
   const cfg = TABELLE[tabella];
 
@@ -201,6 +209,104 @@ export default function SimulatorePortale({
   };
 
   const handleStampa = () => window.print();
+
+  // Nota legale del preventivo: stesse condizioni della stampa, in testo piano
+  // perche' qui l'HTML lo costruiamo a mano per il PDF.
+  const notaPreventivo = (): string => {
+    let n = '';
+    if (tassoZero) n += 'Finanziamento a tasso zero: nessun interesse a carico del cliente. ';
+    n += 'Canoni mensili indicativi, imponibili IVA, salvo approvazione della societa\' di noleggio.';
+    if (tabella === 'pagarent') {
+      n += ` Spese di istruttoria ${eur(PAGARENT_ISTRUTTORIA)} una tantum, non comprese nel canone.`;
+      n += ' Assicurazione all risk sul bene facoltativa.';
+    }
+    if (speseIstruttoria !== null) {
+      n += ` Spese di istruttoria ${eur(speseIstruttoria)} una tantum, non comprese nella rata.`;
+      n += prodottoBcc === 'ff'
+        ? ` Nessun riscatto finale: il bene e' subito di proprieta'.${imposta ? ` Imposta sostitutiva ${eur(imposta)}.` : ''}`
+        : ' Riscatto finale 1% del prezzo di vendita.';
+    }
+    n += ' La proposta definitiva viene confermata dopo l\'esame della documentazione del cliente.';
+    return n;
+  };
+
+  // Preventivo in PDF, brandizzato MCF e client-safe: nessun riferimento al
+  // canale finanziario, nessun dato interno. Stesso contenuto della stampa.
+  const handleScaricaPdf = async () => {
+    if (!canoni) return;
+    setPdfInCorso(true);
+    try {
+      const html2pdf = (await import('html2pdf.js')).default;
+      const oggi = new Date().toLocaleDateString('it-IT', { day: '2-digit', month: 'long', year: 'numeric' });
+      const bene = etichetteBene[tabella] ?? (tabella === 'esg' ? 'Impianto fotovoltaico' : 'Hardware e tecnologia');
+
+      const righe = canoni
+        .filter((c) => c.canone !== null)
+        .map(({ durata, canone }) => {
+          const sel = durataScelta === durata;
+          return `<tr style="${sel ? 'background:#f5f3ff;font-weight:800;color:#664CCD;' : ''}">
+            <td style="padding:8px 10px;border-bottom:1px solid #E1DEE3;">${durata} mesi</td>
+            <td style="padding:8px 10px;border-bottom:1px solid #E1DEE3;text-align:right;">${eur(canone!)}</td>
+          </tr>`;
+        })
+        .join('');
+
+      const html = `
+        <div style="font-family:'Manrope',Helvetica,Arial,sans-serif;color:#293C5B;padding:32px;max-width:620px;">
+          <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:24px;padding-bottom:14px;border-bottom:2px solid #664CCD;">
+            <div>
+              <div style="font-size:18px;font-weight:800;letter-spacing:-0.02em;">
+                <span style="color:#664CCD">Medio</span><span style="color:#293C5B">credito</span><span style="color:#FE6F3A;margin-left:4px">Facile</span>
+              </div>
+              <div style="font-size:8px;letter-spacing:3.5px;color:#664CCD;text-transform:uppercase;margin-top:2px;">L'OFFICINA DEL CREDITO</div>
+            </div>
+            <div style="text-align:right;font-size:10px;color:#787782;">Preventivo del ${oggi}</div>
+          </div>
+
+          <h2 style="font-size:16px;font-weight:800;color:#664CCD;margin:0 0 4px;">Preventivo noleggio operativo</h2>
+          <p style="font-size:11px;color:#787782;margin:0 0 20px;">${bene} — prezzo di vendita ${eur(prezzoCalcolato)}, imponibile IVA</p>
+
+          ${intestatario.trim() ? `<div style="background:#f8fafc;border:1px solid #E1DEE3;border-radius:8px;padding:12px 16px;margin-bottom:20px;">
+            <div style="font-size:10px;color:#787782;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:4px;">Intestato a</div>
+            <div style="font-size:14px;font-weight:700;color:#293C5B;">${intestatario.trim()}</div>
+          </div>` : ''}
+
+          <table style="width:100%;border-collapse:collapse;font-size:12px;">
+            <thead>
+              <tr>
+                <th style="text-align:left;padding:8px 10px;font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:#444451;border-bottom:1px solid #E1DEE3;">Durata</th>
+                <th style="text-align:right;padding:8px 10px;font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:#444451;border-bottom:1px solid #E1DEE3;">Canone mensile</th>
+              </tr>
+            </thead>
+            <tbody>${righe}</tbody>
+          </table>
+
+          <p style="margin-top:20px;font-size:9px;color:#787782;line-height:1.55;">${notaPreventivo()}</p>
+
+          <div style="margin-top:28px;padding-top:12px;border-top:1px solid #E1DEE3;font-size:9px;color:#787782;">
+            <strong style="color:#664CCD">Mediocredito Facile</strong> — mediocreditofacile.it — +39 393 995 7840${partner ? ` — in collaborazione con ${partner}` : ''}
+          </div>
+        </div>
+      `;
+
+      const container = document.createElement('div');
+      container.innerHTML = html;
+      document.body.appendChild(container);
+
+      const slug = intestatario.trim().replace(/[^a-zA-Z0-9]/g, '_').substring(0, 30);
+      await html2pdf().set({
+        margin: [10, 10, 10, 10],
+        filename: `Preventivo_MCF_Noleggio${slug ? '_' + slug : ''}.pdf`,
+        image: { type: 'jpeg', quality: 0.95 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      }).from(container.firstElementChild).save();
+
+      document.body.removeChild(container);
+    } finally {
+      setPdfInCorso(false);
+    }
+  };
 
   const fuoriFascia = prezzoCalcolato > 0 && (prezzoCalcolato < cfg.min || prezzoCalcolato > cfg.max);
 
@@ -389,8 +495,26 @@ export default function SimulatorePortale({
       {/* Stampa simulazione */}
       {canoni && (
         <div class="sp__actions">
+          {pdfPreventivo && (
+            <input
+              type="text"
+              class="sp__input sp__input--intestatario"
+              placeholder="Intestato a (facoltativo)"
+              value={intestatario}
+              onInput={(e) => setIntestatario((e.target as HTMLInputElement).value)}
+            />
+          )}
+          {pdfPreventivo && (
+            <button type="button" class="sp__btn" onClick={handleScaricaPdf} disabled={pdfInCorso}>
+              {pdfInCorso ? 'Preparo il PDF...' : 'Scarica preventivo PDF'}
+            </button>
+          )}
           <button type="button" class="sp__btn sp__btn--ghost" onClick={handleStampa}>Stampa simulazione</button>
-          <span class="sp__actions-hint">La stampa è pulita e senza riferimenti interni: puoi consegnarla al cliente.</span>
+          <span class="sp__actions-hint">
+            {pdfPreventivo
+              ? 'Preventivo e stampa sono puliti e senza riferimenti interni: puoi consegnarli al cliente.'
+              : 'La stampa è pulita e senza riferimenti interni: puoi consegnarla al cliente.'}
+          </span>
         </div>
       )}
 

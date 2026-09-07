@@ -99,7 +99,9 @@
 
 /* Azioni */
 .sp__actions { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
-.sp__actions-hint { font-size: 0.83rem; color: #787782; }
+.sp__actions-hint { font-size: 0.83rem; color: #787782; flex: 1; min-width: 200px; }
+.sp__input--intestatario { max-width: 260px; }
+.sp__btn:disabled { opacity: 0.6; cursor: wait; }
 
 /* Area stampa: nascosta a schermo, unica cosa visibile in stampa */
 .sp__print { display: none; }

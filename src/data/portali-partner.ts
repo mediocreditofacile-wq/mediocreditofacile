@@ -14,7 +14,7 @@ export interface PortalePartner {
   nome: string;
   /** Password del gate partner, usata anche come bearer per le API */
   password: string;
-  /** Prefisso della pratica: EE- Expo Energia, ST- Stilo, FS- Full Service, UD- Unidima */
+  /** Prefisso della pratica: EE- Expo Energia, ST- Stilo, FS- Full Service, UD- Unidima, EC- Extreme Computer */
   prefissoPratica: string;
 }
 
@@ -42,6 +42,12 @@ export const PORTALI_PARTNER: Record<string, PortalePartner> = {
     nome: 'UNIDIMA SRL',
     password: 'unidima',
     prefissoPratica: 'UD',
+  },
+  'extreme-computer': {
+    slug: 'extreme-computer',
+    nome: 'EXTREME COMPUTER di Cinnella Luca',
+    password: 'extremecomputer',
+    prefissoPratica: 'EC',
   },
   // InnovaLux e' un portale di PREVENTIVI, non di pratiche: il fornitore genera
   // da solo i prospetti fotovoltaico. I record vivono sotto preventivi/innovalux/

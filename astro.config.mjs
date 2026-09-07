@@ -39,6 +39,7 @@ export default defineConfig({
           '/tools/edilizia-gierre',
           '/tools/energyteam',
           '/tools/expo-energia',
+          '/tools/extreme-computer',
           '/tools/full-service',
           '/tools/gruppo-barone',
           '/tools/innovalux',
