@@ -527,7 +527,9 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
     const email = ($('recupero-email') as HTMLInputElement).value.trim().toLowerCase();
     if (!email) return errore('Serve la tua email.');
     btn.disabled = true;
-    await apiJson('/api/auth/forget-password', {
+    // Nome dell'endpoint in Better Auth 1.7: /forget-password non esiste piu'
+    // e rispondeva 404, quindi il bottone falliva senza dire niente.
+    await apiJson('/api/auth/request-password-reset', {
       method: 'POST',
       body: JSON.stringify({ email, redirectTo: `${location.origin}/tools/green-go` }),
     });
