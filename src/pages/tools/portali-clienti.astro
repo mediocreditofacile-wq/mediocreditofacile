@@ -12,6 +12,12 @@
  *  - AREE_PARTNER: aree riservate col simulatore dedicato (fotovoltaico) e il tool
  *    della rete commerciale Marotta.
  *
+ * REGOLA: ogni portale o area riservata di un cliente o partner si raggiunge da
+ * Strumenti -> Portali Clienti, e da nessun'altra parte. Nell'hub /tools/ non si
+ * aggiunge mai la card del singolo partner: la sola card ammessa e' quella che
+ * punta qui. Un portale nuovo va quindi in uno dei due array qui sotto, altrimenti
+ * resta irraggiungibile (nessuna pagina ci linka, ed e' noindex).
+ *
  * Per aggiungere una voce: un oggetto nell'array giusto qui sotto (oltre al resto
  * della procedura descritta in CLAUDE.md).
  */
