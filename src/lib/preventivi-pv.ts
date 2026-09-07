@@ -28,13 +28,14 @@ import {
   type InputPreventivo,
   type Profilo,
 } from './prospetti-pv';
-import { DURATE, IMPORTO_MAX, IMPORTO_MIN, RISCATTO } from './prospetti-pv-coefficienti';
+import { IMPORTO_MAX, IMPORTO_MIN } from './prospetti-pv-coefficienti';
+import { TABELLA_DEFAULT, type TabellaCanoni } from './tabelle-canoni';
 
 const DESTINATARIO = 'mediocreditofacile@gmail.com';
 /** Oltre questo tempo si degrada e si consegnano i soli numeri */
 const TIMEOUT_PDF_MS = 25000;
 
-interface DocumentoGenerato {
+export interface DocumentoGenerato {
   nome: string;
   pathname: string;
   size: number;
@@ -56,7 +57,10 @@ const FORME: FormaGiuridica[] = ['societa-capitali', 'ditta-individuale', 'priva
 const INSTALLAZIONI: Installazione[] = ['tetto', 'pensilina', 'terra'];
 
 /** Normalizza il corpo della richiesta in un input valido per il motore */
-export function leggiInput(raw: Record<string, unknown>): InputPreventivo {
+export function leggiInput(
+  raw: Record<string, unknown>,
+  tabella: TabellaCanoni = TABELLA_DEFAULT,
+): InputPreventivo {
   const testo = (k: string) => String(raw[k] ?? '').trim();
   const forma = testo('forma_giuridica') as FormaGiuridica;
   const installazione = testo('installazione') as Installazione;
@@ -76,7 +80,7 @@ export function leggiInput(raw: Record<string, unknown>): InputPreventivo {
     consumo_annuo: numero(raw.consumo_annuo) || null,
     prezzo_kwh: numero(raw.prezzo_kwh) || null,
     profilo: profilo === 'h24' ? 'h24' : 'diurno',
-    durata: DURATE.includes(durata) ? durata : null,
+    durata: tabella.durate.includes(durata) ? durata : null,
   };
 }
 
@@ -87,7 +91,7 @@ function generaId(prefisso: string): string {
   return `${prefisso}-${rome.getFullYear()}${pad(rome.getMonth() + 1)}${pad(rome.getDate())}-${pad(rome.getHours())}${pad(rome.getMinutes())}${pad(rome.getSeconds())}`;
 }
 
-interface RispostaPdf {
+export interface RispostaPdf {
   ok: boolean;
   err?: string;
   pdf?: { filename: string; contenuto: string }[];
@@ -98,7 +102,10 @@ interface RispostaPdf {
  * nel payload del PDF) cosi' esiste in un posto solo: il motore Python la usa al
  * posto dei suoi valori di default.
  */
-async function generaPdf(payload: Record<string, unknown>): Promise<RispostaPdf> {
+export async function generaPdf(
+  payload: Record<string, unknown>,
+  tabella: TabellaCanoni = TABELLA_DEFAULT,
+): Promise<RispostaPdf> {
   const url = import.meta.env.PROSPETTI_PDF_URL as string | undefined;
   const token = import.meta.env.PROSPETTI_TOKEN as string | undefined;
   if (!url || !token) return { ok: false, err: 'microservizio_non_configurato' };
@@ -112,9 +119,11 @@ async function generaPdf(payload: Record<string, unknown>): Promise<RispostaPdf>
         // Coefficienti gia' risolti per questo importo: gli scaglioni li legge
         // solo il portale, il motore riceve una riga per durata.
         tabella: {
-          durate: DURATE,
-          coefficienti: { unica: coefficientiPerImporto(payload.importo as number) },
-          riscatto: RISCATTO,
+          // Solo le durate quotabili per questo importo: su alcune tabelle le
+          // piu' lunghe esistono solo sopra certe soglie.
+          durate: tabella.durateDisponibili(payload.importo as number),
+          coefficienti: { unica: coefficientiPerImporto(payload.importo as number, tabella) },
+          riscatto: tabella.riscatto,
         },
       }),
       signal: AbortSignal.timeout(TIMEOUT_PDF_MS),
@@ -138,8 +147,8 @@ async function generaPdf(payload: Record<string, unknown>): Promise<RispostaPdf>
   }
 }
 
-async function salvaPdf(
-  partner: PortalePartner,
+export async function salvaPdf(
+  slug: string,
   id: string,
   pdf: { filename: string; contenuto: string }[],
 ): Promise<DocumentoGenerato[]> {
@@ -149,7 +158,7 @@ async function salvaPdf(
   const salvati: DocumentoGenerato[] = [];
   for (const f of pdf) {
     const bytes = Uint8Array.from(atob(f.contenuto), (ch) => ch.charCodeAt(0));
-    const pathname = `${pathPreventivi(partner.slug)}${id}/${f.filename}`;
+    const pathname = `${pathPreventivi(slug)}${id}/${f.filename}`;
     try {
       await put(pathname, bytes, {
         access: 'private',
@@ -238,7 +247,7 @@ async function salvaRecord(
   }
 }
 
-const FORMA_LABEL: Record<FormaGiuridica, string> = {
+export const FORMA_LABEL: Record<FormaGiuridica, string> = {
   'societa-capitali': 'Societa di capitali',
   'ditta-individuale': 'Ditta individuale / persona fisica',
   privato: 'Privato senza partita IVA',
@@ -382,7 +391,7 @@ export async function gestisciPreventivo(request: Request, partner: PortalePartn
   const id = generaId(partner.prefissoPratica);
 
   const risultatoPdf = await generaPdf(payload);
-  const documenti = risultatoPdf.ok && risultatoPdf.pdf ? await salvaPdf(partner, id, risultatoPdf.pdf) : [];
+  const documenti = risultatoPdf.ok && risultatoPdf.pdf ? await salvaPdf(partner.slug, id, risultatoPdf.pdf) : [];
   const pdfPronti = documenti.length === 2;
 
   const [recordOk, mail] = await Promise.all([

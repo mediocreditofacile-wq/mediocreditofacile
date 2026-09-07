@@ -15,9 +15,6 @@ import {
   AUTOCONSUMO_BASE,
   AUTOCONSUMO_MAX,
   DETRAZIONE_PRIVATI,
-  DURATE,
-  IMPORTO_MAX,
-  IMPORTO_MIN,
   IPER_COSTO_GESTIONE,
   IPER_PCT,
   IRAP,
@@ -28,11 +25,10 @@ import {
   PREZZO_CESSIONE,
   PREZZO_KWH_DEFAULT,
   PROVINCE_ZONA,
-  RISCATTO,
   SABATINI_COSTO_GESTIONE,
   SABATINI_PCT,
-  coefficiente,
 } from './prospetti-pv-coefficienti';
+import { TABELLA_DEFAULT, type TabellaCanoni } from './tabelle-canoni';
 
 export type FormaGiuridica = 'societa-capitali' | 'ditta-individuale' | 'privato';
 export type Installazione = 'tetto' | 'pensilina' | 'terra';
@@ -61,6 +57,12 @@ export interface InputPreventivo {
 }
 
 export interface Calcolo {
+  /** Listino che ha prodotto questi canoni */
+  tabella: string;
+  /** Durate quotabili per questo importo, in ordine crescente */
+  durate: number[];
+  /** Riscatto della durata scelta, in % dell'imponibile */
+  riscattoPct: number;
   zona: string;
   irraggiamento: number;
   canoni: Record<number, number>;
@@ -123,8 +125,8 @@ export function euro(v: number, dec = 2): string {
 }
 
 /** L'importo cade nel range che l'operatore quota davvero? */
-export function importoQuotabile(importo: number): boolean {
-  return importo >= IMPORTO_MIN && importo <= IMPORTO_MAX && DURATE.every((m) => coefficiente(importo, m) !== null);
+export function importoQuotabile(importo: number, tabella: TabellaCanoni = TABELLA_DEFAULT): boolean {
+  return tabella.quotabile(importo);
 }
 
 /**
@@ -132,10 +134,13 @@ export function importoQuotabile(importo: number): boolean {
  * viaggia verso il microservizio PDF: gli scaglioni li legge solo questo lato,
  * perche' cambiano da un operatore all'altro e perfino tra durate.
  */
-export function coefficientiPerImporto(importo: number): Record<number, number> {
+export function coefficientiPerImporto(
+  importo: number,
+  tabella: TabellaCanoni = TABELLA_DEFAULT,
+): Record<number, number> {
   const mappa: Record<number, number> = {};
-  for (const m of DURATE) {
-    const c = coefficiente(importo, m);
+  for (const m of tabella.durateDisponibili(importo)) {
+    const c = tabella.coefficiente(importo, m);
     if (c !== null) mappa[m] = c;
   }
   return mappa;
@@ -166,21 +171,27 @@ export function autoconsumoStimato(kwp: number, kwhAccumulo: number, profilo: Pr
   return Math.min(Math.max(quota, base), AUTOCONSUMO_MAX);
 }
 
-export function calcolaPreventivo(input: InputPreventivo): Calcolo {
+export function calcolaPreventivo(
+  input: InputPreventivo,
+  tabella: TabellaCanoni = TABELLA_DEFAULT,
+): Calcolo {
   const imp = input.importo;
-  if (!importoQuotabile(imp)) {
+  if (!tabella.quotabile(imp)) {
     throw new Error(
-      `importo_fuori_range: ${imp} euro, quotabili da ${IMPORTO_MIN} a ${IMPORTO_MAX}`,
+      `importo_fuori_range: ${imp} euro, quotabili da ${tabella.importoMin} a ${tabella.importoMax}`,
     );
   }
 
+  // Su alcune tabelle le durate lunghe esistono solo sopra certi importi:
+  // si lavora su quelle davvero quotabili, non sull'elenco completo.
+  const durate = tabella.durateDisponibili(imp);
   const canoni: Record<number, number> = {};
   const totali: Record<number, number> = {};
   const riscatti: Record<number, number> = {};
-  for (const m of DURATE) {
-    canoni[m] = r2((imp * coefficiente(imp, m)!) / 100);
+  for (const m of durate) {
+    canoni[m] = r2((imp * tabella.coefficiente(imp, m)!) / 100);
     totali[m] = r2(canoni[m] * m);
-    riscatti[m] = r2((imp * RISCATTO[m]) / 100);
+    riscatti[m] = r2((imp * tabella.riscatto[m]) / 100);
   }
 
   // === Bilancio energetico ===
@@ -208,9 +219,9 @@ export function calcolaPreventivo(input: InputPreventivo): Calcolo {
   // deducibilita' e' coperto dal beneficio energetico. Nessuna: 72 mesi. ===
   const netto = (canone: number) => canone * (1 - IRES - IRAP);
   // Nessuna durata coperta: si propone la piu' lunga disponibile
-  const durataConsigliata = DURATE.find((m) => netto(canoni[m]) <= beneficioMese) ?? DURATE[DURATE.length - 1];
+  const durataConsigliata = durate.find((m) => netto(canoni[m]) <= beneficioMese) ?? durate[durate.length - 1];
   const durataForzata = Boolean(input.durata && input.durata !== durataConsigliata);
-  const durata = input.durata && DURATE.includes(input.durata) ? input.durata : durataConsigliata;
+  const durata = input.durata && durate.includes(input.durata) ? input.durata : durataConsigliata;
 
   const canone = canoni[durata];
   const totCanoni = totali[durata];
@@ -239,6 +250,9 @@ export function calcolaPreventivo(input: InputPreventivo): Calcolo {
   const esborsoLeasing = totLeasing + SABATINI_COSTO_GESTIONE + IPER_COSTO_GESTIONE;
 
   return {
+    tabella: tabella.id,
+    durate,
+    riscattoPct: tabella.riscatto[durata],
     zona,
     irraggiamento,
     canoni,
@@ -347,7 +361,7 @@ function testoIpotesiBreve(input: InputPreventivo, c: Calcolo): string {
 
 /** Frase sul confronto con la durata immediatamente piu' lunga, se esiste */
 function frasePiuLunga(c: Calcolo): string {
-  const piuLunga = DURATE.find((m) => m > c.durata);
+  const piuLunga = c.durate.find((m) => m > c.durata);
   if (!piuLunga) return '';
   const canone = c.canoni[piuLunga];
   const copertura = c.beneficioMese / canone;
@@ -374,7 +388,7 @@ function testoCopertura(c: Calcolo): string {
 }
 
 function testoGrafico1(c: Calcolo): string {
-  const piuLunga = DURATE.find((m) => m > c.durata);
+  const piuLunga = c.durate.find((m) => m > c.durata);
   const confronto = piuLunga
     ? ` A ${piuLunga} mesi la copertura sale ${conAl(c.beneficioMese / c.canoni[piuLunga])}%.`
     : '';
@@ -385,7 +399,7 @@ function testoGrafico1(c: Calcolo): string {
   return (
     `A ${c.durata} mesi il risparmio energetico copre ${conIl(c.coperturaCanone)}% del canone: ${esito}.` +
     `${confronto}<br/><br/>` +
-    `Dopo il riscatto (${RISCATTO[c.durata]}%, ${euro(c.riscatto, 0)} euro, valori medi indicativi) il beneficio ` +
+    `Dopo il riscatto (${c.riscattoPct}%, ${euro(c.riscatto, 0)} euro, valori medi indicativi) il beneficio ` +
     `resta tutto al cliente: ${euro(c.beneficioAnno, 0)} euro l'anno per la vita utile residua dell'impianto.`
   );
 }

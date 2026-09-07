@@ -1,0 +1,1212 @@
+---
+import Icon from '../../components/Icon.astro';
+import ToolLayout from '../../layouts/ToolLayout.astro';
+/**
+ * Portale fornitore GREEN-GO SRLS — /tools/green-go
+ *
+ * Avellino, P.IVA 02888320641, referente Donato Di Zenzo. Distribuisce
+ * componentistica fotovoltaica agli installatori e realizza impianti chiavi in
+ * mano, con presidio del comparto agricolo. Tagli tipici 15.000-60.000 euro.
+ *
+ * COSA CAMBIA RISPETTO AGLI ALTRI PORTALI: qui gli utenti sono nominali. Non e'
+ * una scelta di stile, e' una conseguenza della scala. Green-Go non ha un
+ * referente unico che chiede i preventivi: ha circa duecento agenti
+ * plurimandatari sparsi per l'Italia, e una password condivisa fra duecento
+ * persone non regge ne' come usabilita' ne' come sicurezza. Questo e' il primo
+ * portale con Better Auth (src/lib/auth.ts), organizzazioni e ruoli.
+ *
+ * La pagina e' un guscio: non sa niente di riservato. Calcolo, listino,
+ * elenco della rete e documenti stanno dietro le API, che ricavano il fornitore
+ * dalla sessione e non dai parametri.
+ *
+ * Ratio interna (NON esposta in pagina): si quota su Grenke ESG++++. La privacy
+ * fornitore BCC Rent&Lease e' firmata e il convenzionamento e' in corso: il
+ * selettore del locatore e' predisposto lato dati (app.fornitore.tabella_canoni)
+ * e si accende cambiando quella riga, senza toccare il codice.
+ */
+---
+<ToolLayout
+  title="Portale Green-Go — Preventivi fotovoltaico | Mediocredito Facile"
+  description="Portale riservato GREEN-GO SRLS: preventivi di noleggio operativo per impianti fotovoltaici."
+  noindex={true}
+  breadcrumbs={[{ name: 'Portale Green-Go', href: '/tools/green-go' }]}
+>
+  <!-- Gate: login, attivazione invito, nuova password. Una card, tre volti. -->
+  <div id="gate" class="gate">
+    <div class="gate__card">
+      <div class="gate__logos">
+        <img src="/images/logo-mediocreditofacile.webp" alt="Mediocredito Facile" class="gate__logo" />
+        <span class="gate__x">&times;</span>
+        <span class="gate__partner-name">GREEN-GO SRLS</span>
+      </div>
+      <div class="gate__divider"></div>
+
+      <!-- 1. Accesso normale -->
+      <div id="vista-login">
+        <p class="gate__label">Portale Riservato</p>
+        <p class="gate__desc">
+          Prepara i preventivi di noleggio operativo sugli impianti fotovoltaici e scarica i prospetti
+          da consegnare al cliente.
+        </p>
+        <div class="gate__form">
+          <input type="email" id="login-email" class="gate__input" placeholder="La tua email" autocomplete="username" />
+          <input type="password" id="login-pwd" class="gate__input" placeholder="Password" autocomplete="current-password" />
+          <button id="login-btn" class="gate__btn">
+            <Icon name="lock_open" />
+            Accedi
+          </button>
+        </div>
+        <p class="gate__link-row">
+          <button type="button" id="vai-recupero" class="gate__link">Ho dimenticato la password</button>
+        </p>
+      </div>
+
+      <!-- 2. Recupero password -->
+      <div id="vista-recupero" hidden>
+        <p class="gate__label">Password dimenticata</p>
+        <p class="gate__desc">
+          Inserisci la tua email: ti arriva un link per sceglierne una nuova. Vale un'ora.
+        </p>
+        <div class="gate__form">
+          <input type="email" id="recupero-email" class="gate__input" placeholder="La tua email" autocomplete="username" />
+          <button id="recupero-btn" class="gate__btn">Mandami il link</button>
+        </div>
+        <p class="gate__link-row">
+          <button type="button" id="torna-login" class="gate__link">Torna all'accesso</button>
+        </p>
+      </div>
+
+      <!-- 3. Nuova password, dopo il link di recupero -->
+      <div id="vista-nuova-password" hidden>
+        <p class="gate__label">Scegli la nuova password</p>
+        <p class="gate__desc">Almeno dieci caratteri. E' personale, non va condivisa.</p>
+        <div class="gate__form">
+          <input type="password" id="nuova-pwd" class="gate__input" placeholder="Nuova password" autocomplete="new-password" />
+          <button id="nuova-pwd-btn" class="gate__btn">Salva e accedi</button>
+        </div>
+      </div>
+
+      <!-- 4. Attivazione invito -->
+      <div id="vista-invito" hidden>
+        <p class="gate__label">Attiva il tuo accesso</p>
+        <p class="gate__desc" id="invito-desc"></p>
+        <div class="gate__form">
+          <input type="text" id="invito-nome" class="gate__input" placeholder="Nome e cognome" autocomplete="name" />
+          <input type="password" id="invito-pwd" class="gate__input" placeholder="Scegli una password" autocomplete="new-password" />
+          <button id="invito-btn" class="gate__btn">Entra nel portale</button>
+        </div>
+        <p class="gate__nota" id="invito-nota"></p>
+      </div>
+
+      <p id="gate-error" class="gate__error" hidden></p>
+      <p id="gate-ok" class="gate__ok" hidden></p>
+    </div>
+  </div>
+
+  <!-- Portale -->
+  <div id="tool" class="gg" style="display:none !important;">
+    <div class="gg__header">
+      <div class="gg__header-brand">
+        <img src="/images/logo-mediocreditofacile.webp" alt="Mediocredito Facile" class="gg__logo" />
+        <div class="gg__header-sep"></div>
+        <div class="gg__partner-badge">
+          <span class="gg__partner-icon"><Icon name="solar_power" size={18} /></span>
+          <span class="gg__partner-label" id="badge-fornitore">GREEN-GO SRLS</span>
+        </div>
+      </div>
+      <div class="gg__header-right">
+        <span class="gg__chi" id="chi-sono"></span>
+        <button id="logout-btn" class="gg__logout">
+          <Icon name="logout" />
+          Esci
+        </button>
+      </div>
+    </div>
+
+    <h1 class="gg__dash-title">Prospetti impianti fotovoltaici</h1>
+    <div class="gg__cards">
+      <a href="#preventivo" class="gg__card">
+        <div class="gg__card-head"><Icon name="calculate" /> Nuovo prospetto</div>
+        <p class="gg__card-desc">Impianto e importo: canone su tutte le durate, bilancio energetico e confronto con il leasing.</p>
+        <span class="gg__card-link">Compila i dati &raquo;</span>
+      </a>
+      <a href="#risultato" class="gg__card">
+        <div class="gg__card-head"><Icon name="description" /> I due documenti</div>
+        <p class="gg__card-desc">Prospetto analitico e prospetto infografico, pronti da consegnare al cliente finale.</p>
+        <span class="gg__card-link">Vai al risultato &raquo;</span>
+      </a>
+      <a href="#storico" class="gg__card">
+        <div class="gg__card-head"><Icon name="receipt_long" /> Storico</div>
+        <p class="gg__card-desc">I prospetti generati, con i numeri e i PDF sempre riscaricabili.</p>
+        <span class="gg__card-link">Vedi lo storico &raquo;</span>
+      </a>
+    </div>
+
+    <!-- 1. Dati -->
+    <section id="preventivo" class="gg__section">
+      <header class="gg__section-head">
+        <span class="gg__section-num">1</span>
+        <div>
+          <h2 class="gg__section-title">I dati dell'impianto</h2>
+          <p class="gg__section-sub">
+            I campi sui consumi sono facoltativi. Se li compili con i dati della bolletta del cliente il
+            calcolo usa quelli; se li lasci vuoti si applicano le ipotesi standard per la zona, e i
+            prospetti lo dichiarano. La durata si può lasciare su automatica: viene proposta la più corta
+            in cui il canone, al netto della deducibilità, è coperto dal risparmio in bolletta.
+          </p>
+        </div>
+      </header>
+
+      <form id="preventivo-form" class="gg__form" novalidate>
+        <div class="gg__form-block">
+          <p class="gg__form-block-title">Cliente finale</p>
+          <div class="gg__grid">
+            <div class="gg__field gg__field--full">
+              <label class="gg__field-label" for="cliente">Ragione sociale o nome *</label>
+              <input type="text" id="cliente" name="cliente" required placeholder="Es. Azienda Agricola Rossi" />
+            </div>
+            <div class="gg__field">
+              <label class="gg__field-label" for="comune">Comune di installazione</label>
+              <input type="text" id="comune" name="comune" placeholder="Es. Avellino" />
+            </div>
+            <div class="gg__field">
+              <label class="gg__field-label" for="provincia">Provincia (sigla)</label>
+              <input type="text" id="provincia" name="provincia" maxlength="2" placeholder="AV" style="text-transform:uppercase" />
+            </div>
+            <div class="gg__field">
+              <label class="gg__field-label" for="forma-giuridica">Forma giuridica *</label>
+              <select id="forma-giuridica" name="forma_giuridica" required>
+                <option value="societa-capitali">Società di capitali (SRL, SPA, SAPA)</option>
+                <option value="ditta-individuale">Ditta individuale / persona fisica con P.IVA</option>
+                <option value="privato">Privato senza partita IVA</option>
+              </select>
+            </div>
+            <div class="gg__field">
+              <label class="gg__field-label" for="rif-preventivo">Riferimento preventivo Green-Go</label>
+              <input type="text" id="rif-preventivo" name="rif_preventivo" placeholder="Es. Preventivo 214/2026" />
+            </div>
+          </div>
+          <div id="avviso-forma" class="gg__avviso" hidden>
+            <span class="gg__avviso-icon"><Icon name="warning" size={22} /></span>
+            <div>
+              <strong id="avviso-titolo"></strong>
+              <p id="avviso-testo"></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="gg__form-block">
+          <p class="gg__form-block-title">Impianto</p>
+          <div class="gg__grid">
+            <div class="gg__field">
+              <label class="gg__field-label" for="kwp">Potenza fotovoltaico (kWp) *</label>
+              <input type="number" id="kwp" name="kwp" min="1" step="0.1" required placeholder="30" />
+            </div>
+            <div class="gg__field">
+              <label class="gg__field-label" for="kwh-accumulo">Capacità accumulo (kWh)</label>
+              <input type="number" id="kwh-accumulo" name="kwh_accumulo" min="0" step="0.1" placeholder="15" />
+            </div>
+            <div class="gg__field">
+              <label class="gg__field-label" for="importo">Importo chiavi in mano, IVA esclusa (€) *</label>
+              <input type="number" id="importo" name="importo" min="800" step="10" required placeholder="35000" />
+            </div>
+            <div class="gg__field">
+              <label class="gg__field-label" for="installazione">Tipo di installazione</label>
+              <select id="installazione" name="installazione">
+                <option value="tetto">Tetto / lastrico solare</option>
+                <option value="pensilina">Pensilina / tettoia</option>
+                <option value="terra">A terra</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="gg__form-block">
+          <p class="gg__form-block-title">Consumi del cliente (facoltativi)</p>
+          <p class="gg__hint">
+            Li trovi sulla bolletta. Senza questi dati il prospetto resta una stima per cliente tipo e lo
+            scrive nero su bianco.
+          </p>
+          <div class="gg__grid">
+            <div class="gg__field">
+              <label class="gg__field-label" for="consumo-annuo">Consumo annuo (kWh)</label>
+              <input type="number" id="consumo-annuo" name="consumo_annuo" min="0" step="100" placeholder="Es. 45000" />
+            </div>
+            <div class="gg__field">
+              <label class="gg__field-label" for="prezzo-kwh">Prezzo energia (€/kWh)</label>
+              <input type="number" id="prezzo-kwh" name="prezzo_kwh" min="0" step="0.01" placeholder="Es. 0,28" />
+            </div>
+            <div class="gg__field">
+              <label class="gg__field-label" for="profilo">Profilo di consumo</label>
+              <select id="profilo" name="profilo">
+                <option value="diurno">Prevalentemente diurno</option>
+                <option value="h24">Attività continua, h24</option>
+              </select>
+            </div>
+            <div class="gg__field">
+              <label class="gg__field-label" for="durata">Durata del noleggio</label>
+              <select id="durata" name="durata">
+                <option value="">Consigliata (automatica)</option>
+                <option value="36">36 mesi</option>
+                <option value="48">48 mesi</option>
+                <option value="60">60 mesi</option>
+                <option value="72">72 mesi</option>
+                <option value="84">84 mesi</option>
+              </select>
+              <p class="gg__hint gg__hint--sotto" id="durata-nota"></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="gg__submit-row">
+          <button type="submit" id="submit-btn" class="gg__submit">
+            <Icon name="calculate" />
+            Genera i prospetti
+          </button>
+          <p class="gg__submit-hint">
+            I due PDF vengono generati subito e restano nello storico. Una copia arriva a Mediocredito Facile.
+          </p>
+        </div>
+        <div id="form-feedback" class="gg__feedback" hidden></div>
+      </form>
+    </section>
+
+    <!-- 2. Risultato -->
+    <section id="risultato" class="gg__section" hidden>
+      <header class="gg__section-head">
+        <span class="gg__section-num">2</span>
+        <div>
+          <h2 class="gg__section-title">Il prospetto</h2>
+          <p class="gg__section-sub" id="risultato-sub"></p>
+        </div>
+      </header>
+      <div id="risultato-body"></div>
+    </section>
+
+    <!-- 3. Storico -->
+    <section id="storico" class="gg__section">
+      <header class="gg__section-head">
+        <span class="gg__section-num">3</span>
+        <div>
+          <h2 class="gg__section-title">I prospetti già generati</h2>
+          <p class="gg__section-sub" id="storico-sub">
+            Restano qui con i loro numeri e i PDF riscaricabili. Quando arriva la documentazione del
+            cliente, il riferimento del prospetto è quello che serve per aprire la pratica.
+          </p>
+        </div>
+      </header>
+      <div class="gg__storico-bar">
+        <button type="button" id="refresh-storico" class="gg__refresh">
+          <Icon name="refresh" />
+          Aggiorna
+        </button>
+        <span id="storico-info" class="gg__storico-info"></span>
+      </div>
+      <div id="storico-wrap" class="gg__storico-wrap"></div>
+    </section>
+
+    <!-- 4. La rete: solo referente e MCF -->
+    <section id="rete" class="gg__section" hidden>
+      <header class="gg__section-head">
+        <span class="gg__section-num">4</span>
+        <div>
+          <h2 class="gg__section-title">La tua rete</h2>
+          <p class="gg__section-sub">
+            Gli accessi sono personali. Apri un accesso e all'agente arriva un invito via email: la password
+            se la sceglie lui, tu non la vedi e non la comunichi. Chi lascia la rete si sospende, e da quel
+            momento non entra più; i preventivi che ha generato restano dove sono.
+          </p>
+        </div>
+      </header>
+
+      <div class="gg__form-block">
+        <p class="gg__form-block-title">Apri un accesso</p>
+        <div class="gg__grid">
+          <div class="gg__field">
+            <label class="gg__field-label" for="inv-nome">Nome e cognome</label>
+            <input type="text" id="inv-nome" placeholder="Es. Mario Rossi" />
+          </div>
+          <div class="gg__field">
+            <label class="gg__field-label" for="inv-email">Email</label>
+            <input type="email" id="inv-email" placeholder="mario.rossi@example.it" />
+          </div>
+        </div>
+        <div class="gg__submit-row" style="margin-top:1rem">
+          <button type="button" id="inv-btn" class="gg__submit">
+            <Icon name="user-check" />
+            Metti in coda l'invito
+          </button>
+          <p class="gg__submit-hint">
+            Gli inviti partono a scaglioni, per non farsi bloccare dal servizio di posta. Con
+            <button type="button" id="inv-ora" class="gg__inline-btn">manda subito il prossimo scaglione</button>
+            fai partire ora quelli in attesa.
+          </p>
+        </div>
+        <div id="rete-feedback" class="gg__feedback" hidden></div>
+      </div>
+
+      <h3 class="gg__sub-title">Chi lavora sul portale</h3>
+      <div class="gg__storico-wrap"><div id="membri-wrap"></div></div>
+
+      <h3 class="gg__sub-title">Inviti</h3>
+      <div class="gg__storico-wrap"><div id="inviti-wrap"></div></div>
+    </section>
+
+    <p class="gg__disclaimer">
+      I valori dei prospetti sono stimati e a scopo illustrativo: non costituiscono offerta vincolante né
+      promessa di approvazione o di condizioni economiche. Ogni operazione è soggetta a valutazione e
+      delibera degli istituti eroganti. Alberto Amà, intermediario del credito.
+    </p>
+  </div>
+</ToolLayout>
+<script>
+  // Il portale e' un guscio: non conosce coefficienti, listini, ne' l'elenco
+  // della rete. Tutto arriva dalle API, che ricavano il fornitore dalla
+  // sessione. Qui dentro non c'e' nessun segreto, ed e' voluto.
+
+  type Utente = { id: string; nome: string; email: string };
+  type Preventivo = {
+    id: string; creato: string; cliente_nome: string; comune: string | null;
+    provincia: string | null; kwp: string; importo: string; durata: number;
+    canone: string; pdf_pronti: boolean; user_id: string;
+    agente_nome: string; agente_email: string;
+    documenti: { nome: string; pathname: string }[];
+    numeri: Record<string, number>;
+  };
+
+  const $ = (id: string) => document.getElementById(id)!;
+  const gate = $('gate');
+  const tool = $('tool');
+
+  let ruolo = 'agente';
+  let vedeTuttaLaRete = false;
+  let io: Utente | null = null;
+
+  // === Formattazione ===
+  const euro = (v: number, dec = 0) =>
+    (Number(v) || 0).toLocaleString('it-IT', {
+      minimumFractionDigits: dec,
+      maximumFractionDigits: dec,
+      // Senza questo l'italiano non separa le migliaia sotto le cinque cifre:
+      // scriverebbe 8001 al posto di 8.001.
+      useGrouping: 'always',
+    });
+  const data = (iso: string) =>
+    new Date(iso).toLocaleString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  const esc = (s: unknown) =>
+    String(s ?? '').replace(/[<>&"']/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&#39;' }[c] || c));
+
+  // === Viste del gate ===
+  const viste = ['vista-login', 'vista-recupero', 'vista-nuova-password', 'vista-invito'];
+  function mostraVista(quale: string) {
+    for (const v of viste) ($(v) as HTMLElement).hidden = v !== quale;
+    ($('gate-error') as HTMLElement).hidden = true;
+    ($('gate-ok') as HTMLElement).hidden = true;
+  }
+  function errore(msg: string) {
+    const el = $('gate-error');
+    el.textContent = msg;
+    el.hidden = false;
+    ($('gate-ok') as HTMLElement).hidden = true;
+  }
+  function conferma(msg: string) {
+    const el = $('gate-ok');
+    el.textContent = msg;
+    el.hidden = false;
+    ($('gate-error') as HTMLElement).hidden = true;
+  }
+
+  function mostraTool() {
+    gate.style.display = 'none';
+    tool.style.cssText = '';
+  }
+  function mostraGate() {
+    gate.style.display = '';
+    tool.style.cssText = 'display:none !important;';
+  }
+
+  // Messaggi tecnici tradotti: l'agente non deve leggere codici di errore.
+  const MESSAGGI: Record<string, string> = {
+    sessione_assente: "La sessione è scaduta. Rifai l'accesso.",
+    utente_disattivato: 'Questo accesso è stato disattivato. Scrivi al tuo referente.',
+    nessuna_organizzazione: 'Questo accesso non è più attivo su nessun portale.',
+    fornitore_sospeso: 'Il portale è temporaneamente sospeso.',
+    permesso_negato: 'Non hai i permessi per questa operazione.',
+    invito_scaduto: "L'invito è scaduto. Chiedi al tuo referente di rimandarlo.",
+    invito_gia_usato: 'Questo invito è già stato usato. Prova ad accedere con la tua password.',
+    invito_inesistente: 'Invito non valido.',
+    gia_membro: 'Questa persona è già nella rete.',
+    invito_gia_aperto: "C'è già un invito aperto per questa email.",
+    email_non_valida: "L'indirizzo email non sembra valido.",
+    dati_incompleti: 'Servono almeno cliente, potenza e importo.',
+    password_troppo_corta: 'La password deve avere almeno dieci caratteri.',
+    origine_non_valida: 'Richiesta bloccata per sicurezza. Ricarica la pagina.',
+  };
+  const traduci = (codice: string) => MESSAGGI[codice] ?? 'Qualcosa non ha funzionato. Riprova.';
+
+  async function apiJson(url: string, opts: RequestInit = {}) {
+    const res = await fetch(url, {
+      credentials: 'same-origin',
+      ...opts,
+      headers: { 'Content-Type': 'application/json', ...(opts.headers ?? {}) },
+    });
+    let corpo: any = null;
+    try { corpo = await res.json(); } catch { /* risposta senza corpo */ }
+    return { res, corpo };
+  }
+
+  // === Avvio: invito, link di recupero, oppure sessione gia' aperta ===
+  const params = new URLSearchParams(location.search);
+  const idInvito = params.get('invito');
+  const tokenReset = params.get('token');
+
+  async function avvio() {
+    if (idInvito) return apriInvito(idInvito);
+    if (tokenReset) { mostraVista('vista-nuova-password'); return; }
+
+    // Se la sessione c'e' ancora, il portale si apre senza chiedere niente.
+    const { res, corpo } = await apiJson('/api/portale-preventivi');
+    if (res.ok && corpo?.ok) return entra(corpo);
+    mostraVista('vista-login');
+  }
+
+  function entra(datiStorico: any) {
+    ruolo = datiStorico.ruolo;
+    vedeTuttaLaRete = Boolean(datiStorico.vedeTuttaLaRete);
+    io = datiStorico.utente;
+    $('badge-fornitore').textContent = datiStorico.fornitoreNome ?? 'GREEN-GO SRLS';
+    $('chi-sono').textContent = `${io?.nome || io?.email}${ruolo === 'referente' ? ' · referente' : ruolo === 'admin' ? ' · MCF' : ''}`;
+    ($('rete') as HTMLElement).hidden = !(ruolo === 'referente' || ruolo === 'admin');
+    $('storico-sub').textContent = vedeTuttaLaRete
+      ? 'Tutti i prospetti della rete, con il nome di chi li ha generati. I PDF restano riscaricabili.'
+      : 'I prospetti che hai generato tu, con i numeri e i PDF sempre riscaricabili.';
+    mostraTool();
+    renderStorico(datiStorico.preventivi ?? []);
+    if (vedeTuttaLaRete) void caricaRete();
+  }
+
+  // === Accesso ===
+  $('login-btn').addEventListener('click', async () => {
+    const btn = $('login-btn') as HTMLButtonElement;
+    const email = ($('login-email') as HTMLInputElement).value.trim().toLowerCase();
+    const password = ($('login-pwd') as HTMLInputElement).value;
+    if (!email || !password) return errore('Servono email e password.');
+
+    btn.disabled = true;
+    const { res } = await apiJson('/api/auth/sign-in/email', {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+    });
+    btn.disabled = false;
+    if (!res.ok) return errore('Email o password non corretti.');
+
+    const storico = await apiJson('/api/portale-preventivi');
+    if (storico.res.ok && storico.corpo?.ok) return entra(storico.corpo);
+    errore(traduci(storico.corpo?.error ?? ''));
+  });
+
+  for (const id of ['login-email', 'login-pwd']) {
+    $(id).addEventListener('keydown', (e) => { if ((e as KeyboardEvent).key === 'Enter') $('login-btn').click(); });
+  }
+
+  $('logout-btn').addEventListener('click', async () => {
+    await apiJson('/api/auth/sign-out', { method: 'POST', body: '{}' });
+    location.href = '/tools/green-go';
+  });
+
+  // === Recupero password ===
+  $('vai-recupero').addEventListener('click', () => {
+    (document.getElementById('recupero-email') as HTMLInputElement).value =
+      ($('login-email') as HTMLInputElement).value;
+    mostraVista('vista-recupero');
+  });
+  $('torna-login').addEventListener('click', () => mostraVista('vista-login'));
+
+  $('recupero-btn').addEventListener('click', async () => {
+    const btn = $('recupero-btn') as HTMLButtonElement;
+    const email = ($('recupero-email') as HTMLInputElement).value.trim().toLowerCase();
+    if (!email) return errore('Serve la tua email.');
+    btn.disabled = true;
+    await apiJson('/api/auth/forget-password', {
+      method: 'POST',
+      body: JSON.stringify({ email, redirectTo: `${location.origin}/tools/green-go` }),
+    });
+    btn.disabled = false;
+    // Risposta sempre uguale: dire "questa email non esiste" servirebbe solo
+    // a chi sta provando indirizzi a caso.
+    conferma("Se quell'indirizzo è registrato, il link è partito. Controlla la posta.");
+  });
+
+  $('nuova-pwd-btn').addEventListener('click', async () => {
+    const btn = $('nuova-pwd-btn') as HTMLButtonElement;
+    const password = ($('nuova-pwd') as HTMLInputElement).value;
+    if (password.length < 10) return errore('La password deve avere almeno dieci caratteri.');
+    btn.disabled = true;
+    const { res } = await apiJson('/api/auth/reset-password', {
+      method: 'POST',
+      body: JSON.stringify({ newPassword: password, token: tokenReset }),
+    });
+    btn.disabled = false;
+    if (!res.ok) return errore('Il link non è più valido. Chiedine un altro.');
+    conferma('Password aggiornata. Ora puoi accedere.');
+    history.replaceState(null, '', '/tools/green-go');
+    mostraVista('vista-login');
+  });
+
+  // === Attivazione invito ===
+  let invitoAccountEsistente = false;
+
+  async function apriInvito(id: string) {
+    const { res, corpo } = await apiJson(`/api/portale-invito?id=${encodeURIComponent(id)}`);
+    if (!res.ok || !corpo?.ok) {
+      mostraVista('vista-login');
+      return errore(traduci(corpo?.error ?? 'invito_inesistente'));
+    }
+    invitoAccountEsistente = Boolean(corpo.accountEsistente);
+    mostraVista('vista-invito');
+    $('invito-desc').textContent = invitoAccountEsistente
+      ? `Hai già un accesso con ${corpo.email}: entra con la tua password e il portale ${corpo.organizzazione} si aggiunge ai tuoi.`
+      : `Accesso per ${corpo.email} sul portale ${corpo.organizzazione}. Scegli una password: è personale, non va condivisa con altri agenti.`;
+    $('invito-nota').textContent = invitoAccountEsistente ? '' : 'Almeno dieci caratteri.';
+    ($('invito-nome') as HTMLElement).hidden = invitoAccountEsistente;
+    ($('invito-pwd') as HTMLInputElement).placeholder = invitoAccountEsistente ? 'La tua password' : 'Scegli una password';
+    ($('invito-pwd') as HTMLInputElement).autocomplete = invitoAccountEsistente ? 'current-password' : 'new-password';
+    $('invito-btn').textContent = invitoAccountEsistente ? 'Aggiungi il portale' : 'Entra nel portale';
+    ($('invito-nome') as HTMLInputElement).value = '';
+    // L'email la conosciamo dall'invito: non si chiede due volte.
+    (window as any).__emailInvito = corpo.email;
+  }
+
+  $('invito-btn').addEventListener('click', async () => {
+    const btn = $('invito-btn') as HTMLButtonElement;
+    const password = ($('invito-pwd') as HTMLInputElement).value;
+    const nome = ($('invito-nome') as HTMLInputElement).value.trim();
+    if (password.length < 10) return errore('La password deve avere almeno dieci caratteri.');
+    if (!invitoAccountEsistente && !nome) return errore('Serve nome e cognome.');
+
+    btn.disabled = true;
+    // Chi ha gia' un account fa prima il login, poi il rapporto si aggiunge.
+    if (invitoAccountEsistente) {
+      const login = await apiJson('/api/auth/sign-in/email', {
+        method: 'POST',
+        body: JSON.stringify({ email: (window as any).__emailInvito, password }),
+      });
+      if (!login.res.ok) { btn.disabled = false; return errore('Password non corretta.'); }
+    }
+
+    const { res, corpo } = await apiJson('/api/portale-invito', {
+      method: 'POST',
+      body: JSON.stringify({ id: idInvito, nome, password }),
+    });
+    btn.disabled = false;
+    if (!res.ok || !corpo?.ok) return errore(traduci(corpo?.error ?? ''));
+
+    history.replaceState(null, '', '/tools/green-go');
+    const storico = await apiJson('/api/portale-preventivi');
+    if (storico.res.ok && storico.corpo?.ok) return entra(storico.corpo);
+    mostraVista('vista-login');
+    conferma('Accesso attivato. Entra con la tua password.');
+  });
+
+  // === Avviso sulla forma giuridica: solo a schermo, mai nei PDF ===
+  const AVVISI: Record<string, { titolo: string; testo: string; grave: boolean }> = {
+    privato: {
+      titolo: 'Il noleggio operativo non è percorribile',
+      testo: 'Senza partita IVA il noleggio operativo non si può fare. La strada è la detrazione fiscale del 50 per cento. Il prospetto si genera comunque, ma il confronto va letto tenendo conto di questo.',
+      grave: true,
+    },
+    'ditta-individuale': {
+      titolo: 'Da verificare prima di procedere',
+      testo: "Controlla che la partita IVA sia attiva e che l'impianto sia destinato all'attività. Occhio all'utenza domestica su immobile abitativo: è un errore che ci è già costato tempo su una pratica vera.",
+      grave: false,
+    },
+  };
+
+  function aggiornaAvviso() {
+    const forma = ($('forma-giuridica') as HTMLSelectElement).value;
+    const box = $('avviso-forma') as HTMLElement;
+    const a = AVVISI[forma];
+    if (!a) { box.hidden = true; return; }
+    $('avviso-titolo').textContent = a.titolo;
+    $('avviso-testo').textContent = a.testo;
+    box.classList.toggle('gg__avviso--grave', a.grave);
+    box.hidden = false;
+  }
+  $('forma-giuridica').addEventListener('change', aggiornaAvviso);
+
+  // === Durate: le piu' lunghe esistono solo sopra certi importi ===
+  function aggiornaDurate() {
+    const importo = Number(($('importo') as HTMLInputElement).value) || 0;
+    const sel = $('durata') as HTMLSelectElement;
+    // Soglie della tabella: 72 mesi da 8.001 euro, 84 da 40.001.
+    const SOGLIE: Record<number, number> = { 72: 8001, 84: 40001 };
+    const spente: number[] = [];
+    for (const opt of Array.from(sel.options)) {
+      const mesi = Number(opt.value);
+      if (!mesi) continue;
+      const disponibile = importo === 0 || importo >= (SOGLIE[mesi] ?? 0);
+      opt.disabled = !disponibile;
+      if (!disponibile) {
+        spente.push(mesi);
+        if (sel.value === opt.value) sel.value = '';
+      }
+    }
+    // Se ne mancano due, si nomina la piu' vicina: e' il vincolo che l'agente
+    // puo' davvero superare alzando l'importo.
+    const prima = Math.min(...spente);
+    $('durata-nota').textContent = spente.length
+      ? `${prima === 84 ? 'Gli' : 'I'} ${prima} mesi partono da ${euro(SOGLIE[prima])} euro di imponibile.`
+      : '';
+  }
+  $('importo').addEventListener('input', aggiornaDurate);
+
+  // === Generazione del prospetto ===
+  function feedback(el: HTMLElement, testo: string, ok: boolean) {
+    el.textContent = testo;
+    el.className = `gg__feedback gg__feedback--${ok ? 'ok' : 'err'}`;
+    el.hidden = false;
+  }
+
+  $('preventivo-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = $('submit-btn') as HTMLButtonElement;
+    const box = $('form-feedback') as HTMLElement;
+    const form = e.target as HTMLFormElement;
+    const dati = Object.fromEntries(new FormData(form).entries());
+
+    btn.disabled = true;
+    btn.textContent = 'Calcolo in corso...';
+    box.hidden = true;
+
+    const { res, corpo } = await apiJson('/api/portale-preventivo', {
+      method: 'POST',
+      body: JSON.stringify({ input: dati }),
+    });
+
+    btn.disabled = false;
+    btn.textContent = 'Genera i prospetti';
+
+    if (!res.ok || !corpo?.ok) {
+      if (corpo?.error === 'importo_fuori_range') {
+        feedback(box, `L'importo è fuori dal range quotabile: da ${euro(corpo.min)} a ${euro(corpo.max)} euro.`, false);
+      } else if (corpo?.error === 'sessione_assente') {
+        mostraGate();
+        mostraVista('vista-login');
+        errore("La sessione è scaduta. Rifai l'accesso: i dati compilati restano nel modulo.");
+      } else {
+        feedback(box, traduci(corpo?.error ?? ''), false);
+      }
+      return;
+    }
+
+    feedback(box, `Prospetto ${corpo.id} generato.`, true);
+    renderRisultato(corpo, dati);
+    void ricaricaStorico();
+    $('risultato').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+  function renderRisultato(r: any, dati: Record<string, any>) {
+    const n = r.numeri;
+    ($('risultato') as HTMLElement).hidden = false;
+    $('risultato-sub').textContent =
+      `${dati.cliente} — impianto da ${euro(Number(dati.kwp), 0)} kWp, ${euro(Number(dati.importo))} euro chiavi in mano. ` +
+      (n.durataForzata ? `Durata ${n.durata} mesi (la consigliata era ${n.durataConsigliata}).` : `Durata consigliata ${n.durata} mesi.`);
+
+    const righeCanoni = (n.durate as number[])
+      .map((m) => `
+        <tr class="${m === n.durata ? 'gg__riga-scelta' : ''}">
+          <td>${m} mesi</td>
+          <td>${euro(n.canoni[m], 2)} €</td>
+          <td>${euro(n.riscatti[m], 0)} €</td>
+        </tr>`)
+      .join('');
+
+    const pdf = (r.documenti ?? [])
+      .map((d: any) => `<button type="button" class="gg__pdf" data-doc="${esc(d.pathname)}">${esc(d.nome)}</button>`)
+      .join('');
+
+    const avvisoPdf = r.pdfPronti
+      ? ''
+      : `<p class="gg__box-nota">I PDF non sono pronti: il servizio che li impagina non ha risposto. I numeri qui sopra sono validi. Rigenera il prospetto tra qualche minuto.</p>`;
+
+    $('risultato-body').innerHTML = `
+      <div class="gg__kpi">
+        <div class="gg__kpi-card">
+          <span class="gg__kpi-num">${euro(n.canone, 2)} €</span>
+          <span class="gg__kpi-label">Canone mensile a ${n.durata} mesi</span>
+        </div>
+        <div class="gg__kpi-card ${n.margineMese >= 0 ? 'gg__kpi-card--ok' : ''}">
+          <span class="gg__kpi-num">${Math.round(n.coperturaCanone * 100)}%</span>
+          <span class="gg__kpi-label">Quota del canone coperta dal risparmio in bolletta</span>
+        </div>
+        <div class="gg__kpi-card">
+          <span class="gg__kpi-num">${euro(n.beneficioMese)} €</span>
+          <span class="gg__kpi-label">Beneficio energetico al mese</span>
+        </div>
+        <div class="gg__kpi-card">
+          <span class="gg__kpi-num">${euro(n.produzione)} kWh</span>
+          <span class="gg__kpi-label">Produzione stimata all'anno</span>
+        </div>
+      </div>
+
+      <div class="gg__due-col">
+        <div class="gg__box">
+          <p class="gg__box-title">Canone per durata</p>
+          <table class="gg__table">
+            <thead><tr><th>Durata</th><th>Canone</th><th>Riscatto</th></tr></thead>
+            <tbody>${righeCanoni}</tbody>
+          </table>
+          <p class="gg__box-nota">Riscatto indicativo: il prezzo effettivo si definisce a fine contratto sullo stato del bene.</p>
+        </div>
+        <div class="gg__box">
+          <p class="gg__box-title">Il conto per il cliente</p>
+          <table class="gg__table">
+            <tbody>
+              <tr><td>Totale canoni</td><td>${euro(n.totCanoni)} €</td></tr>
+              <tr><td>Risparmio fiscale sul noleggio</td><td>${euro(n.fiscoNol)} €</td></tr>
+              <tr><td>Costo netto del noleggio</td><td>${euro(n.costoNettoNol)} €</td></tr>
+              <tr><td>Rata leasing di confronto</td><td>${euro(n.rataLeasing, 2)} €</td></tr>
+            </tbody>
+          </table>
+          <p class="gg__box-nota">Valori stimati a scopo illustrativo, non offerta vincolante.</p>
+        </div>
+      </div>
+
+      <div class="gg__pdf-row">${pdf}</div>
+      ${avvisoPdf}
+    `;
+  }
+
+  // === Download documenti: passano dalla nostra rotta, mai da un URL diretto ===
+  document.addEventListener('click', async (e) => {
+    const btn = (e.target as HTMLElement).closest('[data-doc]') as HTMLButtonElement | null;
+    if (!btn) return;
+    const percorso = btn.dataset.doc!;
+    const testo = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Scarico...';
+    try {
+      const res = await fetch(`/api/portale-doc?path=${encodeURIComponent(percorso)}`, { credentials: 'same-origin' });
+      if (!res.ok) throw new Error(String(res.status));
+      const blob = await res.blob();
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = percorso.split('/').pop() ?? 'prospetto.pdf';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    } catch {
+      alert('Non sono riuscito a scaricare il documento. Riprova tra poco.');
+    }
+    btn.disabled = false;
+    btn.textContent = testo;
+  });
+
+  // === Storico ===
+  async function ricaricaStorico() {
+    const { res, corpo } = await apiJson('/api/portale-preventivi');
+    if (res.ok && corpo?.ok) renderStorico(corpo.preventivi ?? []);
+  }
+  $('refresh-storico').addEventListener('click', () => void ricaricaStorico());
+
+  function renderStorico(righe: Preventivo[]) {
+    $('storico-info').textContent = righe.length
+      ? `${righe.length} prospett${righe.length === 1 ? 'o' : 'i'}`
+      : '';
+    if (!righe.length) {
+      $('storico-wrap').innerHTML = `<p class="gg__storico-empty">Nessun prospetto ancora. Il primo che generi compare qui.</p>`;
+      return;
+    }
+
+    const colonnaAgente = vedeTuttaLaRete ? '<th>Agente</th>' : '';
+    const corpo = righe
+      .map((p) => `
+        <tr>
+          <td>${data(p.creato)}<br><span class="gg__id">${esc(p.id)}</span></td>
+          ${vedeTuttaLaRete ? `<td>${esc(p.agente_nome || p.agente_email)}</td>` : ''}
+          <td>${esc(p.cliente_nome)}${p.comune ? `<br><span class="gg__id">${esc(p.comune)}${p.provincia ? ` (${esc(p.provincia)})` : ''}</span>` : ''}</td>
+          <td>${euro(Number(p.kwp), 0)} kWp<br><span class="gg__id">${euro(Number(p.importo))} €</span></td>
+          <td>${p.durata} mesi<br><span class="gg__id">${euro(Number(p.canone), 2)} €/mese</span></td>
+          <td>${(p.documenti ?? []).length
+            ? (p.documenti).map((d) => `<button type="button" class="gg__pdf" data-doc="${esc(d.pathname)}">${/infografic/i.test(d.nome) ? 'Infografico' : 'Analitico'}</button>`).join('')
+            : '<span class="gg__id">PDF non disponibili</span>'}</td>
+        </tr>`)
+      .join('');
+
+    $('storico-wrap').innerHTML = `
+      <table class="gg__table gg__table--storico">
+        <thead><tr><th>Quando</th>${colonnaAgente}<th>Cliente</th><th>Impianto</th><th>Canone</th><th>Documenti</th></tr></thead>
+        <tbody>${corpo}</tbody>
+      </table>`;
+  }
+
+  // === La rete: solo referente e MCF ===
+  async function caricaRete() {
+    const { res, corpo } = await apiJson('/api/portale-utenti');
+    if (!res.ok || !corpo?.ok) return;
+    renderMembri(corpo.membri ?? []);
+    renderInviti(corpo.inviti ?? []);
+  }
+
+  function renderMembri(membri: any[]) {
+    if (!membri.length) {
+      $('membri-wrap').innerHTML = `<p class="gg__storico-empty">Ancora nessuno oltre a te.</p>`;
+      return;
+    }
+    const righe = membri
+      .map((m) => `
+        <tr class="${m.attivo ? '' : 'gg__riga-spenta'}">
+          <td>${esc(m.nome || '—')}<br><span class="gg__id">${esc(m.email)}</span></td>
+          <td>${m.ruolo === 'referente' ? 'Referente' : 'Agente'}</td>
+          <td>${m.preventivi}${m.ultimo_preventivo ? `<br><span class="gg__id">ultimo ${data(m.ultimo_preventivo)}</span>` : ''}</td>
+          <td>${m.attivo ? 'Attivo' : 'Sospeso'}</td>
+          <td>${m.id === io?.id
+            ? '<span class="gg__id">sei tu</span>'
+            : `<button type="button" class="gg__pdf" data-membro="${esc(m.id)}" data-azione="${m.attivo ? 'sospendi' : 'riattiva'}">${m.attivo ? 'Sospendi' : 'Riattiva'}</button>`}</td>
+        </tr>`)
+      .join('');
+    $('membri-wrap').innerHTML = `
+      <table class="gg__table gg__table--storico">
+        <thead><tr><th>Persona</th><th>Ruolo</th><th>Prospetti</th><th>Stato</th><th></th></tr></thead>
+        <tbody>${righe}</tbody>
+      </table>`;
+  }
+
+  const ETICHETTA_STATO: Record<string, string> = {
+    da_inviare: 'In coda',
+    inviato: 'Inviato',
+    accettato: 'Accettato',
+    fallito: 'Non partito',
+  };
+
+  function renderInviti(inviti: any[]) {
+    if (!inviti.length) {
+      $('inviti-wrap').innerHTML = `<p class="gg__storico-empty">Nessun invito.</p>`;
+      return;
+    }
+    const righe = inviti
+      .map((i) => `
+        <tr>
+          <td>${esc(i.nome)}<br><span class="gg__id">${esc(i.email)}</span></td>
+          <td>${ETICHETTA_STATO[i.stato] ?? esc(i.stato)}${i.ultimo_errore ? `<br><span class="gg__id">${esc(i.ultimo_errore).slice(0, 80)}</span>` : ''}</td>
+          <td>${i.inviato_il ? data(i.inviato_il) : `<span class="gg__id">in attesa del prossimo scaglione</span>`}</td>
+          <td>${i.stato === 'accettato'
+            ? ''
+            : `<button type="button" class="gg__pdf" data-invito="${esc(i.id)}">Rimanda</button>`}</td>
+        </tr>`)
+      .join('');
+    $('inviti-wrap').innerHTML = `
+      <table class="gg__table gg__table--storico">
+        <thead><tr><th>Persona</th><th>Stato</th><th>Inviato</th><th></th></tr></thead>
+        <tbody>${righe}</tbody>
+      </table>`;
+  }
+
+  $('inv-btn').addEventListener('click', async () => {
+    const box = $('rete-feedback') as HTMLElement;
+    const nome = ($('inv-nome') as HTMLInputElement).value.trim();
+    const email = ($('inv-email') as HTMLInputElement).value.trim();
+    if (!nome || !email) return feedback(box, 'Servono nome e email.', false);
+
+    const { res, corpo } = await apiJson('/api/portale-utenti', {
+      method: 'POST',
+      body: JSON.stringify({ azione: 'invita', nome, email, ruolo: 'agente' }),
+    });
+    if (!res.ok || !corpo?.ok) return feedback(box, traduci(corpo?.error ?? ''), false);
+    feedback(box, `${nome} è in coda. L'invito parte col prossimo scaglione.`, true);
+    ($('inv-nome') as HTMLInputElement).value = '';
+    ($('inv-email') as HTMLInputElement).value = '';
+    void caricaRete();
+  });
+
+  $('inv-ora').addEventListener('click', async () => {
+    const box = $('rete-feedback') as HTMLElement;
+    const { res, corpo } = await apiJson('/api/portale-utenti', {
+      method: 'POST',
+      body: JSON.stringify({ azione: 'svuota_coda' }),
+    });
+    if (!res.ok || !corpo?.ok) return feedback(box, traduci(corpo?.error ?? ''), false);
+    feedback(box, `Inviti partiti: ${corpo.inviati}. Rimandati al prossimo giro: ${corpo.rimandati}. Non partiti: ${corpo.falliti}.`, corpo.falliti === 0);
+    void caricaRete();
+  });
+
+  document.addEventListener('click', async (e) => {
+    const el = (e.target as HTMLElement).closest('[data-membro], [data-invito]') as HTMLButtonElement | null;
+    if (!el) return;
+    const box = $('rete-feedback') as HTMLElement;
+    el.disabled = true;
+    const corpoReq = el.dataset.membro
+      ? { azione: el.dataset.azione, utente: el.dataset.membro }
+      : { azione: 'rimanda', invito: el.dataset.invito };
+    const { res, corpo } = await apiJson('/api/portale-utenti', { method: 'POST', body: JSON.stringify(corpoReq) });
+    el.disabled = false;
+    if (!res.ok || !corpo?.ok) return feedback(box, traduci(corpo?.error ?? ''), false);
+    void caricaRete();
+  });
+
+  void avvio();
+</script>
+
+<style>
+  /* === Gate login === */
+  .gate {
+    display: flex; justify-content: center; align-items: center;
+    min-height: 70vh; padding: 2rem 1.5rem;
+    background: linear-gradient(160deg, #fff7f3 0%, #fef3ec 40%, #f5f3ff 100%);
+  }
+  .gate__card {
+    text-align: center; background: #ffffff; border: 1px solid #fde4d4;
+    border-radius: 16px; padding: 2.5rem 2.5rem 2rem; max-width: 460px; width: 100%;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06), 0 1px 4px rgba(254, 111, 58, 0.08);
+  }
+  .gate__logos { display: flex; align-items: center; justify-content: center; gap: 0.75rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+  .gate__logo { height: 40px; display: block; }
+  .gate__x { font-size: 1.2rem; font-weight: 300; color: #94a3b8; }
+  .gate__partner-name { font-size: 1.05rem; font-weight: 800; color: #FE6F3A; letter-spacing: -0.01em; }
+  .gate__divider { height: 1px; background: linear-gradient(90deg, transparent, #fde4d4, transparent); margin-bottom: 1.25rem; }
+  .gate__label { font-size: 0.82rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.5rem; }
+  .gate__desc { font-size: 0.85rem; color: #64748b; line-height: 1.5; margin-bottom: 1.5rem; max-width: 360px; margin-left: auto; margin-right: auto; }
+  .gate__form { display: flex; flex-direction: column; gap: 0.6rem; }
+  .gate__input {
+    padding: 0.8rem 1rem; border: 1.5px solid #e2e8f0; border-radius: 10px;
+    font-family: var(--font-family); font-size: 1rem; color: var(--color-text); background: #f8fafc;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .gate__input:focus { outline: none; border-color: #FE6F3A; box-shadow: 0 0 0 3px rgba(254, 111, 58, 0.12); background: #fff; }
+  .gate__input--error { border-color: #ef4444; }
+  .gate__btn {
+    padding: 0.8rem 1.5rem; background: linear-gradient(135deg, #FE6F3A, #664CCD);
+    color: #ffffff; font-family: var(--font-family); font-weight: 700; font-size: 0.92rem;
+    border: none; border-radius: 10px; cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.2s; white-space: nowrap;
+    display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;
+  }
+  .gate__btn:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(254, 111, 58, 0.28); }
+  .gate__error { color: #ef4444; font-size: 0.82rem; margin-top: 0.75rem; }
+
+  /* === Portale === */
+  .gg { max-width: var(--max-width); margin: 0 auto; padding: 0 1.5rem 4rem; }
+  .gg__header { display: flex; align-items: center; justify-content: space-between; padding: 1.25rem 0; border-bottom: 1px solid #e2e8f0; }
+  .gg__header-brand { display: flex; align-items: center; gap: 1rem; }
+  .gg__logo { height: 36px; flex-shrink: 0; }
+  .gg__header-sep { width: 1px; height: 28px; background: #e2e8f0; }
+  .gg__partner-badge {
+    display: flex; align-items: center; gap: 0.4rem;
+    background: linear-gradient(135deg, #fff7f3, #fde4d4);
+    border: 1px solid #fbcfb0; border-radius: 8px; padding: 0.35rem 0.75rem;
+  }
+  .gg__partner-icon { color: #FE6F3A; display: inline-flex; }
+  .gg__partner-label { font-size: 0.85rem; font-weight: 700; color: #D45A2E; }
+  .gg__logout {
+    background: none; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.4rem 0.85rem;
+    font-family: var(--font-family); font-size: 0.82rem; font-weight: 600; color: #64748b;
+    cursor: pointer; transition: border-color 0.2s, color 0.2s; display: flex; align-items: center; gap: 0.3rem;
+  }
+  .gg__logout:hover { border-color: #FE6F3A; color: #FE6F3A; }
+
+  .gg__conv { font-size: 0.9rem; color: #787782; margin: 1.5rem 0 0.4rem; }
+  .gg__conv strong { color: #0F1020; letter-spacing: 0.04em; }
+  .gg__dash-title { font-size: 1.35rem; font-weight: 800; color: #0F1020; padding-bottom: 0.75rem; margin: 0 0 1.25rem; border-bottom: 1px solid #E1DEE3; }
+  .gg__cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 3rem; }
+  .gg__card {
+    display: flex; flex-direction: column; gap: 0.6rem;
+    background: #F8F7FA; border: 1px solid #E1DEE3; border-bottom: 3px solid #293C5B;
+    border-radius: 10px; padding: 1.25rem; text-decoration: none;
+    transition: transform 0.15s, box-shadow 0.2s;
+  }
+  .gg__card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(15, 16, 32, 0.08); }
+  .gg__card-head { display: flex; align-items: center; gap: 0.45rem; font-size: 1rem; font-weight: 800; color: #293C5B; }
+  .gg__card-head .mcf-icon { color: #FE6F3A; }
+  .gg__card-desc { font-size: 0.84rem; color: #444451; line-height: 1.5; margin: 0; flex: 1; }
+  .gg__card-link { font-size: 0.84rem; font-weight: 700; color: #664CCD; text-decoration: none; }
+  .gg__card-link:hover { text-decoration: underline; }
+
+  /* Sezioni */
+  .gg__section { margin-bottom: 3rem; scroll-margin-top: 90px; }
+  .gg__section-head { display: flex; gap: 1rem; align-items: flex-start; margin-bottom: 1.25rem; }
+  .gg__section-num {
+    flex-shrink: 0; width: 36px; height: 36px;
+    background: linear-gradient(135deg, #FE6F3A, #664CCD);
+    color: #ffffff; font-weight: 800; font-size: 1rem;
+    display: flex; align-items: center; justify-content: center; border-radius: 50%;
+  }
+  .gg__section-title { font-size: 1.2rem; font-weight: 800; color: #0F1020; margin: 0 0 0.3rem; line-height: 1.3; }
+  .gg__section-sub { font-size: 0.9rem; color: #444451; line-height: 1.55; margin: 0; max-width: 720px; }
+
+  /* Form */
+  .gg__form { display: flex; flex-direction: column; gap: 1.5rem; }
+  .gg__form-block { background: #ffffff; border: 1px solid #E1DEE3; border-radius: 14px; padding: 1.5rem 1.75rem; }
+  .gg__form-block-title { font-size: 0.78rem; font-weight: 800; color: #664CCD; text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 1rem; }
+  .gg__hint { font-size: 0.85rem; color: #787782; line-height: 1.5; margin: 0 0 1rem; }
+  .gg__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .gg__field { display: flex; flex-direction: column; gap: 0.35rem; }
+  .gg__field--full { grid-column: 1 / -1; }
+  .gg__field-label { font-size: 0.82rem; font-weight: 600; color: #444451; }
+  .gg__field input, .gg__field select {
+    padding: 0.7rem 0.85rem; border: 1.5px solid #E1DEE3; border-radius: 10px;
+    font-family: var(--font-family); font-size: 0.95rem; color: #0F1020; background: #fafafa;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .gg__field input:focus, .gg__field select:focus {
+    outline: none; border-color: #FE6F3A; background: #ffffff; box-shadow: 0 0 0 3px rgba(254, 111, 58, 0.1);
+  }
+
+  /* Avviso forma giuridica */
+  .gg__avviso {
+    display: flex; gap: 0.85rem; align-items: flex-start;
+    border-radius: 10px; padding: 0.9rem 1.1rem; margin-top: 1rem;
+    background: #fffbeb; border: 1px solid #fde68a;
+  }
+  .gg__avviso--grave { background: #fef2f2; border-color: #fecaca; }
+  .gg__avviso-icon { color: #b45309; flex-shrink: 0; display: inline-flex; }
+  .gg__avviso--grave .gg__avviso-icon { color: #b91c1c; }
+  .gg__avviso strong { display: block; font-size: 0.92rem; margin-bottom: 0.2rem; color: #0F1020; }
+  .gg__avviso p { margin: 0; font-size: 0.85rem; color: #444451; line-height: 1.5; }
+
+  /* Submit */
+  .gg__submit-row {
+    display: flex; align-items: center; gap: 1.25rem;
+    background: linear-gradient(135deg, #fff7f3, #f5f3ff);
+    border: 1px solid #fde4d4; border-radius: 14px; padding: 1.25rem 1.5rem; flex-wrap: wrap;
+  }
+  .gg__submit {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    background: linear-gradient(135deg, #FE6F3A, #664CCD); color: #ffffff;
+    font-family: var(--font-family); font-weight: 700; font-size: 0.95rem;
+    border: none; border-radius: 10px; padding: 0.85rem 1.6rem; cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.2s; white-space: nowrap;
+  }
+  .gg__submit:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(254, 111, 58, 0.28); }
+  .gg__submit:disabled { opacity: 0.6; cursor: wait; }
+  .gg__submit-hint { margin: 0; font-size: 0.85rem; color: #444451; line-height: 1.5; flex: 1; min-width: 240px; }
+
+  /* Storico */
+  .gg__storico-bar { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+  .gg__refresh {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    background: #ffffff; border: 1.5px solid #664CCD; border-radius: 10px;
+    color: #664CCD; font-family: var(--font-family); font-weight: 700; font-size: 0.85rem;
+    padding: 0.5rem 1rem; cursor: pointer; transition: box-shadow 0.2s;
+  }
+  .gg__refresh:hover { box-shadow: 0 4px 12px rgba(102, 76, 205, 0.18); }
+  .gg__storico-info { font-size: 0.85rem; color: #787782; }
+  .gg__storico-wrap { overflow-x: auto; }
+  /* Disclaimer (il feedback sta nel blocco globale: classe assegnata a runtime) */
+  .gg__disclaimer { font-size: 0.78rem; color: #787782; line-height: 1.5; border-top: 1px solid #E1DEE3; padding-top: 1rem; margin: 0; }
+
+  /* Responsive */
+  @media (max-width: 960px) {
+    .gg__cards { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 768px) {
+    .gate__card { padding: 2rem 1.5rem 1.5rem; }
+    .gate__logo { height: 32px; }
+    .gg__logo { height: 28px; }
+    .gg__form-block { padding: 1.25rem; }
+    .gg__grid { grid-template-columns: 1fr; gap: 0.85rem; }
+    .gg__submit-row { flex-direction: column; align-items: stretch; }
+    .gg__submit { justify-content: center; }
+  }
+</style>
+
+<style is:global>
+  /* Risultato (markup dinamico) */
+  .gg .gg__kpi { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+  .gg .gg__kpi-card {
+    background: #F8F7FA; border: 1px solid #E1DEE3; border-radius: 12px;
+    padding: 1.1rem 1.25rem; display: flex; flex-direction: column; gap: 0.3rem;
+  }
+  .gg .gg__kpi-card--ok { background: #ecfdf5; border-color: #a7f3d0; }
+  .gg .gg__kpi-num { font-size: 1.5rem; font-weight: 800; color: #0F1020; line-height: 1.1; }
+  .gg .gg__kpi-label { font-size: 0.8rem; color: #444451; line-height: 1.4; }
+  .gg .gg__due-col { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1rem; }
+  .gg .gg__box { background: #ffffff; border: 1px solid #E1DEE3; border-radius: 12px; padding: 1.25rem 1.4rem; }
+  .gg .gg__box-title { font-size: 0.78rem; font-weight: 800; color: #664CCD; text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 0.85rem; }
+  .gg .gg__box-nota { font-size: 0.8rem; color: #787782; line-height: 1.45; margin: 0.85rem 0 0; }
+
+  /* Tabelle */
+  .gg .gg__table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+  .gg .gg__table th {
+    text-align: left; padding: 0.5rem 0.6rem 0.5rem 0;
+    font-size: 0.74rem; font-weight: 700; color: #787782;
+    text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #E1DEE3;
+  }
+  .gg .gg__table td { padding: 0.55rem 0.6rem 0.55rem 0; border-bottom: 1px solid #f1f1f3; color: #0F1020; line-height: 1.4; }
+  .gg .gg__table td:last-child, .gg .gg__table th:last-child { text-align: right; padding-right: 0; }
+  /* gli importi non vanno mai spezzati su due righe */
+  .gg .gg__table td:last-child { white-space: nowrap; }
+  .gg .gg__table--storico td:last-child { white-space: normal; }
+  .gg .gg__table tbody tr:last-child td { border-bottom: none; }
+  .gg .gg__riga-scelta td { background: #fff7f3; font-weight: 700; }
+
+  /* PDF */
+  .gg .gg__pdf-row { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 1.5rem; }
+  .gg .gg__pdf {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    background: #ffffff; border: 1.5px solid #664CCD; border-radius: 10px;
+    color: #664CCD; font-family: var(--font-family); font-weight: 700; font-size: 0.88rem;
+    padding: 0.6rem 1.1rem; cursor: pointer; transition: box-shadow 0.2s;
+  }
+  .gg .gg__pdf:hover:not(:disabled) { box-shadow: 0 4px 12px rgba(102, 76, 205, 0.18); }
+  .gg .gg__pdf:disabled { opacity: 0.6; cursor: wait; }
+
+
+  /* Storico (markup dinamico) */
+  .gg .gg__storico-empty { background: #f8fafc; border: 1px solid #E1DEE3; border-radius: 10px; padding: 1.25rem; font-size: 0.9rem; color: #64748b; margin: 0; }
+  .gg .gg__table--storico { min-width: 760px; }
+  .gg .gg__table--storico td { vertical-align: top; }
+  .gg .gg__table--storico .gg__pdf { padding: 0.3rem 0.6rem; font-size: 0.78rem; margin: 0 0.3rem 0.3rem 0; }
+  .gg .gg__id { font-size: 0.76rem; color: #787782; }
+
+
+  /* Feedback: la classe viene assegnata a runtime */
+  .gg .gg__feedback { padding: 0.9rem 1.1rem; border-radius: 10px; font-size: 0.9rem; line-height: 1.5; border: 1px solid; }
+  .gg .gg__feedback--ok { background: #ecfdf5; border-color: #a7f3d0; color: #047857; }
+  .gg .gg__feedback--err { background: #fef2f2; border-color: #fecaca; color: #b91c1c; }
+
+  @media (max-width: 960px) {
+    .gg .gg__kpi { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 768px) {
+    .gg .gg__kpi { grid-template-columns: 1fr; }
+  }
+</style>
+<style>
+  /* Aggiunte rispetto agli altri portali: qui il gate ha piu' di un volto
+     (accesso, recupero, nuova password, attivazione invito) e c'e' la
+     sezione della rete, che gli altri portali non hanno. */
+  .gate__link-row { margin: 0.9rem 0 0; }
+  .gate__link {
+    background: none; border: none; padding: 0; cursor: pointer;
+    font-family: var(--font-family); font-size: 0.82rem; font-weight: 600; color: #664CCD;
+    text-decoration: underline;
+  }
+  .gate__link:hover { color: #FE6F3A; }
+  .gate__ok { color: #047857; font-size: 0.82rem; margin-top: 0.75rem; line-height: 1.5; }
+  .gate__nota { font-size: 0.78rem; color: #787782; margin: 0.7rem 0 0; }
+  .gate__error { line-height: 1.5; }
+
+  .gg__header-right { display: flex; align-items: center; gap: 0.9rem; }
+  .gg__chi { font-size: 0.82rem; color: #787782; }
+  .gg__sub-title {
+    font-size: 0.95rem; font-weight: 800; color: #293C5B;
+    margin: 2rem 0 0.85rem; padding-bottom: 0.4rem; border-bottom: 1px solid #E1DEE3;
+  }
+  .gg__inline-btn {
+    background: none; border: none; padding: 0; cursor: pointer;
+    font-family: var(--font-family); font-size: inherit; font-weight: 700; color: #664CCD;
+    text-decoration: underline;
+  }
+  .gg__hint--sotto { margin: 0.3rem 0 0; font-size: 0.78rem; }
+  .gg__field select option:disabled { color: #b9b9c0; }
+
+  @media (max-width: 768px) {
+    .gg__header { flex-wrap: wrap; gap: 0.75rem; }
+    .gg__chi { display: none; }
+  }
+</style>
+
+<style is:global>
+  /* Righe della rete: markup iniettato a runtime, quindi fuori dallo scoped */
+  .gg .gg__riga-spenta td { opacity: 0.55; }
+  .gg .gg__riga-spenta td:first-child { text-decoration: line-through; }
+</style>

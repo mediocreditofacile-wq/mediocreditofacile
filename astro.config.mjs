@@ -41,6 +41,7 @@ export default defineConfig({
           '/tools/expo-energia',
           '/tools/extreme-computer',
           '/tools/full-service',
+          '/tools/green-go',
           '/tools/gruppo-barone',
           '/tools/innovalux',
           '/tools/marotta',
