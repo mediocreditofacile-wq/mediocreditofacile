@@ -748,6 +748,15 @@
     <span style="margin-left:auto; opacity:0.7;">Registro imprese attivo per P.IVA reali</span>
   </div>
 
+  <div class="demo-bar">
+    <span>Estero demo:</span>
+    <span class="demo-piva" onclick="setDemoEstero('FR','447635830')">Francia</span> Les Bufflonnes du Sud &nbsp;·&nbsp;
+    <span class="demo-piva" onclick="setDemoEstero('DE','DE129274202')">Germania</span> Siemens &nbsp;·&nbsp;
+    <span class="demo-piva" onclick="setDemoEstero('ES','A39000013')">Spagna</span> Santander &nbsp;·&nbsp;
+    <span class="demo-piva" onclick="setDemoEstero('BR','33.592.510/0001-54')">Brasile</span> Vale
+    <span style="margin-left:auto; opacity:0.7;">Aziende vere, gia' in cache: cliccarle non consuma ricerche</span>
+  </div>
+
   <div class="search-section">
     <div class="search-label">Ricerca caseificio per P.IVA</div>
     <div class="search-row">
@@ -1177,8 +1186,28 @@ function esciTool(){
 }
 
 function setDemo(p){
+  // Riporta il selettore sull'Italia: se restava su un paese estero, la P.IVA
+  // italiana finirebbe nel registro sbagliato.
+  const sel=document.getElementById("paeseSelect");
+  if(sel&&sel.value!=="IT"){ sel.value="IT"; onPaeseCambio(); }
   document.getElementById("pivaInput").value=p;
   onPivaInput(document.getElementById("pivaInput"));
+  setTimeout(cerca,100);
+}
+
+// Esempi esteri. A differenza dei demo italiani, che sono partite IVA finte
+// risolte dalla tabella DEMO qui dentro, questi sono soggetti veri: la ricerca
+// parte davvero, ma sono gia' in cache da 30 giorni, quindi non spende.
+// Coprono i casi che cambiano l'esito: Francia (Schengen, niente patrimonio
+// netto nel registro), Germania e Spagna (dati completi), Brasile (fuori area
+// euro, il canale non si decide da solo).
+function setDemoEstero(paese,id){
+  const sel=document.getElementById("paeseSelect");
+  sel.value=paese;
+  onPaeseCambio();
+  const el=document.getElementById("pivaInput");
+  el.value=id;
+  onPivaInput(el);
   setTimeout(cerca,100);
 }
 
@@ -1269,6 +1298,11 @@ function attivaPartnerEstero(data){
   document.getElementById("esteroPaese").value=nomePaese(data.paese);
   document.getElementById("esteroArea").value=data.esito.area==="schengen"?"schengen":"extra";
   toggleEstero();
+  // Il verdetto arrivato con la ricerca non conosce ancora l'importo: elabora()
+  // ha appena scelto la macchina di default, ma il ricalcolo era partito quando
+  // stato.paeseControparte era ancora vuoto e si era fermato subito. Senza questa
+  // riga il canale resta "da definire" finche' Andrea non tocca il prezzo.
+  aggiornaProspettoEstero();
 }
 
 function renderControparte(){
