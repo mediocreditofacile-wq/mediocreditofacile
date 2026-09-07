@@ -259,7 +259,11 @@ Mai nero puro #000000 — usare sempre #0F1020 o #444451
 - Telefono: +39 393 995 7840 (link tel:+393939957840)
 - Email: mediocreditofacile@gmail.com
 - Privacy: link a /privacy su tutti i form
-- Immagini: sempre in public/images/, nomi kebab-case
+- Immagini: sempre in public/images/, nomi kebab-case. **Solo .webp**: gli originali .png/.jpg
+  non vanno committati (`.gitignore` li blocca, unica eccezione `logo-email.png`). A settembre 2026
+  erano rimasti 74 originali gia' convertiti accanto ai loro .webp, 227 MB che nessuna pagina
+  referenziava: moltiplicati per ogni deployment avevano saturato i 10 GB di deployment storage
+  del piano. Chi converte un'immagine cancella l'originale, resta nella storia git se serve.
 - Form — campo "fonte" OBBLIGATORIO: ogni form del sito deve avere un campo nascosto `fonte` con lo slug della pagina. Per le landing dinamiche (da landing-pages.json), il componente ContactForm accetta la prop `fonte` e lo slug viene passato automaticamente in [slug].astro. Per i form inline nelle pagine statiche, usare `<input type="hidden" name="fonte" value="[slug]" />`. Il campo arriva a Zapier e da lì nella mail di notifica e in Pipedrive, così ogni lead porta con sé l'informazione della pagina di provenienza.
 
 ## API Routes (Vercel serverless)
