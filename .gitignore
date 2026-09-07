@@ -32,3 +32,8 @@ firebase-debug.log
 
 # Worktree temporanei di Claude Code: sono copie della repo, 1,7 GB
 .claude/worktrees/
+
+# originali non ottimizzati: in public/images vanno solo i .webp serviti
+public/images/*.png
+public/images/*.jpg
+!public/images/logo-email.png
