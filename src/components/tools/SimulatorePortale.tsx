@@ -46,7 +46,7 @@ const TABELLE: Record<Tabella, { label: string; hint: string; min: number; max: 
   },
   pagarent: {
     label: 'PagaRent — Noleggio operativo',
-    hint: 'Beni strumentali in genere: ledwall e display, hardware, attrezzature. Canone mensile. Istruttoria 100 € una tantum a carico del cliente e assicurazione all risk facoltativa (fino al 3,47%), entrambe fuori dal canone.',
+    hint: 'Beni strumentali in genere: hardware, display, attrezzature. Canone mensile. Istruttoria 100 € una tantum a carico del cliente e assicurazione all risk facoltativa (fino al 3,47%), entrambe fuori dal canone.',
     min: PAGARENT_MIN,
     max: PAGARENT_MAX,
     durate: [...PAGARENT_DURATE],

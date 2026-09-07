@@ -5,7 +5,8 @@ import Icon from '../../components/Icon.astro';
  * Stessa struttura del portale UNIDIMA (stesso motore condiviso):
  * - login con email + password (account del titolare Luca Cinnella)
  * - dashboard con card in stile ReteRent (Simulazioni / Preventivi / Richieste)
- * - simulatore su due tabelle, PagaRent (default) e Grenke Pioneer
+ * - simulatore su UNA sola tabella, PagaRent: essendo l'unico canale il menu
+ *   prodotto non compare
  * - preventivo scaricabile in PDF brandizzato MCF, oltre alla stampa
  * - form di caricamento pratica con checklist documenti dinamica e upload allegati
  * Lead vanno a /api/submit-extreme-computer (mail dettagliata + Zapier).
@@ -15,9 +16,10 @@ import Icon from '../../components/Icon.astro';
  * continuita', networking, videosorveglianza), ticket tipicamente sotto i 20.000
  * euro su studi professionali e PMI di Potenza. Impresa individuale attiva dal
  * 1998, un addetto, ATECO 26.20.00, partner MSI. Canale primario PagaRent,
- * alternativa ReteRent/Grenke tabella Pioneer: la rotazione la decide MCF sul
- * merito del cliente finale. Verificare lo stato del censimento fornitore prima
- * di promettere il pagamento diretto.
+ * unico canale esposto nel portale. Se una pratica va ruotata altrove (ReteRent/
+ * Grenke Pioneer o BCC) la decisione resta a MCF, fuori dalla vista del partner.
+ * Verificare lo stato del censimento fornitore prima di promettere il pagamento
+ * diretto.
  */
 import ToolLayout from '../../layouts/ToolLayout.astro';
 import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
@@ -109,19 +111,18 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
           <p class="ec__section-sub">
             Noleggio operativo su hardware IT e sistemi, durate da 24 a 60 mesi. Parti dal prezzo
             di vendita per vedere il canone su tutte le durate, oppure dal canone che il cliente ha in
-            testa per ricavare il prezzo. In entrambe le tabelle l'assicurazione all risk non è compresa
-            nel canone e si aggiunge a parte. L'importo definitivo viene confermato dopo la delibera.
+            testa per ricavare il prezzo. L'assicurazione all risk non è compresa nel canone e si
+            aggiunge a parte. L'importo definitivo viene confermato dopo la delibera.
           </p>
         </div>
       </header>
       <SimulatorePortale
         client:load
-        tabelle={['pagarent', 'pioneer']}
+        tabelle={['pagarent']}
         partner="Extreme Computer di Cinnella Luca"
         pdfPreventivo={true}
         etichetteBene={{
           pagarent: 'Hardware IT e sistemi',
-          pioneer: 'Hardware IT e sistemi',
         }}
       />
     </section>
