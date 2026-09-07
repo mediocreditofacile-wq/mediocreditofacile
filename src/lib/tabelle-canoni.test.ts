@@ -97,6 +97,36 @@ describe('il motore usa la tabella che riceve', () => {
   });
 });
 
+describe('calcolo inverso, dal canone al prezzo', () => {
+  it('chiude il giro: 35.000 euro danno 711,20 e 711,20 riportano a 35.000', () => {
+    const canone = Math.round(35_000 * TABELLA_ESG.coefficiente(35_000, 60)!) / 100;
+    expect(canone).toBe(711.2);
+    expect(TABELLA_ESG.prezzoDaCanone(711.2, 60)).toBeCloseTo(35_000, 0);
+  });
+
+  it('sceglie la fascia in cui il prezzo ricade davvero', () => {
+    // Un canone basso sta in una fascia bassa, uno alto in una alta: il
+    // coefficiente dipende dal prezzo, quindi non c'e' una formula unica.
+    const piccolo = TABELLA_ESG.prezzoDaCanone(60, 60)!;
+    const grande = TABELLA_ESG.prezzoDaCanone(2000, 60)!;
+    expect(TABELLA_ESG.coefficiente(piccolo, 60)).not.toBe(TABELLA_ESG.coefficiente(grande, 60));
+    expect(Math.round(piccolo * TABELLA_ESG.coefficiente(piccolo, 60)!) / 100).toBeCloseTo(60, 0);
+    expect(Math.round(grande * TABELLA_ESG.coefficiente(grande, 60)!) / 100).toBeCloseTo(2000, 0);
+  });
+
+  it('un canone che nessuna fascia regge non viene arrotondato: torna null', () => {
+    // Meglio dire che non esiste che dare all'agente un numero inventato
+    expect(TABELLA_ESG.prezzoDaCanone(999_999, 60)).toBeNull();
+    expect(TABELLA_ESG.prezzoDaCanone(0, 60)).toBeNull();
+  });
+
+  it('vale anche su PagaRent, che ha il suo listino', () => {
+    const prezzo = TABELLA_PAGARENT.prezzoDaCanone(500, 60);
+    expect(prezzo).toBeGreaterThan(0);
+    expect(Math.round(prezzo! * TABELLA_PAGARENT.coefficiente(prezzo!, 60)!) / 100).toBeCloseTo(500, 0);
+  });
+});
+
 describe('getTabella', () => {
   it('risolve gli id noti', () => {
     expect(getTabella('esg')).toBe(TABELLA_ESG);

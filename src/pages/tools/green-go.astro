@@ -125,15 +125,15 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
 
     <h1 class="gg__dash-title">Prospetti impianti fotovoltaici</h1>
     <div class="gg__cards">
-      <a href="#preventivo" class="gg__card">
-        <div class="gg__card-head"><Icon name="calculate" /> Nuovo prospetto</div>
-        <p class="gg__card-desc">Impianto e importo: canone su tutte le durate, bilancio energetico e confronto con il leasing.</p>
-        <span class="gg__card-link">Compila i dati &raquo;</span>
+      <a href="#simulazione" class="gg__card">
+        <div class="gg__card-head"><Icon name="calculate" /> Simulazione rapida</div>
+        <p class="gg__card-desc">Solo numeri: dall'importo il canone su tutte le durate, o dal canone che il cliente regge l'importo che ci sta dentro.</p>
+        <span class="gg__card-link">Fai due conti &raquo;</span>
       </a>
-      <a href="#risultato" class="gg__card">
-        <div class="gg__card-head"><Icon name="description" /> I due documenti</div>
-        <p class="gg__card-desc">Prospetto analitico e prospetto infografico, pronti da consegnare al cliente finale.</p>
-        <span class="gg__card-link">Vai al risultato &raquo;</span>
+      <a href="#preventivo" class="gg__card">
+        <div class="gg__card-head"><Icon name="description" /> Prospetto completo</div>
+        <p class="gg__card-desc">Con i dati del cliente: bilancio energetico, confronto con il leasing e i due PDF da consegnare.</p>
+        <span class="gg__card-link">Compila i dati &raquo;</span>
       </a>
       <a href="#storico" class="gg__card">
         <div class="gg__card-head"><Icon name="receipt_long" /> Storico</div>
@@ -142,10 +142,67 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
       </a>
     </div>
 
-    <!-- 1. Dati -->
-    <section id="preventivo" class="gg__section">
+    <!-- 1. Simulazione rapida: solo numeri, nessun dato del cliente -->
+    <section id="simulazione" class="gg__section">
       <header class="gg__section-head">
         <span class="gg__section-num">1</span>
+        <div>
+          <h2 class="gg__section-title">Due conti al volo</h2>
+          <p class="gg__section-sub">
+            Serve quando hai il cliente al telefono e devi dire un numero. Non chiede i dati del cliente,
+            non produce documenti e non lascia traccia: quando la trattativa si concretizza, il prospetto
+            da consegnare si fa qui sotto.
+          </p>
+        </div>
+      </header>
+
+      <div class="gg__form-block">
+        <div class="gg__scelta">
+          <button type="button" class="gg__scelta-btn gg__scelta-btn--attivo" data-verso="da-prezzo">Ho il prezzo dell'impianto</button>
+          <button type="button" class="gg__scelta-btn" data-verso="da-canone">Ho il canone che il cliente regge</button>
+        </div>
+
+        <div class="gg__grid" id="sim-campi">
+          <div class="gg__field" id="sim-campo-prezzo">
+            <label class="gg__field-label" for="sim-importo">Importo chiavi in mano, IVA esclusa (€)</label>
+            <input type="number" id="sim-importo" min="800" step="100" placeholder="35000" />
+          </div>
+          <div class="gg__field" id="sim-campo-canone" hidden>
+            <label class="gg__field-label" for="sim-canone">Canone mensile (€)</label>
+            <input type="number" id="sim-canone" min="1" step="10" placeholder="700" />
+          </div>
+          <div class="gg__field" id="sim-campo-durata" hidden>
+            <label class="gg__field-label" for="sim-durata">Durata</label>
+            <select id="sim-durata">
+              <option value="36">36 mesi</option>
+              <option value="48">48 mesi</option>
+              <option value="60" selected>60 mesi</option>
+              <option value="72">72 mesi</option>
+              <option value="84">84 mesi</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="gg__submit-row" style="margin-top:1rem">
+          <button type="button" id="sim-btn" class="gg__submit">
+            <Icon name="calculate" />
+            Calcola
+          </button>
+          <p class="gg__submit-hint" id="sim-hint">
+            Il canone e' indicativo: la rata definitiva viene assegnata sul merito creditizio del cliente,
+            una volta esaminata la documentazione.
+          </p>
+        </div>
+
+        <div id="sim-feedback" class="gg__feedback" hidden></div>
+        <div id="sim-risultato"></div>
+      </div>
+    </section>
+
+    <!-- 2. Prospetto completo -->
+    <section id="preventivo" class="gg__section">
+      <header class="gg__section-head">
+        <span class="gg__section-num">2</span>
         <div>
           <h2 class="gg__section-title">I dati dell'impianto</h2>
           <p class="gg__section-sub">
@@ -271,10 +328,10 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
       </form>
     </section>
 
-    <!-- 2. Risultato -->
+    <!-- 3. Risultato del prospetto -->
     <section id="risultato" class="gg__section" hidden>
       <header class="gg__section-head">
-        <span class="gg__section-num">2</span>
+        <span class="gg__section-num">3</span>
         <div>
           <h2 class="gg__section-title">Il prospetto</h2>
           <p class="gg__section-sub" id="risultato-sub"></p>
@@ -283,10 +340,10 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
       <div id="risultato-body"></div>
     </section>
 
-    <!-- 3. Storico -->
+    <!-- 4. Storico -->
     <section id="storico" class="gg__section">
       <header class="gg__section-head">
-        <span class="gg__section-num">3</span>
+        <span class="gg__section-num">4</span>
         <div>
           <h2 class="gg__section-title">I prospetti già generati</h2>
           <p class="gg__section-sub" id="storico-sub">
@@ -305,10 +362,10 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
       <div id="storico-wrap" class="gg__storico-wrap"></div>
     </section>
 
-    <!-- 4. La rete: solo referente e MCF -->
+    <!-- 5. La rete: solo referente e MCF -->
     <section id="rete" class="gg__section" hidden>
       <header class="gg__section-head">
-        <span class="gg__section-num">4</span>
+        <span class="gg__section-num">5</span>
         <div>
           <h2 class="gg__section-title">La tua rete</h2>
           <p class="gg__section-sub">
@@ -662,6 +719,106 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
   }
   $('importo').addEventListener('input', aggiornaDurate);
 
+  // === Simulazione rapida ===
+  // Nessun dato del cliente, niente da salvare: si chiede un numero e si
+  // ottiene un numero. Il calcolo e' server-side come tutto il resto.
+  let versoSim: 'da-prezzo' | 'da-canone' = 'da-prezzo';
+
+  for (const btn of Array.from(document.querySelectorAll('[data-verso]'))) {
+    btn.addEventListener('click', () => {
+      versoSim = (btn as HTMLElement).dataset.verso as typeof versoSim;
+      for (const b of Array.from(document.querySelectorAll('[data-verso]'))) {
+        b.classList.toggle('gg__scelta-btn--attivo', b === btn);
+      }
+      const daPrezzo = versoSim === 'da-prezzo';
+      ($('sim-campo-prezzo') as HTMLElement).hidden = !daPrezzo;
+      ($('sim-campo-canone') as HTMLElement).hidden = daPrezzo;
+      ($('sim-campo-durata') as HTMLElement).hidden = daPrezzo;
+      ($('sim-feedback') as HTMLElement).hidden = true;
+      $('sim-risultato').innerHTML = '';
+    });
+  }
+
+  $('sim-btn').addEventListener('click', async () => {
+    const btn = $('sim-btn') as HTMLButtonElement;
+    const box = $('sim-feedback') as HTMLElement;
+    const corpo =
+      versoSim === 'da-prezzo'
+        ? { verso: 'da-prezzo', importo: ($('sim-importo') as HTMLInputElement).value }
+        : {
+            verso: 'da-canone',
+            canone: ($('sim-canone') as HTMLInputElement).value,
+            durata: ($('sim-durata') as HTMLSelectElement).value,
+          };
+
+    btn.disabled = true;
+    box.hidden = true;
+    const { res, corpo: r } = await apiJson('/api/portale-simulazione', {
+      method: 'POST',
+      body: JSON.stringify(corpo),
+    });
+    btn.disabled = false;
+
+    if (!res.ok || !r?.ok) {
+      $('sim-risultato').innerHTML = '';
+      if (r?.error === 'importo_fuori_range' || r?.error === 'canone_fuori_range') {
+        feedback(box, `Fuori dal range quotabile: si va da ${euro(r.min)} a ${euro(r.max)} euro di imponibile.`, false);
+      } else if (r?.error === 'sessione_assente') {
+        mostraGate();
+        mostraVista('vista-login');
+        errore("La sessione è scaduta. Rifai l'accesso.");
+      } else {
+        feedback(box, traduci(r?.error ?? ''), false);
+      }
+      return;
+    }
+
+    if (r.verso === 'da-canone') {
+      $('sim-risultato').innerHTML = `
+        <div class="gg__kpi gg__kpi--uno">
+          <div class="gg__kpi-card">
+            <span class="gg__kpi-num">${euro(r.prezzo)} €</span>
+            <span class="gg__kpi-label">Imponibile che sta dentro un canone di ${euro(r.canone, 2)} € a ${r.durata} mesi</span>
+          </div>
+        </div>
+        <p class="gg__box-nota">Importo IVA esclusa, riscatto escluso.</p>
+        <div class="gg__pdf-row">
+          <button type="button" class="gg__pdf" id="sim-porta" data-importo="${r.prezzo}">Porta questo importo nel prospetto</button>
+        </div>`;
+      return;
+    }
+
+    const righe = (r.durate as number[])
+      .map((m) => `<tr><td>${m} mesi</td><td>${euro(r.canoni[m], 2)} €</td><td>${euro(r.riscatti[m], 0)} €</td></tr>`)
+      .join('');
+    $('sim-risultato').innerHTML = `
+      <div class="gg__box" style="margin-top:1.25rem">
+        <p class="gg__box-title">Canone per durata su ${euro(r.importo)} €</p>
+        <table class="gg__table">
+          <thead><tr><th>Durata</th><th>Canone</th><th>Riscatto</th></tr></thead>
+          <tbody>${righe}</tbody>
+        </table>
+        <p class="gg__box-nota">
+          Riscatto indicativo: il prezzo effettivo si definisce a fine contratto sullo stato del bene.
+          Le durate più lunghe compaiono sopra certi importi.
+        </p>
+      </div>
+      <div class="gg__pdf-row">
+        <button type="button" class="gg__pdf" id="sim-porta" data-importo="${r.importo}">Porta questo importo nel prospetto</button>
+      </div>`;
+  });
+
+  // Dal conto al volo al prospetto vero, senza ridigitare l'importo
+  document.addEventListener('click', (e) => {
+    const btn = (e.target as HTMLElement).closest('#sim-porta') as HTMLElement | null;
+    if (!btn) return;
+    const campo = $('importo') as HTMLInputElement;
+    campo.value = String(Math.round(Number(btn.dataset.importo)));
+    campo.dispatchEvent(new Event('input'));
+    $('preventivo').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    ($('cliente') as HTMLInputElement).focus();
+  });
+
   // === Generazione del prospetto ===
   function feedback(el: HTMLElement, testo: string, ok: boolean) {
     el.textContent = testo;
@@ -1008,7 +1165,7 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
   .gg__conv { font-size: 0.9rem; color: #787782; margin: 1.5rem 0 0.4rem; }
   .gg__conv strong { color: #0F1020; letter-spacing: 0.04em; }
   .gg__dash-title { font-size: 1.35rem; font-weight: 800; color: #0F1020; padding-bottom: 0.75rem; margin: 0 0 1.25rem; border-bottom: 1px solid #E1DEE3; }
-  .gg__cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 3rem; }
+  .gg__cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1rem; margin-bottom: 3rem; }
   .gg__card {
     display: flex; flex-direction: column; gap: 0.6rem;
     background: #F8F7FA; border: 1px solid #E1DEE3; border-bottom: 3px solid #293C5B;
@@ -1199,6 +1356,17 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
     text-decoration: underline;
   }
   .gg__hint--sotto { margin: 0.3rem 0 0; font-size: 0.78rem; }
+
+  /* Scelta della direzione nella simulazione rapida */
+  .gg__scelta { display: flex; gap: 0.5rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+  .gg__scelta-btn {
+    background: #ffffff; border: 1.5px solid #E1DEE3; border-radius: 10px;
+    padding: 0.55rem 1rem; cursor: pointer;
+    font-family: var(--font-family); font-size: 0.85rem; font-weight: 600; color: #444451;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+  }
+  .gg__scelta-btn:hover { border-color: #FE6F3A; color: #D45A2E; }
+  .gg__scelta-btn--attivo { background: #fff7f3; border-color: #FE6F3A; color: #D45A2E; }
   .gg__field select option:disabled { color: #b9b9c0; }
 
   @media (max-width: 768px) {
@@ -1210,5 +1378,7 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
 <style is:global>
   /* Righe della rete: markup iniettato a runtime, quindi fuori dallo scoped */
   .gg .gg__riga-spenta td { opacity: 0.55; }
+  /* Nella simulazione dal canone il risultato e' uno solo: non va spalmato su quattro colonne */
+  .gg .gg__kpi--uno { grid-template-columns: 1fr; max-width: 460px; margin-top: 1.25rem; }
   .gg .gg__riga-spenta td:first-child { text-decoration: line-through; }
 </style>

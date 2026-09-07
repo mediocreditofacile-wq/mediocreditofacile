@@ -11,7 +11,8 @@
 // Tenerle separate evita l'errore piu' facile, cioe' allinearle credendole
 // la stessa cosa: sullo stesso impianto danno canoni diversi.
 
-import { ESG_MAX, ESG_MIN, getEsgCoeff } from '../data/esg';
+import { ESG_MAX, ESG_MIN, esgPrezzoDaCanone, getEsgCoeff } from '../data/esg';
+import { pagarentPrezzoDaRata } from '../data/pagarent';
 import {
   DURATE as DURATE_PAGARENT,
   IMPORTO_MAX as PAGARENT_MAX,
@@ -32,6 +33,12 @@ export interface TabellaCanoni {
   importoMax: number;
   /** canone = importo x coefficiente / 100. Null se la durata non e' quotabile. */
   coefficiente(importo: number, durata: number): number | null;
+  /**
+   * Calcolo inverso: dal canone che il cliente puo' sostenere all'imponibile.
+   * Serve alla simulazione rapida, dove l'agente parte dalla rata e non dal
+   * prezzo. Null se nessuna fascia regge quel canone su quella durata.
+   */
+  prezzoDaCanone(canone: number, durata: number): number | null;
   /** Le durate effettivamente quotabili per quell'importo */
   durateDisponibili(importo: number): number[];
   /** L'importo si puo' quotare su questa tabella? */
@@ -50,6 +57,7 @@ export const TABELLA_PAGARENT: TabellaCanoni = {
   importoMin: PAGARENT_MIN,
   importoMax: PAGARENT_MAX,
   coefficiente: coeffPagarent,
+  prezzoDaCanone: (canone, durata) => pagarentPrezzoDaRata(canone, durata),
   durateDisponibili(importo) {
     return DURATE_PAGARENT.filter((m) => coeffPagarent(importo, m) !== null);
   },
@@ -93,6 +101,7 @@ export const TABELLA_ESG: TabellaCanoni = {
   importoMin: ESG_MIN,
   importoMax: ESG_MAX,
   coefficiente: (importo, durata) => getEsgCoeff(importo, durata),
+  prezzoDaCanone: (canone, durata) => esgPrezzoDaCanone(canone, durata),
   durateDisponibili(importo) {
     return DURATE_ESG.filter((m) => getEsgCoeff(importo, m) !== null);
   },
