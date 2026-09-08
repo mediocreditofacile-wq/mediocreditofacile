@@ -94,11 +94,17 @@ interface DaInviare {
  * risponde che non ne accetta altre, l'invito resta 'da_inviare' e riparte
  * al giro successivo.
  */
-export async function svuotaCoda(limite = INVITI_PER_GIRO): Promise<{
-  inviati: number;
-  rimandati: number;
-  falliti: number;
-}> {
+export async function svuotaCoda(
+  limite = INVITI_PER_GIRO,
+  /** Un solo invito, quando il referente chiede di mandare proprio quello */
+  solo?: { id: string; organizationId: string },
+): Promise<{ inviati: number; rimandati: number; falliti: number }> {
+  const valori: unknown[] = [limite];
+  let filtro = '';
+  if (solo) {
+    valori.push(solo.id, solo.organizationId);
+    filtro = ` AND i.id = $${valori.length - 1}::bigint AND i.organization_id = $${valori.length}`;
+  }
   const righe = await query<DaInviare>(
     `SELECT i.id, i.organization_id, i.email, i.nome, i.ruolo, i.creato_da, i.tentativi,
             o.name AS org_nome, o.slug AS org_slug,
@@ -106,10 +112,10 @@ export async function svuotaCoda(limite = INVITI_PER_GIRO): Promise<{
        FROM app.invito i
        JOIN "organization" o ON o.id = i.organization_id
        JOIN "user" u ON u.id = i.creato_da
-      WHERE i.stato = 'da_inviare'
+      WHERE i.stato = 'da_inviare'${filtro}
       ORDER BY i.creato ASC
       LIMIT $1`,
-    [limite],
+    valori,
   );
 
   let inviati = 0;
@@ -176,16 +182,39 @@ export async function svuotaCoda(limite = INVITI_PER_GIRO): Promise<{
   return { inviati, rimandati, falliti };
 }
 
-/** Rimette in coda un invito fallito o scaduto */
-export async function rimandaInvito(idInvito: string, organizationId: string): Promise<boolean> {
+/**
+ * Manda subito un singolo invito, saltando la fila.
+ *
+ * Prima questa funzione si limitava a rimettere l'invito in coda, e il bottone
+ * che la chiamava si chiamava "Rimanda": su un invito gia' in coda non faceva
+ * niente, lo stato restava "in attesa del prossimo scaglione" e chi aveva
+ * cliccato credeva di aver spedito. Ora spedisce davvero.
+ */
+export async function inviaSubito(
+  idInvito: string,
+  organizationId: string,
+): Promise<{ ok: boolean; motivo?: string }> {
   const righe = await query(
     `UPDATE app.invito
         SET stato='da_inviare', tentativi=0, ultimo_errore=NULL, invitation_id=NULL, inviato_il=NULL
-      WHERE id=$1 AND organization_id=$2 AND stato <> 'accettato'
+      WHERE id=$1::bigint AND organization_id=$2 AND stato <> 'accettato'
       RETURNING id`,
     [idInvito, organizationId],
   );
-  return righe.length > 0;
+  if (!righe.length) return { ok: false, motivo: 'invito_non_trovato' };
+
+  const esito = await svuotaCoda(1, { id: idInvito, organizationId });
+  if (esito.inviati === 1) return { ok: true };
+
+  // Non e' partita: il motivo e' gia' scritto sulla riga, il portale lo mostra
+  const stato = await queryUna<{ ultimo_errore: string | null; stato: string }>(
+    `SELECT ultimo_errore, stato FROM app.invito WHERE id = $1::bigint`,
+    [idInvito],
+  );
+  return {
+    ok: false,
+    motivo: stato?.stato === 'da_inviare' ? 'invio_rimandato' : 'invio_fallito',
+  };
 }
 
 /** Segna accettato l'invito corrispondente, dopo che l'utente e' entrato */

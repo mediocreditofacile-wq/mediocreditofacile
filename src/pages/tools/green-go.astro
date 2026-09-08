@@ -579,6 +579,9 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
     dati_incompleti: 'Servono almeno cliente, potenza e importo.',
     password_troppo_corta: 'La password deve avere almeno dieci caratteri.',
     origine_non_valida: 'Richiesta bloccata per sicurezza. Ricarica la pagina.',
+    invito_non_trovato: 'Invito non trovato, o già accettato.',
+    invio_rimandato: 'La posta non lo ha accettato adesso: resta in coda e riparte col giro automatico.',
+    invio_fallito: "L'invio non è riuscito. Controlla l'indirizzo email.",
   };
   const traduci = (codice: string) => MESSAGGI[codice] ?? 'Qualcosa non ha funzionato. Riprova.';
 
@@ -1283,7 +1286,7 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
   }
 
   const ETICHETTA_STATO: Record<string, string> = {
-    da_inviare: 'In coda',
+    da_inviare: 'Non ancora inviato',
     inviato: 'Inviato',
     accettato: 'Accettato',
     fallito: 'Non partito',
@@ -1299,10 +1302,10 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
         <tr>
           <td>${esc(i.nome)}<br><span class="gg__id">${esc(i.email)}</span></td>
           <td>${ETICHETTA_STATO[i.stato] ?? esc(i.stato)}${i.ultimo_errore ? `<br><span class="gg__id">${esc(i.ultimo_errore).slice(0, 80)}</span>` : ''}</td>
-          <td>${i.inviato_il ? data(i.inviato_il) : `<span class="gg__id">in attesa del prossimo scaglione</span>`}</td>
+          <td>${i.inviato_il ? data(i.inviato_il) : `<span class="gg__id">parte col giro delle 7, o mandalo ora</span>`}</td>
           <td>${i.stato === 'accettato'
             ? ''
-            : `<button type="button" class="gg__pdf" data-invito="${esc(i.id)}">Rimanda</button>`}</td>
+            : `<button type="button" class="gg__pdf" data-invito="${esc(i.id)}">${i.stato === 'inviato' ? 'Rimanda ora' : 'Manda ora'}</button>`}</td>
         </tr>`)
       .join('');
     $('inviti-wrap').innerHTML = `
@@ -1347,10 +1350,17 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
     el.disabled = true;
     const corpoReq = el.dataset.membro
       ? { azione: el.dataset.azione, utente: el.dataset.membro }
-      : { azione: 'rimanda', invito: el.dataset.invito };
+      : { azione: 'manda_ora', invito: el.dataset.invito };
+    if (el.dataset.invito) { el.textContent = 'Invio...'; }
     const { res, corpo } = await apiJson('/api/portale-utenti', { method: 'POST', body: JSON.stringify(corpoReq) });
     el.disabled = false;
-    if (!res.ok || !corpo?.ok) return feedback(box, traduci(corpo?.error ?? ''), false);
+    if (!res.ok || !corpo?.ok) {
+      void caricaRete();
+      return feedback(box, traduci(corpo?.error ?? ''), false);
+    }
+    // Il bottone che spedisce deve dirlo: prima non dava nessun segnale e si
+    // finiva per cliccarlo due volte credendo che non avesse funzionato.
+    if (el.dataset.invito) feedback(box, "L'invito è partito.", true);
     void caricaRete();
   });
 

@@ -127,6 +127,46 @@ describe.runIf(HA_DB)('coda degli inviti', () => {
     expect(await svuotaCoda(10)).toMatchObject({ inviati: 0, rimandati: 0, falliti: 0 });
   });
 
+  it('manda subito spedisce davvero, non rimette solo in coda', async () => {
+    const { inviaSubito } = await import('./inviti');
+    await accoda(3);
+    const primo = await query<{ id: string }>(
+      `SELECT id::text FROM app.invito WHERE organization_id = $1 ORDER BY creato ASC LIMIT 1`, [ORG]);
+
+    const esito = await inviaSubito(primo[0].id, ORG);
+    expect(esito.ok).toBe(true);
+    // Una sola mail: gli altri due restano in fila, non parte tutto lo scaglione
+    expect(inviate).toHaveLength(1);
+
+    const righe = await query<{ id: string; stato: string; inviato_il: Date | null }>(
+      `SELECT id::text, stato, inviato_il FROM app.invito WHERE organization_id = $1`, [ORG]);
+    const mandato = righe.find((r) => r.id === primo[0].id)!;
+    expect(mandato.stato).toBe('inviato');
+    expect(mandato.inviato_il).not.toBeNull();
+    expect(righe.filter((r) => r.stato === 'da_inviare')).toHaveLength(2);
+  });
+
+  it('manda subito non tocca gli inviti di un altro fornitore', async () => {
+    const { inviaSubito } = await import('./inviti');
+    await accoda(1);
+    const r = await query<{ id: string }>(
+      `SELECT id::text FROM app.invito WHERE organization_id = $1 LIMIT 1`, [ORG]);
+    // Stesso id, organizzazione sbagliata: deve rifiutare
+    const esito = await inviaSubito(r[0].id, 'org-che-non-e-la-sua');
+    expect(esito).toMatchObject({ ok: false, motivo: 'invito_non_trovato' });
+    expect(inviate).toHaveLength(0);
+  });
+
+  it('se la posta rifiuta, lo dice invece di fingere di aver spedito', async () => {
+    const { inviaSubito } = await import('./inviti');
+    await accoda(1);
+    const r = await query<{ id: string }>(
+      `SELECT id::text FROM app.invito WHERE organization_id = $1 LIMIT 1`, [ORG]);
+    esitoMail = { ok: false, err: 'resend_429: daily quota exceeded', ritentabile: true };
+    const esito = await inviaSubito(r[0].id, ORG);
+    expect(esito).toMatchObject({ ok: false, motivo: 'invio_rimandato' });
+  });
+
   it('due volte la stessa email non fanno due inviti', async () => {
     const uno = await accodaInvito({ organizationId: ORG, email: `bis.${S}@example.invalid`, nome: 'Bis', ruolo: 'agente', creatoDa: userId });
     const due = await accodaInvito({ organizationId: ORG, email: `BIS.${S}@example.invalid`, nome: 'Bis', ruolo: 'agente', creatoDa: userId });

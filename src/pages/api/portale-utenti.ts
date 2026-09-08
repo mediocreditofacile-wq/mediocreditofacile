@@ -5,7 +5,7 @@ export const prerender = false;
 // dipende dall'interfaccia: l'organizzazione esce dalla sessione.
 
 import { query } from '../../lib/db';
-import { accodaInvito, invitiDi, rimandaInvito, svuotaCoda } from '../../lib/inviti';
+import { accodaInvito, invitiDi, inviaSubito, svuotaCoda } from '../../lib/inviti';
 import { richiediSessione, type Contesto } from '../../lib/portale-auth';
 
 function json(payload: unknown, status = 200): Response {
@@ -64,7 +64,7 @@ export async function POST({ request }: { request: Request }) {
 
   const azione = String(corpo.azione ?? '');
   const permesso =
-    azione === 'invita' || azione === 'rimanda' || azione === 'svuota_coda'
+    azione === 'invita' || azione === 'manda_ora' || azione === 'svuota_coda'
       ? { utente: ['invita'] as const }
       : { utente: ['disattiva'] as const };
 
@@ -93,9 +93,9 @@ export async function POST({ request }: { request: Request }) {
     return json(r.ok ? { ok: true } : { ok: false, error: r.motivo }, r.ok ? 200 : 409);
   }
 
-  if (azione === 'rimanda') {
-    const ok = await rimandaInvito(String(corpo.invito ?? ''), contesto.organizationId);
-    return json({ ok }, ok ? 200 : 404);
+  if (azione === 'manda_ora') {
+    const r = await inviaSubito(String(corpo.invito ?? ''), contesto.organizationId);
+    return json(r.ok ? { ok: true } : { ok: false, error: r.motivo }, r.ok ? 200 : 409);
   }
 
   if (azione === 'svuota_coda') {
