@@ -195,14 +195,23 @@ export async function inviaSubito(
   idInvito: string,
   organizationId: string,
 ): Promise<{ ok: boolean; motivo?: string }> {
-  const righe = await query(
+  const righe = await query<{ invitation_id: string | null }>(
     `UPDATE app.invito
-        SET stato='da_inviare', tentativi=0, ultimo_errore=NULL, invitation_id=NULL, inviato_il=NULL
+        SET stato='da_inviare', tentativi=0, ultimo_errore=NULL, inviato_il=NULL
       WHERE id=$1::bigint AND organization_id=$2 AND stato <> 'accettato'
-      RETURNING id`,
+      RETURNING invitation_id`,
     [idInvito, organizationId],
   );
   if (!righe.length) return { ok: false, motivo: 'invito_non_trovato' };
+
+  // Il link vecchio va annullato prima di crearne uno nuovo: altrimenti dopo
+  // due rinvii girano tre link validi per la stessa persona, e chi li ha
+  // ricevuti non sa quale usare.
+  const precedente = righe[0].invitation_id;
+  if (precedente) {
+    await query(`UPDATE "invitation" SET status='canceled' WHERE id=$1 AND status='pending'`, [precedente]);
+  }
+  await query(`UPDATE app.invito SET invitation_id=NULL WHERE id=$1::bigint`, [idInvito]);
 
   const esito = await svuotaCoda(1, { id: idInvito, organizationId });
   if (esito.inviati === 1) return { ok: true };

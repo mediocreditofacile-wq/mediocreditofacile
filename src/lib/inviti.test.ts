@@ -146,6 +146,26 @@ describe.runIf(HA_DB)('coda degli inviti', () => {
     expect(righe.filter((r) => r.stato === 'da_inviare')).toHaveLength(2);
   });
 
+  it('rimandare annulla il link precedente, non ne lascia due validi', async () => {
+    const { inviaSubito } = await import('./inviti');
+    await accoda(1);
+    const r = await query<{ id: string }>(
+      `SELECT id::text FROM app.invito WHERE organization_id = $1 LIMIT 1`, [ORG]);
+
+    await inviaSubito(r[0].id, ORG);
+    const primo = await query<{ id: string }>(
+      `SELECT id FROM "invitation" WHERE "organizationId" = $1`, [ORG]);
+    expect(primo).toHaveLength(1);
+
+    await inviaSubito(r[0].id, ORG);
+    const dopo = await query<{ id: string; status: string }>(
+      `SELECT id, status FROM "invitation" WHERE "organizationId" = $1 ORDER BY "createdAt"`, [ORG]);
+    expect(dopo).toHaveLength(2);
+    // Uno solo resta valido: quello vecchio e' annullato
+    expect(dopo.filter((d) => d.status === 'pending')).toHaveLength(1);
+    expect(dopo.find((d) => d.id === primo[0].id)!.status).toBe('canceled');
+  });
+
   it('manda subito non tocca gli inviti di un altro fornitore', async () => {
     const { inviaSubito } = await import('./inviti');
     await accoda(1);
