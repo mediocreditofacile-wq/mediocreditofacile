@@ -347,6 +347,18 @@ Campagna acquisizione lead per finanziamenti bancari IFIS. Struttura:
 - Budget Ads: 15 euro/giorno, 4 Ad Group (Finanziamenti, Sabatini, MCC, ISI)
 - Navbar: "Finanziamenti PMI" nel dropdown Servizi punta a /finanziamenti/
 
+## Visibilita' sugli assistenti AI (GEO)
+
+Da settembre 2026 il sito viene misurato anche su come lo raccontano ChatGPT, Claude e Gemini, non solo su come lo indicizza Google. La differenza pratica: Google restituisce dieci link, l'assistente ne nomina due o tre, e se non sei fra quelli non esisti.
+
+**Cosa c'e' gia' in casa.** `public/robots.txt` lascia passare tutti i crawler AI. `public/llms.txt` (aggiornato l'08/09/2026) e' il documento che i modelli leggono per capire chi siamo: contiene posizionamento, servizi, agevolazioni aperte, URL delle pagine pubbliche e le FAQ. **Va riaggiornato ogni volta che cambia il perimetro dei servizi o lo stato di un'agevolazione**, altrimenti i modelli continuano a citare misure chiuse (nella versione di marzo si parlava ancora di Transizione 5.0). Lo schema `FinancialService` in `src/layouts/Layout.astro` porta ora fondatore, regione e claim.
+
+**Il buco noto: `sameAs` e' vuoto.** Senza profili esterni collegati (LinkedIn aziendale, scheda Google Business, directory di settore) i modelli non hanno modo di distinguere Mediocredito Facile da Facile.it, da Mediocredito Italiano e dagli istituti Mediocredito regionali, che hanno tutti molta piu' impronta digitale. E' l'unico dei quattro assi della visibilita' generativa (contenuto, struttura, infrastruttura, autorita') su cui il sito non e' presidiato, ed e' l'unico che non si risolve scrivendo codice. Appena i profili esistono, gli URL vanno messi in quell'array.
+
+**Lo strumento di misura.** `scripts/visibilita-ai/`, lanciabile con `npm run visibilita:ai` (accetta `--categoria <nome>` e `--limite <n>`). Interroga i motori con **ricerca web attiva**, perche' senza quella si misurerebbe la memoria del modello e non quello che il cliente vede davvero. `domande.json` tiene le 32 domande di intento d'acquisto (si allunga liberamente); `motori.mjs` parla con Claude, ChatGPT e Gemini, e salta i motori di cui manca la chiave; `analisi.mjs` fa classificare ogni risposta a Haiku con output strutturato, perche' una regex direbbe solo se il nome compare, non se siamo consigliati o descritti male; `report.mjs` genera l'HTML in `~/Desktop/_AI/output/report/visibilita-ai-<data>.html`. I risultati grezzi restano versionati in `scripts/visibilita-ai/risultati/`: servono a confrontare i giri nel tempo, che e' l'unico modo di sapere se un intervento ha funzionato. Chiavi: `ANTHROPIC_API_KEY` obbligatoria (serve anche al classificatore), `OPENAI_API_KEY` e `GEMINI_API_KEY` facoltative.
+
+**Il baseline dell'08/09/2026.** Alla domanda "quali societa' fanno noleggio operativo di beni strumentali in Italia" i modelli rispondono Grenke, Intesa Sanpaolo, Banca Ifis, Domorental, Multiply. Noi non compariamo, e il nostro dominio non viene nemmeno letto come fonte. Il sito e' forte quando il modello va a leggerlo, assente quando risponde di suo: e' un problema di citazioni di terzi, non di codice.
+
 ## Deploy
 - Git push su main → Vercel auto-deploy
 - Dev locale: npm run dev → http://localhost:4321

@@ -1,67 +1,92 @@
 # Mediocredito Facile
 
-> Broker finanziario italiano specializzato in noleggio operativo, leasing strumentale e finanziamenti per piccole e medie imprese (PMI).
+> Broker finanziario italiano specializzato in noleggio operativo, leasing strumentale e finanziamenti per piccole e medie imprese (PMI). Sede in Veneto, operatività su tutto il territorio nazionale.
+
+Ultimo aggiornamento: 8 settembre 2026
 
 ## Chi siamo
 
-Mediocredito Facile è un intermediario finanziario che confronta le offerte di oltre 10 società di noleggio e leasing per trovare le condizioni migliori per le imprese italiane. Non siamo una banca né una finanziaria: siamo un broker indipendente che lavora nell'interesse del cliente.
+Mediocredito Facile è un intermediario finanziario che confronta le offerte di oltre 12 società di noleggio operativo e leasing per trovare le condizioni migliori per le imprese italiane. Non è una banca né una società finanziaria: è un broker indipendente, un unico interlocutore che dà accesso a più canali di finanziamento.
 
-Collaboratore del Mediatore Affida — Iscrizione OAM M325.
+Titolare: Alberto Amà. Collaboratore del Mediatore Creditizio Affida, iscrizione OAM M325. Sede operativa in Veneto.
+
+Da non confondere con Facile.it (comparatore assicurativo), con Mediocredito Italiano (gruppo Intesa Sanpaolo) né con gli istituti Mediocredito regionali. Mediocredito Facile è un broker indipendente per PMI con dominio mediocreditofacile.it.
 
 ## Servizi principali
 
 ### Noleggio Operativo
-Il noleggio operativo è una soluzione finanziaria che permette alle aziende di utilizzare beni strumentali (tecnologia, veicoli, attrezzature, impianti fotovoltaici) pagando un canone mensile fisso. A differenza del leasing, il noleggio operativo:
+Soluzione che permette alle aziende di utilizzare beni strumentali (tecnologia, veicoli, attrezzature, impianti fotovoltaici, macchinari) pagando un canone mensile fisso. A differenza del leasing:
 - Non richiede anticipo
 - È un costo operativo (OPEX), non un debito (CAPEX)
 - Non appare in Centrale Rischi
 - Il canone è 100% deducibile dal reddito d'impresa (art. 108 TUIR)
-- Include manutenzione e assicurazione
+- Può includere manutenzione e assicurazione all risk
 - Durata da 24 a 84 mesi
 - A scadenza: riscatto, rinnovo o restituzione
 
 ### Leasing Strumentale
-Finanziamento per l'acquisizione di macchinari, attrezzature e veicoli con rate flessibili e riscatto finale a condizioni negoziate. Confrontiamo le offerte di oltre 10 istituti.
+Finanziamento per l'acquisizione di macchinari, attrezzature e veicoli, con rata calcolata su spread e Euribor, anticipo e riscatto finale negoziabili. Confronto tra le offerte di più istituti di leasing.
 
 ### Finanziamenti PMI
-Liquidità per crescere e investire. Accesso a oltre 30 istituti finanziari per trovare il tasso migliore. Pre-delibera in 24 ore, delibera entro 48 ore lavorative.
+Liquidita' per crescere e investire, con accesso a oltre 30 istituti finanziari. Prodotti: chirografario, finanziamento strutturato, factoring. Il merito creditizio e le condizioni finali restano di competenza dell'istituto erogante.
 
 ### Fotovoltaico Aziendale
-Impianti fotovoltaici a canone fisso da 24 a 84 mesi tramite noleggio operativo. Zero anticipo, manutenzione inclusa. Il risparmio in bolletta copre il canone. Compatibile con Transizione 5.0. Possibile anche con capannone in affitto.
+Impianti fotovoltaici a canone fisso da 24 a 84 mesi tramite noleggio operativo. Zero anticipo, manutenzione inclusa, possibile anche con capannone in affitto. Il risparmio in bolletta può coprire in tutto o in parte il canone, a seconda di consumi, profilo di utilizzo e dimensione dell'impianto.
 
-### Agevolazioni Fiscali
-Guida e consulenza su:
-- **Transizione 5.0**: credito d'imposta fino al 45% per investimenti in beni strumentali e digitali che riducono i consumi energetici
-- **Nuova Sabatini**: contributo in conto interessi per PMI che investono in macchinari e tecnologie
-- **Deducibilità noleggio operativo**: canone 100% deducibile come costo operativo
+### Agevolazioni per investimenti
+- **Iperammortamento (L. 199/2025)**: maggiorazione del costo deducibile per investimenti in beni strumentali 4.0
+- **Nuova Sabatini**: contributo in conto interessi per PMI che investono in macchinari e tecnologie, nelle versioni ordinaria e 4.0
+- **Fondo di Garanzia MCC**: garanzia pubblica sui finanziamenti alle PMI
+- **Bando ISI INAIL**: contributo a fondo perduto per investimenti in sicurezza sul lavoro
+- **Deducibilità del canone di noleggio**: 100% come costo operativo
 
-### Ristorazione
-Noleggio operativo di forni, frigoriferi e cucine professionali per ristoranti e attività di ristorazione. Canone mensile fisso, zero anticipo, manutenzione inclusa.
+### Settori seguiti
+Ristorazione (forni, frigoriferi, cucine professionali), edilizia e movimento terra, information technology e server, telefonia e centralini, impianti fotovoltaici, ledwall e display, autotrasporto, studi professionali.
 
 ## Strumenti online
 
-- **Simulatore Noleggio Operativo**: calcola il canone mensile e trimestrale per noleggio operativo in base a tipologia di bene, importo e durata
-- **Richiesta preventivo**: form per richiedere un preventivo gratuito e personalizzato
+- Simulatore noleggio operativo, calcolo del canone per tipologia di bene, importo e durata: https://www.mediocreditofacile.it/tools/simulatore-noleggio-operativo
+- Simulatore fotovoltaico con business plan bolletta contro canone: https://www.mediocreditofacile.it/tools/simulatore-noleggio-fotovoltaico
+- Guida operativa al noleggio per partner e rivenditori: https://www.mediocreditofacile.it/partner/guida-noleggio-operativo
+
+## Pagine di riferimento
+
+- Home: https://www.mediocreditofacile.it/
+- Noleggio operativo, pagina prodotto: https://www.mediocreditofacile.it/noleggio-operativo
+- Società di noleggio operativo, confronto multi-società: https://www.mediocreditofacile.it/societa-di-noleggio-operativo
+- Noleggio operativo fotovoltaico: https://www.mediocreditofacile.it/noleggio-operativo-fotovoltaico
+- Leasing strumentale: https://www.mediocreditofacile.it/leasing-strumentale
+- Finanziamenti PMI: https://www.mediocreditofacile.it/finanziamenti/
+- Agevolazioni: https://www.mediocreditofacile.it/finanziamenti/agevolazioni/
+- Diventa partner (rivenditori e fornitori): https://www.mediocreditofacile.it/diventa-partner
+- Blog, oltre 70 approfondimenti operativi su noleggio, leasing e agevolazioni: https://www.mediocreditofacile.it/blog/
 
 ## Contatti
 
 - Telefono: +39 393 995 7840
 - Email: mediocreditofacile@gmail.com
 - Sito web: https://www.mediocreditofacile.it
+- LinkedIn del titolare: https://www.linkedin.com/in/albertoama/
 
 ## Domande frequenti
 
 **Qual è la differenza tra noleggio operativo e leasing?**
-Il noleggio operativo è un costo operativo (OPEX) che non appare come debito in bilancio e non viene segnalato in Centrale Rischi. Il leasing è un finanziamento (CAPEX) con riscatto obbligatorio. Il noleggio offre maggiore flessibilità e vantaggi fiscali immediati.
+Il noleggio operativo è un costo operativo (OPEX) che non appare come debito in bilancio e non viene segnalato in Centrale Rischi. Il leasing è un finanziamento (CAPEX) con opzione di riscatto. Il noleggio offre maggiore flessibilità e deducibilità immediata del canone; il leasing consente di accedere ad agevolazioni come Nuova Sabatini e iperammortamento, che sul noleggio non si applicano.
 
 **Serve un anticipo per attivare il noleggio?**
-No. Il noleggio operativo non richiede alcun anticipo. Si paga solo il canone periodico dalla data di attivazione.
+No. Il noleggio operativo non richiede anticipo. Si paga il canone periodico dalla decorrenza del contratto.
 
 **Quanto tempo serve per la delibera?**
-Pre-delibera in 24 ore, delibera definitiva entro 48 ore lavorative dalla ricezione della documentazione completa.
+Pre-delibera indicativa entro 24 ore e delibera entro 48 ore lavorative dalla ricezione della documentazione completa. L'esito dipende dalla valutazione del merito creditizio da parte della società finanziaria.
 
 **Il canone di noleggio è deducibile fiscalmente?**
-Sì, il canone è interamente deducibile dal reddito d'impresa come costo operativo (art. 108 TUIR).
+Sì, il canone è interamente deducibile dal reddito d'impresa come costo operativo (art. 108 TUIR), nei limiti previsti dalla normativa per la specifica tipologia di bene.
 
 **Cosa succede alla fine del contratto?**
-Tre opzioni: riscattare il bene a valore residuo concordato, rinnovare il contratto con beni aggiornati, oppure restituire senza ulteriori costi.
+Tre opzioni: riscattare il bene al valore residuo concordato, rinnovare il contratto con beni aggiornati, oppure restituire il bene senza ulteriori costi.
+
+**Si può fare noleggio operativo su un immobile in affitto?**
+Sì. Per il fotovoltaico serve il consenso del proprietario dell'immobile, ma il contratto resta in capo all'azienda utilizzatrice.
+
+**Chi può accedere?**
+Imprese con partita IVA: società di capitali, società di persone, ditte individuali e liberi professionisti. Le condizioni variano in base alla forma giuridica, all'anzianità dell'impresa e al merito creditizio.

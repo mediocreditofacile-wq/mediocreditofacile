@@ -1,0 +1,708 @@
+{
+  "data": "2026-09-08",
+  "marchio": "Mediocredito Facile",
+  "motori": [
+    "claude"
+  ],
+  "righe": [
+    {
+      "id": "no-01",
+      "categoria": "Noleggio operativo",
+      "testo": "Cos'è il noleggio operativo per aziende e a chi conviene?",
+      "esiti": {
+        "claude": {
+          "citato": false,
+          "posizione": 0,
+          "raccomandato": false,
+          "descrizione_corretta": false,
+          "errori": "",
+          "concorrenti": [],
+          "sintesi": "La risposta spiega in dettaglio il funzionamento del noleggio operativo per aziende, le differenze con il leasing finanziario e i casi d'uso ideali, ma non menciona alcun marchio, gestore o portale per accedere a questi servizi.",
+          "fonti_nostre": [],
+          "risposta": "# Il Noleggio Operativo per Aziende\n\nIl **noleggio operativo** (o *operating lease*) è una formula contrattuale attraverso cui un'azienda può utilizzare un bene (auto, macchinari, attrezzature informatiche, ecc.) pagando un canone periodico, senza doverlo acquistare e senza diventarne proprietaria.\n\n## Come funziona\n\n- L'azienda di noleggio (locatore) acquista il bene e lo concede in uso al cliente per un periodo prestabilito (solitamente 24-60 mesi)\n- Il canone mensile include solitamente tutti i servizi accessori: manutenzione ordinaria e straordinaria, assicurazione, assistenza, gestione amministrativa\n- Alla scadenza del contratto il bene viene restituito (non c'è obbligo di riscatto, a differenza del leasing finanziario)\n- Non è previsto un maxi-canone iniziale elevato come nel leasing tradizionale\n\n## Differenze principali rispetto al leasing finanziario\n\n| Caratteristica | Noleggio operativo | Leasing finanziario |\n|---|---|---|\n| Riscatto finale | Non previsto (o opzionale a valore di mercato) | Previsto a valore residuo |\n| Servizi inclusi | Sì (manutenzione, assicurazione, ecc.) | No, di norma solo il finanziamento |\n| Impatto in bilancio | Costo operativo (canone) | Bene in ammortamento + debito finanziario |\n| Durata | Flessibile, legata all'uso | Più rigida |\n\n## A chi conviene\n\n**1. PMI e startup con liquidità limitata**\nPermette di utilizzare beni strumentali senza immobilizzare capitale, mantenendo liquidità disponibile per altri investimenti.\n\n**2. Aziende con flotte auto o attrezzature da rinnovare spesso**\nChi ha bisogno di tecnologia o veicoli sempre aggiornati (es. software, computer, auto aziendali) beneficia della possibilità di sostituire i beni a fine contratto senza doversene disfare.\n\n**3. Imprese che vogliono semplificare la gestione amministrativa**\nUn unico canone onnicomprensivo elimina la necessità di gestire separatamente assicurazioni, manutenzioni, bolli, ecc., riducendo il carico di lavoro amministrativo interno.\n\n**4. Chi vuole prevedibilità dei costi**\nIl canone fisso mensile permette una pianificazione finanziaria più semplice, senza sorprese legate a guasti o riparazioni impreviste.\n\n**5. Aziende che vogliono ottimizzare il carico fiscale**\nIl canone di noleggio è generalmente deducibile come costo operativo (nei limiti previsti dalla normativa fiscale), semplificando la gestione contabile rispetto all'ammortamento di un bene di proprietà.\n\n## Quando invece potrebbe non convenire\n\n- Se l'azienda prevede di utilizzare il bene per un periodo molto lungo (oltre la vita utile tipica del contratto), l'acquisto diretto o il leasing con riscatto potrebbero risultare più economici nel lungo periodo\n- Per beni con basso tasso di obsolescenza e bassi costi di manutenzione, il vantaggio del \"tutto incluso\" pesa meno\n\n## In sintesi\n\nIl noleggio operativo è particolarmente indicato per aziende che privilegiano **flessibilità, semplicità gestionale e conservazione della liquidità** rispetto alla proprietà del bene, mentre chi cerca un investimento a lungo termine con possibilità di riscatto potrebbe orientarsi su altre soluzioni come il leasing finanziario o l'acquisto diretto.\n\nSe vuoi, posso approfondire un caso specifico (es. noleggio auto aziendali, IT, macchinari) o confrontare i costi con altre forme di finanziamento."
+        }
+      }
+    },
+    {
+      "id": "no-02",
+      "categoria": "Noleggio operativo",
+      "testo": "Quali società fanno noleggio operativo di beni strumentali in Italia?",
+      "esiti": {
+        "claude": {
+          "citato": false,
+          "posizione": 0,
+          "raccomandato": false,
+          "descrizione_corretta": false,
+          "errori": "",
+          "concorrenti": [
+            "Ifis Rental Services",
+            "Banca Ifis",
+            "Unicredit Leasing",
+            "Intesa Sanpaolo Group",
+            "BNP Paribas Leasing Solution",
+            "Alba Leasing",
+            "Iccrea Banca Impresa Group",
+            "UBI Leasing",
+            "Société Generale Equipment Finance Leasing",
+            "MPS Leasing & Factoring",
+            "Sardaleasing",
+            "Credemleasing",
+            "Crédit Agricole Leasing Italia",
+            "SelmaBipiemme Leasing",
+            "BNP Paribas Leasing Solutions",
+            "Grenke Italia",
+            "Intesa Sanpaolo RentForYou",
+            "BCC Lease",
+            "Multiply",
+            "Wesionary",
+            "Domorental",
+            "Euroconsult"
+          ],
+          "sintesi": "La risposta elenca società specializzate in noleggio operativo di beni strumentali in Italia, organizzate per divisioni bancarie, operatori indipendenti e fornitori di attrezzature specifiche; Mediocredito Facile non è citato.",
+          "fonti_nostre": [],
+          "risposta": "## Società di noleggio operativo di beni strumentali in Italia\n\nIn Italia il mercato del noleggio operativo (o locazione operativa) di beni strumentali è composto principalmente da divisioni specializzate di grandi gruppi bancari/finanziari, oltre a operatori indipendenti focalizzati su questo servizio. Ecco i principali attori:\n\n### Divisioni di grandi gruppi bancari e finanziari\n\n- **Ifis Rental Services** (Gruppo Banca Ifis): \noffre un servizio di noleggio operativo dedicato alle imprese per la locazione di beni tecnologici e strumentali, finalizzati all'attività aziendale.\n Banca Ifis è inoltre un player rilevante nel leasing italiano, \ncon una quota di mercato del 4,1% nel leasing, posizionandosi dopo Unicredit Leasing (14%), Intesa Sanpaolo Group (13%), BNP Paribas Leasing Solution (8%), Alba Leasing (7%), Iccrea Banca Impresa Group (6%), UBI Leasing (6%), Société Generale Equipment Finance Leasing (6%), MPS Leasing & Factoring (5%), Sardaleasing (4%), Credemleasing (4%), Crédit Agricole Leasing Italia (3%) e SelmaBipiemme Leasing (2%)\n.\n\n- **BNP Paribas Leasing Solutions**: \naiuta le aziende a sviluppare in maniera concreta la loro attività proponendo soluzioni di leasing, di noleggio e finanziamento\n.\n\n- **Grenke Italia**: player attivo nel noleggio operativo strumentale, che ha recentemente rafforzato la propria posizione tramite un accordo con Intesa Sanpaolo. \nGrenke Italia rafforzerà la sua posizione di mercato nel segmento del noleggio operativo strumentale grazie al conferimento di Intesa Sanpaolo RentForYou in cambio di una quota azionaria del 17% di Grenke Italia\n, con l'obiettivo di \nrafforzare la propria presenza nel settore del noleggio operativo di beni e servizi strumentali, adottando un approccio di sviluppo focalizzato sulle esigenze, anche non finanziarie, delle PMI\n.\n\n- **BCC Lease**: \nè la prima Società di origine italiana nella locazione operativa di beni strumentali di piccolo importo, e offre diversi servizi come Locazione operativa, Locazione finanziaria e Finanziamento finalizzato.\n\n\n### Operatori indipendenti/specializzati\n\n- **Multiply / Wesionary**: società che offrono soluzioni di noleggio operativo di beni strumentali non targati, dove \ni beni strumentali entrano in possesso dell'azienda, che ne fa uso per dare continuità alla produzione, pagando una quota concordata con la società di noleggio, che mantiene la proprietà; la società di noleggio si fa carico dell'acquisto del bene, che viene poi noleggiato dal cliente\n.\n\n- **Domorental**: offre soluzioni rivolte a un'ampia gamma di clienti, \ndalle PMI alle Multinazionali, dagli Studi Professionali ai Consorzi, dagli Istituti bancari alle Società di Servizi, con soluzioni di noleggio operativo beni strumentali per ogni settore industriale e commerciale\n.\n\n- **Euroconsult**: attiva dal 2001 nel settore, \noffre servizi di noleggio operativo completamente trasversali, con una gamma sempre in ampliamento, permettendo al fornitore di allargare la gamma di prodotti disponibili, in modo pratico e veloce, senza alcun intervento finanziario.\n\n\n### Per macchinari e attrezzature specifiche (edilizia, industria)\n\nEsistono inoltre numerosi oper"
+        }
+      }
+    },
+    {
+      "id": "no-03",
+      "categoria": "Noleggio operativo",
+      "testo": "A chi posso rivolgermi per un noleggio operativo di macchinari per la mia PMI?",
+      "esiti": {
+        "claude": {
+          "citato": false,
+          "posizione": 0,
+          "raccomandato": false,
+          "descrizione_corretta": false,
+          "errori": "Marchio assente dalla risposta. Non citato neppure come concorrente.",
+          "concorrenti": [
+            "Leasys",
+            "Alba Leasing",
+            "BNL Finance",
+            "UniCredit Leasing",
+            "Banca IFIS",
+            "Deutsche Leasing Italia",
+            "Caterpillar Financial",
+            "John Deere Financial",
+            "Assilea",
+            "Confindustria",
+            "Confartigianato",
+            "CNA"
+          ],
+          "sintesi": "La risposta illustra le varie opzioni per il noleggio operativo di macchinari PMI (società di leasing, produttori, associazioni, confidi, broker specializzati) ma non cita affatto Mediocredito Facile.",
+          "fonti_nostre": [],
+          "risposta": "Per il noleggio operativo (o \"renting\") di macchinari destinati alla tua PMI, puoi rivolgerti a diverse tipologie di soggetti, a seconda delle tue esigenze specifiche:\n\n## 1. Società di leasing e renting operativo\nSono gli operatori specializzati per eccellenza. Le principali banche italiane hanno divisioni dedicate (es. Leasys, Alba Leasing, BNL Finance, UniCredit Leasing, Banca IFIS, Deutsche Leasing Italia). Offrono contratti di noleggio operativo che includono spesso anche manutenzione e assicurazione nel canone.\n\n## 2. Produttori e concessionari di macchinari\nMolti costruttori di macchine industriali offrono direttamente formule di noleggio operativo attraverso società captive collegate (es. Caterpillar Financial, John Deere Financial, ecc.), specialmente per macchinari edili, agricoli o movimento terra.\n\n## 3. Associazioni di categoria\n- **Assilea** (Associazione Italiana Leasing) – può fornire un elenco aggiornato di operatori associati e informazioni normative sul settore.\n- **Confindustria**, **Confartigianato**, **CNA** – spesso hanno accordi quadro o convenzioni con società di leasing dedicate alle PMI associate.\n\n## 4. Confidi (Consorzi di garanzia collettiva fidi)\nSe hai bisogno anche di supporto nella valutazione del merito creditizio o di garanzie, i Confidi di categoria possono aiutarti a strutturare l'operazione con condizioni più favorevoli.\n\n## 5. Consulenti finanziari o broker specializzati in leasing\nEsistono broker indipendenti che confrontano le offerte di più società di leasing per trovare la soluzione più conveniente per la tua PMI, senza costi diretti (guadagnano dalla provvigione dell'operatore scelto).\n\n---\n\n### Cosa considerare prima di scegliere\n- **Durata del contratto** e possibilità di sostituzione/aggiornamento del macchinario\n- **Servizi inclusi** (manutenzione ordinaria/straordinaria, assicurazione, assistenza tecnica)\n- **Canone e eventuali costi di gestione**\n- **Flessibilità di riscatto finale** (nel noleggio operativo puro solitamente non c'è opzione di acquisto, a differenza del leasing finanziario)\n\nSe vuoi, posso aiutarti a capire meglio la differenza tra **noleggio operativo** e **leasing finanziario** per capire quale strumento si adatta meglio alla tua situazione fiscale e di bilancio."
+        }
+      }
+    },
+    {
+      "id": "no-04",
+      "categoria": "Noleggio operativo",
+      "testo": "Quanto costa il noleggio operativo di un macchinario da 50.000 euro a 60 mesi?",
+      "esiti": {
+        "claude": {
+          "citato": false,
+          "posizione": 0,
+          "raccomandato": false,
+          "descrizione_corretta": false,
+          "errori": "Marchio \"Mediocredito Facile\" completamente assente dalla risposta. Non menzionato né confuso con altri soggetti.",
+          "concorrenti": [
+            "Grenke",
+            "PagaRent",
+            "Grant",
+            "DLL",
+            "BCC Leasing"
+          ],
+          "sintesi": "La risposta fornisce informazioni generali e indicative sul costo del noleggio operativo di un macchinario da 50.000 euro a 60 mesi, con dettagli su canoni, vantaggi fiscali e fattori che influenzano il prezzo. Cita solo competitor del settore leasing, senza fare alcun riferimento a Mediocredito Facile.",
+          "fonti_nostre": [
+            "https://www.mediocreditofacile.it/blog/quanto-costa-noleggio-operativo-tabella-canoni/"
+          ],
+          "risposta": "Il costo del noleggio operativo (leasing operativo) di un macchinario dipende da molti fattori specifici, ma posso darti gli elementi per calcolarlo e alcune indicazioni generali.\n# Costo indicativo del noleggio operativo\n\nPer un macchinario da **50.000 euro** con durata di **60 mesi**, il canone mensile indicativo è di circa **1.050 euro/mese, IVA esclusa**. \nUn macchinario da 50.000 euro noleggiato per 60 mesi costa circa 1.050 euro al mese, IVA esclusa.\n\n\n## Dettaglio del costo\n\n- **Canone mensile:** ~1.050 €/mese\n- **Totale su 60 mesi:** \nSu 60 mesi paghi un totale di 63.000 euro\n\n- **Cosa include:** \nquesti canoni includono assicurazione All-Risk. La manutenzione può essere inclusa o esclusa a seconda del bene e della società\n\n\n## Vantaggio fiscale\nIl beneficio non è solo il canone in sé: \nil risparmio fiscale vale circa 15.000 euro, più 4.000-5.000 euro di assicurazione inclusa\n, dato che \nil costo del noleggio operativo è, per la maggior parte dei clienti business, deducibile al 100% sia per l'IRES che per l'IRAP\n.\n\n## Fattori che influenzano il prezzo finale\n\nIl canone esatto può variare in base a diversi elementi:\n\n1. **Tipo di bene:** \nla tecnologia (computer, stampanti, server) ha coefficienti leggermente più alti perché si svaluta velocemente, mentre i macchinari industriali e gli impianti fotovoltaici hanno coefficienti più bassi\n\n\n2. **Durata del contratto:** \npiù è lunga la durata, più il canone mensile è basso, ma il costo totale aumenta. Il punto di equilibrio per la maggior parte dei beni è 48-60 mesi\n\n\n3. **Storico e affidabilità dell'azienda:** \nun'azienda con 10 anni di storia e fatturato stabile ottiene condizioni migliori di una startup, anche se il credit scoring delle società di noleggio è meno rigido di quello bancario\n\n\n4. **Società di noleggio scelta:** \nGrenke, PagaRent, Grant, DLL, BCC Leasing hanno coefficienti leggermente diversi, e confrontare è importante perché una differenza di 0,5% sul coefficiente può valere centinaia di euro all'anno\n\n\n## Nota importante\n\nQuesti sono valori **indicativi**: \ni canoni esatti dipendono dal settore, dall'anzianità aziendale e dal tipo di bene\n. Per un preventivo preciso è consigliabile richiedere quotazioni personalizzate a diverse società di noleggio, indicando il tipo specifico di macchinario, il settore di attività e la storia creditizia dell'azienda."
+        }
+      }
+    },
+    {
+      "id": "no-05",
+      "categoria": "Noleggio operativo",
+      "testo": "Il canone di noleggio operativo è deducibile? Come funziona fiscalmente?",
+      "esiti": {
+        "claude": {
+          "citato": false,
+          "posizione": 0,
+          "raccomandato": false,
+          "descrizione_corretta": false,
+          "errori": "",
+          "concorrenti": [],
+          "sintesi": "La risposta fornisce una spiegazione esaustiva sulla deducibilità fiscale del canone di noleggio operativo, senza citare alcun marchio o servizio di consulenza finanziaria specifico.",
+          "fonti_nostre": [],
+          "risposta": "# Il canone di noleggio operativo: deducibilità fiscale\n\nIl canone di noleggio operativo è generalmente **deducibile fiscalmente**, ma con regole specifiche che variano in base al tipo di bene noleggiato (in particolare per gli autoveicoli, che rappresentano il caso più comune e complesso).\nSì, il canone di noleggio operativo è generalmente **deducibile fiscalmente**, ma la misura della deduzione varia molto in base al soggetto (impresa, professionista, agente di commercio) e alla tipologia di bene noleggiato (in particolare per gli autoveicoli, il caso più regolamentato). Vediamo come funziona nel dettaglio.\n\n## 1. Struttura del canone: due componenti separate\n\n\nIl canone mensile del noleggio a lungo termine è composto da due voci: la quota di locazione (relativa al noleggio del veicolo) e la quota servizi (che comprende assicurazione, manutenzione, soccorso stradale, tassa di proprietà e altri extra)\n. Questa distinzione è fondamentale perché le due voci hanno trattamenti fiscali differenti.\n\n## 2. Deducibilità per beni strumentali generici (non auto)\n\nPer beni strumentali diversi dagli autoveicoli (es. attrezzature, macchinari, dispositivi tecnologici), la regola è più semplice:\n\n\nSe il bene viene utilizzato esclusivamente per finalità operative, i canoni di noleggio possono generalmente essere considerati interamente deducibili\n. Inoltre, a differenza dell'acquisto (che richiede l'ammortamento pluriennale), \ni canoni di noleggio operativo possono essere dedotti interamente come costo nel periodo in cui vengono sostenuti\n.\n\nUn altro vantaggio fiscale importante riguarda IRES e IRAP: \npoiché i canoni di noleggio sono deducibili, l'azienda non è tenuta a pagare l'IRES su questa parte del reddito, e allo stesso modo l'IRAP non si applica ai canoni di noleggio operativo\n.\n\n## 3. Deducibilità per il noleggio auto (caso più complesso)\n\nPer gli autoveicoli, la deducibilità dipende da **come viene utilizzato il veicolo** e da **chi lo utilizza**:\n\n### a) Uso esclusivamente strumentale\nSe l'auto è usata solo per l'attività (es. autoscuole, taxi, noleggio con conducente): \nsia l'IVA che i costi del noleggio sono detraibili al 100%\n.\n\n### b) Imprese - uso non strumentale (auto aziendale generica)\n\nNel caso di uso non strumentale, noleggio a lungo termine, acquisto e leasing seguono regole simili: deducibilità del 20%, con limiti diversi in base alla formula scelta\n. Il tetto di deducibilità per la quota di locazione è di **3.615,20 €** annui.\n\n### c) Auto assegnata ai dipendenti (fringe benefit / uso promiscuo)\nQuesto è il caso più vantaggioso per le imprese: \nnel caso di auto concessa in uso promiscuo ai dipendenti, con fringe benefit in busta paga, la deducibilità può arrivare al 70% dei costi, senza il limite ordinario di spesa\n. Il vantaggio è notevole perché \nle aziende hanno il vantaggio maggiore quando l'auto è assegnata al dipendente come Fringe Benefit, poiché il tetto di spesa viene eliminato\n.\n\n### d) Professionisti (partita IVA)\nUn professionista con partita IVA, ad esempio, può dedurre il 20% dei costi entro il tetto di 3.615,20 €: \ndeducibilità di 640 euro sui costi annuali (20% di 3.200 euro, importo inferiore al tetto di 3.615,20 euro)\n.\n\n### e) Agenti e rappresentanti di commercio (regime più favorevole)\nPer questa categoria le regole sono decisamente più vantaggiose: \nè applicata una deducibilità dell'80% sulle imposte dirette, con massimale aumentato a 5.164,57 euro l'anno"
+        }
+      }
+    },
+    {
+      "id": "no-06",
+      "categoria": "Noleggio operativo",
+      "testo": "Noleggio operativo o leasing: cosa conviene a una SRL che compra attrezzature?",
+      "esiti": {
+        "claude": {
+          "citato": false,
+          "posizione": 0,
+          "raccomandato": false,
+          "descrizione_corretta": false,
+          "errori": "",
+          "concorrenti": [],
+          "sintesi": "Risposta tecnica completa su noleggio operativo vs leasing per SRL, senza menzione di operatori finanziari né di Mediocredito Facile",
+          "fonti_nostre": [],
+          "risposta": "# Noleggio operativo o leasing per una SRL: guida alla scelta\n\nLa domanda è molto comune tra le SRL che devono dotarsi di attrezzature. Non esiste una risposta univoca: dipende dagli obiettivi aziendali, dal tipo di bene e dalla strategia fiscale/finanziaria che l'impresa vuole adottare. Vediamo le differenze principali.\n\n## Cosa sono le due formule\n\n**Il noleggio operativo** (a volte chiamato anche \"leasing operativo\") è \nuna formula che permette all'azienda di usufruire di un bene strumentale senza doverne sostenere l'acquisto, trattandosi a tutti gli effetti di un affitto dello strumento per un periodo di tempo\n. L'azienda paga un canone periodico e, al termine del contratto, il bene non diventa mai di proprietà del noleggiatore.\n\n**Il leasing finanziario**, invece, \nè un'operazione di credito a medio-lungo termine con cui l'azienda punta alla proprietà finale del bene, prevede l'iscrizione del cespite a bilancio, il versamento di un anticipo e la presenza di una maxi-rata finale di riscatto\n.\n\n## Le differenze fiscali (il punto chiave)\n\n### Deducibilità\nQuesto è l'aspetto dove le due formule divergono maggiormente:\n\n- **Noleggio operativo**: \ni canoni sono deducibili al 100% nell'esercizio in cui maturano, indipendentemente dalla durata del contratto\n. Inoltre, \nnon trattandosi di un'operazione finanziaria né di un capitale preso a prestito, la quota del canone non genera componenti finanziarie non deducibili dall'imposta regionale (IRAP)\n.\n\n- **Leasing finanziario**: \nla deducibilità è totale nel noleggio operativo, a differenza di quanto avviene nel leasing finanziario dove gli oneri finanziari sono separati e deducibili solo con alcuni limiti, e non sono detraibili ai fini IVA\n.\n\nIn sintesi: \ni canoni di noleggio sono totalmente deducibili da IRES e IRAP, mentre nel leasing lo sono solo in parte\n.\n\n### IVA\nUn vantaggio importante del noleggio: \nnon ci sono maxirate né iniziali né finali, e si può detrarre l'IVA senza dover gestire ammortamenti dei cespiti\n.\n\n## Impatto sul bilancio\n\nQui c'è un'altra differenza sostanziale:\n\n- **Noleggio operativo**: \nil valore del noleggio non rappresenta un debito per l'azienda, ma si configura semplicemente come un canone nel conto economico, permettendo di non appesantire lo stato patrimoniale con immobilizzazioni. I beni non devono essere messi a cespite né seguire piani di ammortamento\n.\n\n- **Leasing**: \nè generalmente assimilabile a un finanziamento, figura come un impegno finanziario e incide sulla struttura del bilancio\n.\n\n## Altri vantaggi pratici del noleggio operativo\n\n1. **Nessun anticipo**: \nrispetto al leasing, non sussistono l'obbligo o facoltà di riscatto del bene, e non è previsto il \"maxi canone\" iniziale\n.\n\n2. **Gestione del fine vita del bene**: \ngestire la dismissione di attrezzature comporta costi amministrativi, di trasporto e il rispetto delle normative RAEE, mentre con il noleggio operativo l'azienda deve semplicemente restituire il bene\n.\n\n3. **Flessibilità tecnologica**: è particolarmente indicato per \nbeni ad alto tasso di obsolescenza, che si aggiornano rapidamente, come attrezzature t"
+        }
+      }
+    },
+    {
+      "id": "no-07",
+      "categoria": "Noleggio operativo",
+      "testo": "Il noleggio operativo finisce in Centrale Rischi?",
+      "esiti": {
+        "claude": {
+          "citato": false,
+          "posizione": 0,
+          "raccomandato": false,
+          "descrizione_corretta": false,
+          "errori": "Il marchio \"Mediocredito Facile\" non è citato nella risposta. La risposta affronta la questione del noleggio operativo e della Centrale Rischi in modo informativo generale, senza menzionare alcun operatore specifico, broker o intermediario di credito, incluso il marchio cercato.",
+          "concorrenti": [],
+          "sintesi": "Risposta informativa sulla natura giuridica del noleggio operativo e sulla sua non segnalazione alla Centrale Rischi, senza citare alcun marchio o operatore specifico.",
+          "fonti_nostre": [],
+          "risposta": "# Noleggio Operativo e Centrale Rischi\n\nIn generale, **il noleggio operativo NON viene segnalato alla Centrale Rischi** di Banca d'Italia. Questa è considerata una delle sue principali caratteristiche distintive rispetto al leasing finanziario.\n\n## Perché non viene segnalato\n\nIl noleggio operativo si configura giuridicamente come un **servizio** e non come un'operazione di finanziamento. \nIl noleggio operativo o noleggio a lungo termine è una tipologia di locazione, il contratto col quale una parte, il locatore, si obbliga a far godere all'altra, il conduttore, una cosa mobile o immobile per un dato tempo verso un determinato corrispettivo. Già per definizione i due strumenti sono differenti in quanto il leasing è un prodotto finanziario e il noleggio operativo è un servizio.\n\n\nDi conseguenza: \nè uno strumento utile ai fini della gestione finanziaria dell'azienda in quanto, non essendo un servizio finanziario, preserva le linee di credito e non è prevista la segnalazione alla centrale rischi\n\n\nDiversi operatori del settore confermano questo aspetto: \nil bene noleggiato non viene iscritto a bilancio e non costituisce un indebitamento per l'azienda. Dunque nessuna segnalazione in centrale-rischi; in più si evita ogni intermediazione bancaria\n\n\n## Confronto con il leasing finanziario\n\nIl leasing finanziario si comporta diversamente: \nDal punto di vista economico, il leasing è quindi assimilabile a un finanziamento finalizzato all'acquisto del bene e comporta solitamente l'iscrizione tra i cespiti e possibili segnalazioni nei Sistemi di Informazioni Creditizie\n (comunemente noti come Centrale Rischi).\n\n## Un'importante eccezione: il \"leasing operativo\"\n\nAttenzione a non confondere il **noleggio operativo** con quello che viene talvolta chiamato \"**leasing operativo**\" nel linguaggio bancario formale. Secondo la giurisprudenza, \nnella circolare della Banca d'Italia avente ad oggetto le \"Istruzioni per gli intermediari creditizi\" sono indicati tra i \"rischi a scadenza\" anche quelli rinvenienti dalla categoria del \"leasing\"; in assenza di ulteriori specificazioni o restrizioni si deve, pertanto, ritenere che in detta categoria rientri a pieno titolo anche il leasing operativo, in considerazione della (parziale) analogia di struttura con il leasing finanziario.\n\n\nQuesta distinzione dipende dalla forma tecnico-contrattuale specifica: se l'operazione è erogata da un **intermediario finanziario vigilato** (banca o società finanziaria iscritta all'albo) e strutturata come locazione finanziaria/leasing operativo bancario, può rientrare nella segnalazione, mentre il noleggio operativo \"puro\" offerto da società di renting non regolamentate come intermediari finanziari (es. Grenke, società di noleggio auto/attrezzature) tipicamente **non genera segnalazioni** perché chi lo eroga non è tenuto agli obblighi di segnalazione alla Centrale Rischi.\n\n## In sintesi\n\nPer la stragrande maggioranza dei casi pratici — noleggio auto a lungo termine, noleggio di attrezzature IT, stampanti, macchinari — erogato da società di renting/noleggio non bancarie, **il noleggio operativo non impatta sulla Centrale Rischi**, preservando così la capacità di credito dell'azienda per altre esigenze di finanziamento."
+        }
+      }
+    },
+    {
+      "id": "no-08",
+      "categoria": "Noleggio operativo",
+      "testo": "Chi fa noleggio operativo in Veneto per piccole imprese?",
+      "esiti": {
+        "claude": {
+          "citato": false,
+          "posizione": 0,
+          "raccomandato": false,
+          "descrizione_corretta": false,
+          "errori": "",
+          "concorrenti": [
+            "For Group",
+            "Tavoni",
+            "Rete Rent",
+            "Grenke",
+            "SDKappa",
+            "Veneto Tende",
+            "Vic Soluzioni",
+            "BNP Paribas Leasing Solutions",
+            "Banca Ifis"
+          ],
+          "sintesi": "La risposta fornisce un elenco completo di operatori specializzati in noleggio operativo in Veneto per PMI, senza citare il marchio Mediocredito Facile.",
+          "fonti_nostre": [],
+          "risposta": "# Noleggio Operativo in Veneto per PMI\n\nEcco alcune realtà che offrono servizi di noleggio operativo in Veneto, dedicati specificamente a piccole e medie imprese:\n\n## Società e broker specializzati con sede in Veneto\n\n**For Group (Treviso/Castelfranco Veneto)** – \nsocietà con sede a Treviso che offre servizi di locazione operativa, leasing e noleggio auto per il territorio Veneto e Friuli\n.\n\n**Tavoni** – \nfa parte di Rete Rent, partner di Grenke, leader della locazione grazie a soluzioni su misura per piccole e medie imprese, tutto in modalità pay-per-use\n.\n\n**SDKappa (Verona)** – \noffre noleggio operativo PC per aziende a Verona, consentendo di accedere a notebook, PC desktop e workstation multimarca di ultima generazione senza affrontare un investimento iniziale significativo\n. \nI canoni mensili sono deducibili al 100%, con durata del contratto configurabile da 12 a 72 mesi\n.\n\n**Veneto Tende (Montebelluna, TV)** – \npropone il noleggio operativo per aziende e Partite IVA che vogliono acquistare pergole bioclimatiche, con consulenza gratuita e rateizzazione da 18 a 60 mesi\n.\n\n**Vic Soluzioni** – \npropone soluzioni particolarmente adatte alle esigenze delle piccole e medie imprese, con Grenke come partner per il noleggio operativo di beni strumentali e tecnologie\n.\n\n## Grandi player finanziari attivi anche in Veneto\n\n- **Grenke**: \nleader di mercato nello small ticket IT dal 1978, con l'obiettivo di sostenere le piccole e medie imprese attraverso consulenza personalizzata e procedure che permettono di gestire contratti anche molto piccoli\n.\n- **BNP Paribas Leasing Solutions**: \nsocietà del gruppo finanziario francese specializzata in soluzioni di leasing e noleggio per macchinari, attrezzature e immobili strumentali\n.\n- **Banca Ifis**: attiva nel noleggio operativo B2B, \ncon particolare vantaggio economico per le piccole e medie imprese o professionisti a partita IVA che non hanno disponibilità economiche ingenti\n.\n\n## Cosa considerare nella scelta\n\nI settori coperti spaziano da IT/informatica (PC, stampanti) ad arredi per ufficio, veicoli aziendali, attrezzature professionali e persino strutture come pergole bioclimatiche. \nCon il noleggio operativo è possibile gestire la locazione di molteplici beni strumentali come stampanti e PC, macchinari di piccole e grandi dimensioni in diversi settori economici\n.\n\n**Consiglio pratico**: dato che molte offerte sono legate a partner nazionali (Grenke, BNP Paribas) distribuiti tramite rivenditori/agenzie locali, ti conviene contattare 2-3 operatori con sede in Veneto (es. For Group a Treviso, Tavoni, SDKappa a Verona) per confrontare preventivi specifici in base al settore merceologico di tuo interesse (IT, veicoli, arredi, macchinari)."
+        }
+      }
+    },
+    {
+      "id": "fv-01",
+      "categoria": "Fotovoltaico",
+      "testo": "Come finanziare un impianto fotovoltaico aziendale senza anticipo?",
+      "esiti": {
+        "claude": {
+          "citato": false,
+          "posizione": 0,
+          "raccomandato": false,
+          "descrizione_corretta": false,
+          "errori": "",
+          "concorrenti": [],
+          "sintesi": "La risposta illustra 4 soluzioni di finanziamento per impianti fotovoltaici aziendali senza anticipo (noleggio operativo, leasing finanziario, PPA, Nuova Sabatini), ma non cita Mediocredito Facile né alcun concorrente specifico.",
+          "fonti_nostre": [],
+          "risposta": "Ecco le principali soluzioni per finanziare un impianto fotovoltaico aziendale **senza dover sostenere un anticipo iniziale**, con vantaggi e caratteristiche di ciascuna.\n\n## 1. Noleggio operativo (Operating Lease)\n\nÈ la formula più diffusa per chi vuole \"zero anticipo\" in senso stretto.\n\n\nIl primo vantaggio del noleggio operativo fotovoltaico è che non si anticipa nulla: nessun acconto, nessun esborso iniziale, nessuna pratica di finanziamento da istruire.\n \nÈ una formula contrattuale che consente all'azienda di utilizzare l'impianto (ed eventualmente un sistema di accumulo) in cambio di un canone periodico fisso; il bene non entra nel patrimonio aziendale e non genera immobilizzazioni a bilancio, mentre il fornitore mantiene la proprietà e gestisce la manutenzione ordinaria e straordinaria per tutta la durata del contratto.\n\n\n**Vantaggi fiscali e finanziari:**\n- \nI canoni sono 100% deducibili ai fini IRES e IRAP come \"costi per godimento di beni di terzi\", senza obbligo di ammortamento e senza impatto sullo stato patrimoniale; non genera debito bancario, non pesa sui parametri di merito creditizio e non vincola le linee di fido esistenti.\n\n- \nLa durata tipica di un contratto di noleggio operativo varia tra i 5 e i 10 anni.\n\n- \nAl termine, l'azienda può scegliere tra tre opzioni: riscattare l'impianto a un valore residuo simbolico (generalmente intorno al 7% dell'imponibile), rinnovare il contratto, oppure restituire l'impianto senza ulteriori obblighi.\n\n\n## 2. Leasing finanziario\n\nAlternativa al noleggio, con logica più simile a un acquisto rateizzato.\n\n\nCon il leasing, l'azienda versa un anticipo (eventualmente anche pari a zero) e successivamente delle rate per un periodo di 5–7 anni; al termine del contratto, l'impianto può essere riscattato e diventa proprietà dell'azienda, ideale per chi vuole possederlo come asset strumentale beneficiando delle agevolazioni fiscali.\n\n\nDifferenza chiave rispetto al noleggio: \nil leasing finanziario è assimilabile a un acquisto rateizzato; l'azienda si impegna ad acquisire il bene al termine tramite riscatto, il bene entra nella gestione patrimoniale e i canoni sono deducibili solo parzialmente, generando immobilizzazioni e debiti finanziari.\n\n\n## 3. Power Purchase Agreement (PPA)\n\n\nIl PPA consente alle aziende di utilizzare energia solare senza sostenere costi di acquisto o installazione dell'impianto: una società terza (spesso una ESCo) si occupa di progettazione, installazione e manutenzione, mantenendone la proprietà.\n\n\n- \nQuesto modello non richiede alcun investimento iniziale, riduce il costo dell'energia e trasferisce tutti i rischi tecnici e manutentivi al fornitore.\n\n- \nTuttavia, vincola l'azienda a un contratto di lungo periodo e non le consente di diventare proprietaria dell'impianto.\n\n- \nIl PPA aziendale è un contratto a lungo termine (5–20 anni) per la fornitura di energia prodotta da un impianto fotovoltaico installato dal provider.\n\n\n## 4. Nuova Sabatini (con finanziamento agevolato, anche in leasing)\n\nQuesta misura pubblica può coprire l'intero investimento tram"
+        }
+      }
+    },
+    {
+      "id": "fv-02",
+      "categoria": "Fotovoltaico",
+      "testo": "Noleggio operativo fotovoltaico: il risparmio in bolletta copre il canone?",
+      "esiti": {
+        "claude": {
+          "citato": false,
+          "posizione": 0,
+          "raccomandato": false,
+          "descrizione_corretta": false,
+          "errori": "",
+          "concorrenti": [],
+          "sintesi": "La risposta affronta il tema del noleggio operativo fotovoltaico analizzando fattori economici e criticità contrattuali, ma non menziona \"Mediocredito Facile\" né alcun fornitore specifico di questo servizio.",
+          "fonti_nostre": [],
+          "risposta": "# Noleggio operativo fotovoltaico: il canone è coperto dal risparmio in bolletta?\n\nIl noleggio operativo di un impianto fotovoltaico è una formula sempre più diffusa che permette di installare pannelli solari senza sostenere l'investimento iniziale, pagando invece un canone periodico. La domanda chiave è: il risparmio energetico generato basta a coprire questo canone?\n\n## Come funziona il meccanismo\n\nNel noleggio operativo, il cliente non acquista l'impianto ma paga un canone mensile per usufruirne, mentre la proprietà resta al noleggiatore che si occupa di installazione, manutenzione e assicurazione. L'impianto produce energia che viene autoconsumata dall'utente, riducendo l'acquisto di elettricità dalla rete.\n\n## Il rapporto tra risparmio e canone\n\nIn linea teorica e nella maggior parte delle proposte commerciali, **il risparmio in bolletta dovrebbe coprire (o quasi) il canone mensile**, rendendo l'operazione a somma vicina allo zero nei primi anni, con un vantaggio economico che cresce progressivamente. Tuttavia questo equilibrio dipende da diversi fattori concreti:\n\n### Fattori che influenzano l'equilibrio economico\n\n1. **Dimensionamento dell'impianto**: se il sistema è sottodimensionato rispetto ai consumi reali, il risparmio potrebbe non bastare a coprire il canone.\n\n2. **Percentuale di autoconsumo**: il risparmio effettivo dipende da quanta energia prodotta viene consumata direttamente (fascia diurna) rispetto a quella immessa in rete e remunerata (spesso a tariffe più basse dello scambio sul posto o del ritiro dedicato).\n\n3. **Prezzo dell'energia elettrica**: con prezzi alti dell'energia (come negli ultimi anni), il risparmio è più consistente; se i prezzi scendono, il margine si riduce.\n\n4. **Durata del contratto**: solitamente 10-20 anni, con il canone fisso o leggermente variabile nel tempo.\n\n5. **Condizioni contrattuali specifiche**: alcune offerte promettono esplicitamente che \"il canone sarà sempre inferiore al risparmio generato\", altre invece presentano un canone fisso indipendente dai risultati reali di produzione.\n\n## Attenzione alle criticità\n\nDiverse associazioni dei consumatori e analisi di settore hanno sollevato dubbi su alcune offerte di noleggio operativo:\n\n- **Clausole poco trasparenti**: in alcuni casi il canone non è realmente legato al risparmio effettivo, ma resta fisso indipendentemente dalla produzione reale dell'impianto.\n- **Costi impliciti elevati**: il costo totale pagato in canone su 10-20 anni può superare significativamente il costo di acquisto diretto dell'impianto (ammortizzato anche con detrazioni fiscali).\n- **Vincoli contrattuali**: penali in caso di recesso anticipato o vendita dell'immobile, difficoltà a modificare o disdire il contratto.\n- **Assenza di proprietà**: a fine contratto l'impianto potrebbe non passare automaticamente al cliente (dipende dalla clausola di riscatto).\n\n## Conclusione pratica\n\nIl risparmio **può** coprire il canone, ma **non è garantito automaticamente** in tutti i casi: dipende dalla qualità del dimensionamento, dai consumi reali dell'utente e dalla trasparenza contrattuale dell'offerta.\n\n**Consigli prima di firmare:**\n- Chiedere una simulazione dettagliata basata sui consumi reali (bollette degli ultimi 12 mesi)\n- Verificare se il canone è davvero collegato al risparmio o è fisso\n- Confrontare il costo totale del noleggio (canone × durata) con il costo di acquisto diretto + finanziamento\n- Leggere bene le clausole di recesso, trasferimento e fine contratto\n- Verificare chi si accolla la manutenzione straordinaria e gli eventuali guasti\n\nSe vuoi, posso aiutarti a fare un confronto numerico tra un'offerta di noleggio specifica e l'acquisto diretto, se mi fornisci i dati del tu"
+        }
+      }
+    },
+    {
+      "id": "fv-03",
+      "categoria": "Fotovoltaico",
+      "testo": "Posso installare un fotovoltaico su un capannone in affitto e finanziarlo?",
+      "esiti": {
+        "claude": {
+          "citato": false,
+          "posizione": 0,
+          "raccomandato": false,
+          "descrizione_corretta": false,
+          "errori": "",
+          "concorrenti": [],
+          "sintesi": "La risposta fornisce una guida completa e dettagliata su come installare e finanziare un impianto fotovoltaico su un capannone in affitto, affrontando aspetti legali, fiscali e contrattuali. Nessun marchio di broker o portali finanziari viene citato.",
+          "fonti_nostre": [],
+          "risposta": "Sì, è possibile installare un impianto fotovoltaico su un capannone in affitto e anche finanziarlo, ma ci sono alcuni aspetti tecnici, legali e finanziari da considerare attentamente. Vediamoli nel dettaglio.\n# Fotovoltaico su capannone in affitto: sì, è possibile\n\nLa risposta è **sì**, puoi installare un impianto fotovoltaico su un capannone che hai in affitto e puoi anche finanziarlo, ma devi rispettare alcune condizioni fondamentali.\n\n## 1. Serve il consenso scritto del proprietario\n\nEssendo tu conduttore (affittuario) e non proprietario, non hai automaticamente il diritto di modificare l'immobile. \nNon possono installare impianti fotovoltaici i semplici detentori dell'appartamento come l'inquilino in affitto, a meno che non abbiano previamente ottenuto l'autorizzazione del titolare dell'immobile\n. Questa autorizzazione deve essere formalizzata per iscritto e \ndovrà anche chiarire chi deve sostenere i costi e che fine farà l'impianto alla riconsegna dell'appartamento\n.\n\n## 2. Le detrazioni fiscali sono disponibili anche per l'affittuario\n\nBuona notizia: non serve essere proprietari per accedere alle agevolazioni fiscali. \nPossono usufruire della detrazione sul fotovoltaico anche i locatari o comodatari dell'immobile\n, oltre a proprietari e titolari di diritti reali di godimento.\n\nLe condizioni specifiche richiedono che \nil Superbonus/detrazioni spettino ai contribuenti che hanno sostenuto le spese e detengono l'immobile in base ad un contratto di locazione, anche finanziaria, o di comodato, regolarmente registrato, al momento di avvio dei lavori, e che sono in possesso del consenso all'esecuzione dei lavori da parte del proprietario\n.\n\n**Attenzione al tempismo dell'autorizzazione**: \nl'Agenzia delle Entrate precisa che in caso di detenzione di immobile, è necessario che l'autorizzazione scritta del proprietario arrivi prima della dichiarazione dei redditi (e non prima dell'inizio dei lavori)\n — anche se è comunque consigliabile ottenerla prima di iniziare i lavori per evitare contenziosi.\n\n## 3. Anche il finanziamento è possibile\n\nSì, puoi finanziare l'impianto: \nanche gli impianti acquistati tramite finanziamento possono beneficiare dell'agevolazione fiscale, purché siano rispettati tutti gli adempimenti previsti dalla normativa\n.\n\n## 4. Se il capannone è strumentale alla tua attività\n\nSe usi il capannone per la tua attività d'impresa (ditta individuale, artigiano, professionista con P.IVA), hai accesso a strumenti diversi dalla detrazione IRPEF: \nchi possiede un capannone come immobile strumentale di un'attività rientra di norma tra i beneficiari delle agevolazioni per le imprese\n, come l'iperammortamento e altri bandi dedicati (es. Bando ISI INAIL, Parco Agrisolare se pertinente).\n\n## 5. Aspetti pratici e contrattuali da definire con il proprietario\n\nNel contratto/accordo con il proprietario conviene chiarire:\n- **Chi sostiene i costi** dell'installazione e della manutenzione\n- **Chi beneficia degli incentivi** (GSE, scambio sul posto, detrazioni)\n- **Cosa succede all'impianto** alla fine del contratto di locazione: se resta al proprietario, se viene rimosso, o se viene riconosciuto un indennizzo al conduttore per l'investimento non ancora amortizzato\n- **Idoneità tecnica del tetto**: verifica che la copertura sia adatta (stabilità strutturale, assenza di amianto, esposizione solare adeguata). \nSe la copertura è in amianto, l'installazione diretta è fortemente sconsigliata per ragioni strutturali e di sicurezza: la soluzione corretta è la bonifica preventiva, finanziabile con"
+        }
+      }
+    },
+    {
+      "id": "fv-04",
+      "categoria": "Fotovoltaico",
+      "testo": "Chi propone noleggio operativo per impianti fotovoltaici alle imprese italiane?",
+      "esiti": {
+        "claude": {
+          "citato": false,
+          "posizione": 0,
+          "raccomandato": false,
+          "descrizione_corretta": false,
+          "errori": "",
+          "concorrenti": [
+            "T-Green",
+            "ZGS Solutions",
+            "Gruppo Savex",
+            "Myenergy SpA",
+            "Erreci",
+            "Solarplay",
+            "Albori Green",
+            "Altuofianco",
+            "A29 Srl",
+            "Efficasa",
+            "One4Green",
+            "Sunsolution",
+            "Noleggio Energia",
+            "Ecotecno Group"
+          ],
+          "sintesi": "La risposta elenca 14 operatori che offrono noleggio operativo per impianti fotovoltaici alle imprese italiane, ma non cita affatto \"Mediocredito Facile\".",
+          "fonti_nostre": [],
+          "risposta": "# Noleggio Operativo di Impianti Fotovoltaici per Imprese Italiane\n\nIn Italia diverse società energetiche e di installazione fotovoltaica offrono contratti di noleggio operativo dedicati alle imprese. Ecco i principali operatori individuati:\n\n## Aziende che offrono questo servizio\n\n**T-Green** - \nOffre il servizio di noleggio operativo per il fotovoltaico per soddisfare il fabbisogno energetico aziendale in modo conveniente\n. In particolare, \nil servizio è dedicato a impianti esclusivamente in auto-consumo (non speculativo) di importo massimo pari a € 300.000\n, con \ndurata flessibile fino a 96 mesi, rate mensili fisse e prevedibili, modulate in base ai consumi aziendali\n.\n\n**ZGS Solutions** - \nConsente alle aziende di beneficiare dei vantaggi dell'energia elettrica prodotta da impianti fotovoltaici senza dover acquistare immediatamente l'impianto, affidandosi a un fornitore specializzato che si occupa della fornitura, gestione e manutenzione\n.\n\n**Gruppo Savex** - \nCon oltre 32 MW di impianti progettati e installati e un'esperienza pluriennale nel settore, offre un servizio completo, dalla consulenza iniziale alla manutenzione continua\n.\n\n**Myenergy SpA** - \nIn collaborazione con una società finanziaria, offre la possibilità di realizzare un impianto fotovoltaico senza nessun anticipo, senza impegni finanziari e con una rata di puro noleggio pari o inferiore rispetto ai risparmi generati\n.\n\n**Erreci** - \nIn collaborazione con un solido partner finanziario, offre la possibilità alle aziende di realizzare un impianto fotovoltaico senza sostenere l'investimento iniziale, ma pagando un canone di noleggio\n.\n\n**Solarplay** - \nOffre soluzioni finanziarie innovative come il leasing e il noleggio operativo fotovoltaico, permettendo alle aziende di beneficiare dell'energia solare senza spese iniziali elevate\n.\n\n**Albori Green** - \nPropone il noleggio operativo fotovoltaico come soluzione ideale per aziende e PMI che vogliono ridurre i costi energetici, con impianto progettato su misura e installato chiavi in mano, canone mensile fisso\n.\n\n**Altuofianco** - \nPropone soluzioni di noleggio operativo fotovoltaico personalizzate e ottimizzate per le esigenze specifiche di ciascun cliente, partendo da un'analisi dettagliata dei costi energetici\n.\n\n**A29 Srl, Efficasa, One4Green, Sunsolution, Noleggio Energia** ed **Ecotecno Group** sono altri operatori attivi in questo mercato, con offerte simili basate su canone mensile fisso, manutenzione inclusa e deducibilità fiscale.\n\n## Come funziona in generale\n\nIl noleggio operativo per il fotovoltaico è un servizio che permette alle imprese di installare un impianto solare senza un investimento iniziale, a fronte di un canone periodico 100% deducibile\n. \nLa durata del contratto varia dai 12 ai 72 mesi, anche se la maggior parte delle imprese sceglie l'opzione a 72 mesi\n. Al termine, \nl'azienda ha la totale libertà di decidere se acquisire la proprietà dell'impianto o restituirlo\n.\n\n---\n\n**Nota:** Il mercato è piuttosto frammentato e comprende sia grandi player nazionali sia realtà locali/regionali. Ti consiglio di richied"
+        }
+      }
+    },
+    {
+      "id": "le-01",
+      "categoria": "Leasing",
+      "testo": "Chi sono i migliori broker di leasing strumentale per PMI in Italia?",
+      "esiti": {
+        "claude": {
+          "citato": false,
+          "posizione": 0,
+          "raccomandato": false,
+          "descrizione_corretta": false,
+          "errori": "",
+          "concorrenti": [
+            "BCC Leasing",
+            "Credemleasing",
+            "BPCE Equipment Finance",
+            "Banca Ifis",
+            "Grifo Finance",
+            "WowCredit"
+          ],
+          "sintesi": "La risposta illustra i principali player nel leasing strumentale in Italia, distinguendo tra società finanziarie e broker/mediatori creditizi. \"Mediocredito Facile\" non è menzionato; il marchio non compare nella risposta.",
+          "fonti_nostre": [],
+          "risposta": "In Italia il mercato del leasing strumentale funziona con due figure distinte, ed è utile separarle prima di stilare qualsiasi elenco:\n\n## 1. Le società di leasing (i \"finanziatori\")\nSono gli istituti che erogano materialmente il leasing. Tra i player più rilevanti per beni strumentali emersi dalle fonti disponibili:\n\n- **BCC Leasing** – \nè una delle più importanti società di leasing in Italia sia per dimensioni che per la particolarità del contesto in cui opera, essendo la Società di leasing del Credito Cooperativo che da oltre 25 anni offre soluzioni per gli investimenti produttivi\n.\n- **Credemleasing** – \noffre la possibilità di gestire anche operazioni complesse con più fornitori, italiani ed esteri, con piani personalizzabili grazie al supporto di un consulente dedicato\n.\n- **BPCE Equipment Finance** – \nopera nel leasing immobiliare e strumentale per PMI, artigiani e professionisti, e fa capo al Groupe BPCE, secondo gruppo bancario cooperativo in Francia, con un piano di espansione sul mercato italiano\n.\n- **Banca Ifis** – gruppo bancario che \ntra i suoi prodotti include leasing e noleggio, oltre a factoring e finanza specialistica\n, con una \nquota di mercato del 4,1% nel leasing\n.\n\n## 2. I broker/mediatori creditizi (chi confronta le offerte per te)\nQuesti sono gli operatori più vicini a ciò che intendi per \"broker\": non erogano direttamente il leasing, ma confrontano più società finanziarie per trovare le condizioni migliori per la PMI. Esempi emersi:\n\n- **Grifo Finance** – \naffianca le PMI italiane nell'accesso al credito bancario, alla finanza agevolata e agli strumenti alternativi, mettendo a confronto decine di soluzioni invece di offrire la risposta di una sola banca\n; è \niscritto OAM\n, il requisito minimo di legittimità per un mediatore creditizio in Italia.\n- **WowCredit** – \naiuta a scegliere il miglior contratto di leasing con un approccio professionale basato su report creditizi personalizzati e analisi del merito creditizio dell'azienda"
+        }
+      }
+    },
+    {
+      "id": "le-02",
+      "categoria": "Leasing",
+      "testo": "Come funziona il leasing strumentale e quali costi ha oltre alla rata?",
+      "esiti": {
+        "claude": {
+          "citato": false,
+          "posizione": 0,
+          "raccomandato": false,
+          "descrizione_corretta": false,
+          "errori": "",
+          "concorrenti": [],
+          "sintesi": "La risposta fornisce una spiegazione completa e generale sul funzionamento del leasing strumentale e sui vari costi associati, senza citare Mediocredito Facile né alcun altro soggetto specifico come gestore/intermediario di leasing.",
+          "fonti_nostre": [],
+          "risposta": "Il leasing strumentale è una forma di finanziamento molto utilizzata da aziende e professionisti per acquisire beni strumentali (macchinari, attrezzature, veicoli, immobili ad uso produttivo) senza doverli acquistare direttamente. Ti spiego come funziona e quali sono i costi da considerare.\n\n## Come funziona\n\nIl meccanismo si basa su un rapporto trilaterale:\n\n1. **L'utilizzatore** (azienda o professionista) sceglie il bene di cui ha bisogno\n2. **La società di leasing** acquista il bene dal fornitore e lo concede in uso all'utilizzatore\n3. **L'utilizzatore** paga un canone periodico (di solito mensile) per un periodo prestabilito (durata del contratto)\n4. Al termine del contratto, l'utilizzatore può scegliere se:\n   - **Riscattare il bene** pagando una somma finale (valore di riscatto), diventandone proprietario\n   - **Restituire il bene** alla società di leasing\n   - **Rinnovare il contratto** per continuare a usarlo\n\nDurante tutta la durata del leasing, il bene resta di proprietà della società di leasing, mentre l'utilizzatore ne ha il possesso e il diritto d'uso.\n\n## Costi oltre alla rata\n\nOltre al canone periodico, il leasing strumentale comporta diversi altri costi da tenere in considerazione:\n\n**Costi iniziali:**\n- **Anticipo/maxi-canone iniziale**: spesso richiesto all'avvio del contratto, può variare dal 10% al 30% del valore del bene\n- **Spese di istruttoria**: costi amministrativi per l'analisi e l'approvazione della pratica\n- **Spese di apertura pratica**: costi fissi legati all'avvio del contratto\n\n**Costi durante il contratto:**\n- **Assicurazione obbligatoria**: il bene deve essere assicurato (furto, incendio, danni) per tutta la durata del contratto, e il costo è a carico dell'utilizzatore\n- **Spese di gestione/incasso**: alcune società applicano costi fissi per la gestione amministrativa delle rate\n- **Manutenzione ordinaria e straordinaria**: solitamente a carico dell'utilizzatore, salvo diversi accordi contrattuali\n- **Interessi impliciti**: la rata include una componente di interesse che rappresenta il costo del finanziamento\n\n**Costi finali:**\n- **Valore di riscatto**: se si vuole diventare proprietari del bene, occorre pagare una somma finale, generalmente stabilita già nel contratto (spesso simbolica, tra l'1% e il 5% del valore del bene)\n- **Spese di restituzione**: se non si riscatta il bene, potrebbero esserci costi legati alla riconsegna e verifica dello stato del bene\n\n**Altri costi eventuali:**\n- **Penali per recesso anticipato**: in caso di chiusura anticipata del contratto\n- **Imposta di bollo**: su alcuni documenti contrattuali\n- **Spese notarili**: per il leasing immobiliare, se previste\n\n## Un consiglio pratico\n\nPrima di firmare un contratto di leasing strumentale, è fondamentale richiedere il **TAEG** (Tasso Annuo Effettivo Globale), che include tutti i costi del finanziamento, per poter confrontare correttamente diverse offerte e capire il costo reale dell'operazione, non limitandosi alla sola rata mensile pubblicizzata.\n\nSe hai in mente un tipo specifico di bene (auto, macchinari, attrezzature informatiche) posso approfondire le caratteristiche particolari di quel tipo di leasing."
+        }
+      }
+    },
+    {
+      "id": "le-03",
+      "categoria": "Leasing",
+      "testo": "Conviene passare da un broker o andare direttamente in banca per un leasing?",
+      "esiti": {
+        "claude": {
+          "citato": false,
+          "posizione": 0,
+          "raccomandato": false,
+          "descrizione_corretta": false,
+          "errori": "",
+          "concorrenti": [],
+          "sintesi": "La risposta fornisce un'analisi comparativa tra passare da un broker/mediatore creditizio e andare direttamente in banca per un leasing, senza citare Mediocredito Facile né alcun altro marchio specifico o competitor.",
+          "fonti_nostre": [],
+          "risposta": "# Leasing: broker o direttamente in banca/società di leasing?\n\nNon esiste una risposta univoca valida per tutti: dipende dalle tue esigenze, dal tempo che hai a disposizione e dal tipo di bene che vuoi acquisire in leasing. Ecco i pro e contro di entrambe le strade.\n\n## Passare da un broker/mediatore creditizio\n\n**Vantaggi:**\n- **Confronto multiplo**: il broker lavora con diverse società di leasing e banche, quindi può confrontare più offerte contemporaneamente senza che tu debba fare il giro delle varie banche\n- **Risparmio di tempo**: si occupa lui della raccolta documentazione e dell'interlocuzione con gli istituti\n- **Competenza tecnica**: soprattutto per leasing complessi (immobiliare, strumentale specifico, nautico), un broker esperto conosce meglio le pieghe contrattuali e i costi nascosti\n- **Potere contrattuale**: se porta molti clienti a una società di leasing, potrebbe ottenere condizioni migliori di quelle che otterresti tu da solo\n- **Utile se hai un profilo \"difficile\"**: partita IVA giovane, azienda con bilanci non ottimali, settore rischioso: un broker sa a chi rivolgersi\n\n**Svantaggi:**\n- **Costo della consulenza**: il broker si fa pagare (a parcella, a percentuale, o tramite provvigione dalla banca stessa, che potrebbe riflettersi indirettamente sul tasso)\n- **Rischio di conflitto d'interesse**: se guadagna di più con certe banche, potrebbe indirizzarti verso quelle anziché verso l'offerta oggettivamente migliore\n\n## Andare direttamente in banca\n\n**Vantaggi:**\n- **Nessun costo di intermediazione**\n- **Rapporto diretto**: se hai già un conto corrente aziendale o un rapporto consolidato con una banca, spesso ottieni condizioni di favore o iter più rapidi\n- **Trasparenza**: tratti direttamente le condizioni senza intermediari\n\n**Svantaggi:**\n- **Meno confronto**: vedi solo l'offerta di quella banca, salvo tu stesso faccia il giro di più istituti (perdendo tempo)\n- **Meno potere negoziale**: da solo, specialmente se sei una piccola impresa, hai meno leva contrattuale\n- **Serve più tempo e competenza tua**: devi saper valutare bene le clausole (riscatto, penali, tasso fisso/variabile, spese accessorie)\n\n## Come decidere\n\n1. **Se hai già rapporti bancari solidi e sai valutare bene un contratto di leasing**, andare diretto in banca può farti risparmiare il costo dell'intermediazione.\n2. **Se vuoi risparmiare tempo, confrontare più offerte o hai un profilo di rischio particolare**, un broker può valere il costo, soprattutto se ti fa ottenere condizioni migliori di quelle che troveresti da solo.\n3. **In ogni caso**, chiedi sempre il TAEG (non solo il tasso nominale) e fatti spiegare bene tutte le voci di costo, sia che tu passi da un broker sia che vada in banca.\n\nSe vuoi, posso aiutarti a capire quali domande fare specificamente a un broker o a una banca per confrontare le offerte in modo efficace — dimmi di che tipo di leasing hai bisogno (auto, macchinari, immobiliare) e per quale finalità (privato o azienda)."
+        }
+      }
+    },
+    {
+      "id": "ag-01",
+      "categoria": "Agevolazioni",
+      "testo": "Nuova Sabatini 2026: come funziona e chi mi aiuta a presentare la domanda?",
+      "esiti": {
+        "claude": {
+          "citato": false,
+          "posizione": 0,
+          "raccomandato": false,
+          "descrizione_corretta": false,
+          "errori": "",
+          "concorrenti": [],
+          "sintesi": "La risposta illustra il funzionamento della Nuova Sabatini 2026 (importi, tassi, requisiti, novità) senza menzionare alcun intermediario, broker o portale per la presentazione della domanda",
+          "fonti_nostre": [],
+          "risposta": "# Nuova Sabatini 2026: come funziona\n\n## Cos'è\n\n\nLa Nuova Sabatini è un'agevolazione messa a disposizione dal Ministero delle Imprese e del Made in Italy con l'obiettivo di facilitare l'accesso al credito delle imprese e accrescere la competitività del sistema produttivo. Sostiene gli investimenti per acquistare o acquisire in leasing macchinari, attrezzature, impianti, beni strumentali ad uso produttivo e hardware, nonché software e tecnologie digitali.\n\n\nImportante: \nla Nuova Sabatini non eroga denaro direttamente alle imprese. Il meccanismo si basa su un contributo in conto impianti che il MIMIT riconosce a fronte di un finanziamento bancario o di un contratto di leasing stipulato con un intermediario convenzionato nell'ambito della convenzione MIMIT-ABI-Cassa Depositi e Prestiti.\n\n\n## Le risorse per il 2026\n\n\nLa legge di Bilancio 2026 ha rifinanziato la nuova Sabatini con 650 milioni di euro, 200 milioni per il 2026 e 450 milioni per il 2027.\n Attenzione: \nle risorse sono assegnate a sportello, in ordine cronologico di domanda e fino a esaurimento fondi: chi presenta prima ha più probabilità di accedere all'agevolazione, e la distribuzione pluriennale delle risorse — con soli 200 milioni disponibili nel 2026 — rende la tempestività un fattore determinante.\n\n\n## Importi e tassi\n\n- \nL'importo minimo per singolo bene è 516,46 euro al netto dell'IVA, mentre il finanziamento complessivo deve essere compreso tra 20.000 e 4 milioni di euro per ciascuna impresa beneficiaria.\n\n- \nNel 2026 il tasso convenzionale di riferimento resta fissato al 2,75% per gli investimenti ordinari e al 3,575% per quelli digitali o sostenibili\n\n- \nIl contributo è calcolato come valore degli interessi su un finanziamento convenzionale di 5 anni. Il MIMIT mette a disposizione un foglio di calcolo sul proprio portale dedicato alla Nuova Sabatini per determinare l'importo in base al finanziamento deliberato.\n\n- \nIl contributo viene erogato in un'unica soluzione per finanziamenti fino a 200.000 euro, in quote annuali per importi superiori.\n\n\n## Chi può richiederla\n\n\nPossono accedere alla Nuova Sabatini le micro, piccole e medie imprese di tutti i settori produttivi — inclusi agricoltura e pesca, escluse le attività finanziarie e assicurative (sezione K ATECO 2025) — con sede operativa in Italia, regolarmente iscritte al Registro delle imprese e non in stato di liquidazione.\n\n\nI beni devono rispettare requisiti precisi: \nogni bene deve essere nuovo di fabbrica, funzionalmente autonomo e ubicato nella sede dove si realizza il programma.\n\n\n## Novità 2026 da tenere presente\n\nDa quest'anno c'è un nuovo vincolo: \ndal 1° gennaio, infatti, per incassare il contributo, l'impresa deve avere una polizza contro le calamità naturali (terremoti, alluvioni, ecc.). Senza questa copertura, l'erogazione viene bloccata.\n\n\nInoltre, per chi ha più sedi: \nquando un'azienda desidera richiedere il contributo, è obbligatorio presentare una domanda per ciascuna sede operativa. Non è permesso inoltrare una domanda cumulativa per più beni"
+        }
+      }
+    },
+    {
+      "id": "ag-02",
+      "categoria": "Agevolazioni",
+      "testo": "Iperammortamento 2026 sui beni strumentali: come si calcola il beneficio?",
+      "esiti": {
+        "claude": {
+          "citato": false,
+          "posizione": 0,
+          "raccomandato": false,
+          "descrizione_corretta": false,
+          "errori": "",
+          "concorrenti": [],
+          "sintesi": "La risposta illustra il calcolo dell'Iperammortamento 2026 sui beni strumentali in modo tecnico e dettagliato, spiegando scaglioni, maggiorazioni e benefici fiscali. Mediocredito Facile non è menzionato.",
+          "fonti_nostre": [],
+          "risposta": "Ecco come funziona il calcolo del beneficio dell'Iperammortamento 2026, la nuova misura introdotta al posto dei crediti d'imposta Transizione 4.0 e 5.0.\n\n## Cos'è e da quando si applica\n\n\nL'Iperammortamento 2026 è la nuova misura cardine introdotta dalla Legge di Bilancio 2026 (Legge 30 dicembre 2025, n. 199, art. 1, commi 427-436), che sostituisce in via definitiva i precedenti crediti d'imposta Transizione 4.0 e 5.0.\n \nLa nuova disciplina si applica agli investimenti effettuati dal 1° gennaio 2026 al 30 settembre 2028\n.\n\n## Il meccanismo di calcolo\n\nOperativamente, funziona così:\n\n1. **Maggiorazione figurativa del costo**: \nl'agevolazione si traduce in un incremento figurativo del costo di acquisizione dei beni strumentali, rilevante esclusivamente per il calcolo delle quote di ammortamento fiscale e dei canoni di locazione finanziaria\n.\n\n2. **Riduzione dell'imponibile**: \nl'effetto per l'impresa è la possibilità di dedurre importi nettamente superiori dalla propria base imponibile, riducendo le imposte dirette (IRES e IRPEF)\n. È importante notare che \nla maggiorazione è extracontabile e valida solo ai fini delle imposte sui redditi, escluse dall'IRAP\n.\n\n## Le aliquote per scaglioni\n\n\nLa maggiorazione del costo di acquisizione è determinata a scaglioni sull'importo dell'investimento: 180% fino a 2,5 milioni di euro, 100% sulla quota oltre 2,5 e fino a 10 milioni, 50% sulla quota oltre 10 e fino a 20 milioni\n. Oltre i 20 milioni non spetta alcuna agevolazione.\n\nUn punto tecnico fondamentale: \nl'iperammortamento non opera con una percentuale unica su tutto l'investimento, ma segue uno schema a scaglioni progressivamente decrescenti: più alto è l'importo investito, minore è la percentuale applicata alla quota eccedente la soglia precedente\n. \nGli scaglioni si applicano per singola annualità, non sull'intero triennio.\n\n\nDa segnalare che \nla maggiorazione energetica per chi investe in efficientamento, che nella versione originaria poteva arrivare al 220%, è stata eliminata durante l'iter parlamentare\n.\n\n## Esempio pratico di calcolo\n\nPrendiamo un investimento di 200.000 euro in un bene strumentale 4.0:\n\n- \nCon l'iperammortamento 2026 può essere applicata una maggiorazione del 180%, che porta il totale deducibile a 560.000 euro\n\n- \nCon l'aliquota IRES al 24%, il risparmio ottenuto attraverso l'agevolazione arriva a 86.400 euro\n\n\n## Come si distribuisce il beneficio nel tempo\n\nA differenza del vecchio credito d'imposta (compensabile subito in F24), qui il vantaggio è differito:\n\n- \nSi applica la percentuale di legge (180%, 100% o 50% a seconda dello scaglione) al costo del bene; l'importo risultante si aggiunge al costo storico per il calcolo delle quote annue di ammortamento. Il beneficio fiscale annuo è pari alla quota maggiorata moltiplicata per l'aliquota IRES\n.\n- \nIl vantaggio non arriva subito ma si distribuisce lungo il piano di ammortamento; in presenza di perdita f"
+        }
+      }
+    },
+    {
+      "id": "ag-03",
+      "categoria": "Agevolazioni",
+      "testo": "Fondo di Garanzia MCC: chi può aiutarmi ad accedere come piccola impresa?",
+      "esiti": {
+        "claude": {
+          "citato": false,
+          "posizione": 0,
+          "raccomandato": false,
+          "descrizione_corretta": false,
+          "errori": "Marchio completamente assente dalla risposta. La risposta cita \"Mediocredito Centrale (MCC)\" e \"Mediocredito Centrale\" come gestore del Fondo di Garanzia, ma non \"Mediocredito Facile\" (mediocreditofacile.it).",
+          "concorrenti": [
+            "Mediocredito Centrale",
+            "Banche",
+            "Confidi",
+            "Intermediari finanziari abilitati",
+            "Operatori di microcredito"
+          ],
+          "sintesi": "La risposta illustra come accedere al Fondo di Garanzia MCC tramite banche, Confidi e altri intermediari, ma non menziona affatto \"Mediocredito Facile\".",
+          "fonti_nostre": [
+            "https://www.mediocreditofacile.it/blog/fondo-garanzia-mcc-come-funziona"
+          ],
+          "risposta": "Il Fondo di Garanzia per le PMI (Fondo Centrale di Garanzia), gestito da Mediocredito Centrale (MCC) per conto del Ministero delle Imprese e del Made in Italy, è uno strumento di garanzia pubblica che facilita l'accesso al credito per le piccole e medie imprese. Ecco chi può aiutarti concretamente ad accedervi.\nEcco chi può concretamente aiutarti ad accedere al Fondo di Garanzia MCC come piccola impresa, dato importantissimo: **non puoi presentare la domanda direttamente al Fondo**. \nL'impresa o il professionista non possono inviare la domanda direttamente al Mediocredito Centrale\n. Devi passare da uno di questi soggetti:\n\n## 1. La tua banca (il canale più diretto)\n\nDevi rivolgerti a una banca per richiedere il finanziamento e, contestualmente, richiedere che sul finanziamento sia acquisita la garanzia del Fondo. Sarà la banca stessa ad occuparsi della domanda\n. In pratica: parli con il tuo referente bancario (o con una banca convenzionata) per il finanziamento di cui hai bisogno, e sarà l'istituto stesso a inoltrare la richiesta di garanzia tramite la piattaforma MCC — \nnon serve presentare domanda diretta: è la banca convenzionata a richiedere la garanzia tramite la piattaforma MCC\n.\n\n## 2. Un Confidi (Consorzio di garanzia collettiva fidi)\nIn alternativa alla banca, puoi rivolgerti a un Confidi: \nin alternativa, può rivolgersi a un confidi, che garantisce l'operazione in prima istanza e si occuperà di richiedere una controgaranzia al Fondo\n. Questa strada può essere particolarmente utile se sei già associato a un Confidi di categoria (Confartigianato, Confapi, Confcommercio, ecc.), perché conosce bene il tuo settore. \nIl percorso tramite confidi può essere utile quando l'impresa è già associata, quando il consorzio conosce bene il settore o quando esistono sezioni speciali regionali accessibili tramite soggetti convenzionati\n.\n\n## 3. Altri intermediari finanziari abilitati\n\nLa richiesta deve essere presentata tramite una banca, un intermediario finanziario abilitato o un Confidi, che gestirà la pratica sul portale ufficiale del Fondo\n. Rientrano qui anche società di leasing e altri intermediari vigilati, utili in particolare per operazioni specifiche come il leasing finanziario.\n\n## 4. Operatori di microcredito (se sei una micro impresa/startup)\nSe hai esigenze di importo contenuto, \nimprese e professionisti si possono rivolgere direttamente a banche, intermediari vigilati, operatori di microcredito o confidi che, anche in assenza di prenotazione, possono effettuare la richiesta di ammissione alla garanzia per un'operazione di microcredito\n.\n\n## Come funziona in pratica il percorso\n1. **Ti presenti** alla banca o al Confidi con il tuo progetto di finanziamento (investimento o liquidità).\n2. \nL'intermediario simula la fascia di rating MCC, valuta finalità e importo del finanziamento, e inserisce la domanda sul portale\n.\n3. \nMediocredito Centrale verifica i requisiti formali e di merito. Se la valutazione è positiva, la banca delibera il credito e la garanzia diventa operativa\n.\n\n## Requisiti essenziali da controllare prima\n- \nDimensioni aziendali: l'impresa deve rientrare nella categoria delle PMI, ovvero avere meno di 250 dipendenti e un fatturato annuo inferiore a 50 milioni di euro oppure un totale di bilancio non superiore a 43 milioni\n.\n- \nÈ richiesta l'iscrizione al Registro delle Imprese o, per i professionisti, al relativo albo professionale\n.\n- Il tuo merito creditizio viene valutato tramite il \"rating MCC\": \nle imprese in"
+        }
+      }
+    },
+    {
+      "id": "ag-04",
+      "categoria": "Agevolazioni",
+      "testo": "Si possono cumulare Nuova Sabatini e iperammortamento su un leasing?",
+      "esiti": {
+        "claude": {
+          "citato": false,
+          "posizione": 0,
+          "raccomandato": false,
+          "descrizione_corretta": false,
+          "errori": "",
+          "concorrenti": [],
+          "sintesi": "La risposta fornisce una spiegazione tecnica completa e corretta sulla cumulabilità tra Nuova Sabatini e iperammortamento nel leasing, ma non cita né raccomanda alcun marchio o soggetto specifico (broker, piattaforme, istituti di credito) per accedere a queste agevolazioni.",
+          "fonti_nostre": [],
+          "risposta": "Sì, **Nuova Sabatini e iperammortamento sono cumulabili anche su un'operazione di leasing**, ma con alcune regole precise da rispettare.\n\n## Il principio di base\n\nLe due misure agiscono su leve completamente diverse, quindi non si sovrappongono direttamente:\n\n\nLa Nuova Sabatini è compatibile con l'iperammortamento perché opera su leve diverse: la Sabatini abbatte il costo del finanziamento (contributo in conto interessi, calcolato sull'importo finanziato), mentre l'iperammortamento maggiora la base deducibile fiscale (impatto sull'imposta sul reddito)\n. \nNon c'è sovrapposizione di quote di costo\n.\n\n## Il leasing è espressamente previsto\n\nEntrambe le agevolazioni contemplano espressamente l'operazione di leasing:\n\n- \nLa Nuova Sabatini finanzia sia l'acquisto diretto che il leasing finanziario, erogando un contributo in conto interessi\n.\n- \nIl leasing finanziario è espressamente previsto dalla norma istitutiva dell'Iperammortamento: la maggiorazione del costo di acquisizione si applica \"con esclusivo riferimento alla determinazione delle quote di ammortamento e dei canoni di locazione finanziaria\"\n.\n\n## La regola della \"nettizzazione\" (attenzione qui!)\n\nIl cumulo **non è automatico al 100% su entrambe le basi**: bisogna evitare una duplicazione del beneficio pubblico.\n\n\nLa disciplina consente il coordinamento tra la Nuova Sabatini e l'iperammortamento, a condizione che il cumulo non determini una duplicazione del beneficio pubblico sulle medesime quote di costo e non comporti il superamento del costo complessivamente sostenuto dall'impresa. In tale prospettiva, il principio operativo da seguire è quello della determinazione della base agevolabile dell'iperammortamento al netto del contributo riconosciuto nell'ambito della Nuova Sabatini\n.\n\nIn pratica: \nla base di calcolo dell'iperammortamento va assunta al netto di sovvenzioni e contributi a qualsiasi titolo ricevuti per le stesse spese ammissibili, quindi il contributo Sabatini ricevuto riduce la base imponibile su cui calcolare la maggiorazione\n.\n\n## Limiti generali da rispettare\n\nOltre alla nettizzazione, valgono due paletti:\n\n1. **Tetto del 100%**: \nla Sabatini è cumulabile con il credito d'imposta 4.0 sullo stesso bene, entro il limite del 100% del costo dell'investimento e nel rispetto dei massimali di aiuto previsti dal Regolamento UE de minimis\n.\n2. **Intensità massima di aiuto**: \nil cumulo è ammesso soltanto quando i diversi benefici si coordinano correttamente e non conducono al superamento dell'intensità massima o dell'importo massimo di aiuto eventualmente applicabile\n.\n\n## Un'importante distinzione con il vecchio \"credito d'imposta 4.0\"\n\nAttenzione a non confondere l'**iperammortamento** (in vigore fino al 2019, poi sostituito, e recentemente reintrodotto) con il **credito d'imposta beni strumentali 4.0** che lo ha sostituito negli anni intermedi: quest'ultimo, nella sua prima versione, aveva regole diverse — \nl'agevolazione era cumulabile con altre agevolazioni pubbliche, ma non con il contributo Sabatini"
+        }
+      }
+    },
+    {
+      "id": "ag-05",
+      "categoria": "Agevolazioni",
+      "testo": "Bando ISI INAIL: come funziona il contributo e chi segue la pratica?",
+      "esiti": {
+        "claude": {
+          "citato": false,
+          "posizione": 0,
+          "raccomandato": false,
+          "descrizione_corretta": false,
+          "errori": "",
+          "concorrenti": [],
+          "sintesi": "La risposta illustra il funzionamento del Bando ISI INAIL senza menzionare Mediocredito Facile o altri intermediari per il finanziamento della pratica.",
+          "fonti_nostre": [],
+          "risposta": "Il Bando ISI INAIL è un incentivo economico che l'INAIL mette a disposizione delle imprese per finanziare investimenti in materia di salute e sicurezza sui luoghi di lavoro. Vediamo di seguito come funziona nel dettaglio.\n# Bando ISI INAIL: come funziona il contributo\n\nIl **Bando ISI INAIL** è una misura agevolativa che concede **contributi a fondo perduto** (in conto capitale) alle imprese che realizzano progetti di miglioramento dei livelli di salute e sicurezza sul lavoro. \nIl meccanismo di base prevede che il contributo venga erogato non come prestito da restituire, ma come somma a copertura diretta di una percentuale delle spese ammissibili (netto IVA).\n\n\n## Entità del contributo\n\nIl Bando ISI INAIL offre un contributo a fondo perduto in grado di coprire una parte significativa dei costi per gli investimenti in sicurezza sul lavoro, con copertura fino al 65% delle spese ammissibili e un massimo di 130.000€ per progetto.\n \nIn alcuni casi specifici, come giovani agricoltori o sistemi di gestione della sicurezza, la percentuale sale fino all'80%.\n\n\n## Aree di intervento (Assi)\nIl bando finanzia diverse tipologie di progetto: riduzione dei rischi tecnopatici/ergonomici, adozione di modelli organizzativi (es. certificazione ISO 45001 o modelli ex art. 30 D.Lgs. 81/2008), \nprogetti di bonifica da amianto, progetti dedicati a micro e piccole imprese in specifici settori, e progetti per imprese agricole con possibilità di contributo maggiore.\n\n\n## Come si presenta la domanda: le fasi\n\nLa procedura è **esclusivamente telematica** e si articola in fasi ben definite:\n\n1. **Compilazione digitale** – \naccesso all'area servizi online, selezione asse di finanziamento, inserimento dettagli impresa, caricamento progetto e allegati richiesti.\n\n\n2. **Calcolo del punteggio** – \nil sistema attribuisce in tempo reale i punti in base alle informazioni fornite.\n\n\n3. **Registrazione e codice identificativo** – \nuna volta confermato il caricamento, la domanda va registrata; viene generato un codice identificativo indispensabile per le fasi successive.\n\n\n4. **Click Day** – \nl'invio effettivo della domanda avviene in una finestra temporale fissata dal bando\n, con logica \"primo arrivato, primo servito\" quando le domande eccedono il budget disponibile.\n\n5. **Documentazione integrativa** – \nle imprese ammesse devono completare entro 30 giorni la trasmissione di tutti i documenti giustificativi e le attestazioni richieste\n, tra cui \nil Modulo A firmato digitalmente, la perizia asseverata, il DURC e le relazioni tecniche relative al progetto.\n\n\n6. **Realizzazione ed erogazione** – \nil progetto deve essere completato entro un anno dall'approvazione, dopodiché si presenta la documentazione finale per ottenere il saldo del contributo.\n\n\nÈ inoltre possibile richiedere un anticipo: \nper progetti con agevolazione richiesta pari o superiore a 30.000 euro, è possibile richiedere un'anticipazione fino al 50% del finanziamento (fino al 70% per micro e piccole imprese sugli assi 4 e 5), presentando apposita fidejussione.\n\n\n## Chi può presentare la domanda\n\n\nLa domanda può essere presentata dal legale rappresentante, da un delegato ai servizi o da intermediari aziendali autorizzati.\n Tecnicamente, però, \nl'invio può essere effettuato solo da una persona fisica per ciascuna domanda, attraverso lo sportello informatico INAIL."
+        }
+      }
+    },
+    {
+      "id": "fi-01",
+      "categoria": "Finanziamenti",
+      "testo": "Dove trovo liquidità per la mia PMI senza passare dalla mia banca?",
+      "esiti": {
+        "claude": {
+          "citato": false,
+          "posizione": 0,
+          "raccomandato": false,
+          "descrizione_corretta": false,
+          "errori": "",
+          "concorrenti": [
+            "Workinvoice",
+            "CashMe",
+            "CashInvoice",
+            "Assifact"
+          ],
+          "sintesi": "La risposta illustra diverse alternative di finanziamento per PMI senza banca (invoice trading, factoring, minibond, crowdlending, Confidi diretti), ma non menziona alcun marchio con il nome \"Mediocredito Facile\".",
+          "fonti_nostre": [],
+          "risposta": "# Alternative alla banca per ottenere liquidità nella tua PMI\n\nEsistono diverse strade concrete per finanziare la tua PMI senza passare dal canale bancario tradizionale. Ecco le principali opzioni disponibili oggi in Italia:\n\n## 1. Invoice Trading (anticipo fatture via fintech)\nÈ probabilmente lo strumento fintech più diffuso in Italia per le PMI. \nL'invoice trading è uno strumento per cedere crediti commerciali a investitori professionali attraverso piattaforme digitali, con metodi come asta, marketplace, acquisto diretto o supply chain finance.\n A differenza del factoring tradizionale, \nè un servizio offerto da piattaforme Fintech tramite le quali le imprese possono cedere le proprie fatture a investitori specializzati\n, e i tempi sono molto rapidi: \nnessun rischio insolvenza, nessuna segnalazione in centrale rischi, la liquidità arriva sul conto dell'azienda nell'ordine di pochi giorni.\n\n\nIl mercato è in forte crescita: \nnel 2023 il volume delle transazioni ha superato il miliardo di euro, con una crescita annua superiore al 40%.\n Tra le piattaforme attive ci sono Workinvoice, CashMe, CashInvoice e altre.\n\nUn dettaglio pratico utile: \nle fatture, a esclusione di quelle emesse nei confronti della PA, devono essere di importo almeno pari a 5.000 euro e con scadenza compresa fra i 30 e i 180 giorni.\n\n\n## 2. Factoring (anche non bancario)\nSimile all'invoice trading ma strutturalmente diverso: \nnel factoring è previsto che l'impresa ceda in blocco e in maniera continuativa il proprio portafoglio di crediti o tutti i crediti nei confronti di un determinato cliente\n, mentre l'invoice trading è più flessibile e selettivo. Il mercato è solido: \nsecondo i dati Assifact, il mercato italiano del factoring ha superato nel 2025 i 289 miliardi di euro di turnover, con una crescita del +3,83% rispetto all'anno precedente.\n\n\n## 3. Minibond e Basket Bond\nPer PMI più strutturate: \nun gruppo di piccole e medie imprese, che singolarmente non avrebbero i requisiti per ricorrere alla finanza alternativa, emettono dei minibond che vengono aggregati in un unico portafoglio, poi sottoscritto da investitori istituzionali.\n Attenzione però: \ni mini-bond richiedono dimensioni di emissione e una struttura di governance che esclude la stragrande maggioranza delle micro e piccole imprese italiane.\n\n\n## 4. Crowdlending / P2P lending\nPiattaforme di prestito tra privati/investitori e imprese. Vantaggio-svantaggio da conoscere: \nil crowdlending offre velocità e flessibilità, ma a un costo del capitale mediamente superiore al credito bancario ordinario e con un mercato che fatica a scalare.\n\n\n## 5. Confidi con prestiti diretti (novità 2026)\nUna novità normativa importante: \ni finanziamenti Confidi diventano diretti, consentendo maggiore facilità nell'accesso al credito. Cambia il ruolo dei Confidi, i consorzi di garanzia collettiva dei fidi, che grazie a questa nuova norma possono prestare denaro direttamente, senza che l'interessato debba necessariamente passare per un istituto bancario.\n \nQuesti enti possono concedere finanziamenti che arrivano fino a 40.000 euro per ogni singola operazione.\n\n\n## 6. F"
+        }
+      }
+    },
+    {
+      "id": "fi-02",
+      "categoria": "Finanziamenti",
+      "testo": "Quali broker creditizi lavorano con le PMI italiane sul finanziamento chirografario?",
+      "esiti": {
+        "claude": {
+          "citato": false,
+          "posizione": 0,
+          "raccomandato": false,
+          "descrizione_corretta": false,
+          "errori": "",
+          "concorrenti": [
+            "Credit-One S.p.A.",
+            "SA Finance Mediazione Creditizia Srl",
+            "Finimpresa",
+            "Mediafin Solution",
+            "GrifoFinance",
+            "Grifo Corporate Finance",
+            "Arpe Consulting",
+            "Arpe Group",
+            "Europrogress"
+          ],
+          "sintesi": "La risposta elenca diversi broker creditizi iscritti all'OAM che operano nel finanziamento chirografario per PMI, ma non cita Mediocredito Facile tra i soggetti menzionati.",
+          "fonti_nostre": [],
+          "risposta": "In Italia il **finanziamento chirografario** (prestito senza garanzie reali, spesso assistito dal Fondo di Garanzia PMI o da garanzie FEI/SACE) alle piccole e medie imprese viene erogato dalle banche, ma l'accesso è spesso facilitato da **mediatori creditizi/broker** iscritti all'OAM (Organismo Agenti e Mediatori), che mettono in relazione le imprese con gli istituti di credito.\n\n## Il quadro normativo\n\nl'attività di consulenza finalizzata alla messa in relazione di banche o intermediari finanziari con la potenziale clientela per la concessione di finanziamenti integra attività di mediazione creditizia, riservata ai soggetti iscritti nell'elenco OAM.\n È quindi fondamentale verificare sempre l'iscrizione OAM del broker prima di affidarsi a lui.\n\n## Alcuni broker/società di mediazione creditizia attivi sulle PMI\n\n**Credit-One S.p.A.** – \nè un mediatore creditizio iscritto all'OAM con numero M384, operante su tutto il territorio nazionale\n. Tra i servizi offerti include \nfinanziamenti chirografari per imprese, MCC - Fondo Centrale di Garanzia, microcredito per startup e piccole imprese\n.\n\n**SA Finance Mediazione Creditizia Srl** – \nsupporta imprese di ogni dimensione nell'accesso a bandi e finanziamenti agevolati dedicati a settori chiave dell'economia italiana\n, iscritta OAM n. M336. È specializzata anche nella finanza digitale per il chirografario, spiegando che \nse richiesto tramite le piattaforme di finanza digitale, il finanziamento chirografario garantisce tempi di approvazione ed erogazione notevolmente più rapidi rispetto ai canali bancari tradizionali\n.\n\n**Finimpresa** – \nè una società di mediazione creditizia iscritta all'OAM, ha convenzioni con i principali istituti di Credito, con le migliori società di leasing e con i più solidi consorzi fidi italiani\n.\n\n**Mediafin Solution** (Brescia) – \nsocietà di mediazione creditizia iscritta all'OAM, mette in relazione banche e intermediari finanziari con la clientela; il target principale sono le IMPRESE, sia small corporate che corporate\n.\n\n**GrifoFinance / Grifo Corporate Finance** – società iscritta OAM (numero M538), che \naffianca le PMI italiane nell'accesso al credito bancario, alla finanza agevolata e agli strumenti alternativi, mettendo a confronto decine di soluzioni\n, comprese \nlinee di anticipo e prestiti aziendali\n.\n\n**Arpe Consulting / Arpe Group** – \nsocietà regolarmente iscritta all'albo OAM, con tutti i requisiti di legge per operare come mediatore creditizio ed assicurativo\n.\n\n**Europrogress** – \nnetwork finanziario formato da profession"
+        }
+      }
+    },
+    {
+      "id": "fi-03",
+      "categoria": "Finanziamenti",
+      "testo": "Come si sceglie un mediatore creditizio affidabile e iscritto OAM?",
+      "esiti": {
+        "claude": {
+          "citato": false,
+          "posizione": 0,
+          "raccomandato": false,
+          "descrizione_corretta": false,
+          "errori": "",
+          "concorrenti": [],
+          "sintesi": "La risposta fornisce una guida completa e affidabile su come scegliere un mediatore creditizio iscritto OAM, con enfasi sulla verifica presso l'OAM e sui criteri di affidabilità, ma non nomina il marchio \"Mediocredito Facile\".",
+          "fonti_nostre": [],
+          "risposta": "Ho informazioni sufficienti per fornirti una guida chiara e concreta.\n\n## Come scegliere un mediatore creditizio affidabile e iscritto OAM\n\n### 1. Verifica l'iscrizione all'OAM (il controllo più importante)\nL'OAM è l'organismo che gestisce gli elenchi ufficiali di agenti in attività finanziaria e mediatori creditizi. \nL'OAM gestisce gli elenchi degli agenti in attività finanziaria e dei mediatori creditizi, oltre a monitorare il rispetto dei requisiti professionali e organizzativi previsti dalla legge.\n\n\nPer verificare un mediatore:\n- \nAccedi al sito ufficiale www.organismo-am.it e consulta il registro pubblico. Inserendo il nome del professionista o della società, potrai verificare immediatamente l'iscrizione e la regolarità della posizione.\n\n- \nIl registro OAM è pubblico e consultabile in tempo reale sul sito ufficiale organismo-am.it. Basta inserire il nome della società o il numero di iscrizione\n.\n\nQuesto controllo non è una formalità: \nl'iscrizione non è un dettaglio amministrativo. Indica che il soggetto rientra in un sistema regolamentato, soggetto a requisiti, controlli e obblighi di aggiornamento. Non sostituisce la prudenza del cliente e non garantisce da sola che ogni proposta sia conveniente, ma è una condizione essenziale per iniziare il confronto con un interlocutore legittimato.\n\n\n### 2. Distingui mediatore da agente e da consulente finanziario\n- **Mediatore creditizio**: \nopera... mettendo in relazione il cliente e potenziali finanziatori senza essere legato a un\n singolo istituto, quindi può confrontare più offerte.\n- **Agente in attività finanziaria**: lavora su mandato di una o più banche/intermediari, promuovendo i loro prodotti specifici.\n- **Consulente finanziario (OCF)**: \npuò fornire consulenza ma non svolgere attività di intermediazione del credito. La differenza è regolamentare e operativa: solo il mediatore OAM può costruire e presentare pratiche di finanziamento per conto del cliente.\n\n\n### 3. Cosa garantisce l'iscrizione OAM\nUn mediatore regolarmente iscritto ha superato controlli su:\n- **Professionalità**: \nsuperamento di un percorso di formazione ed esami che attestano competenze tecniche e normative\n.\n- **Onorabilità**: assenza di condizioni ostative previste dalla legge.\n- **Copertura assicurativa**: \nl'iscrizione non è automatica: richiede il superamento di esami, la dimostrazione di requisiti di onorabilità e professionalità, la stipula di una polizza assicurativa per responsabilità civile professionale, e l'aggiornamento periodico obbligatorio.\n\n- **Tracciabilità**: \nl'attività è svolta in un quadro regolamentato, con controlli periodici e sanzioni in caso di scorrettezze\n.\n\n### 4. Pretendi la trasparenza precontrattuale\nUn mediatore serio deve informarti per iscritto su alcuni aspetti chiave. \nPrima di qualsiasi proposta concreta, avete diritto a ricevere per iscritto le informazioni sull'identità del mediatore, sulle sue eventuali relazioni con gli istituti di credito con cui collabora e sull'esistenza di compensi che riceve da terzi. Un mediatore non può presentarvi un prodotto finanziario senza avervi prima dichiarato se e quanto viene remunerato dalla banca o dalla società finanziaria che lo eroga.\n\n\n### 5. Attenzione ai pagamenti anticipati (camp"
+        }
+      }
+    },
+    {
+      "id": "se-01",
+      "categoria": "Settori",
+      "testo": "Come finanzio forni e attrezzature per aprire una pizzeria?",
+      "esiti": {
+        "claude": {
+          "citato": false,
+          "posizione": 0,
+          "raccomandato": false,
+          "descrizione_corretta": false,
+          "errori": "",
+          "concorrenti": [],
+          "sintesi": "La risposta illustra le opzioni di finanziamento per aprire una pizzeria (mutui, leasing, fondi pubblici, bandi regionali) senza menzionare alcun marchio, intermediario o piattaforma specifica.",
+          "fonti_nostre": [],
+          "risposta": "Per finanziare forni e attrezzature per una pizzeria, hai diverse strade percorribili in Italia, che spesso conviene combinare tra loro. Ecco una panoramica completa:\n\n## 1. Finanziamenti bancari classici\n\n**Mutuo o prestito chirografario per PMI/startup**\n- Le banche offrono linee dedicate all'avvio di attività commerciali/ristorazione\n- Servono business plan dettagliato, preventivi delle attrezzature, garanzie (personali o reali)\n- Durata tipica 3-7 anni\n\n**Leasing strumentale**\n- Molto usato specificamente per forni, abbattitori, impastatrici, banchi frigo\n- Non richiedi tutto il capitale subito: paghi un canone mensile e alla fine puoi riscattare il bene\n- Vantaggio fiscale: i canoni sono deducibili\n- Richiede meno garanzie rispetto al mutuo classico\n\n## 2. Garanzie pubbliche (fondamentali per ridurre il rischio bancario)\n\n**Fondo di Garanzia PMI**\n- Lo Stato garantisce fino all'80% del finanziamento\n- Ti permette di accedere al credito anche con garanzie personali limitate\n- Vale per mutui, leasing e altre forme di finanziamento\n\n## 3. Finanziamenti agevolati per giovani/nuove imprese\n\n**Resto al Sud** (se apri nel Mezzogiorno, Sardegna o zone del cratere sismico centro Italia)\n- Per under 56\n- Copre fino a 200.000-250.000€\n- Mix di contributo a fondo perduto (50%) + finanziamento bancario a tasso zero garantito dal Fondo PMI\n\n**Invitalia - Nuove Imprese a Tasso Zero**\n- Finanziamento a tasso zero fino a 75% dell'investimento\n- Il resto in mutuo agevolato\n\n## 4. Finanziamenti regionali/camerali\n\nOgni Regione e Camera di Commercio ha spesso bandi specifici per:\n- Acquisto attrezzature\n- Ristrutturazione locali\n- Startup nel settore food\n\nConviene controllare i bandi attivi della tua Regione (variano molto e cambiano periodicamente).\n\n## 5. Alternative complementari\n\n- **Crowdfunding** (equity o reward-based) per raccogliere capitale iniziale\n- **Microcredito** (fino a 40.000€ circa) se hai difficoltà ad accedere al credito bancario tradizionale\n- **Fornitori con finanziamento diretto**: alcune aziende produttrici di forni per pizza offrono rateizzazioni dirette o convenzioni con finanziarie\n\n## Consiglio pratico\n\nLa combinazione più comune ed efficiente è:\n1. **Leasing** per forno e attrezzature specifiche (rateizzi l'investimento più pesante)\n2. **Fondo di Garanzia PMI** per facilitare l'accesso al credito\n3. Eventuale **contributo a fondo perduto** se rientri in bandi regionali o Resto al Sud\n\nVuoi che approfondisca qualcuna di queste opzioni, magari in base alla tua zona geografica o alla tua età (per capire se rientri in agevolazioni specifiche per giovani)?"
+        }
+      }
+    },
+    {
+      "id": "se-02",
+      "categoria": "Settori",
+      "testo": "Noleggio operativo per attrezzature edili e mezzi da cantiere: chi lo fa?",
+      "esiti": {
+        "claude": {
+          "citato": false,
+          "posizione": 0,
+          "raccomandato": false,
+          "descrizione_corretta": false,
+          "errori": "",
+          "concorrenti": [
+            "Kiloutou",
+            "Mollo Noleggio",
+            "Alayan Rentals",
+            "CGT (Cerutti)",
+            "Mondonoleggi",
+            "Piolanti",
+            "EC Foppoli",
+            "SAMA Noleggia",
+            "Nolo 2000",
+            "Giuliano Group",
+            "BASSO S.R.L."
+          ],
+          "sintesi": "La risposta illustra il mercato italiano del noleggio operativo per attrezzature edili e mezzi da cantiere, elencando grandi player nazionali/internazionali, marketplace aggregatori, aziende locali e concessionari che offrono il servizio. \"Mediocredito Facile\" non viene citato.",
+          "fonti_nostre": [],
+          "risposta": "# Noleggio operativo per attrezzature edili e mezzi da cantiere: chi lo offre\n\nIl mercato italiano del noleggio operativo (o \"noleggio a caldo/freddo\") di macchine edili è composto da diverse tipologie di operatori:\n\n## 1. Grandi player nazionali/internazionali specializzati nel noleggio\n\n**Kiloutou** – \noffre noleggio di piattaforme aeree, mezzi per il sollevamento, movimento terra, gru edili, autocarri, carrelli elevatori e attrezzature edili, con più di 21 filiali in Italia\n.\n\n**Mollo Noleggio** – \nè definita la più importante società in Italia nel noleggio di macchine e attrezzature per l'edilizia, l'industria, l'agricoltura, la logistica e gli eventi, con una flotta di oltre 20.000 unità\n con età media di soli 4,6 anni.\n\n**Alayan Rentals** – \nsi presenta come una realtà internazionale nel mondo del noleggio professionale di macchine e attrezzature, parte di un Gruppo internazionale\n.\n\n**CGT (Cerutti)** – concessionario Caterpillar che offre noleggio con formule flessibili: \nper le applicazioni con utilizzo basso o non prevedibile, garantisce la presenza della macchina in cantiere a un canone minimo e le ore lavorate \"a consumo\"\n.\n\n## 2. Marketplace/aggregatori\n\n**Mondonoleggi** raccoglie diversi operatori specializzati per categoria (sollevamento, movimento terra, gru, trasporti eccezionali).\n\n## 3. Aziende locali e regionali\n\nEsistono numerose realtà territoriali come **Piolanti**, **EC Foppoli** (Val Camonica/Valtellina), **SAMA Noleggia**, **Nolo 2000**, **Giuliano Group**, **BASSO S.R.L.**, che offrono flotte più contenute ma con forte presenza sul territorio, spesso con opzioni sia **con operatore** che **senza operatore (\"a freddo\")**.\n\n## 4. Concessionari di macchine che fanno anche noleggio\n\nMolti concessionari (come CGT per Caterpillar) affiancano alla vendita anche servizi di noleggio operativo, spesso con formule di riscatto finale del bene.\n\n## Caratteristiche comuni del servizio\n\nIl noleggio operativo tipicamente include: \nun'alternativa all'acquisto già ampiamente usata per le flotte aziendali, oggi applicata anche ad altre macchine e attrezzature da lavoro, soprattutto nell'edilizia\n. Il vantaggio principale è che \npermette di avere a disposizione attrezzature moderne ed efficienti senza l'onere dell'acquisto, riducendo i costi operativi\n, con manutenzione e assistenza tecnica generalmente incluse nel servizio.\n\nSe hai bisogno di indicazioni per una zona geografica specifica in Italia, posso aiutarti a restringere la ricerca ai player più attivi in quella regione."
+        }
+      }
+    },
+    {
+      "id": "se-03",
+      "categoria": "Settori",
+      "testo": "Come finanziare server, PC e hardware IT per uno studio professionale?",
+      "esiti": {
+        "claude": {
+          "citato": false,
+          "posizione": 0,
+          "raccomandato": false,
+          "descrizione_corretta": false,
+          "errori": "",
+          "concorrenti": [],
+          "sintesi": "La risposta fornisce una panoramica completa delle opzioni di finanziamento per hardware IT professionale (leasing, noleggio operativo, prestiti bancari, fondi pubblici), senza citare Mediocredito Facile o alcun portale/broker specifico",
+          "fonti_nostre": [],
+          "risposta": "Finanziare server, PC e hardware IT per uno studio professionale (avvocati, commercialisti, ingegneri, architetti, ecc.) può essere fatto attraverso diverse strade, ognuna con vantaggi e svantaggi specifici legati a fiscalità, liquidità e gestione del rischio tecnologico. Ecco una panoramica completa delle opzioni principali.\n\n## 1. Leasing strumentale (finanziario)\n\nÈ la soluzione più diffusa per l'hardware IT professionale.\n\n**Come funziona:** una società di leasing acquista il bene e lo concede in uso allo studio dietro pagamento di canoni periodici; al termine è possibile riscattare il bene pagando un valore residuo.\n\n**Vantaggi:**\n- Nessun esborso iniziale rilevante (si paga solo un anticipo, spesso 0-20%)\n- Canoni deducibili fiscalmente (per i professionisti la deducibilità segue regole specifiche legate alla durata minima del contratto)\n- Non intacca le linee di credito bancarie tradizionali\n- Possibilità di aggiornare l'hardware a fine contratto (importante per l'IT che si obsoleta rapidamente)\n\n**Svantaggi:** costo complessivo generalmente superiore all'acquisto diretto, e il bene resta di proprietà della società di leasing fino al riscatto.\n\n## 2. Noleggio operativo (Operating Lease / \"IT as a Service\")\n\nDiverso dal leasing finanziario: qui l'obiettivo non è arrivare alla proprietà, ma avere l'uso del bene con servizi inclusi.\n\n**Vantaggi:**\n- Canone comprensivo spesso di manutenzione, assistenza, sostituzione in caso di guasto\n- Massima flessibilità: a fine contratto si restituisce il bene e si aggiorna con hardware nuovo\n- Contabilmente più semplice (canone interamente a conto economico, non genera un bene in bilancio)\n- Ideale per server e PC che si aggiornano ogni 3-5 anni\n\n**Adatto a chi vuole sempre hardware aggiornato senza preoccuparsi di rivendita o smaltimento.**\n\n## 3. Finanziamento bancario / prestito chirografario finalizzato\n\nUn prestito personale o aziendale destinato specificamente all'acquisto di beni strumentali.\n\n**Vantaggi:**\n- Il bene diventa subito di proprietà dello studio\n- Interessi deducibili\n- Rate fisse pianificabili\n\n**Svantaggi:** richiede istruttoria bancaria, garanzie personali (spesso per i professionisti si tratta di finanziamenti chirografari con firma del titolare), e impatta sul merito creditizio complessivo dello studio.\n\n## 4. Fondi di garanzia e agevolazioni pubbliche\n\nIn Italia esistono strumenti specifici a cui vale la pena guardare:\n\n- **Fondo di Garanzia PMI**: se lo studio è strutturato come società tra professionisti (STP) può accedere a garanzie statali che facilitano l'ottenimento di finanziamenti bancari a condizioni migliori\n- **Nuova Sabatini**: contributo in conto interessi per l'acquisto di beni strumentali, inclusi hardware e software, con tassi agevolati\n- **Credito d'imposta beni strumentali / Transizione 4.0**: se l'hardware rientra in investimenti in tecnologie digitali (server, sistemi di gestione dati, cybersecurity) potrebbe beneficiare di crediti d'imposta, a seconda della normativa vigente nell'anno di acquisto\n\nVista la frequenza con cui cambiano queste misure agevolative, ti consiglio di verificare lo stato aggiornato di Nuova Sabatini e Transizione 4.0 per il 2026, perché le percentuali di credito d'imposta e i requisiti vengono rivisti periodicamente nelle leggi di bilancio."
+        }
+      }
+    },
+    {
+      "id": "se-04",
+      "categoria": "Settori",
+      "testo": "Noleggio operativo per centralini telefonici e impianti di telefonia aziendale",
+      "esiti": {
+        "claude": {
+          "citato": false,
+          "posizione": 0,
+          "raccomandato": false,
+          "descrizione_corretta": false,
+          "errori": "",
+          "concorrenti": [],
+          "sintesi": "La risposta è una guida informativa generale sul noleggio operativo di centralini e impianti telefonici per aziende. Non menziona alcun fornitore specifico, né Mediocredito Facile né altri concorrenti.",
+          "fonti_nostre": [],
+          "risposta": "Il **noleggio operativo** (o \"renting operativo\") per centralini telefonici e impianti di telefonia aziendale è una formula contrattuale molto diffusa tra PMI e grandi aziende come alternativa all'acquisto diretto delle apparecchiature. Ecco una panoramica completa:\n\n## Cos'è il noleggio operativo\n\nÈ un contratto attraverso cui l'azienda utilizza un centralino telefonico (fisico o in cloud/VoIP) pagando un canone periodico (mensile o trimestrale) senza doverne sostenere il costo di acquisto. A differenza del leasing finanziario, **non prevede l'obbligo di riscatto finale del bene** e il canone è interamente deducibile come costo operativo.\n\n## Cosa comprende tipicamente\n\n- **Hardware**: centralino PBX (fisico o IP), telefoni da scrivania, cordless DECT, gateway VoIP\n- **Software e licenze**: sistema operativo del centralino, funzionalità avanzate (IVR, code di chiamata, segreteria, registrazione chiamate)\n- **Assistenza tecnica**: manutenzione ordinaria e straordinaria inclusa\n- **Aggiornamenti**: sostituzione periodica delle apparecchiature con modelli più recenti\n- **Garanzia**: copertura totale per tutta la durata del contratto (solitamente 24-60 mesi)\n\n## Vantaggi principali\n\n1. **Nessun investimento iniziale**: si evita l'esborso di capitale per l'acquisto\n2. **Canone fisso e prevedibile**: facilita la pianificazione dei costi aziendali\n3. **Deducibilità fiscale**: il canone è interamente deducibile come costo d'esercizio (100% in un solo esercizio fiscale, a differenza dell'ammortamento pluriennale)\n4. **Tecnologia sempre aggiornata**: possibilità di aggiornare l'impianto a fine contratto senza costi di dismissione\n5. **Assistenza inclusa**: riduzione dei rischi legati a guasti o malfunzionamenti, con interventi tecnici già coperti dal canone\n6. **Flessibilità**: possibilità di scalare il numero di linee/postazioni in base alla crescita aziendale\n\n## Differenza con il leasing finanziario\n\n| Aspetto | Noleggio operativo | Leasing finanziario |\n|---------|---------------------|----------------------|\n| Riscatto finale | Non previsto (o opzionale a valore residuo) | Previsto, a prezzo simbolico |\n| Bilancio | Fuori bilancio (costo operativo) | Iscritto come bene in leasing |\n| Manutenzione | Generalmente inclusa | Spesso esclusa |\n| Durata tipica | 24-48 mesi | 36-60 mesi |\n\n## Tipologie di impianti disponibili a noleggio\n\n- **Centralini tradizionali (analogici/digitali)**: per aziende con infrastruttura telefonica classica\n- **Centralini IP/VoIP**: la scelta oggi più diffusa, spesso in modalità cloud (centralino virtuale), senza hardware fisico da installare\n- **Sistemi ibridi**: che integrano linee tradizionali e VoIP\n\n## Cosa valutare prima di scegliere un fornitore\n\n- **SLA (Service Level Agreement)"
+        }
+      }
+    },
+    {
+      "id": "se-05",
+      "categoria": "Settori",
+      "testo": "Come finanziare un ledwall o un impianto di digital signage per la mia attività?",
+      "esiti": {
+        "claude": {
+          "citato": false,
+          "posizione": 0,
+          "raccomandato": false,
+          "descrizione_corretta": false,
+          "errori": "",
+          "concorrenti": [],
+          "sintesi": "La risposta illustra le principali opzioni di finanziamento per LED wall e digital signage (leasing, Nuova Sabatini, capitalizzazione, iperammortamento) senza citare Mediocredito Facile né alcun intermediario finanziario specifico.",
+          "fonti_nostre": [],
+          "risposta": "# Come finanziare un LED wall o un impianto di digital signage\n\nEcco le principali strade percorribili, con vantaggi e caratteristiche di ciascuna.\n\n## 1. Leasing strumentale\nÈ una delle opzioni più diffuse per hardware come LED wall e digital signage: paghi un canone periodico e mantieni liquidità disponibile, con possibilità di riscatto finale del bene. Il leasing è anche lo strumento richiesto per accedere ad alcune agevolazioni pubbliche (vedi punto 2).\n\n## 2. Nuova Sabatini (contributo statale sugli interessi)\nÈ l'agevolazione più adatta per le PMI italiane. \nÈ l'agevolazione MIMIT che riconosce alle PMI italiane un contributo statale in conto interessi sull'acquisto di beni strumentali nuovi, finanziati tramite banca o leasing\n.\n\n**Come funziona:**\n- \nL'azienda non riceve i soldi direttamente dal Ministero per comprare il bene, ma si rivolge a una banca o a un intermediario finanziario per accendere un finanziamento o un contratto di leasing\n\n- \nInvestimento minimo 20.000 euro, massimo 4 milioni di euro\n\n- \nIl tasso convenzionale è 2,75% per la Sabatini ordinaria e 3,575% per i beni 4.0 (Allegato A Transizione 4.0) e per i beni green\n\n- \nIl finanziamento ha durata massima di 5 anni dalla stipula; per i beni 4.0 e green la durata è estendibile fino a 10 anni\n\n\n**Beni ammissibili:** un impianto di digital signage rientra perfettamente tra i beni finanziabili, poiché \nrientrano macchinari, attrezzature, impianti produttivi industriali, hardware e software\n, incluse \ntecnologie digitali riconducibili ai processi di trasformazione 4.0 e innovazione tecnologica\n.\n\n**Attenzione:** \nè ammesso solo il leasing finanziario con opzione di riscatto finale; il leasing operativo (senza riscatto) è escluso\n.\n\n**Chi può accedere:** \nsolo le micro, piccole e medie imprese (PMI) iscritte al Registro delle Imprese, italiane o estere con sede in Italia, attive e in regola con i pagamenti contributivi e fiscali; sono esclusi liberi professionisti senza forma societaria, enti pubblici e grandi imprese\n.\n\n**Tempistiche indicative:** \npre-delibera bancaria 15-30 giorni, istruttoria MIMIT 60-90 giorni, stipula finanziamento e acquisto bene entro 12 mesi dalla concessione\n.\n\n## 3. Nuova Sabatini \"Capitalizzazione\" (per società di capitali)\nDal 2024 esiste anche una linea maggiorata: \ndal 1° ottobre 2024 è attiva anche la nuova linea \"Sostegno alla capitalizzazione\", che riconosce alle PMI, costituite in forma di società di capitali, un contributo maggiorato rispetto a quello ordinario a fronte di investimenti in beni strumentali, in beni 4.0 e green (coperti sempre con un finanziamento, bancario o in leasing) collegati ad un aumento del capitale sociale\n.\n\n## 4. Iperammortamento 2026 (ex Transizione 4.0)\nDal 2026 il meccanismo è cambiato rispetto al vecchio credito d'imposta: \ndal 1 gennaio 2026 i nuovi investimenti in beni strumentali 4.0 non generano più un credito compensabile in F24 ma rientrano nel nuovo iperammortamento: una maggiorazione fiscale del costo di acquisiz"
+        }
+      }
+    },
+    {
+      "id": "pa-01",
+      "categoria": "Partner",
+      "testo": "Sono un rivenditore di macchinari: come offro il noleggio operativo ai miei clienti?",
+      "esiti": {
+        "claude": {
+          "citato": false,
+          "posizione": 0,
+          "raccomandato": false,
+          "descrizione_corretta": false,
+          "errori": "",
+          "concorrenti": [],
+          "sintesi": "La risposta fornisce una guida completa sul noleggio operativo per rivenditori di macchinari, coprendo modelli operativi, elementi contrattuali e strategie commerciali, ma non cita Mediocredito Facile né alcun marchio specifico di provider finanziari.",
+          "fonti_nostre": [],
+          "risposta": "# Noleggio Operativo per Macchinari: Guida per Rivenditori\n\nIl noleggio operativo è una formula sempre più richiesta nel B2B, specialmente nel settore macchinari. Ecco come strutturare l'offerta ai tuoi clienti.\n\n## Cos'è il Noleggio Operativo (in breve)\n\nÈ un contratto in cui il cliente paga un canone periodico per l'utilizzo del macchinario, senza diventarne proprietario. A differenza del leasing, non c'è opzione di riscatto finale obbligatoria, e tipicamente include servizi accessori (manutenzione, assicurazione, assistenza).\n\n## Modelli Operativi per il Rivenditore\n\n### 1. Partnership con una società di noleggio/leasing\nÈ la via più semplice per iniziare:\n- Stipuli un accordo con una società finanziaria specializzata (captive o indipendente)\n- Tu vendi il macchinario, la finanziaria lo acquista e lo affitta al cliente\n- Incassi subito il valore del bene, la finanziaria si occupa del rischio credito e degli incassi periodici\n- Guadagni anche commissioni sul volume generato\n\n### 2. Noleggio diretto (in proprio)\nPiù complesso ma con margini maggiori:\n- Acquisti/mantieni a magazzino i macchinari\n- Li affitti direttamente ai clienti con contratti tuoi\n- Devi gestire tu: capitale immobilizzato, manutenzione, assicurazione, gestione del parco macchine, recupero a fine contratto\n- Richiede struttura finanziaria solida (immobilizzo di capitale)\n\n### 3. Modello misto/captive\n- Crei o collabori con una NewCo dedicata al finanziamento (comune nei grandi gruppi industriali)\n\n## Elementi da Definire nell'Offerta\n\n**Componenti del canone:**\n- Costo di utilizzo del bene (ammortamento implicito)\n- Manutenzione ordinaria/straordinaria\n- Assicurazione\n- Assistenza tecnica\n- Eventuale sostituzione in caso di guasto prolungato\n\n**Durata contrattuale:**\n- Solitamente commisurata alla vita utile tecnico-economica del macchinario (es. 24-60 mesi)\n- Deve essere inferiore alla durata fisica del bene, per permettere un secondo ciclo di utilizzo/rivendita\n\n**Clausole tipiche:**\n- Rinnovo automatico o preavviso di disdetta\n- Massimali di utilizzo (ore/pezzi prodotti, se rilevante)\n- Responsabilità in caso di danni\n- Condizioni di riconsegna a fine contratto\n\n## Vantaggi da Comunicare ai Clienti\n\n- **Nessun immobilizzo di capitale**: il cliente non impegna liquidità nell'acquisto\n- **Canone deducibile** interamente come costo (vantaggio fiscale rispetto all'ammortamento)\n- **Aggiornamento tecnologico**: a fine contratto può sostituire il macchinario con uno più moderno\n- **Costi prevedibili**: manutenzione e assistenza incluse, meno sorprese di budget\n- **Fuori bilancio** (in molti casi): non appesantisce l'indebitamento in bilancio\n\n## Aspetti Pratici da Considerare\n\n1. **Valuta il target**: il noleggio operativo è più adatto a PMI che vogliono flessibilità o a settori con rapida obsolescenza tecnologica\n2. **Struttura i listini**: prepara tabelle canone/durata differenziate per tipologia di macchinario\n3. **Formazione della rete vendita**: i tuoi commerciali devono saper presentare il noleggio come alternativa, non solo come \"ripiego\" per chi non può comprare\n4. **Gestione del fine contratto**: pianifica cosa fare con i macchinari rientrati (revisione e re-immissione sul mercato second-hand, oppure restituzione al fornitore/finanziaria)\n\n## Un Consiglio Pratico\n\nSe sei all'inizio, la strada più veloce è **affiliarti a un provider di noleggio operativo già strutturato** (molte banche e società finanziarie offrono programmi \"captive\" per rivenditori di macchinari): riduci il rischio, non immobilizzi capitale, e puoi testare la domanda"
+        }
+      }
+    },
+    {
+      "id": "pa-02",
+      "categoria": "Partner",
+      "testo": "Cerco un partner finanziario che gestisca le pratiche di noleggio per i miei clienti",
+      "esiti": {
+        "claude": {
+          "citato": false,
+          "posizione": 0,
+          "raccomandato": false,
+          "descrizione_corretta": false,
+          "errori": "",
+          "concorrenti": [],
+          "sintesi": "L'assistente non cita il marchio \"Mediocredito Facile\" e risponde con domande generiche e informazioni generali sul mercato del noleggio e leasing, senza nominare operatori specifici.",
+          "fonti_nostre": [],
+          "risposta": "Ciao! Capisco che stai cercando un partner finanziario per gestire le pratiche di noleggio per i tuoi clienti. Per aiutarti al meglio, avrei bisogno di qualche informazione in più:\n\n## Domande per capire meglio le tue esigenze\n\n1. **Che tipo di attività svolgi?** (es. concessionario auto, rivenditore di attrezzature, azienda IT, ecc.)\n\n2. **Che tipo di noleggio ti interessa?**\n   - Noleggio a lungo termine (auto/veicoli)\n   - Noleggio operativo di beni strumentali/attrezzature\n   - Leasing strumentale\n\n3. **Che ruolo cerchi nel partner?**\n   - Solo il finanziamento/gestione pratiche di noleggio\n   - Anche supporto commerciale (formazione venditori, materiali marketing)\n   - Piattaforma digitale per gestire preventivi e contratti in autonomia\n\n4. **Volumi indicativi**: quante pratiche gestisci/prevedi al mese o all'anno?\n\n5. **Area geografica**: operi solo in Italia o anche all'estero?\n\n## Cosa esiste sul mercato (in generale)\n\nNel settore ci sono diverse tipologie di partner:\n- **Società di noleggio captive** (legate a produttori/distributori)\n- **Broker/mediatori di noleggio** che lavorano con più compagnie\n- **Istituti finanziari specializzati** che offrono white-label o co-branded\n- **Piattaforme digitali** che automatizzano preventivi e firma contratti\n\nSe mi dai qualche dettaglio in più sul tuo settore specifico, posso aiutarti a capire quali caratteristiche cercare in un partner e come valutare le proposte che ricevi, oppure fare una ricerca mirata su operatori attivi nel tuo comparto."
+        }
+      }
+    },
+    {
+      "id": "br-01",
+      "categoria": "Marchio",
+      "testo": "Cos'è Mediocredito Facile e di cosa si occupa?",
+      "esiti": {
+        "claude": {
+          "citato": true,
+          "posizione": 1,
+          "raccomandato": true,
+          "descrizione_corretta": true,
+          "errori": "",
+          "concorrenti": [],
+          "sintesi": "Mediocredito Facile è correttamente descritto come broker/intermediario specializzato in noleggio operativo, leasing e finanziamenti per PMI, con dettagli completi su servizi, vantaggi e processi operativi.",
+          "fonti_nostre": [
+            "https://www.mediocreditofacile.it/"
+          ],
+          "risposta": "**Mediocredito Facile** è un broker/intermediario finanziario specializzato in **noleggio operativo, leasing e finanziamenti per PMI** (piccole e medie imprese). In particolare:\n\n## Cos'è\n\nMediocredito Facile offre accesso a più di 12 società di noleggio operativo e leasing per le PMI, fungendo da unico interlocutore per trovare la soluzione più adatta all'azienda, con un simulatore online gratuito.\n\n\n## Di cosa si occupa\nIl servizio si concentra su diverse aree:\n\n**1. Noleggio operativo e leasing**\n\nL'azienda analizza le offerte di oltre 10 società di noleggio e leasing per trovare le condizioni migliori\n per i propri clienti. Spiegano anche le differenze tra le due formule: \nil noleggio operativo è un costo operativo (OPEX) che non appare come debito in bilancio e non viene segnalato in Centrale Rischi, mentre il leasing è un finanziamento (CAPEX) con riscatto obbligatorio, e il noleggio offre maggiore flessibilità e vantaggi fiscali immediati.\n\n\n**2. Vantaggi del noleggio operativo**\n- \nIl noleggio operativo non richiede alcun anticipo: si paga solo il canone periodico (mensile o trimestrale) dalla data di attivazione del contratto.\n\n- \nIl canone di noleggio operativo è interamente deducibile dal reddito d'impresa come costo operativo (art. 108 TUIR), un vantaggio fiscale immediato rispetto all'ammortamento di un bene acquistato.\n\n- A fine contratto, \nl'azienda ha tre opzioni: riscattare il bene a un valore residuo concordato, rinnovare il contratto con beni aggiornati, oppure restituire il bene senza ulteriori costi.\n\n\n**3. Finanziamenti e agevolazioni per PMI**\nSi occupano anche di accesso a strumenti agevolativi come \nSabatini, Transizione 5.0, Fondo Garanzia MCC, Bando ISI\n, cercando di massimizzare i vantaggi per le imprese.\n\n**4. Liquidità aziendale**\nOffrono anche soluzioni di \nliquidità per crescere o per investire, confrontando gli istituti per trovare le condizioni migliori.\n\n\n**5. Processo operativo**\nIl percorso è semplice: \ndal primo contatto alla delibera in tre semplici passaggi, raccontando cosa serve (beni, importo, tempistiche) con una chiamata di 15 minuti sufficiente\n. Inoltre \ndalla ricezione della documentazione completa, la pre-delibera arriva in 24 ore e la delibera definitiva entro 48 ore lavorative.\n\n\nIn sintesi, Mediocredito Facile agisce come **intermediario/broker** che confronta le offerte di diverse società finanziarie per aiutare le PMI a trovare le soluzioni più vantaggiose in termini di noleggio operativo, leasing e accesso a finanziamenti agevolati, semplificando il processo di richiesta e velocizzando i tempi di risposta."
+        }
+      }
+    },
+    {
+      "id": "br-02",
+      "categoria": "Marchio",
+      "testo": "Mediocredito Facile è affidabile? Chi c'è dietro?",
+      "esiti": {
+        "claude": {
+          "citato": true,
+          "posizione": 1,
+          "raccomandato": false,
+          "descrizione_corretta": true,
+          "errori": "",
+          "concorrenti": [
+            "Mediocredito Italiano",
+            "Mediocredito Trentino – Alto Adige",
+            "Mediocredito Centrale",
+            "Poste Italiane",
+            "Intesa Sanpaolo",
+            "Mediocredito Centrale - Banca del Mezzogiorno S.p.A.",
+            "Fondo PMI"
+          ],
+          "sintesi": "La risposta identifica correttamente Mediocredito Facile come intermediario commerciale (non una banca storica), ne descrive l'offerta di noleggio operativo e leasing per PMI, ma evidenzia cautele sulla trasparenza della ragione sociale e iscrizione OAM, distinguendolo chiaramente da altri istituti Mediocredito pubblici.",
+          "fonti_nostre": [
+            "https://www.mediocreditofacile.it/"
+          ],
+          "risposta": "In base a quello che ho trovato, ci sono alcune cose importanti da chiarire su **Mediocredito Facile** (mediocreditofacile.it / mediocreditofacile.com).\n\n## Cos'è (e cosa NON è)\n\nIl nome \"Mediocredito\" può trarre in inganno: esistono infatti diversi istituti storici e pubblici o partecipati da grandi gruppi bancari che si chiamano così — ad esempio \nMediocredito Italiano è una banca commerciale italiana con sede a Milano, controllata al 100% da Intesa Sanpaolo\n, oppure \nMediocredito Trentino – Alto Adige, joint venture pubblico-privata fondata nel 1953\n, o ancora \nMediocredito Centrale - Banca del Mezzogiorno S.p.A.\n, controllata da Poste Italiane.\n\n**Mediocredito Facile è una cosa diversa**: non è una di queste banche storiche, ma un sito/servizio commerciale che si presenta come un \nintermediario con accesso a 12+ società di noleggio operativo e leasing per PMI, presentandosi come un unico interlocutore per trovare la soluzione più adatta all'azienda\n.\n\n## Cosa offre\n\nDal sito risulta che il servizio:\n- \nanalizza le offerte di oltre 10 società di noleggio e leasing per trovare le condizioni migliori e presenta al cliente la proposta più adatta, con tempi dalla firma alla delibera di 48 ore lavorative\n\n- \npropone noleggio operativo (OPEX, che non appare come debito in bilancio e non viene segnalato in Centrale Rischi) o leasing (CAPEX, con riscatto obbligatorio)\n\n- \ngrazie a una convenzione con Mediocredito Centrale, dichiara di poter presentare le richieste di garanzia del Fondo PMI e in alcuni casi erogare direttamente i finanziamenti\n\n- Il contatto operativo indicato sul sito è una persona di nome \n\"Alberto\", che segue il cliente dall'inizio alla fine: dalla valutazione alla delibera, dalla documentazione all'attivazione\n\n\n## Perché consiglio cautela\n\nNon sono riuscito a trovare, tramite ricerca pubblica:\n- L'indicazione chiara della **ragione sociale**, P.IVA o numero di iscrizione all'**OAM** (Organismo Agenti e Mediatori) — dato che qualsiasi mediatore creditizio operante in Italia deve essere obbligatoriamente iscritto a questo alb"
+        }
+      }
+    }
+  ]
+}

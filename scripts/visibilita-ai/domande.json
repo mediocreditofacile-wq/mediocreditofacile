@@ -1,0 +1,46 @@
+{
+  "marchio": "Mediocredito Facile",
+  "dominio": "mediocreditofacile.it",
+  "alias": ["MCF", "mediocredito facile", "mediocreditofacile"],
+  "domande": [
+    { "id": "no-01", "categoria": "Noleggio operativo", "testo": "Cos'è il noleggio operativo per aziende e a chi conviene?" },
+    { "id": "no-02", "categoria": "Noleggio operativo", "testo": "Quali società fanno noleggio operativo di beni strumentali in Italia?" },
+    { "id": "no-03", "categoria": "Noleggio operativo", "testo": "A chi posso rivolgermi per un noleggio operativo di macchinari per la mia PMI?" },
+    { "id": "no-04", "categoria": "Noleggio operativo", "testo": "Quanto costa il noleggio operativo di un macchinario da 50.000 euro a 60 mesi?" },
+    { "id": "no-05", "categoria": "Noleggio operativo", "testo": "Il canone di noleggio operativo è deducibile? Come funziona fiscalmente?" },
+    { "id": "no-06", "categoria": "Noleggio operativo", "testo": "Noleggio operativo o leasing: cosa conviene a una SRL che compra attrezzature?" },
+    { "id": "no-07", "categoria": "Noleggio operativo", "testo": "Il noleggio operativo finisce in Centrale Rischi?" },
+    { "id": "no-08", "categoria": "Noleggio operativo", "testo": "Chi fa noleggio operativo in Veneto per piccole imprese?" },
+
+    { "id": "fv-01", "categoria": "Fotovoltaico", "testo": "Come finanziare un impianto fotovoltaico aziendale senza anticipo?" },
+    { "id": "fv-02", "categoria": "Fotovoltaico", "testo": "Noleggio operativo fotovoltaico: il risparmio in bolletta copre il canone?" },
+    { "id": "fv-03", "categoria": "Fotovoltaico", "testo": "Posso installare un fotovoltaico su un capannone in affitto e finanziarlo?" },
+    { "id": "fv-04", "categoria": "Fotovoltaico", "testo": "Chi propone noleggio operativo per impianti fotovoltaici alle imprese italiane?" },
+
+    { "id": "le-01", "categoria": "Leasing", "testo": "Chi sono i migliori broker di leasing strumentale per PMI in Italia?" },
+    { "id": "le-02", "categoria": "Leasing", "testo": "Come funziona il leasing strumentale e quali costi ha oltre alla rata?" },
+    { "id": "le-03", "categoria": "Leasing", "testo": "Conviene passare da un broker o andare direttamente in banca per un leasing?" },
+
+    { "id": "ag-01", "categoria": "Agevolazioni", "testo": "Nuova Sabatini 2026: come funziona e chi mi aiuta a presentare la domanda?" },
+    { "id": "ag-02", "categoria": "Agevolazioni", "testo": "Iperammortamento 2026 sui beni strumentali: come si calcola il beneficio?" },
+    { "id": "ag-03", "categoria": "Agevolazioni", "testo": "Fondo di Garanzia MCC: chi può aiutarmi ad accedere come piccola impresa?" },
+    { "id": "ag-04", "categoria": "Agevolazioni", "testo": "Si possono cumulare Nuova Sabatini e iperammortamento su un leasing?" },
+    { "id": "ag-05", "categoria": "Agevolazioni", "testo": "Bando ISI INAIL: come funziona il contributo e chi segue la pratica?" },
+
+    { "id": "fi-01", "categoria": "Finanziamenti", "testo": "Dove trovo liquidità per la mia PMI senza passare dalla mia banca?" },
+    { "id": "fi-02", "categoria": "Finanziamenti", "testo": "Quali broker creditizi lavorano con le PMI italiane sul finanziamento chirografario?" },
+    { "id": "fi-03", "categoria": "Finanziamenti", "testo": "Come si sceglie un mediatore creditizio affidabile e iscritto OAM?" },
+
+    { "id": "se-01", "categoria": "Settori", "testo": "Come finanzio forni e attrezzature per aprire una pizzeria?" },
+    { "id": "se-02", "categoria": "Settori", "testo": "Noleggio operativo per attrezzature edili e mezzi da cantiere: chi lo fa?" },
+    { "id": "se-03", "categoria": "Settori", "testo": "Come finanziare server, PC e hardware IT per uno studio professionale?" },
+    { "id": "se-04", "categoria": "Settori", "testo": "Noleggio operativo per centralini telefonici e impianti di telefonia aziendale" },
+    { "id": "se-05", "categoria": "Settori", "testo": "Come finanziare un ledwall o un impianto di digital signage per la mia attività?" },
+
+    { "id": "pa-01", "categoria": "Partner", "testo": "Sono un rivenditore di macchinari: come offro il noleggio operativo ai miei clienti?" },
+    { "id": "pa-02", "categoria": "Partner", "testo": "Cerco un partner finanziario che gestisca le pratiche di noleggio per i miei clienti" },
+
+    { "id": "br-01", "categoria": "Marchio", "testo": "Cos'è Mediocredito Facile e di cosa si occupa?" },
+    { "id": "br-02", "categoria": "Marchio", "testo": "Mediocredito Facile è affidabile? Chi c'è dietro?" }
+  ]
+}

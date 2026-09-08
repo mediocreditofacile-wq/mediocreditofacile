@@ -10,18 +10,32 @@ const { title, description, ogImage = '/images/hero-homepage.webp', noindex = fa
 const canonicalURL = new URL(Astro.url.pathname, 'https://www.mediocreditofacile.it');
 
 // Structured data — Organization (appare su tutte le pagine)
+// sameAs disambigua l'entità per i motori di ricerca e gli assistenti AI: senza profili
+// esterni collegati il brand viene confuso con Facile.it e Mediocredito Italiano.
+// Il LinkedIn personale sta sotto founder, non qui: sameAs dell'organizzazione elenca
+// profili dell'organizzazione. Mancano ancora pagina LinkedIn aziendale, scheda Google
+// Business e directory di settore: appena esistono, i loro URL vanno in questo array.
 const organizationLD = {
   '@context': 'https://schema.org',
   '@type': 'FinancialService',
   name: 'Mediocredito Facile',
-  description: 'Servizi finanziari per PMI: noleggio operativo, leasing strumentale e finanziamenti. Accesso a 12+ società partner.',
+  slogan: "L'officina del credito",
+  description:
+    'Broker finanziario indipendente per PMI: noleggio operativo, leasing strumentale e finanziamenti. Un unico interlocutore con accesso a oltre 12 società di noleggio e leasing. Collaboratore del Mediatore Creditizio Affida, iscrizione OAM M325.',
   url: 'https://www.mediocreditofacile.it',
   logo: 'https://www.mediocreditofacile.it/images/logo-mediocreditofacile.webp',
   telephone: '+393939957840',
   email: 'mediocreditofacile@gmail.com',
+  founder: {
+    '@type': 'Person',
+    name: 'Alberto Amà',
+    jobTitle: 'Broker finanziario',
+    sameAs: ['https://www.linkedin.com/in/albertoama/'],
+  },
+  address: { '@type': 'PostalAddress', addressRegion: 'Veneto', addressCountry: 'IT' },
   areaServed: { '@type': 'Country', name: 'IT' },
   serviceType: ['Noleggio Operativo', 'Leasing Strumentale', 'Finanziamenti PMI', 'Fotovoltaico Aziendale', 'Agevolazioni Fiscali'],
-  knowsAbout: ['noleggio operativo', 'leasing strumentale', 'finanziamenti PMI', 'fotovoltaico aziendale', 'agevolazioni fiscali', 'Transizione 5.0', 'Nuova Sabatini', 'credito d\'imposta', 'OPEX', 'deducibilità canone'],
+  knowsAbout: ['noleggio operativo', 'leasing strumentale', 'finanziamenti PMI', 'fotovoltaico aziendale', 'agevolazioni per investimenti', 'iperammortamento', 'Nuova Sabatini', 'Fondo di Garanzia MCC', 'Bando ISI INAIL', 'OPEX', 'deducibilità canone'],
   sameAs: [],
 };
 ---
