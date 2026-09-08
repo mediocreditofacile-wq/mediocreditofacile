@@ -36,6 +36,13 @@ describe('percorsoDelFornitore', () => {
     expect(percorsoDelFornitore(base, 'preventivi/green-go-altro/X/f.pdf')).toBe(false);
   });
 
+  it('le guide sono di tutti: non appartengono a un fornitore', async () => {
+    const { percorsoDelFornitore } = await import('./portale-auth');
+    expect(percorsoDelFornitore(base, 'guide/Guida_Portale_MCF.pdf')).toBe(true);
+    // ma restano dietro il login, e la risalita non passa nemmeno di qui
+    expect(percorsoDelFornitore(base, 'guide/../preventivi/innovalux/IL-1/x.pdf')).toBe(false);
+  });
+
   it('rifiuta la risalita di cartella', async () => {
     const { percorsoDelFornitore } = await import('./portale-auth');
     expect(percorsoDelFornitore(base, 'preventivi/green-go/../innovalux/IL-1/f.pdf')).toBe(false);

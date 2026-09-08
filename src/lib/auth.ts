@@ -152,6 +152,7 @@ export const auth = betterAuth({
           slug: data.organization.slug,
           invitante: data.inviter.user.name || data.inviter.user.email,
           baseUrl: BASE_URL,
+          ruolo: data.role,
         });
         if (!esito.ok) {
           throw new Error(esito.ritentabile ? 'mail_ritentabile' : `mail_fallita: ${esito.err}`);

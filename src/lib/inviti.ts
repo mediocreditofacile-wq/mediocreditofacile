@@ -150,6 +150,7 @@ export async function svuotaCoda(
       slug: r.org_slug,
       invitante: r.invitante,
       baseUrl: BASE_URL,
+      ruolo: r.ruolo,
     });
 
     if (esito.ok) {

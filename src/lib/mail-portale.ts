@@ -98,7 +98,7 @@ export function layoutMail(titolo: string, corpo: string): string {
       <h1 style="color:#664CCD;font-size:20px;margin:0 0 20px;font-weight:700">${escapeHtml(titolo)}</h1>
       ${corpo}
       <p style="font-size:12px;color:#787782;margin-top:32px;border-top:1px solid #E1DEE3;padding-top:12px">
-        Mediocredito Facile di Alberto Ama, intermediario del credito.<br>
+        Mediocredito Facile di Alberto Amà, intermediario del credito.<br>
         Se non aspettavi questo messaggio, rispondi a questa email e ce ne occupiamo.
       </p>
     </div>

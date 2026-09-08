@@ -135,6 +135,11 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
         <p class="gg__card-desc">Con i dati del cliente: bilancio energetico, confronto con il leasing e i due PDF da consegnare.</p>
         <span class="gg__card-link">Compila i dati &raquo;</span>
       </a>
+      <a href="#comefunziona" class="gg__card">
+        <div class="gg__card-head"><Icon name="menu_book" /> Come funziona</div>
+        <p class="gg__card-desc">Le due guide da scaricare e le cose che si sbagliano più spesso, spiegate una volta sola.</p>
+        <span class="gg__card-link">Leggi &raquo;</span>
+      </a>
       <a href="#storico" class="gg__card">
         <div class="gg__card-head"><Icon name="receipt_long" /> Storico</div>
         <p class="gg__card-desc">I prospetti generati, con i numeri e i PDF sempre riscaricabili.</p>
@@ -443,10 +448,76 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
       <div id="storico-wrap" class="gg__storico-wrap"></div>
     </section>
 
-    <!-- 5. La rete: solo referente e MCF -->
-    <section id="rete" class="gg__section" hidden>
+    <!-- 5. Come funziona -->
+    <section id="comefunziona" class="gg__section">
       <header class="gg__section-head">
         <span class="gg__section-num">5</span>
+        <div>
+          <h2 class="gg__section-title">Come funziona</h2>
+          <p class="gg__section-sub">
+            Due guide in PDF, le stesse che ti sono arrivate con l'invito, e qui sotto le cose che
+            capita più spesso di doversi ricordare.
+          </p>
+        </div>
+      </header>
+
+      <div class="gg__form-block">
+        <p class="gg__form-block-title">Le guide</p>
+        <div class="gg__pdf-row">
+          <button type="button" class="gg__pdf" data-doc="guide/Guida_Noleggio_Operativo_MCF.pdf">
+            Guida al noleggio operativo
+          </button>
+          <button type="button" class="gg__pdf" data-doc="guide/Guida_Portale_MCF.pdf">
+            Guida al portale
+          </button>
+        </div>
+        <p class="gg__box-nota">
+          La prima spiega fatturazione, documenti, decorrenza e fine contratto. La seconda spiega
+          questo portale. Sono aggiornate: scaricale da qui invece di cercare la vecchia email.
+        </p>
+      </div>
+
+      <div class="gg__due-col" style="margin-top:1rem">
+        <div class="gg__box">
+          <p class="gg__box-title">Le tre cose che si sbagliano più spesso</p>
+          <table class="gg__table">
+            <tbody>
+              <tr><td>
+                <strong>Il privato senza partita IVA.</strong> Il noleggio operativo non è percorribile:
+                la strada è la detrazione del 50 per cento. Il portale te lo dice, ma è meglio saperlo
+                prima di aver fatto il sopralluogo.
+              </td></tr>
+              <tr><td>
+                <strong>La ditta individuale.</strong> Verifica partita IVA attiva e destinazione
+                strumentale. Occhio all'utenza domestica su immobile abitativo: è un errore che è già
+                costato tempo su una pratica vera.
+              </td></tr>
+              <tr><td>
+                <strong>Il canone non è definitivo.</strong> La rata viene assegnata sul merito
+                creditizio del cliente, esaminata la documentazione. Non prometterla come chiusa.
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="gg__box">
+          <p class="gg__box-title">Le agevolazioni, in due righe</p>
+          <p class="gg__box-nota" style="margin:0 0 0.7rem">
+            Nuova Sabatini Green e iperammortamento valgono per il leasing e per l'acquisto, non per il
+            noleggio operativo. Non è una scelta nostra, è la norma: per questo nel business plan
+            compaiono nella colonna del leasing e cambiano il confronto tra le due strade.
+          </p>
+          <p class="gg__box-nota" style="margin:0">
+            Gli interruttori non sono solo grafici: se ne spegni una, esce anche dai testi e dai totali
+            dei due PDF che consegni al cliente. Spegnila quando sai che quel cliente non ci rientra.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. La rete: solo referente e MCF -->
+    <section id="rete" class="gg__section" hidden>
+      <header class="gg__section-head">
+        <span class="gg__section-num">6</span>
         <div>
           <h2 class="gg__section-title">La tua rete</h2>
           <p class="gg__section-sub">

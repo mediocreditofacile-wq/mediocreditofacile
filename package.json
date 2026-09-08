@@ -11,7 +11,8 @@
     "test:watch": "vitest",
     "db:migrate": "tsx --env-file=.env.local scripts/db-migrate.ts",
     "db:sql": "tsx --env-file=.env.local scripts/db-sql.ts",
-    "seed:green-go": "tsx --env-file=.env.local scripts/seed-green-go.ts"
+    "seed:green-go": "tsx --env-file=.env.local scripts/seed-green-go.ts",
+    "guide:carica": "tsx --env-file=.env.local scripts/carica-guide.ts"
   },
   "dependencies": {
     "@astrojs/preact": "^4.1.3",

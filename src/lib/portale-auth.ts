@@ -227,6 +227,9 @@ export function vedeTuttoIlFornitore(contesto: Contesto): boolean {
  */
 export function percorsoDelFornitore(contesto: Contesto, percorso: string): boolean {
   if (!percorso || percorso.includes('..')) return false;
+  // Le guide non sono di nessun fornitore in particolare: chiunque abbia una
+  // sessione valida puo' scaricarle. Sono documenti commerciali, non pratiche.
+  if (percorso.startsWith('guide/')) return true;
   if (contesto.ruolo === 'admin' && !contesto.fornitoreSlug) return true;
   if (!contesto.fornitoreSlug) return false;
   return (
