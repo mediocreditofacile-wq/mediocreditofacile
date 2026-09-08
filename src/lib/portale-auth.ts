@@ -32,6 +32,7 @@ export interface Contesto {
   organizationId: string | null;
   fornitoreSlug: string | null;
   fornitoreNome: string | null;
+  fornitoreCitta: string | null;
   tabellaCanoni: string | null;
   /** Prefisso degli id preventivo, es. GG */
   prefisso: string | null;
@@ -67,12 +68,13 @@ interface RigaFornitore {
   organization_id: string;
   tabella_canoni: string;
   prefisso: string;
+  citta: string | null;
   attivo: boolean;
 }
 
 async function fornitoreDaOrg(organizationId: string): Promise<RigaFornitore | null> {
   return queryUna<RigaFornitore>(
-    `SELECT slug, nome, organization_id, tabella_canoni, prefisso, attivo
+    `SELECT slug, nome, organization_id, tabella_canoni, prefisso, citta, attivo
        FROM app.fornitore WHERE organization_id = $1`,
     [organizationId],
   );
@@ -80,7 +82,7 @@ async function fornitoreDaOrg(organizationId: string): Promise<RigaFornitore | n
 
 async function fornitoreDaSlug(slug: string): Promise<RigaFornitore | null> {
   return queryUna<RigaFornitore>(
-    `SELECT slug, nome, organization_id, tabella_canoni, prefisso, attivo
+    `SELECT slug, nome, organization_id, tabella_canoni, prefisso, citta, attivo
        FROM app.fornitore WHERE slug = $1`,
     [slug],
   );
@@ -205,6 +207,7 @@ export async function richiediSessione(
       organizationId: fornitore?.organization_id ?? null,
       fornitoreSlug: fornitore?.slug ?? null,
       fornitoreNome: fornitore?.nome ?? null,
+      fornitoreCitta: fornitore?.citta ?? null,
       tabellaCanoni: fornitore?.tabella_canoni ?? null,
       prefisso: fornitore?.prefisso ?? null,
     },

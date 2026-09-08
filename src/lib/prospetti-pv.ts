@@ -34,6 +34,34 @@ export type FormaGiuridica = 'societa-capitali' | 'ditta-individuale' | 'privato
 export type Installazione = 'tetto' | 'pensilina' | 'terra';
 export type Profilo = 'diurno' | 'h24';
 
+/**
+ * Come il prospetto va confezionato: chi e' il fornitore e quali agevolazioni
+ * entrano nei conti. I default riproducono esattamente il comportamento del
+ * portale InnovaLux, che e' l'unico che esisteva quando questo motore e' nato.
+ */
+export interface OpzioniProspetto {
+  /** Nome che compare nel prospetto. Era cablato a InnovaLux dentro il PDF. */
+  fornitoreNome?: string;
+  fornitoreCitta?: string;
+  /**
+   * Forma breve usata nell'intestazione di pagina, dove lo spazio e' poco.
+   * Esiste per una ragione sola: l'intestazione dei prospetti InnovaLux gia'
+   * emessi dice "InnovaLux", non "InnovaLux S.r.l.", e non deve cambiare.
+   */
+  fornitoreEtichetta?: string;
+  /** Agevolazioni sul ramo leasing. Spente, escono dai testi E dai totali. */
+  includiSabatini?: boolean;
+  includiIper?: boolean;
+}
+
+export const OPZIONI_INNOVALUX: Required<OpzioniProspetto> = {
+  fornitoreNome: 'InnovaLux S.r.l.',
+  fornitoreCitta: 'Milano',
+  fornitoreEtichetta: 'InnovaLux',
+  includiSabatini: true,
+  includiIper: true,
+};
+
 export interface InputPreventivo {
   cliente: string;
   comune: string;
@@ -100,6 +128,9 @@ export interface Calcolo {
   sabatini: number;
   sabatiniNetto: number;
   iresIper: number;
+  /** Quali agevolazioni sono entrate in questi numeri */
+  conSabatini: boolean;
+  conIper: boolean;
   iperNetto: number;
   costoNettoLeasing: number;
   detrazionePrivati: number;
@@ -174,6 +205,7 @@ export function autoconsumoStimato(kwp: number, kwhAccumulo: number, profilo: Pr
 export function calcolaPreventivo(
   input: InputPreventivo,
   tabella: TabellaCanoni = TABELLA_DEFAULT,
+  opzioni: OpzioniProspetto = {},
 ): Calcolo {
   const imp = input.importo;
   if (!tabella.quotabile(imp)) {
@@ -242,12 +274,18 @@ export function calcolaPreventivo(
   const interessi = totLeasing - imp;
 
   // === Agevolazioni (solo ramo leasing) ===
-  const sabatini = imp * SABATINI_PCT;
-  const iresIper = imp * IPER_PCT * IRES;
+  // Spente non si nascondono soltanto: escono dai totali, altrimenti il
+  // confronto prometterebbe un costo netto che il cliente non otterra' mai.
+  const conSabatini = opzioni.includiSabatini ?? true;
+  const conIper = opzioni.includiIper ?? true;
+  const sabatini = conSabatini ? imp * SABATINI_PCT : 0;
+  const costoSabatini = conSabatini ? SABATINI_COSTO_GESTIONE : 0;
+  const iresIper = conIper ? imp * IPER_PCT * IRES : 0;
+  const costoIper = conIper ? IPER_COSTO_GESTIONE : 0;
   const iresOrd = imp * IRES;
   const iresInt = interessi * (IRES + IRAP);
   const beneficiLeasing = iresIper + iresOrd + iresInt + sabatini;
-  const esborsoLeasing = totLeasing + SABATINI_COSTO_GESTIONE + IPER_COSTO_GESTIONE;
+  const esborsoLeasing = totLeasing + costoSabatini + costoIper;
 
   return {
     tabella: tabella.id,
@@ -284,9 +322,11 @@ export function calcolaPreventivo(
     totLeasing,
     interessi,
     sabatini,
-    sabatiniNetto: sabatini - SABATINI_COSTO_GESTIONE,
+    sabatiniNetto: sabatini - costoSabatini,
     iresIper,
-    iperNetto: iresIper - IPER_COSTO_GESTIONE,
+    conSabatini,
+    conIper,
+    iperNetto: iresIper - costoIper,
     costoNettoLeasing: esborsoLeasing - beneficiLeasing,
     detrazionePrivati: imp * DETRAZIONE_PRIVATI,
     coperturaCanone: beneficioMese / canone,
@@ -426,7 +466,15 @@ const MESI = [
  * si aspetta. Lo script ricalcola i numeri dagli stessi input, i testi narrativi
  * invece arrivano gia' composti da qui.
  */
-export function buildPayloadPdf(input: InputPreventivo, c: Calcolo): Record<string, unknown> {
+export function buildPayloadPdf(
+  input: InputPreventivo,
+  c: Calcolo,
+  opzioni: OpzioniProspetto = {},
+): Record<string, unknown> {
+  const o = { ...OPZIONI_INNOVALUX, ...opzioni };
+  // L'etichetta breve segue il nome: chi passa un fornitore senza indicarla
+  // si ritroverebbe altrimenti "InnovaLux" stampato in intestazione.
+  const etichetta = opzioni.fornitoreEtichetta ?? opzioni.fornitoreNome ?? OPZIONI_INNOVALUX.fornitoreEtichetta;
   const data = input.data ? new Date(input.data) : new Date();
   const dataFile = data.toISOString().slice(0, 10);
   const dataTesto = `${data.getDate()} ${MESI[data.getMonth()]} ${data.getFullYear()}`;
@@ -436,7 +484,13 @@ export function buildPayloadPdf(input: InputPreventivo, c: Calcolo): Record<stri
     slug: slugCliente(input.cliente),
     data_file: dataFile,
     data_testo: dataTesto,
-    soluzione: `${input.cliente} | impianto ${euro(input.kwp, 0)} kWp${accumulo} InnovaLux`,
+    soluzione: `${input.cliente} | impianto ${euro(input.kwp, 0)} kWp${accumulo} ${etichetta}`,
+    // Il nome del fornitore era cablato dentro il motore Python: ogni portale
+    // diverso da InnovaLux stampava il nome sbagliato addosso al cliente.
+    fornitore_nome: o.fornitoreNome,
+    fornitore_citta: o.fornitoreCitta,
+    includi_sabatini: o.includiSabatini,
+    includi_iper: o.includiIper,
     rif_impianto: `${input.cliente}, ${euro(input.kwp, 0)} kWp${input.kwh_accumulo ? ` + ${euro(input.kwh_accumulo, 0)} kWh` : ''}`,
     rif_contratto: input.rif_preventivo || 'Preventivo InnovaLux',
     installazione: INSTALLAZIONE_LABEL[input.installazione] ?? INSTALLAZIONE_LABEL.tetto,

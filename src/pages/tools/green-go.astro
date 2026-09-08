@@ -157,7 +157,17 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
       </header>
 
       <div class="gg__form-block">
-        <div class="gg__scelta">
+        <div class="gg__grid" style="margin-bottom:1.25rem">
+          <div class="gg__field gg__field--full">
+            <label class="gg__field-label" for="sim-tipo">Cosa vuoi calcolare</label>
+            <select id="sim-tipo">
+              <option value="canone">Solo il canone</option>
+              <option value="fotovoltaico">Impianto fotovoltaico, business plan completo</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="gg__scelta" id="sim-scelta">
           <button type="button" class="gg__scelta-btn gg__scelta-btn--attivo" data-verso="da-prezzo">Ho il prezzo dell'impianto</button>
           <button type="button" class="gg__scelta-btn" data-verso="da-canone">Ho il canone che il cliente regge</button>
         </div>
@@ -180,6 +190,59 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
               <option value="72">72 mesi</option>
               <option value="84">84 mesi</option>
             </select>
+          </div>
+        </div>
+
+        <!-- Campi in piu' del business plan: compaiono solo scegliendo fotovoltaico -->
+        <div id="sim-pv" hidden>
+          <div class="gg__grid">
+            <div class="gg__field">
+              <label class="gg__field-label" for="sim-kwp">Potenza fotovoltaico (kWp)</label>
+              <input type="number" id="sim-kwp" min="1" step="0.1" placeholder="30" />
+            </div>
+            <div class="gg__field">
+              <label class="gg__field-label" for="sim-accumulo">Capacità accumulo (kWh)</label>
+              <input type="number" id="sim-accumulo" min="0" step="0.1" placeholder="15" />
+            </div>
+            <div class="gg__field">
+              <label class="gg__field-label" for="sim-provincia">Provincia (sigla)</label>
+              <input type="text" id="sim-provincia" maxlength="2" placeholder="AV" style="text-transform:uppercase" />
+            </div>
+            <div class="gg__field">
+              <label class="gg__field-label" for="sim-durata-pv">Durata</label>
+              <select id="sim-durata-pv">
+                <option value="">Consigliata (automatica)</option>
+                <option value="36">36 mesi</option>
+                <option value="48">48 mesi</option>
+                <option value="60">60 mesi</option>
+                <option value="72">72 mesi</option>
+                <option value="84">84 mesi</option>
+              </select>
+            </div>
+            <div class="gg__field">
+              <label class="gg__field-label" for="sim-consumo">Consumo annuo del cliente (kWh)</label>
+              <input type="number" id="sim-consumo" min="0" step="100" placeholder="facoltativo" />
+            </div>
+            <div class="gg__field">
+              <label class="gg__field-label" for="sim-prezzo-kwh">Prezzo energia (€/kWh)</label>
+              <input type="number" id="sim-prezzo-kwh" min="0" step="0.01" placeholder="facoltativo" />
+            </div>
+          </div>
+
+          <p class="gg__form-block-title" style="margin-top:1.5rem">Agevolazioni sul ramo leasing</p>
+          <p class="gg__hint">
+            Valgono per il leasing e per l'acquisto, non per il noleggio operativo. Spegnendole
+            spariscono dal confronto e dai due PDF, non solo da questa schermata.
+          </p>
+          <div class="gg__toggle-row">
+            <label class="gg__toggle" id="sim-lab-sabatini">
+              <input type="checkbox" id="sim-sabatini" checked />
+              <span>Nuova Sabatini Green</span>
+            </label>
+            <label class="gg__toggle" id="sim-lab-iper">
+              <input type="checkbox" id="sim-iper" checked />
+              <span>Iperammortamento 2026</span>
+            </label>
           </div>
         </div>
 
@@ -312,6 +375,24 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
               </select>
               <p class="gg__hint gg__hint--sotto" id="durata-nota"></p>
             </div>
+          </div>
+        </div>
+
+        <div class="gg__form-block">
+          <p class="gg__form-block-title">Agevolazioni da includere nei prospetti</p>
+          <p class="gg__hint">
+            Valgono per il leasing e per l'acquisto, non per il noleggio operativo. Se le spegni,
+            spariscono dai due PDF e dai totali del confronto, non solo dalla schermata.
+          </p>
+          <div class="gg__toggle-row">
+            <label class="gg__toggle">
+              <input type="checkbox" id="pv-sabatini" name="includi_sabatini" checked />
+              <span>Nuova Sabatini Green</span>
+            </label>
+            <label class="gg__toggle">
+              <input type="checkbox" id="pv-iper" name="includi_iper" checked />
+              <span>Iperammortamento 2026</span>
+            </label>
           </div>
         </div>
 
@@ -723,6 +804,28 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
   // Nessun dato del cliente, niente da salvare: si chiede un numero e si
   // ottiene un numero. Il calcolo e' server-side come tutto il resto.
   let versoSim: 'da-prezzo' | 'da-canone' = 'da-prezzo';
+  let tipoSim: 'canone' | 'fotovoltaico' = 'canone';
+
+  $('sim-tipo').addEventListener('change', () => {
+    tipoSim = ($('sim-tipo') as HTMLSelectElement).value as typeof tipoSim;
+    const pv = tipoSim === 'fotovoltaico';
+    // Nel business plan si parte sempre dal prezzo: il calcolo inverso non
+    // avrebbe un impianto su cui costruire il bilancio energetico.
+    ($('sim-scelta') as HTMLElement).hidden = pv;
+    ($('sim-pv') as HTMLElement).hidden = !pv;
+    if (pv) {
+      versoSim = 'da-prezzo';
+      ($('sim-campo-prezzo') as HTMLElement).hidden = false;
+      ($('sim-campo-canone') as HTMLElement).hidden = true;
+      ($('sim-campo-durata') as HTMLElement).hidden = true;
+      for (const b of Array.from(document.querySelectorAll('[data-verso]'))) {
+        b.classList.toggle('gg__scelta-btn--attivo', (b as HTMLElement).dataset.verso === 'da-prezzo');
+      }
+    }
+    ($('sim-feedback') as HTMLElement).hidden = true;
+    $('sim-risultato').innerHTML = '';
+    $('sim-btn').textContent = pv ? 'Calcola il business plan' : 'Calcola';
+  });
 
   for (const btn of Array.from(document.querySelectorAll('[data-verso]'))) {
     btn.addEventListener('click', () => {
@@ -742,14 +845,24 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
   $('sim-btn').addEventListener('click', async () => {
     const btn = $('sim-btn') as HTMLButtonElement;
     const box = $('sim-feedback') as HTMLElement;
+    const val = (id: string) => (document.getElementById(id) as HTMLInputElement).value;
     const corpo =
-      versoSim === 'da-prezzo'
-        ? { verso: 'da-prezzo', importo: ($('sim-importo') as HTMLInputElement).value }
-        : {
-            verso: 'da-canone',
-            canone: ($('sim-canone') as HTMLInputElement).value,
-            durata: ($('sim-durata') as HTMLSelectElement).value,
-          };
+      tipoSim === 'fotovoltaico'
+        ? {
+            verso: 'fotovoltaico',
+            importo: val('sim-importo'),
+            kwp: val('sim-kwp'),
+            kwh_accumulo: val('sim-accumulo'),
+            provincia: val('sim-provincia'),
+            durata: val('sim-durata-pv'),
+            consumo_annuo: val('sim-consumo'),
+            prezzo_kwh: val('sim-prezzo-kwh'),
+            includi_sabatini: ($('sim-sabatini') as HTMLInputElement).checked,
+            includi_iper: ($('sim-iper') as HTMLInputElement).checked,
+          }
+        : versoSim === 'da-prezzo'
+          ? { verso: 'da-prezzo', importo: val('sim-importo') }
+          : { verso: 'da-canone', canone: val('sim-canone'), durata: val('sim-durata') };
 
     btn.disabled = true;
     box.hidden = true;
@@ -770,6 +883,11 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
       } else {
         feedback(box, traduci(r?.error ?? ''), false);
       }
+      return;
+    }
+
+    if (r.verso === 'fotovoltaico') {
+      renderBusinessPlan(r);
       return;
     }
 
@@ -808,6 +926,119 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
       </div>`;
   });
 
+  // Il business plan a schermo. Gli stessi numeri che finiscono nei due PDF:
+  // se qui e li' dicessero cose diverse, l'agente farebbe una figuraccia
+  // davanti al cliente con il documento in mano.
+  function renderBusinessPlan(r: any) {
+    // Un'agevolazione chiusa nel registro non si puo' nemmeno accendere
+    const aperte = r.agevolazioniAperte ?? { sabatini: true, iper: true };
+    ($('sim-lab-sabatini') as HTMLElement).hidden = !aperte.sabatini;
+    ($('sim-lab-iper') as HTMLElement).hidden = !aperte.iper;
+
+    const durataNota = r.durataForzata
+      ? `Durata ${r.durata} mesi, forzata: la consigliata era ${r.durataConsigliata}.`
+      : `Durata consigliata ${r.durata} mesi.`;
+    const fonteConsumi = r.datiRealiConsumo
+      ? 'Calcolato sui consumi reali del cliente.'
+      : 'Stima per cliente tipo: senza i consumi dalla bolletta si applicano le ipotesi di zona, e i prospetti lo dichiarano.';
+
+    const righeCanoni = (r.durate as number[])
+      .map((m) => `
+        <tr class="${m === r.durata ? 'gg__riga-scelta' : ''}">
+          <td>${m} mesi</td><td>${euro(r.canoni[m], 2)} €</td><td>${euro(r.riscatti[m], 0)} €</td>
+        </tr>`)
+      .join('');
+
+    const righeAgevolazioni = [
+      r.conSabatini
+        ? `<tr><td>Contributo Nuova Sabatini Green</td><td>${euro(r.sabatini)} €</td></tr>
+           <tr><td>Al netto della gestione pratica</td><td>${euro(r.sabatiniNetto)} €</td></tr>`
+        : '',
+      r.conIper
+        ? `<tr><td>Risparmio IRES da iperammortamento</td><td>${euro(r.iresIper)} €</td></tr>
+           <tr><td>Al netto della pratica 4.0</td><td>${euro(r.iperNetto)} €</td></tr>`
+        : '',
+    ].join('');
+
+    const nessunaAgevolazione = !r.conSabatini && !r.conIper
+      ? `<p class="gg__box-nota">Nessuna agevolazione inclusa: il leasing resta valutato sui soli interessi dedotti e sull'ammortamento del bene.</p>`
+      : '';
+
+    $('sim-risultato').innerHTML = `
+      <div class="gg__kpi" style="margin-top:1.5rem">
+        <div class="gg__kpi-card">
+          <span class="gg__kpi-num">${euro(r.canone, 2)} €</span>
+          <span class="gg__kpi-label">Canone mensile del noleggio a ${r.durata} mesi</span>
+        </div>
+        <div class="gg__kpi-card ${r.margineMese >= 0 ? 'gg__kpi-card--ok' : ''}">
+          <span class="gg__kpi-num">${Math.round(r.coperturaCanone * 100)}%</span>
+          <span class="gg__kpi-label">Quota del canone coperta dal risparmio in bolletta</span>
+        </div>
+        <div class="gg__kpi-card">
+          <span class="gg__kpi-num">${euro(r.beneficioMese)} €</span>
+          <span class="gg__kpi-label">Beneficio energetico al mese</span>
+        </div>
+        <div class="gg__kpi-card">
+          <span class="gg__kpi-num">${euro(r.produzione)} kWh</span>
+          <span class="gg__kpi-label">Produzione stimata all'anno</span>
+        </div>
+      </div>
+
+      <div class="gg__due-col">
+        <div class="gg__box">
+          <p class="gg__box-title">Noleggio operativo</p>
+          <table class="gg__table">
+            <thead><tr><th>Durata</th><th>Canone</th><th>Riscatto</th></tr></thead>
+            <tbody>${righeCanoni}</tbody>
+          </table>
+          <table class="gg__table" style="margin-top:0.85rem">
+            <tbody>
+              <tr><td>Totale canoni a ${r.durata} mesi</td><td>${euro(r.totCanoni)} €</td></tr>
+              <tr><td>Risparmio fiscale (IRES + IRAP)</td><td>${euro(r.fiscoNol)} €</td></tr>
+              <tr><td>Costo netto stimato</td><td>${euro(r.costoNettoNol)} €</td></tr>
+            </tbody>
+          </table>
+          <p class="gg__box-nota">${durataNota} Zero anticipo, canone interamente deducibile, Centrale Rischi non impegnata.</p>
+        </div>
+
+        <div class="gg__box">
+          <p class="gg__box-title">Leasing finanziario, per confronto</p>
+          <table class="gg__table">
+            <tbody>
+              <tr><td>Rata mensile a ${r.durata} mesi</td><td>${euro(r.rataLeasing, 2)} €</td></tr>
+              <tr><td>Totale rate e riscatto</td><td>${euro(r.totLeasing)} €</td></tr>
+              <tr><td>Interessi complessivi</td><td>${euro(r.interessi)} €</td></tr>
+              ${righeAgevolazioni}
+              <tr class="gg__riga-scelta"><td>Costo netto stimato</td><td>${euro(r.costoNettoLeasing)} €</td></tr>
+            </tbody>
+          </table>
+          ${nessunaAgevolazione}
+          <p class="gg__box-nota">
+            Il leasing porta la proprieta' del bene e apre le agevolazioni, ma impegna le linee bancarie
+            e richiede una delibera creditizia piena.
+          </p>
+        </div>
+      </div>
+
+      <div class="gg__box" style="margin-top:1rem">
+        <p class="gg__box-title">Il bilancio energetico</p>
+        <table class="gg__table">
+          <tbody>
+            <tr><td>Produzione stimata</td><td>${euro(r.produzione)} kWh/anno</td></tr>
+            <tr><td>Autoconsumata</td><td>${euro(r.autoKwh)} kWh (${Math.round(r.autoconsumoQuota * 100)}%)</td></tr>
+            <tr><td>Immessa in rete</td><td>${euro(r.cedKwh)} kWh</td></tr>
+            <tr><td>Prezzo energia usato</td><td>${euro(r.prezzoKwh, 2)} €/kWh</td></tr>
+            <tr><td>Beneficio complessivo</td><td>${euro(r.beneficioAnno)} €/anno</td></tr>
+          </tbody>
+        </table>
+        <p class="gg__box-nota">${fonteConsumi}</p>
+      </div>
+
+      <div class="gg__pdf-row">
+        <button type="button" class="gg__pdf" id="sim-porta" data-importo="${r.importo}">Porta questi dati nel prospetto</button>
+      </div>`;
+  }
+
   // Dal conto al volo al prospetto vero, senza ridigitare l'importo
   document.addEventListener('click', (e) => {
     const btn = (e.target as HTMLElement).closest('#sim-porta') as HTMLElement | null;
@@ -815,6 +1046,23 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
     const campo = $('importo') as HTMLInputElement;
     campo.value = String(Math.round(Number(btn.dataset.importo)));
     campo.dispatchEvent(new Event('input'));
+
+    // Dal business plan si porta tutto l'impianto, non il solo importo:
+    // ridigitare kWp, accumulo e provincia e' il modo piu' facile di sbagliarli.
+    if (tipoSim === 'fotovoltaico') {
+      const copia: [string, string][] = [
+        ['sim-kwp', 'kwp'], ['sim-accumulo', 'kwh-accumulo'], ['sim-provincia', 'provincia'],
+        ['sim-consumo', 'consumo-annuo'], ['sim-prezzo-kwh', 'prezzo-kwh'], ['sim-durata-pv', 'durata'],
+      ];
+      for (const [da, a] of copia) {
+        const sorgente = document.getElementById(da) as HTMLInputElement | null;
+        const destinazione = document.getElementById(a) as HTMLInputElement | null;
+        if (sorgente && destinazione && sorgente.value) destinazione.value = sorgente.value;
+      }
+      (document.getElementById('pv-sabatini') as HTMLInputElement).checked = ($('sim-sabatini') as HTMLInputElement).checked;
+      (document.getElementById('pv-iper') as HTMLInputElement).checked = ($('sim-iper') as HTMLInputElement).checked;
+    }
+
     $('preventivo').scrollIntoView({ behavior: 'smooth', block: 'start' });
     ($('cliente') as HTMLInputElement).focus();
   });
@@ -831,7 +1079,11 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
     const btn = $('submit-btn') as HTMLButtonElement;
     const box = $('form-feedback') as HTMLElement;
     const form = e.target as HTMLFormElement;
-    const dati = Object.fromEntries(new FormData(form).entries());
+    const dati: Record<string, unknown> = Object.fromEntries(new FormData(form).entries());
+    // Una checkbox spenta non compare in FormData: senza queste due righe
+    // spegnere un'agevolazione non avrebbe nessun effetto sul PDF.
+    dati.includi_sabatini = ($('pv-sabatini') as HTMLInputElement).checked;
+    dati.includi_iper = ($('pv-iper') as HTMLInputElement).checked;
 
     btn.disabled = true;
     btn.textContent = 'Calcolo in corso...';
@@ -1367,6 +1619,17 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
   }
   .gg__scelta-btn:hover { border-color: #FE6F3A; color: #D45A2E; }
   .gg__scelta-btn--attivo { background: #fff7f3; border-color: #FE6F3A; color: #D45A2E; }
+
+  .gg__toggle-row { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+  .gg__toggle {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    background: #F8F7FA; border: 1.5px solid #E1DEE3; border-radius: 10px;
+    padding: 0.6rem 1rem; cursor: pointer;
+    font-size: 0.88rem; font-weight: 600; color: #444451;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .gg__toggle:has(input:checked) { background: #f5f3ff; border-color: #664CCD; color: #4c37a8; }
+  .gg__toggle input { width: 16px; height: 16px; accent-color: #664CCD; cursor: pointer; }
   .gg__field select option:disabled { color: #b9b9c0; }
 
   @media (max-width: 768px) {

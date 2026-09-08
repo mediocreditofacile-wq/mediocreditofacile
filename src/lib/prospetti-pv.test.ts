@@ -222,8 +222,48 @@ describe('payload per il microservizio PDF', () => {
       'prezzo_kwh', 'prezzo_cessione', 'durata', 'ires', 'irap', 'tasso_leasing',
       'riscatto_leasing', 'sabatini_pct', 'costo_sabatini', 'iper_pct', 'costo_40',
       'testo_ipotesi', 'testo_ipotesi_breve', 'testo_copertura', 'testo_grafico1',
+      'fornitore_nome', 'fornitore_citta', 'includi_sabatini', 'includi_iper',
     ];
     expect(Object.keys(payload).sort()).toEqual(attese.sort());
+  });
+
+  it('senza opzioni resta il prospetto InnovaLux, identico a prima', () => {
+    expect(payload.fornitore_nome).toBe('InnovaLux S.r.l.');
+    expect(payload.fornitore_citta).toBe('Milano');
+    expect(payload.includi_sabatini).toBe(true);
+    expect(payload.includi_iper).toBe(true);
+    // L'intestazione dei prospetti gia' emessi dice "InnovaLux", non la
+    // ragione sociale per esteso: quella riga non deve cambiare.
+    expect(String(payload.soluzione)).toMatch(/ InnovaLux$/);
+  });
+
+  it('il nome del fornitore arriva dal chiamante e finisce nel prospetto', () => {
+    // Era cablato dentro il motore Python: i prospetti di Green-Go uscivano
+    // con scritto InnovaLux addosso, sotto gli occhi del cliente finale.
+    const altro = buildPayloadPdf(GIACCIO, calcolaPreventivo(GIACCIO), {
+      fornitoreNome: 'GREEN-GO SRLS',
+      fornitoreCitta: 'Avellino',
+    }) as Record<string, unknown>;
+    expect(altro.fornitore_nome).toBe('GREEN-GO SRLS');
+    expect(String(altro.soluzione)).toContain('GREEN-GO SRLS');
+    // Chi non indica l'etichetta breve non deve ritrovarsi InnovaLux addosso
+    expect(String(altro.soluzione)).not.toContain('InnovaLux');
+  });
+
+  it('le agevolazioni spente escono dai totali, non solo dai testi', () => {
+    const con = calcolaPreventivo(GIACCIO);
+    const senza = calcolaPreventivo(GIACCIO, undefined, {
+      includiSabatini: false,
+      includiIper: false,
+    });
+    expect(senza.sabatini).toBe(0);
+    expect(senza.iresIper).toBe(0);
+    expect(senza.conSabatini).toBe(false);
+    // Niente agevolazioni, niente pratiche da pagare: il costo netto del
+    // leasing sale, ma l'esborso non porta piu' le spese di gestione.
+    expect(senza.costoNettoLeasing).toBeGreaterThan(con.costoNettoLeasing);
+    expect(con.conSabatini).toBe(true);
+    expect(con.conIper).toBe(true);
   });
 
   it('non fa trapelare coefficienti', () => {

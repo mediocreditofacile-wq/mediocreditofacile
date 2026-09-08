@@ -16,6 +16,7 @@
 // Se il microservizio PDF non risponde il preventivo NON fallisce: numeri a
 // schermo, record salvato, mail senza allegati e un avviso esplicito.
 
+import { agevolazioneAttiva } from '../data/leasing';
 import { query } from './db';
 import { DESTINATARIO_MCF, escapeHtml, inviaMail, layoutMail } from './mail-portale';
 import type { Contesto } from './portale-auth';
@@ -26,7 +27,15 @@ import {
   salvaPdf,
   type DocumentoGenerato,
 } from './preventivi-pv';
-import { buildPayloadPdf, calcolaPreventivo, euro, slugCliente, type Calcolo, type InputPreventivo } from './prospetti-pv';
+import {
+  buildPayloadPdf,
+  calcolaPreventivo,
+  euro,
+  slugCliente,
+  type Calcolo,
+  type InputPreventivo,
+  type OpzioniProspetto,
+} from './prospetti-pv';
 import { getTabella } from './tabelle-canoni';
 
 /** Id leggibile: <PREFISSO>-AAAAMMGG-HHMMSS in ora italiana, come le pratiche */
@@ -68,6 +77,7 @@ async function salvaRecord(
           coperturaCanone: c.coperturaCanone, margineMese: c.margineMese,
           fiscoNol: c.fiscoNol, costoNettoNol: c.costoNettoNol,
           rataLeasing: c.rataLeasing, sabatini: c.sabatini, iresIper: c.iresIper,
+          conSabatini: c.conSabatini, conIper: c.conIper, costoNettoLeasing: c.costoNettoLeasing,
         }),
         JSON.stringify(documenti.map((d) => ({ nome: d.nome, pathname: d.pathname }))),
         pdfPronti,
@@ -210,6 +220,21 @@ export async function generaPreventivo(
   const tabella = getTabella(contesto.tabellaCanoni);
   const input = leggiInput(corpo, tabella);
 
+  // Chi firma il prospetto e quali agevolazioni entrano nei conti. Il nome del
+  // fornitore esce dal contesto, mai dalla richiesta: e' il nome che il cliente
+  // finale legge sul documento.
+  const opzioni: OpzioniProspetto = {
+    fornitoreNome: contesto.fornitoreNome ?? undefined,
+    fornitoreCitta: contesto.fornitoreCitta ?? undefined,
+    fornitoreEtichetta: contesto.fornitoreNome ?? undefined,
+    // Stesso controllo della simulazione: un'agevolazione chiusa nel registro
+    // non entra nel prospetto nemmeno se il client la chiede.
+    includiSabatini:
+      agevolazioneAttiva('sabatini') && corpo.includi_sabatini !== false && corpo.includi_sabatini !== 'false',
+    includiIper:
+      agevolazioneAttiva('iperammortamento') && corpo.includi_iper !== false && corpo.includi_iper !== 'false',
+  };
+
   if (!input.cliente || input.kwp <= 0 || input.importo <= 0) {
     return { ok: false, error: 'dati_incompleti' };
   }
@@ -218,8 +243,8 @@ export async function generaPreventivo(
     return { ok: false, error: 'importo_fuori_range', min: tabella.importoMin, max: tabella.importoMax };
   }
 
-  const c = calcolaPreventivo(input, tabella);
-  const payload = buildPayloadPdf(input, c);
+  const c = calcolaPreventivo(input, tabella, opzioni);
+  const payload = buildPayloadPdf(input, c, opzioni);
   const id = generaId(prefisso);
 
   const risultatoPdf = await generaPdf(payload, tabella);
@@ -278,7 +303,15 @@ export async function generaPreventivo(
       costoNettoNol: c.costoNettoNol,
       rataLeasing: c.rataLeasing,
       sabatini: c.sabatini,
+      sabatiniNetto: c.sabatiniNetto,
       iresIper: c.iresIper,
+      iperNetto: c.iperNetto,
+      conSabatini: c.conSabatini,
+      conIper: c.conIper,
+      interessi: c.interessi,
+      totLeasing: c.totLeasing,
+      riscattoLeasing: c.riscattoLeasing,
+      costoNettoLeasing: c.costoNettoLeasing,
       detrazionePrivati: c.detrazionePrivati,
     },
     documenti: documenti.map((d) => ({ nome: d.nome, pathname: d.pathname })),

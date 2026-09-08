@@ -14,7 +14,7 @@ import type { Contesto } from './portale-auth';
 describe('percorsoDelFornitore', () => {
   const base: Contesto = {
     userId: 'u1', email: 'a@b.it', nome: 'Agente', ruolo: 'agente',
-    organizationId: 'org-gg', fornitoreSlug: 'green-go', fornitoreNome: 'GREEN-GO SRLS',
+    organizationId: 'org-gg', fornitoreSlug: 'green-go', fornitoreNome: 'GREEN-GO SRLS', fornitoreCitta: 'Avellino',
     tabellaCanoni: 'esg', prefisso: 'GG',
   };
 
@@ -51,7 +51,7 @@ describe('percorsoDelFornitore', () => {
 describe('vedeTuttoIlFornitore', () => {
   const base: Contesto = {
     userId: 'u1', email: 'a@b.it', nome: 'x', ruolo: 'agente',
-    organizationId: 'org', fornitoreSlug: 'green-go', fornitoreNome: 'G', tabellaCanoni: 'esg', prefisso: 'GG',
+    organizationId: 'org', fornitoreSlug: 'green-go', fornitoreNome: 'G', fornitoreCitta: null, tabellaCanoni: 'esg', prefisso: 'GG',
   };
 
   it('l agente vede solo i propri preventivi', async () => {
