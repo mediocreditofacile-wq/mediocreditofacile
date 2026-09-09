@@ -133,6 +133,13 @@ export const REGIONI: Regione[] = [
           'un milione di fatturato e il fotovoltaico pagato per cassa: la liquidità è tornata con un lease back sui macchinari, invece di continuare a cedere le fatture al 5%',
         servizi: ['finanziamenti'],
       },
+      {
+        slug: 'leasing-bene-difettoso-vizi-fornitore',
+        titolo: 'Carpenteria meccanica del veneziano',
+        dettaglio:
+          'curvatubi a controllo numerico consegnata con cinque mesi di ritardo e con vizi: chi paga i canoni, contro chi si agisce e perché il verbale di consegna va firmato solo a macchina provata',
+        servizi: ['leasing'],
+      },
     ],
     contenuti: {
       'noleggio-operativo': {

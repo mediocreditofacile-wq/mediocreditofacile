@@ -94,7 +94,9 @@ function formatDate(dateStr: string): string {
 // Structured data Article per SEO
 // Pagina servizio del territorio dell'articolo. risolviPaginaLocale lancia in build
 // se la chiave non e' nel registro, cosi' un territorio inventato non arriva online.
-const paginaLocale = post.data.territorio ? risolviPaginaLocale(post.data.territorio) : null;
+const paginaLocale = post.data.territorio
+  ? risolviPaginaLocale(post.data.territorio, post.data.cluster)
+  : null;
 
 const articleLD = {
   '@context': 'https://schema.org',

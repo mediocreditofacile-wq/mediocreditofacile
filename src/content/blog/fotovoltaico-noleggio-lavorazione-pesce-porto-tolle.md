@@ -13,7 +13,7 @@ cluster: "fotovoltaico"
 
 ---
 
-Per capire questa storia bisogna partire dalla fine: un capannone a Porto Tolle, provincia di Rovigo, comprato all'asta. Dentro, quattordici persone che puliscono alici e sardine a mano. Filettatura, marinatura, confezionamento in fusti. Il prodotto finisce a trasformatori industriali come Ragnetti e Mancetti, e in parte va in Spagna. Non è un ristorante, non è una pescheria: è un'industria di lavorazione del pesce azzurro, con celle frigorifere accese 24 ore su 24, ogni giorno dell'anno.
+Per capire questa storia bisogna partire dalla fine: un capannone a Porto Tolle, provincia di Rovigo, comprato all'asta. Dentro, quattordici persone che puliscono alici e sardine a mano. Filettatura, marinatura, confezionamento in fusti. Il prodotto finisce a trasformatori industriali del settore ittico, e in parte va in Spagna. Non è un ristorante, non è una pescheria: è un'industria di lavorazione del pesce azzurro, con celle frigorifere accese 24 ore su 24, ogni giorno dell'anno.
 
 Mario Benzo ha 63 anni, viene da Sottomarina, e in questo mestiere ci è cresciuto. La sua SRLS fattura un milione e quattro, ha 14 dipendenti — quasi tutti operai a tempo parziale — e un patrimonio netto di 134mila euro. I numeri hanno avuto un'oscillazione nel 2024 (il fatturato è sceso da 1,8 a 1,4 milioni) per una ragione specifica: Mario ha internalizzato personale che prima era esterno. Meno fatturato apparente, stessa capacità produttiva, costi fissi più alti ma struttura più solida. Nel 2025 l'utile è risalito a 44mila euro. L'azienda ha sette anni di storia e un impianto produttivo reale, tangibile, che puoi toccare con mano.
 
