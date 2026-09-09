@@ -100,11 +100,16 @@ const articleLD = {
   author: {
     '@type': 'Person',
     name: post.data.author,
+    jobTitle: 'Broker finanziario',
+    url: 'https://www.mediocreditofacile.it',
+    sameAs: ['https://www.linkedin.com/in/albertoama/'],
   },
   publisher: {
-    '@type': 'Organization',
+    '@type': 'FinancialService',
     name: 'Mediocredito Facile',
     url: 'https://www.mediocreditofacile.it',
+    telephone: '+393939957840',
+    areaServed: { '@type': 'Country', name: 'IT' },
   },
   ...(post.data.image && {
     image: `https://www.mediocreditofacile.it${post.data.image}`,
@@ -198,6 +203,23 @@ const breadcrumbLD = {
             </div>
           </aside>
         )}
+
+        {/* Chi scrive — blocco dichiarativo, pensato per essere citabile
+            fuori dal contesto dell'articolo (motori di ricerca e assistenti AI). */}
+        <aside class="article__chi">
+          <h2 class="article__chi-title">Chi ha scritto questo articolo</h2>
+          <p>
+            <strong>Mediocredito Facile</strong> è la società di brokeraggio finanziario di Alberto Amà,
+            con sede in Veneto e operatività su tutto il territorio italiano. Mette a confronto le offerte
+            di oltre dodici società di noleggio operativo e leasing per conto di piccole e medie imprese,
+            seguendo la pratica dalla valutazione preliminare fino alla delibera e all'attivazione del contratto.
+            È collaboratore del Mediatore Creditizio Affida, iscrizione OAM M325.
+          </p>
+          <p class="article__chi-contatti">
+            Per una valutazione gratuita: <a href="tel:+393939957840">+39 393 995 7840</a> ·
+            <a href="mailto:mediocreditofacile@gmail.com">mediocreditofacile@gmail.com</a>
+          </p>
+        </aside>
 
         {/* CTA finale */}
         <div class="article__cta">
@@ -363,6 +385,42 @@ const breadcrumbLD = {
   }
 
   /* ═══ CTA finale ═══ */
+  .article__chi {
+    margin-top: 3rem;
+    padding: 1.75rem;
+    border: 1px solid var(--color-border);
+    border-left: 3px solid var(--color-primary);
+    border-radius: 10px;
+    background: var(--color-bg);
+  }
+
+  .article__chi-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-primary);
+    margin: 0 0 0.75rem;
+  }
+
+  .article__chi p {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--color-text);
+    margin: 0 0 0.6rem;
+  }
+
+  .article__chi-contatti {
+    font-size: 0.9rem !important;
+    color: var(--color-text-light) !important;
+    margin-bottom: 0 !important;
+  }
+
+  .article__chi-contatti a {
+    color: var(--color-primary);
+    font-weight: 600;
+  }
+
   .article__cta {
     background: linear-gradient(135deg, #f8f6ff 0%, #eef0ff 100%);
     border: 1px solid var(--color-primary-bg);

@@ -1,0 +1,429 @@
+---
+/**
+ * Noleggio operativo fotovoltaico in Puglia — /noleggio-operativo-fotovoltaico-puglia
+ *
+ * Pagina servizio territoriale. Nasce dal giro di misura sugli assistenti AI del
+ * settembre 2026: alle domande su chi fa noleggio operativo i modelli citano
+ * fornitori locali con pagine geolocalizzate, mentre la nostra copertura era una
+ * sola pagina nazionale. Il territorio non e' scelto a tavolino: il partner
+ * installatore sul fotovoltaico e' Arca Energia, di Brindisi.
+ *
+ * I numeri di irraggiamento vengono da IRRADIANCE in src/data/bp-fotovoltaico.ts
+ * (fonte PVGIS), gli stessi che usa il simulatore: non vanno scritti a mano qui.
+ */
+import Icon from '../components/Icon.astro';
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import ContactForm from '../components/ContactForm.astro';
+import { IRRADIANCE } from '../data/bp-fotovoltaico';
+
+const pageUrl = 'https://www.mediocreditofacile.it/noleggio-operativo-fotovoltaico-puglia';
+
+const resaSud = IRRADIANCE.sud;
+const resaNord = IRRADIANCE.nord;
+const scarto = Math.round(((resaSud - resaNord) / resaNord) * 100);
+
+const province = ['Bari', 'Brindisi', 'Lecce', 'Taranto', 'Foggia', 'Barletta-Andria-Trani'];
+
+const faqs = [
+  {
+    q: 'Conviene il noleggio operativo per un impianto fotovoltaico in Puglia?',
+    a: `In Puglia un impianto rende in media ${resaSud} kWh per ogni kWp installato in un anno, contro i ${resaNord} kWh del Nord Italia: circa il ${scarto}% in più a parità di impianto (dati PVGIS). Il canone di noleggio invece è lo stesso in tutta Italia, perché dipende dall'importo e dalla durata, non dalla latitudine. È la ragione per cui al Sud il rapporto tra quanto paghi e quanto produci è il più favorevole del Paese. Quanto del canone venga coperto dal risparmio in bolletta dipende però dai consumi reali e dal profilo di utilizzo: va calcolato caso per caso, non dato per scontato.`,
+  },
+  {
+    q: 'Posso installare l\'impianto su un capannone o una masseria che non è di mia proprietà?',
+    a: "Sì, ed è una situazione frequente, soprattutto tra le aziende agricole e le strutture ricettive che conducono fondi di terzi. Il contratto di noleggio resta in capo all'azienda che utilizza l'impianto; serve il consenso scritto del proprietario dell'immobile all'installazione. È uno dei vantaggi del noleggio operativo rispetto all'acquisto: non stai immobilizzando capitale su un immobile che non è tuo.",
+  },
+  {
+    q: 'Chi progetta e installa gli impianti?',
+    a: 'Sul fotovoltaico lavoriamo con Arca Energia, società di Brindisi con dodici dipendenti, specializzata in impianti per il comparto industriale e il terziario con sistemi di accumulo. Loro seguono progetto, installazione, pratiche di connessione e manutenzione; noi la parte finanziaria. Il cliente ha due interlocutori, ciascuno per il suo mestiere.',
+  },
+  {
+    q: 'Quanto costa il canone mensile?',
+    a: "Il canone si calcola sull'importo dell'impianto chiavi in mano e sulla durata scelta, da 24 a 84 mesi. Non esiste un listino unico: i coefficienti cambiano da un operatore all'altro e in base al merito creditizio dell'azienda. Sul sito trovi un simulatore che restituisce il canone indicativo per importo e durata, e il confronto con la bolletta attuale.",
+  },
+  {
+    q: 'Serve un anticipo?',
+    a: 'No. Il noleggio operativo non prevede anticipo: si paga il canone dalla decorrenza del contratto. Il canone è interamente deducibile dal reddito d\'impresa come costo operativo (art. 108 TUIR) e il contratto non viene segnalato in Centrale Rischi, quindi non erode le linee di credito che hai in banca.',
+  },
+  {
+    q: 'In quali province operate?',
+    a: `Seguiamo tutta la Puglia: ${province.join(', ')}. La consulenza si fa in videochiamata o al telefono, il sopralluogo tecnico sul posto lo fa l'installatore. Fuori dalla Puglia lavoriamo comunque su tutto il territorio nazionale, con altri partner installatori.`,
+  },
+  {
+    q: 'Un privato senza partita IVA può fare il noleggio operativo?',
+    a: 'No. Il noleggio operativo è riservato a soggetti con partita IVA e presuppone la destinazione strumentale del bene. Per un immobile a uso abitativo la strada è un\'altra, tipicamente la detrazione fiscale sulle ristrutturazioni: in quel caso te lo diciamo subito invece di farti perdere tempo.',
+  },
+];
+
+const faqJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqs.map((f) => ({
+    '@type': 'Question',
+    name: f.q,
+    acceptedAnswer: { '@type': 'Answer', text: f.a },
+  })),
+};
+
+// Il servizio dichiara l'area servita provincia per provincia: e' l'informazione
+// che manca alla pagina nazionale e che i motori usano per rispondere "chi fa X a Y".
+const serviceJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  name: 'Noleggio operativo per impianti fotovoltaici in Puglia',
+  serviceType: 'Noleggio operativo fotovoltaico',
+  description:
+    'Noleggio operativo di impianti fotovoltaici per imprese pugliesi: canone mensile fisso, nessun anticipo, impianto chiavi in mano. Installazione a cura di Arca Energia, Brindisi.',
+  url: pageUrl,
+  provider: {
+    '@type': 'FinancialService',
+    name: 'Mediocredito Facile',
+    url: 'https://www.mediocreditofacile.it',
+    telephone: '+393939957840',
+  },
+  areaServed: province.map((p) => ({
+    '@type': 'AdministrativeArea',
+    name: `Provincia di ${p}`,
+    containedInPlace: { '@type': 'AdministrativeArea', name: 'Puglia' },
+  })),
+  audience: { '@type': 'BusinessAudience', name: 'Piccole e medie imprese con partita IVA' },
+};
+---
+
+<Layout
+  title="Noleggio Operativo Fotovoltaico in Puglia | Mediocredito Facile"
+  description={`Impianti fotovoltaici a canone mensile per imprese pugliesi: nessun anticipo, chiavi in mano, installazione Arca Energia di Brindisi. In Puglia la resa è di ${resaSud} kWh per kWp l'anno. Consulenza gratuita.`}
+>
+  <script type="application/ld+json" set:html={JSON.stringify(faqJsonLd)} />
+  <script type="application/ld+json" set:html={JSON.stringify(serviceJsonLd)} />
+
+  <Header minimal={false} />
+
+  <section class="pfv-hero">
+    <div class="pfv-hero__inner">
+      <p class="pfv-eyebrow">Puglia · {province.join(' · ')}</p>
+      <h1 class="pfv-hero__title">Noleggio operativo fotovoltaico in Puglia</h1>
+      <p class="pfv-hero__sub">
+        Un impianto chiavi in mano pagato con un canone mensile fisso, senza anticipo e senza toccare
+        le linee di credito in banca. Progettazione e installazione a cura di Arca Energia, Brindisi.
+      </p>
+      <div class="pfv-hero__actions">
+        <a href="#contatti" class="pfv-btn pfv-btn--primary">Richiedi la simulazione</a>
+        <a href="/tools/simulatore-noleggio-fotovoltaico" class="pfv-btn pfv-btn--outline">Calcola il canone</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="pfv-section">
+    <div class="pfv-wrap">
+      <h2>In Puglia lo stesso impianto rende il {scarto}% in più</h2>
+      <p>
+        Un impianto fotovoltaico in Puglia produce in media {resaSud} kWh all'anno per ogni kWp
+        installato. Lo stesso impianto, montato in Pianura Padana, ne produce {resaNord}: sono i dati
+        di irraggiamento PVGIS, quelli che usiamo anche nel simulatore. Il canone di noleggio, invece,
+        non cambia da Brindisi a Bergamo, perché dipende dall'importo del bene e dalla durata del
+        contratto.
+      </p>
+      <p>
+        Da qui viene il vantaggio del territorio: paghi lo stesso e produci di più. Quanta parte del
+        canone se la paghi con la bolletta dipende poi dai consumi reali dell'azienda e da quando
+        consuma, perché l'energia che vale davvero è quella che usi mentre la produci. Un capannone
+        che lavora di giorno e un albergo aperto ventiquattr'ore hanno due conti diversi, e vanno
+        fatti con i loro numeri.
+      </p>
+    </div>
+  </section>
+
+  <section class="pfv-section pfv-section--alt">
+    <div class="pfv-wrap">
+      <h2>Come funziona</h2>
+      <div class="pfv-grid">
+        <div class="pfv-card">
+          <span class="pfv-card__icon"><Icon name="savings" size={28} /></span>
+          <h3>Nessun anticipo</h3>
+          <p>
+            Si parte con il canone dalla decorrenza del contratto. L'investimento non esce dalla cassa
+            e non immobilizza capitale.
+          </p>
+        </div>
+        <div class="pfv-card">
+          <span class="pfv-card__icon"><Icon name="receipt_long" size={28} /></span>
+          <h3>Canone interamente deducibile</h3>
+          <p>
+            È un costo operativo, deducibile dal reddito d'impresa ai sensi dell'art. 108 TUIR, non un
+            debito iscritto in bilancio.
+          </p>
+        </div>
+        <div class="pfv-card">
+          <span class="pfv-card__icon"><Icon name="account_balance" size={28} /></span>
+          <h3>Fuori dalla Centrale Rischi</h3>
+          <p>
+            Il contratto non viene segnalato: le linee di credito che hai in banca restano dove sono,
+            per il circolante.
+          </p>
+        </div>
+        <div class="pfv-card">
+          <span class="pfv-card__icon"><Icon name="construction" size={28} /></span>
+          <h3>Chiavi in mano</h3>
+          <p>
+            Progetto, installazione, pratiche di connessione e manutenzione stanno dentro un unico
+            contratto. Durate da 24 a 84 mesi.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="pfv-section">
+    <div class="pfv-wrap">
+      <h2>Chi installa: Arca Energia, Brindisi</h2>
+      <p>
+        Sul fotovoltaico in Puglia lavoriamo con Arca Energia, società di Brindisi con dodici
+        dipendenti, che progetta e installa impianti per il comparto industriale e per il terziario,
+        con sistemi di accumulo. La taglia tipica delle operazioni che seguiamo insieme sta fra i
+        50.000 e i 150.000 euro di impianto.
+      </p>
+      <p>
+        La divisione del lavoro è netta e conviene dirla: loro fanno il sopralluogo, il progetto,
+        l'installazione e l'assistenza; noi costruiamo la parte finanziaria, confrontiamo gli
+        operatori di noleggio e seguiamo la pratica fino alla delibera. Nessuno dei due fa il mestiere
+        dell'altro.
+      </p>
+    </div>
+  </section>
+
+  <section class="pfv-section pfv-section--alt">
+    <div class="pfv-wrap">
+      <h2>Chi lo usa da queste parti</h2>
+      <p>
+        Le operazioni che vediamo in Puglia hanno una fisionomia ricorrente. Agriturismi e strutture
+        ricettive del Salento, dove il picco di consumo coincide con il picco di produzione estiva.
+        Aziende agricole e frantoi, con carichi stagionali molto marcati. Distributori di carburante e
+        attività aperte tutto il giorno. Capannoni artigianali con un tetto grande e una bolletta che
+        pesa più dell'affitto.
+      </p>
+      <p>
+        C'è poi un caso che in Puglia torna spesso: l'azienda che lavora su un immobile che non
+        possiede, in affitto o in comodato. Sull'acquisto è un ostacolo serio, perché nessuno investe
+        volentieri su un tetto altrui. Sul noleggio operativo no: il contratto è in capo a chi
+        utilizza l'impianto, serve il consenso scritto del proprietario e l'operazione si fa.
+      </p>
+    </div>
+  </section>
+
+  <section class="pfv-section pfv-faq">
+    <div class="pfv-wrap">
+      <h2>Domande frequenti</h2>
+      {faqs.map((f) => (
+        <details class="pfv-faq__item">
+          <summary>{f.q}</summary>
+          <p>{f.a}</p>
+        </details>
+      ))}
+      <p class="pfv-nota">
+        Approfondimenti: <a href="/noleggio-operativo-fotovoltaico">noleggio operativo fotovoltaico</a>,
+        <a href="/noleggio-operativo">come funziona il noleggio operativo</a>,
+        <a href="/tools/simulatore-noleggio-fotovoltaico">simulatore del canone</a>.
+      </p>
+    </div>
+  </section>
+
+  <ContactForm
+    fonte="noleggio-operativo-fotovoltaico-puglia"
+    heading="Fatti fare il conto sulla tua bolletta"
+    subheading="Mandaci potenza dell'impianto e spesa elettrica attuale: ti rimandiamo il confronto tra canone e risparmio, senza impegno."
+    ctaText="Richiedi la simulazione"
+  />
+
+  <Footer />
+</Layout>
+
+<style>
+  .pfv-hero {
+    background: var(--mcf-ghost);
+    padding: 4.5rem 1.5rem 4rem;
+    border-bottom: 1px solid var(--mcf-platinum);
+  }
+
+  .pfv-hero__inner {
+    max-width: 820px;
+    margin: 0 auto;
+  }
+
+  .pfv-eyebrow {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--mcf-accent);
+    margin: 0 0 0.75rem;
+  }
+
+  .pfv-hero__title {
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: var(--mcf-accent);
+    margin: 0 0 1rem;
+  }
+
+  .pfv-hero__sub {
+    font-size: 1.125rem;
+    font-weight: 500;
+    line-height: 1.55;
+    color: var(--mcf-charcoal);
+    max-width: 62ch;
+    margin: 0 0 2rem;
+  }
+
+  .pfv-hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .pfv-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+
+  .pfv-btn--primary {
+    background: var(--mcf-primary);
+    color: #fff;
+  }
+
+  .pfv-btn--primary:hover {
+    background: var(--mcf-primary-dark);
+  }
+
+  .pfv-btn--outline {
+    border: 1.5px solid var(--mcf-primary);
+    color: var(--mcf-primary);
+  }
+
+  .pfv-btn--outline:hover {
+    background: rgba(254, 111, 58, 0.08);
+  }
+
+  .pfv-section {
+    padding: 4rem 1.5rem;
+  }
+
+  .pfv-section--alt {
+    background: var(--mcf-ghost);
+  }
+
+  .pfv-wrap {
+    max-width: 820px;
+    margin: 0 auto;
+  }
+
+  .pfv-wrap h2 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+    color: var(--mcf-black);
+    margin: 0 0 1rem;
+  }
+
+  .pfv-wrap p {
+    font-size: 1rem;
+    line-height: 1.65;
+    color: var(--mcf-charcoal);
+    max-width: 68ch;
+    margin: 0 0 1rem;
+  }
+
+  .pfv-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+  }
+
+  .pfv-card {
+    background: #fff;
+    border: 1px solid var(--mcf-platinum);
+    border-radius: 16px;
+    padding: 1.5rem;
+  }
+
+  .pfv-card__icon {
+    display: inline-flex;
+    color: var(--mcf-accent);
+    margin-bottom: 0.5rem;
+  }
+
+  .pfv-card h3 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--mcf-black);
+    margin: 0 0 0.5rem;
+  }
+
+  .pfv-card p {
+    font-size: 0.9375rem;
+    margin: 0;
+  }
+
+  .pfv-faq__item {
+    border-bottom: 1px solid var(--mcf-platinum);
+    padding: 1rem 0;
+  }
+
+  .pfv-faq__item summary {
+    font-weight: 600;
+    color: var(--mcf-black);
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .pfv-faq__item summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .pfv-faq__item summary::before {
+    content: '+';
+    color: var(--mcf-primary);
+    font-weight: 700;
+    margin-right: 0.6rem;
+  }
+
+  .pfv-faq__item[open] summary::before {
+    content: '−';
+  }
+
+  .pfv-faq__item p {
+    margin: 0.75rem 0 0;
+    font-size: 0.95rem;
+  }
+
+  .pfv-nota {
+    margin-top: 2rem !important;
+    font-size: 0.9rem !important;
+    color: var(--mcf-taupe) !important;
+  }
+
+  .pfv-nota a {
+    color: var(--mcf-accent);
+    font-weight: 600;
+  }
+
+  @media (max-width: 640px) {
+    .pfv-hero {
+      padding: 3rem 1.25rem;
+    }
+
+    .pfv-section {
+      padding: 3rem 1.25rem;
+    }
+  }
+</style>
