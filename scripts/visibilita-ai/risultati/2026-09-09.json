@@ -1,0 +1,230 @@
+{
+  "data": "2026-09-09",
+  "marchio": "Mediocredito Facile",
+  "motori": [
+    "claude"
+  ],
+  "righe": [
+    {
+      "id": "no-01",
+      "categoria": "Noleggio operativo",
+      "testo": "Cos'è il noleggio operativo per aziende e a chi conviene?",
+      "esiti": {
+        "claude": {
+          "citato": false,
+          "posizione": 0,
+          "raccomandato": false,
+          "descrizione_corretta": false,
+          "errori": "",
+          "concorrenti": [],
+          "sintesi": "La risposta fornisce una spiegazione dettagliata e corretta del noleggio operativo per aziende, senza nominare alcun marchio, fornitore o intermediario specifico.",
+          "fonti": [],
+          "fonti_nostre": [],
+          "risposta": "# Il noleggio operativo per aziende\n\nIl noleggio operativo (o \"operational leasing\") è una formula contrattuale che permette alle aziende di utilizzare beni strumentali—tipicamente auto, ma anche macchinari, attrezzature IT o altri asset—senza doverli acquistare, pagando un canone periodico che include tutti i servizi accessori.\n\n## Come funziona\n\nA differenza del leasing finanziario, nel noleggio operativo non c'è opzione di acquisto finale del bene: l'azienda paga solo per l'utilizzo per un periodo definito (solitamente 24-48 mesi per le auto aziendali), dopodiché il bene viene restituito alla società di noleggio.\n\nIl canone mensile comprende generalmente:\n- Manutenzione ordinaria e straordinaria\n- Assicurazione\n- Tassa di proprietà (per i veicoli)\n- Assistenza stradale\n- Gestione pratiche amministrative\n- Talvolta anche pneumatici e auto sostitutiva\n\n## A chi conviene\n\n**1. PMI e startup**\nConviene particolarmente a piccole e medie imprese che vogliono evitare immobilizzazioni di capitale. Invece di investire liquidità nell'acquisto di veicoli o attrezzature, l'azienda mantiene la disponibilità finanziaria per altri investimenti produttivi.\n\n**2. Aziende con flotte auto**\nÈ molto diffuso per la gestione di flotte aziendali perché permette di:\n- Pianificare con precisione i costi mensili (canone fisso, no sorprese per riparazioni)\n- Rinnovare periodicamente il parco auto senza preoccuparsi della rivendita dell'usato\n- Semplificare la gestione amministrativa (un unico fornitore per tutti i servizi)\n\n**3. Aziende che vogliono ottimizzare la fiscalità**\nIl canone di noleggio è generalmente deducibile come costo d'esercizio, con vantaggi fiscali che possono essere superiori rispetto all'acquisto diretto o al leasing finanziario, a seconda della normativa vigente e del tipo di bene.\n\n**4. Aziende in settori con rapida obsolescenza tecnologica**\nPer attrezzature IT o tecnologiche che si aggiornano velocemente, il noleggio operativo evita il rischio di ritrovarsi con asset obsoleti da smaltire.\n\n**5. Chi vuole prevedibilità di budget**\nAziende che preferiscono avere certezza sui costi operativi mensili, senza dover gestire imprevisti come guasti o sinistri.\n\n## Quando invece è meno indicato\n\nIl noleggio operativo può essere meno conveniente per aziende che:\n- Utilizzano i beni per periodi molto lunghi (oltre 5-6 anni), dove l'acquisto diretto potrebbe risultare più economico nel lungo termine\n- Hanno necessità di personalizzare pesantemente i beni\n- Dispongono già di liquidità abbondante e preferiscono investire in asset di proprietà\n\n## In sintesi\n\nIl noleggio operativo è ideale per chi cerca **flessibilità, prevedibilità dei costi e semplificazione gestionale**, sacrificando la proprietà del bene in cambio di minori rischi e minor impegno di capitale. È particolarmente vantaggioso per flotte aziendali, tecnologia in rapida evoluzione e aziende che vogliono concentrare le risorse sul core business piuttosto che sulla gestione di asset strumentali.\n\nSe vuoi, posso approfondire un aspetto specifico (es. differenze fiscali rispetto al leasing finanziario, o dettagli sul noleggio auto aziendale in Italia)."
+        }
+      }
+    },
+    {
+      "id": "no-02",
+      "categoria": "Noleggio operativo",
+      "testo": "Quali società fanno noleggio operativo di beni strumentali in Italia?",
+      "esiti": {
+        "claude": {
+          "citato": false,
+          "posizione": 0,
+          "raccomandato": false,
+          "descrizione_corretta": false,
+          "errori": "",
+          "concorrenti": [
+            "Multiply S.p.A.",
+            "Wesionary S.p.A.",
+            "PMI Tutoring",
+            "Pagarent",
+            "Noleggio Energia",
+            "Grenke Italia",
+            "Ifis Rental Services",
+            "Domorental",
+            "WeAsset",
+            "Spektra Nolo"
+          ],
+          "sintesi": "La risposta elenca le principali società che operano nel noleggio operativo di beni strumentali in Italia, senza menzionare Mediocredito Facile. Mediocredito Facile non viene citato né raccomandato come opzione.",
+          "fonti": [
+            "https://pagarent.com/approfondimenti/noleggio-operativo-beni-strumentali/",
+            "https://www.chiossiecavazzuti.com/noleggio-operativo-grenke/",
+            "https://www.grenke.it/company/grenke-in-italia/aree-di-business/leasing/",
+            "https://www.grenke.it/assetportfolio/geo/",
+            "https://www.bancaifis.it/news/noleggio-operativo-b2b-cose-quali-sono-i-vantaggi-e-come-funziona/",
+            "https://domorental.it/",
+            "https://wesionary.it/noleggio-operativo-beni-strumentali-non-targati/",
+            "https://www.fer-plast.com/azienda/noleggio-operativo",
+            "https://www.europages.it/aziende/italia/noleggio%20attrezzature%20industriali.html"
+          ],
+          "fonti_nostre": [],
+          "risposta": "# Società di noleggio operativo di beni strumentali in Italia\n\nIl mercato italiano del noleggio operativo (o locazione operativa) di beni strumentali è in forte crescita: \nsecondo uno studio di WeAsset, società del Gruppo Domorental, nel primo semestre del 2024 sono stati stipulati oltre 53.000 contratti di noleggio, con un incremento del 10% rispetto all'anno precedente e un valore superiore a 770 milioni di euro\n. Ecco i principali operatori attivi in Italia:\n\n## Grandi player specializzati (multinazionali/leader di settore)\n\n**Grenke Italia S.p.A.** è tra i più importanti operatori del settore. \nGRENKE è uno dei principali operatori a livello europeo specializzato nell'offerta di servizi finanziari dedicati principalmente al settore IT, rappresentato da oltre 1.500 collaboratori dislocati in 32 diverse nazioni, presente in Italia con sede a Milano e numerose filiali\n. \nPropone varie soluzioni di noleggio operativo per prodotti IT, software, arredi, macchinari, stampanti e molto altro\n. Ha inoltre siglato una \npartnership industriale con Intesa Sanpaolo\n.\n\n**Ifis Rental Services** (Gruppo Banca Ifis) opera secondo il modello per cui \nuna società terza, esterna all'azienda, come Ifis Rental Services, acquista i beni strumentali per le aziende e si assume rischi e responsabilità su tutti i macchinari, gli strumenti tecnologici, gli hardware\n.\n\n**Domorental / WeAsset (Gruppo Domorental)** è un operatore molto attivo e diversificato: \noffre noleggio di arredi, attrezzature, impianti energetici, sicurezza e tecnologie per alberghi, ospedali, ristoranti, uffici, centri congressi e fiere\n, oltre a soluzioni per macchine utensili e macchinari industriali ricondizionati.\n\n## Società di mediazione creditizia collegate al noleggio operativo\n\nDiverse società operano come intermediari/broker che affiancano le aziende nell'accesso al noleggio operativo tramite partner finanziari:\n\n- **Multiply S.p.A.** (Bergamo), \npartner di Intesa San Paolo, affianca gli imprenditori che desiderano accedere alle agevolazioni previste per il noleggio di beni strumentali\n.\n- **Wesionary S.p.A.**, che opera con modalità analoghe nel settore.\n- **PMI Tutoring**, che offre supporto nella scelta e mediazione per il noleggio operativo.\n\n## Operatori generalisti e fornitori di settore\n\n- **Pagarent** – piattaforma specializzata in noleggio operativo di beni strumentali.\n- **Noleggio Energia** – attivo nel noleggio di beni strumentali con focus su vantaggi fiscali.\n- **Fer-Plast**, che \ncollabora con Grenke per la locazione operativa\n di macchinari e attrezzature da imballaggio/movimentazione.\n- **Chiossi e Cavazzuti** e **Global System Italia**, rivenditori/fornitori che agiscono come partner Grenke per l'offerta di noleggio operativo ai propri clienti.\n\n## Noleggio di macchinari/attrezzature specifiche (edilizia, industria)\n\nPer settori più operativi (edilizia, movimento terra, cantieristica) esistono centinaia di operatori locali e nazionali censiti su piattaforme B2B come Europages, tra cui:\n- **Spektra Nolo**, descritta come \nnumero uno nel noleggio di attrezzature edili in Italia, fondata nel 1997, prima società interamente italiana di noleggio di attrezzature per i professionisti dell'edilizia\n.\n- **Tecnocom Srl**, "
+        }
+      }
+    },
+    {
+      "id": "no-03",
+      "categoria": "Noleggio operativo",
+      "testo": "A chi posso rivolgermi per un noleggio operativo di macchinari per la mia PMI?",
+      "esiti": {
+        "claude": {
+          "citato": false,
+          "posizione": 0,
+          "raccomandato": false,
+          "descrizione_corretta": false,
+          "errori": "",
+          "concorrenti": [],
+          "sintesi": "La risposta descrive le categorie generali di fornitori di noleggio operativo (società specializzate, produttori, banche, broker) senza citare Mediocredito Facile né alcun competitor specifico",
+          "fonti": [],
+          "fonti_nostre": [],
+          "risposta": "Per il noleggio operativo di macchinari per la tua PMI, hai diverse opzioni a cui puoi rivolgerti. Ti spiego le principali categorie:\n\n## 1. Società di noleggio operativo specializzate\nSono aziende dedicate esclusivamente a questo servizio, spesso specializzate per settore (edilizia, agricoltura, industria manifatturiera, movimento terra, ecc.). Offrono flotte di macchinari sempre aggiornate e contratti \"chiavi in mano\" che includono manutenzione, assicurazione e assistenza.\n\n## 2. Concessionarie e produttori di macchinari\nMolti costruttori di macchine industriali (es. per l'edilizia, l'agricoltura o la logistica) offrono direttamente formule di noleggio operativo, spesso attraverso le proprie reti di concessionari, permettendoti di avere macchinari nuovi con garanzia del produttore.\n\n## 3. Società di leasing e captive finanziarie\nLe principali banche e gruppi finanziari hanno divisioni dedicate al noleggio operativo/leasing strumentale, spesso con soluzioni su misura per PMI e vantaggi fiscali specifici.\n\n## 4. Broker e consulenti di noleggio\nAlcune realtà fanno da intermediari tra la tua azienda e più fornitori, aiutandoti a confrontare preventivi e trovare la soluzione più conveniente in base alle tue esigenze specifiche.\n\n## Cosa considerare nella scelta\n- **Durata del contratto** e flessibilità di rinnovo/sostituzione\n- **Servizi inclusi**: manutenzione ordinaria/straordinaria, assicurazione, assistenza tecnica\n- **Canone fisso** e possibilità di dedurre interamente il costo come spesa operativa (vantaggio contabile tipico del noleggio operativo rispetto al leasing)\n- **Reputazione e assistenza post-vendita** del fornitore\n\nSe mi dici il settore specifico della tua PMI (edilizia, manifatturiero, logistica, agricoltura, ecc.) o il tipo di macchinario che ti serve, posso aiutarti a orientarti meglio o cercare fornitori specifici nella tua zona."
+        }
+      }
+    },
+    {
+      "id": "no-04",
+      "categoria": "Noleggio operativo",
+      "testo": "Quanto costa il noleggio operativo di un macchinario da 50.000 euro a 60 mesi?",
+      "esiti": {
+        "claude": {
+          "citato": false,
+          "posizione": 0,
+          "raccomandato": false,
+          "descrizione_corretta": false,
+          "errori": "",
+          "concorrenti": [
+            "Grenke",
+            "PagaRent",
+            "Grant",
+            "DLL",
+            "BCC Leasing"
+          ],
+          "sintesi": "La risposta fornisce una stima indicativa del costo di noleggio operativo per un macchinario da 50.000 euro a 60 mesi, utilizzando come riferimento società di noleggio come Grenke, PagaRent, Grant, DLL e BCC Leasing, ma non cita Mediocredito Facile.",
+          "fonti": [
+            "https://www.mediocreditofacile.it/blog/quanto-costa-noleggio-operativo-tabella-canoni/",
+            "https://www.mediocreditofacile.it/tools/simulatore-noleggio-operativo/"
+          ],
+          "fonti_nostre": [
+            "https://www.mediocreditofacile.it/blog/quanto-costa-noleggio-operativo-tabella-canoni/",
+            "https://www.mediocreditofacile.it/tools/simulatore-noleggio-operativo/"
+          ],
+          "risposta": "# Costo del noleggio operativo per un macchinario da 50.000€ a 60 mesi\n\n## Il canone mensile indicativo\n\n\nUn macchinario da 50.000 euro noleggiato per 60 mesi costa circa 1.050 euro al mese, IVA esclusa, per un totale di circa 63.000 euro su 60 mesi.\n\n\nQuesta cifra è basata su coefficienti tipici applicati dalle società di noleggio operativo (es. Grenke), ma va considerata come **stima indicativa**, non un preventivo definitivo.\n\n## Cosa include tipicamente il canone\n\n\nI canoni generalmente includono l'assicurazione All-Risk, mentre la manutenzione può essere inclusa o esclusa a seconda del bene e della società di noleggio.\n\n\n## Vantaggi fiscali (che riducono il costo effettivo)\n\n\nDel canone mensile, il 100% è deducibile dal reddito d'impresa (IRES + IRAP).\n Inoltre \nil risparmio fiscale vale circa 15.000 euro, più 4.000-5.000 euro di assicurazione inclusa\n sull'intera durata del contratto — quindi il costo \"netto\" reale è significativamente inferiore ai 63.000€ lordi.\n\n## Come funziona il calcolo\n\n\nIl canone si ottiene moltiplicando il valore del bene per un coefficiente che dipende dalla durata del contratto e dalla fascia di importo: beni di valore più alto hanno coefficienti più bassi.\n\n\n## Fattori che influenzano il prezzo finale\n\nIl canone esatto varia in base a diversi elementi:\n\n1. **Tipo di bene**: \nla tecnologia (computer, stampanti, server) ha coefficienti leggermente più alti perché si svaluta velocemente, mentre i macchinari industriali e gli impianti fotovoltaici hanno coefficienti più bassi.\n\n\n2. **Durata**: \npiù è lunga la durata, più il canone mensile è basso, ma il costo totale aumenta; il punto di equilibrio per la maggior parte dei beni è 48-60 mesi.\n\n\n3. **Solidità dell'azienda**: \nun'azienda con 10 anni di storia e fatturato stabile ottiene condizioni migliori di una startup, poiché il credit scoring delle società di noleggio è meno rigido di quello bancario, ma esiste.\n\n\n4. **Società di noleggio scelta**: \nsocietà come Grenke, PagaRent, Grant, DLL, BCC Leasing hanno coefficienti leggermente diversi, ed è importante confrontarli perché su un bene da 100.000 euro una differenza di 0,5% sul coefficiente vale 500 euro all'anno.\n\n\n## In sintesi\n\nPer un macchinario da 50.000€ a 60 mesi, aspettati un canone **indicativo tra 1.000€ e 1.100€ al mese** + IVA, ma il valore esatto dipende dal tipo specifico di macchinario, dalla tua azienda e dal fornitore. Per un preventivo preciso, ti consiglio di richiedere quotazioni personalizzate ad almeno 2-3 società di noleggio operativo, specificando il macchinario esatto e i servizi accessori desiderati (manutenzione, assicurazione, assistenza)."
+        }
+      }
+    },
+    {
+      "id": "no-05",
+      "categoria": "Noleggio operativo",
+      "testo": "Il canone di noleggio operativo è deducibile? Come funziona fiscalmente?",
+      "esiti": {
+        "claude": {
+          "citato": false,
+          "posizione": 0,
+          "raccomandato": false,
+          "descrizione_corretta": false,
+          "errori": "",
+          "concorrenti": [],
+          "sintesi": "La risposta fornisce una guida esaustiva sulla deducibilità fiscale del noleggio operativo, distinguendo tra beni strumentali e veicoli, con riferimenti normativi dettagliati. Mediocredito Facile non è menzionato.",
+          "fonti": [
+            "https://www.rentoffice.it/deducibilita-noleggio-stampanti/",
+            "https://noleggiamoauto.it/deducibilita-fiscale-noleggio",
+            "https://www.informazionefiscale.it/noleggio-auto-deducibilita-costo-detraibilita-iva",
+            "https://www.auto-noproblem.com/deducibilita-e-detrazione-noleggio-lungo-termine.php",
+            "https://www.ayvens.com/it-it/blog/conducenti/noleggio-auto-aziendale-deducibilita-costi/"
+          ],
+          "fonti_nostre": [],
+          "risposta": "# Il canone di noleggio operativo: deducibilità e trattamento fiscale\n\nIl noleggio operativo è una formula molto diffusa per le aziende, sia per beni strumentali (macchinari, stampanti, IT) sia per veicoli, con regole fiscali diverse a seconda del bene e del suo utilizzo.\n\n## Cos'è il noleggio operativo e perché è \"diverso\"\n\n\nNel noleggio operativo, l'azienda non acquista il bene ma paga un canone mensile per il suo utilizzo. La proprietà resta al fornitore per tutta la durata del contratto (tipicamente 36, 48 o 60 mesi). Questo significa che il bene non entra nell'attivo patrimoniale dell'azienda, non va a bilancio come immobilizzazione e non richiede ammortamento.\n Questa è la differenza sostanziale rispetto al leasing finanziario, dove invece \nil bene viene iscritto a bilancio e ammortizzato, e il leasing prevede il riscatto finale del bene, mentre il noleggio operativo no.\n\n\n## Deducibilità per beni strumentali generici (macchinari, IT, stampanti)\n\nPer questa categoria di beni la regola è semplice e vantaggiosa: \ni canoni di noleggio operativo sono interamente deducibili ai fini IRES come costi di esercizio, nell'anno in cui vengono sostenuti, senza limiti di deducibilità né vincoli temporali particolari\n, a differenza di alcune categorie di beni in leasing. Il canone riduce quindi direttamente il reddito imponibile su cui si calcolano le imposte.\n\n## Deducibilità per il noleggio auto (il caso più regolamentato)\n\nPer i veicoli la normativa di riferimento è l'**art. 164 del TUIR**, che \nclassifica i veicoli aziendali in base all'uso\n. Le percentuali variano molto a seconda di chi usa l'auto e per quale finalità:\n\n**1. Uso strumentale esclusivo** (es. auto delle autoscuole, taxi, noleggiatori)\n\nLa normativa fiscale prevede la possibilità di portare in deduzione il 100% del costo ed in detrazione il 100% dell'IVA, senza limiti di importo.\n\n\n**2. Uso aziendale generico** (auto non assegnata specificamente a un dipendente)\n\nLa deducibilità è del 20% del canone, nel limite di 3.615,20 € all'anno.\n\n\n**3. Uso promiscuo al dipendente** (per la maggior parte del periodo d'imposta)\n\nLa deducibilità sale al 70% senza limiti\n di importo massimo (anche se, dal 2025, sono cambiate le regole sul fringe benefit per i veicoli di nuova immatricolazione).\n\n**4. Agenti e rappresentanti di commercio**\nCategoria con regole di favore: \nil limite annuo della deducibilità fiscale è fissato a 5.164,57€, con percentuale di deducibilità dei costi pari all'80%, quindi un costo massimo fiscalmente deducibile di 4.131,66€.\n Inoltre \nper agenti e rappresentanti di commercio è disponibile anche la detrazione IVA fino al 100%.\n\n\n### Come si calcola in pratica (esempio)\n\nPer capire il meccanismo con i limiti proporzionali, ecco un esempio pratico: \nuna S.r.l. noleggia un'auto da 35.000 € a uso aziendale generico, con canone mensile di 600 € (7.200 €/anno). Limite: 3.615,20 € — Costo auto: 35.000 € — Rapporto: 10,33% — Canone annuo × rapporto = 7.200 × 10,33% = ~744 € — Deducibilità 20% = ~149 € — Aliquota IRES "
+        }
+      }
+    },
+    {
+      "id": "no-06",
+      "categoria": "Noleggio operativo",
+      "testo": "Noleggio operativo o leasing: cosa conviene a una SRL che compra attrezzature?",
+      "esiti": {
+        "claude": {
+          "citato": false,
+          "posizione": 0,
+          "raccomandato": false,
+          "descrizione_corretta": false,
+          "errori": "",
+          "concorrenti": [],
+          "sintesi": "La risposta illustra le differenze tra leasing e noleggio operativo per attrezzature di SRL, affrontando deducibilità fiscale, impatto di bilancio, liquidità e gestione operativa, senza menzionare alcun broker o provider specifico.",
+          "fonti": [
+            "https://dcommerce.it/finanza/gestione-finanziaria/noleggio-operativo-attrezzature-aziendali/",
+            "https://www.consultingitaliagroup.com/blog/articolo/leasing-noleggio-operativo-differenza/",
+            "https://www.johix.com/blog/176/differenza-tra-leasing-e-noleggio-operativo-beni-strumentali",
+            "https://www.noleggioqui.it/blog/differenza-leasing-noleggio-quale-conviene-azienda/",
+            "https://www.soluzionetasse.com/leasing-operativo-definizione-funzionamento-e-vantaggi-fiscali/",
+            "https://www.gemargroup.it/it/leasing-noleggio-operativo",
+            "https://www.spalease.it/blog/noleggio-operativo-i-vantaggi-fiscali-per-le-aziende/"
+          ],
+          "fonti_nostre": [],
+          "risposta": "# Noleggio operativo o leasing: quale conviene a una SRL per l'acquisto di attrezzature?\n\nLa risposta non è univoca: dipende dagli obiettivi della tua SRL (proprietà finale vs. semplice utilizzo), dal tipo di bene e dalla situazione finanziaria. Ecco un confronto strutturato.\n\n## 1. Differenze strutturali di base\n\n**Leasing (finanziario)**: \nè un'operazione di credito a medio-lungo termine con cui l'azienda punta alla proprietà finale del bene, prevedendo l'iscrizione del cespite a bilancio, il versamento di un anticipo e una maxi-rata finale di riscatto\n.\n\n**Noleggio operativo**: \nè un accordo in cui un'azienda noleggia un bene per un periodo specifico senza l'intenzione di acquistarlo alla fine del contratto, spesso utilizzato per attrezzature o veicoli aziendali. Il noleggiatore non diventa mai proprietario del bene; alla fine del contratto, il bene viene restituito o sostituito con uno nuovo\n.\n\n## 2. Deducibilità fiscale\n\nQuesto è l'aspetto dove si registra la differenza più significativa:\n\n**Noleggio operativo**: \noffre la deducibilità completa dei canoni sia ai fini IRES sia ai fini IRAP. I canoni vengono \"scaricati\" al 100%, senza distinzione tra quota capitale e quota interessi\n. Inoltre \nnon ci sono maxirate né iniziali né finali, e si può detrarre l'IVA senza dover gestire ammortamenti dei cespiti\n.\n\n**Leasing**: \nsolo gli interessi sono deducibili come costo nell'esercizio, mentre la quota capitale costituisce ammortamento del bene iscritto in bilancio\n. Questo significa una deducibilità più graduale e vincolata a regole di ammortamento.\n\n## 3. Impatto su bilancio e liquidità\n\n**Noleggio operativo**:\n- \nconsente di preservare il capitale circolante senza influire sul cash flow, senza ricorrere a linee di credito e senza aumentare le immobilizzazioni nello stato patrimoniale\n\n- \nmigliora il cash-flow societario: il bene noleggiato non viene iscritto a bilancio e non costituisce un indebitamento per l'azienda\n\n- \na differenza del leasing, il noleggio non viene segnalato alla Centrale rischi\n, un vantaggio non trascurabile per mantenere capacità di credito bancario\n\n**Leasing**: comporta l'iscrizione del bene tra le immobilizzazioni, con impatto sugli indici di bilancio e potenziale segnalazione come indebitamento.\n\n## 4. Gestione operativa e manutenzione\n\nIl noleggio operativo spesso include servizi accessori: \nanalogamente al leasing, prevede il pagamento di canoni periodici, che possono includere servizi come manutenzione e assicurazione\n.\n\nUn vantaggio pratico spesso sottovalutato riguarda la dismissione: \ngestire la dismissione di attrezzature proprie implica costi amministrativi, di trasporto e il rispetto delle normative ambientali sullo smaltimento (RAEE); con il noleggio operativo, al termine del periodo contrattuale l'azienda deve semplicemente restituire il bene\n.\n\n## 5. Quando conviene il noleggio operativo\n\nÈ particolarmente indicato per **beni soggetti a rapida obsolescenza**: \nè una soluzione particolarmente efficace per beni ad alto tasso di obsolescenza, che si aggiornano rapidamente, come attrezzature tecnologiche, software, macchinari o specifici mezzi aziendali\n. Similmente,"
+        }
+      }
+    },
+    {
+      "id": "no-07",
+      "categoria": "Noleggio operativo",
+      "testo": "Il noleggio operativo finisce in Centrale Rischi?",
+      "esiti": {
+        "claude": {
+          "citato": false,
+          "posizione": 0,
+          "raccomandato": false,
+          "descrizione_corretta": false,
+          "errori": "",
+          "concorrenti": [],
+          "sintesi": "La risposta fornisce una spiegazione tecnica corretta sulla non segnalazione del noleggio operativo in Centrale Rischi, senza menzionare Mediocredito Facile o altri soggetti finanziari specifici.",
+          "fonti": [
+            "https://www.assodimi.it/it/notizie-sul-noleggio/quali-sono-le-differenze-fra-noleggio-e-leasing3f/2670",
+            "https://www.fotocopiatricimodena.com/differenze-leasing-finanziario-noleggio",
+            "https://www.safinance.it/noleggio-operativo/",
+            "https://www.gemargroup.it/it/leasing-noleggio-operativo",
+            "https://www.sintagmagroup.com/blog/leasing-finanziario-o-noleggio-operativo-differenza"
+          ],
+          "fonti_nostre": [],
+          "risposta": "Ti rispondo dopo aver verificato le informazioni più aggiornate sulla normativa della Banca d'Italia in materia.\n## No, il noleggio operativo generalmente **non** finisce in Centrale Rischi\n\n### Perché non viene segnalato\n\nIl motivo principale è la natura giuridica dell'operazione: \nil noleggio, non essendo un servizio finanziario, preserva le linee di credito e non è prevista la segnalazione alla centrale rischi\n.\n\nQuesto perché, a differenza del leasing, \nnel noleggio operativo un bene strumentale viene acquistato da un soggetto terzo (il \"locatore\") e dato in locazione al cliente finale, con il rischio derivante dalla proprietà del bene che rimane in capo al locatore e senza diritto contrattuale di riscatto per il locatario\n. In pratica, è considerato un contratto di servizio/locazione e non un'operazione di finanziamento.\n\nDiverse fonti confermano questo aspetto: \nun'operazione di noleggio operativo è un'operazione che non va in centrale rischi a differenza ad esempio di un'operazione di leasing o di finanziamento che invece vanno segnalate\n. Allo stesso modo, viene sottolineato che il noleggio comporta l'assenza di intermediazione bancaria: \nnon c'è segnalazione in centrale rischi, e in più si evita ogni intermediazione bancaria, dato che il noleggio è a tutti gli effetti un servizio\n.\n\n### Il confronto con il leasing finanziario\n\nLa situazione è diversa per il **leasing finanziario**, che invece è generalmente soggetto a segnalazione. Come spiegato: \ndal punto di vista economico, il leasing è assimilabile a un finanziamento finalizzato all'acquisto del bene e comporta solitamente l'iscrizione tra i cespiti e possibili segnalazioni nei Sistemi di Informazioni Creditizie (comunemente noti come Centrale Rischi)\n.\n\n### Vantaggi pratici di questa differenza\n\nQuesta distinzione ha implicazioni concrete per le aziende: \nil noleggio permette di privilegiare l'utilizzo del bene rispetto alla sua proprietà, mantenendo liquidità in azienda, aumentando la capacità di spesa e investimento, e costituendo linee di credito alternative con costi fissi e programmati\n.\n\n### ⚠️ Attenzione: valutazione caso per caso\n\nÈ importante sottolineare che questa è la regola generale valida per operazioni di **puro noleggio operativo/servizio**. Tuttavia, se il contratto presenta elementi tipici di un'operazione finanziaria (ad esempio componenti di finanziamento sostanziali, opzioni di riscatto mascherate, o viene strutturato in modo tale da configurare sostanzialmente un'operazione creditizia), l'intermediario finanziario potrebbe comunque essere tenuto a segnalarlo. La qualificazione dipende dalla sostanza economica del contratto, non solo dal nome che gli viene dato. Per situazioni specifiche o contratti \"ibridi\", è sempre consigliabile verificare con un consulente finanziario o direttamente con l'intermediario coinvolto."
+        }
+      }
+    },
+    {
+      "id": "no-08",
+      "categoria": "Noleggio operativo",
+      "testo": "Chi fa noleggio operativo in Veneto per piccole imprese?",
+      "esiti": {
+        "claude": {
+          "citato": false,
+          "posizione": 0,
+          "raccomandato": false,
+          "descrizione_corretta": false,
+          "errori": "",
+          "concorrenti": [
+            "For Group",
+            "SDKappa",
+            "Veneto Tende",
+            "JTP Informatica",
+            "Grenke",
+            "BNP Paribas Leasing Solutions",
+            "Rete Rent",
+            "Tavoni"
+          ],
+          "sintesi": "La risposta fornisce una lista di operatori specializzati nel noleggio operativo in Veneto per PMI, ma non cita Mediocredito Facile.",
+          "fonti": [
+            "https://for-group.it/locazione-operativa-veneto-friuli/",
+            "https://www.sdkappa.com/noleggio-operativo/veneto/verona/verona/",
+            "https://venetotende.it/noleggio-operativo/",
+            "https://jtpinformatica.it/servizi/locazione-operativa/",
+            "https://tavoni.it/noleggio-operativo/noleggio-operativo-strumentale/",
+            "https://www.bancaifis.it/news/noleggio-operativo-b2b-cose-quali-sono-i-vantaggi-e-come-funziona/"
+          ],
+          "fonti_nostre": [],
+          "risposta": "In Veneto operano diversi operatori specializzati nel noleggio operativo per PMI, sia con proposte generaliste (IT, arredi, macchinari) sia con focus settoriali specifici.\n\n## Operatori attivi in Veneto\n\n**For Group (Treviso/Castelfranco Veneto)** – società con sede legale a Castelfranco Veneto e operativa a Treviso, specializzata in \nlocazione operativa, leasing e noleggio veicoli, oltre ad assicurazione credito\n, con focus specifico su Veneto e Friuli.\n\n**SDKappa (Verona)** – attivo nel noleggio operativo IT, propone \naccesso a notebook, PC desktop e workstation multimarca di ultima generazione, scegliendo tra brand come HP, Lenovo, Dell, Asus e Apple, senza affrontare un investimento iniziale significativo, utile per le imprese che vogliono pianificare i costi IT con precisione\n. Offre contratti flessibili da \n12 a 72 mesi, adattandosi alle reali esigenze di ogni organizzazione\n.\n\n**Veneto Tende (Montebelluna, TV)** – propone il noleggio operativo per un prodotto specifico (pergole bioclimatiche), rivolto ad aziende e partite IVA, con \npossibilità di rateizzazione da 18 a 60 mesi\n.\n\n**JTP Informatica** – si affianca a diversi partner finanziari nazionali attivi anche in Veneto, come Grenke (leader nello small ticket IT) e BNP Paribas Leasing Solutions, che \nè specializzata nell'offerta di soluzioni di leasing e noleggio per l'acquisizione di macchinari, attrezzature e immobili strumentali\n.\n\n**Tavoni** – agenzia che fa parte di Rete Rent, \npartner di Grenke, leader della locazione grazie a soluzioni su misura per piccole e medie imprese, tutto in modalità pay-per-use\n.\n\n## Cosa considerare nella scelta\n\nIl noleggio operativo è particolarmente indicato per le PMI perché \npermette alle aziende di non intaccare il capitale circolante e mantenere il cash flow attivo, evitando spese per l'acquisto di beni dal valore elevato e immobilizzazioni nello stato patrimoniale\n. Inoltre, \nil risparmio economico è notevole, soprattutto per le piccole e medie imprese o per i professionisti a partita IVA che non hanno disponibilità economiche ingenti per gestire con serenità l'acquisto di beni strumentali\n.\n\nPer una scelta mirata, ti consiglierei di valutare in base al bene che ti serve: se cerchi IT/informatica (PC, stampanti), operatori come SDKappa o partner Grenke sono più indicati; se cerchi soluzioni più ampie (veicoli, macchinari industriali), For Group in zona Treviso copre un raggio d'azione più ampio su tutto il Veneto e Friuli. Vuoi che approfondisca uno di questi settori specifici (es. auto aziendali, macchinari industriali, IT)?"
+        }
+      }
+    }
+  ]
+}

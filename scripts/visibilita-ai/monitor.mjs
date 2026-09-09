@@ -84,7 +84,9 @@ async function main() {
           domanda: d.testo,
           risposta: testo,
         });
-        // Se il motore ha letto il nostro sito lo sappiamo dalle fonti, non dal testo.
+        // Le fonti dicono chi il motore ha letto davvero: le nostre per sapere se ci
+        // apre, tutte le altre per sapere quali pagine occupano il posto della risposta.
+        esito.fonti = fonti;
         esito.fonti_nostre = fonti.filter((u) => u.includes(config.dominio));
         esito.risposta = testo;
         esiti[motore.id] = esito;
