@@ -36,6 +36,8 @@ const PAROLE_COMUNI = new Set([
   // o nomi propri: darebbero un allarme a ogni articolo e coprirebbero i veri.
   'tappezzeria', 'caseifici', 'caseificio', 'master', 'perse', 'terzo', 'settore',
   'cremona', 'privati', 'contenzioso', 'fotovoltaico', 'pratica', 'pratiche',
+  // I nomi di battesimo senza cognome sono ammessi nei racconti (vedi CLAUDE.md),
+  // e come nomi di cartella scatterebbero su meta' degli articoli.
   'massimiliano', 'gianluca', 'giovanni', 'paolo', 'luigi', 'antonio', 'michele',
 ]);
 
