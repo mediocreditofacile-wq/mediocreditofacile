@@ -1,0 +1,397 @@
+---
+/**
+ * Pagina servizio per territorio. Un solo impianto per le tre rotte
+ * (noleggio-operativo, leasing, finanziamenti) per tutte le regioni.
+ *
+ * Il testo che distingue una pagina dall'altra sta in src/data/territori.ts,
+ * non qui: qui c'è solo l'impaginazione. Se un domani questa pagina dovesse
+ * riempirsi di frasi generiche scritte nel markup, sarebbero le stesse su
+ * ventuno URL, che è il modo più rapido di farsele declassare tutte.
+ */
+import Icon from './Icon.astro';
+import ContactForm from './ContactForm.astro';
+import { SERVIZI, slugTerritoriale, type ChiaveServizio, type Regione } from '../data/territori';
+
+interface Props {
+  regione: Regione;
+  servizio: ChiaveServizio;
+}
+
+const { regione, servizio } = Astro.props;
+const s = SERVIZI[servizio];
+const c = regione.contenuti[servizio]!;
+const dove = `${regione.preposizione} ${regione.nome}`;
+const pageUrl = `https://www.mediocreditofacile.it${slugTerritoriale(servizio, regione)}`;
+
+// Gli altri due servizi della stessa regione: tengono insieme la tripletta
+// e danno al lettore la strada laterale invece di riportarlo al nazionale.
+const casi = regione.casi.filter((k) => k.servizi.includes(servizio));
+
+const altriServizi = (Object.keys(SERVIZI) as ChiaveServizio[])
+  .filter((k) => k !== servizio && regione.contenuti[k])
+  .map((k) => ({ nome: SERVIZI[k].nome, url: slugTerritoriale(k, regione) }));
+
+// Le domande proprie del servizio vengono prima. Le due comuni sono ridotte al
+// minimo: ogni riga condivisa e' una riga identica sulle altre pagine della regione.
+const faqs = [
+  ...c.faq,
+  {
+    q: 'Coprite tutta la regione?',
+    a: `Sì, tutte le province: ${regione.province.join(', ')}. La consulenza si fa al telefono o in videochiamata e la documentazione viaggia in digitale, quindi la distanza non cambia i tempi.`,
+  },
+  {
+    q: 'Quanto costa la consulenza?',
+    a: 'Niente: il compenso arriva dalla società che delibera la pratica, non dal cliente. Segue tutto Alberto Amà, dalla prima valutazione all\'attivazione del contratto. Mediocredito Facile è collaboratore del Mediatore Creditizio Affida, iscrizione OAM M325.',
+  },
+];
+
+const faqJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqs.map((f) => ({
+    '@type': 'Question',
+    name: f.q,
+    acceptedAnswer: { '@type': 'Answer', text: f.a },
+  })),
+};
+
+const serviceJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  name: `${s.nome.charAt(0).toUpperCase()}${s.nome.slice(1)} ${dove}`,
+  serviceType: s.nome,
+  description: c.sommario,
+  url: pageUrl,
+  provider: {
+    '@type': 'FinancialService',
+    name: 'Mediocredito Facile',
+    url: 'https://www.mediocreditofacile.it',
+    telephone: '+393939957840',
+  },
+  areaServed: regione.province.map((p) => ({
+    '@type': 'AdministrativeArea',
+    name: `Provincia di ${p}`,
+    containedInPlace: { '@type': 'AdministrativeArea', name: regione.nome },
+  })),
+  audience: { '@type': 'BusinessAudience', name: 'Piccole e medie imprese con partita IVA' },
+};
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(faqJsonLd)} />
+<script type="application/ld+json" set:html={JSON.stringify(serviceJsonLd)} />
+
+<section class="ter-hero">
+  <div class="ter-wrap">
+    <p class="ter-eyebrow">{regione.nome} · {regione.province.join(' · ')}</p>
+    <h1 class="ter-hero__title">{s.nome.charAt(0).toUpperCase()}{s.nome.slice(1)} {dove}</h1>
+    <p class="ter-hero__sub">{c.sommario}</p>
+    <div class="ter-hero__actions">
+      <a href="#contatti" class="ter-btn ter-btn--primary">Richiedi una valutazione</a>
+      <a href="tel:+393939957840" class="ter-btn ter-btn--outline">
+        <Icon name="phone" size={18} /> 393 995 7840
+      </a>
+    </div>
+  </div>
+</section>
+
+<section class="ter-section">
+  <div class="ter-wrap">
+    <h2>{s.nome.charAt(0).toUpperCase()}{s.nome.slice(1)} {dove}: perché</h2>
+    <p>{c.perche}</p>
+  </div>
+</section>
+
+<section class="ter-section ter-section--alt">
+  <div class="ter-wrap">
+    <h2>Le richieste che arrivano da qui</h2>
+    <p>{c.ricorrenze}</p>
+    <h3 class="ter-h3">Il punto da guardare</h3>
+    <p>{c.attenzione}</p>
+  </div>
+</section>
+
+{regione.partner.length > 0 && (
+  <section class="ter-section">
+    <div class="ter-wrap">
+      <h2>Con chi lavoriamo sul territorio</h2>
+      <div class="ter-grid">
+        {regione.partner.map((p) => (
+          <div class="ter-card">
+            <h3>{p.nome}</h3>
+            <p class="ter-card__luogo">{p.citta}</p>
+            <p>{p.attivita}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+)}
+
+{casi.length > 0 && (
+  <section class="ter-section ter-section--alt">
+    <div class="ter-wrap">
+      <h2>Pratiche seguite {dove}</h2>
+      <p>
+        Casi reali raccontati sul blog, con i numeri dell'operazione. I clienti non sono nominati:
+        la loro situazione finanziaria appartiene a loro.
+      </p>
+      <ul class="ter-casi">
+        {casi.map((k) => (
+          <li>
+            <a href={`/blog/${k.slug}/`}>{k.titolo}</a> — {k.dettaglio}.
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+)}
+
+<section class="ter-section ter-faq">
+  <div class="ter-wrap">
+    <h2>Domande frequenti</h2>
+    {faqs.map((f) => (
+      <details class="ter-faq__item">
+        <summary>{f.q}</summary>
+        <p>{f.a}</p>
+      </details>
+    ))}
+    <p class="ter-nota">
+      {altriServizi.length > 0 && (
+        <>
+          Sempre {dove}: {altriServizi.map((a, i) => (
+            <>
+              {i > 0 && ', '}
+              <a href={a.url}>{a.nome}</a>
+            </>
+          ))}.{' '}
+        </>
+      )}
+      Come funziona in generale: <a href={s.pagineMadre}>{s.nome}</a>.
+    </p>
+  </div>
+</section>
+
+<ContactForm
+  fonte={`${s.prefisso}-${regione.chiave}`}
+  heading={`Parliamo della tua operazione`}
+  subheading={`Raccontaci cosa ti serve e per quale importo: ti diciamo se ha senso, con quale formula e in quanto tempo. Consulenza gratuita, imprese ${dove} e nel resto d'Italia.`}
+  ctaText="Richiedi una valutazione"
+/>
+
+<style>
+  .ter-wrap {
+    max-width: 820px;
+    margin: 0 auto;
+  }
+
+  .ter-hero {
+    background: var(--mcf-ghost);
+    padding: 4.5rem 1.5rem 4rem;
+    border-bottom: 1px solid var(--mcf-platinum);
+  }
+
+  .ter-eyebrow {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--mcf-accent);
+    margin: 0 0 0.75rem;
+  }
+
+  .ter-hero__title {
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: var(--mcf-accent);
+    margin: 0 0 1rem;
+  }
+
+  .ter-hero__sub {
+    font-size: 1.125rem;
+    font-weight: 500;
+    line-height: 1.55;
+    color: var(--mcf-charcoal);
+    max-width: 62ch;
+    margin: 0 0 2rem;
+  }
+
+  .ter-hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .ter-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+
+  .ter-btn--primary {
+    background: var(--mcf-primary);
+    color: #fff;
+  }
+
+  .ter-btn--primary:hover {
+    background: var(--mcf-primary-dark);
+  }
+
+  .ter-btn--outline {
+    border: 1.5px solid var(--mcf-primary);
+    color: var(--mcf-primary);
+  }
+
+  .ter-btn--outline:hover {
+    background: rgba(254, 111, 58, 0.08);
+  }
+
+  .ter-section {
+    padding: 4rem 1.5rem;
+  }
+
+  .ter-section--alt {
+    background: var(--mcf-ghost);
+  }
+
+  .ter-wrap h2 {
+    font-size: clamp(1.5rem, 3.5vw, 2rem);
+    font-weight: 800;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+    color: var(--mcf-black);
+    margin: 0 0 1rem;
+  }
+
+  .ter-wrap p {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: var(--mcf-charcoal);
+    max-width: 68ch;
+    margin: 0 0 1rem;
+  }
+
+  .ter-h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--mcf-black);
+    margin: 2rem 0 0.5rem;
+  }
+
+  .ter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+  }
+
+  .ter-card {
+    background: #fff;
+    border: 1px solid var(--mcf-platinum);
+    border-radius: 16px;
+    padding: 1.5rem;
+  }
+
+  .ter-card h3 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--mcf-black);
+    margin: 0 0 0.25rem;
+  }
+
+  .ter-card__luogo {
+    font-size: 0.8rem !important;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--mcf-accent) !important;
+    margin-bottom: 0.6rem !important;
+  }
+
+  .ter-card p {
+    font-size: 0.9375rem;
+    margin: 0;
+  }
+
+  .ter-casi {
+    margin: 1rem 0 0;
+    padding-left: 1.1rem;
+  }
+
+  .ter-casi li {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: var(--mcf-charcoal);
+    margin-bottom: 0.75rem;
+    max-width: 68ch;
+  }
+
+  .ter-casi li::marker {
+    color: var(--mcf-accent);
+  }
+
+  .ter-casi a {
+    color: var(--mcf-accent);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .ter-faq__item {
+    border-bottom: 1px solid var(--mcf-platinum);
+    padding: 1rem 0;
+  }
+
+  .ter-faq__item summary {
+    font-weight: 600;
+    color: var(--mcf-black);
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .ter-faq__item summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .ter-faq__item summary::before {
+    content: '+';
+    color: var(--mcf-primary);
+    font-weight: 700;
+    margin-right: 0.6rem;
+  }
+
+  .ter-faq__item[open] summary::before {
+    content: '−';
+  }
+
+  .ter-faq__item p {
+    margin: 0.75rem 0 0;
+    font-size: 0.95rem;
+  }
+
+  .ter-nota {
+    margin-top: 2rem !important;
+    font-size: 0.9rem !important;
+    color: var(--mcf-taupe) !important;
+  }
+
+  .ter-nota a {
+    color: var(--mcf-accent);
+    font-weight: 600;
+  }
+
+  @media (max-width: 640px) {
+    .ter-hero {
+      padding: 3rem 1.25rem;
+    }
+
+    .ter-section {
+      padding: 3rem 1.25rem;
+    }
+  }
+</style>

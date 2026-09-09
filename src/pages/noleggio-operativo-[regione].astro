@@ -1,0 +1,35 @@
+---
+/**
+ * Pagine territoriali del servizio "noleggio-operativo".
+ * Impaginazione e testi stanno rispettivamente in PaginaTerritoriale.astro e
+ * src/data/territori.ts: qui c'e' solo la generazione delle rotte.
+ */
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import PaginaTerritoriale from '../components/PaginaTerritoriale.astro';
+import { regioniPubblicate, SERVIZI } from '../data/territori';
+
+const SERVIZIO = 'noleggio-operativo' as const;
+
+export async function getStaticPaths() {
+  return regioniPubblicate('noleggio-operativo').map((regione) => ({
+    params: { regione: regione.chiave },
+    props: { regione },
+  }));
+}
+
+const { regione } = Astro.props;
+const s = SERVIZI[SERVIZIO];
+const c = regione.contenuti[SERVIZIO]!;
+const nome = s.nome.charAt(0).toUpperCase() + s.nome.slice(1);
+---
+
+<Layout
+  title={`${nome} ${regione.preposizione} ${regione.nome} | Mediocredito Facile`}
+  description={c.sommario}
+>
+  <Header minimal={false} />
+  <PaginaTerritoriale regione={regione} servizio={SERVIZIO} />
+  <Footer />
+</Layout>
