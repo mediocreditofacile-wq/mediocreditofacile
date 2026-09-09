@@ -14,6 +14,9 @@ const blog = defineCollection({
     cluster: z
       .enum(['noleggio', 'leasing', 'finanziamenti', 'agevolazioni', 'fotovoltaico', 'casi-studio'])
       .optional(),
+    // Territorio di riferimento: chiave del registro in src/data/pagine-locali.ts.
+    // Ogni articolo nuovo va collegato alla sua pagina servizio locale.
+    territorio: z.string().optional(),
   }),
 });
 

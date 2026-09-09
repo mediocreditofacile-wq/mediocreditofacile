@@ -215,6 +215,10 @@ Le landing finanziamenti e agevolazioni sono pagine Astro dedicate (non da JSON)
 - Fix SEO globale: `ToolLayout.astro` ora ha canonical su www (era apex, in conflitto con sitemap).
 - Sitemap (`astro.config.mjs`): aggiunto `filter` che esclude dalla sitemap le pagine `noindex` (partner riservati `/tools/*` + thank-you page), prima ci finivano mandando segnali in conflitto.
 
+**REGOLA VINCOLANTE: ogni articolo nuovo del blog dichiara il proprio territorio e linka la pagina servizio locale.** Nel frontmatter si mette `territorio: "<chiave>"`, dove la chiave sta nel registro `src/data/pagine-locali.ts`; il template stampa da solo il link dentro il blocco identificativo. Non e' una raccomandazione documentale: `risolviPaginaLocale()` **fa fallire la build** se la chiave non e' nel registro, e l'errore dice quali chiavi esistono e cosa fare. Un articolo senza `territorio` passa (il campo e' opzionale, i settanta gia' pubblicati non si toccano), ma per uno nuovo l'assenza va motivata: se il pezzo non ha un territorio, di solito e' perche' non racconta un caso vero.
+
+Il territorio si sceglie per **pertinenza doppia, geografica e di servizio**: la pagina locale dichiara anche di che servizio parla, quindi un articolo sulle attrezzature agricole nel Salento non linka la pagina del fotovoltaico in Puglia solo perche' la regione coincide. Se la pagina giusta non esiste, si crea prima quella. Il registro regge tre livelli — regione, provincia, comune — cosi' un pezzo su una pratica di Adria puo' puntare ad Adria e uno che ragiona sul Veneto al Veneto. **Per aggiungere un territorio**: si crea la pagina servizio (modello: `src/pages/noleggio-operativo-fotovoltaico-puglia.astro`), si aggiunge la voce al registro, si mette il link nel footer, e da quel momento gli articoli possono agganciarsi. Oggi il registro contiene la sola Puglia.
+
 ## ContactForm — prop del componente
 Il componente `src/components/ContactForm.astro` accetta queste prop opzionali:
 - `fonte?: string` → valorizza il campo nascosto `fonte` nel payload (slug della landing)

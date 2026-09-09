@@ -1,5 +1,6 @@
 ---
 import Icon from '../../components/Icon.astro';
+import { risolviPaginaLocale, frasePaginaLocale } from '../../data/pagine-locali';
 import Layout from '../../layouts/Layout.astro';
 import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
@@ -91,6 +92,10 @@ function formatDate(dateStr: string): string {
 }
 
 // Structured data Article per SEO
+// Pagina servizio del territorio dell'articolo. risolviPaginaLocale lancia in build
+// se la chiave non e' nel registro, cosi' un territorio inventato non arriva online.
+const paginaLocale = post.data.territorio ? risolviPaginaLocale(post.data.territorio) : null;
+
 const articleLD = {
   '@context': 'https://schema.org',
   '@type': 'Article',
@@ -215,6 +220,12 @@ const breadcrumbLD = {
             seguendo la pratica dalla valutazione preliminare fino alla delibera e all'attivazione del contratto.
             È collaboratore del Mediatore Creditizio Affida, iscrizione OAM M325.
           </p>
+          {paginaLocale && (
+            <p class="article__chi-locale">
+              Operiamo su tutto il territorio nazionale. Per questa zona:{' '}
+              <a href={paginaLocale.url}>{frasePaginaLocale(paginaLocale)}</a>.
+            </p>
+          )}
           <p class="article__chi-contatti">
             Per una valutazione gratuita: <a href="tel:+393939957840">+39 393 995 7840</a> ·
             <a href="mailto:mediocreditofacile@gmail.com">mediocreditofacile@gmail.com</a>
@@ -408,6 +419,18 @@ const breadcrumbLD = {
     line-height: 1.6;
     color: var(--color-text);
     margin: 0 0 0.6rem;
+  }
+
+  .article__chi-locale {
+    font-size: 0.95rem;
+    margin-bottom: 0.6rem !important;
+  }
+
+  .article__chi-locale a {
+    color: var(--color-primary);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
   }
 
   .article__chi-contatti {
