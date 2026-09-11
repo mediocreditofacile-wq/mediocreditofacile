@@ -51,7 +51,24 @@ export async function GET({ request }: { request: Request }) {
     [contesto.organizationId],
   );
 
-  return json({ ok: true, ruolo: contesto.ruolo, membri, inviti: await invitiDi(contesto.organizationId) });
+  // Le richieste ancora da guardare stanno in cima: sono l'unica cosa in
+  // questa schermata che aspetta una decisione.
+  const richieste = await query(
+    `SELECT id::text, nome, azienda, email, telefono, nota, stato, creato
+       FROM app.richiesta_accesso
+      WHERE organization_id = $1
+      ORDER BY (stato = 'nuova') DESC, creato DESC
+      LIMIT 200`,
+    [contesto.organizationId],
+  );
+
+  return json({
+    ok: true,
+    ruolo: contesto.ruolo,
+    membri,
+    inviti: await invitiDi(contesto.organizationId),
+    richieste,
+  });
 }
 
 export async function POST({ request }: { request: Request }) {
@@ -64,7 +81,8 @@ export async function POST({ request }: { request: Request }) {
 
   const azione = String(corpo.azione ?? '');
   const permesso =
-    azione === 'invita' || azione === 'manda_ora' || azione === 'svuota_coda'
+    azione === 'invita' || azione === 'manda_ora' || azione === 'svuota_coda' ||
+    azione === 'approva_richiesta' || azione === 'rifiuta_richiesta'
       ? { utente: ['invita'] as const }
       : { utente: ['disattiva'] as const };
 
@@ -91,6 +109,35 @@ export async function POST({ request }: { request: Request }) {
       creatoDa: contesto.userId,
     });
     return json(r.ok ? { ok: true } : { ok: false, error: r.motivo }, r.ok ? 200 : 409);
+  }
+
+  if (azione === 'approva_richiesta' || azione === 'rifiuta_richiesta') {
+    const id = String(corpo.richiesta ?? '');
+    const approva = azione === 'approva_richiesta';
+    // La richiesta si legge dalla propria organizzazione, non per id nudo:
+    // l'id e' un numero e indovinarlo e' banale.
+    const r = await query<{ nome: string; email: string }>(
+      `UPDATE app.richiesta_accesso
+          SET stato = $3, gestita_da = $4, gestita_il = now()
+        WHERE id = $1::bigint AND organization_id = $2 AND stato = 'nuova'
+        RETURNING nome, email`,
+      [id, contesto.organizationId, approva ? 'approvata' : 'rifiutata', contesto.userId],
+    );
+    if (!r.length) return json({ ok: false, error: 'richiesta_non_trovata' }, 404);
+    if (!approva) return json({ ok: true, approvata: false });
+
+    // Approvare vuol dire accodare l'invito: da li' in poi il percorso e'
+    // quello di sempre, password scelta dall'agente e nessuna credenziale
+    // che gira a voce.
+    const esito = await accodaInvito({
+      organizationId: contesto.organizationId,
+      email: r[0].email,
+      nome: r[0].nome,
+      ruolo: 'agente',
+      creatoDa: contesto.userId,
+    });
+    return json(esito.ok ? { ok: true, approvata: true } : { ok: false, error: esito.motivo },
+                esito.ok ? 200 : 409);
   }
 
   if (azione === 'manda_ora') {

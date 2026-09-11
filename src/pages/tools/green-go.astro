@@ -58,6 +58,8 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
         </div>
         <p class="gate__link-row">
           <button type="button" id="vai-recupero" class="gate__link">Ho dimenticato la password</button>
+          <span class="gate__sep">·</span>
+          <button type="button" id="vai-richiesta" class="gate__link">Non ho un accesso</button>
         </p>
       </div>
 
@@ -96,6 +98,27 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
           <button id="invito-btn" class="gate__btn">Entra nel portale</button>
         </div>
         <p class="gate__nota" id="invito-nota"></p>
+      </div>
+
+      <!-- 5. Richiesta di accesso, per chi il portale non ce l'ha ancora -->
+      <div id="vista-richiesta" hidden>
+        <p class="gate__label">Richiedi l'accesso</p>
+        <p class="gate__desc">
+          Lascia i tuoi dati: la richiesta arriva al referente della rete, che attiva l'accesso.
+          Ricevi l'invito via email e scegli tu la password.
+        </p>
+        <div class="gate__form">
+          <input type="text" id="req-nome" class="gate__input" placeholder="Nome e cognome" autocomplete="name" />
+          <input type="text" id="req-azienda" class="gate__input" placeholder="Azienda" autocomplete="organization" />
+          <input type="email" id="req-email" class="gate__input" placeholder="Email" autocomplete="email" />
+          <input type="tel" id="req-telefono" class="gate__input" placeholder="Telefono (facoltativo)" autocomplete="tel" />
+          <!-- Campo trappola: nessun umano lo vede, i robot lo compilano -->
+          <input type="text" id="req-sito" class="gate__honey" tabindex="-1" autocomplete="off" aria-hidden="true" />
+          <button id="req-btn" class="gate__btn">Invia la richiesta</button>
+        </div>
+        <p class="gate__link-row">
+          <button type="button" id="torna-login-2" class="gate__link">Ho già un accesso</button>
+        </p>
       </div>
 
       <p id="gate-error" class="gate__error" hidden></p>
@@ -532,6 +555,15 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
         </div>
       </header>
 
+      <div id="richieste-blocco" hidden>
+        <h3 class="gg__sub-title" style="margin-top:0">Richieste in attesa</h3>
+        <p class="gg__hint">
+          Arrivano dagli installatori che hanno ricevuto la lettera e hanno compilato il modulo.
+          Approvando parte l'invito: la password se la sceglie l'agente, tu non la vedi.
+        </p>
+        <div class="gg__storico-wrap"><div id="richieste-wrap"></div></div>
+      </div>
+
       <div class="gg__form-block">
         <p class="gg__form-block-title">Apri un accesso</p>
         <div class="gg__grid">
@@ -610,7 +642,7 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
     String(s ?? '').replace(/[<>&"']/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&#39;' }[c] || c));
 
   // === Viste del gate ===
-  const viste = ['vista-login', 'vista-recupero', 'vista-nuova-password', 'vista-invito'];
+  const viste = ['vista-login', 'vista-recupero', 'vista-nuova-password', 'vista-invito', 'vista-richiesta'];
   function mostraVista(quale: string) {
     for (const v of viste) ($(v) as HTMLElement).hidden = v !== quale;
     ($('gate-error') as HTMLElement).hidden = true;
@@ -654,6 +686,10 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
     dati_incompleti: 'Servono almeno cliente, potenza e importo.',
     password_troppo_corta: 'La password deve avere almeno dieci caratteri.',
     origine_non_valida: 'Richiesta bloccata per sicurezza. Ricarica la pagina.',
+    hai_gia_accesso: 'Questa email ha già un accesso: prova a entrare, o recupera la password.',
+    richiesta_gia_inviata: 'La tua richiesta è già in attesa. Ti scriviamo appena viene attivata.',
+    fornitore_sconosciuto: 'Portale non riconosciuto. Controlla il link che hai ricevuto.',
+    richiesta_non_trovata: 'Richiesta non trovata, o già gestita.',
     invito_non_trovato: 'Invito non trovato, o già accettato.',
     invio_rimandato: 'La posta non lo ha accettato adesso: resta in coda e riparte col giro automatico.',
     invio_fallito: "L'invio non è riuscito. Controlla l'indirizzo email.",
@@ -672,6 +708,7 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
   }
 
   // === Avvio: invito, link di recupero, oppure sessione gia' aperta ===
+  const PORTALE = 'green-go';
   const params = new URLSearchParams(location.search);
   const idInvito = params.get('invito');
   const tokenReset = params.get('token');
@@ -737,6 +774,38 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
     mostraVista('vista-recupero');
   });
   $('torna-login').addEventListener('click', () => mostraVista('vista-login'));
+  $('torna-login-2').addEventListener('click', () => mostraVista('vista-login'));
+  $('vai-richiesta').addEventListener('click', () => mostraVista('vista-richiesta'));
+
+  // La lettera agli installatori porta qui: /tools/green-go?richiesta=1
+  if (params.get('richiesta')) {
+    setTimeout(() => mostraVista('vista-richiesta'), 0);
+  }
+
+  $('req-btn').addEventListener('click', async () => {
+    const btn = $('req-btn') as HTMLButtonElement;
+    const val = (id: string) => (document.getElementById(id) as HTMLInputElement).value.trim();
+    if (!val('req-nome') || !val('req-email')) return errore('Servono almeno nome e email.');
+
+    btn.disabled = true;
+    const { res, corpo } = await apiJson('/api/portale-richiesta', {
+      method: 'POST',
+      body: JSON.stringify({
+        fornitore: PORTALE,
+        nome: val('req-nome'),
+        azienda: val('req-azienda'),
+        email: val('req-email'),
+        telefono: val('req-telefono'),
+        sito: val('req-sito'),
+      }),
+    });
+    btn.disabled = false;
+    if (!res.ok || !corpo?.ok) return errore(traduci(corpo?.error ?? ''));
+    conferma('Richiesta inviata. Ti arriva un invito via email appena viene attivata.');
+    for (const c of ['req-nome', 'req-azienda', 'req-email', 'req-telefono']) {
+      (document.getElementById(c) as HTMLInputElement).value = '';
+    }
+  });
 
   $('recupero-btn').addEventListener('click', async () => {
     const btn = $('recupero-btn') as HTMLButtonElement;
@@ -1354,8 +1423,42 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
   async function caricaRete() {
     const { res, corpo } = await apiJson('/api/portale-utenti');
     if (!res.ok || !corpo?.ok) return;
+    renderRichieste(corpo.richieste ?? []);
     renderMembri(corpo.membri ?? []);
     renderInviti(corpo.inviti ?? []);
+  }
+
+  const ETICHETTA_RICHIESTA: Record<string, string> = {
+    nuova: 'Da decidere',
+    approvata: 'Approvata',
+    rifiutata: 'Rifiutata',
+  };
+
+  function renderRichieste(richieste: any[]) {
+    const nuove = richieste.filter((r) => r.stato === 'nuova');
+    // Il blocco esiste solo se c'e' qualcosa da decidere o da ricordare
+    ($('richieste-blocco') as HTMLElement).hidden = richieste.length === 0;
+    if (!richieste.length) return;
+
+    const righe = richieste
+      .map((r) => `
+        <tr class="${r.stato === 'nuova' ? '' : 'gg__riga-spenta'}">
+          <td>${esc(r.nome)}${r.azienda ? `<br><span class="gg__id">${esc(r.azienda)}</span>` : ''}</td>
+          <td>${esc(r.email)}${r.telefono ? `<br><span class="gg__id">${esc(r.telefono)}</span>` : ''}</td>
+          <td>${data(r.creato)}</td>
+          <td>${ETICHETTA_RICHIESTA[r.stato] ?? esc(r.stato)}</td>
+          <td>${r.stato !== 'nuova' ? '' : `
+            <button type="button" class="gg__pdf" data-richiesta="${esc(r.id)}" data-esito="approva">Approva</button>
+            <button type="button" class="gg__pdf" data-richiesta="${esc(r.id)}" data-esito="rifiuta">Rifiuta</button>`}</td>
+        </tr>`)
+      .join('');
+
+    $('richieste-wrap').innerHTML = `
+      ${nuove.length ? `<p class="gg__box-nota" style="margin:0 0 0.6rem">${nuove.length} in attesa di una decisione.</p>` : ''}
+      <table class="gg__table gg__table--storico">
+        <thead><tr><th>Chi</th><th>Contatti</th><th>Quando</th><th>Stato</th><th></th></tr></thead>
+        <tbody>${righe}</tbody>
+      </table>`;
   }
 
   function renderMembri(membri: any[]) {
@@ -1441,13 +1544,15 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
   });
 
   document.addEventListener('click', async (e) => {
-    const el = (e.target as HTMLElement).closest('[data-membro], [data-invito]') as HTMLButtonElement | null;
+    const el = (e.target as HTMLElement).closest('[data-membro], [data-invito], [data-richiesta]') as HTMLButtonElement | null;
     if (!el) return;
     const box = $('rete-feedback') as HTMLElement;
     el.disabled = true;
     const corpoReq = el.dataset.membro
       ? { azione: el.dataset.azione, utente: el.dataset.membro }
-      : { azione: 'manda_ora', invito: el.dataset.invito };
+      : el.dataset.richiesta
+        ? { azione: `${el.dataset.esito}_richiesta`, richiesta: el.dataset.richiesta }
+        : { azione: 'manda_ora', invito: el.dataset.invito };
     if (el.dataset.invito) { el.textContent = 'Invio...'; }
     const { res, corpo } = await apiJson('/api/portale-utenti', { method: 'POST', body: JSON.stringify(corpoReq) });
     el.disabled = false;
@@ -1458,6 +1563,11 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
     // Il bottone che spedisce deve dirlo: prima non dava nessun segnale e si
     // finiva per cliccarlo due volte credendo che non avesse funzionato.
     if (el.dataset.invito) feedback(box, "L'invito è partito.", true);
+    if (el.dataset.richiesta) {
+      feedback(box, corpo.approvata
+        ? "Approvata: l'invito è in coda e parte col prossimo scaglione."
+        : 'Richiesta archiviata.', true);
+    }
     void caricaRete();
   });
 
@@ -1699,6 +1809,9 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
     text-decoration: underline;
   }
   .gate__link:hover { color: #FE6F3A; }
+  .gate__sep { color: #cbd5e1; margin: 0 0.45rem; }
+  /* Campo trappola per i robot: fuori dallo schermo, mai visibile, mai a fuoco */
+  .gate__honey { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
   .gate__ok { color: #047857; font-size: 0.82rem; margin-top: 0.75rem; line-height: 1.5; }
   .gate__nota { font-size: 0.78rem; color: #787782; margin: 0.7rem 0 0; }
   .gate__error { line-height: 1.5; }
