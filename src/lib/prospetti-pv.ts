@@ -62,7 +62,7 @@ export interface OpzioniProspetto {
    */
   separati?: boolean;
   /** Marchio del fornitore, solo sul prospetto di noleggio */
-  brand?: { colore: string; nome: string; logo_b64?: string };
+  brand?: { colore: string; accento?: string; nome: string; logo_b64?: string };
 }
 
 export const OPZIONI_INNOVALUX: Omit<Required<OpzioniProspetto>, 'brand'> = {

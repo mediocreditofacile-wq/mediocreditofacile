@@ -39,6 +39,7 @@ export interface Contesto {
   /** Marchio del fornitore sul prospetto di noleggio (mai sul leasing) */
   brandLogo: string | null;
   brandColore: string | null;
+  brandAccento: string | null;
 }
 
 export type EsitoSessione =
@@ -74,13 +75,14 @@ interface RigaFornitore {
   citta: string | null;
   brand_logo: string | null;
   brand_colore: string | null;
+  brand_accento: string | null;
   attivo: boolean;
 }
 
 async function fornitoreDaOrg(organizationId: string): Promise<RigaFornitore | null> {
   return queryUna<RigaFornitore>(
     `SELECT slug, nome, organization_id, tabella_canoni, prefisso, citta,
-            brand_logo, brand_colore, attivo
+            brand_logo, brand_colore, brand_accento, attivo
        FROM app.fornitore WHERE organization_id = $1`,
     [organizationId],
   );
@@ -89,7 +91,7 @@ async function fornitoreDaOrg(organizationId: string): Promise<RigaFornitore | n
 async function fornitoreDaSlug(slug: string): Promise<RigaFornitore | null> {
   return queryUna<RigaFornitore>(
     `SELECT slug, nome, organization_id, tabella_canoni, prefisso, citta,
-            brand_logo, brand_colore, attivo
+            brand_logo, brand_colore, brand_accento, attivo
        FROM app.fornitore WHERE slug = $1`,
     [slug],
   );
@@ -219,6 +221,7 @@ export async function richiediSessione(
       prefisso: fornitore?.prefisso ?? null,
       brandLogo: fornitore?.brand_logo ?? null,
       brandColore: fornitore?.brand_colore ?? null,
+      brandAccento: fornitore?.brand_accento ?? null,
     },
   };
 }

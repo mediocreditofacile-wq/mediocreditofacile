@@ -10,7 +10,10 @@ import { get } from '@vercel/blob';
 import { env } from './db';
 
 export interface BrandFornitore {
+  /** Banda di testata e intestazioni di tabella: scuro, regge il testo bianco */
   colore: string;
+  /** Titoli di sezione e righe evidenziate: piu' chiaro, su fondo bianco */
+  accento?: string;
   nome: string;
   /** Logo in base64: il microservizio PDF lo riceve nel payload */
   logo_b64?: string;
@@ -27,12 +30,16 @@ const cache = new Map<string, string>();
 export async function brandFornitore(opts: {
   logo: string | null;
   colore: string | null;
+  accento?: string | null;
   nome: string | null;
 }): Promise<BrandFornitore | undefined> {
   if (!opts.colore && !opts.logo) return undefined;
 
   const brand: BrandFornitore = {
     colore: opts.colore ?? '#0F1020',
+    // Senza un secondo tono si usa lo stesso: meglio un documento monocromo
+    // che un documento con due marchi addosso.
+    accento: opts.accento ?? opts.colore ?? undefined,
     nome: opts.nome ?? '',
   };
 

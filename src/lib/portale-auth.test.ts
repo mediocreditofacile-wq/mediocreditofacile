@@ -15,7 +15,7 @@ describe('percorsoDelFornitore', () => {
   const base: Contesto = {
     userId: 'u1', email: 'a@b.it', nome: 'Agente', ruolo: 'agente',
     organizationId: 'org-gg', fornitoreSlug: 'green-go', fornitoreNome: 'GREEN-GO SRLS', fornitoreCitta: 'Avellino',
-    tabellaCanoni: 'esg', prefisso: 'GG', brandLogo: null, brandColore: null,
+    tabellaCanoni: 'esg', prefisso: 'GG', brandLogo: null, brandColore: null, brandAccento: null,
   };
 
   it('accetta i percorsi del proprio fornitore', async () => {
@@ -58,7 +58,7 @@ describe('percorsoDelFornitore', () => {
 describe('vedeTuttoIlFornitore', () => {
   const base: Contesto = {
     userId: 'u1', email: 'a@b.it', nome: 'x', ruolo: 'agente',
-    organizationId: 'org', fornitoreSlug: 'green-go', fornitoreNome: 'G', fornitoreCitta: null, tabellaCanoni: 'esg', prefisso: 'GG', brandLogo: null, brandColore: null,
+    organizationId: 'org', fornitoreSlug: 'green-go', fornitoreNome: 'G', fornitoreCitta: null, tabellaCanoni: 'esg', prefisso: 'GG', brandLogo: null, brandColore: null, brandAccento: null,
   };
 
   it('l agente vede solo i propri preventivi', async () => {

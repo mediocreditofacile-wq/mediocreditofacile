@@ -235,6 +235,7 @@ export async function generaPreventivo(
     brand: await brandFornitore({
       logo: contesto.brandLogo,
       colore: contesto.brandColore,
+      accento: contesto.brandAccento,
       nome: contesto.fornitoreNome,
     }),
     // Stesso controllo della simulazione: un'agevolazione chiusa nel registro
