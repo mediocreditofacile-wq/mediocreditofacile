@@ -26,6 +26,7 @@ import {
   PREZZO_KWH_DEFAULT,
   PROVINCE_ZONA,
   SABATINI_COSTO_GESTIONE,
+  leasingPercorribile,
   SABATINI_PCT,
 } from './prospetti-pv-coefficienti';
 import { TABELLA_DEFAULT, type TabellaCanoni } from './tabelle-canoni';
@@ -52,14 +53,25 @@ export interface OpzioniProspetto {
   /** Agevolazioni sul ramo leasing. Spente, escono dai testi E dai totali. */
   includiSabatini?: boolean;
   includiIper?: boolean;
+  /**
+   * Documenti separati: il prospetto di noleggio e quello di leasing escono
+   * come due file distinti invece che come un documento unico. Green-Go lo ha
+   * chiesto perche' al cliente deve arrivare l'offerta che gli e' stata fatta,
+   * e perche' sono due impianti diversi (il leasing pretende moduli europei).
+   * Il default resta il documento unico: InnovaLux non cambia.
+   */
+  separati?: boolean;
+  /** Marchio del fornitore, solo sul prospetto di noleggio */
+  brand?: { colore: string; nome: string; logo_b64?: string };
 }
 
-export const OPZIONI_INNOVALUX: Required<OpzioniProspetto> = {
+export const OPZIONI_INNOVALUX: Omit<Required<OpzioniProspetto>, 'brand'> = {
   fornitoreNome: 'InnovaLux S.r.l.',
   fornitoreCitta: 'Milano',
   fornitoreEtichetta: 'InnovaLux',
   includiSabatini: true,
   includiIper: true,
+  separati: false,
 };
 
 export interface InputPreventivo {
@@ -484,13 +496,23 @@ export function buildPayloadPdf(
     slug: slugCliente(input.cliente),
     data_file: dataFile,
     data_testo: dataTesto,
-    soluzione: `${input.cliente} | impianto ${euro(input.kwp, 0)} kWp${accumulo} ${etichetta}`,
+    // Sul documento unico il nome del fornitore sta nella riga di testata; sui
+    // documenti separati no: quello di noleggio porta gia' il suo marchio, e su
+    // quello di leasing il fornitore e' nominato nella prima sezione.
+    soluzione: o.separati
+      ? `${input.cliente} | impianto ${euro(input.kwp, 0)} kWp${accumulo}`
+      : `${input.cliente} | impianto ${euro(input.kwp, 0)} kWp${accumulo} ${etichetta}`,
     // Il nome del fornitore era cablato dentro il motore Python: ogni portale
     // diverso da InnovaLux stampava il nome sbagliato addosso al cliente.
     fornitore_nome: o.fornitoreNome,
     fornitore_citta: o.fornitoreCitta,
     includi_sabatini: o.includiSabatini,
     includi_iper: o.includiIper,
+    // 'separati' fa uscire due documenti; 'tutto' e' il documento unico storico
+    ramo: o.separati ? 'separati' : 'tutto',
+    // Il prospetto di leasing esiste solo sopra la soglia commerciale
+    con_leasing: o.separati ? leasingPercorribile(input.importo) : false,
+    brand: opzioni.brand,
     rif_impianto: `${input.cliente}, ${euro(input.kwp, 0)} kWp${input.kwh_accumulo ? ` + ${euro(input.kwh_accumulo, 0)} kWh` : ''}`,
     rif_contratto: input.rif_preventivo || 'Preventivo InnovaLux',
     installazione: INSTALLAZIONE_LABEL[input.installazione] ?? INSTALLAZIONE_LABEL.tetto,

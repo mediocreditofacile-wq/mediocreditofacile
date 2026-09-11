@@ -17,6 +17,7 @@
 // schermo, record salvato, mail senza allegati e un avviso esplicito.
 
 import { agevolazioneAttiva } from '../data/leasing';
+import { brandFornitore } from './brand-fornitore';
 import { query } from './db';
 import { DESTINATARIO_MCF, escapeHtml, inviaMail, layoutMail } from './mail-portale';
 import type { Contesto } from './portale-auth';
@@ -36,6 +37,7 @@ import {
   type InputPreventivo,
   type OpzioniProspetto,
 } from './prospetti-pv';
+import { leasingPercorribile } from './prospetti-pv-coefficienti';
 import { getTabella } from './tabelle-canoni';
 
 /** Id leggibile: <PREFISSO>-AAAAMMGG-HHMMSS in ora italiana, come le pratiche */
@@ -227,6 +229,14 @@ export async function generaPreventivo(
     fornitoreNome: contesto.fornitoreNome ?? undefined,
     fornitoreCitta: contesto.fornitoreCitta ?? undefined,
     fornitoreEtichetta: contesto.fornitoreNome ?? undefined,
+    // Sui portali nominali i documenti escono separati: al cliente finale deve
+    // arrivare la strada che gli e' stata proposta, non tutte e due.
+    separati: true,
+    brand: await brandFornitore({
+      logo: contesto.brandLogo,
+      colore: contesto.brandColore,
+      nome: contesto.fornitoreNome,
+    }),
     // Stesso controllo della simulazione: un'agevolazione chiusa nel registro
     // non entra nel prospetto nemmeno se il client la chiede.
     includiSabatini:
@@ -250,7 +260,9 @@ export async function generaPreventivo(
   const risultatoPdf = await generaPdf(payload, tabella);
   const documenti =
     risultatoPdf.ok && risultatoPdf.pdf ? await salvaPdf(contesto.fornitoreSlug!, id, risultatoPdf.pdf) : [];
-  const pdfPronti = documenti.length === 2;
+  // Due documenti di noleggio, piu' il leasing quando l'importo lo consente
+  const attesi = leasingPercorribile(input.importo) ? 3 : 2;
+  const pdfPronti = documenti.length === attesi;
 
   const [recordOk, mail] = await Promise.all([
     salvaRecord(id, contesto, input, c, documenti, pdfPronti),
@@ -308,6 +320,7 @@ export async function generaPreventivo(
       iperNetto: c.iperNetto,
       conSabatini: c.conSabatini,
       conIper: c.conIper,
+      leasingPercorribile: leasingPercorribile(input.importo),
       interessi: c.interessi,
       totLeasing: c.totLeasing,
       riscattoLeasing: c.riscattoLeasing,

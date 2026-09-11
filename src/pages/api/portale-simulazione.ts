@@ -24,6 +24,7 @@ export const prerender = false;
 import { agevolazioneAttiva } from '../../data/leasing';
 import { richiediSessione } from '../../lib/portale-auth';
 import { leggiInput } from '../../lib/preventivi-pv';
+import { SOGLIA_LEASING, leasingPercorribile } from '../../lib/prospetti-pv-coefficienti';
 import { calcolaPreventivo, type OpzioniProspetto } from '../../lib/prospetti-pv';
 import { getTabella } from '../../lib/tabelle-canoni';
 
@@ -73,8 +74,11 @@ export async function POST({ request }: { request: Request }) {
     // Il registro AGEVOLAZIONI_STATO decide quali misure sono aperte: una
     // chiusa non si accende dal client, altrimenti il portale prometterebbe
     // un contributo che non esiste piu'.
-    const sabatiniAperta = agevolazioneAttiva('sabatini');
-    const iperAperta = agevolazioneAttiva('iperammortamento');
+    // Sotto la soglia commerciale il leasing non si propone, e con lui spariscono
+    // le due agevolazioni, che al noleggio operativo non si applicano comunque.
+    const conLeasing = leasingPercorribile(input.importo);
+    const sabatiniAperta = conLeasing && agevolazioneAttiva('sabatini');
+    const iperAperta = conLeasing && agevolazioneAttiva('iperammortamento');
     const opzioni: OpzioniProspetto = {
       includiSabatini: sabatiniAperta && corpo.includi_sabatini !== false,
       includiIper: iperAperta && corpo.includi_iper !== false,
@@ -87,6 +91,9 @@ export async function POST({ request }: { request: Request }) {
       importo: input.importo,
       // Cosa il portale puo' offrire oggi: la pagina nasconde i toggle chiusi
       agevolazioniAperte: { sabatini: sabatiniAperta, iper: iperAperta },
+      // Sotto soglia la pagina non mostra affatto la colonna del leasing
+      leasingPercorribile: conLeasing,
+      sogliaLeasing: SOGLIA_LEASING,
       // Solo risultati: nessun coefficiente e nessuna fascia.
       durate: c.durate,
       canoni: c.canoni,

@@ -234,20 +234,24 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
             </div>
           </div>
 
-          <p class="gg__form-block-title" style="margin-top:1.5rem">Agevolazioni sul ramo leasing</p>
-          <p class="gg__hint">
-            Valgono per il leasing e per l'acquisto, non per il noleggio operativo. Spegnendole
-            spariscono dal confronto e dai due PDF, non solo da questa schermata.
-          </p>
-          <div class="gg__toggle-row">
-            <label class="gg__toggle" id="sim-lab-sabatini">
-              <input type="checkbox" id="sim-sabatini" checked />
-              <span>Nuova Sabatini Green</span>
-            </label>
-            <label class="gg__toggle" id="sim-lab-iper">
-              <input type="checkbox" id="sim-iper" checked />
-              <span>Iperammortamento 2026</span>
-            </label>
+          <!-- Sotto la soglia commerciale il leasing non si propone: questo
+               blocco sparisce, perche' le due agevolazioni vivono solo li'. -->
+          <div id="sim-agevolazioni">
+            <p class="gg__form-block-title" style="margin-top:1.5rem">Agevolazioni sul ramo leasing</p>
+            <p class="gg__hint">
+              Valgono per il leasing e per l'acquisto, non per il noleggio operativo. Spegnendole
+              spariscono dal confronto e dai due PDF, non solo da questa schermata.
+            </p>
+            <div class="gg__toggle-row">
+              <label class="gg__toggle" id="sim-lab-sabatini">
+                <input type="checkbox" id="sim-sabatini" checked />
+                <span>Nuova Sabatini Green</span>
+              </label>
+              <label class="gg__toggle" id="sim-lab-iper">
+                <input type="checkbox" id="sim-iper" checked />
+                <span>Iperammortamento 2026</span>
+              </label>
+            </div>
           </div>
         </div>
 
@@ -383,7 +387,7 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
           </div>
         </div>
 
-        <div class="gg__form-block">
+        <div class="gg__form-block" id="pv-agevolazioni">
           <p class="gg__form-block-title">Agevolazioni da includere nei prospetti</p>
           <p class="gg__hint">
             Valgono per il leasing e per l'acquisto, non per il noleggio operativo. Se le spegni,
@@ -872,7 +876,18 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
       ? `${prima === 84 ? 'Gli' : 'I'} ${prima} mesi partono da ${euro(SOGLIE[prima])} euro di imponibile.`
       : '';
   }
-  $('importo').addEventListener('input', aggiornaDurate);
+  // Sotto la soglia commerciale il leasing non si propone, quindi le due
+  // agevolazioni non hanno dove applicarsi: il blocco sparisce dal form e
+  // nessuno dei due PDF le nomina.
+  const SOGLIA_LEASING = 80000;
+  function aggiornaAgevolazioni() {
+    const importo = Number(($('importo') as HTMLInputElement).value) || 0;
+    // A campo vuoto si tiene visibile: si nasconde solo quando si sa che e' sotto
+    const fuori = importo > 0 && importo < SOGLIA_LEASING;
+    ($('pv-agevolazioni') as HTMLElement).hidden = fuori;
+  }
+  $('importo').addEventListener('input', () => { aggiornaDurate(); aggiornaAgevolazioni(); });
+  aggiornaAgevolazioni();
 
   // === Simulazione rapida ===
   // Nessun dato del cliente, niente da salvare: si chiede un numero e si
@@ -1004,10 +1019,15 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
   // se qui e li' dicessero cose diverse, l'agente farebbe una figuraccia
   // davanti al cliente con il documento in mano.
   function renderBusinessPlan(r: any) {
-    // Un'agevolazione chiusa nel registro non si puo' nemmeno accendere
+    // Un'agevolazione chiusa nel registro non si puo' nemmeno accendere, e
+    // sotto la soglia commerciale il leasing non si propone affatto: niente
+    // colonna, niente toggle. Se non glielo proponiamo, l'agente non deve
+    // vederlo, altrimenti finisce per raccontarlo al cliente.
     const aperte = r.agevolazioniAperte ?? { sabatini: true, iper: true };
+    const conLeasing = r.leasingPercorribile !== false;
     ($('sim-lab-sabatini') as HTMLElement).hidden = !aperte.sabatini;
     ($('sim-lab-iper') as HTMLElement).hidden = !aperte.iper;
+    ($('sim-agevolazioni') as HTMLElement).hidden = !conLeasing;
 
     const durataNota = r.durataForzata
       ? `Durata ${r.durata} mesi, forzata: la consigliata era ${r.durataConsigliata}.`
@@ -1058,7 +1078,7 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
         </div>
       </div>
 
-      <div class="gg__due-col">
+      <div class="${conLeasing ? 'gg__due-col' : ''}">
         <div class="gg__box">
           <p class="gg__box-title">Noleggio operativo</p>
           <table class="gg__table">
@@ -1075,6 +1095,7 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
           <p class="gg__box-nota">${durataNota} Zero anticipo, canone interamente deducibile, Centrale Rischi non impegnata.</p>
         </div>
 
+        ${!conLeasing ? '' : `
         <div class="gg__box">
           <p class="gg__box-title">Leasing finanziario, per confronto</p>
           <table class="gg__table">
@@ -1091,8 +1112,13 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
             Il leasing porta la proprieta' del bene e apre le agevolazioni, ma impegna le linee bancarie
             e richiede una delibera creditizia piena.
           </p>
-        </div>
+        </div>`}
       </div>
+      ${conLeasing ? '' : `<p class="gg__box-nota">
+        Su questo importo il leasing non si propone: sotto ${euro(r.sogliaLeasing ?? 80000)} euro di
+        imponibile la strada e' il noleggio operativo, e con essa non entrano Sabatini e
+        iperammortamento, che al noleggio non si applicano.
+      </p>`}
 
       <div class="gg__box" style="margin-top:1rem">
         <p class="gg__box-title">Il bilancio energetico</p>

@@ -223,6 +223,7 @@ describe('payload per il microservizio PDF', () => {
       'riscatto_leasing', 'sabatini_pct', 'costo_sabatini', 'iper_pct', 'costo_40',
       'testo_ipotesi', 'testo_ipotesi_breve', 'testo_copertura', 'testo_grafico1',
       'fornitore_nome', 'fornitore_citta', 'includi_sabatini', 'includi_iper',
+      'ramo', 'con_leasing', 'brand',
     ];
     expect(Object.keys(payload).sort()).toEqual(attese.sort());
   });
@@ -248,6 +249,38 @@ describe('payload per il microservizio PDF', () => {
     expect(String(altro.soluzione)).toContain('GREEN-GO SRLS');
     // Chi non indica l'etichetta breve non deve ritrovarsi InnovaLux addosso
     expect(String(altro.soluzione)).not.toContain('InnovaLux');
+  });
+
+  it('senza opzioni resta il documento unico, come per InnovaLux', () => {
+    expect(payload.ramo).toBe('tutto');
+    expect(payload.con_leasing).toBe(false);
+    expect(payload.brand).toBeUndefined();
+  });
+
+  it('con i documenti separati il leasing esce solo sopra la soglia', () => {
+    const sotto = buildPayloadPdf(
+      { ...GIACCIO, importo: 35_000 },
+      calcolaPreventivo({ ...GIACCIO, importo: 35_000 }),
+      { separati: true },
+    ) as Record<string, unknown>;
+    expect(sotto.ramo).toBe('separati');
+    // 35.000 euro: il leasing non si propone, quindi il documento non esce
+    expect(sotto.con_leasing).toBe(false);
+
+    const sopra = buildPayloadPdf(
+      { ...GIACCIO, importo: 120_000 },
+      calcolaPreventivo({ ...GIACCIO, importo: 120_000 }),
+      { separati: true },
+    ) as Record<string, unknown>;
+    expect(sopra.con_leasing).toBe(true);
+  });
+
+  it('il marchio del fornitore viaggia nel payload solo se lo si passa', () => {
+    const brandizzato = buildPayloadPdf(GIACCIO, calcolaPreventivo(GIACCIO), {
+      separati: true,
+      brand: { colore: '#1e6145', nome: 'GREEN-GO SRLS' },
+    }) as Record<string, unknown>;
+    expect(brandizzato.brand).toMatchObject({ colore: '#1e6145' });
   });
 
   it('le agevolazioni spente escono dai totali, non solo dai testi', () => {

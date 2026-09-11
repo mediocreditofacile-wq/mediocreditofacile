@@ -97,6 +97,8 @@ export interface RispostaPdf {
   pdf?: { filename: string; contenuto: string }[];
 }
 
+interface FilePdf { filename: string; pdf_base64: string }
+
 /**
  * Chiama il microservizio. La tabella dei coefficienti viaggia qui dentro (non
  * nel payload del PDF) cosi' esiste in un posto solo: il motore Python la usa al
@@ -134,12 +136,15 @@ export async function generaPdf(
     }
     const json = await res.json();
     if (!json?.ok) return { ok: false, err: 'pdf_risposta_negativa' };
+    // `extra` porta il prospetto di leasing quando esce come documento a se':
+    // e' vuoto sui portali che generano il documento unico.
+    const extra: FilePdf[] = Array.isArray(json.extra) ? json.extra : [];
     return {
       ok: true,
-      pdf: [
-        { filename: json.analitico.filename, contenuto: json.analitico.pdf_base64 },
-        { filename: json.infografico.filename, contenuto: json.infografico.pdf_base64 },
-      ],
+      pdf: [json.analitico, json.infografico, ...extra].map((f: FilePdf) => ({
+        filename: f.filename,
+        contenuto: f.pdf_base64,
+      })),
     };
   } catch (e) {
     const msg = e instanceof Error ? e.message : 'unknown';

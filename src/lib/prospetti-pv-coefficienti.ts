@@ -48,6 +48,23 @@ export const IRAP = 0.039;
 /** Detrazione per privati senza partita IVA, in 10 quote annuali */
 export const DETRAZIONE_PRIVATI = 0.5;
 
+/**
+ * Sotto questo imponibile il leasing non si propone, e non compare da nessuna
+ * parte: ne' a schermo, ne' nel confronto, ne' come documento.
+ *
+ * Non e' un limite tecnico, e' una scelta commerciale di Alberto detta in call
+ * con Green-Go il 10/09/2026: sotto i 100 kWp il leasing non ha senso, e sono
+ * anche due impianti diversi, perche' le agevolazioni pretendono moduli europei
+ * che costano il doppio. Far vedere all'agente una rata di leasing su un
+ * impianto da 18.000 euro significa fargliela raccontare al cliente.
+ */
+export const SOGLIA_LEASING = 80000;
+
+/** Il leasing e' percorribile su questo importo? */
+export function leasingPercorribile(importo: number): boolean {
+  return importo >= SOGLIA_LEASING;
+}
+
 // === Leasing finanziario di confronto ===
 export const LEASING_TASSO = 0.06;
 export const LEASING_RISCATTO = 0.01;
