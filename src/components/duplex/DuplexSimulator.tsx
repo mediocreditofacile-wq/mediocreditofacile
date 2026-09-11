@@ -5,7 +5,9 @@ import accessoriDB from '../../data/duplex-accessori.json';
 import './duplex-simulator.css';
 
 // Tipi del listino e dei coefficienti
-type Alimentazione = 'cavo' | 'batteria' | null;
+// 'steam' non e' un'alimentazione ma un allestimento (vapore): sta qui perche' nel
+// selettore occupa lo stesso posto di cavo e batteria, come terza variante della famiglia.
+type Alimentazione = 'cavo' | 'batteria' | 'steam' | null;
 interface ModelloListino {
   id: string;
   label: string;
@@ -37,10 +39,15 @@ type AccessoriDB = Record<string, AccessoriFamiglia>;
 const DURATE = [24, 36, 48, 60] as const;
 type Durata = typeof DURATE[number];
 
-// Ricavo "famiglia" dal label rimuovendo " a cavo"/" a batteria".
-// Serve a presentare un dropdown "Modello" piu' pulito (Duplex 340 invece di due voci separate).
+// Ricavo "famiglia" dal label rimuovendo il suffisso di variante (" a cavo", " a batteria", " Steam").
+// Serve a presentare un dropdown "Modello" piu' pulito (Duplex 340 invece di tre voci separate).
 function familyOf(item: ModelloListino): string {
-  return item.label.replace(/ a (cavo|batteria)$/i, '');
+  return item.label.replace(/ (a (cavo|batteria)|steam)$/i, '');
+}
+
+// Etichetta della variante nel selettore: "a cavo"/"a batteria" reggono la preposizione, "steam" no.
+function etichettaVariante(a: Exclude<Alimentazione, null>): string {
+  return a === 'steam' ? 'steam (vapore)' : `a ${a}`;
 }
 
 interface Famiglia {
@@ -84,7 +91,7 @@ export default function DuplexSimulator() {
 
   // Stato simulatore. Default: Ultrax 45.
   const [famigliaNome, setFamigliaNome] = useState<string>('Ultrax 45');
-  const [alimentazione, setAlimentazione] = useState<'cavo' | 'batteria'>('cavo');
+  const [alimentazione, setAlimentazione] = useState<Exclude<Alimentazione, null>>('cavo');
   const [quantita, setQuantita] = useState<Record<string, number>>({});
   const [durata, setDurata] = useState<Durata>(60);
   const [serviziInclusi, setServiziInclusi] = useState<boolean>(false);
@@ -227,18 +234,18 @@ export default function DuplexSimulator() {
 
             {famigliaCorrente?.hasAlimentazione && (
               <div class="dx-sim__field">
-                <label class="dx-sim__label" for="dx-sim-alim">Alimentazione</label>
+                <label class="dx-sim__label" for="dx-sim-alim">Allestimento</label>
                 <select
                   id="dx-sim-alim"
                   class="dx-sim__select"
                   value={alimentazione}
-                  onChange={(e) => setAlimentazione((e.target as HTMLSelectElement).value as 'cavo' | 'batteria')}
+                  onChange={(e) => setAlimentazione((e.target as HTMLSelectElement).value as Exclude<Alimentazione, null>)}
                 >
                   {famigliaCorrente.varianti
                     .filter((v) => v.alimentazione !== null)
                     .map((v) => (
                       <option value={v.alimentazione as string}>
-                        a {v.alimentazione} - {formatEuro(v.prezzo)} euro
+                        {etichettaVariante(v.alimentazione as Exclude<Alimentazione, null>)} - {formatEuro(v.prezzo)} euro
                       </option>
                     ))}
                 </select>
