@@ -37,3 +37,8 @@ firebase-debug.log
 public/images/*.png
 public/images/*.jpg
 !public/images/logo-email.png
+
+# Config locale di altri agenti: .codex punta a percorsi di questa macchina,
+# AGENTS.md e' una copia di CLAUDE.md che resta indietro e ne duplicherebbe le credenziali
+.codex/
+AGENTS.md
