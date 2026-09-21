@@ -264,3 +264,39 @@
     gap: 40px;
   }
 }
+
+/* Tabella tradizionale / Grace Period e data di consegna */
+.dx-sim__tab:disabled { color: #b9b9b9; border-color: #e3e2df; cursor: not-allowed; }
+.dx-sim__hint {
+  font-family: 'Manrope', system-ui, sans-serif;
+  font-size: 13px;
+  color: #5a5a5a;
+  line-height: 1.45;
+  margin: 0;
+}
+.dx-sim__hint-link { color: var(--dx-blue, #1B3A57); font-weight: 600; }
+.dx-sim__date { background-image: none; padding-right: 12px; }
+
+/* Data di inizio pagamenti: e' la domanda che fa il cliente, quindi sta in evidenza */
+.dx-sim__paga {
+  background: var(--dx-blue, #1B3A57);
+  color: #ffffff;
+  border-radius: 4px;
+  padding: 20px 24px;
+  font-family: 'Manrope', system-ui, sans-serif;
+}
+.dx-sim__paga-label {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #c9d4df;
+  margin: 0 0 4px 0;
+}
+.dx-sim__paga-value {
+  font-size: clamp(26px, 4.4vw, 34px);
+  font-weight: 800;
+  line-height: 1.1;
+  margin: 0 0 8px 0;
+}
+.dx-sim__paga-note { font-size: 13px; line-height: 1.5; color: #e3e9ef; margin: 0; }

@@ -1,0 +1,279 @@
+---
+// Spiega ai commerciali la differenza tra tabella tradizionale e Grace Period.
+// I numeri degli esempi escono da duplex-calendario.ts, lo stesso calcolo del simulatore.
+import { calendarioPagamenti, dataEstesa, finestreConsegna, meseAnno, trimestreEsteso } from '../../lib/duplex-calendario';
+import { coefficienteGrace } from '../../data/duplex-grace';
+import coefficienti from '../../data/duplex-coefficienti.json';
+
+const PREZZO = 3500; // Ultrax 45
+const DURATA = 60;
+const canoneTrad = Math.round(PREZZO * coefficienti.senza_servizi[String(DURATA) as '60']);
+const cGrace = coefficienteGrace(PREZZO, DURATA);
+const canoneGrace = cGrace !== null ? Math.round((PREZZO * cGrace) / 100) : null;
+
+const trad = calendarioPagamenti(new Date(2026, 8, 21), canoneTrad, DURATA, 'tradizionale');
+const grace = calendarioPagamenti(new Date(2026, 9, 13), canoneGrace ?? canoneTrad, DURATA, 'grace');
+
+const euro = (n: number) =>
+  new Intl.NumberFormat('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
+const euroTondo = (n: number) => new Intl.NumberFormat('it-IT', { maximumFractionDigits: 0 }).format(n);
+const mese = (d: Date) => meseAnno(d).split(' ')[0].slice(0, 3);
+
+// Striscia dei mesi: dalla consegna per sette mesi, ogni mese con il suo stato.
+type Stato = 'consegna' | 'prorata' | 'fattura' | 'coperto' | 'grace';
+function striscia(consegna: Date, inizio: Date, primaFattura: Date) {
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(consegna.getFullYear(), consegna.getMonth() + i, 1);
+    const t = d.getTime();
+    let stato: Stato;
+    if (i === 0) stato = 'consegna';
+    else if (t < inizio.getTime()) stato = 'prorata';
+    else if (t < primaFattura.getTime()) stato = 'grace';
+    else if ((d.getMonth() - primaFattura.getMonth() + 12) % 3 === 0) stato = 'fattura';
+    else stato = 'coperto';
+    return { etichetta: mese(d), stato };
+  });
+}
+const strisciaTrad = striscia(trad.consegna, trad.inizioLocazione, trad.primaFattura);
+const strisciaGrace = striscia(grace.consegna, grace.inizioLocazione, grace.primaFattura);
+const legenda: Record<Stato, string> = {
+  consegna: 'Consegna',
+  prorata: 'Pro rata',
+  fattura: 'Fattura trimestre',
+  coperto: 'Nel trimestre',
+  grace: 'Spostato a fine',
+};
+const giornoPrima = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate() - 1);
+
+// Finestre di consegna rispetto a oggi: scritte in build, riscritte nel browser a ogni apertura.
+const finestre = finestreConsegna(new Date());
+const senzaAnno = (d: Date) => dataEstesa(d).replace(/ \d{4}$/, '');
+---
+
+<section class="dx-gp" id="grace-period">
+  <div class="dx-gp__inner">
+    <h2 class="dx-gp__title">Tradizionale o Grace Period: quando paga il cliente</h2>
+    <p class="dx-gp__lead">
+      Il canone è mensile, ma la società di locazione fattura a trimestri solari anticipati: 1 gennaio,
+      1 aprile, 1 luglio, 1 ottobre. Il contratto parte dal primo di questi giorni dopo la consegna. I giorni
+      che restano tra la consegna e l'inizio del trimestre si pagano a parte, con il pro rata.
+    </p>
+
+    <div class="dx-gp__formula">
+      <p class="dx-gp__formula-label">Pro rata</p>
+      <p class="dx-gp__formula-text">canone mensile ÷ 30 × giorni dalla consegna all'inizio del trimestre</p>
+    </div>
+
+    <div class="dx-gp__oggi" id="dx-gp-oggi">
+      <p class="dx-gp__oggi-h">Da quando si paga, con le date di oggi</p>
+      <table class="dx-gp__oggi-t">
+        <thead>
+          <tr><th>Consegna</th><th>Tradizionale</th><th>Grace Period</th></tr>
+        </thead>
+        <tbody>
+          {finestre.map((f, i) => (
+            <tr data-finestra={i}>
+              <td data-k="consegna">{i === 0 ? `da oggi al ${senzaAnno(f.al)}` : `dal ${senzaAnno(f.dal)} al ${senzaAnno(f.al)}`}</td>
+              <td data-k="trad">{dataEstesa(f.pagaTradizionale)}</td>
+              <td data-k="grace" class="dx-gp__oggi-grace">{dataEstesa(f.pagaGrace)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="dx-gp__grid">
+      <article class="dx-gp__card">
+        <p class="dx-gp__tag">Tabella tradizionale</p>
+        <h3 class="dx-gp__h">Si paga dalla consegna</h3>
+        <p class="dx-gp__p">
+          Ultrax 45 a {canoneTrad} euro al mese, consegnata il {dataEstesa(trad.consegna)}. Dal 21 al 30 settembre
+          sono {trad.giorniProRata} giorni: {canoneTrad} ÷ 30 = {euro(trad.costoGiornaliero)} euro al giorno, per
+          {' '}{trad.giorniProRata} fa <strong>{euro(trad.importoProRata)} euro</strong> di pro rata. Il
+          {' '}{dataEstesa(trad.primaFattura)} arriva la prima fattura trimestrale, {euroTondo(trad.importoTrimestre)} euro
+          ({canoneTrad} × 3), e da lì una ogni tre mesi.
+        </p>
+        <ol class="dx-gp__strip" aria-label="Calendario tabella tradizionale">
+          {strisciaTrad.map((m) => (
+            <li class={`dx-gp__m dx-gp__m--${m.stato}`}>
+              <span class="dx-gp__m-mese">{m.etichetta}</span>
+              <span class="dx-gp__m-stato">{legenda[m.stato]}</span>
+            </li>
+          ))}
+        </ol>
+      </article>
+
+      <article class="dx-gp__card dx-gp__card--grace">
+        <p class="dx-gp__tag dx-gp__tag--grace">Tabella Grace Period</p>
+        <h3 class="dx-gp__h">Si paga un trimestre dopo</h3>
+        <p class="dx-gp__p">
+          Il pro rata e il primo trimestre non si pagano subito: vanno in coda al contratto. Consegna il
+          {' '}{dataEstesa(grace.consegna)}: il pro rata va dal 13 ottobre al {dataEstesa(giornoPrima(grace.inizioLocazione))},
+          il trimestre {trimestreEsteso(grace.inizioLocazione)} slitta anche lui, e la prima fattura arriva il
+          {' '}<strong>{dataEstesa(grace.primaFattura)}</strong>. Il cliente usa la macchina per quasi sei mesi prima di
+          pagare.
+        </p>
+        <ol class="dx-gp__strip" aria-label="Calendario tabella Grace Period">
+          {strisciaGrace.map((m) => (
+            <li class={`dx-gp__m dx-gp__m--${m.stato}`}>
+              <span class="dx-gp__m-mese">{m.etichetta}</span>
+              <span class="dx-gp__m-stato">{legenda[m.stato]}</span>
+            </li>
+          ))}
+        </ol>
+      </article>
+    </div>
+
+    <div class="dx-gp__note">
+      <p class="dx-gp__p">
+        <strong>Cosa cambia nel prezzo.</strong> La Grace Period ha coefficienti suoi, che il simulatore applica da
+        solo quando la scegli{canoneGrace !== null ? `: sulla Ultrax 45 a 60 mesi il canone passa da ${canoneTrad} a ${canoneGrace} euro al mese` : ''}.
+        Non è sempre più cara: sulle durate corte costa qualcosa in più, a 60 mesi e sopra i 5.000 euro è allineata o
+        sotto. Il numero di canoni non cambia e il pro rata si paga comunque: cambia quando. Il contratto finisce un
+        trimestre più tardi.
+      </p>
+      <p class="dx-gp__p">
+        <strong>Quando proporla.</strong> Al cliente che compra in bassa stagione, a chi apre un'attività nuova e a
+        chi deve prima far lavorare la macchina per incassare. Se al cliente interessa solo il canone più basso,
+        la tabella tradizionale resta la scelta giusta.
+      </p>
+    </div>
+
+    <div class="dx-gp__foglio">
+      <a class="dx-gp__foglio-img" href="/docs/duplex-grace-period.pdf" target="_blank" rel="noopener">
+        <img src="/images/duplex/grace-period-foglio.webp" alt="Anteprima del foglio PDF sul Grace Period" width="620" height="877" loading="lazy" />
+      </a>
+      <div class="dx-gp__foglio-txt">
+        <h3 class="dx-gp__h">Il foglio da girare al cliente</h3>
+        <p class="dx-gp__p">
+          Una pagina in PDF con la regola dei trimestri, il pro rata, i due esempi e la tabella di quando si
+          inizia a pagare per ogni trimestre di consegna. Si manda così com'è, anche su WhatsApp.
+        </p>
+        <a class="dx-gp__pdf" href="/docs/duplex-grace-period.pdf" download>Scarica il PDF</a>
+        <a class="dx-gp__pdf dx-gp__pdf--sec" href="/docs/duplex-grace-period.pdf" target="_blank" rel="noopener">Aprilo</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { dataEstesa, finestreConsegna } from '../../lib/duplex-calendario';
+  const box = document.getElementById('dx-gp-oggi');
+  if (box) {
+    const senzaAnno = (d: Date) => dataEstesa(d).replace(/ \d{4}$/, '');
+    finestreConsegna(new Date()).forEach((f, i) => {
+      const riga = box.querySelector(`[data-finestra="${i}"]`);
+      if (!riga) return;
+      const set = (k: string, v: string) => {
+        const c = riga.querySelector(`[data-k="${k}"]`);
+        if (c) c.textContent = v;
+      };
+      set('consegna', i === 0 ? `da oggi al ${senzaAnno(f.al)}` : `dal ${senzaAnno(f.dal)} al ${senzaAnno(f.al)}`);
+      set('trad', dataEstesa(f.pagaTradizionale));
+      set('grace', dataEstesa(f.pagaGrace));
+    });
+  }
+</script>
+
+<style>
+  .dx-gp {
+    background: var(--dx-grey-soft, #F2F0EC);
+    padding: 56px 0;
+    border-bottom: 1px solid var(--dx-border, #D9D7D2);
+    font-family: 'Manrope', system-ui, sans-serif;
+  }
+  .dx-gp__inner { max-width: 1120px; margin: 0 auto; padding: 0 20px; }
+  .dx-gp__title {
+    font-weight: 800;
+    font-size: clamp(22px, 3.6vw, 30px);
+    color: var(--dx-blue, #1B3A57);
+    margin: 0 0 12px 0;
+  }
+  .dx-gp__lead { font-size: 16px; line-height: 1.6; color: #3a3a3a; margin: 0 0 20px 0; max-width: 760px; }
+  .dx-gp__formula {
+    background: #ffffff;
+    border-left: 4px solid var(--dx-orange, #E66A2C);
+    padding: 14px 18px;
+    margin: 0 0 28px 0;
+    max-width: 760px;
+  }
+  .dx-gp__formula-label {
+    font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+    color: #9a4a1c; margin: 0 0 4px 0;
+  }
+  .dx-gp__formula-text { font-size: 16px; font-weight: 700; color: var(--dx-blue, #1B3A57); margin: 0; }
+  .dx-gp__grid { display: grid; grid-template-columns: 1fr; gap: 18px; }
+  .dx-gp__card {
+    background: #ffffff;
+    border: 1px solid var(--dx-border, #D9D7D2);
+    border-radius: 4px;
+    padding: 22px;
+    min-width: 0;
+  }
+  .dx-gp__card--grace { border-color: #f3c9ad; }
+  .dx-gp__tag {
+    display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--dx-blue, #1B3A57); background: #e7ecf1; padding: 4px 8px; border-radius: 3px; margin: 0 0 10px 0;
+  }
+  .dx-gp__tag--grace { color: #9a4a1c; background: #FCEBDF; }
+  .dx-gp__h { font-size: 19px; font-weight: 800; color: var(--dx-text, #1A1A1A); margin: 0 0 10px 0; }
+  .dx-gp__p { font-size: 15px; line-height: 1.6; color: #3a3a3a; margin: 0 0 14px 0; }
+  .dx-gp__p strong { color: var(--dx-blue, #1B3A57); }
+  .dx-gp__strip {
+    list-style: none; margin: 0; padding: 0;
+    display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px;
+  }
+  .dx-gp__m {
+    border-radius: 3px; padding: 8px 2px; text-align: center;
+    display: flex; flex-direction: column; gap: 3px; min-width: 0;
+  }
+  .dx-gp__m-mese { font-size: 12px; font-weight: 800; text-transform: capitalize; }
+  .dx-gp__m-stato { font-size: 10px; line-height: 1.2; overflow-wrap: anywhere; }
+  .dx-gp__m--consegna { background: var(--dx-blue, #1B3A57); color: #ffffff; }
+  .dx-gp__m--prorata { background: #e7ecf1; color: var(--dx-blue, #1B3A57); }
+  .dx-gp__m--grace { background: #FCEBDF; color: #9a4a1c; }
+  .dx-gp__m--fattura { background: var(--dx-orange, #E66A2C); color: #ffffff; }
+  .dx-gp__m--coperto { background: #f7f6f3; color: #8a8a8a; }
+  .dx-gp__note {
+    margin: 22px 0 0 0; background: #ffffff; border: 1px solid var(--dx-border, #D9D7D2);
+    border-radius: 4px; padding: 20px 22px 6px;
+  }
+  .dx-gp__pdf {
+    display: inline-flex; margin-top: 22px; background: var(--dx-blue, #1B3A57); color: #ffffff;
+    font-weight: 700; font-size: 15px; padding: 13px 20px; border-radius: 4px; text-decoration: none;
+  }
+  .dx-gp__pdf:hover { background: #122a40; }
+  .dx-gp__pdf--sec { background: #ffffff; color: var(--dx-blue, #1B3A57); border: 1px solid var(--dx-blue, #1B3A57); margin-left: 10px; }
+  .dx-gp__pdf--sec:hover { background: #e7ecf1; }
+  .dx-gp__oggi {
+    background: var(--dx-blue, #1B3A57); color: #ffffff; border-radius: 4px;
+    padding: 20px 22px; margin: 0 0 24px 0; max-width: 760px;
+  }
+  .dx-gp__oggi-h {
+    font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+    color: #c9d4df; margin: 0 0 10px 0;
+  }
+  .dx-gp__oggi-t { width: 100%; border-collapse: collapse; font-size: 15px; }
+  .dx-gp__oggi-t th {
+    text-align: left; font-size: 12px; font-weight: 600; color: #c9d4df;
+    padding: 6px 8px 6px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  .dx-gp__oggi-t td { padding: 10px 8px 10px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.12); vertical-align: top; }
+  .dx-gp__oggi-t tr:last-child td { border-bottom: 0; }
+  .dx-gp__oggi-grace { font-weight: 800; color: #ffd2b8; }
+  .dx-gp__foglio {
+    margin-top: 22px; display: grid; grid-template-columns: 1fr; gap: 22px; align-items: center;
+    background: #ffffff; border: 1px solid var(--dx-border, #D9D7D2); border-radius: 4px; padding: 22px;
+  }
+  .dx-gp__foglio-img { display: block; max-width: 300px; }
+  .dx-gp__foglio-img img {
+    display: block; width: 100%; height: auto; border: 1px solid var(--dx-border, #D9D7D2);
+    box-shadow: 0 6px 18px rgba(27, 58, 87, 0.12);
+  }
+  @media (min-width: 768px) {
+    .dx-gp__foglio { grid-template-columns: 300px 1fr; }
+  }
+  @media (min-width: 900px) {
+    .dx-gp__grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>

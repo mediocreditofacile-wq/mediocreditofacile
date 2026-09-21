@@ -3,6 +3,7 @@ import Layout from '../../layouts/Layout.astro';
 import DuplexHeader from '../../components/duplex/DuplexHeader.astro';
 import DuplexHero from '../../components/duplex/DuplexHero.astro';
 import DuplexSimulator from '../../components/duplex/DuplexSimulator.tsx';
+import DuplexGracePeriod from '../../components/duplex/DuplexGracePeriod.astro';
 import DuplexSeiCose from '../../components/duplex/DuplexSeiCose.astro';
 import DuplexComeFunziona from '../../components/duplex/DuplexComeFunziona.astro';
 import DuplexFAQ from '../../components/duplex/DuplexFAQ.astro';
@@ -53,6 +54,7 @@ const ogImage = '/images/duplex/ultrax-45-og.png';
       </section>
 
       <DuplexSimulator client:visible />
+      <DuplexGracePeriod />
       <DuplexSeiCose />
       <DuplexComeFunziona />
       <DuplexFAQ />

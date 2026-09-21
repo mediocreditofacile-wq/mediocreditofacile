@@ -9,8 +9,8 @@
  * Due blocchi:
  *  - PORTALI_PRATICHE: costruiti sul motore condiviso (src/lib/pratiche-partner.ts),
  *    login email+password, simulatore, caricamento pratica con documenti, stato richieste.
- *  - AREE_PARTNER: aree riservate col simulatore dedicato (fotovoltaico) e il tool
- *    della rete commerciale Marotta.
+ *  - AREE_PARTNER: aree riservate col simulatore dedicato (fotovoltaico), il tool
+ *    della rete commerciale Marotta e il portale distributori Duplex.
  *
  * REGOLA: ogni portale o area riservata di un cliente o partner si raggiunge da
  * Strumenti -> Portali Clienti, e da nessun'altra parte. Nell'hub /tools/ non si
@@ -94,6 +94,14 @@ const PORTALI_PRATICHE: PortaleCard[] = [
 ];
 
 const AREE_PARTNER: PortaleCard[] = [
+  {
+    nome: 'Duplex',
+    href: '/tools/duplex',
+    icona: 'cleaning_services',
+    settore: 'Pulizia industriale',
+    descrizione:
+      'Canone delle macchine Duplex con accessori, scelta tra tabella tradizionale e Grace Period, calendario delle fatture dalla data di consegna e foglio PDF da girare al cliente.',
+  },
   {
     nome: 'Marotta Evolution',
     href: '/tools/marotta/',

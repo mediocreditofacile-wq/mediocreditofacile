@@ -2,6 +2,13 @@ import { useEffect, useMemo, useState } from 'preact/hooks';
 import listino from '../../data/duplex-listino.json';
 import coefficienti from '../../data/duplex-coefficienti.json';
 import accessoriDB from '../../data/duplex-accessori.json';
+import { coefficienteGrace, graceDisponibile } from '../../data/duplex-grace';
+import {
+  calendarioPagamenti,
+  dataEstesa,
+  trimestreEsteso,
+  type TabellaCanoni,
+} from '../../lib/duplex-calendario';
 import './duplex-simulator.css';
 
 // Tipi del listino e dei coefficienti
@@ -75,6 +82,21 @@ function formatEuro(n: number): string {
   return new Intl.NumberFormat('it-IT', { maximumFractionDigits: 0 }).format(n);
 }
 
+function formatEuroCent(n: number): string {
+  return new Intl.NumberFormat('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
+}
+
+// Data di oggi in formato yyyy-mm-dd per l'input date (fuso locale, non UTC).
+function oggiIso(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function daIso(s: string): Date {
+  const [y, m, g] = s.split('-').map(Number);
+  return new Date(y, (m || 1) - 1, g || 1);
+}
+
 // GTM helper: push event al dataLayer se presente
 function trackEvent(name: string, payload: Record<string, unknown> = {}) {
   if (typeof window === 'undefined') return;
@@ -95,6 +117,8 @@ export default function DuplexSimulator() {
   const [quantita, setQuantita] = useState<Record<string, number>>({});
   const [durata, setDurata] = useState<Durata>(60);
   const [serviziInclusi, setServiziInclusi] = useState<boolean>(false);
+  const [tabella, setTabella] = useState<TabellaCanoni>('tradizionale');
+  const [consegna, setConsegna] = useState<string>(oggiIso());
 
   const famigliaCorrente = famiglie.find((f) => f.nome === famigliaNome) ?? famiglie[0];
 
@@ -125,8 +149,36 @@ export default function DuplexSimulator() {
 
   // Calcoli
   const prezzoFinale = varianteAttiva.prezzo + totaleAccessori;
-  const coefficiente = (serviziInclusi ? coeff.con_servizi : coeff.senza_servizi)[String(durata)] ?? 0;
+  // Tabella tradizionale: coefficiente unico nazionale Duplex per durata.
+  // Grace Period: coefficiente Grenke per fascia di importo; con i servizi si applica la
+  // stessa maggiorazione che la tabella tradizionale ha tra "con" e "senza" servizi.
+  const coeffTradizionale = coeff.senza_servizi[String(durata)] ?? 0;
+  const maggiorazioneServizi = coeffTradizionale
+    ? (coeff.con_servizi[String(durata)] ?? coeffTradizionale) / coeffTradizionale
+    : 1;
+  const cGrace = coefficienteGrace(prezzoFinale, durata);
+  const graceApplicabile = cGrace !== null;
+  const tabellaEffettiva: TabellaCanoni = tabella === 'grace' && graceApplicabile ? 'grace' : 'tradizionale';
+  const coefficiente =
+    tabellaEffettiva === 'grace'
+      ? (cGrace as number) / 100 * (serviziInclusi ? maggiorazioneServizi : 1)
+      : (serviziInclusi ? coeff.con_servizi : coeff.senza_servizi)[String(durata)] ?? 0;
   const canoneMensile = Math.round(prezzoFinale * coefficiente);
+  const calendario = useMemo(
+    () => calendarioPagamenti(daIso(consegna), canoneMensile, durata, tabellaEffettiva),
+    [consegna, canoneMensile, durata, tabellaEffettiva],
+  );
+  // Stessa consegna con l'altra tabella: serve solo la data, il canone non conta.
+  const tabellaAlternativa: TabellaCanoni = tabellaEffettiva === 'grace' ? 'tradizionale' : 'grace';
+  const alternativa = useMemo(
+    () => calendarioPagamenti(daIso(consegna), canoneMensile, durata, tabellaAlternativa),
+    [consegna, canoneMensile, durata, tabellaAlternativa],
+  );
+  const ultimoGiornoFinestra = new Date(
+    calendario.inizioLocazione.getFullYear(),
+    calendario.inizioLocazione.getMonth(),
+    0,
+  );
   const importoTrimestrale = canoneMensile * 3;
   const totaleCorrisposto = canoneMensile * durata;
   const mensileDisponibile = prezzoFinale > 10000;
@@ -146,12 +198,14 @@ export default function DuplexSimulator() {
     const parts = [
       varianteAttiva.label,
       `${durata} mesi`,
+      tabellaEffettiva === 'grace' ? 'tabella Grace Period' : 'tabella tradizionale',
+      `consegna prevista ${dataEstesa(calendario.consegna)}`,
       serviziInclusi ? 'servizi inclusi' : 'senza servizi',
       `canone ${canoneMensile} euro`,
       dettaglioAccessori ? `accessori: ${dettaglioAccessori}` : null,
     ].filter(Boolean);
     return parts.join(' - ');
-  }, [varianteAttiva, durata, serviziInclusi, canoneMensile, dettaglioAccessori]);
+  }, [varianteAttiva, durata, serviziInclusi, canoneMensile, dettaglioAccessori, tabellaEffettiva, calendario]);
 
   // Sincronizza l'hidden #dx-form-config: il form Astro lo legge al submit.
   useEffect(() => {
@@ -165,10 +219,11 @@ export default function DuplexSimulator() {
       modello: varianteAttiva.label,
       durata,
       servizi: serviziInclusi,
+      tabella: tabellaEffettiva,
       accessori: dettaglioAccessori || 'nessuno',
       canone: canoneMensile,
     });
-  }, [varianteAttiva.label, durata, serviziInclusi, dettaglioAccessori, canoneMensile]);
+  }, [varianteAttiva.label, durata, serviziInclusi, dettaglioAccessori, canoneMensile, tabellaEffettiva]);
 
   // Quando cambia famiglia, normalizzo alimentazione e azzero quantita' accessori
   // (gli accessori sono per-famiglia, non hanno senso da portarsi dietro).
@@ -312,6 +367,55 @@ export default function DuplexSimulator() {
               </div>
             </div>
 
+            <div class="dx-sim__field">
+              <label class="dx-sim__label">Tabella</label>
+              <div class="dx-sim__tabs" role="tablist" aria-label="Tabella canoni">
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={tabellaEffettiva === 'tradizionale'}
+                  class={`dx-sim__tab ${tabellaEffettiva === 'tradizionale' ? 'dx-sim__tab--active' : ''}`}
+                  onClick={() => setTabella('tradizionale')}
+                >
+                  Tradizionale
+                </button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={tabellaEffettiva === 'grace'}
+                  class={`dx-sim__tab ${tabellaEffettiva === 'grace' ? 'dx-sim__tab--active' : ''}`}
+                  onClick={() => setTabella('grace')}
+                  disabled={!graceApplicabile}
+                >
+                  Grace Period
+                </button>
+              </div>
+              <p class="dx-sim__hint">
+                {!graceDisponibile
+                  ? 'Tabella Grace Period in aggiornamento.'
+                  : !graceApplicabile
+                    ? 'Grace Period non disponibile su questo importo e durata.'
+                    : tabellaEffettiva === 'grace'
+                      ? 'Pro rata e primo trimestre vanno a fine contratto: il cliente paga un trimestre dopo.'
+                      : 'Pro rata alla consegna, poi trimestri anticipati.'}{' '}
+                <a href="#grace-period" class="dx-sim__hint-link">Come funziona</a>
+              </p>
+            </div>
+
+            <div class="dx-sim__field">
+              <label class="dx-sim__label" for="dx-sim-consegna">Consegna prevista</label>
+              <input
+                id="dx-sim-consegna"
+                type="date"
+                class="dx-sim__select dx-sim__date"
+                value={consegna}
+                onChange={(e) => {
+                  const v = (e.target as HTMLInputElement).value;
+                  if (v) setConsegna(v);
+                }}
+              />
+            </div>
+
             <label class="dx-sim__toggle">
               <input
                 type="checkbox"
@@ -330,13 +434,39 @@ export default function DuplexSimulator() {
               <p class="dx-sim__hero-note">IVA esclusa, deducibile 100%</p>
             </div>
 
+            <div class="dx-sim__paga" aria-live="polite">
+              <p class="dx-sim__paga-label">
+                {tabellaEffettiva === 'grace' ? 'Grace Period, inizia a pagare il' : 'Inizia a pagare il'}
+              </p>
+              <p class="dx-sim__paga-value">{dataEstesa(calendario.primaFattura)}</p>
+              <p class="dx-sim__paga-note">
+                Consegna entro il {dataEstesa(ultimoGiornoFinestra)}.{' '}
+                {tabellaEffettiva === 'grace'
+                  ? `Con la tabella tradizionale pagherebbe dal ${dataEstesa(alternativa.primaFattura)}.`
+                  : graceApplicabile
+                    ? `Con la Grace Period pagherebbe dal ${dataEstesa(alternativa.primaFattura)}.`
+                    : ''}
+              </p>
+            </div>
+
             <div class="dx-sim__detail">
               <h3 class="dx-sim__detail-h">Come funziona il pagamento</h3>
               <p class="dx-sim__detail-row">
                 <strong>Pagamento:</strong> trimestrale anticipato ({formatEuro(canoneMensile)} x 3 = {formatEuro(importoTrimestrale)} euro)
               </p>
               <p class="dx-sim__detail-row">
-                <strong>Promo lancio:</strong> grace period + pro rata dal giorno di consegna. Inizi a pagare a settembre.
+                <strong>Pro rata:</strong> {calendario.giorniProRata} giorni dal {dataEstesa(calendario.consegna)} al{' '}
+                {dataEstesa(new Date(calendario.inizioLocazione.getTime() - 86_400_000))}, {formatEuroCent(calendario.costoGiornaliero)} euro
+                al giorno = {formatEuroCent(calendario.importoProRata)} euro
+                {calendario.grace ? ', spostato a fine contratto.' : ', fatturato alla consegna.'}
+              </p>
+              {calendario.grace && (
+                <p class="dx-sim__detail-row">
+                  <strong>Grace Period:</strong> il trimestre {trimestreEsteso(calendario.inizioLocazione)} va a fine contratto insieme al pro rata.
+                </p>
+              )}
+              <p class="dx-sim__detail-row">
+                <strong>Fine contratto:</strong> {dataEstesa(calendario.fineContratto)}
               </p>
               <p class="dx-sim__detail-row">
                 <strong>Pagamento mensile:</strong> {mensileDisponibile
