@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
 import { getEsgCoeff, ESG_DURATE, ESG_MIN, ESG_MAX } from '../../data/esg';
 import { eur } from '../../data/grenke';
+import VerificaCliente from './VerificaCliente';
 
 // Simulatore del canone per /fiera. Versione ridotta: importo e durata, in uscita
 // il canone mensile. Coefficienti dalla tabella Grenke ESG++++ (fotovoltaico),
@@ -101,6 +102,8 @@ export default function SimulatoreFiera() {
         <p class="simf__nota">Canone indicativo, non è un'offerta.</p>
       </div>
       </div>
+
+      {pronto && <VerificaCliente importo={importo || null} />}
     </section>
   );
 }

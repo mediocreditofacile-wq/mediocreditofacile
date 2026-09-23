@@ -248,6 +248,24 @@
           "value": "noindex, nofollow"
         }
       ]
+    },
+    {
+      "source": "/fiera2",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        }
+      ]
+    },
+    {
+      "source": "/fiera2/",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        }
+      ]
     }
   ]
 }

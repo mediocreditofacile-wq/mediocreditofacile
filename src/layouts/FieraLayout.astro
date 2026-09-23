@@ -1,0 +1,413 @@
+---
+// Guscio comune delle pagine atterraggio del QR (/fiera, /fiera2): testata con
+// vCard, telefono e WhatsApp, modulo contatti con ripiego WhatsApp, chiusura.
+// La parte dimostrativa (simulatore, business plan) arriva dallo slot.
+//
+// Pagina autonoma, senza Layout del sito: deve pesare poco e aprirsi su rete
+// mobile lenta. La cosa che non deve mai rompersi e' il link alla vCard: e' un
+// <a> puro, senza JS. Noindex (meta + header X-Robots-Tag in vercel.json) e
+// fuori dalla sitemap.
+interface Props {
+  /** Valore del campo `fonte` del lead */
+  fonte: string;
+  /** Testo precompilato del messaggio WhatsApp */
+  waTesto: string;
+  /** Titolo e sottotitolo del modulo */
+  titoloModulo: string;
+  sottotitoloModulo?: string;
+  /** Etichetta e suggerimento del campo libero */
+  etichettaNote?: string;
+  suggerimentoNote?: string;
+  /** Descrizione della pagina (meta) */
+  descrizione?: string;
+  /** Arco delle durate nella seconda riga dell'apertura */
+  arcoDurate?: string;
+}
+
+const {
+  fonte,
+  waTesto,
+  titoloModulo,
+  sottotitoloModulo = 'Rispondo entro 24 ore.',
+  etichettaNote = 'Cosa vendi',
+  suggerimentoNote = 'Moduli, inverter, accumuli, impianti chiavi in mano...',
+  descrizione = 'Noleggio operativo e leasing per i clienti dei fornitori. Salva il contatto di Alberto Amà.',
+  arcoDurate = '24-60',
+} = Astro.props;
+const WA_TESTO = waTesto;
+const waBase = 'https://wa.me/393939957840';
+---
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="theme-color" content="#0F1020" />
+  <title>Alberto Amà · Mediocredito Facile</title>
+  <meta name="description" content={descrizione} />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+
+  <!-- GTM asincrono: serve solo agli eventi, non blocca niente -->
+  <script is:inline>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-K78CWLRC');</script>
+
+  <!-- Manrope senza bloccare il render: finche' non arriva vale il font di sistema -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" media="print" onload="this.media='all'" />
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" /></noscript>
+
+  <style is:inline>
+    :root {
+      --mcf-primary: #FE6F3A;
+      --mcf-primary-dark: #D45A2E;
+      --mcf-accent: #664CCD;
+      --mcf-accent-light: #9B8AE6;
+      --mcf-black: #0F1020;
+      --mcf-text: #293C5B;
+      --mcf-taupe: #787782;
+      --mcf-platinum: #E1DEE3;
+      --mcf-ghost: #F8F7FA;
+      --mcf-error: #CC3333;
+      --offwhite: #F4F2EE;
+      --font: 'Manrope', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body { margin: 0; font-family: var(--font); background: var(--mcf-ghost); color: var(--mcf-text); line-height: 1.5; -webkit-font-smoothing: antialiased; }
+    a { color: inherit; }
+
+    .hero { background: var(--mcf-black); color: var(--offwhite); padding: 28px 16px 32px; border-bottom: 4px solid var(--mcf-accent); }
+    .wrap { max-width: 520px; margin: 0 auto; }
+    .brand { font-size: 15px; letter-spacing: 0.01em; margin: 0 0 20px; color: var(--offwhite); }
+    .brand b { font-weight: 800; color: var(--mcf-accent-light); }
+    .brand span { font-weight: 800; color: var(--mcf-primary); }
+    h1 { font-size: 28px; line-height: 1.18; font-weight: 800; margin: 0 0 18px; letter-spacing: -0.01em; }
+    .punti { list-style: none; margin: 0 0 24px; padding: 0; }
+    .punti li { position: relative; padding-left: 18px; margin: 0 0 10px; font-size: 16px; color: #D9D6DE; }
+    .punti li::before { content: ''; position: absolute; left: 0; top: 9px; width: 8px; height: 8px; border-radius: 2px; background: var(--mcf-accent); }
+
+    .btn { display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 56px; padding: 14px 20px; border-radius: 12px; font: 800 18px/1.2 var(--font); text-decoration: none; text-align: center; border: 0; cursor: pointer; width: 100%; }
+    .btn-primary { background: var(--mcf-primary); color: #fff; box-shadow: 0 6px 20px rgba(254,111,58,0.28); }
+    .btn-primary:active { background: var(--mcf-primary-dark); }
+    .azioni { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+    .btn-sec { min-height: 52px; font-size: 16px; font-weight: 600; color: var(--offwhite); background: rgba(102,76,205,0.16); border: 1.5px solid var(--mcf-accent); }
+    .nota { font-size: 13px; color: #A9A6B0; margin: 12px 0 0; text-align: center; }
+
+    main { padding: 24px 16px 8px; }
+    .card { background: #fff; border: 1px solid var(--mcf-platinum); border-radius: 16px; padding: 22px 18px; box-shadow: 0 2px 10px rgba(15,16,32,0.05); }
+    h2 { font-size: 21px; line-height: 1.25; font-weight: 800; margin: 0 0 6px; color: var(--mcf-black); }
+    .sub { margin: 0 0 18px; font-size: 15px; color: var(--mcf-taupe); }
+    label { display: block; font-size: 14px; font-weight: 600; margin: 0 0 6px; color: var(--mcf-text); }
+    .campo { margin-bottom: 14px; }
+    input[type=text], input[type=tel], input[type=email], textarea {
+      display: block; width: 100%; min-height: 48px; padding: 12px 14px; font: 400 16px/1.3 var(--font);
+      color: var(--mcf-text); background: #fff; border: 1.5px solid var(--mcf-platinum); border-radius: 10px; -webkit-appearance: none; appearance: none;
+    }
+    textarea { min-height: 88px; resize: vertical; }
+    input:focus, textarea:focus { outline: none; border-color: var(--mcf-accent); box-shadow: 0 0 0 3px rgba(102,76,205,0.15); }
+    .consenso { display: flex; gap: 12px; align-items: flex-start; min-height: 48px; margin: 6px 0 16px; font-size: 14px; font-weight: 400; cursor: pointer; }
+    .consenso input { flex: 0 0 auto; width: 24px; height: 24px; margin: 0; accent-color: var(--mcf-primary); }
+    .consenso a { color: var(--mcf-accent); font-weight: 600; }
+    .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+    .esito { margin: 14px 0 0; font-size: 15px; }
+    .esito[hidden] { display: none; }
+    .esito.ok { color: #2D8F4E; font-weight: 600; }
+    .esito.ko { color: var(--mcf-error); }
+    .btn-wa { margin-top: 10px; background: var(--mcf-black); color: #fff; }
+    .reg-nota { margin: 0 0 14px; padding: 12px 14px; border-radius: 10px; background: rgba(254,111,58,0.10); color: var(--mcf-black); font-weight: 600; font-size: 15px; }
+    .reg-nota[hidden] { display: none; }
+
+    .chiusura { padding: 20px 16px 36px; }
+    .chiusura ul { list-style: none; padding: 0; margin: 0; }
+    .chiusura li { padding: 12px 0; border-top: 1px solid var(--mcf-platinum); font-size: 15px; }
+    .chiusura li:first-child { border-top: 0; }
+    footer { padding: 0 16px 32px; font-size: 12px; color: var(--mcf-taupe); text-align: center; }
+    footer a { color: var(--mcf-taupe); }
+
+
+    /* Simulatore (isola SimulatoreFiera): finche' non c'e' data-pronto il corpo resta
+       invisibile ma occupa il suo spazio, cosi' l'idratazione non sposta niente */
+    .simf { margin-bottom: 20px; }
+    .simf__area { position: relative; }
+    .simf__corpo { visibility: hidden; }
+    .simf[data-pronto] .simf__corpo { visibility: visible; }
+    .simf__ripiego { position: absolute; left: 0; right: 0; top: 0; margin: 0; font-size: 15px; color: var(--mcf-taupe); }
+    .simf[data-pronto] .simf__ripiego { display: none; }
+    .simf h2 { margin-bottom: 16px; }
+    .simf__euro { position: relative; }
+    .simf__euro input { padding-right: 40px; font-size: 20px; font-weight: 600; }
+    .simf__euro span { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); font-weight: 600; color: var(--mcf-taupe); }
+    .simf__etichetta { display: block; font-size: 14px; font-weight: 600; margin: 0 0 6px; }
+    .simf__durate { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .simf__durate button { min-height: 48px; padding: 6px 4px; border-radius: 10px; border: 1.5px solid var(--mcf-platinum); background: #fff; color: var(--mcf-text); font: 600 15px/1.2 var(--font); cursor: pointer; }
+    .simf__durate button.on { border-color: var(--mcf-accent); background: rgba(102,76,205,0.10); color: var(--mcf-black); }
+    .simf__esito { margin-top: 6px; padding: 16px; border-radius: 12px; background: var(--mcf-black); color: var(--offwhite); }
+    .simf__cifra { display: block; font-size: 32px; font-weight: 800; line-height: 1.1; font-variant-numeric: tabular-nums; }
+    .simf__unita { display: block; margin-top: 4px; font-size: 14px; color: #D9D6DE; }
+    .simf__avviso { margin: 10px 0 0; font-size: 14px; color: var(--mcf-primary-dark); }
+    .simf__nota { margin: 10px 0 0; font-size: 13px; color: var(--mcf-taupe); }
+
+    /* Verifica cliente (isola VerificaCliente) */
+    .verf { margin-top: 22px; padding-top: 20px; border-top: 1px solid var(--mcf-platinum); }
+    .verf h3 { margin: 0 0 4px; font-size: 18px; font-weight: 800; color: var(--mcf-black); }
+    .verf__sub { margin: 0 0 14px; font-size: 14px; color: var(--mcf-taupe); }
+    .verf__msg { margin: 8px 0 0; font-size: 14px; color: var(--mcf-text); }
+    .verf__link { background: none; border: 0; padding: 0; font: 600 14px var(--font); color: var(--mcf-accent); text-decoration: underline; cursor: pointer; min-height: 32px; }
+    .verf__scheda { margin-top: 10px; padding: 14px; border: 1px solid var(--mcf-platinum); border-radius: 12px; background: var(--mcf-ghost); }
+    .verf__nome { margin: 0; font-size: 17px; font-weight: 800; color: var(--mcf-black); }
+    .verf__riga { margin: 2px 0 0; font-size: 14px; }
+    .verf__semaforo { display: inline-flex; align-items: center; gap: 10px; margin-top: 12px; padding: 8px 14px; border-radius: 999px; font-weight: 800; font-size: 16px; }
+    .verf__punto { width: 12px; height: 12px; border-radius: 50%; background: currentColor; }
+    .verf__semaforo--verde { background: rgba(45,143,78,0.12); color: #2D8F4E; }
+    .verf__semaforo--giallo { background: rgba(230,168,23,0.16); color: #9A6B00; }
+    .verf__semaforo--rosso { background: rgba(204,51,51,0.10); color: var(--mcf-error); }
+    .verf__criteri { list-style: none; margin: 10px 0 0; padding: 0; font-size: 14px; }
+    .verf__criteri li { padding: 3px 0 3px 18px; position: relative; }
+    .verf__criteri li::before { content: ''; position: absolute; left: 2px; top: 10px; width: 8px; height: 8px; border-radius: 50%; background: var(--mcf-platinum); }
+    .verf__criteri li.ok::before { background: #2D8F4E; }
+    .verf__criteri li.ko::before { background: var(--mcf-error); }
+    .verf__nota { margin: 8px 0 0; font-size: 13px; color: var(--mcf-taupe); }
+
+    /* Business plan fotovoltaico (isola BusinessPlanFiera) */
+    .simf__durate.sei { grid-template-columns: repeat(3, 1fr); }
+    .simf__durate button:disabled { opacity: 0.35; cursor: not-allowed; }
+    .simf__dettagli { margin: 4px 0 14px; }
+    .simf__dettagli summary { min-height: 44px; display: flex; align-items: center; font-weight: 600; font-size: 14px; color: var(--mcf-accent); cursor: pointer; }
+    .simf__griglia { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    select { display: block; width: 100%; min-height: 48px; padding: 10px 12px; font: 400 16px/1.3 var(--font); color: var(--mcf-text); background: #fff; border: 1.5px solid var(--mcf-platinum); border-radius: 10px; }
+    .bpf__confronto { margin-top: 6px; padding: 16px; border-radius: 12px; background: var(--mcf-black); color: var(--offwhite); }
+    .bpf__titolo { margin: 0 0 12px; font-size: 15px; color: #D9D6DE; }
+    .bpf__barra { margin-bottom: 12px; }
+    .bpf__barra-testa { display: flex; justify-content: space-between; gap: 8px; font-size: 14px; margin-bottom: 4px; }
+    .bpf__barra-testa b { font-variant-numeric: tabular-nums; }
+    .bpf__traccia { height: 12px; border-radius: 6px; background: rgba(255,255,255,0.08); overflow: hidden; display: flex; }
+    .bpf__traccia span { display: block; height: 100%; }
+    .bpf__oggi { background: #9B8AE6; }
+    .bpf__residua { background: #D9D6DE; }
+    .bpf__canone { background: var(--mcf-primary); }
+    .bpf__legenda { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 4px 0 0; font-size: 12px; color: #A9A6B0; }
+    .bpf__legenda i { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 5px; vertical-align: 0; }
+    .bpf__esito { margin: 14px 0 0; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.12); }
+    .bpf__cifra { display: block; font-size: 28px; font-weight: 800; line-height: 1.15; font-variant-numeric: tabular-nums; }
+    .bpf__cifra.pos { color: #7FD99C; }
+    .bpf__cifra.neg { color: #FFB199; }
+    .bpf__frase { display: block; margin-top: 4px; font-size: 14px; color: #D9D6DE; }
+    .bpf__numeri { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0 0; }
+    .bpf__numeri div { padding: 10px 12px; border: 1px solid var(--mcf-platinum); border-radius: 10px; }
+    .bpf__numeri dt { font-size: 12px; color: var(--mcf-taupe); }
+    .bpf__numeri dd { margin: 2px 0 0; font-weight: 800; font-size: 16px; color: var(--mcf-black); font-variant-numeric: tabular-nums; }
+
+    @media (min-width: 600px) { h1 { font-size: 34px; } .hero { padding-top: 40px; } }
+  </style>
+</head>
+<body>
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-K78CWLRC" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+
+  <header class="hero">
+    <div class="wrap">
+      <p class="brand"><b>Medio</b>credito <span>Facile</span> · Alberto Amà</p>
+      <h1>Il tuo cliente paga a canone. Tu incassi tutto alla consegna.</h1>
+      <ul class="punti">
+        <li>Un solo punto di accesso a oltre 12 operatori di noleggio e leasing.</li>
+        <li>Il cliente finale spalma la fornitura su {arcoDurate} mesi, con canone interamente deducibile.</li>
+        <li>Tu incassi alla consegna dalla società di noleggio e resti fuori dal rischio di credito.</li>
+      </ul>
+
+      <a class="btn btn-primary" id="vcard" href="/alberto-ama.vcf" download="alberto-ama.vcf">Salva il contatto</a>
+      <div class="azioni">
+        <a class="btn btn-sec" href="tel:+393939957840">Chiama</a>
+        <a class="btn btn-sec" id="wa" href={`${waBase}?text=${encodeURIComponent(WA_TESTO)}`}>WhatsApp</a>
+      </div>
+      <p class="nota">+39 393 995 7840 · mediocreditofacile@gmail.com</p>
+    </div>
+  </header>
+
+  <main>
+    <div class="wrap">
+      <!-- Parte dimostrativa: isole separate, se non si idratano il resto funziona uguale -->
+      <slot />
+
+      <form class="card" id="form-fiera" action="/api/fiera-lead" method="post" novalidate>
+        <p class="reg-nota" id="reg-nota" hidden>Registrati per continuare a usare il servizio.</p>
+        <h2>{titoloModulo}</h2>
+        <p class="sub">{sottotitoloModulo}</p>
+
+        <input type="hidden" name="fonte" value={fonte} />
+        <input type="hidden" name="variante" value="fiera" />
+        <input type="hidden" name="sorgente" id="sorgente" value="" />
+        <input type="hidden" name="importo_simulato" id="sim_importo" value="" />
+        <input type="hidden" name="durata_simulata" id="sim_durata" value="" />
+        <input type="hidden" name="simulazione" id="simulazione" value="" />
+        <input type="hidden" name="cliente_piva" id="cliente_piva" value="" />
+        <input type="hidden" name="cliente_ragione_sociale" id="cliente_ragione_sociale" value="" />
+        <input type="hidden" name="cliente_valutazione" id="cliente_valutazione" value="" />
+        <div class="hp" aria-hidden="true">
+          <label for="website">Sito web</label>
+          <input type="text" id="website" name="website" tabindex="-1" autocomplete="off" />
+        </div>
+
+        <div class="campo">
+          <label for="nome">Nome e cognome</label>
+          <input type="text" id="nome" name="nome" autocomplete="name" required />
+        </div>
+        <div class="campo">
+          <label for="azienda">Azienda</label>
+          <input type="text" id="azienda" name="azienda" autocomplete="organization" />
+        </div>
+        <div class="campo">
+          <label for="piva">Partita IVA</label>
+          <input type="text" id="piva" name="piva" inputmode="numeric" pattern="[0-9]{11}" maxlength="11" autocomplete="off" />
+        </div>
+        <div class="campo">
+          <label for="telefono">Cellulare</label>
+          <input type="tel" id="telefono" name="telefono" inputmode="tel" autocomplete="tel" required />
+        </div>
+        <div class="campo">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" inputmode="email" autocomplete="email" />
+        </div>
+        <div class="campo">
+          <label for="cosa_vendi">{etichettaNote}</label>
+          <textarea id="cosa_vendi" name="cosa_vendi" placeholder={suggerimentoNote}></textarea>
+        </div>
+
+        <label class="consenso">
+          <input type="checkbox" id="consenso" name="consenso" value="si" required />
+          <span>Ho letto l'<a href="/privacy" target="_blank" rel="noopener">informativa privacy</a> e acconsento a essere ricontattato per questa richiesta.</span>
+        </label>
+
+        <button class="btn btn-primary" type="submit" id="invia">Invia</button>
+        <p class="esito" id="esito" role="status" hidden></p>
+        <a class="btn btn-wa" id="wa-ripiego" href="#" hidden>Mandalo su WhatsApp</a>
+      </form>
+    </div>
+  </main>
+
+  <section class="chiusura">
+    <div class="wrap">
+      <ul>
+        <li>Rispondo entro 24 ore con la rata.</li>
+        <li>Se i volumi lo giustificano, apriamo un plafond intestato alla tua azienda.</li>
+        <li>Se vendi tramite rivenditori, ti costruisco la tua pagina di preventivazione.</li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>
+    <a href="https://www.mediocreditofacile.it">mediocreditofacile.it</a> · <a href="/privacy">Privacy</a>
+  </footer>
+
+  <script is:inline define:vars={{ WA_TESTO, waBase }}>
+    (function () {
+      // Evento GTM solo se il container c'e': la pagina non dipende mai da GTM
+      function evento(nome, extra) {
+        if (window.dataLayer && typeof window.dataLayer.push === 'function') {
+          try { window.dataLayer.push(Object.assign({ event: nome }, extra || {})); } catch (e) {}
+        }
+      }
+
+      // ?s=b biglietto, ?s=v volantino: sorgente di dettaglio nel payload
+      var s = '';
+      try { s = (new URLSearchParams(location.search).get('s') || '').toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 20); } catch (e) {}
+      document.getElementById('sorgente').value = s;
+
+      document.getElementById('vcard').addEventListener('click', function () {
+        evento('fiera_vcard_salvata', { sorgente: s });
+      });
+
+      var form = document.getElementById('form-fiera');
+      var esito = document.getElementById('esito');
+      var ripiego = document.getElementById('wa-ripiego');
+      var btn = document.getElementById('invia');
+      var CAMPI = ['nome', 'azienda', 'piva', 'telefono', 'email', 'cosa_vendi'];
+      var CHIAVE = 'mcf_fiera_form';
+
+      // In padiglione la rete cade: i valori si salvano a ogni blur e tornano al reload
+      function salva() {
+        var d = {};
+        CAMPI.forEach(function (k) { d[k] = form.elements[k].value; });
+        try { sessionStorage.setItem(CHIAVE, JSON.stringify(d)); } catch (e) {}
+      }
+      try {
+        var salvati = JSON.parse(sessionStorage.getItem(CHIAVE) || 'null');
+        if (salvati) CAMPI.forEach(function (k) { if (salvati[k]) form.elements[k].value = salvati[k]; });
+      } catch (e) {}
+      CAMPI.forEach(function (k) { form.elements[k].addEventListener('blur', salva); });
+
+      // La partita IVA accetta solo cifre, anche se incollata con spazi o prefisso IT
+      form.elements.piva.addEventListener('input', function () {
+        var v = this.value.replace(/\D/g, '').slice(0, 11);
+        if (v !== this.value) this.value = v;
+      });
+
+      function mostra(testo, tipo) {
+        esito.textContent = testo;
+        esito.className = 'esito ' + tipo;
+        esito.hidden = false;
+      }
+
+      function linkWhatsApp() {
+        var f = form.elements;
+        var righe = [WA_TESTO + '.'];
+        if (f.nome.value) righe.push('Sono ' + f.nome.value.trim() + (f.azienda.value ? ', ' + f.azienda.value.trim() : '') + '.');
+        if (f.piva.value) righe.push('P.IVA ' + f.piva.value);
+        if (f.cosa_vendi.value) righe.push('Vendo: ' + f.cosa_vendi.value.trim());
+        if (f.telefono.value) righe.push('Cell. ' + f.telefono.value.trim());
+        if (f.email.value) righe.push('Mail ' + f.email.value.trim());
+        return waBase + '?text=' + encodeURIComponent(righe.join('\n'));
+      }
+
+      function fallito() {
+        mostra("L'invio non è andato a buon fine, la rete in fiera fa quello che può. Mandami gli stessi dati su WhatsApp: sono già scritti.", 'ko');
+        ripiego.href = linkWhatsApp();
+        ripiego.hidden = false;
+        btn.disabled = false;
+        btn.textContent = 'Riprova';
+      }
+
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        salva();
+        ripiego.hidden = true;
+        var f = form.elements;
+
+        if (!f.nome.value.trim()) { mostra('Scrivi il tuo nome.', 'ko'); f.nome.focus(); return; }
+        if (!f.telefono.value.trim() && !f.email.value.trim()) { mostra('Serve almeno il cellulare o la mail.', 'ko'); f.telefono.focus(); return; }
+        if (f.piva.value && !/^\d{11}$/.test(f.piva.value)) { mostra('La partita IVA ha 11 cifre.', 'ko'); f.piva.focus(); return; }
+        if (!f.consenso.checked) { mostra("Spunta il consenso all'informativa per inviare.", 'ko'); f.consenso.focus(); return; }
+
+        // Honeypot compilato: si finge l'invio e si scarta
+        if (f.website.value) { mostra('Ricevuto, ti rispondo entro 24 ore.', 'ok'); form.reset(); return; }
+
+        btn.disabled = true;
+        btn.textContent = 'Invio...';
+        var ctrl = 'AbortController' in window ? new AbortController() : null;
+        var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, 15000);
+
+        fetch(form.action, { method: 'POST', body: new FormData(form), signal: ctrl ? ctrl.signal : undefined })
+          .then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); })
+          .then(function (j) {
+            clearTimeout(timer);
+            // consegnato === false: la route ha risposto ma la mail non e' partita
+            if (!j || j.ok !== true || j.consegnato === false) return fallito();
+            evento('fiera_lead_inviato', { sorgente: s });
+            // Il server ha esteso l'uso della verifica: le isole si riaprono
+            document.getElementById('reg-nota').hidden = true;
+            try { window.dispatchEvent(new CustomEvent('fiera:registrato')); } catch (e) {}
+            try { sessionStorage.removeItem(CHIAVE); } catch (e) {}
+            form.reset();
+            btn.textContent = 'Inviato';
+            mostra('Ricevuto, ti rispondo entro 24 ore con la rata.', 'ok');
+          })
+          .catch(function () { clearTimeout(timer); fallito(); });
+      });
+    })();
+  </script>
+</body>
+</html>

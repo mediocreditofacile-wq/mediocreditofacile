@@ -30,6 +30,7 @@ export default defineConfig({
           '/grazie-fin',
           '/design-system/icons',
           '/fiera',
+          '/fiera2',
           '/tools/age-srl',
           '/tools/arca-energia',
           '/tools/credenziali',

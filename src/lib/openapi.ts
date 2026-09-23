@@ -48,6 +48,25 @@ export const COSTI = {
 } as const;
 export type Servizio = keyof typeof COSTI;
 
+/**
+ * Prezzo oltre la franchigia mensile, euro IVA esclusa. COSTI mette a zero i
+ * servizi con quota inclusa; qui c'e' quanto costano quando la quota e' finita.
+ * Serve ai tetti che vanno calcolati in modo prudente, come quello della fiera.
+ */
+export const LISTINO_OLTRE_FRANCHIGIA: Partial<Record<Servizio, number>> = {
+  'IT-advanced': 0.10,
+  'IT-start': 0.05,
+  'IT-shareholders': 0.03,
+};
+
+/**
+ * Chi ha originato la chiamata. 'sito' sono gli strumenti interni e il tool
+ * Marotta (il default, e il percorso storico del registro); 'fiera' e' la
+ * pagina /fiera. Tetti separati: un picco in padiglione non deve mangiare il
+ * budget che serve a una pratica vera.
+ */
+export type Sorgente = 'sito' | 'fiera';
+
 const SCOPES = [
   'GET:company.openapi.com/IT-start',
   'GET:company.openapi.com/IT-advanced',
@@ -127,7 +146,13 @@ export async function getToken(): Promise<string> {
   return body.data.token;
 }
 
-async function chiama(url: string, servizio: Servizio, init?: RequestInit, ritenta = true): Promise<any> {
+async function chiama(
+  url: string,
+  servizio: Servizio,
+  init?: RequestInit,
+  ritenta = true,
+  sorgente: Sorgente = 'sito',
+): Promise<any> {
   const token = await getToken();
   const res = await fetch(url, {
     ...init,
@@ -142,26 +167,28 @@ async function chiama(url: string, servizio: Servizio, init?: RequestInit, riten
   if (ritenta && /wrong token/i.test(String(body?.message ?? ''))) {
     tokenCache = null;
     await new Promise((r) => setTimeout(r, 4000));
-    return chiama(url, servizio, init, false);
+    return chiama(url, servizio, init, false, sorgente);
   }
   if (!res.ok || body?.success === false) {
     throw new Error(`${servizio}: ${body?.message ?? res.status}`);
   }
-  await registraCosto(servizio);
+  await registraCosto(servizio, sorgente);
   const dati = Array.isArray(body?.data) ? body.data[0] ?? null : body?.data ?? null;
   return { trovato: dati != null, dati, lista: Array.isArray(body?.data) ? body.data : null };
 }
 
 // --- registro spesa ----------------------------------------------------------
 // Un blob per chiamata: sommarli e' banale e non serve leggere-modificare-scrivere.
-async function registraCosto(servizio: Servizio) {
+// La sorgente sta nel percorso e non nel contenuto, cosi' spesaDelMese() la legge
+// dall'elenco dei nomi senza aprire i file. 'sito' resta nel percorso storico.
+async function registraCosto(servizio: Servizio, sorgente: Sorgente = 'sito') {
   const costo = COSTI[servizio] ?? 0;
   const ora = new Date();
   const mese = `${ora.getFullYear()}-${String(ora.getMonth() + 1).padStart(2, '0')}`;
   try {
     await put(
-      `openapi/costi/${mese}/${ora.getTime()}-${servizio}.json`,
-      JSON.stringify({ servizio, costo, quando: ora.toISOString() }),
+      `openapi/costi/${mese}/${sorgente === 'sito' ? '' : `${sorgente}/`}${ora.getTime()}-${servizio}.json`,
+      JSON.stringify({ servizio, costo, sorgente, quando: ora.toISOString() }),
       { access: 'private', addRandomSuffix: true, contentType: 'application/json', token: blobToken() },
     );
   } catch {
@@ -169,13 +196,21 @@ async function registraCosto(servizio: Servizio) {
   }
 }
 
-export interface Consumo {
-  mese: string;
+export interface ConsumoParziale {
   chiamate: number;
   totale: number;
-  /** Quante chiamate per ciascun servizio: serve al tetto sulla ricerca gratuita */
   perServizio: Record<string, number>;
 }
+
+export interface Consumo extends ConsumoParziale {
+  mese: string;
+  /** Quante chiamate per ciascun servizio: serve al tetto sulla ricerca gratuita */
+  perServizio: Record<string, number>;
+  /** Lo stesso conto diviso per chi ha originato la chiamata */
+  perSorgente: Record<Sorgente, ConsumoParziale>;
+}
+
+const vuoto = (): ConsumoParziale => ({ chiamate: 0, totale: 0, perServizio: {} });
 
 // Il conteggio si legge elencando i blob del mese: una list() a ogni ricerca
 // sarebbe uno spreco, quindi il risultato resta caldo un minuto. Il tetto e' una
@@ -189,20 +224,36 @@ export async function spesaDelMese(mese?: string): Promise<Consumo> {
     return consumoCache.dato;
   }
   try {
-    const { blobs } = await list({ prefix: `openapi/costi/${m}/`, limit: 1000, token: blobToken() });
-    let totale = 0;
-    const perServizio: Record<string, number> = {};
+    // Il registro supera le 1000 voci in un mese intenso: si pagina col cursore
+    const blobs: { pathname: string }[] = [];
+    let cursor: string | undefined;
+    do {
+      const r = await list({ prefix: `openapi/costi/${m}/`, limit: 1000, cursor, token: blobToken() });
+      blobs.push(...r.blobs);
+      cursor = r.cursor;
+    } while (cursor);
+
+    const tutto = vuoto();
+    const perSorgente: Record<Sorgente, ConsumoParziale> = { sito: vuoto(), fiera: vuoto() };
     for (const b of blobs) {
-      const nome = b.pathname.split('/').pop() ?? '';
+      const parti = b.pathname.split('/');
+      const nome = parti.pop() ?? '';
+      // openapi/costi/<mese>/<file> e' 'sito'; openapi/costi/<mese>/fiera/<file> e' 'fiera'
+      const sorgente: Sorgente = parti.length > 3 && parti[3] === 'fiera' ? 'fiera' : 'sito';
       const servizio = nome.replace(/^\d+-/, '').replace(/-[a-zA-Z0-9]+\.json$/, '.json').replace(/\.json$/, '');
-      totale += (COSTI as Record<string, number>)[servizio] ?? 0;
-      perServizio[servizio] = (perServizio[servizio] ?? 0) + 1;
+      const costo = (COSTI as Record<string, number>)[servizio] ?? 0;
+      for (const c of [tutto, perSorgente[sorgente]]) {
+        c.chiamate += 1;
+        c.totale += costo;
+        c.perServizio[servizio] = (c.perServizio[servizio] ?? 0) + 1;
+      }
     }
-    const dato: Consumo = { mese: m, chiamate: blobs.length, totale: Math.round(totale * 100) / 100, perServizio };
+    for (const c of [tutto, perSorgente.sito, perSorgente.fiera]) c.totale = Math.round(c.totale * 100) / 100;
+    const dato: Consumo = { mese: m, ...tutto, perSorgente };
     consumoCache = { chiave: m, dato, quando: Date.now() };
     return dato;
   } catch {
-    return { mese: m, chiamate: 0, totale: 0, perServizio: {} };
+    return { mese: m, ...vuoto(), perSorgente: { sito: vuoto(), fiera: vuoto() } };
   }
 }
 
@@ -228,20 +279,25 @@ export interface EsitoTetto {
   consumo: Consumo;
 }
 
-/** Controlla se c'e' ancora budget per una chiamata a un dato servizio. */
-export async function entroIlTetto(servizio: Servizio): Promise<EsitoTetto> {
+/**
+ * Controlla se c'e' ancora budget per una chiamata a un dato servizio.
+ * Conta solo le chiamate della sorgente indicata: la fiera ha il suo tetto
+ * (vedi src/lib/fiera-guardia.ts) e non consuma quello degli strumenti.
+ */
+export async function entroIlTetto(servizio: Servizio, sorgente: Sorgente = 'sito'): Promise<EsitoTetto> {
   const consumo = await spesaDelMese();
+  const mio = consumo.perSorgente[sorgente];
   if (COSTI[servizio] === 0) {
     const tetto = numeroEnv('OPENAPI_TETTO_RICERCHE', 400);
-    const fatte = consumo.perServizio[servizio] ?? 0;
+    const fatte = mio.perServizio[servizio] ?? 0;
     if (fatte >= tetto) {
       return { ok: false, motivo: `tetto ricerche del mese raggiunto (${fatte}/${tetto})`, consumo };
     }
     return { ok: true, consumo };
   }
   const tetto = numeroEnv('OPENAPI_TETTO_MESE', 30);
-  if (consumo.totale >= tetto) {
-    return { ok: false, motivo: `tetto di spesa del mese raggiunto (${consumo.totale} / ${tetto} euro)`, consumo };
+  if (mio.totale >= tetto) {
+    return { ok: false, motivo: `tetto di spesa del mese raggiunto (${mio.totale} / ${tetto} euro)`, consumo };
   }
   return { ok: true, consumo };
 }
@@ -503,26 +559,14 @@ async function ricercaDallaCache(piva: string): Promise<RicercaBase | null> {
  * in piu' il patrimonio netto vero e il punteggio di rischio: sono dati gia'
  * pagati, tenerli nascosti non farebbe risparmiare niente.
  */
-export async function ricercaBase(piva: string): Promise<RicercaBase> {
-  const scheda = await dallaCache(piva);
-  if (scheda?.advanced) {
-    const r = normalizza(scheda.advanced, piva, 'scheda');
-    const eco = scheda.full?.ecofin ?? {};
-    r.patrimonioNetto = num(eco.netWorth);
-    if (scheda.score) {
-      r.punteggio = {
-        rating: scheda.score.rating ?? null,
-        classe: scheda.score.risk_score ?? null,
-        descrizione: scheda.score.risk_score_description ?? null,
-      };
-    }
-    return r;
-  }
+export async function ricercaBase(
+  piva: string,
+  opts: { sorgente?: Sorgente } = {},
+): Promise<RicercaBase> {
+  const daCache = await ricercaSoloCache(piva);
+  if (daCache) return daCache;
 
-  const inCache = await ricercaDallaCache(piva);
-  if (inCache) return inCache;
-
-  const res = await chiama(`${COMPANY}/IT-advanced/${piva}`, 'IT-advanced');
+  const res = await chiama(`${COMPANY}/IT-advanced/${piva}`, 'IT-advanced', undefined, true, opts.sorgente ?? 'sito');
   if (!res.trovato || !res.dati) {
     return {
       trovata: false, piva, fonte: 'openapi', ragioneSociale: null, formaGiuridica: null, stato: null,
@@ -541,6 +585,40 @@ export async function ricercaBase(piva: string): Promise<RicercaBase> {
     /* la cache che non scrive non e' un errore bloccante */
   }
   return r;
+}
+
+/**
+ * La ricerca base, ma solo se non costa niente: scheda completa gia' pagata o
+ * ricerca gia' fatta negli ultimi 30 giorni. Null se servirebbe una chiamata.
+ * Serve a chi deve decidere se una ricerca scala un tetto prima di farla.
+ */
+export async function ricercaSoloCache(piva: string): Promise<RicercaBase | null> {
+  const scheda = await dallaCache(piva);
+  if (scheda?.advanced) {
+    const r = normalizza(scheda.advanced, piva, 'scheda');
+    const eco = scheda.full?.ecofin ?? {};
+    r.patrimonioNetto = num(eco.netWorth);
+    if (scheda.score) {
+      r.punteggio = {
+        rating: scheda.score.rating ?? null,
+        classe: scheda.score.risk_score ?? null,
+        descrizione: scheda.score.risk_score_description ?? null,
+      };
+    }
+    return r;
+  }
+
+  return ricercaDallaCache(piva);
+}
+
+/**
+ * Il fatturato su cui ragionare: l'ultimo bilancio, altrimenti l'ultimo anno
+ * dello storico con ricavi. Zero vale come assente: un rapporto prezzo/fatturato
+ * su zero darebbe un giudizio su un dato che non esiste.
+ */
+export function fatturatoDaRicerca(r: RicercaBase): number | null {
+  const candidato = r.fatturato ?? r.storico.find((x) => (x.fatturato ?? 0) > 0)?.fatturato ?? null;
+  return candidato != null && candidato > 0 ? candidato : null;
 }
 
 // --- ricerca estera (WW-advanced) --------------------------------------------
