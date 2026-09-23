@@ -13,6 +13,7 @@
 // segna comunque la chiamata, il conto lo si legge sul wallet.
 
 import { put, list, get } from '@vercel/blob';
+import { conEsito, type EsitoVerifica, type RegistroVerifiche, type TipoVerifica } from './verifiche-cache';
 
 // L'SDK Blob legge process.env, che in dev Astro non popola sempre: passiamo
 // il token esplicitamente cosi' cache e registro costi funzionano anche in locale.
@@ -335,6 +336,44 @@ async function inCache(piva: string, dati: any) {
   }
 }
 
+// --- registro verifiche ------------------------------------------------------
+// Esiti di negativita' e report persona, uno per codice fiscale o partita IVA.
+// La logica (registro o chiamata) sta in verifiche-cache.ts; qui solo il blob.
+// Lettura senza cache CDN: il file si legge e si riscrive a pochi secondi di
+// distanza, e una copia vecchia di un minuto farebbe perdere un esito appena scritto.
+
+const percorsoVerifica = (cf: string) => `openapi/verifiche/${cf}.json`;
+
+export async function leggiVerifica(cf: string): Promise<RegistroVerifiche | null> {
+  try {
+    const b = await get(percorsoVerifica(cf), { access: 'private', token: blobToken(), useCache: false });
+    if (!b?.stream) return null;
+    return JSON.parse(await new Response(b.stream).text());
+  } catch {
+    return null;
+  }
+}
+
+/** Scrive una voce rileggendo il file subito prima, cosi' l'altra voce non si perde. */
+export async function scriviVerifica(cf: string, tipo: TipoVerifica, esito: EsitoVerifica): Promise<void> {
+  const attuale = await leggiVerifica(cf);
+  await put(percorsoVerifica(cf), JSON.stringify(conEsito(attuale, cf, tipo, esito)), {
+    access: 'private',
+    addRandomSuffix: false,
+    allowOverwrite: true,
+    contentType: 'application/json',
+    cacheControlMaxAge: 60,
+    token: blobToken(),
+  });
+}
+
+/** Esiti gia' in registro per un elenco di codici. Solo blob, mai Openapi. */
+export async function esitiVerifiche(codici: string[]): Promise<Record<string, RegistroVerifiche>> {
+  const unici = [...new Set(codici.map((c) => c.trim().toUpperCase()).filter(Boolean))];
+  const letti = await Promise.all(unici.map(async (c) => [c, await leggiVerifica(c)] as const));
+  return Object.fromEntries(letti.filter(([, r]) => r != null)) as Record<string, RegistroVerifiche>;
+}
+
 // --- chiamate ----------------------------------------------------------------
 
 export interface SchedaAzienda {
@@ -368,7 +407,14 @@ export async function schedaAzienda(piva: string, opts: { conNegativita?: boolea
   ]);
 
   let negativitaId: string | null = null;
-  if (opts.conNegativita) negativitaId = await avviaNegativita(piva).catch(() => null);
+  if (opts.conNegativita) {
+    negativitaId = await avviaNegativita(piva).catch(() => null);
+    // l'id si salva subito: se la pagina si ricarica durante l'attesa, l'esito resta recuperabile
+    if (negativitaId) {
+      await scriviVerifica(piva, 'negativita', { id: negativitaId, avviata: new Date().toISOString(), pronto: false })
+        .catch(() => {});
+    }
+  }
 
   const scheda: SchedaAzienda = {
     trovata: true,
@@ -424,7 +470,11 @@ export async function esitoReportPersona(id: string): Promise<{ pronto: boolean;
     headers: { Authorization: `Bearer ${token}` },
   });
   const body = await res.json().catch(() => null);
-  if (body?.success && body?.data?.status && body.data.status !== 'PENDING') {
+  // Lo stato sta in data.state ("completed"), non in data.status: leggendo status
+  // il report non risultava mai pronto e il polling finiva in "nessuna risposta"
+  // anche con l'esito disponibile. Verificato il 23/09/2026 su un report reale.
+  const stato = String(body?.data?.state ?? body?.data?.status ?? '').toLowerCase();
+  if (body?.success && stato === 'completed') {
     return { pronto: true, dati: body.data };
   }
   return { pronto: false };

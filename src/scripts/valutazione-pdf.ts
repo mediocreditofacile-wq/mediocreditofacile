@@ -7,6 +7,8 @@
 //
 // Funzione pura: non tocca il DOM, cosi' la si puo' provare anche fuori dal browser.
 
+import { leggiReport, sintesiReport } from '../lib/report-persona';
+
 const SCALA = ['A1', 'A2', 'A3', 'B1', 'B2', 'B3', 'C1', 'C2', 'C3'];
 const COLORI: [number, number, number][] = [
   [15, 123, 52], [46, 158, 67], [102, 183, 47], [168, 198, 28], [227, 196, 0],
@@ -82,13 +84,14 @@ export async function creaPdfScheda(s: any, D: Dizionari) {
     doc.setFontSize(8);
     for (const [k, v] of righe) {
       const testo = doc.splitTextToSize(String(v ?? '—'), 108) as string[];
-      const h = Math.max(4.6, testo.length * 3.6 + 1);
+      const chiave = doc.splitTextToSize(k, 68) as string[];
+      const h = Math.max(4.6, Math.max(testo.length, chiave.length) * 3.6 + 1);
       pagina(h);
       doc.setFillColor(250, 249, 251);
       doc.setDrawColor(RIGA[0], RIGA[1], RIGA[2]); doc.setLineWidth(0.1);
       doc.line(L, y + h - 1.2, R, y + h - 1.2);
       doc.setFont('helvetica', 'normal'); setCol(GRIGIO);
-      doc.text(doc.splitTextToSize(k, 68) as string[], L, y + 2.6);
+      doc.text(chiave, L, y + 2.6);
       doc.setFont('helvetica', 'normal'); setCol(NERO);
       doc.text(testo, R, y + 2.6, { align: 'right' });
       y += h;
@@ -199,9 +202,13 @@ export async function creaPdfScheda(s: any, D: Dizionari) {
 
   // ---------- eventi negativi ----------
   titolo("Eventi negativi sull'azienda");
-  const n = s.negativita ?? null;
+  const V: Record<string, any> = s.verifiche ?? {};
+  const regAz = V[String(piva).toUpperCase()]?.negativita;
+  const n = s.negativita ?? (regAz?.pronto ? regAz.dati : null);
+  const testoNeg = (d: any) =>
+    [d.presenzaProtesti && 'protesti', d.presenzaPregiudizievoli && 'pregiudizievoli', d.presenzaProcedure && 'procedure concorsuali'].filter(Boolean).join(', ') || 'nessun evento rilevato';
   const esito = n
-    ? [n.presenzaProtesti && 'protesti', n.presenzaPregiudizievoli && 'pregiudizievoli', n.presenzaProcedure && 'procedure concorsuali'].filter(Boolean).join(', ') || 'nessun evento rilevato'
+    ? testoNeg(n) + (regAz?.pronto && regAz.avviata ? ` (verificata il ${dataIt(regAz.avviata)})` : '')
     : 'verifica non conclusa al momento della stampa';
   doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); setCol(NERO);
   pagina(8); doc.text(esito, L, y); y += 8;
@@ -247,6 +254,42 @@ export async function creaPdfScheda(s: any, D: Dizionari) {
       y += 5.2;
     });
     y += 2;
+  }
+
+  // ---------- verifiche su soci e amministratori ----------
+  // Solo gli esiti gia' conclusi: una verifica in corso non si stampa come se ci fosse
+  const persone = new Map<string, string>();
+  soci.forEach((x: any) => { if (x.taxCode) persone.set(String(x.taxCode).toUpperCase(), x.companyName || `${x.name ?? ''} ${x.surname ?? ''}`.trim()); });
+  mg.forEach((m: any) => { if (m.taxCode) persone.set(String(m.taxCode).toUpperCase(), `${m.name ?? ''} ${m.surname ?? ''}`.trim()); });
+  const verificate = [...persone].filter(([cf]) => V[cf]?.negativita?.pronto || V[cf]?.report?.pronto);
+  if (verificate.length) {
+    titolo('Verifiche su soci e amministratori');
+    coppie(verificate.map(([cf, nm]) => {
+      const r = V[cf];
+      const parti: string[] = [];
+      if (r.negativita?.pronto) parti.push(`eventi negativi: ${testoNeg(r.negativita.dati)} (${dataIt(r.negativita.avviata) ?? ''})`);
+      const rep = r.report?.pronto ? leggiReport(r.report.dati) : null;
+      if (rep) parti.push(`report: ${sintesiReport(rep)} (${dataIt(r.report.avviata) ?? ''})`);
+      return [`${nm}\n${cf}`, parti.join('\n')] as [string, string];
+    }));
+
+    // un blocco per ogni report persona
+    verificate.forEach(([cf, nm]) => {
+      const rep = V[cf]?.report?.pronto ? leggiReport(V[cf].report.dati) : null;
+      if (!rep) return;
+      titolo(`Report persona: ${nm}`);
+      sottotitolo(`Cariche (${rep.cariche.length})`);
+      if (rep.cariche.length) coppie(rep.cariche.map((c) => [c.societa || 'n.d.', [c.ruolo, c.dal && `dal ${c.dal}`, c.stato && `stato ${c.stato}`].filter(Boolean).join(' · ')] as [string, string]));
+      sottotitolo(`Partecipazioni (${rep.partecipazioni.length})`);
+      if (rep.partecipazioni.length) coppie(rep.partecipazioni.map((p) => [p.societa || 'n.d.', [p.percentuale && `${p.percentuale}%`, p.quota && `quota ${p.quota}`].filter(Boolean).join(' · ')] as [string, string]));
+      sottotitolo(`Immobili (${rep.immobili.length})`);
+      if (rep.immobili.length) coppie(rep.immobili.map((i) => [`${i.comune}${i.provincia ? ` (${i.provincia})` : ''}`, [i.tipologia, i.diritto, i.classamento].filter(Boolean).join(' · ')] as [string, string]));
+      const eventi = [...rep.protesti.map((e) => ['Protesto', e] as const), ...rep.constatazioni.map((e) => ['Constatazione', e] as const)];
+      sottotitolo(`Eventi negativi (${eventi.length})`);
+      coppie(eventi.length
+        ? eventi.map(([t, e]) => [t, e.campi.map(([k, v]) => `${k} ${v}`).join(' · ')] as [string, string])
+        : [['Protesti e constatazioni', 'nessuno']]);
+    });
   }
 
   // ---------- anagrafica e indici ----------

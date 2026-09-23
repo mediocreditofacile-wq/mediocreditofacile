@@ -127,6 +127,16 @@ const datiClient = { CODICI, ETICHETTE, RUOLI, VALORI };
   .val .attesa { color: #664CCD; font-weight: 600; }
   .val .esito-si { color: #A31515; font-weight: 700; }
   .val .esito-no { color: #0F7B34; font-weight: 600; }
+  .val .gia { display: block; font-size: .75rem; color: #787782; font-weight: 400; margin-top: 2px; }
+
+  /* --- Report persona, espandibile sotto la riga --- */
+  .val tr.rep-riga td { background: #fff !important; padding: 0 16px 16px 50px; }
+  .val details.rep summary { cursor: pointer; color: #664CCD; font-weight: 600; font-size: .875rem; padding: 8px 0; }
+  .val details.rep h5 { font-size: .75rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: #0F1020; margin: 16px 0 6px; }
+  .val details.rep table { font-size: .8125rem; }
+  .val details.rep th { text-align: left; font-weight: 600; font-size: .6875rem; text-transform: uppercase; letter-spacing: .05em; color: #787782; padding: 6px 10px; border-bottom: 1.5px solid #664CCD; background: none; }
+  .val details.rep td { padding: 6px 10px; }
+  .val details.rep p { font-size: .8125rem; color: #787782; margin: 4px 0; }
 
   /* --- Tachimetro --- */
   .val .testa { display: grid; grid-template-columns: 340px 1fr; gap: 32px; align-items: center; }

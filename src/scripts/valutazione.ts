@@ -4,6 +4,7 @@
 // su window.__VAL__: sono dati generati, non vanno riscritti a mano.
 
 import { PAESI_SEPA, PAESI_MONDO, FORMATO_ID, nomePaese } from '../data/paesi';
+import { leggiReport, sintesiReport } from '../lib/report-persona';
 
 type Dizionari = {
   CODICI: Record<string, string>;
@@ -128,8 +129,71 @@ function barraAzione(gruppo: string, azioni: [string, string, number][]): string
   return `<div class="azione" data-gruppo="${gruppo}">${b}<span class="costo-sel" data-gruppo="${gruppo}">nessuno selezionato</span></div>`;
 }
 
-const rigaSel = (gruppo: string, cf: string, nome: string, celle: string) =>
-  `<tr><td class="ck"><input type="checkbox" class="pick" data-gruppo="${gruppo}" data-cf="${esc(cf)}" data-nome="${esc(nome)}"></td>${celle}<td class="num esito" data-cf="${esc(cf)}"><span class="vuoto">non richiesto</span></td></tr>`;
+// --- esiti delle verifiche ----------------------------------------------------
+// Arrivano gia' allegati alla scheda (s.verifiche, per codice fiscale) quando sono
+// stati pagati in passato, oppure dal polling quando si lanciano adesso.
+
+const esitoNeg = (d: any) => {
+  if (!d) return '<span class="vuoto">nessuna risposta</span>';
+  const v = [d.presenzaProtesti && 'protesti', d.presenzaPregiudizievoli && 'pregiudizievoli', d.presenzaProcedure && 'procedure'].filter(Boolean);
+  return v.length ? `<span class="esito-si">${v.join(', ')}</span>` : '<span class="esito-no">nessun evento</span>';
+};
+
+const giaVerificata = (avviata?: string) =>
+  avviata ? `<span class="gia">già verificata il ${dataIt(avviata) ?? 'n.d.'}</span>` : '';
+
+function esitoReport(d: any, avviata?: string): string {
+  const r = leggiReport(d);
+  if (!r) return '<span class="vuoto">report senza contenuto leggibile</span>';
+  const eventi = r.protesti.length + r.constatazioni.length;
+  return `<span class="${eventi ? 'esito-si' : 'esito-no'}">report: ${esc(sintesiReport(r))}</span>${giaVerificata(avviata)}`;
+}
+
+const IN_LAVORAZIONE = '<span class="attesa">in lavorazione, riapri la scheda tra qualche minuto</span>';
+
+/** Contenuto della cella esito: negativita' sopra, report sotto. */
+function cellaEsito(reg: any): string {
+  const n = reg?.negativita, r = reg?.report;
+  const neg = n?.pronto ? esitoNeg(n.dati) + giaVerificata(n.avviata)
+    : n?.id ? '<span class="attesa">verifica in corso…</span>'
+    : '<span class="vuoto">non richiesto</span>';
+  const rep = r?.pronto ? esitoReport(r.dati, r.avviata)
+    : r?.id ? '<span class="attesa">report in corso…</span>'
+    : '';
+  return `<div class="e-neg">${neg}</div><div class="e-rep">${rep}</div>`;
+}
+
+/** Blocco espandibile con il contenuto del report persona. */
+function bloccoReport(d: any, avviata?: string): string {
+  const r = leggiReport(d);
+  if (!r) return '';
+  const tab = (th: string[], righe: string[][]) => righe.length
+    ? `<table><thead><tr>${th.map((t) => `<th>${t}</th>`).join('')}</tr></thead><tbody>${
+        righe.map((c) => `<tr>${c.map((x) => `<td>${esc(x) || '<span class="vuoto">n.d.</span>'}</td>`).join('')}</tr>`).join('')
+      }</tbody></table>`
+    : '<p>Nessuna voce.</p>';
+  const eventi = [...r.protesti.map((e) => ['Protesto', e]), ...r.constatazioni.map((e) => ['Constatazione', e])] as [string, { campi: [string, string][] }][];
+
+  return `<details class="rep"><summary>Report persona${avviata ? ` del ${dataIt(avviata) ?? ''}` : ''}: ${esc(sintesiReport(r))}</summary>
+    <h5>Cariche (${r.cariche.length})</h5>
+    ${tab(['Società', 'Ruolo', 'Dal', 'Stato carica'], r.cariche.map((c) => [c.societa, c.ruolo, c.dal, c.stato]))}
+    <h5>Partecipazioni (${r.partecipazioni.length})</h5>
+    ${tab(['Società', 'Codice fiscale', 'Quota %', 'Valore quota'], r.partecipazioni.map((p) => [p.societa, p.cf, p.percentuale, p.quota]))}
+    <h5>Immobili (${r.immobili.length})</h5>
+    ${tab(['Comune', 'Tipologia', 'Diritto', 'Classamento'], r.immobili.map((i) => [`${i.comune}${i.provincia ? ` (${i.provincia})` : ''}`, i.tipologia, i.diritto, i.classamento]))}
+    <h5>Eventi negativi (${eventi.length})</h5>
+    ${eventi.length ? eventi.map(([t, e]) => `<p><strong>${t}</strong>: ${esc(e.campi.map(([k, v]) => `${k} ${v}`).join(' · '))}</p>`).join('') : '<p>Nessun protesto e nessuna constatazione.</p>'}
+    <p>Stato carica: codice di Openapi riportato così com'è.</p>
+  </details>`;
+}
+
+const rigaReport = (cf: string, colonne: number, d: any, avviata?: string) =>
+  `<tr class="rep-riga" data-cf="${esc(cf)}"><td colspan="${colonne}">${bloccoReport(d, avviata)}</td></tr>`;
+
+const rigaSel = (gruppo: string, cf: string, nome: string, celle: string, reg: any, colonne: number, extra = '') => {
+  const riga = `<tr><td class="ck"><input type="checkbox" class="pick" data-gruppo="${gruppo}" data-cf="${esc(cf)}" data-nome="${esc(nome)}" data-colonne="${colonne}"${extra}></td>${celle}<td class="num esito" data-cf="${esc(cf)}">${cellaEsito(reg)}</td></tr>`;
+  return reg?.report?.pronto ? riga + rigaReport(cf, colonne, reg.report.dati, reg.report.avviata) : riga;
+};
 
 export function rendiScheda(s: any): string {
   const F = s.full ?? {}, A = s.advanced ?? {}, CS = s.score ?? {};
@@ -147,6 +211,8 @@ export function rendiScheda(s: any): string {
   const ate = A.atecoClassification?.ateco ?? {};
   // rating assente (azienda troppo giovane per essere classificata): niente classe finta
   const idx = SCALA.indexOf(CS.rating ?? '') >= 0 ? SCALA.indexOf(CS.rating) : null;
+  const V: Record<string, any> = s.verifiche ?? {};
+  const reg = (cf: unknown) => V[String(cf ?? '').trim().toUpperCase()];
 
   let h = `<div class="scheda"><div class="scheda-head">
     <div class="scheda-rs">${esc(nome)}</div>
@@ -178,9 +244,11 @@ export function rendiScheda(s: any): string {
     <div><span>Dipendenti</span><strong>${val(F.employees?.employee)}</strong></div>
   </div></div>`;
 
-  // eventi negativi azienda (asincroni: si riempiono da soli)
+  // eventi negativi azienda: dal registro se gia' concluso, altrimenti si riempiono da soli
+  const negAz = reg(s.piva)?.negativita;
   h += `<div class="blocco"><div class="blocco-tit">Eventi negativi sull'azienda</div>
-    <div id="negAzienda" data-id="${esc(s.negativitaId ?? '')}"><span class="attesa">verifica in corso…</span></div></div>`;
+    <div id="negAzienda" data-id="${esc(negAz?.pronto ? '' : (negAz?.id ?? s.negativitaId ?? ''))}">${
+      negAz?.pronto ? esitoNeg(negAz.dati) + giaVerificata(negAz.avviata) : '<span class="attesa">verifica in corso…</span>'}</div></div>`;
 
   // soci
   const soci = s.soci ?? [];
@@ -191,7 +259,7 @@ export function rendiScheda(s: any): string {
     h += '<table class="sel"><thead><tr><th class="ck"></th><th>Socio</th><th class="num">Quota</th><th class="num">Eventi negativi</th></tr></thead><tbody>';
     soci.forEach((x: any) => {
       const n = x.companyName || `${x.name ?? ''} ${x.surname ?? ''}`.trim();
-      h += rigaSel('soci', x.taxCode ?? '', n, `<td><strong>${esc(n)}</strong><br><span class="cf">${esc(x.taxCode ?? '')}</span></td><td class="num">${val(x.percentShare)}%</td>`);
+      h += rigaSel('soci', x.taxCode ?? '', n, `<td><strong>${esc(n)}</strong><br><span class="cf">${esc(x.taxCode ?? '')}</span></td><td class="num">${val(x.percentShare)}%</td>`, reg(x.taxCode), 4);
     });
     h += '</tbody></table>' + barraAzione('soci', [['neg', 'Verifica eventi negativi', PREZZI.neg]]);
   }
@@ -207,8 +275,10 @@ export function rendiScheda(s: any): string {
       const ruoli = (m.roles ?? []).map((r: any) => D.RUOLI[r?.role?.code] ?? val(r?.role?.description)).filter(Boolean);
       let ruolo = ruoli.join(' · ') || '—';
       if (m.isLegalRepresentative) ruolo += ' <strong>(legale rappresentante)</strong>';
+      // nome e cognome viaggiano separati: spezzare "Nome Cognome" sbaglia sui nomi composti
       h += rigaSel('amm', m.taxCode ?? '', n,
-        `<td><strong>${esc(n)}</strong><br><span class="cf">${esc(m.taxCode ?? '')}</span></td><td>${ruolo}</td><td class="num">${val(m.age)}</td><td class="num">${val(m.birthTown)}</td>`);
+        `<td><strong>${esc(n)}</strong><br><span class="cf">${esc(m.taxCode ?? '')}</span></td><td>${ruolo}</td><td class="num">${val(m.age)}</td><td class="num">${val(m.birthTown)}</td>`,
+        reg(m.taxCode), 6, ` data-n="${esc(m.name ?? '')}" data-c="${esc(m.surname ?? '')}"`);
     });
     h += '</tbody></table>' + barraAzione('amm', [['neg', 'Verifica eventi negativi', PREZZI.neg], ['rep', 'Report completo: cariche, partecipazioni, immobili', PREZZI.rep]]);
     h += '</div>';
@@ -260,22 +330,59 @@ function aggiornaCosto(gruppo: string) {
     : `${n} ${n === 1 ? 'selezionato' : 'selezionati'} · ${[...btns].map((b) => `${nf(n * Number(b.dataset.prezzo), 2)} €`).join(' oppure ')} + IVA`;
 }
 
-/** Ripassa a chiedere l'esito: la negativita' ci mette oltre un minuto. */
-function attendi(id: string, tipo: 'negativita' | 'report', mostra: (d: any) => void, tentativi = 40) {
+/**
+ * Ripassa a chiedere l'esito ogni 6 secondi. Niente limite di tentativi: dopo
+ * quattro minuti si smette e si avvisa. L'id e' gia' salvato nel registro lato
+ * server, quindi riaprendo la scheda l'esito arriva da li' senza rispendere.
+ */
+const ATTESA_MS = 4 * 60 * 1000;
+function attendi(id: string, tipo: 'negativita' | 'report', cf: string, mostra: (d: any, avviata?: string) => void, scaduto: () => void) {
+  const fine = Date.now() + ATTESA_MS;
   const giro = async () => {
-    const r = await api(`/api/verifica?tipo=${tipo}&id=${encodeURIComponent(id)}`).catch(() => null);
-    if (r?.pronto) return mostra(r.dati);
-    if (--tentativi > 0) setTimeout(giro, 6000);
-    else mostra(null);
+    const r = await api(`/api/verifica?tipo=${tipo}&id=${encodeURIComponent(id)}&cf=${encodeURIComponent(cf)}`).catch(() => null);
+    if (r?.pronto) return mostra(r.dati, r.avviata);
+    if (Date.now() < fine) setTimeout(giro, 6000);
+    else scaduto();
   };
   setTimeout(giro, 6000);
 }
 
-const esitoNeg = (d: any) => {
-  if (!d) return '<span class="vuoto">nessuna risposta</span>';
-  const v = [d.presenzaProtesti && 'protesti', d.presenzaPregiudizievoli && 'pregiudizievoli', d.presenzaProcedure && 'procedure'].filter(Boolean);
-  return v.length ? `<span class="esito-si">${v.join(', ')}</span>` : '<span class="esito-no">nessun evento</span>';
-};
+/** Tutte le celle della stessa persona: lo stesso CF puo' stare tra i soci e tra gli amministratori. */
+const celle = (cf: string, parte: 'e-neg' | 'e-rep') =>
+  [...document.querySelectorAll<HTMLElement>(`td.esito[data-cf="${cf}"] .${parte}`)];
+const scrivi = (cf: string, parte: 'e-neg' | 'e-rep', html: string) => celle(cf, parte).forEach((c) => (c.innerHTML = html));
+
+/** Tiene allineata la scheda in memoria, che e' quella che finisce nel PDF. */
+function registra(cf: string, tipo: 'negativita' | 'report', voce: any) {
+  if (!schedaCorrente) return;
+  schedaCorrente.verifiche ??= {};
+  schedaCorrente.verifiche[cf] = { ...(schedaCorrente.verifiche[cf] ?? { cf }), [tipo]: voce };
+}
+
+function mostraNeg(cf: string, id: string, d: any, avviata?: string) {
+  scrivi(cf, 'e-neg', esitoNeg(d) + giaVerificata(avviata));
+  registra(cf, 'negativita', { id, avviata, pronto: true, dati: d });
+}
+
+function mostraReport(cf: string, id: string, d: any, avviata?: string) {
+  scrivi(cf, 'e-rep', esitoReport(d, avviata));
+  registra(cf, 'report', { id, avviata, pronto: true, dati: d });
+  // blocco espandibile sotto ogni riga della persona, rimpiazzando quello vecchio
+  document.querySelectorAll<HTMLInputElement>(`.pick[data-cf="${cf}"]`).forEach((c) => {
+    const tr = c.closest('tr')!;
+    if (tr.nextElementSibling?.matches(`tr.rep-riga[data-cf="${cf}"]`)) tr.nextElementSibling.remove();
+    tr.insertAdjacentHTML('afterend', rigaReport(cf, Number(c.dataset.colonne ?? 4), d, avviata));
+  });
+}
+
+/** Segue una verifica fino all'esito, o fino al messaggio di attesa. */
+function segui(tipo: 'negativita' | 'report', cf: string, id: string) {
+  const parte = tipo === 'report' ? 'e-rep' : 'e-neg';
+  scrivi(cf, parte, `<span class="attesa">${tipo === 'report' ? 'report in corso…' : 'verifica in corso…'}</span>`);
+  attendi(id, tipo, cf,
+    (d, avviata) => (tipo === 'report' ? mostraReport : mostraNeg)(cf, id, d, avviata),
+    () => scrivi(cf, parte, IN_LAVORAZIONE));
+}
 
 function collega() {
   document.querySelectorAll<HTMLInputElement>('.pick').forEach((c) =>
@@ -284,23 +391,41 @@ function collega() {
   document.querySelectorAll<HTMLButtonElement>('.val-btn[data-gruppo]').forEach((b) =>
     b.addEventListener('click', async () => {
       const g = b.dataset.gruppo!, azione = b.dataset.azione!;
+      const tipo = azione === 'neg' ? 'negativita' : 'report';
+      const parte = tipo === 'report' ? 'e-rep' : 'e-neg';
       const scelti = [...document.querySelectorAll<HTMLInputElement>(`.pick[data-gruppo="${g}"]:checked`)];
       document.querySelectorAll<HTMLButtonElement>(`.val-btn[data-gruppo="${g}"]`).forEach((x) => (x.disabled = true));
-      for (const c of scelti) {
-        const cf = c.dataset.cf!, td = document.querySelector(`td.esito[data-cf="${cf}"]`) as HTMLElement;
-        if (td) td.innerHTML = '<span class="attesa">richiesta inviata…</span>';
-        if (azione === 'neg') {
-          const r = await api('/api/verifica', { method: 'POST', body: JSON.stringify({ tipo: 'negativita', cf }) });
-          if (r?.id) attendi(r.id, 'negativita', (d) => { if (td) td.innerHTML = esitoNeg(d); });
-          else if (td) td.innerHTML = `<span class="vuoto">${esc(r?.errore ?? 'non avviata')}</span>`;
-        } else {
-          const nome = (c.dataset.nome ?? '').split(' ');
-          const r = await api('/api/verifica', { method: 'POST', body: JSON.stringify({ tipo: 'report', nome: nome[0] ?? '', cognome: nome.slice(1).join(' '), cf }) });
-          if (r?.id) attendi(r.id, 'report', () => { if (td) td.innerHTML = '<span class="esito-no">report pronto</span>'; });
-          else if (td) td.innerHTML = `<span class="vuoto">${esc(r?.errore ?? 'non avviato')}</span>`;
+      try {
+        for (const c of scelti) {
+          const cf = c.dataset.cf!;
+          scrivi(cf, parte, '<span class="attesa">richiesta inviata…</span>');
+          const corpo = tipo === 'negativita'
+            ? { tipo, cf }
+            : { tipo, cf, nome: c.dataset.n || (c.dataset.nome ?? '').split(' ')[0], cognome: c.dataset.c || (c.dataset.nome ?? '').split(' ').slice(1).join(' ') };
+          const r = await api('/api/verifica', { method: 'POST', body: JSON.stringify(corpo) }).catch((e) => ({ errore: String(e) }));
+          if (!r?.id) { scrivi(cf, parte, `<span class="vuoto">${esc(r?.errore ?? 'non avviata')}</span>`); continue; }
+          // gia' pagata e conclusa: il server risponde dal registro, nessuna spesa
+          if (r.pronto) (tipo === 'report' ? mostraReport : mostraNeg)(cf, r.id, r.dati, r.avviata);
+          else {
+            registra(cf, tipo, { id: r.id, avviata: r.avviata, pronto: false });
+            segui(tipo, cf, r.id);
+          }
         }
+      } finally {
+        // i bottoni tornano attivi a fine giro, secondo la selezione rimasta
+        aggiornaCosto(g);
       }
     }));
+
+  // verifiche lanciate prima di un ricaricamento e non ancora concluse: si riprende l'attesa
+  const V = schedaCorrente?.verifiche ?? {};
+  for (const [cf, reg] of Object.entries<any>(V)) {
+    if (cf === schedaCorrente?.piva) continue;          // la negativita' dell'azienda la segue avvia()
+    if (!document.querySelector(`td.esito[data-cf="${cf}"]`)) continue;
+    for (const tipo of ['negativita', 'report'] as const) {
+      if (reg?.[tipo]?.id && !reg[tipo].pronto) segui(tipo, cf, reg[tipo].id);
+    }
+  }
 }
 
 /**
@@ -475,7 +600,11 @@ export function montaValutazione() {
     if (btnPdf) btnPdf.style.display = 'inline-flex';
     if (r.spesa) $('spesa').innerHTML = `spesa di ${esc(r.spesa.mese)}<strong>${nf(r.spesa.totale, 2)} €</strong>${r.spesa.chiamate} chiamate`;
     const na = $('negAzienda');
-    if (na?.dataset.id) attendi(na.dataset.id, 'negativita', (d) => { na.innerHTML = esitoNeg(d); if (schedaCorrente) schedaCorrente.negativita = d; });
+    const negAz = r.verifiche?.[r.piva]?.negativita;
+    if (negAz?.pronto) schedaCorrente.negativita = negAz.dati;   // gia' in registro, mostrata da rendiScheda
+    else if (na?.dataset.id) attendi(na.dataset.id, 'negativita', r.piva,
+      (d, avviata) => { na.innerHTML = esitoNeg(d) + giaVerificata(avviata); if (schedaCorrente) schedaCorrente.negativita = d; },
+      () => { na.innerHTML = IN_LAVORAZIONE; });
     else if (na) na.innerHTML = '<span class="vuoto">non avviata</span>';
   };
   cerca.addEventListener('click', avvia);
