@@ -1,5 +1,6 @@
 // Costi accessori di un noleggio Grenke, quelli che non stanno nel canone.
-// Fonte: guida operativa Rete Rent-GRENKE e "Alla scoperta del noleggio 2026".
+// Fonte: guida operativa Rete Rent-GRENKE e "Alla scoperta del noleggio - guida
+// operativa 2026" del kit ReteRent, lette il 23/09/2026.
 // Servono al simulatore Duplex e al preventivo PDF che l'agente manda al cliente:
 // stanno qui e non nei componenti perche' i due devono dire la stessa cifra.
 
