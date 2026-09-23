@@ -42,10 +42,15 @@ export function riscatto(imponibile: number, durataMesi: number): number | null 
   return Math.round(((imponibile * perc) / 100) * 100) / 100;
 }
 
-/** Quanto spende il cliente dall'inizio alla fine, polizze e riscatto compresi. */
+/**
+ * Quanto spende il cliente sul contratto: canoni, istruttoria e riscatto.
+ * La polizza NON entra nel totale ed e' una voce a se', 115 euro l'anno: dipende da
+ * quanti anni solari tocca il contratto e il cliente puo' anche assicurarsi in proprio
+ * (le condizioni Grenke lo prevedono). Metterla dentro darebbe un totale che sembra
+ * certo e non lo e'.
+ */
 export function totaleContratto(imponibile: number, canoneMensile: number, durataMesi: number): number {
   const canoni = canoneMensile * durataMesi;
-  const polizze = polizzaAnnua(imponibile) * annualitaPolizza(durataMesi);
   const risc = riscatto(imponibile, durataMesi) ?? 0;
-  return Math.round((canoni + polizze + speseIstruttoria(imponibile) + risc) * 100) / 100;
+  return Math.round((canoni + speseIstruttoria(imponibile) + risc) * 100) / 100;
 }

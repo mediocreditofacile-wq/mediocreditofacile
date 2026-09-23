@@ -4,7 +4,6 @@ import accessoriDB from '../../data/duplex-accessori.json';
 import { coefficienteGrace, graceDisponibile } from '../../data/duplex-grace';
 import { coefficienteSputnik } from '../../data/duplex-sputnik';
 import {
-  annualitaPolizza,
   polizzaAnnua,
   riscatto,
   speseIstruttoria,
@@ -198,7 +197,6 @@ export default function DuplexSimulator() {
   const mensileDisponibile = prezzoFinale > 10000;
   const istruttoria = speseIstruttoria(prezzoFinale);
   const polizza = polizzaAnnua(prezzoFinale);
-  const annualita = annualitaPolizza(durata);
   const riscattoFinale = riscatto(prezzoFinale, durata);
   const totaleTutto = totaleContratto(prezzoFinale, canoneMensile, durata);
 
@@ -296,11 +294,11 @@ export default function DuplexSimulator() {
 
       const riga = (voce: string, nota: string, a: string, b: string, pari: boolean, tot = false) => `
         <tr>
-          <td style="padding:5px 9px;border-bottom:1px solid ${BORDO};vertical-align:top;background:${tot ? GRIGIO : pari ? '#faf9f7' : '#fff'};${tot ? `font-weight:800;color:${BLU};border-bottom:0;` : ''}">
+          <td style="padding:4px 9px;border-bottom:1px solid ${BORDO};vertical-align:top;background:${tot ? GRIGIO : pari ? '#faf9f7' : '#fff'};${tot ? `font-weight:800;color:${BLU};border-bottom:0;` : ''}">
             ${voce}${nota ? `<span style="display:block;font-size:9.5px;color:#777;line-height:1.35;margin-top:2px;font-weight:400;">${nota}</span>` : ''}
           </td>
-          <td style="padding:5px 9px;border-bottom:1px solid ${BORDO};text-align:right;white-space:nowrap;background:${tot ? GRIGIO : pari ? '#faf9f7' : '#fff'};${tot ? `font-weight:800;color:${BLU};border-bottom:0;` : ''}">${a}</td>
-          ${mostraGrace ? `<td style="padding:5px 9px;border-bottom:1px solid ${BORDO};text-align:right;white-space:nowrap;background:${tot ? GRIGIO : pari ? '#faf9f7' : '#fff'};${tot ? `font-weight:800;color:${BLU};border-bottom:0;` : ''}">${b}</td>` : ''}
+          <td style="padding:4px 9px;border-bottom:1px solid ${BORDO};text-align:right;white-space:nowrap;background:${tot ? GRIGIO : pari ? '#faf9f7' : '#fff'};${tot ? `font-weight:800;color:${BLU};border-bottom:0;` : ''}">${a}</td>
+          ${mostraGrace ? `<td style="padding:4px 9px;border-bottom:1px solid ${BORDO};text-align:right;white-space:nowrap;background:${tot ? GRIGIO : pari ? '#faf9f7' : '#fff'};${tot ? `font-weight:800;color:${BLU};border-bottom:0;` : ''}">${b}</td>` : ''}
         </tr>`;
 
       const eur = (n: number) => `${euroPdf(n)} euro`;
@@ -315,7 +313,7 @@ export default function DuplexSimulator() {
             <div style="font-size:12px;line-height:1.45;color:#d5dde6;">Noleggio operativo a ${durata} mesi. Nessun anticipo, canone interamente deducibile, IVA detraibile sulla singola fattura.</div>
           </div>
 
-          <div style="padding:14px 26px 18px;">
+          <div style="padding:12px 26px 12px;">
             <div style="background:${GRIGIO};border-left:4px solid ${ARANCIO};padding:9px 14px;margin-bottom:12px;display:flex;justify-content:space-between;gap:16px;">
               <b style="font-size:13px;color:${BLU};">${varianteAttiva.label}${dettaglioAccessori ? ` + ${dettaglioAccessori}` : ''}</b>
               <span style="font-size:11.5px;color:#444;">${euroPdf(prezzoFinale)} euro imponibile · ${euroPdf(prezzoFinale * 1.22)} euro IVA inclusa</span>
@@ -333,7 +331,7 @@ export default function DuplexSimulator() {
             </div>
 
             <div style="font-size:14px;font-weight:800;color:${BLU};margin-bottom:6px;">Tutte le voci, niente escluso</div>
-            <table style="width:100%;border-collapse:collapse;font-size:11px;margin-bottom:10px;">
+            <table style="width:100%;border-collapse:collapse;font-size:10.5px;margin-bottom:8px;">
               <thead><tr>
                 <th style="text-align:left;font-size:9px;letter-spacing:0.06em;text-transform:uppercase;color:#fff;background:${BLU};padding:6px 9px;">Voce</th>
                 <th style="text-align:right;font-size:9px;letter-spacing:0.06em;text-transform:uppercase;color:#fff;background:${BLU};padding:6px 9px;">Canone standard</th>
@@ -359,17 +357,17 @@ export default function DuplexSimulator() {
                 ${riga(
                   `Polizza all risk, ${euroPdf(polizza)} euro all'anno`,
                   `Obbligatoria sul bene: incendio, furto, atti vandalici, danni accidentali ed elettrici. <b>La prima fattura arriva alla decorrenza del contratto</b>, poi una a ogni inizio anno. Costa il 3,55% del valore${polizza === 115 ? `, qui ${euroPdf((prezzoFinale * 3.55) / 100)} euro, ma la quota minima fatturabile è 115 euro l'anno: si paga quella` : ''}.`,
-                  eur(polizza * annualita),
-                  eur(polizza * annualita),
+                  `${euroPdf(polizza)} euro all'anno`,
+                  `${euroPdf(polizza)} euro all'anno`,
                   false,
                 )}
                 ${riscattoFinale !== null ? riga('Riscatto a fine contratto', 'Facoltativo: in alternativa si restituisce la macchina o si prosegue il noleggio a canone ridotto.', eur(riscattoFinale), eur(riscattoFinale), true) : ''}
-                ${riga(`Totale in ${durata} mesi, riscatto e polizze compresi`, '', eur(totStd), eur(totGrace), false, true)}
+                ${riga(`Totale in ${durata} mesi, riscatto compreso`, 'Polizza esclusa: si paga a parte, una volta l\'anno.', eur(totStd), eur(totGrace), false, true)}
               </tbody>
             </table>
 
-            <div style="background:${GRIGIO};border-radius:3px;padding:9px 13px;font-size:10px;line-height:1.45;color:#333;">
-              <p style="margin:0 0 6px;"><b style="color:${BLU}">Sulla polizza.</b> In caso di danno resta una franchigia: minimo 150 euro più IVA, fino al 15% dell'indennizzo per furto, rapina e caduta, fino al 25% per fenomeno elettrico. Usura e guasti in garanzia del costruttore sono un'altra cosa e non rientrano.</p>
+            <div style="background:${GRIGIO};border-radius:3px;padding:8px 12px;font-size:9.5px;line-height:1.4;color:#333;">
+              <p style="margin:0 0 6px;"><b style="color:${BLU}">Sulla polizza.</b> Resta fuori dal totale perché si paga a parte ogni anno, e in caso di danno c'è una franchigia: minimo 150 euro più IVA, fino al 15% dell'indennizzo per furto, rapina e caduta, fino al 25% per fenomeno elettrico. Usura e guasti in garanzia del costruttore sono un'altra cosa e non rientrano.</p>
               <p style="margin:0;"><b style="color:${BLU}">Cosa serve per partire:</b> visura camerale, carta d'identità e codice fiscale del titolare, IBAN, email e cellulare. Risposta in 24-48 ore.</p>
             </div>
 
@@ -625,7 +623,7 @@ export default function DuplexSimulator() {
                 <strong>Spese di istruttoria:</strong> {formatEuro(istruttoria)} euro una tantum, all'avvio.
               </p>
               <p class="dx-sim__detail-row">
-                <strong>Polizza all risk:</strong> {formatEuroCent(polizza)} euro all'anno ({annualita} annualità), fuori dal canone.
+                <strong>Polizza all risk:</strong> {euroPdf(polizza)} euro all'anno, fuori dal canone e fuori dal totale.
                 La prima arriva alla decorrenza, poi una a ogni inizio anno.
               </p>
               {riscattoFinale !== null && (
@@ -635,7 +633,7 @@ export default function DuplexSimulator() {
               )}
               <p class="dx-sim__detail-row">
                 <strong>Canoni in {durata} mesi:</strong> {euroPdf(totaleCorrisposto)} euro.
-                Con polizze, istruttoria e riscatto il cliente spende {euroPdf(totaleTutto)} euro.
+                Con istruttoria e riscatto il cliente spende {euroPdf(totaleTutto)} euro, polizza esclusa.
               </p>
             </div>
 

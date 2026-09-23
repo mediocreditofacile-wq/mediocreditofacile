@@ -32,9 +32,9 @@ describe('costi accessori Duplex', () => {
     expect(riscatto(1931, 30)).toBeNull();
   });
 
-  it('totale del caso Duplex 340 a 60 mesi', () => {
-    // 43 x 60 canoni + 5 polizze da 115 + 75 istruttoria + 57,93 riscatto.
-    expect(totaleContratto(1931, 43, 60)).toBe(3287.93);
-    expect(totaleContratto(1931, 51, 60)).toBe(3767.93);
+  it('totale del caso Duplex 340 a 60 mesi, polizza esclusa', () => {
+    // 51,60 x 60 canoni + 75 istruttoria + 57,93 riscatto. La polizza resta fuori.
+    expect(totaleContratto(1931, 51.6, 60)).toBe(3228.93);
+    expect(totaleContratto(1931, 51.15, 60)).toBe(3201.93);
   });
 });
