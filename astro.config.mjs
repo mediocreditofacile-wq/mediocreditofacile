@@ -29,6 +29,7 @@ export default defineConfig({
           '/grazie-agev',
           '/grazie-fin',
           '/design-system/icons',
+          '/fiera',
           '/tools/age-srl',
           '/tools/arca-energia',
           '/tools/credenziali',

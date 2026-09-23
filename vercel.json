@@ -216,5 +216,38 @@
       "path": "/api/portale-inviti-drain",
       "schedule": "0 7 * * *"
     }
+  ],
+  "headers": [
+    {
+      "source": "/alberto-ama.vcf",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "text/vcard; charset=utf-8"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600"
+        }
+      ]
+    },
+    {
+      "source": "/fiera",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        }
+      ]
+    },
+    {
+      "source": "/fiera/",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        }
+      ]
+    }
   ]
 }

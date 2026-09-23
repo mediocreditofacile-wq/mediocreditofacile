@@ -6,7 +6,12 @@ interface Lead {
   telefono: string;
   fonte: string;
   variante: string;
+  /** Campi aggiuntivi dei form che raccolgono piu' dei quattro base (es. /fiera) */
+  extra: [string, string][];
 }
+
+// Campi gia' stampati nella mail o che non vanno mostrati
+const CAMPI_NOTI = new Set(['nome', 'email', 'telefono', 'fonte', 'variante', 'website']);
 
 function escapeHtml(value: string): string {
   return value.replace(/[<>&"']/g, (c) => {
@@ -31,6 +36,7 @@ async function sendResendEmail(lead: Lead): Promise<{ ok: boolean; err?: string 
         <tr><td style="padding:4px 12px 4px 0"><strong>Telefono</strong></td><td>${escapeHtml(lead.telefono)}</td></tr>
         <tr><td style="padding:4px 12px 4px 0"><strong>Fonte</strong></td><td>${escapeHtml(lead.fonte || '-')}</td></tr>
         <tr><td style="padding:4px 12px 4px 0"><strong>Form</strong></td><td>${escapeHtml(lead.variante || 'primary')}</td></tr>
+        ${lead.extra.map(([k, v]) => `<tr><td style="padding:4px 12px 4px 0"><strong>${escapeHtml(k)}</strong></td><td>${escapeHtml(v)}</td></tr>`).join('')}
         <tr><td style="padding:4px 12px 4px 0"><strong>Ora</strong></td><td>${new Date().toLocaleString('it-IT', { timeZone: 'Europe/Rome' })}</td></tr>
       </table>
       <p style="font-family:system-ui,sans-serif;font-size:13px;color:#787782;margin-top:24px">Notifica diretta via Resend, indipendente da Zapier.</p>
@@ -106,7 +112,15 @@ export async function POST({ request }: { request: Request }) {
     });
   }
 
-  const lead: Lead = { nome, email, telefono, fonte, variante };
+  // Tutto cio' che il form manda oltre ai campi base finisce nella mail: con
+  // Zapier fuori dallo stack, la mail e' l'unico posto dove il lead arriva intero.
+  const extra: [string, string][] = [];
+  for (const [k, v] of data.entries()) {
+    if (CAMPI_NOTI.has(k) || typeof v !== 'string' || !v.trim()) continue;
+    extra.push([k.slice(0, 40), v.trim().slice(0, 1000)]);
+  }
+
+  const lead: Lead = { nome, email, telefono, fonte, variante, extra };
 
   // Tento entrambi i canali in parallelo. Nessuno blocca l'altro.
   const [mailResult, zapierResult] = await Promise.all([
@@ -140,7 +154,12 @@ export async function POST({ request }: { request: Request }) {
   }
 
   // Sempre 200 al browser: la UX non deve cambiare anche se un canale di delivery fallisce.
-  return new Response(JSON.stringify({ ok: true }), {
+  // `consegnato` dice se la mail e' partita: i form che hanno un ripiego (es. /fiera
+  // propone WhatsApp) lo leggono, gli altri lo ignorano. Guarda solo Resend perche'
+  // Zapier non fa piu' parte dello stack: un webhook ancora vivo risponderebbe 200
+  // senza che il lead arrivi a nessuno.
+  const consegnato = mailResult.ok;
+  return new Response(JSON.stringify({ ok: true, consegnato }), {
     status: 200,
     headers: { 'Content-Type': 'application/json' },
   });
