@@ -17,6 +17,13 @@ export const ENERGY_PRICE_DEFAULT = 0.28;
 /** Valore di immissione in rete (ritiro dedicato GSE). */
 export const FEED_IN_PRICE = 0.13;
 
+/**
+ * Vita utile dell'impianto su cui si quantifica il beneficio dopo il riscatto.
+ * E' l'ipotesi dei prospetti PDF ("20 anni e oltre", src/lib/prospetti-pv.ts):
+ * prudente, perche' gli anni oltre il ventesimo non si contano.
+ */
+export const VITA_UTILE_ANNI = 20;
+
 /** Irraggiamento medio per zona (kWh/kWp/anno — fonte PVGIS). */
 export const IRRADIANCE: Record<string, number> = {
   nord: 1100,

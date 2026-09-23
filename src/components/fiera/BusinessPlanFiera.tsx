@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
 import { getEsgCoeff, ESG_DURATE, ESG_MIN, ESG_MAX } from '../../data/esg';
-import { eur } from '../../data/grenke';
-import { calcolaBilancioEnergetico, ZONE_LABELS } from '../../data/bp-fotovoltaico';
+import { eur, RISCATTI } from '../../data/grenke';
+import { calcolaBilancioEnergetico, ZONE_LABELS, VITA_UTILE_ANNI } from '../../data/bp-fotovoltaico';
 import VerificaCliente from './VerificaCliente';
 
 // Business plan fotovoltaico della pagina /fiera: il canone del noleggio contro
@@ -14,6 +14,11 @@ import VerificaCliente from './VerificaCliente';
 //
 // Il conto: spesa di domani = bolletta che resta + canone - energia ceduta in rete.
 // La deducibilita' del canone non entra nel conto: il confronto regge senza.
+//
+// E il dopo: finito il noleggio si riscatta l'impianto (riscatti fotovoltaico di
+// src/data/grenke.ts) e da li' il risparmio e' tutto del cliente fino a fine vita
+// utile (VITA_UTILE_ANNI). Anche quando nei mesi del noleggio si spende un po' di
+// piu', il saldo sulla vita dell'impianto e' quello che fa capire l'operazione.
 //
 // Gli stili stanno nel blocco inline di FieraLayout: nessun CSS in piu' da scaricare.
 
@@ -104,6 +109,20 @@ export default function BusinessPlanFiera() {
   if (importo && importo < ESG_MIN) avviso = `Il noleggio parte da ${eur(ESG_MIN)}.`;
   else if (importo > ESG_MAX) avviso = `Oltre ${eur(ESG_MAX)} si quota su misura: scrivimi qui sotto.`;
 
+  // Dopo il noleggio: riscatto, poi il risparmio resta tutto al cliente
+  const dopo =
+    conto && conto.differenza != null && bilancio
+      ? (() => {
+          const riscattoPct = RISCATTI.Fotovoltaico[conto.durata] ?? 0;
+          const riscatto = (importo * riscattoPct) / 100;
+          const beneficioAnno = bilancio.risparmioMensileTotale * 12;
+          const anniDopo = Math.max(0, VITA_UTILE_ANNI - conto.durata / 12);
+          const noleggio = conto.differenza * conto.durata;
+          const saldo = noleggio - riscatto + beneficioAnno * anniDopo;
+          return { riscattoPct, riscatto, beneficioAnno, anniDopo, saldo };
+        })()
+      : null;
+
   useEffect(() => {
     if (!conto) return;
     campo('sim_importo', String(importo));
@@ -117,6 +136,7 @@ export default function BusinessPlanFiera() {
         `canone ${eur(conto.canone)} a ${conto.durata} mesi`,
         bolletta ? `bolletta ${migliaia(bolletta)} €/mese` : '',
         conto.domani != null ? `dopo ${tondo(conto.domani)}/mese` : '',
+        dopo ? `saldo ${VITA_UTILE_ANNI} anni ${dopo.saldo >= 0 ? '+' : '-'}${tondo(Math.abs(dopo.saldo))}` : '',
         `${ZONE_LABELS[zona]}, ${PROFILI[profilo]}`,
       ].filter(Boolean).join(' · '),
     );
@@ -127,7 +147,7 @@ export default function BusinessPlanFiera() {
         try { dl.push({ event: 'fiera_simulazione', importo, durata: conto.durata }); } catch { /* mai bloccare */ }
       }
     }
-  }, [conto?.canone, conto?.domani, zona, profilo, accumulo, kwp]);
+  }, [conto?.canone, conto?.domani, dopo?.saldo, zona, profilo, accumulo, kwp]);
 
   // Le barre misurano le cifre scritte accanto: la seconda e' bolletta che resta
   // piu' canone al netto dell'energia ceduta, cioe' esattamente la spesa di domani
@@ -219,12 +239,27 @@ export default function BusinessPlanFiera() {
                 </span>
                 <span class="bpf__frase">
                   {conto.differenza! >= 0
-                    ? `ogni mese rispetto a oggi, dal primo canone. A fine noleggio l'impianto si può riscattare con una quota residua, e da lì il risparmio in bolletta resta tutto al cliente.`
-                    : conto.durata < (disponibili[disponibili.length - 1] ?? 0)
-                      ? 'rispetto a oggi: prova una durata più lunga, il canone scende.'
-                      : "rispetto a oggi: l'impianto è grande per questi consumi, conviene rivedere la potenza."}
+                    ? `al mese rispetto a oggi, dal primo canone.`
+                    : `al mese per ${conto.durata} mesi: è lo sforzo del noleggio. Poi l'impianto diventa tuo, e da quel momento in poi è tutto guadagno.`}
                 </span>
               </div>
+
+              {dopo && (
+                <div class="bpf__dopo">
+                  <p class="bpf__dopo-testa">Finito il noleggio</p>
+                  <p class="bpf__dopo-riga">
+                    Riscatti l'impianto con {dopo.riscattoPct}% del prezzo, {tondo(dopo.riscatto)}, e il canone sparisce.
+                    Quello che l'impianto ti fa risparmiare resta tutto tuo: {tondo(bilancio.risparmioMensileTotale)} al mese,{' '}
+                    {tondo(dopo.beneficioAnno)} l'anno.
+                  </p>
+                  <span class={`bpf__cifra ${dopo.saldo >= 0 ? 'pos' : 'neg'}`}>
+                    {dopo.saldo >= 0 ? `+${tondo(dopo.saldo)}` : `−${tondo(-dopo.saldo)}`}
+                  </span>
+                  <span class="bpf__frase">
+                    in {VITA_UTILE_ANNI} anni rispetto a restare in bolletta, riscatto compreso.
+                  </span>
+                </div>
+              )}
             </div>
           )}
 
@@ -239,7 +274,7 @@ export default function BusinessPlanFiera() {
 
           {avviso && <p class="simf__avviso">{avviso}</p>}
           <p class="simf__nota">
-            Stima indicativa, non è un'offerta. Canone da tabella di noleggio operativo, energia a {migliaia(Math.round((bilancio?.prezzoKwh ?? 0.28) * 100))} centesimi al kWh, irraggiamento {ZONE_LABELS[zona]}. La deducibilità del canone non è nel conto.
+            Stima indicativa, non è un'offerta. Canone da tabella di noleggio operativo, energia a {migliaia(Math.round((bilancio?.prezzoKwh ?? 0.28) * 100))} centesimi al kWh, irraggiamento {ZONE_LABELS[zona]}, {VITA_UTILE_ANNI} anni di vita utile. La deducibilità del canone non è nel conto.
           </p>
         </div>
       </div>
