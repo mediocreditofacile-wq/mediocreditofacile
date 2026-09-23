@@ -157,10 +157,8 @@ export async function creaPdfScheda(s: any, D: Dizionari) {
   doc.text(CS.rating ?? 'n.d.', xd, y + 12);
   doc.setFont('helvetica', 'normal'); doc.setFontSize(8); setCol(GRIGIO);
   doc.text(`${CS.risk_score_description ?? ''}${idx >= 0 ? ` · classe ${idx + 1} di 9` : ' · nessuna classe assegnata'}`, xd, y + 17);
-  const sev = Number(CS.risk_severity ?? 0);
   const dati: [string, string][] = [
     ['Punteggio di rischio', String(CS.risk_score ?? '—')],
-    ['Severità', `${sev} su 990`],
     ['Linea di credito consigliata', euro(CS.operational_credit_limit)],
   ];
   let yy = y + 24;

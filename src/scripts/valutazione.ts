@@ -147,7 +147,6 @@ export function rendiScheda(s: any): string {
   const ate = A.atecoClassification?.ateco ?? {};
   // rating assente (azienda troppo giovane per essere classificata): niente classe finta
   const idx = SCALA.indexOf(CS.rating ?? '') >= 0 ? SCALA.indexOf(CS.rating) : null;
-  const sev = Number(CS.risk_severity ?? 0);
 
   let h = `<div class="scheda"><div class="scheda-head">
     <div class="scheda-rs">${esc(nome)}</div>
@@ -161,11 +160,8 @@ export function rendiScheda(s: any): string {
     <div><div class="rat">${esc(CS.rating ?? 'n.d.')}<small>${esc(CS.risk_score_description ?? '')}${idx != null ? ` · classe ${idx + 1} di 9` : ' · nessuna classe assegnata'}</small></div>
       <div class="riga">
         <div><span>Punteggio di rischio</span><strong>${esc(CS.risk_score ?? '—')}</strong></div>
-        <div><span>Severità</span><strong>${sev} su 990</strong></div>
         <div><span>Linea di credito consigliata</span><strong>${euro(CS.operational_credit_limit)}</strong></div>
       </div>
-      <div class="sev"><div class="sev-bar"><div class="sev-mark" style="left:${Math.max(0.4, Math.min(100, (sev / 990) * 100)).toFixed(2)}%"></div></div>
-      <div class="sev-lab"><span>1 — rischio minimo</span><span>990 — rischio massimo</span></div></div>
     </div></div></div>`;
 
   // riassunto
