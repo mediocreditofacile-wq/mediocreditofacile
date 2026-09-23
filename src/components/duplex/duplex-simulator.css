@@ -300,3 +300,52 @@
   margin: 0 0 8px 0;
 }
 .dx-sim__paga-note { font-size: 13px; line-height: 1.5; color: #e3e9ef; margin: 0; }
+
+/* Preventivo PDF per il cliente finale */
+.dx-sim__pdf {
+  border: 1px solid var(--dx-border, #D9D7D2);
+  border-radius: 4px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-family: 'Manrope', system-ui, sans-serif;
+}
+.dx-sim__pdf-h {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--dx-blue, #1B3A57);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0;
+}
+.dx-sim__pdf-input {
+  font-family: 'Manrope', system-ui, sans-serif;
+  font-size: 15px;
+  padding: 11px 12px;
+  border: 1px solid #c9c8c5;
+  border-radius: 4px;
+  background: #ffffff;
+  color: var(--dx-text, #1A1A1A);
+  width: 100%;
+}
+.dx-sim__pdf-input:focus {
+  outline: 2px solid var(--dx-blue, #1B3A57);
+  outline-offset: 1px;
+  border-color: var(--dx-blue, #1B3A57);
+}
+.dx-sim__pdf-btn {
+  background: var(--dx-blue, #1B3A57);
+  color: #ffffff;
+  font-family: 'Manrope', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  border: 0;
+  border-radius: 4px;
+  padding: 13px 20px;
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+.dx-sim__pdf-btn:hover { background: #122a40; }
+.dx-sim__pdf-btn:disabled { background: #8d9aa6; cursor: default; }
+.dx-sim__pdf-note { font-size: 12.5px; color: #5a5a5a; line-height: 1.45; margin: 0; }

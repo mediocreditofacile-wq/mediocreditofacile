@@ -3,11 +3,12 @@
 // I numeri degli esempi escono da duplex-calendario.ts, lo stesso calcolo del simulatore.
 import { calendarioPagamenti, dataEstesa, finestreConsegna, meseAnno, trimestreEsteso } from '../../lib/duplex-calendario';
 import { coefficienteGrace } from '../../data/duplex-grace';
-import coefficienti from '../../data/duplex-coefficienti.json';
+import { coefficienteSputnik } from '../../data/duplex-sputnik';
 
 const PREZZO = 3500; // Ultrax 45
 const DURATA = 60;
-const canoneTrad = Math.round(PREZZO * coefficienti.senza_servizi[String(DURATA) as '60']);
+const cTrad = coefficienteSputnik(PREZZO, DURATA);
+const canoneTrad = Math.round((PREZZO * (cTrad ?? 0)) / 100);
 const cGrace = coefficienteGrace(PREZZO, DURATA);
 const canoneGrace = cGrace !== null ? Math.round((PREZZO * cGrace) / 100) : null;
 
@@ -128,9 +129,8 @@ const senzaAnno = (d: Date) => dataEstesa(d).replace(/ \d{4}$/, '');
       <p class="dx-gp__p">
         <strong>Cosa cambia nel prezzo.</strong> La Grace Period ha coefficienti suoi, che il simulatore applica da
         solo quando la scegli{canoneGrace !== null ? `: sulla Ultrax 45 a 60 mesi il canone passa da ${canoneTrad} a ${canoneGrace} euro al mese` : ''}.
-        Non è sempre più cara: sulle durate corte costa qualcosa in più, a 60 mesi e sopra i 5.000 euro è allineata o
-        sotto. Il numero di canoni non cambia e il pro rata si paga comunque: cambia quando. Il contratto finisce un
-        trimestre più tardi.
+        Non è sempre più cara: a 24 e 36 mesi costa un po' di più, a 48 e 60 un po' meno. Il numero di canoni non
+        cambia e il pro rata si paga comunque: cambia quando. Il contratto finisce un trimestre più tardi.
       </p>
       <p class="dx-gp__p">
         <strong>Quando proporla.</strong> Al cliente che compra in bassa stagione, a chi apre un'attività nuova e a
