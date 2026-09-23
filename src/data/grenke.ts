@@ -150,7 +150,8 @@ export function getAdjustedCoeff(valore: number, durata: number): number | null 
   return getCoeff(valore, durata);
 }
 
-// Formattazione euro (locale italiano)
+// Formattazione euro (locale italiano). useGrouping 'always' perche' l'italiano di
+// default non separa le migliaia sotto le cinque cifre (1526,00 invece di 1.526,00).
 export function eur(n: number): string {
-  return n.toLocaleString('it-IT', { style: 'currency', currency: 'EUR', minimumFractionDigits: 2 });
+  return n.toLocaleString('it-IT', { style: 'currency', currency: 'EUR', minimumFractionDigits: 2, useGrouping: 'always' } as Intl.NumberFormatOptions);
 }

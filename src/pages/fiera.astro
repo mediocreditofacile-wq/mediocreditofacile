@@ -3,6 +3,8 @@
 // Pagina autonoma, senza Layout: deve pesare poco e aprirsi su rete mobile lenta.
 // La cosa che non deve mai rompersi e' il link alla vCard: e' un <a> puro, senza JS.
 // Noindex (meta + header X-Robots-Tag in vercel.json) e fuori dalla sitemap.
+import SimulatoreFiera from '../components/fiera/SimulatoreFiera.tsx';
+
 const FONTE = 'fiera-ssec-2026';
 const WA_TESTO = 'Ciao Alberto, ci siamo visti a SSEC';
 const waBase = 'https://wa.me/393939957840';
@@ -98,6 +100,29 @@ const waBase = 'https://wa.me/393939957840';
     footer { padding: 0 16px 32px; font-size: 12px; color: var(--mcf-taupe); text-align: center; }
     footer a { color: var(--mcf-taupe); }
 
+
+    /* Simulatore (isola SimulatoreFiera): finche' non c'e' data-pronto il corpo resta
+       invisibile ma occupa il suo spazio, cosi' l'idratazione non sposta niente */
+    .simf { margin-bottom: 20px; }
+    .simf__area { position: relative; }
+    .simf__corpo { visibility: hidden; }
+    .simf[data-pronto] .simf__corpo { visibility: visible; }
+    .simf__ripiego { position: absolute; left: 0; right: 0; top: 0; margin: 0; font-size: 15px; color: var(--mcf-taupe); }
+    .simf[data-pronto] .simf__ripiego { display: none; }
+    .simf h2 { margin-bottom: 16px; }
+    .simf__euro { position: relative; }
+    .simf__euro input { padding-right: 40px; font-size: 20px; font-weight: 600; }
+    .simf__euro span { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); font-weight: 600; color: var(--mcf-taupe); }
+    .simf__etichetta { display: block; font-size: 14px; font-weight: 600; margin: 0 0 6px; }
+    .simf__durate { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .simf__durate button { min-height: 48px; padding: 6px 4px; border-radius: 10px; border: 1.5px solid var(--mcf-platinum); background: #fff; color: var(--mcf-text); font: 600 15px/1.2 var(--font); cursor: pointer; }
+    .simf__durate button.on { border-color: var(--mcf-accent); background: rgba(102,76,205,0.10); color: var(--mcf-black); }
+    .simf__esito { margin-top: 6px; padding: 16px; border-radius: 12px; background: var(--mcf-black); color: var(--offwhite); }
+    .simf__cifra { display: block; font-size: 32px; font-weight: 800; line-height: 1.1; font-variant-numeric: tabular-nums; }
+    .simf__unita { display: block; margin-top: 4px; font-size: 14px; color: #D9D6DE; }
+    .simf__avviso { margin: 10px 0 0; font-size: 14px; color: var(--mcf-primary-dark); }
+    .simf__nota { margin: 10px 0 0; font-size: 13px; color: var(--mcf-taupe); }
+
     @media (min-width: 600px) { h1 { font-size: 34px; } .hero { padding-top: 40px; } }
   </style>
 </head>
@@ -125,6 +150,9 @@ const waBase = 'https://wa.me/393939957840';
 
   <main>
     <div class="wrap">
+      <!-- Isola separata: se non si idrata resta il ripiego, e il resto della pagina funziona uguale -->
+      <SimulatoreFiera client:load />
+
       <form class="card" id="form-fiera" action="/api/submit" method="post" novalidate>
         <h2>Dimmi cosa vendi, ti mando la rata</h2>
         <p class="sub">Rispondo entro 24 ore.</p>
@@ -132,6 +160,8 @@ const waBase = 'https://wa.me/393939957840';
         <input type="hidden" name="fonte" value={FONTE} />
         <input type="hidden" name="variante" value="fiera" />
         <input type="hidden" name="sorgente" id="sorgente" value="" />
+        <input type="hidden" name="importo_simulato" id="sim_importo" value="" />
+        <input type="hidden" name="durata_simulata" id="sim_durata" value="" />
         <div class="hp" aria-hidden="true">
           <label for="website">Sito web</label>
           <input type="text" id="website" name="website" tabindex="-1" autocomplete="off" />
