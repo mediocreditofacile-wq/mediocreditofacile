@@ -103,7 +103,9 @@ function credenziali() {
 
 // Il token vive nel modulo: su Fluid Compute l'istanza si riusa fra richieste,
 // quindi in pratica lo si crea una volta ogni tanto, non a ogni ricerca.
-let tokenCache: { token: string; scade: number } | null = null;
+// La data di creazione serve solo al log quando Openapi lo rifiuta.
+interface TokenAttivo { token: string; scade: number; creato: string }
+let tokenCache: TokenAttivo | null = null;
 
 // Il nome del token porta dentro l'impronta degli scope. Serve perche' il token
 // esistente viene riusato finche' e' valido: se si aggiunge un servizio (per dire
@@ -118,8 +120,8 @@ function improntaScope(): string {
 }
 const NOME_TOKEN = `mcf-runtime-${improntaScope()}`;
 
-export async function getToken(): Promise<string> {
-  if (tokenCache && Date.now() < tokenCache.scade - 60_000) return tokenCache.token;
+async function tokenAttivo(): Promise<TokenAttivo> {
+  if (tokenCache && Date.now() < tokenCache.scade - 60_000) return tokenCache;
 
   const auth = credenziali();
   // Riusa un token nostro ancora valido invece di accumularne uno per avvio
@@ -130,8 +132,12 @@ export async function getToken(): Promise<string> {
     (t: any) => t?.name === NOME_TOKEN && new Date(t?.expireAt ?? 0).getTime() > Date.now() + 3600_000,
   );
   if (esistente?.token) {
-    tokenCache = { token: esistente.token, scade: new Date(esistente.expireAt).getTime() };
-    return esistente.token;
+    tokenCache = {
+      token: esistente.token,
+      scade: new Date(esistente.expireAt).getTime(),
+      creato: String(esistente.createdAt ?? ''),
+    };
+    return tokenCache;
   }
 
   const res = await fetch(`${OAUTH}/tokens`, {
@@ -143,39 +149,74 @@ export async function getToken(): Promise<string> {
   if (!body?.success || !body?.data?.token) {
     throw new Error(`Token Openapi non creato: ${body?.message ?? res.status}`);
   }
-  tokenCache = { token: body.data.token, scade: new Date(body.data.expireAt).getTime() };
-  return body.data.token;
+  tokenCache = {
+    token: body.data.token,
+    scade: new Date(body.data.expireAt).getTime(),
+    creato: String(body.data.createdAt ?? new Date().toISOString()),
+  };
+  return tokenCache;
 }
+
+export async function getToken(): Promise<string> {
+  return (await tokenAttivo()).token;
+}
+
+// Attese prima di ogni nuovo tentativo quando Openapi risponde "Wrong Token".
+// Due i casi visti. Il token appena creato, che impiega qualche secondo a
+// diventare operativo: basta la prima attesa. E il 30/09/2026 un token valido,
+// in uso da un mese e con credito sul wallet, rifiutato due volte a 4 secondi
+// di distanza e accettato di nuovo pochi minuti dopo: per quello c'e' la seconda.
+const ATTESE_WRONG_TOKEN = [4_000, 10_000];
+
+// Al posto di "IT-full: Wrong Token", che fa pensare a un guasto nostro. La
+// chiamata rifiutata non si paga, e dove il messaggio arriva e' la prima della
+// richiesta, quindi "nulla" e' vero.
+export const MESSAGGIO_ACCESSO_RIFIUTATO =
+  'Openapi non ha accettato l\'accesso in questo momento, non è stato addebitato nulla: riprova tra qualche minuto';
+
+const isoOppureNull = (ms: number) => (Number.isFinite(ms) ? new Date(ms).toISOString() : null);
 
 async function chiama(
   url: string,
   servizio: Servizio,
   init?: RequestInit,
-  ritenta = true,
   sorgente: Sorgente = 'sito',
 ): Promise<any> {
-  const token = await getToken();
-  const res = await fetch(url, {
-    ...init,
-    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', ...(init?.headers ?? {}) },
-  });
-  // 204 = nessun risultato: partita IVA inesistente o non trovata
-  if (res.status === 204) return { trovato: false, dati: null };
-  const body = await res.json().catch(() => null);
-  // Un token appena creato impiega qualche secondo a diventare operativo: la
-  // prima chiamata dopo un avvio a freddo puo' tornare "Wrong Token". Si aspetta
-  // e si riprova una volta sola, altrimenti l'utente vede un errore fantasma.
-  if (ritenta && /wrong token/i.test(String(body?.message ?? ''))) {
-    tokenCache = null;
-    await new Promise((r) => setTimeout(r, 4000));
-    return chiama(url, servizio, init, false, sorgente);
+  for (let tentativo = 0; ; tentativo++) {
+    const t = await tokenAttivo();
+    const res = await fetch(url, {
+      ...init,
+      headers: { Authorization: `Bearer ${t.token}`, 'Content-Type': 'application/json', ...(init?.headers ?? {}) },
+    });
+    // 204 = nessun risultato: partita IVA inesistente o non trovata
+    if (res.status === 204) return { trovato: false, dati: null };
+    const body = await res.json().catch(() => null);
+
+    if (/wrong token/i.test(String(body?.message ?? ''))) {
+      const attesa = ATTESE_WRONG_TOKEN[tentativo];
+      // Nome e date del token, mai il valore: dicono se era appena nato o se
+      // Openapi ha rifiutato un token vecchio e buono
+      console.warn(JSON.stringify({
+        evento: 'openapi_wrong_token',
+        servizio,
+        tentativo: tentativo + 1,
+        token: NOME_TOKEN,
+        creato: t.creato,
+        scade: isoOppureNull(t.scade),
+        riprovaTraMs: attesa ?? null,
+      }));
+      if (attesa === undefined) throw new Error(MESSAGGIO_ACCESSO_RIFIUTATO);
+      tokenCache = null;
+      await new Promise((r) => setTimeout(r, attesa));
+      continue;
+    }
+    if (!res.ok || body?.success === false) {
+      throw new Error(`${servizio}: ${body?.message ?? res.status}`);
+    }
+    await registraCosto(servizio, sorgente);
+    const dati = Array.isArray(body?.data) ? body.data[0] ?? null : body?.data ?? null;
+    return { trovato: dati != null, dati, lista: Array.isArray(body?.data) ? body.data : null };
   }
-  if (!res.ok || body?.success === false) {
-    throw new Error(`${servizio}: ${body?.message ?? res.status}`);
-  }
-  await registraCosto(servizio, sorgente);
-  const dati = Array.isArray(body?.data) ? body.data[0] ?? null : body?.data ?? null;
-  return { trovato: dati != null, dati, lista: Array.isArray(body?.data) ? body.data : null };
 }
 
 // --- registro spesa ----------------------------------------------------------
@@ -616,7 +657,7 @@ export async function ricercaBase(
   const daCache = await ricercaSoloCache(piva);
   if (daCache) return daCache;
 
-  const res = await chiama(`${COMPANY}/IT-advanced/${piva}`, 'IT-advanced', undefined, true, opts.sorgente ?? 'sito');
+  const res = await chiama(`${COMPANY}/IT-advanced/${piva}`, 'IT-advanced', undefined, opts.sorgente ?? 'sito');
   if (!res.trovato || !res.dati) {
     return {
       trovata: false, piva, fonte: 'openapi', ragioneSociale: null, formaGiuridica: null, stato: null,
