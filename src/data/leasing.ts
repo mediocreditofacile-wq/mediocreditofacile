@@ -214,9 +214,11 @@ export function agevolazioneAttiva(key: AgevolazioneKey): boolean {
 // ═══════════════════════════════════════════════════════════════════════════
 
 // Euribor 3M — da aggiornare manualmente quando il valore cambia in modo significativo
-// Fonte: rilevazione su Lease for Business al 09/05/2026 (Banca d'Italia / EMMI)
-export const EURIBOR_3M = 2.23; // % annuo
-export const EURIBOR_3M_DATA = '09/05/2026';
+// Fonte: preventivo Sella Leasing n. 17714/2 del 22/09/2026, indicizzazione "Euribor 3 mesi
+// 365" al 2,66%. Prima era 2,23 (rilevazione su Lease for Business al 09/05/2026).
+// Lo stesso valore sta nel tool Marotta (public/tools/marotta/index.html, EURIBOR_3M).
+export const EURIBOR_3M = 2.66; // % annuo
+export const EURIBOR_3M_DATA = '22/09/2026';
 
 // Tipologie bene supportate dal simulatore leasing
 // Per ora SOLO strumentale generico, ma struttura parametrica per estensione futura
