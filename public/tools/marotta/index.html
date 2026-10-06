@@ -417,6 +417,15 @@
   .acc-item input { width:18px; height:18px; accent-color:var(--blue); cursor:pointer; }
   .acc-name { flex:1; font-weight:500; }
   .acc-price { color:var(--text-muted); font-weight:600; font-size:13px; }
+  /* .acc-item .acc-prezzo: batte ".acc-item input", che vale per le caselle da 18px */
+  .acc-item .acc-prezzo {
+    width:130px; height:auto; flex-shrink:0; padding:7px 9px; font-size:13px; text-align:right; cursor:text;
+    border:1px solid var(--border-strong); border-radius:var(--radius-sm);
+    background:var(--surface); color:var(--text); outline:none;
+  }
+  /* disabilitato il clic passa all'etichetta: spunta l'accessorio e porta il cursore nel campo */
+  .acc-item .acc-prezzo:disabled { opacity:0.45; pointer-events:none; }
+  .acc-avviso { font-size:11px; color:var(--amber-text); margin:-2px 0 8px 40px; }
   .altro-row { display:flex; gap:8px; margin-bottom:8px; align-items:center; }
   .altro-row .altro-desc { flex:1; }
   .altro-row .altro-prezzo { width:120px; flex-shrink:0; }
@@ -450,6 +459,11 @@
   .scenario-out { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm); padding:10px 12px; }
   .scenario-out-row { display:flex; justify-content:space-between; font-size:13px; padding:3px 0; color:var(--text-muted); }
   .scenario-out-row strong { color:var(--text); }
+  .scenario-operatore { font-size:11px; color:var(--text-hint); margin:-4px 0 10px; }
+  .scenario-avviso {
+    font-size:12px; line-height:1.45; margin-top:8px; padding:7px 10px; border-radius:var(--radius-sm);
+    background:var(--amber-bg); color:var(--amber-text);
+  }
   .scenario-pdf { display:flex; align-items:center; gap:8px; font-size:13px; margin-top:10px; cursor:pointer; }
   .scenario-pdf input { width:16px; height:16px; accent-color:var(--blue); }
   .plafond-row { display:grid; grid-template-columns:1fr 1fr 1fr auto; gap:10px; align-items:end; padding:10px 0; border-bottom:1px solid var(--border); }
@@ -730,7 +744,7 @@
 </script>
 
 <div class="topbar">
-  <img src="https://marottaevolution.it/wp-content/uploads/2020/09/logo-marotta-tricolore.png" alt="Marotta Evolution" onerror="this.style.display='none'">
+  <img id="topbarLogo" alt="Marotta Evolution">
   <div class="topbar-title">Strumento finanziario MCF</div>
   <div class="topbar-badge">Uso interno — riservato</div>
   <button type="button" class="topbar-exit" onclick="esciTool()">Esci</button>
@@ -817,7 +831,7 @@
       <div class="field-label" style="margin-bottom:8px;">Prezzo macchina (IVA esclusa)</div>
       <div class="price-row">
         <button type="button" class="price-step" onclick="stepPrezzo(-500)" title="-500 €">&minus;</button>
-        <input class="price-input" id="prezzoInput" type="text" inputmode="numeric" oninput="onPrezzoInput(this)">
+        <input class="price-input" id="prezzoInput" type="text" inputmode="numeric" value="0" onfocus="this.select()" oninput="onPrezzoInput(this)">
         <button type="button" class="price-step" onclick="stepPrezzo(500)" title="+500 €">+</button>
       </div>
       <div class="note-small" id="prezzoHint"></div>
@@ -836,19 +850,19 @@
 
       <hr class="divider">
 
-      <div class="card-title">Simulatore canone Grenke — locazione operativa</div>
+      <div class="card-title">Simulatore canone Grenke — locazione operativa fino a €<span class="tetto-grenke">240.000</span></div>
       <table class="canone-table">
         <thead>
           <tr><th>Durata</th><th>Importo</th><th>Canone/mese</th><th>Riscatto</th><th>Pagamento</th></tr>
         </thead>
         <tbody id="canoneBody"></tbody>
       </table>
-      <div class="note-small">Pagamento trimestrale anticipato standard. Mensile disponibile sopra €12.000 di canone con maggiorazione +5%. Riscatto secondo tabella Grenke (categoria Altri Beni Strumentali). Assicurazione obbligatoria non inclusa nei coefficienti.</div>
+      <div class="note-small">Pagamento trimestrale anticipato standard. Mensile disponibile sopra €12.000 di canone con maggiorazione +5%. Riscatto secondo tabella Grenke (categoria Altri Beni Strumentali). Assicurazione obbligatoria non inclusa nei coefficienti. Sopra €<span class="tetto-grenke">240.000</span> di offerta Grenke non quota: il noleggio passa su Econocom, nel Confronto soluzioni.</div>
 
       <hr class="divider">
 
       <div class="card-title">Preventivatore inverso — dal canone al prezzo</div>
-      <div class="note-small" style="margin-top:0;">Quando il cliente ragiona a rata e non a prezzo: inserisci il canone che è disposto a pagare e ottieni il massimo importo di macchine finanziabile su quella durata.</div>
+      <div class="note-small" style="margin-top:0;">Quando il cliente ragiona a rata e non a prezzo: inserisci il canone che è disposto a pagare e ottieni il massimo importo di macchine finanziabile con Grenke su quella durata, fino al tetto di €<span class="tetto-grenke">240.000</span>.</div>
       <div class="prev-grid" style="margin-top:12px;">
         <div>
           <div class="field-label">Canone obiettivo (€/mese)</div>
@@ -882,16 +896,16 @@
         <div class="override-title">Override manuale (Carmine)</div>
         <div class="override-row">
           <span class="override-label">Anticipo richiesto</span>
-          <input type="range" id="slAnticipo" min="0" max="30" step="5" value="0" oninput="aggiornaOverride()">
+          <input type="range" id="slAnticipo" min="0" max="30" step="1" value="0" oninput="aggiornaOverride('anticipo')">
           <span class="override-val" id="outAnticipo">0%</span>
         </div>
         <div class="override-row">
           <span class="override-label">Markup canone</span>
-          <select id="selMarkup" onchange="aggiornaOverride()">
+          <select id="selMarkup" onchange="aggiornaOverride('markup')">
             <option value="0">Nessuno (0%)</option>
-            <option value="0.3">+0.3%</option>
-            <option value="0.5">+0.5%</option>
-            <option value="1">+1.0%</option>
+            <option value="0.3">+0,3%</option>
+            <option value="0.5">+0,5%</option>
+            <option value="1">+1%</option>
           </select>
         </div>
         <textarea class="override-note" id="creditNote" placeholder="Note interne (non appaiono nel preventivo)..."></textarea>
@@ -957,7 +971,7 @@
     <!-- Confronto soluzioni -->
     <div class="card" id="confrontoCard">
       <div class="card-title">Confronto soluzioni</div>
-      <div class="note-small">Quattro scenari finanziari sulla stessa configurazione (€<span id="confrontoImporto"></span>). Spunta quelli da includere nel preventivo PDF.</div>
+      <div class="note-small">Fino a quattro soluzioni sulla stessa configurazione (€<span id="confrontoImporto"></span>). Quelle spuntate compongono il preventivo PDF, affiancate in una tabella. Il noleggio va su Grenke fino a €<span class="tetto-grenke">240.000</span> e su Econocom sopra; il leasing è Sella, con anticipo di partenza al 10%. Anticipo e markup della valutazione creditizia entrano già nei numeri.</div>
       <div class="scenari-grid" id="scenariGrid"></div>
     </div>
 
@@ -974,7 +988,7 @@
         <div class="prev-grid" style="margin-top:16px;">
           <div>
             <div class="field-label">Area</div>
-            <select class="select-styled" id="esteroArea" onchange="aggiornaEstero()">
+            <select class="select-styled" id="esteroArea" onchange="ricalcola()">
               <option value="schengen">Area Schengen / SEPA</option>
               <option value="extra">Extra-Schengen (con assicurazione crediti)</option>
             </select>
@@ -1089,18 +1103,20 @@
 
 <script>
 // Catalogo allineato al tool Marotta (Joker Store): 3 macchine principali + 4 accessori.
-// I prezzi sono quelli del listino corrente. prezzoMin/prezzoMax = range per le frecce ±500 (step 2).
-// TODO: confermare range Fast/Mevo6 e prezzi accessori con Martina (ufficio tecnico Marotta).
+// Niente prezzi di listino, nemmeno qui (30/09/2026, richiesta di Andrea): il tool si usa
+// davanti al cliente e il prezzo lo digita il commerciale, partendo da zero. Un listino
+// accanto al nome diceva una cifra e il campo un'altra, e il cliente chiedeva quale delle due
+// fosse vera. Il sorgente della pagina è leggibile, quindi i prezzi non stanno neanche nel codice.
 const MACCHINE = [
   // --- Macchine principali (formatrici, scelta unica) ---
-  {id:"plus", nome:"Mevo Plus", prezzo:145000, prezzoMin:145000, prezzoMax:155000, pezziOra:400,  tipo:"principale"},
-  {id:"fast", nome:"Mevo Fast", prezzo:185000, prezzoMin:185000, prezzoMax:195000, pezziOra:1200, tipo:"principale"},
-  {id:"mevo6",nome:"Mevo 6",    prezzo:280000, prezzoMin:280000, prezzoMax:290000, pezziOra:2400, tipo:"principale"},
+  {id:"plus", nome:"Mevo Plus", pezziOra:400,  tipo:"principale"},
+  {id:"fast", nome:"Mevo Fast", pezziOra:1200, tipo:"principale"},
+  {id:"mevo6",nome:"Mevo 6",    pezziOra:2400, tipo:"principale"},
   // --- Accessori / kit (configurabili dopo la scelta della principale) ---
-  {id:"evotella",   nome:"Evotella",     prezzo:45000, pezziOra:0, tipo:"accessorio", compatibile:["plus","fast","mevo6"]},
-  {id:"evomixer",   nome:"Evo Mixer",    prezzo:35000, pezziOra:0, tipo:"accessorio", compatibile:["plus","fast","mevo6"]},
-  {id:"evotransfer",nome:"Evo Transfer", prezzo:28000, pezziOra:0, tipo:"accessorio", compatibile:["plus","fast","mevo6"]},
-  {id:"evoclean",   nome:"Evo Clean",    prezzo:38000, pezziOra:0, tipo:"accessorio", compatibile:["plus","fast","mevo6"]},
+  {id:"evotella",   nome:"Evotella",     pezziOra:0, tipo:"accessorio", compatibile:["plus","fast","mevo6"]},
+  {id:"evomixer",   nome:"Evo Mixer",    pezziOra:0, tipo:"accessorio", compatibile:["plus","fast","mevo6"]},
+  {id:"evotransfer",nome:"Evo Transfer", pezziOra:0, tipo:"accessorio", compatibile:["plus","fast","mevo6"]},
+  {id:"evoclean",   nome:"Evo Clean",    pezziOra:0, tipo:"accessorio", compatibile:["plus","fast","mevo6"]},
 ];
 
 // Solo le 3 principali sono selezionabili come macchina base
@@ -1145,7 +1161,8 @@ const DEMO={
   "22222222220":{rs:"Formaggi Del Sud Srl",fat:290000},
 };
 
-let stato={fat:0,rs:"",piva:"",canale:"grenke",macchina:null,azienda:null,durataSelezionata:36,
+// accessori: [{id, prezzo}] — prezzo digitato dal commerciale, 0 = incluso nell'offerta
+let stato={fat:0,rs:"",piva:"",canale:"grenke",macchina:null,azienda:null,override:null,
   prezzoPrincipale:0,accessori:[],altriMacchinari:[],prezzoTotale:0,funnelAttivo:false,funnel:null,
   canaleDoc:null,docSpuntati:{},scenari:null,plafond:null,
   inverso:null,estero:{attivo:false,valoreManuale:false},
@@ -1346,9 +1363,14 @@ function renderControparte(){
 function aggiornaProspettoEstero(){
   if(!stato.paeseControparte)return;
   clearTimeout(window._espTimer);
+  // paese e codice fissati ora: se nel frattempo si cerca un altro cliente, la risposta si butta
+  const paese=stato.paeseControparte, id=stato.idControparte;
+  const stesso=()=>stato.paeseControparte===paese&&stato.idControparte===id;
   window._espTimer=setTimeout(async()=>{
+    if(!stesso()) return;
     try{
-      const d=await cercaEstero(stato.paeseControparte,stato.idControparte);
+      const d=await cercaEstero(paese,id);
+      if(!stesso()) return;
       if(d&&d.found){
         stato.export=d.esito;
         if(stato.azienda) stato.azienda.esito=d.esito;
@@ -1397,6 +1419,7 @@ function onPivaInput(el){
 
 async function cerca(){
   const piva=document.getElementById("pivaInput").value.trim();
+  clearTimeout(window._espTimer); // nessuna risposta del cliente precedente deve arrivare dopo
   stato.piva=piva;
   stato.azienda=null;
   stato.paeseControparte=null;stato.idControparte=null;stato.export=null;stato.newco=null;
@@ -1476,8 +1499,18 @@ function elaboraManuale(){
   const fat=parseInt(document.getElementById("manFat").value);
   if(!rs||!fat)return;
   stato.rs=rs;stato.fat=fat;
+  // Controparte estera non trovata nel registro: resta estera. Senza, il tool la tratta
+  // da italiana (P.IVA nel PDF, noleggio Grenke anche fuori Schengen).
+  const iso=paeseSelezionato();
+  if(iso!=="IT") stato.azienda={paese:iso};
   document.getElementById("manualForm").style.display="none";
   elabora();
+  if(iso!=="IT"){
+    document.getElementById("esteroToggle").checked=true;
+    document.getElementById("esteroPaese").value=nomePaese(iso);
+    document.getElementById("esteroArea").value=PAESI_SEPA.some(([c])=>c===iso)?"schengen":"extra";
+    toggleEstero();
+  }
 }
 
 function classifica(fat){
@@ -1486,41 +1519,127 @@ function classifica(fat){
   return{label:"Strutturato",fascia:"large",canale:"sella",canaleLabel:"Sella Leasing",incentivi:true};
 }
 
+// L'ultima fascia è aperta verso l'alto; sotto la prima (500 €) la tabella non quota,
+// e prima si ricadeva sul coefficiente più basso: 300 € uscivano a 14 al mese.
 function getCoeff(prezzo,mesi){
   const row=GRENKE.find(r=>r.mesi===mesi);
   if(!row)return null;
-  const b=row.bands.find(b=>prezzo>=b.da&&prezzo<=b.a)||row.bands[row.bands.length-1];
-  return b.c;
+  const ult=row.bands[row.bands.length-1];
+  const b=row.bands.find(b=>prezzo>=b.da&&prezzo<=b.a)||(prezzo>ult.a?ult:null);
+  return b?b.c:null;
 }
+const GRENKE_MINIMO=500;
 
 function calcCanone(prezzo,mesi){
   const c=getCoeff(prezzo,mesi);
   return c?Math.round(prezzo*c/100):null;
 }
 
+// Markup della credit policy (suggerito o deciso da Carmine), in % sul canone. Lo leggono
+// scenari, tabella Grenke e preventivatore inverso, così nessuno mostra un canone diverso.
+function markupAttuale(){ const cp=stato.creditPolicy; return cp?(cp.overrideMarkup||0):0; }
+function canoneGrenkeConMarkup(prezzo,mesi,markup){
+  const c=getCoeff(prezzo,mesi);
+  const m=markup!=null?markup:markupAttuale();
+  return c?Math.round(prezzo*c/100*(1+m/100)):null;
+}
+// Markup che la credit policy darebbe su un altro importo: l'override di Carmine se c'è,
+// altrimenti il criterio 2 di valutaCreditPolicy (patrimonio netto rispetto al prezzo).
+// Serve al preventivatore inverso, che cerca proprio l'importo e non può usare il markup
+// calcolato sul prezzo di partenza.
+function markupPerImporto(prezzo){
+  if(stato.override&&stato.override.markup!=null) return stato.override.markup;
+  const pn=stato.azienda?.patrimonioNetto;
+  if(pn==null||!(prezzo>0)) return 0;
+  const r=pn/prezzo*100;
+  return r>=75?0:r>=60?0.3:r>=50?0.5:0;
+}
+// Le stesse fasce viste dal lato dell'importo: fino a PN/0,75 markup 0, fino a PN/0,6 +0,3,
+// fino a PN/0,5 +0,5, oltre di nuovo 0 (lì il semaforo è rosso). Con l'override di Carmine
+// o senza patrimonio netto la fascia è una sola.
+function fasceMarkup(){
+  if(stato.override&&stato.override.markup!=null) return [{m:stato.override.markup,da:0,a:Infinity}];
+  const pn=stato.azienda?.patrimonioNetto;
+  if(pn==null||!(pn>0)) return [{m:0,da:0,a:Infinity}];
+  const s1=Math.floor(pn/0.75), s2=Math.floor(pn/0.6), s3=Math.floor(pn/0.5);
+  return [{m:0,da:0,a:s1},{m:0.3,da:s1+1,a:s2},{m:0.5,da:s2+1,a:s3},{m:0,da:s3+1,a:Infinity}];
+}
+
 // Riscatto Grenke per durata — categoria "Altri Beni Strumentali" (fonte: src/data/grenke.ts MCF)
 const RISCATTO={24:10,36:6,48:4,60:3};
+
+// Grenke quota le offerte fino a 240.000 € (Alberto ad Andrea, call del 30/09/2026). Sopra
+// non si calcola niente su Grenke: il noleggio passa su Econocom, il leasing resta.
+// Vale per il cliente italiano; l'estero ha il suo tetto (GRENKE_LIMITE_ESTERO, 200.000).
+const GRENKE_LIMITE=240000;
+
+// Cliente fuori Italia (toggle "Partner estero" o controparte estera trovata): vale la
+// regola export, la stessa del pannello estero, altrimenti la stessa schermata direbbe
+// Econocom sopra e Grenke sotto. Tetto Grenke 200.000; fuori area Schengen niente Grenke.
+function clienteEstero(){ return !!(stato.estero&&stato.estero.attivo); }
+function fuoriSchengen(){
+  const el=document.getElementById('esteroArea');
+  return clienteEstero()&&!!el&&el.value==='extra';
+}
+function limiteGrenke(){ return clienteEstero()?GRENKE_LIMITE_ESTERO:GRENKE_LIMITE; }
+function grenkeDisponibile(importo){ return importo>0&&importo<=limiteGrenke()&&!fuoriSchengen(); }
+
+// Operatore del noleggio: lo decide l'importo dell'offerta, non il commerciale.
+// 'sace' = cliente fuori area Schengen sotto il tetto: il noleggio non si fa, si passa
+// dal percorso assicurato della sezione Partner estero.
+function operatoreNoleggio(importo){
+  if(!(importo>0)) return null;
+  if(importo>limiteGrenke()) return 'econocom';
+  return fuoriSchengen()?'sace':'grenke';
+}
+
+// --- Econocom: noleggio operativo sopra i 240.000 € ---
+// 60 mesi: tabella inviata da Luca Silvestrin (Econocom) il 26/05/2026, la stessa di
+// src/data/econocom-pa.ts MCF. E' l'unica durata che Econocom ha messo per iscritto.
+// 24, 36 e 48 mesi NON vengono da una tabella Econocom: sono ricavati dal 60 alle stesse
+// condizioni finanziarie, col metodo della proposta Buffalo Food del 17/07/2026 (tasso
+// mensile implicito nel coefficiente a 60 mesi, rendita a rate posticipate), fascia per
+// fascia. Scelta di Alberto del 30/09/2026, consapevole che deroga alla regola "un
+// coefficiente viene sempre da una tabella": per questo a video e nel PDF quei canoni
+// dicono "da confermare con Econocom". Il metodo riproduce al centesimo i canoni Buffalo
+// su 400.000 € (36 mesi: 12.427,81; 48 mesi: 9.656,65).
+// Fasce: da incluso, a escluso. Canone mensile anticipato, nessun riscatto in tabella.
+const ECONOCOM_FASCE=[
+  {da:150000,a:300000,label:"fascia 150–300k",c:{24:0.04515444,36:0.03126270,48:0.02433798,60:0.0202}},
+  {da:300000,a:500000,label:"fascia 300–500k",c:{24:0.04496327,36:0.03106953,48:0.02414163,60:0.0200}},
+  {da:500000,a:700000,label:"fascia 500–700k",c:{24:0.04486743,36:0.03097279,48:0.02404338,60:0.0199}},
+  {da:700000,a:null,  label:"oltre 700k",     c:{24:0.04467525,36:0.03077897,48:0.02384670,60:0.0197}},
+];
+const ECONOCOM_DURATA_TABELLA=60; // l'unica letta davvero da una tabella
+
+function canoneEconocom(importo,mesi){
+  if(!(importo>=ECONOCOM_MIN))return null;
+  const f=ECONOCOM_FASCE.find(f=>importo>=f.da&&(f.a===null||importo<f.a));
+  const c=f?f.c[mesi]:null;
+  return c?{coeff:c,fascia:f,daConfermare:mesi!==ECONOCOM_DURATA_TABELLA}:null;
+}
 
 // --- Preventivatore inverso: dal canone al prezzo ---
 // Il coefficiente dipende dalla fascia di prezzo, quindi non basta dividere: si cerca
 // la fascia in cui la soluzione prezzo = canone / coefficiente ricade davvero.
-// Se la soluzione cade in un buco fra due fasce si tiene la fascia inferiore (prezzo
-// più basso, quindi mai un importo promesso al cliente che poi non regge).
-function prezzoDaCanone(canone,mesi){
+// Si parte dalla fascia più alta: i coefficienti scendono con l'importo, quindi la prima
+// fascia che regge dà l'importo massimo (prima si partiva dal basso e, dove due fasce
+// contigue reggevano entrambe, si proponeva la più bassa: 48.824 invece di 50.256).
+// Se la soluzione cade in un buco fra due fasce si tiene il tetto della fascia inferiore,
+// mai un importo che poi non regge. max = tetto esterno (Grenke o fascia di markup).
+function prezzoDaCanone(canone,mesi,max=Infinity){
   const row=GRENKE.find(r=>r.mesi===mesi);
   if(!row||!(canone>0))return null;
   const ultima=row.bands.length-1;
-  let fallback=null;
-  for(let i=0;i<row.bands.length;i++){
+  for(let i=ultima;i>=0;i--){
     const b=row.bands[i];
-    // l'ultima fascia è aperta verso l'alto: getCoeff() applica quel coefficiente
-    // anche sopra i 500.000, quindi qui va trattata allo stesso modo
-    const tetto=i===ultima?Infinity:b.a;
+    if(b.da>max) continue;
+    // l'ultima fascia è aperta verso l'alto, come in getCoeff()
+    const tetto=Math.min(i===ultima?Infinity:b.a,max);
     const p=canone*100/b.c;
-    if(p>=b.da&&p<=tetto) return {prezzo:Math.floor(p),coeff:b.c,esatto:true};
-    if(p>tetto) fallback={prezzo:b.a,coeff:b.c,esatto:false};
+    if(p>=b.da) return {prezzo:Math.floor(Math.min(p,tetto)),grezzo:Math.floor(p),coeff:b.c,esatto:p<=tetto};
   }
-  return fallback;
+  return null;
 }
 
 function aggiornaInverso(){
@@ -1528,22 +1647,46 @@ function aggiornaInverso(){
   const mesi=parseInt(document.getElementById('invDurata').value);
   const box=document.getElementById('invResult');
   const btn=document.getElementById('invApply');
-  if(!(canone>0)){box.style.display='none';btn.style.display='none';return;}
+  // ogni ramo che nasconde il bottone azzera anche l'importo: non si porta un numero che non vale più
+  const nascondi=html=>{ stato.inverso=null; btn.style.display='none'; box.style.display=html?'block':'none'; if(html) box.innerHTML=html; };
+  if(!(canone>0)) return nascondi('');
 
-  const r=prezzoDaCanone(canone,mesi);
-  if(!r){box.style.display='block';btn.style.display='none';box.innerHTML='Canone fuori dalle fasce Grenke per questa durata.';return;}
+  if(fuoriSchengen()) return nascondi('Cliente fuori area Schengen: Grenke non opera, si passa dal percorso assicurato nella sezione Partner estero.');
 
-  const canoneReale=calcCanone(r.prezzo,mesi)||0;
+  // Col markup attivo il canone del preventivo è più alto: si cerca l'importo sul canone
+  // al netto del markup, così il cliente paga quello che ha chiesto e non 1% in più.
+  // Il markup automatico cambia con l'importo (patrimonio netto / prezzo), quindi si cerca
+  // il massimo dentro ogni fascia di markup e si tiene il più alto. Non dipende dal prezzo
+  // digitato prima e alle soglie non sfora il canone chiesto.
+  const tetto=limiteGrenke();
+  let best=null;
+  for(const f of fasceMarkup()){
+    const x=prezzoDaCanone(canone/(1+f.m/100),mesi,Math.min(f.a,tetto));
+    if(!x) continue;
+    const p=x.prezzo;
+    if(p<f.da||p<GRENKE_MINIMO||markupPerImporto(p)!==f.m) continue;
+    if(!best||p>best.prezzo) best={prezzo:p,markup:f.m,grezzo:x.grezzo,esatto:x.esatto,tagliatoFascia:p<x.grezzo&&p===f.a};
+  }
+  if(!best) return nascondi('Canone fuori dalle fasce Grenke per questa durata.');
+  const r=best;
+
+  // Oltre il tetto Grenke non si promette niente: l'importo si ferma al tetto
+  const oltre=best.grezzo>tetto&&best.prezzo===tetto;
+  const prezzo=best.prezzo;
+  const markup=best.markup; // quello che il preventivo applicherà davvero su questo importo
+  const canoneReale=canoneGrenkeConMarkup(prezzo,mesi,markup)||0;
   const riscPerc=RISCATTO[mesi]||0;
-  const riscVal=Math.round(r.prezzo*riscPerc/100);
-  let html=`<strong>Importo massimo finanziabile: €${fmt(r.prezzo)}</strong>`;
-  html+=`<br>Canone effettivo su quell'importo: €${fmt(canoneReale)}/mese × ${mesi} mesi`;
+  const riscVal=Math.round(prezzo*riscPerc/100);
+  let html=`<strong>Importo massimo finanziabile: €${fmt(prezzo)}</strong>`;
+  html+=`<br>Canone effettivo su quell'importo: €${fmt(canoneReale)}/mese × ${mesi} mesi${markup>0?` (markup +${fmt(markup)}% incluso)`:''}`;
   html+=`<br>Riscatto finale ${riscPerc}%: €${fmt(riscVal)}`;
-  if(!r.esatto) html+=`<br><span style="color:var(--amber-text)">Con quel canone si esce dalla fascia: importo limitato al tetto della fascia applicabile.</span>`;
+  // l'avviso serve solo se il tetto taglia davvero il canone chiesto (a 240.000 esatti no)
+  if(oltre&&canoneReale<canone) html+=`<br><span style="color:var(--amber-text)">Quel canone porta oltre €${fmt(tetto)}, dove Grenke non quota: l'importo si ferma al tetto. Sopra il noleggio passa su Econocom.</span>`;
+  else if(!oltre&&!r.esatto&&!r.tagliatoFascia) html+=`<br><span style="color:var(--amber-text)">Con quel canone si esce dalla fascia: importo limitato al tetto della fascia applicabile.</span>`;
   box.innerHTML=html;
   box.style.display='block';
   btn.style.display='inline-flex';
-  stato.inverso={prezzo:r.prezzo,mesi};
+  stato.inverso={prezzo,mesi};
 }
 
 // Porta l'importo trovato nella configurazione: gli accessori e i macchinari fuori
@@ -1551,7 +1694,7 @@ function aggiornaInverso(){
 function applicaPrezzoInverso(){
   if(!stato.inverso)return;
   let extra=0;
-  (stato.accessori||[]).forEach(id=>{const a=MACCHINE.find(x=>x.id===id); if(a)extra+=a.prezzo;});
+  accessoriScelti().forEach(a=>{extra+=a.prezzo;});
   (stato.altriMacchinari||[]).forEach(x=>{extra+=parseInt(x.prezzo)||0;});
   const nuovo=stato.inverso.prezzo-extra;
   if(nuovo<=0){
@@ -1560,18 +1703,27 @@ function applicaPrezzoInverso(){
   }
   stato.prezzoPrincipale=nuovo;
   document.getElementById('prezzoInput').value=nuovo;
-  selezionaDurata(stato.inverso.mesi);
   ricalcola();
 }
 
 // --- Leasing Sella (per il confronto soluzioni) — modello "capitale-gonfiato" da src/data/leasing.ts MCF ---
 // Tasso effettivo = spread + Euribor 3M; la provvigione è caricata nel capitale finanziato.
 // Spread = medio commerciale 2,75% (stesso usato nella variante fornitori). Provvigione 1%.
-const EURIBOR_3M=2.23;          // % annuo (da aggiornare manualmente)
-const SELLA_LEASING={spread:2.75,provvigionePerc:1,istruttoria:380,incassoRata:6,durate:[24,36,48,60,72,84]};
+// Euribor 3M: 2,66% dal preventivo Sella Leasing n. 17714/2 del 22/09/2026 (indicizzazione
+// "Euribor 3 mesi 365"). Da aggiornare a mano quando il mercato si muove; prima era 2,23 (09/05/2026).
+const EURIBOR_3M=2.66;          // % annuo
+const EURIBOR_3M_DATA='22/09/2026';
+const SELLA_LEASING={spread:2.75,provvigionePerc:1,istruttoria:380,incassoRata:6,durate:[24,36,48,60,72,84],
+  // riscatto massimo per durata, RISCATTO_MAX_STD di src/data/leasing.ts MCF (validato sul quotatore Affida)
+  riscattoMax:{24:50,36:40,48:30,60:20,72:15,84:10},
+  importoMin:9000};  // importo minimo Sella, stesso valore di src/data/leasing.ts MCF
 
 // Calcola la rata leasing Sella. preMesi = mesi di preammortamento (solo interessi).
-function calcLeasingSella(importo,durata,anticipoPerc,riscattoPerc,preMesi){
+// markupPerc = markup della credit policy, in percentuale sulla rata (Alberto, 30/09/2026).
+// Il totale si somma dagli importi arrotondati, cioè da quelli che il cliente legge nel
+// preventivo: così si ricontrolla a mano e torna.
+function calcLeasingSella(importo,durata,anticipoPerc,riscattoPerc,preMesi,markupPerc){
+  const k=1+(markupPerc||0)/100;
   const anticipo=importo*(anticipoPerc/100);
   const riscatto=importo*(riscattoPerc/100);
   const numRate=durata-1;                       // il primo mese è l'anticipo
@@ -1581,10 +1733,11 @@ function calcLeasingSella(importo,durata,anticipoPerc,riscattoPerc,preMesi){
   const capitaleAmm=(importo-anticipo)+provvigione;   // capitale gonfiato della provvigione
   const pvRiscatto=riscatto/Math.pow(1+r,numRate);
   const capitaleFin=capitaleAmm-pvRiscatto;
-  const rata=capitaleFin*(r*Math.pow(1+r,numRate))/(Math.pow(1+r,numRate)-1);
-  const preRata=preMesi>0?capitaleAmm*r:0;            // preammortamento: sola quota interessi
-  const totale=anticipo+preMesi*preRata+numRate*rata+riscatto+SELLA_LEASING.istruttoria+numRate*SELLA_LEASING.incassoRata;
-  return {rata:Math.round(rata),anticipo:Math.round(anticipo),riscatto:Math.round(riscatto),preRata:Math.round(preRata),totale:Math.round(totale),tasso:tassoEff};
+  const rata=Math.round(capitaleFin*(r*Math.pow(1+r,numRate))/(Math.pow(1+r,numRate)-1)*k);
+  const preRata=preMesi>0?Math.round(capitaleAmm*r*k):0;  // preammortamento: sola quota interessi
+  const antR=Math.round(anticipo), riscR=Math.round(riscatto);
+  const totale=antR+preMesi*preRata+numRate*rata+riscR+SELLA_LEASING.istruttoria+numRate*SELLA_LEASING.incassoRata;
+  return {rata,anticipo:antR,riscatto:riscR,preRata,totale,tasso:tassoEff,numRate};
 }
 
 // useGrouping:'always' perché l'italiano di default non separa le migliaia sotto le
@@ -1699,6 +1852,18 @@ function valutaCreditPolicy(){
   if(!m)return;
   const prezzo=stato.prezzoTotale||0;
 
+  // A prezzo zero non c'è niente da valutare: un semaforo verde su 0 € sarebbe una bugia
+  if(!(prezzo>0)){
+    stato.creditPolicy=null;
+    document.getElementById("creditPolicyCard").style.display="block";
+    document.getElementById("semaforoBox").innerHTML=`<div class="note-small" style="margin-top:0">Inserisci il prezzo dell'offerta: la valutazione parte da lì.</div>`;
+    document.getElementById("creditDetail").innerHTML='';
+    document.getElementById("maxFinHint").textContent='';
+    document.getElementById("aiMemo").style.display="none";
+    clearTimeout(window._aiTimer); // un'analisi partita su un giallo non deve arrivare su un prezzo azzerato
+    return;
+  }
+
   // Dati di bilancio, se il registro imprese li ha dati
   const pn=stato.azienda?.patrimonioNetto;  // patrimonio netto
   const utile=stato.azienda?.utile;         // utile
@@ -1712,19 +1877,20 @@ function valutaCreditPolicy(){
 
   // --- Criterio 1: Prezzo macchina ≤ 20% del fatturato ---
   const ratioPrezzo=fat>0?(prezzo/fat*100):999;
+  const ratioTxt=ratioPrezzo.toLocaleString('it-IT',{minimumFractionDigits:1,maximumFractionDigits:1});
   if(ratioPrezzo<=20){
-    criteri.push({nome:'Rapporto prezzo/fatturato',valore:`${ratioPrezzo.toFixed(1)}% (≤20%)`,ok:true});
+    criteri.push({nome:'Rapporto prezzo/fatturato',valore:`${ratioTxt}% (≤20%)`,ok:true});
   }else if(ratioPrezzo<=30){
     // Tra 20% e 30%: giallo → anticipo proporzionale
     semaforo='giallo';
     anticipo=Math.round((ratioPrezzo-20)*2); // 20%→0%, 25%→10%, 30%→20%
-    criteriGiallo.push(`Prezzo macchina = ${ratioPrezzo.toFixed(1)}% del fatturato (soglia 20%) → anticipo ${anticipo}%`);
-    criteri.push({nome:'Rapporto prezzo/fatturato',valore:`${ratioPrezzo.toFixed(1)}% (>20%)`,ok:false});
+    criteriGiallo.push(`Prezzo macchina = ${ratioTxt}% del fatturato (soglia 20%) → anticipo ${anticipo}%`);
+    criteri.push({nome:'Rapporto prezzo/fatturato',valore:`${ratioTxt}% (>20%)`,ok:false});
   }else{
     // Oltre 30%: rosso
     semaforo='rosso';
-    motivo.push(`Prezzo macchina = ${ratioPrezzo.toFixed(1)}% del fatturato (massimo 20%)`);
-    criteri.push({nome:'Rapporto prezzo/fatturato',valore:`${ratioPrezzo.toFixed(1)}% (>20%)`,ok:false});
+    motivo.push(`Prezzo macchina = ${ratioTxt}% del fatturato (massimo 20%)`);
+    criteri.push({nome:'Rapporto prezzo/fatturato',valore:`${ratioTxt}% (>20%)`,ok:false});
   }
 
   // --- Criterio 2: Patrimonio netto ≥ 75% del prezzo macchina ---
@@ -1736,7 +1902,7 @@ function valutaCreditPolicy(){
       if(semaforo!=='rosso')semaforo='giallo';
       const markupPn=ratioPn<60?0.5:0.3;
       markup=Math.max(markup,markupPn);
-      criteriGiallo.push(`Patrimonio netto = ${ratioPn.toFixed(0)}% del prezzo macchina (soglia 75%) → markup +${markupPn}%`);
+      criteriGiallo.push(`Patrimonio netto = ${ratioPn.toFixed(0)}% del prezzo macchina (soglia 75%) → markup +${fmt(markupPn)}%`);
       criteri.push({nome:'Patrimonio netto / prezzo',valore:`${ratioPn.toFixed(0)}% (<75%)`,ok:false});
     }else{
       semaforo='rosso';
@@ -1784,7 +1950,9 @@ function valutaCreditPolicy(){
     }
   }
 
-  // --- Massimale finanziabile Grenke: min(20% fatturato, patrimonio netto) (brief 4.2) ---
+  // --- Massimale finanziabile: min(20% fatturato, patrimonio netto) (brief 4.2) ---
+  // Nato come regola Grenke, vale su qualunque operatore: sopra i 240.000 Grenke non c'è
+  // più, ma la sostenibilità dell'operazione per il caseificio resta la stessa.
   const cap20=fat>0?fat*0.20:null;
   let maxFin=null;
   if(cap20!=null&&pn!=null) maxFin=Math.min(cap20,pn);
@@ -1793,10 +1961,10 @@ function valutaCreditPolicy(){
   if(maxFin!=null){
     if(prezzo>maxFin){
       semaforo='rosso';
-      motivo.push(`Importo €${fmt(prezzo)} oltre il massimale finanziabile Grenke €${fmt(Math.round(maxFin))} (min 20% fatturato / patrimonio netto)`);
-      criteri.push({nome:'Massimale finanziabile Grenke',valore:`€${fmt(Math.round(maxFin))} — importo oltre soglia`,ok:false});
+      motivo.push(`Importo €${fmt(prezzo)} oltre il massimale finanziabile €${fmt(Math.round(maxFin))} (min 20% fatturato / patrimonio netto)`);
+      criteri.push({nome:'Massimale finanziabile',valore:`€${fmt(Math.round(maxFin))} — importo oltre soglia`,ok:false});
     }else{
-      criteri.push({nome:'Massimale finanziabile Grenke',valore:`€${fmt(Math.round(maxFin))} — importo entro soglia`,ok:true});
+      criteri.push({nome:'Massimale finanziabile',valore:`€${fmt(Math.round(maxFin))} — importo entro soglia`,ok:true});
     }
   }
 
@@ -1811,16 +1979,21 @@ function valutaCreditPolicy(){
   let approvazione=cgsInfo?cgsInfo.perc:null;
   if(approvazione!=null&&maxFin!=null&&prezzo>maxFin) approvazione=Math.round(approvazione/2);
 
-  // Salva nello stato
-  stato.creditPolicy={semaforo,anticipo,markup,criteriGiallo,motivo,criteri,maxFin,cgs,cgsInfo,approvazione,aiMemo:null,overrideAnticipo:anticipo,overrideMarkup:markup,overrideNote:''};
+  // Salva nello stato. L'override di Carmine, se c'è, vince sul suggerito e sopravvive ai
+  // ricalcoli: prima ogni cifra digitata nel prezzo lo riportava al valore automatico.
+  const ov=stato.override||{};
+  stato.creditPolicy={semaforo,anticipo,markup,criteriGiallo,motivo,criteri,maxFin,cgs,cgsInfo,approvazione,aiMemo:null,
+    overrideAnticipo:ov.anticipo!=null?ov.anticipo:anticipo,
+    overrideMarkup:ov.markup!=null?ov.markup:markup,overrideNote:''};
 
   renderCreditPolicy();
 
-  // Se giallo con 2+ criteri → chiama AI (debounce: il prezzo è editabile a ogni tasto)
-  if(semaforo==='giallo'&&criteriGiallo.length>=2){
-    clearTimeout(window._aiTimer);
-    window._aiTimer=setTimeout(chiamaCreditAI,700);
-  }
+  // Se giallo con 2+ criteri → chiama AI (debounce: il prezzo è editabile a ogni tasto).
+  // Il timer si cancella sempre: un giallo di passaggio mentre si digita non deve
+  // produrre un'analisi su un prezzo finale rosso o verde.
+  clearTimeout(window._aiTimer);
+  if(semaforo==='giallo'&&criteriGiallo.length>=2) window._aiTimer=setTimeout(chiamaCreditAI,700);
+  else document.getElementById("aiMemo").style.display="none";
 }
 
 function renderCreditPolicy(){
@@ -1844,21 +2017,26 @@ function renderCreditPolicy(){
     badge=`<div class="cgs-badge cgs-${cp.semaforo==='rosso'?'red':'amber'}">Approvazione stimata ${cp.approvazione}%</div>`;
   }
 
+  // In verde con un override attivo "zero anticipo, canone base" non è più vero
+  const conOverride=cp.overrideAnticipo>0||cp.overrideMarkup>0;
+  const sub=cp.semaforo==='verde'&&conOverride
+    ?'Tutti i criteri soddisfatti. Anticipo o markup decisi a mano: vedi sotto cosa entra nei numeri.'
+    :subs[cp.semaforo];
   document.getElementById("semaforoBox").innerHTML=`
     <div class="semaphore semaphore--${cp.semaforo}">
       <div class="semaphore__dot"></div>
       <div>
         <div class="semaphore__label">${labels[cp.semaforo]}</div>
-        <div class="semaphore__sub">${subs[cp.semaforo]}</div>
+        <div class="semaphore__sub">${sub}</div>
       </div>
     </div>${badge}`;
 
-  // Massimale finanziabile Grenke accanto al prezzo (brief 4.2)
+  // Massimale finanziabile accanto al prezzo (brief 4.2)
   const mh=document.getElementById("maxFinHint");
   if(mh){
     if(cp.maxFin!=null){
       const ok=(stato.prezzoTotale||0)<=cp.maxFin;
-      mh.innerHTML=`Massimale finanziabile Grenke: <strong>€${fmt(Math.round(cp.maxFin))}</strong> (min 20% fatturato · patrimonio netto). Importo offerta €${fmt(stato.prezzoTotale||0)} — <span style="color:var(--${ok?'green':'red'});font-weight:600">${ok?'entro soglia':'oltre soglia'}</span>.`;
+      mh.innerHTML=`Massimale finanziabile: <strong>€${fmt(Math.round(cp.maxFin))}</strong> (min 20% fatturato · patrimonio netto). Importo offerta €${fmt(stato.prezzoTotale||0)} — <span style="color:var(--${ok?'green':'red'});font-weight:600">${ok?'entro soglia':'oltre soglia'}</span>.`;
     }else{ mh.textContent=''; }
   }
 
@@ -1877,15 +2055,35 @@ function renderCreditPolicy(){
     detail+='<br><br>'+cp.motivo.map(m=>`<span style="color:var(--red)">⚠</span> ${m}`).join('<br>');
   }else if(cp.semaforo==='giallo'){
     if(cp.criteriGiallo.length>0) detail+='<br><br>'+cp.criteriGiallo.join('<br>');
-    const m=stato.macchina;
-    if(m&&cp.overrideAnticipo>0){
-      const importoAnticipo=Math.round((stato.prezzoTotale||0)*cp.overrideAnticipo/100);
-      detail+=`<br><br><strong>Anticipo suggerito:</strong> €${fmt(importoAnticipo)} (${cp.overrideAnticipo}%)`;
+    // Il suggerito resta quello calcolato; la decisione di Carmine, se diversa, a parte
+    if(cp.anticipo>0){
+      const importoAnticipo=Math.round((stato.prezzoTotale||0)*cp.anticipo/100);
+      detail+=`<br><br><strong>Anticipo suggerito:</strong> €${fmt(importoAnticipo)} (${cp.anticipo}%)`;
     }
-    if(cp.overrideMarkup>0){
-      detail+=`<br><strong>Markup canone:</strong> +${cp.overrideMarkup}%`;
-    }
+    if(cp.markup>0) detail+=`<br><strong>Markup suggerito:</strong> +${fmt(cp.markup)}%`;
   }
+  if(cp.overrideAnticipo!==cp.anticipo||cp.overrideMarkup!==cp.markup){
+    detail+=`<br><br><strong>Deciso da Carmine:</strong> anticipo ${cp.overrideAnticipo}%, markup +${fmt(cp.overrideMarkup)}%`;
+  }
+
+  // Instradamento e condizioni che entrano nei numeri del Confronto soluzioni
+  const prezzo=stato.prezzoTotale||0;
+  const op=operatoreNoleggio(prezzo);
+  const tetto=limiteGrenke();
+  const canaleNol={
+    econocom:`noleggio su Econocom (offerta oltre €${fmt(tetto)}, Grenke non quota)`,
+    grenke:`noleggio su Grenke (offerta entro €${fmt(tetto)})`,
+    sace:`noleggio non disponibile: cliente fuori area Schengen, percorso assicurato SACE`,
+  }[op]||'noleggio da definire';
+  detail+=`<br><br><strong>Canali:</strong> ${canaleNol} · leasing su Sella.`;
+  if(op==='econocom'){
+    const pl=plafondResiduo('Econocom');
+    if(pl!=null&&prezzo>pl) detail+=`<br><span style="color:var(--red)">⚠</span> Offerta oltre il plafond Econocom residuo (€${fmt(pl)}).`;
+  }
+  const effetti=[];
+  if(cp.overrideAnticipo>0) effetti.push(`anticipo minimo ${cp.overrideAnticipo}% sui leasing (il noleggio resta a zero e lo segnala)`);
+  if(cp.overrideMarkup>0) effetti.push(`canoni e rate +${fmt(cp.overrideMarkup)}%`);
+  if(effetti.length) detail+=`<br><strong>Applicato al confronto:</strong> ${effetti.join('; ')}.`;
   document.getElementById("creditDetail").innerHTML=detail;
 
   // Imposta slider/select override ai valori correnti
@@ -1894,22 +2092,39 @@ function renderCreditPolicy(){
   document.getElementById("selMarkup").value=cp.overrideMarkup.toString();
 }
 
-function aggiornaOverride(){
-  if(!stato.creditPolicy)return;
-  stato.creditPolicy.overrideAnticipo=parseInt(document.getElementById("slAnticipo").value);
-  stato.creditPolicy.overrideMarkup=parseFloat(document.getElementById("selMarkup").value);
+// Override di Carmine: anticipo e markup si salvano separati, così toccare uno non
+// congela l'altro. Si azzerano solo quando si cerca un altro cliente.
+function aggiornaOverride(campo){
+  // si salva anche a prezzo zero: al primo prezzo valutaCreditPolicy lo riprende da qui
+  if(!stato.override) stato.override={};
+  if(campo==='anticipo') stato.override.anticipo=parseInt(document.getElementById("slAnticipo").value);
+  if(campo==='markup') stato.override.markup=parseFloat(document.getElementById("selMarkup").value);
+  document.getElementById("outAnticipo").textContent=document.getElementById("slAnticipo").value+'%';
+  if(!stato.creditPolicy){ aggiornaInverso(); return; } // l'inverso usa già l'override salvato
+  const ov=stato.override;
+  if(ov.anticipo!=null) stato.creditPolicy.overrideAnticipo=ov.anticipo;
+  if(ov.markup!=null) stato.creditPolicy.overrideMarkup=ov.markup;
   document.getElementById("outAnticipo").textContent=stato.creditPolicy.overrideAnticipo+'%';
   renderCreditPolicy();
+  // anticipo e markup cambiano i numeri: si ricalcola tutto ciò che li mostra
+  aggiornaCanone();
+  aggiornaInverso();
+  aggiornaFunnel();
+  refreshScenari();
+  aggiornaPrevSummary();
+  aggiornaEstero();
 }
 
 async function chiamaCreditAI(){
+  if(stato.creditPolicy?.semaforo!=='giallo') return;
   const memo=document.getElementById("aiMemo");
   const body=document.getElementById("aiMemoBody");
   memo.style.display="block";
   body.innerHTML='<span class="ai-memo__loading">Analisi in corso...</span>';
 
   const m=stato.macchina;
-  const canoneMese=calcCanone(stato.prezzoTotale||0,36)||0;
+  const rif=scenarioRiferimento();
+  const canoneMese=rif?rif.c.canone:0;
   const percCanone=stato.fat>0?((canoneMese*12)/stato.fat*100).toFixed(1):'n.d.';
 
   const profilo={
@@ -1930,6 +2145,8 @@ async function chiamaCreditAI(){
       body:JSON.stringify(profilo)
     });
     const data=await res.json();
+    // la risposta può arrivare dopo un cambio di prezzo: se non è più giallo, non si mostra
+    if(stato.creditPolicy?.semaforo!=='giallo'){ memo.style.display="none"; return; }
     if(data.memo){
       stato.creditPolicy.aiMemo=data.memo;
       body.textContent=data.memo;
@@ -1987,15 +2204,40 @@ function elabora(){
   if(stato.azienda?.cgs!=null) badgesHtml+=cgsBadgeTag(stato.azienda.cgs);
   document.getElementById("badgesBox").innerHTML=badgesHtml;
 
+  // Solo i nomi: il prezzo lo digita il commerciale
   document.getElementById("machineSelect").innerHTML=macchineLista.map(m=>
-    `<option value="${m.id}">${m.nome} — €${fmt(m.prezzo)}</option>`
+    `<option value="${m.id}">${m.nome}</option>`
   ).join("");
   document.getElementById("machineSelect").value=macchineLista[0].id;
 
-  // Reset configurazione e imposta la macchina principale di default
+  // Reset configurazione: nuovo cliente, prezzi da zero, nessun override di Carmine
+  stato.prezzoPrincipale=0;
+  document.getElementById("prezzoInput").value="0";
   stato.accessori=[];
   stato.altriMacchinari=[];
+  stato.override=null;
   stato.inverso=null;
+  // anche le soluzioni: un'etichetta scritta per il cliente di prima finirebbe nel suo PDF
+  stato.scenari=defaultScenari();
+  // e tutto ciò che è del cliente precedente: titolare, note, logo, documenti, analisi.
+  // Nome del commerciale e validità restano, sono di Andrea.
+  ['prevTitolare','prevNote','creditNote','prevLogo'].forEach(id=>{const e=document.getElementById(id); if(e) e.value='';});
+  stato.logoCliente=null; stato.logoClienteW=0; stato.logoClienteH=0;
+  document.getElementById('logoClientePreview').innerHTML='';
+  stato.docSpuntati={};
+  document.getElementById('funnelToggle').checked=false;
+  stato.funnelAttivo=false;
+  document.getElementById('funnelBody').style.display='none';
+  // i numeri del funnel tornano quelli di partenza: erano la produzione del caseificio di prima
+  ['numPezzi','numOre','numGiorni','gMozzMano','gStrMano','gMozzMacc','gStrMacc','costoMP','costoOperaio','operaiMano','operaiMacc','margineKg']
+    .forEach(id=>{const e=document.getElementById(id); if(e&&e.defaultValue!=null) e.value=e.defaultValue;});
+  // override di Carmine a zero anche nei controlli, non solo nello stato
+  document.getElementById('slAnticipo').value='0';
+  document.getElementById('outAnticipo').textContent='0%';
+  document.getElementById('selMarkup').value='0';
+  // Partner estero: area e paese del cliente precedente non valgono per il nuovo
+  document.getElementById('esteroArea').value='schengen';
+  document.getElementById('esteroPaese').value='';
   stato.estero={attivo:false,valoreManuale:false};
   document.getElementById("esteroToggle").checked=false;
   document.getElementById("esteroBody").style.display="none";
@@ -2018,10 +2260,9 @@ function onCambioPrincipale(){
   const m=MACCHINE.find(x=>x.id===id);
   if(!m)return;
   stato.macchina=m;
-  stato.prezzoPrincipale=m.prezzo;
-  document.getElementById("prezzoInput").value=m.prezzo;
+  // Il prezzo digitato resta: cambiare modello non deve riportare nessun listino a video
   document.getElementById("prezzoHint").textContent=
-    `Listino ${m.nome}: €${fmt(m.prezzo)}. Usa ±500 € o digita direttamente il prezzo trattato.`;
+    `Digita il prezzo trattato della ${m.nome}, IVA esclusa, o usa ±500 €.`;
   // Produzione di base dalla macchina principale (per il funnel)
   const slP=document.getElementById("slPezzi"), numP=document.getElementById("numPezzi");
   if(numP) numP.value=m.pezziOra;
@@ -2030,8 +2271,11 @@ function onCambioPrincipale(){
   ricalcola();
 }
 
+// Solo cifre, e niente zero davanti: il campo parte da 0 e uno zero in testa al prezzo non si legge
+function soloCifre(v){ return (v||'').replace(/[^0-9]/g,'').replace(/^0+(?=\d)/,''); }
+
 function onPrezzoInput(el){
-  const v=el.value.replace(/[^0-9]/g,'');
+  const v=soloCifre(el.value);
   el.value=v;
   stato.prezzoPrincipale=parseInt(v)||0;
   ricalcola();
@@ -2043,22 +2287,55 @@ function stepPrezzo(delta){
   ricalcola();
 }
 
+// Accessori: casella + prezzo digitato. Spuntato a zero = incluso nell'offerta, e nel PDF
+// compare come "incluso"; a video un avviso ricorda che il prezzo potrebbe mancare.
+function accessorioScelto(id){ return stato.accessori.find(x=>x.id===id)||null; }
+
+function accessoriScelti(){
+  return (stato.accessori||[]).map(x=>{
+    const a=MACCHINE.find(m=>m.id===x.id);
+    return a?{id:x.id,nome:a.nome,prezzo:x.prezzo||0}:null;
+  }).filter(Boolean);
+}
+
+function avvisoAccessorio(id){
+  const sel=accessorioScelto(id);
+  return sel&&!(sel.prezzo>0)?'Senza prezzo: nel preventivo compare come incluso.':'';
+}
+
 function renderAccessori(){
   const princ=stato.macchina?stato.macchina.id:null;
   const list=MACCHINE.filter(m=>m.tipo==="accessorio" && (!m.compatibile||m.compatibile.includes(princ)));
   document.getElementById("accessoriList").innerHTML=list.map(a=>{
-    const checked=stato.accessori.includes(a.id)?"checked":"";
+    const sel=accessorioScelto(a.id);
     return `<label class="acc-item">
-      <input type="checkbox" ${checked} onchange="toggleAccessorio('${a.id}')">
+      <input type="checkbox" ${sel?"checked":""} onchange="toggleAccessorio('${a.id}')">
       <span class="acc-name">${a.nome}</span>
-      <span class="acc-price">+€${fmt(a.prezzo)}</span>
-    </label>`;
+      <input class="acc-prezzo" id="accPrezzo-${a.id}" type="text" inputmode="numeric" placeholder="Prezzo €"
+        value="${sel?(sel.prezzo||0):''}" ${sel?'':'disabled'} onfocus="this.select()"
+        oninput="updatePrezzoAccessorio('${a.id}',this)">
+    </label>
+    <div class="acc-avviso" id="accAvviso-${a.id}">${avvisoAccessorio(a.id)}</div>`;
   }).join("");
 }
 
 function toggleAccessorio(id){
-  const i=stato.accessori.indexOf(id);
-  if(i>=0)stato.accessori.splice(i,1); else stato.accessori.push(id);
+  const i=stato.accessori.findIndex(x=>x.id===id);
+  if(i>=0) stato.accessori.splice(i,1); else stato.accessori.push({id,prezzo:0});
+  renderAccessori();
+  if(i<0){ const el=document.getElementById('accPrezzo-'+id); if(el) el.focus(); }
+  ricalcola();
+}
+
+// Aggiorna solo lo stato e l'avviso, senza ridisegnare la lista: il campo non perde il fuoco
+function updatePrezzoAccessorio(id,el){
+  const v=soloCifre(el.value);
+  el.value=v;
+  const sel=accessorioScelto(id);
+  if(!sel) return;
+  sel.prezzo=parseInt(v)||0;
+  const av=document.getElementById('accAvviso-'+id);
+  if(av) av.textContent=avvisoAccessorio(id);
   ricalcola();
 }
 
@@ -2079,7 +2356,7 @@ function aggiungiAltroMacchinario(){
 }
 
 function updateAltro(i,campo,val,el){
-  if(campo==='prezzo'){ val=val.replace(/[^0-9]/g,''); if(el)el.value=val; }
+  if(campo==='prezzo'){ val=soloCifre(val); if(el)el.value=val; }
   if(stato.altriMacchinari[i]) stato.altriMacchinari[i][campo]=val;
   ricalcola();
 }
@@ -2092,51 +2369,72 @@ function rimuoviAltro(i){
 
 function calcPrezzoTotale(){
   let tot=stato.prezzoPrincipale||0;
-  (stato.accessori||[]).forEach(id=>{const a=MACCHINE.find(x=>x.id===id); if(a)tot+=a.prezzo;});
+  accessoriScelti().forEach(a=>{tot+=a.prezzo;});
   (stato.altriMacchinari||[]).forEach(x=>{tot+=parseInt(x.prezzo)||0;});
   return tot;
 }
 
+// La configurazione in una riga: principale + accessori + macchinari fuori catalogo
+function descrizioneConfigurazione(){
+  const m=stato.macchina;
+  let config=m?m.nome:'';
+  accessoriScelti().forEach(a=>config+=` + ${a.nome}`);
+  stato.altriMacchinari.filter(x=>(parseInt(x.prezzo)||0)>0)
+    .forEach(x=>config+=` + ${(x.descrizione||'macchinario').trim()||'macchinario'}`);
+  return config;
+}
+
 function renderTotale(){
-  const acc=stato.accessori.map(id=>MACCHINE.find(x=>x.id===id)).filter(Boolean);
   const altri=stato.altriMacchinari.filter(x=>(parseInt(x.prezzo)||0)>0);
   let html=`<strong>${stato.macchina?stato.macchina.nome:''}</strong> — €${fmt(stato.prezzoPrincipale||0)}`;
-  acc.forEach(a=>{html+=`<br>+ ${a.nome} — €${fmt(a.prezzo)}`;});
+  accessoriScelti().forEach(a=>{html+=`<br>+ ${a.nome} — ${a.prezzo>0?'€'+fmt(a.prezzo):'incluso'}`;});
   altri.forEach(x=>{html+=`<br>+ ${(x.descrizione||'Macchinario').trim()||'Macchinario'} — €${fmt(parseInt(x.prezzo)||0)}`;});
   html+=`<br><strong>Totale offerta: €${fmt(stato.prezzoTotale)}</strong>`;
   document.getElementById("totaleConfig").innerHTML=html;
 }
 
-// Ricalcola il totale e aggiorna le sezioni dipendenti (non ridisegna gli input)
+// Ricalcola il totale e aggiorna le sezioni dipendenti (non ridisegna gli input).
+// L'ordine conta: gli scenari leggono anticipo e markup della credit policy, e il
+// riepilogo legge gli scenari, quindi viene per ultimo.
 function ricalcola(){
   stato.prezzoTotale=calcPrezzoTotale();
   renderTotale();
-  aggiornaCanone();      // tabella canone (su prezzoTotale) + prev summary
-  valutaCreditPolicy();  // semafori sul totale finanziato
-  aggiornaFunnel();      // canone nel funnel
+  valutaCreditPolicy();  // semafori sul totale finanziato: fissa anticipo e markup
+  aggiornaCanone();      // tabella Grenke (su prezzoTotale, fino al tetto), markup compreso
+  aggiornaInverso();     // tetto e markup possono essere cambiati: il riquadro si riallinea
+  aggiornaFunnel();      // canone di riferimento nel funnel
   refreshScenari();      // aggiorna i canoni del confronto sulla nuova configurazione
+  aggiornaPrevSummary(); // riepilogo del preventivo = soluzioni spuntate
   aggiornaEstero();      // Schengen/SACE lavorano sullo stesso totale offerta
   aggiornaProspettoEstero(); // la rata Econocom dipende dall'importo, che cambia qui
 }
 
+// Tabella Grenke di consultazione. Il preventivo non la legge: i numeri del PDF
+// vengono solo dal Confronto soluzioni.
 function aggiornaCanone(){
   const prezzo=stato.prezzoTotale||0;
-  const durate=[24,36,48,60];
-  document.getElementById("canoneBody").innerHTML=durate.map(d=>{
-    const c=calcCanone(prezzo,d);
+  const body=document.getElementById("canoneBody");
+  const riga=t=>{ body.innerHTML=`<tr><td colspan="5">${t}</td></tr>`; };
+  // il tetto nei testi fissi segue il cliente: 240.000 in Italia, 200.000 all'estero
+  document.querySelectorAll('.tetto-grenke').forEach(e=>{ e.textContent=fmt(limiteGrenke()); });
+  if(fuoriSchengen()) return riga('Cliente fuori area Schengen: Grenke non opera. Il percorso è nella sezione Partner estero.');
+  if(prezzo>limiteGrenke()) return riga(`Offerta di €${fmt(prezzo)}, oltre €${fmt(limiteGrenke())}: Grenke non quota. Il noleggio passa su Econocom, lo trovi nel Confronto soluzioni.`);
+  if(prezzo>0&&prezzo<GRENKE_MINIMO) return riga(`Sotto €${fmt(GRENKE_MINIMO)} Grenke non quota.`);
+  const markup=markupAttuale();
+  body.innerHTML=[24,36,48,60].map(d=>{
+    // stesso canone del Confronto soluzioni: markup della credit policy compreso
+    const c=canoneGrenkeConMarkup(prezzo,d)||0;
     const riscPerc=RISCATTO[d]||0;
     const riscVal=Math.round(prezzo*riscPerc/100);
     const freq=c>12000?"Mensile (+5%) o trim.":"Trimestrale";
-    const sel=d===stato.durataSelezionata;
-    return `<tr class="${sel?"selected":""}" onclick="selezionaDurata(${d})">
+    return `<tr>
       <td>${d} mesi</td>
       <td>€${fmt(prezzo)}</td>
-      <td>€${fmt(c)}/mese</td>
+      <td>€${fmt(c)}/mese${markup>0?` (markup +${fmt(markup)}%)`:''}</td>
       <td>€${fmt(riscVal)}</td>
       <td>${freq}</td>
     </tr>`;
   }).join("");
-  aggiornaPrevSummary();
 }
 
 // Lettura numerica robusta di un input
@@ -2176,7 +2474,11 @@ function aggiornaFunnel(){
   const kgMeseMacc=pezziMese*gMacc/1000;
 
   const margMese=Math.round(kgMeseMacc*margineKg);
-  const canoneMese=calcCanone(stato.prezzoTotale||0,36)||0;
+  // Il canone è quello della prima soluzione spuntata per il PDF: lo stesso che il cliente legge
+  const rif=scenarioRiferimento();
+  const canoneMese=rif?rif.c.canone:0;
+  const canoneLabel=rif?rif.label:'';
+  const daConfermare=!!(rif&&rif.c.daConfermare);
   const residuo=margMese-canoneMese;
   const perc=margMese>0?Math.round(canoneMese/margMese*100):0;
 
@@ -2190,18 +2492,18 @@ function aggiornaFunnel(){
   const rispTot=rispMP+rispMO;
 
   // Salva per il PDF
-  stato.funnel={pezziMese,kgMeseMacc,margMese,canoneMese,rispMP,rispMO,rispTot};
+  stato.funnel={pezziMese,kgMeseMacc,margMese,canoneMese,canoneLabel,daConfermare,rispMP,rispMO,rispTot};
 
   document.getElementById("funnelResult").innerHTML=`
     <div class="funnel-card"><div class="funnel-label">Kg burrata/giorno</div><div class="funnel-value">${fmt(Math.round(kgGiornoMacc))} kg</div></div>
     <div class="funnel-card"><div class="funnel-label">Pezzi/mese</div><div class="funnel-value">${fmt(Math.round(pezziMese))}</div></div>
     <div class="funnel-card"><div class="funnel-label">Margine lordo/mese</div><div class="funnel-value">€${fmt(margMese)}</div></div>
-    <div class="funnel-card accent"><div class="funnel-label">Margine residuo (dopo canone)</div><div class="funnel-value">€${fmt(residuo)}/mese</div></div>
+    <div class="funnel-card accent"><div class="funnel-label">Margine residuo (dopo canone)</div><div class="funnel-value">${canoneMese>0?'€'+fmt(residuo)+'/mese':'—'}</div></div>
   `;
 
   const ok=perc>0&&perc<50;
   document.getElementById("selfSustain").innerHTML=
-    `<div class="sustain-pill ${ok?"sustain-yes":"sustain-no"}">Canone = ${perc}% del margine generato${ok?" — la macchina si sostiene da sola":""}</div>`;
+    canoneMese>0?`<div class="sustain-pill ${ok?"sustain-yes":"sustain-no"}">Canone = ${perc}% del margine generato${ok?" — la macchina si sostiene da sola":""}</div>`:'';
 
   const copre=rispTot>=canoneMese&&canoneMese>0;
   document.getElementById("risparmioBox").innerHTML=`
@@ -2209,7 +2511,9 @@ function aggiornaFunnel(){
       <strong>Risparmio con la macchina</strong> (rispetto alla lavorazione a mano):<br>
       Materia prima: <strong>€${fmt(rispMP)}/mese</strong> · Manodopera: <strong>€${fmt(rispMO)}/mese</strong><br>
       Totale risparmio: <strong>€${fmt(rispTot)}/mese</strong> (€${fmt(rispTot*12)}/anno)<br>
-      Canone: €${fmt(canoneMese)}/mese — ${copre?'<strong>il solo risparmio copre il canone</strong>':'il canone eccede il risparmio di €'+fmt(canoneMese-rispTot)+'/mese'}
+      ${canoneMese>0
+        ?`Canone${canoneLabel?` (${canoneLabel})`:''}: €${fmt(canoneMese)}/mese${daConfermare?' (da confermare)':''} — ${copre?'<strong>il solo risparmio copre il canone</strong>':'il canone eccede il risparmio di €'+fmt(canoneMese-rispTot)+'/mese'}`
+        :'Nessuna soluzione con un canone da confrontare: inserisci il prezzo o scegli una soluzione quotabile.'}
     </div>`;
 }
 
@@ -2238,87 +2542,255 @@ function aggiornaDoc(){
   }).join("");
 }
 
-// --- Confronto soluzioni (4 scenari sulla stessa configurazione) ---
+// --- Confronto soluzioni: fino a 4 scenari sulla stessa configurazione ---
+// E' l'unico posto dove si calcolano le soluzioni del preventivo. Schermo, riepilogo,
+// funnel, analisi AI e PDF leggono tutti calcScenario(): il preventivo Tualat del
+// 30/09/2026 aveva due motori (riquadro Grenke sopra, scenari sotto) e mostrava 13.147 e
+// 11.682 per lo "stesso" noleggio a 36 mesi, perché il secondo era un leasing Sella.
+//
+// Credit policy dentro i numeri (Alberto, 30/09/2026):
+//  - noleggio: operatore deciso dall'importo, Grenke fino a 240.000 e Econocom sopra;
+//  - markup: canone e rata x (1 + markup/100), su ogni prodotto;
+//  - anticipo richiesto (semaforo o override di Carmine): minimo per il leasing. Il
+//    noleggio resta a zero e lo scenario lo segnala.
+const NOLEGGIO_DURATE=[24,36,48,60];
+const LEASING_ANTICIPO_DEFAULT=10;   // "il leasing parte dal 10% ed è libero" (Alberto ad Andrea)
+const LEASING_RISCATTO_DEFAULT=1;
+
+// label vuota + labelManuale false = etichetta generata dai parametri
 function defaultScenari(){
   return [
-    {label:"Noleggio 60 mesi",       prodotto:"noleggio",durata:60,anticipo:0, preammortamento:0,riscattoPerc:3,includiPdf:true},
-    {label:"Noleggio 48 mesi",       prodotto:"noleggio",durata:48,anticipo:0, preammortamento:0,riscattoPerc:4,includiPdf:false},
-    {label:"Leasing 60 Sella",       prodotto:"leasing", durata:60,anticipo:0, preammortamento:0,riscattoPerc:1,includiPdf:false},
-    {label:"Leasing 48 Sella + 10%", prodotto:"leasing", durata:48,anticipo:10,preammortamento:0,riscattoPerc:1,includiPdf:false},
+    {label:"",labelManuale:false,prodotto:"noleggio",durata:60,anticipo:0, preammortamento:0,riscattoPerc:0,includiPdf:true},
+    {label:"",labelManuale:false,prodotto:"noleggio",durata:48,anticipo:0, preammortamento:0,riscattoPerc:0,includiPdf:false},
+    {label:"",labelManuale:false,prodotto:"leasing", durata:60,anticipo:LEASING_ANTICIPO_DEFAULT,preammortamento:0,riscattoPerc:LEASING_RISCATTO_DEFAULT,includiPdf:false},
+    {label:"",labelManuale:false,prodotto:"leasing", durata:48,anticipo:LEASING_ANTICIPO_DEFAULT,preammortamento:0,riscattoPerc:LEASING_RISCATTO_DEFAULT,includiPdf:false},
   ];
+}
+
+function scenari(){
+  if(!stato.scenari) stato.scenari=defaultScenari();
+  return stato.scenari;
+}
+
+// Plafond residuo di un canale dalla vista interna; null se il plafond non è impostato
+function plafondResiduo(canale){
+  const p=(stato.plafond||defaultPlafond()).find(x=>x.canale===canale);
+  return p&&p.totale>0?(p.residuo||0):null;
 }
 
 function calcScenario(s){
   const prezzo=stato.prezzoTotale||0;
+  const cp=stato.creditPolicy;
+  const markup=cp?(cp.overrideMarkup||0):0;
+  const antRichiesto=cp?(cp.overrideAnticipo||0):0;
+  const k=1+markup/100;
+  const avvisi=[];
+  const base={prodotto:s.prodotto,durata:s.durata,markup,operatore:null,pagamento:'—',
+    anticipoPerc:0,anticipoEuro:0,preMesi:0,preRata:0,riscattoPerc:null,riscattoEuro:null,
+    spese:0,speseRata:0,numRate:s.durata,canone:0,totale:0,daConfermare:false,avvisi};
+  if(!(prezzo>0)) return base; // offerta vuota: niente istruttoria e incasso su zero euro
+
   if(s.prodotto==='leasing'){
-    const r=calcLeasingSella(prezzo,s.durata,s.anticipo||0,s.riscattoPerc||0,s.preammortamento||0);
-    return {canone:r.rata,riscattoEuro:r.riscatto,anticipoEuro:r.anticipo,preRata:r.preRata,totale:r.totale};
+    if(prezzo<SELLA_LEASING.importoMin){
+      avvisi.push(`Sotto €${fmt(SELLA_LEASING.importoMin)} Sella non finanzia il leasing.`);
+      return {...base,operatore:'sella'};
+    }
+    const antScenario=s.anticipo||0;
+    const antPerc=Math.max(antScenario,antRichiesto);
+    if(antPerc>=100){
+      avvisi.push('Anticipo pari o oltre il 100% del bene: non resta niente da finanziare.');
+      return {...base,operatore:'sella',anticipoPerc:antPerc};
+    }
+    if(antPerc>antScenario) avvisi.push(`Anticipo portato al ${antPerc}% dalla valutazione creditizia (lo scenario indicava ${antScenario}%).`);
+    const pre=s.preammortamento||0;
+    const riscMax=SELLA_LEASING.riscattoMax[s.durata]??20;
+    const risc=Math.min(s.riscattoPerc||0,riscMax);
+    if((s.riscattoPerc||0)>riscMax) avvisi.push(`Riscatto portato al ${riscMax}%, il massimo Sella a ${s.durata} mesi (lo scenario indicava ${fmt(s.riscattoPerc)}%).`);
+    const r=calcLeasingSella(prezzo,s.durata,antPerc,risc,pre,markup);
+    return {...base,operatore:'sella',pagamento:`${r.numRate} rate mensili`,
+      anticipoPerc:antPerc,anticipoEuro:r.anticipo,preMesi:pre,preRata:r.preRata,
+      riscattoPerc:risc,riscattoEuro:r.riscatto,spese:SELLA_LEASING.istruttoria,
+      speseRata:SELLA_LEASING.incassoRata,numRate:r.numRate,canone:r.rata,totale:r.totale};
   }
-  // Noleggio operativo Grenke: riscatto da tabella, nessun anticipo
-  const canone=calcCanone(prezzo,s.durata)||0;
-  const riscPerc=RISCATTO[s.durata]||0;
-  const riscattoEuro=Math.round(prezzo*riscPerc/100);
-  return {canone,riscattoEuro,anticipoEuro:0,preRata:0,totale:canone*s.durata+riscattoEuro};
+
+  // Noleggio: zero anticipo per regola; se la valutazione lo chiede, lo si dice
+  if(antRichiesto>0) avvisi.push(`La valutazione chiede un anticipo del ${antRichiesto}%: il noleggio parte da zero. Proponi il leasing o senti Carmine.`);
+  const op=operatoreNoleggio(prezzo);
+  if(op==='sace'){
+    avvisi.push('Cliente fuori area Schengen: Grenke non opera e sotto €200.000 il noleggio non si fa. Si passa dal percorso assicurato SACE, nella sezione Partner estero.');
+    return {...base,operatore:'sace'};
+  }
+  if(op==='grenke'){
+    const c=getCoeff(prezzo,s.durata);
+    if(!c){ avvisi.push(`Sotto €${fmt(GRENKE_MINIMO)} Grenke non quota.`); return {...base,operatore:'grenke',pagamento:'Trimestrale anticipato'}; }
+    const canone=Math.round(prezzo*c/100*k);
+    const riscPerc=RISCATTO[s.durata]||0;
+    const riscattoEuro=Math.round(prezzo*riscPerc/100);
+    return {...base,operatore:'grenke',pagamento:'Trimestrale anticipato',
+      riscattoPerc:riscPerc,riscattoEuro,canone,totale:canone*s.durata+riscattoEuro};
+  }
+  if(op==='econocom'){
+    const e=canoneEconocom(prezzo,s.durata);
+    if(!e){
+      avvisi.push(`Econocom non quota ${s.durata} mesi: scegli un'altra durata.`);
+      return {...base,operatore:'econocom',pagamento:'Mensile anticipato'};
+    }
+    const canone=Math.round(prezzo*e.coeff*k);
+    if(e.daConfermare) avvisi.push(`Canone Econocom a ${s.durata} mesi ricavato dalla tabella a 60 mesi: da confermare con Econocom prima di firmare.`);
+    const pl=plafondResiduo('Econocom');
+    if(pl!=null&&prezzo>pl) avvisi.push(`Supera il plafond Econocom residuo (€${fmt(pl)}): serve un ampliamento prima della delibera.`);
+    return {...base,operatore:'econocom',pagamento:'Mensile anticipato',canone,
+      totale:canone*s.durata,daConfermare:e.daConfermare};
+  }
+  return base; // prezzo a zero: niente operatore, niente canone
 }
 
-function updateScenarioLabel(i,val){ if(stato.scenari[i]) stato.scenari[i].label=val; }
+// Etichetta generata dai parametri; quella scritta a mano vince finché non si cambiano
+// prodotto, durata, anticipo o preammortamento (Tualat: "Leasing 48" girava a 60 mesi).
+function etichettaAuto(s,c){
+  if(s.prodotto==='leasing'){
+    let t=`Leasing ${s.durata} mesi`;
+    const a=c?c.anticipoPerc:(s.anticipo||0);
+    if(a>0) t+=`, anticipo ${fmt(a)}%`;
+    if(s.preammortamento>0) t+=`, preammortamento ${s.preammortamento} mesi`;
+    return t;
+  }
+  return `Noleggio ${s.durata} mesi`;
+}
+// Un'etichetta scritta a mano vale per l'anticipo con cui è stata scritta: se la credit
+// policy o Carmine lo alzano, torna quella automatica (il PDF non può dire 10% in testa
+// alla colonna e 20% nella riga Anticipo).
+// Anticipo che il leasing avrà appena c'è un prezzo: quello dello scenario o quello richiesto
+function anticipoAtteso(s){
+  if(s.prodotto!=='leasing') return 0;
+  const cp=stato.creditPolicy;
+  return Math.max(s.anticipo||0,cp?(cp.overrideAnticipo||0):0);
+}
+// Non si cancella mai: se l'anticipo torna quello di partenza, torna anche l'etichetta
+// scritta a mano. A prezzo zero non c'è anticipo effettivo da confrontare.
+function etichettaManualeValida(s,c){
+  const manuale=(s.label||'').trim();
+  if(!s.labelManuale||!manuale) return false;
+  // a prezzo zero o su un leasing non quotabile non c'è anticipo effettivo da confrontare
+  if(s.prodotto!=='leasing'||s.labelAnticipo==null||!(stato.prezzoTotale>0)||!(c.canone>0)) return true;
+  return c.anticipoPerc===s.labelAnticipo;
+}
+function etichettaScenario(s,c){
+  c=c||calcScenario(s);
+  return etichettaManualeValida(s,c)?s.label.trim():etichettaAuto(s,c);
+}
 
-// Cambi strutturali (prodotto/durata) → re-render completo. includiPdf → solo stato.
+// Prima soluzione spuntata per il PDF (o la prima in elenco): è il canone che funnel e
+// analisi AI usano, quello che il cliente legge per primo.
+// Solo tra le soluzioni con un canone: una soluzione non quotabile non ha niente da dire
+// al funnel, che altrimenti scriverebbe un risparmio contro 0 euro.
+function scenarioRiferimento(){
+  const sc=scenari();
+  const inclusi=sc.filter(x=>x.includiPdf);
+  for(const s of (inclusi.length?inclusi:sc)){
+    const c=calcScenario(s);
+    if(c.canone>0) return {s,c,label:etichettaScenario(s,c)};
+  }
+  return null;
+}
+
+function updateScenarioLabel(i,val){
+  const s=stato.scenari[i]; if(!s)return;
+  s.label=val;
+  s.labelManuale=val.trim()!=='';
+  s.labelAnticipo=anticipoAtteso(s);
+  aggiornaPrevSummary();
+  aggiornaFunnel();
+}
+
+// Cambi strutturali (prodotto/durata) → re-render completo. includiPdf → riepilogo e funnel.
 function updateScenario(i,campo,val){
   const s=stato.scenari[i]; if(!s)return;
-  if(campo==='includiPdf'){ s.includiPdf=val; return; }
-  if(campo==='prodotto'){ s.prodotto=val; if(val==='noleggio'&&s.durata>60)s.durata=60; }
+  if(campo==='includiPdf'){ s.includiPdf=val; aggiornaPrevSummary(); aggiornaFunnel(); return; }
+  if(campo==='prodotto'){
+    s.prodotto=val;
+    if(val==='leasing'){
+      if(!(s.anticipo>0)) s.anticipo=LEASING_ANTICIPO_DEFAULT;
+      if(!(s.riscattoPerc>0)) s.riscattoPerc=LEASING_RISCATTO_DEFAULT;
+    }else{
+      s.anticipo=0; s.preammortamento=0;
+      if(!NOLEGGIO_DURATE.includes(s.durata)) s.durata=60;
+    }
+  }
   else if(campo==='durata') s.durata=parseInt(val);
+  s.labelManuale=false;
   renderScenari();
+  aggiornaPrevSummary();
+  aggiornaFunnel();
 }
 
 // Campi numerici (anticipo/preammortamento/riscatto) → aggiorna solo gli output (niente perdita di focus)
 function updateScenarioNum(i,campo,val){
   const s=stato.scenari[i]; if(!s)return;
-  s[campo]=parseFloat(val)||0;
+  s[campo]=Math.max(0,parseFloat(val)||0);
+  if(campo==='preammortamento') s.labelManuale=false; // l'anticipo lo segue già labelAnticipo
   refreshScenari();
+  aggiornaPrevSummary();
+  aggiornaFunnel();
 }
+
+const NOME_OPERATORE={grenke:'Grenke',econocom:'Econocom',sella:'Sella Leasing'};
 
 function buildScenarioOut(s){
   const c=calcScenario(s);
-  const antRow=(s.prodotto==='leasing'&&c.anticipoEuro>0)?`<div class="scenario-out-row"><span>Anticipo</span><strong>€${fmt(c.anticipoEuro)}</strong></div>`:'';
-  const preRow=(s.prodotto==='leasing'&&s.preammortamento>0)?`<div class="scenario-out-row"><span>Preammortamento</span><strong>€${fmt(c.preRata)}/mese × ${s.preammortamento}</strong></div>`:'';
-  return `<div class="scenario-out-row"><span>Canone</span><strong>€${fmt(c.canone)}/mese</strong></div>
-    ${antRow}${preRow}
-    <div class="scenario-out-row"><span>Riscatto</span><strong>€${fmt(c.riscattoEuro)}</strong></div>
-    <div class="scenario-out-row"><span>Totale</span><strong>€${fmt(c.totale)}</strong></div>`;
+  let op;
+  if(c.operatore==='grenke') op=`Operatore: Grenke (offerta entro €${fmt(limiteGrenke())})`;
+  else if(c.operatore==='econocom') op=`Operatore: Econocom (offerta oltre €${fmt(limiteGrenke())})`;
+  else if(c.operatore==='sace') op='Noleggio non disponibile fuori area Schengen';
+  else if(c.operatore==='sella') op=`Operatore: Sella Leasing · Euribor 3M ${fmt(EURIBOR_3M)}% (${EURIBOR_3M_DATA})`;
+  else op='Inserisci il prezzo: l\'operatore dipende dall\'importo.';
+  const riga=(k,v)=>`<div class="scenario-out-row"><span>${k}</span><strong>${v}</strong></div>`;
+  let html=`<div class="scenario-operatore">${op}</div>`;
+  html+=riga('Canone',`€${fmt(c.canone)}/mese${c.daConfermare?' (da confermare)':''}`);
+  if(c.markup>0) html+=riga('di cui markup',`+${fmt(c.markup)}%`);
+  html+=riga('Pagamento',c.pagamento);
+  if(c.anticipoEuro>0) html+=riga(`Anticipo (${fmt(c.anticipoPerc)}%)`,`€${fmt(c.anticipoEuro)}`);
+  if(c.preMesi>0) html+=riga('Preammortamento',`€${fmt(c.preRata)}/mese × ${c.preMesi}`);
+  html+=riga('Riscatto',c.riscattoEuro!=null?`€${fmt(c.riscattoEuro)} (${fmt(c.riscattoPerc)}%)`:(c.operatore==='econocom'?'da concordare':'—'));
+  if(c.spese>0) html+=riga('Spese',`€${fmt(c.spese)} + €${fmt(c.speseRata)}/rata`);
+  html+=riga('Totale',`€${fmt(c.totale)}`);
+  c.avvisi.forEach(a=>{html+=`<div class="scenario-avviso">${a}</div>`;});
+  return html;
 }
 
-// Refresh leggero: solo importo + box output di ciascuno scenario
+// Refresh leggero: importo, box output e, se non scritte a mano, le etichette
 function refreshScenari(){
   const imp=document.getElementById("confrontoImporto");
   if(imp) imp.textContent=fmt(stato.prezzoTotale||0);
-  (stato.scenari||[]).forEach((s,i)=>{
+  scenari().forEach((s,i)=>{
     const out=document.getElementById('scenarioOut'+i);
     if(out) out.innerHTML=buildScenarioOut(s);
+    const lab=document.getElementById('scenarioLabel'+i);
+    if(lab&&document.activeElement!==lab) lab.value=etichettaScenario(s);
   });
 }
 
 function renderScenari(){
-  if(!stato.scenari) stato.scenari=defaultScenari();
   const imp=document.getElementById("confrontoImporto");
   if(imp) imp.textContent=fmt(stato.prezzoTotale||0);
   const grid=document.getElementById("scenariGrid");
   if(!grid)return;
-  const durateNol=[24,36,48,60], durateLea=SELLA_LEASING.durate;
-  grid.innerHTML=stato.scenari.map((s,i)=>{
-    const durate=s.prodotto==='leasing'?durateLea:durateNol;
+  const durateLea=SELLA_LEASING.durate;
+  grid.innerHTML=scenari().map((s,i)=>{
+    const durate=s.prodotto==='leasing'?durateLea:NOLEGGIO_DURATE;
     const optD=durate.map(d=>`<option value="${d}" ${d===s.durata?'selected':''}>${d} mesi</option>`).join('');
     const leasingFields=s.prodotto==='leasing'?`<div class="scenario-row">
-      <div class="scenario-field"><label>Anticipo %</label><input type="number" value="${s.anticipo}" oninput="updateScenarioNum(${i},'anticipo',this.value)"></div>
-      <div class="scenario-field"><label>Preammort. mesi</label><input type="number" value="${s.preammortamento}" oninput="updateScenarioNum(${i},'preammortamento',this.value)"></div>
-      <div class="scenario-field"><label>Riscatto %</label><input type="number" step="0.1" value="${s.riscattoPerc}" oninput="updateScenarioNum(${i},'riscattoPerc',this.value)"></div>
+      <div class="scenario-field"><label>Anticipo %</label><input type="number" min="0" max="99" value="${s.anticipo}" oninput="updateScenarioNum(${i},'anticipo',this.value)"></div>
+      <div class="scenario-field"><label>Preammort. mesi</label><input type="number" min="0" value="${s.preammortamento}" oninput="updateScenarioNum(${i},'preammortamento',this.value)"></div>
+      <div class="scenario-field"><label>Riscatto %</label><input type="number" min="0" max="${SELLA_LEASING.riscattoMax[s.durata]??20}" step="0.1" value="${s.riscattoPerc}" oninput="updateScenarioNum(${i},'riscattoPerc',this.value)"></div>
     </div>`:'';
+    const label=etichettaScenario(s).replace(/"/g,'&quot;');
     return `<div class="scenario">
-      <input class="scenario-label" value="${(s.label||'').replace(/"/g,'&quot;')}" oninput="updateScenarioLabel(${i},this.value)">
+      <input class="scenario-label" id="scenarioLabel${i}" value="${label}" title="Si scrive da sola dai parametri; puoi riscriverla a mano"
+        oninput="updateScenarioLabel(${i},this.value)" onblur="refreshScenari()">
       <div class="scenario-row">
         <select onchange="updateScenario(${i},'prodotto',this.value)">
-          <option value="noleggio" ${s.prodotto==='noleggio'?'selected':''}>Noleggio Grenke</option>
+          <option value="noleggio" ${s.prodotto==='noleggio'?'selected':''}>Noleggio operativo</option>
           <option value="leasing" ${s.prodotto==='leasing'?'selected':''}>Leasing Sella</option>
         </select>
         <select onchange="updateScenario(${i},'durata',this.value)">${optD}</select>
@@ -2340,13 +2812,9 @@ const GRENKE_LIMITE_ESTERO=200000;
 
 // Econocom, tabella 60 mesi (Luca Silvestrin, 26/05/2026 — stessa di src/data/econocom-pa.ts MCF).
 // rata = importo × coefficiente di fascia. Sotto i 150.000 € l'operazione è fuori target.
+// La colonna 60 mesi viene da ECONOCOM_FASCE (sezione Econocom in alto): una tabella sola.
 const ECONOCOM_MIN=150000;
-const ECONOCOM_60M=[
-  {da:150000,a:300000,c:0.0202,label:"fascia 150–300k"},
-  {da:300000,a:500000,c:0.0200,label:"fascia 300–500k"},
-  {da:500000,a:700000,c:0.0199,label:"fascia 500–700k"},
-  {da:700000,a:null,  c:0.0197,label:"oltre 700k"},
-];
+const ECONOCOM_60M=ECONOCOM_FASCE.map(f=>({da:f.da,a:f.a,c:f.c[60],label:f.label}));
 function rataEconocom(importo){
   if(!(importo>=ECONOCOM_MIN))return null;
   const f=ECONOCOM_60M.find(f=>importo>=f.da&&(f.a===null||importo<f.a));
@@ -2381,7 +2849,8 @@ function fmt2(n){return (n||0).toLocaleString("it-IT",{minimumFractionDigits:2,m
 function toggleEstero(){
   stato.estero.attivo=document.getElementById('esteroToggle').checked;
   document.getElementById('esteroBody').style.display=stato.estero.attivo?'block':'none';
-  if(stato.estero.attivo) aggiornaEstero();
+  // cliente estero = regola export: cambia l'operatore del noleggio, quindi si ricalcola tutto
+  ricalcola();
 }
 
 function aggiornaEstero(){
@@ -2404,21 +2873,29 @@ function renderSchengen(){
   const p=stato.prezzoTotale||0;
   const righe=[];
 
+  // stesso markup e stesso arrotondamento del Confronto soluzioni
+  const markup=markupAttuale();
+  const mk=markup>0?` (markup +${fmt(markup)}%)`:'';
   const entroLimite=p>0&&p<=GRENKE_LIMITE_ESTERO;
-  const cG=entroLimite?calcCanone(p,60):null;
+  const cG=entroLimite?canoneGrenkeConMarkup(p,60):null;
+  const vuoto=!(p>0);
+  const notaG=vuoto?'Inserisci il prezzo dell\'offerta'
+    :!entroLimite?'Sopra €200.000: fuori perimetro Grenke'
+    :cG?'Entro il limite di €200.000':`Sotto €${fmt(GRENKE_MINIMO)} Grenke non quota`;
   righe.push(`<tr>
     <td>Grenke — noleggio operativo</td>
     <td>60 mesi</td>
-    <td>${cG?'€'+fmt(cG)+'/mese':'—'}</td>
-    <td>${entroLimite?'Entro il limite di €200.000':'Sopra €200.000: fuori perimetro Grenke'}</td>
+    <td>${cG?'€'+fmt(cG)+'/mese'+mk:'—'}</td>
+    <td>${notaG}</td>
   </tr>`);
 
   const e=rataEconocom(p);
+  const rataE=e?Math.round(p*e.fascia.c*(1+markup/100)):null;
   righe.push(`<tr>
     <td>Econocom — noleggio operativo</td>
     <td>60 mesi</td>
-    <td>${e?'€'+fmt(e.rata)+'/mese':'—'}</td>
-    <td>${e?e.fascia.label:'Sotto €'+fmt(ECONOCOM_MIN)+': fuori target Econocom'}</td>
+    <td>${e?'€'+fmt(rataE)+'/mese'+mk:'—'}</td>
+    <td>${vuoto?'Inserisci il prezzo dell\'offerta':e?e.fascia.label:'Sotto €'+fmt(ECONOCOM_MIN)+': fuori target Econocom'}</td>
   </tr>`);
 
   document.getElementById('esteroSchengenBody').innerHTML=righe.join('');
@@ -2462,6 +2939,9 @@ function updatePlafond(i,campo,val){
   stato.plafond[i][campo]=parseInt((''+val).replace(/[^0-9]/g,''))||0;
   const imp=document.getElementById('plafondImp'+i);
   if(imp) imp.textContent='€'+fmt(Math.max(0,(stato.plafond[i].totale||0)-(stato.plafond[i].residuo||0)));
+  // il residuo Econocom fa scattare l'avviso negli scenari e nella valutazione
+  refreshScenari();
+  if(stato.creditPolicy) renderCreditPolicy();
 }
 function renderPlafond(){
   if(!stato.plafond) stato.plafond=defaultPlafond();
@@ -2476,55 +2956,46 @@ function renderPlafond(){
     </div>`).join('');
 }
 
-// --- Selezione durata ---
-function selezionaDurata(d){
-  stato.durataSelezionata=d;
-  aggiornaCanone();
-}
-
-// --- Riepilogo preventivo ---
+// --- Riepilogo preventivo: le soluzioni spuntate, con gli stessi numeri del PDF ---
 function aggiornaPrevSummary(){
   const m=stato.macchina;
   if(!m)return;
   const prezzo=stato.prezzoTotale||0;
-  const d=stato.durataSelezionata;
-  const canone=calcCanone(prezzo,d);
-  const riscPerc=RISCATTO[d]||0;
-  const riscVal=Math.round(prezzo*riscPerc/100);
-  const totale=canone*d+riscVal;
-
-  // Applica override credit policy
-  const cp=stato.creditPolicy;
-  const anticipo=cp?cp.overrideAnticipo:0;
-  const importoAnticipo=Math.round(prezzo*anticipo/100);
-
-  // Configurazione (principale + accessori + altri macchinari)
-  const acc=stato.accessori.map(id=>MACCHINE.find(x=>x.id===id)).filter(Boolean);
-  const altri=stato.altriMacchinari.filter(x=>(parseInt(x.prezzo)||0)>0);
-  let config=m.nome;
-  acc.forEach(a=>config+=` + ${a.nome}`);
-  altri.forEach(x=>config+=` + ${(x.descrizione||'macchinario').trim()||'macchinario'}`);
-
-  let html=`<strong>${config}</strong> — €${fmt(prezzo)}<br>`;
-  html+=`Durata: <strong>${d} mesi</strong> · Canone: <strong>€${fmt(canone)}/mese</strong><br>`;
-  html+=`Riscatto finale: €${fmt(riscVal)} · Totale contratto: €${fmt(totale)}`;
-  if(anticipo>0) html+=`<br>Anticipo: <strong>€${fmt(importoAnticipo)}</strong> (${anticipo}%)`;
+  let html=`<strong>${descrizioneConfigurazione()}</strong> — €${fmt(prezzo)}`;
+  const inclusi=scenari().filter(s=>s.includiPdf);
+  if(!(prezzo>0)) html+=`<br>Inserisci il prezzo per preparare il preventivo.`;
+  else if(!(stato.prezzoPrincipale>0)) html+=`<br><span style="color:var(--amber-text)">Manca il prezzo della ${m.nome}: il PDF non parte finché non lo inserisci.</span>`;
+  else if(!inclusi.length) html+=`<br><span style="color:var(--amber-text)">Nessuna soluzione spuntata nel Confronto soluzioni: il PDF ne vuole almeno una.</span>`;
+  else inclusi.forEach(s=>{
+    const c=calcScenario(s);
+    if(!(c.canone>0)){ html+=`<br>${etichettaScenario(s,c)}: <span style="color:var(--amber-text)">non quotabile. ${c.avvisi[c.avvisi.length-1]||''}</span>`; return; }
+    html+=`<br>${etichettaScenario(s,c)}: <strong>€${fmt(c.canone)}/mese</strong>${c.daConfermare?' (da confermare con Econocom)':''}`;
+    if(c.anticipoEuro>0) html+=` · anticipo €${fmt(c.anticipoEuro)}`;
+    html+=` · totale €${fmt(c.totale)}`;
+  });
   document.getElementById("prevSummary").innerHTML=html;
 }
 
-// --- Precarica logo Marotta per il PDF ---
-let logoMarottaBase64=null;
-(function(){
-  const img=new Image();
-  img.crossOrigin='anonymous';
-  img.onload=function(){
-    const c=document.createElement('canvas');
-    c.width=img.naturalWidth;c.height=img.naturalHeight;
-    c.getContext('2d').drawImage(img,0,0);
-    logoMarottaBase64=c.toDataURL('image/png');
-  };
-  img.src='https://marottaevolution.it/wp-content/uploads/2020/09/logo-marotta-tricolore.png';
-})();
+// --- Logo Marotta per il PDF ---
+// Incorporato nel file: l'indirizzo sul sito Marotta (logo-marotta-tricolore.png) risponde
+// 404 e i PDF uscivano con il testo di ripiego. Estratto il 30/09/2026 dall'offerta Marotta
+// 20202176 (Caseificio Mediterraneo), 466x146 px, blu su fondo trasparente: sulla banda navy
+// va posato su una piastrina bianca, come il logo del cliente.
+const LOGO_MAROTTA_W=466, LOGO_MAROTTA_H=146;
+const logoMarottaBase64='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAdIAAACSCAYAAADxT0vuAAAACXBIWXMAAA7EAAAOxAGVKw4bAABLHklEQVR4nO2dCZwT5f3/B4oHsJtkMsney6HUg024llNspbXF4sGxu7kWxWV3M9lklxtEFAWP1tr2p/0pwm5msguiiKgoBfHW9tf2b209altra6vVVuvRel8gsPk/3ycz2clkJpmZTDYLPJ/X63klm01mnjnf832e70FRRERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERETHmQZbW08fbYu46mi2dkShO0NERERERDTgVczWOph21wI64rrN3j7uZabdfcTRMT5uD9e8Z2XHnFro/hEREREREQ0sLRxjsUdcs+l29w/pSM1zTIf7K8eS8XGlhuC6zYxV7qKor/EWy9QYY72Bt1v28kzxWt42bOKzFHWCGcsnIiIiIiLKv9jaE5xLxm+zd4z71NExLg5WpxycTtl7e8R9qCg0dqzRVXYPHVqN4HkFz1j+zDusvd1OW1xsHPobQfXfPYztjtuZojPN3FQiIiIiIiLTZetwzVKzPDM1JlJzp571xClqEG8r+iayOu/h7dYDAM2YAM+YBKR9f9PxrQ7bU/nabiIiIiIiIlNki4ydl80ClX+GQdruPkSzZ7izLR8BdDBPWy7gGevTUnDGZOCUf4YbY329H3YBERERERGRccG8aDbrUw5RPPyLGt3u3qS2XLBAu63W73CM9TeJ4Vs6BZii1Sl/3y28x8O8jO2l/twXREREREREusUsGTtVEzwlnzMRd6+t3R2jmh3FSsvstFi+HrVb9nGy+c+YbOhWbpEmPusDaoyxPtPf+4OIiIiIiEiX7EvGjtVjjdoj7i8dS92s0rJuoaiTeLtlPcdYvuiWWZep75U/k8OUdxQ/0d/7g4iIiIiISJeGXTyynGl392qCaNj9ni1S8y2l5Wyhi1xRu/V38vlOxblPAZYp1qeC8xGyaO/u7/1BRERERESkXbOoIXR7jd8eGdebdVi33f1acfj00+WL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';
+
+// Lo stesso logo nella barra in alto dell'interfaccia (anche lì l'indirizzo remoto dava 404)
+(()=>{ const tl=document.getElementById('topbarLogo'); if(tl) tl.src=logoMarottaBase64; })();
+
+// Disegna il logo su piastrina bianca alta h mm e restituisce il bordo destro della piastrina
+function disegnaLogoMarotta(doc,x,y,h){
+  const pad=2, lh=h-pad*2, lw=lh*LOGO_MAROTTA_W/LOGO_MAROTTA_H;
+  doc.setFillColor(255,255,255);
+  doc.roundedRect(x,y,lw+pad*2,h,2,2,'F');
+  try{ doc.addImage(logoMarottaBase64,'PNG',x+pad,y+pad,lw,lh); }
+  catch(e){ console.warn('Logo Marotta non aggiunto',e); }
+  return x+lw+pad*2;
+}
 
 // --- Logo cliente (upload, per il PDF) ---
 function caricaLogoCliente(input){
@@ -2545,22 +3016,61 @@ function caricaLogoCliente(input){
   reader.readAsDataURL(file);
 }
 
+// --- Testi nel PDF ---
+// jsPDF con Helvetica stampa solo il set WinAnsi (Latin-1 più € e poche altre): le lettere
+// oltre, polacche, turche, greche, cirilliche, uscivano come simboli. Si traslitterano; le
+// lettere Latin-1 (à, ü, ñ...) restano come sono.
+const WINANSI_EXTRA='€‚ƒ„…†‡ˆ‰Š‹ŒŽ‘’“”•–—˜™š›œžŸ';
+const TRASLIT=(()=>{
+  const m={'Ł':'L','ł':'l','Đ':'D','đ':'d','ı':'i','Ħ':'H','ħ':'h','ς':'s'};
+  const coppie='ΑA ΒB ΓG ΔD ΕE ΖZ ΗI ΘTh ΙI ΚK ΛL ΜM ΝN ΞX ΟO ΠP ΡR ΣS ΤT ΥY ΦF ΧCh ΨPs ΩO '+
+    'АA БB ВV ГG ҐG ДD ЕE ЁE ЄYe ЖZh ЗZ ИI ІI ЇYi ЙY КK ЛL МM НN ОO ПP РR СS ТT УU ФF ХKh ЦTs ЧCh ШSh ЩShch Ъ ЫY Ь ЭE ЮYu ЯYa';
+  coppie.split(' ').forEach(t=>{ const c=t[0], r=t.slice(1); m[c]=r; m[c.toLowerCase()]=r.toLowerCase(); });
+  return m;
+})();
+function testoPdf(t){
+  // per codice numerico, così niente sequenze di escape da tenere allineate
+  let out='';
+  for(const ch of String(t==null?'':t)){
+    const c=ch.codePointAt(0);
+    if(c<=0xFF||WINANSI_EXTRA.includes(ch)){ out+=ch; continue; }
+    if(c>0xFFFF) continue;                                                                   // emoji e simili
+    if((c>=0x2000&&c<=0x200A)||c===0x202F||c===0x205F||c===0x3000){ out+=' '; continue; }   // spazi tipografici
+    if((c>=0x200B&&c<=0x200D)||c===0x2060||c===0xFEFF) continue;                            // caratteri invisibili
+    if((c>=0x2010&&c<=0x2012)||c===0x2212){ out+='-'; continue; }                            // trattini e segno meno
+    if(c===0x2192){ out+='->'; continue; }                                                   // freccia
+    if(c===0x2713||c===0x2714){ out+='•'; continue; }                                        // spunte
+    if(TRASLIT[ch]!=null){ out+=TRASLIT[ch]; continue; }
+    // lettera con segni diacritici: si tiene la base (ş -> s, ř -> r), poi di nuovo la tabella
+    const base=[...ch.normalize('NFKD')].filter(x=>{const k=x.codePointAt(0); return k<0x300||k>0x36F;}).join('');
+    if(TRASLIT[base]!=null){ out+=TRASLIT[base]; continue; }
+    out+=[...base].every(x=>x.codePointAt(0)<=0xFF||WINANSI_EXTRA.includes(x))?base:'?';
+  }
+  return out;
+}
+
 // --- Generazione PDF ---
+// I numeri vengono solo dal Confronto soluzioni (calcScenario), gli stessi che Andrea vede
+// a video. Niente più riquadro Grenke separato (scelta di Alberto, 30/09/2026): le
+// soluzioni spuntate stanno affiancate in colonna, da una a quattro.
 function generaPDF(){
-  const{jsPDF}=window.jspdf;
-  const doc=new jsPDF({unit:'mm',format:'a4'});
   const m=stato.macchina;
   if(!m)return;
-
-  const d=stato.durataSelezionata;
   const prezzo=stato.prezzoTotale||0;
-  const canone=calcCanone(prezzo,d);
-  const riscPerc=RISCATTO[d]||0;
-  const riscVal=Math.round(prezzo*riscPerc/100);
-  const totale=canone*d+riscVal;
+  if(!(prezzo>0)){ alert("Inserisci il prezzo dell'offerta prima di generare il preventivo."); return; }
+  if(!(stato.prezzoPrincipale>0)){ alert(`Manca il prezzo della ${m.nome}: inseriscilo prima di generare il preventivo.`); return; }
+  const soluzioni=scenari().filter(s=>s.includiPdf).map(s=>{const c=calcScenario(s); return {s,c,label:etichettaScenario(s,c)};});
+  if(!soluzioni.length){ alert("Spunta almeno una soluzione nel Confronto soluzioni: è quella che finisce nel preventivo."); return; }
+  const senzaCanone=soluzioni.find(x=>!(x.c.canone>0));
+  if(senzaCanone){
+    // l'ultimo avviso è sempre la causa del canone a zero (fuori Schengen, sotto soglia, durata)
+    const motivo=senzaCanone.c.avvisi[senzaCanone.c.avvisi.length-1]||'Cambia durata.';
+    alert(`"${senzaCanone.label}" non ha un canone. ${motivo} Togli la spunta o scegli un'altra soluzione.`); return;
+  }
+
+  const{jsPDF}=window.jspdf;
+  const doc=new jsPDF({unit:'mm',format:'a4'});
   const cp=stato.creditPolicy;
-  const anticipo=cp?cp.overrideAnticipo:0;
-  const importoAnticipo=Math.round(prezzo*anticipo/100);
   const nomeComm=document.getElementById("prevNome").value||'Alberto Amà';
   const validita=parseInt(document.getElementById("prevValidita").value)||30;
   const note=document.getElementById("prevNote").value.trim();
@@ -2570,12 +3080,24 @@ function generaPDF(){
   const dataOggi=oggi.toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'});
   const scadenza=new Date(oggi.getTime()+validita*86400000).toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'});
 
+  const haNol=soluzioni.some(x=>x.s.prodotto==='noleggio');
+  const haLea=soluzioni.some(x=>x.s.prodotto==='leasing');
+  const titolo=haNol&&haLea?'PROPOSTA DI NOLEGGIO E LEASING':haLea?'PROPOSTA DI LEASING':'PROPOSTA DI NOLEGGIO OPERATIVO';
+
   const W=210;
   const H=297;
   const mL=20; // margine sinistro
   const mR=20; // margine destro
   const cW=W-mL-mR; // larghezza contenuto
+  // Ultima linea di base utile: la fascia del piè di pagina parte a H-28, e una riga di
+  // testo scende di circa 1,2 mm sotto la sua linea di base.
+  const FONDO=H-30;
   let y=0;
+  // Se il blocco non ci sta, pagina nuova: il piè di pagina si disegna alla fine su tutte
+  // h = distanza fra la linea di base corrente e l'ultima del blocco: se non ci sta, pagina nuova
+  const spazio=h=>{ if(y+h>FONDO){ doc.addPage(); y=24; } };
+  // interlinea vera di jsPDF in mm per la dimensione di carattere corrente
+  const interlinea=()=>doc.getFontSize()*doc.getLineHeightFactor()*25.4/72;
 
   // Colori brand Marotta
   const navy=[14,0,96];    // #0e0060
@@ -2591,21 +3113,14 @@ function generaPDF(){
   doc.rect(0,48,W,3,'F');
 
   // Logo Marotta (se caricato)
-  if(logoMarottaBase64){
-    doc.addImage(logoMarottaBase64,'PNG',mL,10,50,18);
-  }else{
-    doc.setTextColor(255,255,255);
-    doc.setFontSize(16);
-    doc.setFont('helvetica','bold');
-    doc.text('MAROTTA EVOLUTION',mL,22);
-  }
+  const fineLogo=disegnaLogoMarotta(doc,mL,9,16);
 
   // Logo cliente accanto a quello Marotta (su chip bianco per leggibilità)
   if(stato.logoCliente&&stato.logoClienteW>0){
     const maxW=30,maxH=14;
     const ratio=Math.min(maxW/stato.logoClienteW,maxH/stato.logoClienteH);
     const dw=stato.logoClienteW*ratio, dh=stato.logoClienteH*ratio;
-    const chipX=78, chipY=9;
+    const chipX=fineLogo+6, chipY=9; // dopo la piastrina Marotta, mai sopra
     doc.setFillColor(255,255,255);
     doc.roundedRect(chipX,chipY,dw+6,dh+6,2,2,'F');
     const fmtImg=stato.logoCliente.indexOf('image/png')>=0?'PNG':'JPEG';
@@ -2625,142 +3140,251 @@ function generaPDF(){
   doc.setTextColor(180,200,220);
   doc.text(`${numProposta}  ·  ${dataOggi}`,W-mR,28,{align:'right'});
 
-  // Titolo proposta centrato
+  // Titolo proposta centrato: segue i prodotti inclusi
   doc.setTextColor(255,255,255);
   doc.setFontSize(14);
   doc.setFont('helvetica','bold');
-  doc.text('PROPOSTA DI NOLEGGIO OPERATIVO',W/2,42,{align:'center'});
+  doc.text(titolo,W/2,42,{align:'center'});
 
   y=60;
   doc.setTextColor(0,0,0);
 
   // ========== SEZIONE 1: DATI CLIENTE ==========
-  const boxH=titolare?29:22;
+  // Testi lunghi a capo: prima una ragione sociale lunga usciva dal foglio e un indirizzo
+  // lungo si stampava sopra la partita IVA
+  const y0=y;
+  doc.setFont('helvetica','italic'); doc.setFontSize(9);
+  const titL=titolare?doc.splitTextToSize(`Alla cortese attenzione di ${testoPdf(titolare)}`,cW-10).slice(0,2):[];
+  doc.setFont('helvetica','bold'); doc.setFontSize(12);
+  let rsL=doc.splitTextToSize(testoPdf(stato.rs),cW-10);
+  if(rsL.length>3){ rsL=rsL.slice(0,3); while(rsL[2].length&&doc.getTextWidth(rsL[2]+'…')>cW-10) rsL[2]=rsL[2].slice(0,-1); rsL[2]=rsL[2].trimEnd()+'…'; }
+  doc.setFont('helvetica','normal'); doc.setFontSize(10);
+  // sulla controparte estera non è una partita IVA ma il codice del registro del suo paese
+  const paeseCp=stato.azienda?.paese;
+  const idTxt=paeseCp?`${nomePaese(paeseCp)} · ${testoPdf(stato.piva)}`:'P.IVA '+stato.piva;
+  const ind=stato.azienda?.indirizzo?testoPdf(stato.azienda.indirizzo):'';
+  // l'indirizzo sta sulla riga dell'identificativo se c'è posto, altrimenti va sotto
+  const indStessaRiga=!!ind&&doc.getTextWidth(idTxt)+doc.getTextWidth(ind)+8<=cW-10;
+  const indL=ind&&!indStessaRiga?doc.splitTextToSize(ind,cW-10).slice(0,2):[];
+  const ultimaBase=y0+7+titL.length*5+(titL.length?1:0)+(rsL.length-1)*5.5+6+indL.length*5;
+  const boxH=ultimaBase-(y0-6)+4;
   doc.setFillColor(244,246,248);
-  doc.roundedRect(mL,y-6,cW,boxH,2,2,'F');
+  doc.roundedRect(mL,y0-6,cW,boxH,2,2,'F');
   doc.setFontSize(8);
   doc.setTextColor(...teal);
   doc.setFont('helvetica','bold');
   doc.text('DATI CLIENTE',mL+5,y);
   y+=7;
-  if(titolare){
+  if(titL.length){
     doc.setFontSize(9);
     doc.setFont('helvetica','italic');
     doc.setTextColor(90,90,90);
-    doc.text(`Alla cortese attenzione di ${titolare}`,mL+5,y);
-    y+=6;
+    titL.forEach(l=>{ doc.text(l,mL+5,y); y+=5; });
+    y+=1;
   }
   doc.setFont('helvetica','bold');
   doc.setFontSize(12);
   doc.setTextColor(20,20,20);
-  doc.text(stato.rs,mL+5,y);
+  rsL.forEach((l,i)=>{ doc.text(l,mL+5,y); if(i<rsL.length-1) y+=5.5; });
   y+=6;
   doc.setFontSize(10);
   doc.setFont('helvetica','normal');
   doc.setTextColor(80,80,80);
-  doc.text('P.IVA '+stato.piva,mL+5,y);
-  if(stato.azienda?.indirizzo){
-    doc.text(stato.azienda.indirizzo,W-mR-5,y,{align:'right'});
-  }
-  y+=titolare?20:18;
+  doc.text(idTxt,mL+5,y);
+  if(indStessaRiga) doc.text(ind,W-mR-5,y,{align:'right'});
+  indL.forEach(l=>{ y+=5; doc.text(l,mL+5,y); });
+  y=y0-6+boxH+12;
 
   // ========== SEZIONE 2: BENE / CONFIGURAZIONE ==========
+  // Accessorio spuntato senza prezzo = incluso nell'offerta
   const voci=[{nome:m.nome,prezzo:stato.prezzoPrincipale||0}];
-  stato.accessori.forEach(id=>{const a=MACCHINE.find(x=>x.id===id); if(a)voci.push({nome:a.nome,prezzo:a.prezzo});});
+  accessoriScelti().forEach(a=>voci.push({nome:a.nome,prezzo:a.prezzo,incluso:!(a.prezzo>0)}));
   stato.altriMacchinari.forEach(x=>{const p=parseInt(x.prezzo)||0; if(p>0)voci.push({nome:(x.descrizione||'Macchinario').trim()||'Macchinario',prezzo:p});});
   const multiVoce=voci.length>1;
-  const beneH=11+voci.length*6+(multiVoce?7:0);
-  doc.setFillColor(244,246,248);
-  doc.roundedRect(mL,y-6,cW,beneH,2,2,'F');
+  doc.setFontSize(10); doc.setFont('helvetica','normal');
+  // descrizioni lunghe a capo, senza finire sopra il prezzo
+  voci.forEach(v=>{ v.righe=doc.splitTextToSize(testoPdf(v.nome),cW-10-38); v.h=6+(v.righe.length-1)*4.5; });
+  const beneH=11+voci.reduce((h,v)=>h+v.h,0)+(multiVoce?7:0);
+  // Il riquadro va intero: dove si trova se ci sta, a pagina nuova se è corto. Un elenco
+  // lungo invece scorre voce per voce, senza lasciare mezza pagina bianca.
+  const troppoAlto=beneH-9>FONDO-y&&beneH>100;
+  if(!troppoAlto){
+    spazio(beneH-9);
+    doc.setFillColor(244,246,248);
+    doc.roundedRect(mL,y-6,cW,beneH,2,2,'F');
+  }
   doc.setFontSize(8);
   doc.setTextColor(...teal);
   doc.setFont('helvetica','bold');
   doc.text('BENE OGGETTO DEL CONTRATTO',mL+5,y);
   y+=7;
   voci.forEach(v=>{
+    if(troppoAlto) spazio((v.righe.length-1)*4.5);
     doc.setFontSize(10);
     doc.setFont('helvetica','normal');
     doc.setTextColor(20,20,20);
-    doc.text(v.nome,mL+5,y);
+    v.righe.forEach((l,i)=>doc.text(l,mL+5,y+i*4.5));
     doc.setTextColor(80,80,80);
-    doc.text(`\u20AC${fmt(v.prezzo)}`,W-mR-5,y,{align:'right'});
-    y+=6;
+    doc.text(v.incluso?'incluso':`€${fmt(v.prezzo)}`,W-mR-5,y,{align:'right'});
+    y+=v.h;
   });
   if(multiVoce){
+    if(troppoAlto) spazio(0);
     doc.setFontSize(10);
     doc.setFont('helvetica','bold');
     doc.setTextColor(20,20,20);
     doc.text('Totale beni (IVA esclusa)',mL+5,y);
-    doc.text(`\u20AC${fmt(prezzo)}`,W-mR-5,y,{align:'right'});
+    doc.text(`€${fmt(prezzo)}`,W-mR-5,y,{align:'right'});
     y+=7;
   }
-  y+=10;
+  y+=7;
 
-  // ========== SEZIONE 3: CONDIZIONI FINANZIARIE ==========
+  // ========== SEZIONE 3: SOLUZIONI (una colonna per soluzione) ==========
+  const n=soluzioni.length;
+  const labW=44;                       // colonna delle voci
+  const colW=(cW-labW)/n;
+  const cx=i=>mL+labW+colW*i+colW/2;   // centro della colonna i
+
+  spazio(110);
   doc.setFillColor(...navy);
   doc.roundedRect(mL,y-6,cW,10,2,2,'F');
   doc.setFontSize(8);
   doc.setTextColor(255,255,255);
   doc.setFont('helvetica','bold');
-  doc.text('CONDIZIONI FINANZIARIE',mL+5,y);
-  y+=10;
+  doc.text(n===1?'CONDIZIONI FINANZIARIE':'SOLUZIONI A CONFRONTO',mL+5,y);
+  y+=11;
 
+  // Intestazioni di colonna: nome della soluzione (max due righe) e tipo di prodotto
+  doc.setFontSize(9.5);
+  doc.setFont('helvetica','bold');
+  doc.setTextColor(20,20,20);
+  // fino a tre righe; 'preammortamento' non entra in una colonna da 31 mm e si abbrevia
+  // fino a quattro righe; oltre si chiude con i puntini invece di tagliare in silenzio
+  const intest=soluzioni.map(x=>{
+    let l=doc.splitTextToSize(testoPdf(x.label).replace(/preammortamento/g,'preamm.'),colW-4);
+    if(l.length>4){
+      l=l.slice(0,4);
+      while(l[3].length&&doc.getTextWidth(l[3]+'…')>colW-4) l[3]=l[3].slice(0,-1);
+      l[3]=l[3].trimEnd()+'…';
+    }
+    return l;
+  });
+  const righeIntest=Math.max(...intest.map(l=>l.length));
+  intest.forEach((l,i)=>doc.text(l,cx(i),y,{align:'center'}));
+  y+=righeIntest*4.2;
+  doc.setFontSize(7.5);
+  doc.setFont('helvetica','normal');
+  doc.setTextColor(...teal);
+  soluzioni.forEach((x,i)=>doc.text(x.s.prodotto==='leasing'?'Leasing finanziario':'Noleggio operativo',cx(i),y,{align:'center'}));
+  y+=3;
+  doc.setDrawColor(220,220,220); doc.setLineWidth(0.2); doc.line(mL,y,W-mR,y);
+  y+=6;
+
+  // Righe: [voce, valore per soluzione, evidenza]
   const righe=[
-    ['Durata contratto',`${d} mesi`],
-    ['Canone mensile (IVA esclusa)',`\u20AC${fmt(canone)}`],
-    ['Modalit\u00e0 pagamento','Trimestrale anticipato'],
-    ['Valore riscatto finale',`\u20AC${fmt(riscVal)} (${riscPerc}%)`],
-    ['Totale complessivo contratto',`\u20AC${fmt(totale)}`],
-    ['Assicurazione','Obbligatoria, non inclusa nel canone'],
+    ['Durata',x=>`${x.c.durata} mesi`],
+    ['Anticipo',x=>x.c.anticipoEuro>0?`€${fmt(x.c.anticipoEuro)} (${fmt(x.c.anticipoPerc)}%)`:'Nessuno'],
+    ['Canone mensile (IVA esclusa)',x=>`€${fmt(x.c.canone)}${x.c.daConfermare?' *':''}`,'canone'],
+    ['Pagamento',x=>x.c.pagamento],
   ];
-  if(anticipo>0){
-    righe.splice(2,0,['Acconto richiesto',`\u20AC${fmt(importoAnticipo)} (${anticipo}%)`]);
-  }
+  if(soluzioni.some(x=>x.c.preMesi>0)) righe.push(['Preammortamento',x=>x.c.preMesi>0?`€${fmt(x.c.preRata)} × ${x.c.preMesi} mesi`:'—']);
+  righe.push(['Riscatto finale',x=>x.c.riscattoEuro!=null?`€${fmt(x.c.riscattoEuro)} (${fmt(x.c.riscattoPerc)}%)`:'Da concordare']);
+  if(haLea) righe.push(['Spese istruttoria e incasso',x=>x.c.spese>0?`€${fmt(x.c.spese)} + €${fmt(x.c.speseRata)}/rata`:'—']);
+  righe.push(['Totale complessivo',x=>`€${fmt(x.c.totale)}`,'totale']);
+  righe.push(['Assicurazione',x=>x.c.operatore==='econocom'?'Da definire in quotazione':'Obbligatoria, non inclusa']);
 
-  doc.setFontSize(10);
-  righe.forEach((r,i)=>{
-    if(i%2===0){doc.setFillColor(248,249,251);doc.rect(mL,y-4,cW,9,'F');}
+  righe.forEach((r,ri)=>{
+    const [voce,val,evid]=r;
+    const fs=evid==='canone'?11:9;
+    doc.setFontSize(fs);
+    const celle=soluzioni.map(x=>doc.splitTextToSize(val(x),colW-4));
+    doc.setFontSize(9);
+    const voceL=doc.splitTextToSize(voce,labW-6);
+    const linee=Math.max(voceL.length,...celle.map(c=>c.length));
+    const h=(evid==='canone'?4.4:3.4)+linee*3.9;
+    if(ri%2===0){ doc.setFillColor(248,249,251); doc.rect(mL,y-4.3,cW,h,'F'); }
     doc.setFont('helvetica','normal');
     doc.setTextColor(90,90,90);
-    doc.text(r[0],mL+5,y);
-    doc.setFont('helvetica','bold');
-    doc.setTextColor(20,20,20);
-    doc.text(r[1],W-mR-5,y,{align:'right'});
-    y+=9;
+    doc.text(voceL,mL+3,y);
+    doc.setFontSize(fs);
+    doc.setFont('helvetica',evid?'bold':'normal');
+    if(evid==='canone') doc.setTextColor(...navy); else doc.setTextColor(20,20,20);
+    celle.forEach((c,i)=>doc.text(c,cx(i),y,{align:'center'}));
+    y+=h;
   });
-  y+=10;
+  y+=1;
 
-  // ========== SEZIONE 4: VANTAGGI ==========
-  // Linea teal decorativa
-  doc.setDrawColor(...teal);
-  doc.setLineWidth(0.5);
-  doc.line(mL,y-4,mL+30,y-4);
-  doc.setFontSize(8);
-  doc.setTextColor(...teal);
-  doc.setFont('helvetica','bold');
-  doc.text('VANTAGGI DEL NOLEGGIO OPERATIVO',mL,y+2);
-  y+=9;
-  doc.setFontSize(10);
-  doc.setTextColor(40,40,40);
+  // Condizioni personalizzate: solo se l'override di Carmine cambia un numero stampato.
+  // Il markup tocca ogni soluzione; l'anticipo solo i leasing (il noleggio resta a zero).
+  // Sta fra le note della tabella: stampata in fondo finiva sopra le note o da sola a pagina 2.
+  // Si ricalcolano le soluzioni coi valori suggeriti e si confrontano con quelle stampate.
+  let personalizzate=false;
+  if(cp&&(cp.overrideMarkup!==cp.markup||cp.overrideAnticipo!==cp.anticipo)){
+    const ov=[cp.overrideMarkup,cp.overrideAnticipo];
+    cp.overrideMarkup=cp.markup; cp.overrideAnticipo=cp.anticipo;
+    const senza=soluzioni.map(x=>calcScenario(x.s));
+    [cp.overrideMarkup,cp.overrideAnticipo]=ov;
+    personalizzate=soluzioni.some((x,i)=>x.c.canone!==senza[i].canone||x.c.totale!==senza[i].totale||x.c.anticipoEuro!==senza[i].anticipoEuro);
+  }
+
+  // Note sotto la tabella: cosa c'è dentro il totale e cosa va ancora confermato
+  const noteTab=['Importi IVA esclusa.'];
+  if(soluzioni.some(x=>x.c.daConfermare)) noteTab.push('* Canone Econocom calcolato alle condizioni della tabella a 60 mesi: soggetto a conferma di Econocom in sede di quotazione.');
+  if(soluzioni.some(x=>x.c.operatore==='grenke')) noteTab.push('Noleggio: canone mensile fatturato a trimestre anticipato; il totale comprende il riscatto finale.');
+  if(soluzioni.some(x=>x.c.operatore==='econocom')) noteTab.push('Noleggio: canone mensile anticipato, senza anticipo e senza deposito; condizioni di fine contratto da concordare.');
+  if(haLea) noteTab.push('Leasing: rata indicativa indicizzata all\'Euribor 3 mesi; il totale comprende anticipo, riscatto e spese di istruttoria e incasso.');
+  if(personalizzate) noteTab.push(`Condizioni personalizzate — approvate da ${testoPdf(nomeComm)}.`);
+  doc.setFontSize(7.5);
   doc.setFont('helvetica','normal');
-  const vantaggi=[
-    'Canone 100% deducibile come costo d\'esercizio',
-    'Nessuna immobilizzazione di capitale',
-    'Manutenzione e obsolescenza a carico del locatore',
-  ];
-  vantaggi.forEach(v=>{
-    doc.setTextColor(...teal);
-    doc.text('\u2022',mL+3,y);
-    doc.setTextColor(40,40,40);
-    doc.text(v,mL+9,y);
-    y+=7;
+  doc.setTextColor(110,110,110);
+  // le note restano insieme: una sola riga orfana in cima alla pagina dopo non si legge
+  const righeNote=noteTab.map(t=>doc.splitTextToSize(t,cW-4));
+  spazio(righeNote.reduce((h,l)=>h+l.length*3.5,0)-3.5);
+  righeNote.forEach(l=>{
+    doc.text(l,mL+2,y);
+    y+=l.length*3.5;
   });
-  y+=6;
+  y+=7;
+
+  // ========== SEZIONE 4: VANTAGGI DEL NOLEGGIO (solo se c'è un noleggio) ==========
+  if(haNol){
+    spazio(23); // dalla linea del titolo all'ultimo vantaggio
+    // Linea teal decorativa
+    doc.setDrawColor(...teal);
+    doc.setLineWidth(0.5);
+    doc.line(mL,y-4,mL+30,y-4);
+    doc.setFontSize(8);
+    doc.setTextColor(...teal);
+    doc.setFont('helvetica','bold');
+    doc.text('VANTAGGI DEL NOLEGGIO OPERATIVO',mL,y+2);
+    y+=9;
+    doc.setFontSize(10);
+    doc.setTextColor(40,40,40);
+    doc.setFont('helvetica','normal');
+    const vantaggi=[
+      'Canone 100% deducibile come costo d\'esercizio',
+      'Nessuna immobilizzazione di capitale',
+      'Manutenzione e obsolescenza a carico del locatore',
+    ];
+    vantaggi.forEach(v=>{
+      doc.setTextColor(...teal);
+      doc.text('•',mL+3,y);
+      doc.setTextColor(40,40,40);
+      doc.text(v,mL+9,y);
+      y+=7;
+    });
+    y+=6;
+  }
 
   // ========== SEZIONE 5: STIMA PRODUTTIVA E RISPARMIO (opzionale) ==========
   const f=stato.funnel;
   if(stato.funnelAttivo&&f&&f.margMese>0){
+    const funnelText=`Produzione stimata: ${fmt(Math.round(f.pezziMese))} pezzi/mese (${fmt(Math.round(f.kgMeseMacc))} kg/mese), per un margine lordo di €${fmt(f.margMese)}/mese a fronte di un canone di €${fmt(f.canoneMese)}/mese${f.daConfermare?' *':''}${f.canoneLabel?` (${testoPdf(f.canoneLabel)})`:''}. Rispetto alla lavorazione a mano, la macchina genera un risparmio stimato di €${fmt(f.rispTot)}/mese (materia prima €${fmt(f.rispMP)} + manodopera €${fmt(f.rispMO)}), pari a €${fmt(f.rispTot*12)}/anno.`;
+    doc.setFontSize(10);
+    const lines=doc.splitTextToSize(funnelText,cW-10);
+    spazio(9+(lines.length-1)*interlinea()); // titolo più testo, fino all'ultima riga
     doc.setDrawColor(...teal);
+    doc.setLineWidth(0.5);
     doc.line(mL,y-4,mL+30,y-4);
     doc.setFontSize(8);
     doc.setTextColor(...teal);
@@ -2770,94 +3394,61 @@ function generaPDF(){
     doc.setFontSize(10);
     doc.setTextColor(40,40,40);
     doc.setFont('helvetica','normal');
-    const funnelText=`Produzione stimata: ${fmt(Math.round(f.pezziMese))} pezzi/mese (${fmt(Math.round(f.kgMeseMacc))} kg/mese), per un margine lordo di \u20AC${fmt(f.margMese)}/mese a fronte di un canone di \u20AC${fmt(canone)}/mese. Rispetto alla lavorazione a mano, la macchina genera un risparmio stimato di \u20AC${fmt(f.rispTot)}/mese (materia prima \u20AC${fmt(f.rispMP)} + manodopera \u20AC${fmt(f.rispMO)}), pari a \u20AC${fmt(f.rispTot*12)}/anno.`;
-    const lines=doc.splitTextToSize(funnelText,cW-10);
     doc.text(lines,mL+5,y);
-    y+=lines.length*6+8;
+    y+=lines.length*interlinea()+6;
   }
 
   // ========== NOTE ==========
   if(note){
+    doc.setFontSize(10);
+    const noteLines=doc.splitTextToSize(testoPdf(note),cW-10);
+    spazio(6+(Math.min(noteLines.length,3)-1)*interlinea()); // il titolo NOTE non resta orfano
     doc.setFontSize(8);
     doc.setTextColor(...teal);
     doc.setFont('helvetica','bold');
     doc.text('NOTE',mL,y);
     y+=6;
     doc.setFontSize(10);
-    doc.setTextColor(40,40,40);
     doc.setFont('helvetica','normal');
-    const noteLines=doc.splitTextToSize(note,cW-10);
-    doc.text(noteLines,mL+5,y);
-    y+=noteLines.length*6+6;
-  }
-
-  // Condizioni personalizzate
-  if(cp&&(cp.overrideAnticipo!==cp.anticipo||cp.overrideMarkup!==cp.markup)){
-    doc.setFontSize(8);
-    doc.setTextColor(120,120,120);
-    doc.setFont('helvetica','italic');
-    doc.text(`Condizioni personalizzate \u2014 approvate da ${nomeComm}`,mL+5,y);
-    doc.setFont('helvetica','normal');
-    y+=8;
-  }
-
-  // ========== CONFRONTO SOLUZIONI (scenari selezionati) ==========
-  const scenariPdf=(stato.scenari||[]).filter(s=>s.includiPdf);
-  if(scenariPdf.length){
-    const needed=20+scenariPdf.length*8+34;
-    if(y>H-needed){ doc.addPage(); y=24; }
-    doc.setDrawColor(...teal); doc.setLineWidth(0.5); doc.line(mL,y-4,mL+30,y-4);
-    doc.setFontSize(8); doc.setTextColor(...teal); doc.setFont('helvetica','bold');
-    doc.text('CONFRONTO SOLUZIONI',mL,y+2); y+=9;
-    const colX=[mL+2,mL+78,mL+108,mL+138,W-mR-2];
-    doc.setFontSize(8); doc.setTextColor(120,120,120); doc.setFont('helvetica','bold');
-    doc.text('Soluzione',colX[0],y);
-    doc.text('Durata',colX[1],y,{align:'right'});
-    doc.text('Canone',colX[2],y,{align:'right'});
-    doc.text('Riscatto',colX[3],y,{align:'right'});
-    doc.text('Totale',colX[4],y,{align:'right'});
-    y+=2; doc.setDrawColor(220,220,220); doc.setLineWidth(0.2); doc.line(mL,y,W-mR,y); y+=5;
-    doc.setFont('helvetica','normal'); doc.setFontSize(9);
-    scenariPdf.forEach((s,idx)=>{
-      const c=calcScenario(s);
-      if(idx%2===0){ doc.setFillColor(248,249,251); doc.rect(mL,y-4,cW,8,'F'); }
-      doc.setTextColor(20,20,20);
-      const labelTxt=doc.splitTextToSize(s.label||(s.prodotto==='leasing'?'Leasing':'Noleggio'),72)[0];
-      doc.text(labelTxt,colX[0],y);
-      doc.setTextColor(60,60,60);
-      doc.text(`${s.durata} m`,colX[1],y,{align:'right'});
-      doc.text(`\u20ac${fmt(c.canone)}`,colX[2],y,{align:'right'});
-      doc.text(`\u20ac${fmt(c.riscattoEuro)}`,colX[3],y,{align:'right'});
-      doc.setTextColor(20,20,20); doc.setFont('helvetica','bold');
-      doc.text(`\u20ac${fmt(c.totale)}`,colX[4],y,{align:'right'});
-      doc.setFont('helvetica','normal');
-      y+=8;
+    // riga per riga: una nota lunga continua sulla pagina dopo invece di finire sotto il piè di pagina
+    // le ultime due righe piene vanno insieme (una firma dopo una riga vuota non resta sola),
+    // e una riga vuota in cima a una pagina nuova non si stampa
+    const piene=noteLines.map((l,i)=>l.trim()?i:-1).filter(i=>i>=0);
+    const penultima=piene.length>1?piene[piene.length-2]:-1, ultima=piene[piene.length-1];
+    noteLines.forEach((l,i)=>{
+      spazio(i===penultima?(ultima-i)*interlinea():0);
+      if(!l.trim()&&y===24) return;
+      doc.setFontSize(10); doc.setTextColor(40,40,40); doc.text(l,mL+5,y); y+=interlinea();
     });
     y+=4;
   }
 
-  // ========== FOOTER ==========
-  // Banda footer
-  doc.setFillColor(...dark);
-  doc.rect(0,H-28,W,28,'F');
-  doc.setFillColor(...teal);
-  doc.rect(0,H-28,W,1.5,'F');
 
-  doc.setFontSize(9);
-  doc.setTextColor(220,220,220);
-  doc.setFont('helvetica','bold');
-  doc.text(`Proposta preparata da: ${nomeComm}`,mL,H-19);
-  doc.setFont('helvetica','normal');
-  doc.setTextColor(160,170,180);
-  doc.text('mediocreditofacile.it  |  +39 393 995 7840  |  mediocreditofacile@gmail.com',mL,H-13);
+  // ========== FOOTER, su ogni pagina ==========
+  const pagine=doc.getNumberOfPages();
+  for(let p=1;p<=pagine;p++){
+    doc.setPage(p);
+    doc.setFillColor(...dark);
+    doc.rect(0,H-28,W,28,'F');
+    doc.setFillColor(...teal);
+    doc.rect(0,H-28,W,1.5,'F');
 
-  doc.setTextColor(220,220,220);
-  doc.setFont('helvetica','bold');
-  doc.text(`Valida fino al ${scadenza}`,W-mR,H-19,{align:'right'});
-  doc.setFont('helvetica','normal');
-  doc.setFontSize(7);
-  doc.setTextColor(130,140,150);
-  doc.text('I dati produttivi sono stime indicative. Il canone \u00e8 soggetto a delibera finale di Grenke Italia SpA.',mL,H-6);
+    doc.setFontSize(9);
+    doc.setTextColor(220,220,220);
+    doc.setFont('helvetica','bold');
+    doc.text(`Proposta preparata da: ${testoPdf(nomeComm)}`,mL,H-19);
+    doc.setFont('helvetica','normal');
+    doc.setTextColor(160,170,180);
+    doc.text('mediocreditofacile.it  |  +39 393 995 7840  |  mediocreditofacile@gmail.com',mL,H-13);
+
+    doc.setTextColor(220,220,220);
+    doc.setFont('helvetica','bold');
+    doc.text(`Valida fino al ${scadenza}`,W-mR,H-19,{align:'right'});
+    doc.setFont('helvetica','normal');
+    doc.setFontSize(7);
+    doc.setTextColor(130,140,150);
+    doc.text('I dati produttivi sono stime indicative. Canoni e rate sono soggetti a delibera della società di noleggio o di leasing.',mL,H-6);
+  }
 
   // Salva
   const fileName=`Preventivo_${stato.rs.replace(/[^a-zA-Z0-9]/g,'_')}_${numProposta}.pdf`;
@@ -2884,8 +3475,7 @@ function generaProspettoEstero(){
   // Header
   doc.setFillColor(...navy); doc.rect(0,0,W,44,'F');
   doc.setFillColor(...teal);  doc.rect(0,44,W,3,'F');
-  if(logoMarottaBase64){ doc.addImage(logoMarottaBase64,'PNG',mL,9,50,18); }
-  else{ doc.setTextColor(255,255,255); doc.setFontSize(15); doc.setFont('helvetica','bold'); doc.text('MAROTTA EVOLUTION',mL,21); }
+  disegnaLogoMarotta(doc,mL,9,16);
   doc.setTextColor(255,255,255); doc.setFontSize(9); doc.setFont('helvetica','normal');
   doc.text('in partnership con',W-mR,13,{align:'right'});
   doc.setFontSize(11); doc.setFont('helvetica','bold');
@@ -2908,21 +3498,21 @@ function generaProspettoEstero(){
     doc.setFont('helvetica','normal'); doc.setTextColor(110,115,120);
     doc.text(etichetta,mL,y);
     doc.setTextColor(20,20,20); doc.setFont('helvetica','bold');
-    const testo=doc.splitTextToSize(String(valore),cW-58);
+    const testo=doc.splitTextToSize(testoPdf(valore),cW-58);
     doc.text(testo,mL+58,y);
     y+=Math.max(5.5,testo.length*4.6);
   };
   const paragrafo=(t,colore)=>{
     doc.setFont('helvetica','normal'); doc.setFontSize(8.5);
     doc.setTextColor(...(colore||[70,75,80]));
-    const testo=doc.splitTextToSize(t,cW);
+    const testo=doc.splitTextToSize(testoPdf(t),cW);
     doc.text(testo,mL,y); y+=testo.length*4+2;
     doc.setFontSize(9);
   };
   const elenco=(voci)=>{
     doc.setFontSize(8.5); doc.setTextColor(70,75,80); doc.setFont('helvetica','normal');
     voci.forEach(v=>{
-      const testo=doc.splitTextToSize(v,cW-5);
+      const testo=doc.splitTextToSize(testoPdf(v),cW-5);
       doc.setTextColor(...teal); doc.text('•',mL,y);
       doc.setTextColor(70,75,80); doc.text(testo,mL+4,y);
       y+=testo.length*4+1.5;

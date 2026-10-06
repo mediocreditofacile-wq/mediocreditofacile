@@ -1,4 +1,7 @@
-// --- Coefficienti GRENKE ESG++++ (fonte: Tabella ESG ++++.pdf — Kit collaboratore Grenke / ReteRent) ---
+// --- Coefficienti GRENKE ESG++++ ---
+// Fonte: PDF "Tabella ESG ++++" del kit collaboratore Grenke / ReteRent, documento del
+// 26/03/2026. Non ancora riscontrato sul simulatore ReteRent: se un canone non torna,
+// confrontarlo con quick-quotation prima di fidarsi.
 // Tabella dedicata al fotovoltaico: il coefficiente restituisce direttamente il CANONE MENSILE.
 // Struttura: per ogni durata, array di fasce { da, a, c } ordinate per importo crescente.
 // Le durate lunghe sono disponibili solo dalle fasce alte: 72 mesi da 8.001 €, 84 mesi da 40.001 €.

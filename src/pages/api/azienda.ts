@@ -8,7 +8,7 @@ export const prerender = false;
  * spende soldi veri a ogni chiamata, quindi l'endpoint non e' mai pubblico.
  */
 
-import { schedaAzienda, spesaDelMese } from '../../lib/openapi';
+import { schedaAzienda, spesaDelMese, esitiVerifiche } from '../../lib/openapi';
 
 function autorizzato(request: Request): boolean {
   const atteso = import.meta.env.VALUTAZIONE_KEY as string;
@@ -34,9 +34,17 @@ export async function GET({ request }: { request: Request }) {
   try {
     const scheda = await schedaAzienda(piva, { conNegativita: true });
     if (!scheda.trovata) return json({ trovata: false, piva });
-    const spesa = await spesaDelMese();
-    console.log(JSON.stringify({ evento: 'scheda_azienda', piva, daCache: !!scheda.daCache }));
-    return json({ ...scheda, spesa });
+    // Esiti delle verifiche gia' pagate su azienda, soci e amministratori: solo blob,
+    // nessuna chiamata Openapi. Stanno fuori dalla cache della scheda perche' hanno
+    // una vita loro: un report pagato oggi deve comparire anche su una scheda di ieri.
+    const codici = [
+      piva,
+      ...(scheda.soci ?? []).map((s: any) => String(s?.taxCode ?? '')),
+      ...((scheda.full?.managers ?? []) as any[]).map((m) => String(m?.taxCode ?? '')),
+    ];
+    const [spesa, verifiche] = await Promise.all([spesaDelMese(), esitiVerifiche(codici)]);
+    console.log(JSON.stringify({ evento: 'scheda_azienda', piva, daCache: !!scheda.daCache, verifiche: Object.keys(verifiche).length }));
+    return json({ ...scheda, spesa, verifiche });
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'errore sconosciuto';
     console.error(JSON.stringify({ evento: 'scheda_azienda_errore', piva, msg }));

@@ -1,5 +1,8 @@
 // --- Coefficienti Grenke reali (tabella Sputnik++++, pagamento trimestrale) ---
-// Fonte: Grenke Italia SpA — Rete Rent
+// Fonte: PDF "Tabella SPUTNIK ++++" del kit ReteRent (documento del 26/05/2025),
+// riscontrato il 23/09/2026 sul simulatore ReteRent (endpoint quick-quotation,
+// codice tabella SPT): coincide cifra per cifra. Qui i valori sono arrotondati a tre
+// decimali come sul PDF; il portale ne restituisce cinque (2,27766 contro 2,277).
 // Struttura: per ogni durata, array di fasce { da, a, c } ordinate per importo crescente
 
 export const GRENKE_COEFFS: Record<number, { da: number; a: number; c: number }[]> = {

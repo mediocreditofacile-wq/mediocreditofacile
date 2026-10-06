@@ -127,6 +127,16 @@ const datiClient = { CODICI, ETICHETTE, RUOLI, VALORI };
   .val .attesa { color: #664CCD; font-weight: 600; }
   .val .esito-si { color: #A31515; font-weight: 700; }
   .val .esito-no { color: #0F7B34; font-weight: 600; }
+  .val .gia { display: block; font-size: .75rem; color: #787782; font-weight: 400; margin-top: 2px; }
+
+  /* --- Report persona, espandibile sotto la riga --- */
+  .val tr.rep-riga td { background: #fff !important; padding: 0 16px 16px 50px; }
+  .val details.rep summary { cursor: pointer; color: #664CCD; font-weight: 600; font-size: .875rem; padding: 8px 0; }
+  .val details.rep h5 { font-size: .75rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: #0F1020; margin: 16px 0 6px; }
+  .val details.rep table { font-size: .8125rem; }
+  .val details.rep th { text-align: left; font-weight: 600; font-size: .6875rem; text-transform: uppercase; letter-spacing: .05em; color: #787782; padding: 6px 10px; border-bottom: 1.5px solid #664CCD; background: none; }
+  .val details.rep td { padding: 6px 10px; }
+  .val details.rep p { font-size: .8125rem; color: #787782; margin: 4px 0; }
 
   /* --- Tachimetro --- */
   .val .testa { display: grid; grid-template-columns: 340px 1fr; gap: 32px; align-items: center; }
@@ -137,10 +147,6 @@ const datiClient = { CODICI, ETICHETTE, RUOLI, VALORI };
   .val .gauge .cap { font: 500 9.5px Manrope, sans-serif; fill: #787782; }
   .val .rat { font-size: 3rem; font-weight: 800; color: #0F1020; line-height: 1; font-variant-numeric: tabular-nums; }
   .val .rat small { font-size: 1rem; font-weight: 600; color: #787782; display: block; margin-top: 4px; }
-  .val .sev { margin-top: 18px; max-width: 460px; }
-  .val .sev-bar { position: relative; height: 9px; border-radius: 999px; background: linear-gradient(90deg, #0F7B34, #A8C61C, #E3C400, #EE6B1F, #A31515); }
-  .val .sev-mark { position: absolute; top: -5px; width: 3px; height: 19px; background: #0F1020; border-radius: 2px; transform: translateX(-50%); }
-  .val .sev-lab { display: flex; justify-content: space-between; font-size: .75rem; color: #787782; margin-top: 6px; }
   .val .tre { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; }
   .val .tre .voce { border: 1.5px solid #FE6F3A; border-radius: 10px; padding: 16px 24px; }
   .val .tre .etichetta { font-size: .8125rem; color: #787782; }

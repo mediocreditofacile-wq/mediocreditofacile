@@ -23,22 +23,12 @@ export const prerender = false;
  * solo. L'endpoint a pagamento, quello si', nascera' autenticato.
  */
 
-import { ricercaBase, entroIlTetto } from '../../lib/openapi';
+import { ricercaBase, entroIlTetto, fatturatoDaRicerca } from '../../lib/openapi';
 import { headersMarotta } from '../../lib/origini-marotta';
+import { pivaValida } from '../../lib/piva';
 
 export async function OPTIONS({ request }: { request: Request }) {
   return new Response(null, { status: 204, headers: headersMarotta(request.headers.get('origin')) });
-}
-
-/** Controllo del carattere di controllo: evita di spendere una chiamata su un refuso */
-function pivaValida(p: string): boolean {
-  if (!/^\d{11}$/.test(p)) return false;
-  let somma = 0;
-  for (let i = 0; i < 10; i++) {
-    const d = Number(p[i]);
-    somma += i % 2 === 0 ? d : d * 2 > 9 ? d * 2 - 9 : d * 2;
-  }
-  return (10 - (somma % 10)) % 10 === Number(p[10]);
 }
 
 export async function GET({ request }: { request: Request }) {
@@ -66,8 +56,7 @@ export async function GET({ request }: { request: Request }) {
     // mandarlo sul form manuale, che e' quello che Andrea fa oggi comunque.
     // Un fatturato a zero vale come assente: il criterio prezzo/fatturato non
     // si puo' calcolare, e passarlo per buono darebbe un rosso finto.
-    const candidato = r.fatturato ?? r.storico.find((s) => (s.fatturato ?? 0) > 0)?.fatturato ?? null;
-    const fatturato = candidato != null && candidato > 0 ? candidato : null;
+    const fatturato = fatturatoDaRicerca(r);
     if (fatturato == null) {
       console.log(JSON.stringify({ evento: 'ricerca_azienda', piva, esito: 'senza bilancio', fonte: r.fonte }));
       return json({ found: false, error: 'Nessun bilancio depositato', ragioneSociale: r.ragioneSociale });

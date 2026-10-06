@@ -1,0 +1,14 @@
+---
+// Versione generica dell'atterraggio QR (simulatore del canone, nessun business
+// plan). Era /fiera fino al 23/09/2026, quando /fiera e' diventata la pagina
+// fotovoltaico per SSEC. Resta per altri usi: stesso guscio, stessa vCard.
+import FieraLayout from '../layouts/FieraLayout.astro';
+import SimulatoreFiera from '../components/fiera/SimulatoreFiera.tsx';
+---
+<FieraLayout
+  fonte="fiera2"
+  waTesto="Ciao Alberto, ho visto la tua pagina"
+  titoloModulo="Dimmi cosa vendi, ti mando la rata"
+>
+  <SimulatoreFiera client:load />
+</FieraLayout>
