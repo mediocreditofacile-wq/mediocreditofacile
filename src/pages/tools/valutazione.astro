@@ -51,9 +51,19 @@ const datiClient = { CODICI, ETICHETTE, RUOLI, VALORI };
         <input class="val-piva" id="piva" type="text" inputmode="numeric" maxlength="11" placeholder="Partita IVA (11 cifre)">
         <button class="val-btn" id="cerca" disabled>Analizza</button>
         <button class="val-btn val-btn--2" id="pdf" style="display:none;">Scarica la scheda in PDF</button>
+        <button class="val-btn val-btn--ghost" id="tornaRecenti" style="display:none;">Ricerche recenti</button>
         <button class="val-btn val-btn--ghost" id="esci">Esci</button>
       </div>
       <div class="val-msg" id="msg"></div>
+
+      <!-- L'elenco e' la cache: le schede scadute non ci sono, e riaprirne una non costa -->
+      <section class="val-rec" id="recenti" style="display:none;">
+        <div class="val-rec__head">
+          <h2 class="val-rec__tit">Ricerche ultimi 30 giorni</h2>
+          <div class="val-rec__pag" id="recentiPag"></div>
+        </div>
+        <div id="recentiLista"></div>
+      </section>
 
       <div id="scheda"></div>
     </div>
@@ -99,6 +109,29 @@ const datiClient = { CODICI, ETICHETTE, RUOLI, VALORI };
   .val-btn--2 { background: transparent; color: #FE6F3A; border: 1.5px solid #FE6F3A; }
   .val-btn--2:disabled { background: transparent; border-color: #E1DEE3; color: #787782; }
   .val-msg { font-size: .9375rem; color: #787782; margin-top: 16px; min-height: 22px; }
+
+  /* --- Ricerche ultimi 30 giorni --- */
+  .val-rec { border: 1px solid #E1DEE3; border-radius: 16px; padding: 24px; margin-top: 8px; }
+  .val-rec__head { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }
+  .val-rec__tit { font-size: .75rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: #664CCD; }
+  .val-rec__pag { display: flex; align-items: center; gap: 12px; font-size: .875rem; color: #444451; font-variant-numeric: tabular-nums; }
+  .val-rec__fr { font-family: inherit; font-size: 1.125rem; font-weight: 600; line-height: 1; color: #664CCD; background: #fff; border: 1.5px solid #E1DEE3; border-radius: 6px; width: 36px; height: 36px; cursor: pointer; }
+  .val-rec__fr:hover:not(:disabled) { border-color: #664CCD; }
+  .val-rec__fr:disabled { color: #E1DEE3; cursor: default; }
+  .val table.rec th.num, .val table.rec td.num { white-space: nowrap; }
+  .val table.rec tbody tr { cursor: pointer; }
+  .val table.rec tbody tr:hover td { background: rgba(254, 111, 58, .08); }
+  .val table.rec .rec-apri { font: inherit; font-weight: 700; color: #0F1020; background: none; border: 0; padding: 0; text-align: left; cursor: pointer; }
+  .val table.rec .rec-apri:focus-visible { outline: 2px solid #FE6F3A; outline-offset: 2px; }
+  .val .rec-rat { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; color: #0F1020; }
+  .val .rec-rat i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; }
+  .val .rec-giorni { display: block; font-size: .75rem; color: #787782; }
+  @media (max-width: 640px) {
+    .val-rec { padding: 16px; }
+    .val table.rec .rec-opz { display: none; }
+    .val table.rec td, .val table.rec th { padding-left: 10px; padding-right: 10px; }
+    .val table.rec th.num, .val table.rec td.num { white-space: normal; }
+  }
 
   /* --- Scheda --- */
   .val .scheda { border: 1px solid #E1DEE3; border-radius: 16px; overflow: hidden; margin: 24px 0; }
@@ -161,7 +194,7 @@ const datiClient = { CODICI, ETICHETTE, RUOLI, VALORI };
     /* senza questo il tachimetro esce grigio e le testate bianche */
     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
     /* del sito resta solo la scheda: via header, footer, ricerca e comandi */
-    body > *:not(main), .val-head, .val-cerca, .val-msg, .val-gate,
+    body > *:not(main), .val-head, .val-cerca, .val-msg, .val-gate, .val-rec,
     header, footer, nav, .tool-breadcrumb { display: none !important; }
     .val { padding: 0; max-width: none; }
     .val .scheda { border: none; border-radius: 0; margin: 0; }
