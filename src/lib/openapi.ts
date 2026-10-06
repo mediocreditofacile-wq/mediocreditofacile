@@ -10,7 +10,8 @@
 // Prezzi (listino console, IVA esclusa) in COSTI: servono al registro spesa.
 // L'anagrafica ha 30 chiamate al mese gratis su IT-start e IT-advanced, quindi
 // quelle voci sono a zero finche' non si sfonda la franchigia: il registro
-// segna comunque la chiamata, il conto lo si legge sul wallet.
+// segna comunque la chiamata. La spesa del mese pero' non si fida del solo
+// registro: la riconcilia con le transazioni del wallet (vedi spesaDelMese).
 
 import { put, list, get } from '@vercel/blob';
 
@@ -123,10 +124,21 @@ export async function getToken(): Promise<string> {
   if (!body?.success || !body?.data?.token) {
     throw new Error(`Token Openapi non creato: ${body?.message ?? res.status}`);
   }
+  // Un token appena creato impiega qualche secondo a diventare operativo. L'attesa
+  // sta qui, una volta sola alla nascita del token, e non in un ritentativo dentro
+  // chiama(): ritentare una chiamata a pagamento vuol dire pagarla due volte.
+  await new Promise((r) => setTimeout(r, 4000));
   tokenCache = { token: body.data.token, scade: new Date(body.data.expireAt).getTime() };
   return body.data.token;
 }
 
+// Openapi addebita anche risposte d'errore. Verificato sulle transazioni del wallet:
+// il 13/08 su 03993191208 e il 16/09 su 05400750260 IT-full ha risposto "Wrong Token"
+// con un token valido, e ogni risposta e' stata fatturata 0,30 come una buona. Per
+// questo si registra ogni risposta che arriva, non solo i successi, e le chiamate a
+// pagamento non si ritentano: il ritentativo del 16/09 ha pagato due IT-full a vuoto.
+// Resta fuori la 204 (nessun risultato): nel wallet non c'e' traccia di addebiti su
+// partite IVA non trovate, e se ci fossero li recupera comunque la riconciliazione.
 async function chiama(url: string, servizio: Servizio, init?: RequestInit, ritenta = true): Promise<any> {
   const token = await getToken();
   const res = await fetch(url, {
@@ -136,32 +148,36 @@ async function chiama(url: string, servizio: Servizio, init?: RequestInit, riten
   // 204 = nessun risultato: partita IVA inesistente o non trovata
   if (res.status === 204) return { trovato: false, dati: null };
   const body = await res.json().catch(() => null);
-  // Un token appena creato impiega qualche secondo a diventare operativo: la
-  // prima chiamata dopo un avvio a freddo puo' tornare "Wrong Token". Si aspetta
-  // e si riprova una volta sola, altrimenti l'utente vede un errore fantasma.
-  if (ritenta && /wrong token/i.test(String(body?.message ?? ''))) {
-    tokenCache = null;
-    await new Promise((r) => setTimeout(r, 4000));
-    return chiama(url, servizio, init, false);
+  const ok = res.ok && body?.success !== false;
+  const messaggio = String(body?.message ?? res.status);
+  await registraCosto(servizio, ok ? null : messaggio);
+
+  if (!ok) {
+    const tokenRifiutato = /wrong token/i.test(messaggio);
+    if (tokenRifiutato) tokenCache = null;
+    // Il ritentativo resta solo sui servizi a costo zero, dove non spende niente
+    if (ritenta && tokenRifiutato && COSTI[servizio] === 0) {
+      await new Promise((r) => setTimeout(r, 4000));
+      return chiama(url, servizio, init, false);
+    }
+    throw new Error(`${servizio}: ${messaggio}`);
   }
-  if (!res.ok || body?.success === false) {
-    throw new Error(`${servizio}: ${body?.message ?? res.status}`);
-  }
-  await registraCosto(servizio);
   const dati = Array.isArray(body?.data) ? body.data[0] ?? null : body?.data ?? null;
   return { trovato: dati != null, dati, lista: Array.isArray(body?.data) ? body.data : null };
 }
 
 // --- registro spesa ----------------------------------------------------------
 // Un blob per chiamata: sommarli e' banale e non serve leggere-modificare-scrivere.
-async function registraCosto(servizio: Servizio) {
+// Il nome resta `<timestamp>-<servizio>.json` anche per le risposte d'errore, perche'
+// costano uguale: l'esito sta nel contenuto, per chi deve ricostruire un episodio.
+async function registraCosto(servizio: Servizio, errore: string | null = null) {
   const costo = COSTI[servizio] ?? 0;
   const ora = new Date();
   const mese = `${ora.getFullYear()}-${String(ora.getMonth() + 1).padStart(2, '0')}`;
   try {
     await put(
       `openapi/costi/${mese}/${ora.getTime()}-${servizio}.json`,
-      JSON.stringify({ servizio, costo, quando: ora.toISOString() }),
+      JSON.stringify({ servizio, costo, quando: ora.toISOString(), esito: errore ? 'errore' : 'ok', errore }),
       { access: 'private', addRandomSuffix: true, contentType: 'application/json', token: blobToken() },
     );
   } catch {
@@ -171,38 +187,97 @@ async function registraCosto(servizio: Servizio) {
 
 export interface Consumo {
   mese: string;
+  /** Chiamate nel registro del mese (successi ed errori) */
   chiamate: number;
+  /** Spesa del mese: addebitato dal wallet + registrato dopo l'ultimo addebito */
   totale: number;
   /** Quante chiamate per ciascun servizio: serve al tetto sulla ricerca gratuita */
   perServizio: Record<string, number>;
+  /** Somma del solo registro a listino, per confronto */
+  registrato: number;
+  /** Gia' fatturato da Openapi nel mese; null se il wallet non ha risposto */
+  addebitato: number | null;
+  /** Registrato dopo l'ultimo addebito: fatto ma non ancora fatturato */
+  inAttesa: number;
 }
 
-// Il conteggio si legge elencando i blob del mese: una list() a ogni ricerca
-// sarebbe uno spreco, quindi il risultato resta caldo un minuto. Il tetto e' una
+// --- addebiti reali dal wallet -------------------------------------------------
+// Il registro vede solo le chiamate che passano da chiama(), e a prezzo di listino.
+// Il 23/09/2026 il confronto con la console dava agosto 9,71 contro 15,46 reali:
+// mancavano le prove fatte durante lo sviluppo e le risposte d'errore addebitate.
+// La fonte vera e' /wallet/transactions, che risponde con Basic Auth come /tokens.
+//
+// Openapi pero' fattura a lotti, con ritardi da mezz'ora a quindici ore (chiamate
+// del 16/09 alle 17:20 addebitate il 17/09 alle 08:22). Quindi la spesa del mese e':
+// quanto il wallet ha gia' addebitato nel mese, piu' quanto il registro ha visto
+// passare dopo l'ultimo addebito. Una chiamata fatta pochi minuti prima di un lotto
+// che la fattura in quello dopo puo' sfuggire per un'ora: per un tetto va bene.
+// Il mese dell'addebito e' quello della fattura, come in console: una chiamata del
+// 30 sera fatturata il 1 mattina finisce nel mese dopo.
+async function transazioniWallet(): Promise<{ amount: number; createdAt: string }[] | null> {
+  try {
+    const res = await fetch(`${OAUTH}/wallet/transactions`, { headers: { Authorization: credenziali() } });
+    const body = await res.json();
+    return Array.isArray(body?.data) ? body.data : null;
+  } catch {
+    return null;
+  }
+}
+
+const meseDi = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+
+// Registro e wallet si leggono una volta al minuto al massimo: una list() e una
+// chiamata al wallet a ogni ricerca sarebbero uno spreco. Il tetto e' una
 // barriera contro l'abuso, non un contatore contabile: un minuto di ritardo va bene.
 let consumoCache: { chiave: string; dato: Consumo; quando: number } | null = null;
 
 export async function spesaDelMese(mese?: string): Promise<Consumo> {
-  const ora = new Date();
-  const m = mese ?? `${ora.getFullYear()}-${String(ora.getMonth() + 1).padStart(2, '0')}`;
+  const m = mese ?? meseDi(new Date());
   if (consumoCache && consumoCache.chiave === m && Date.now() - consumoCache.quando < 60_000) {
     return consumoCache.dato;
   }
+  const tondo = (n: number) => Math.round(n * 1000) / 1000;
   try {
-    const { blobs } = await list({ prefix: `openapi/costi/${m}/`, limit: 1000, token: blobToken() });
-    let totale = 0;
+    const [{ blobs }, transazioni] = await Promise.all([
+      list({ prefix: `openapi/costi/${m}/`, limit: 1000, token: blobToken() }),
+      transazioniWallet(),
+    ]);
+
+    // Addebiti del mese e momento dell'ultimo lotto fatturato (anche di mesi prima)
+    const uscite = (transazioni ?? []).filter((t) => Number(t.amount) < 0);
+    const addebitato = transazioni
+      ? uscite.filter((t) => meseDi(new Date(t.createdAt)) === m).reduce((s, t) => s - Number(t.amount), 0)
+      : null;
+    const ultimoAddebito = uscite.reduce((max, t) => Math.max(max, new Date(t.createdAt).getTime()), 0);
+
+    let registrato = 0;
+    let inAttesa = 0;
     const perServizio: Record<string, number> = {};
     for (const b of blobs) {
       const nome = b.pathname.split('/').pop() ?? '';
+      const quando = Number(nome.match(/^\d+/)?.[0] ?? 0);
       const servizio = nome.replace(/^\d+-/, '').replace(/-[a-zA-Z0-9]+\.json$/, '.json').replace(/\.json$/, '');
-      totale += (COSTI as Record<string, number>)[servizio] ?? 0;
+      const costo = (COSTI as Record<string, number>)[servizio] ?? 0;
+      registrato += costo;
+      if (quando > ultimoAddebito) inAttesa += costo;
       perServizio[servizio] = (perServizio[servizio] ?? 0) + 1;
     }
-    const dato: Consumo = { mese: m, chiamate: blobs.length, totale: Math.round(totale * 100) / 100, perServizio };
+
+    // Senza wallet si ricade sul solo registro, che sottostima ma e' meglio di niente
+    const totale = addebitato == null ? registrato : addebitato + inAttesa;
+    const dato: Consumo = {
+      mese: m,
+      chiamate: blobs.length,
+      totale: Math.round(totale * 100) / 100,
+      perServizio,
+      registrato: tondo(registrato),
+      addebitato: addebitato == null ? null : tondo(addebitato),
+      inAttesa: tondo(addebitato == null ? registrato : inAttesa),
+    };
     consumoCache = { chiave: m, dato, quando: Date.now() };
     return dato;
   } catch {
-    return { mese: m, chiamate: 0, totale: 0, perServizio: {} };
+    return { mese: m, chiamate: 0, totale: 0, perServizio: {}, registrato: 0, addebitato: null, inAttesa: 0 };
   }
 }
 
@@ -297,7 +372,23 @@ export interface SchedaAzienda {
  * La verifica eventi negativi sull'azienda parte qui ma e' asincrona: torna l'id
  * e l'esito si recupera dopo con esitoNegativita().
  */
-export async function schedaAzienda(piva: string, opts: { conNegativita?: boolean } = {}): Promise<SchedaAzienda> {
+export function schedaAzienda(piva: string, opts: { conNegativita?: boolean } = {}): Promise<SchedaAzienda> {
+  // La cache si scrive solo a scheda finita, circa otto secondi dopo: due richieste
+  // ravvicinate sulla stessa partita IVA la trovano vuota tutte e due e pagano
+  // due volte. E' successo il 16/09 su 04154590162 (due schede a un secondo di
+  // distanza, 1,26 euro buttati). La seconda richiesta si aggancia alla prima.
+  // Vale dentro la stessa istanza, che su Fluid Compute e' il caso normale per
+  // richieste contemporanee; il blocco vero e' comunque il pulsante nella pagina.
+  const inCorso = schedeInCorso.get(piva);
+  if (inCorso) return inCorso;
+  const p = caricaScheda(piva, opts).finally(() => schedeInCorso.delete(piva));
+  schedeInCorso.set(piva, p);
+  return p;
+}
+
+const schedeInCorso = new Map<string, Promise<SchedaAzienda>>();
+
+async function caricaScheda(piva: string, opts: { conNegativita?: boolean }): Promise<SchedaAzienda> {
   const cached = await dallaCache(piva);
   if (cached) return { ...cached, daCache: true };
 

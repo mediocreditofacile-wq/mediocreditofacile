@@ -421,6 +421,9 @@ export function montaValutazione() {
   paese.value = 'IT';
 
   const estero = () => paese.value !== 'IT';
+  const valido = () => (estero() ? piva.value.trim().length >= 4 : piva.value.length === 11);
+  // Una ricerca alla volta: vedi avvia()
+  let inCorso = false;
 
   paese.addEventListener('change', () => {
     piva.value = '';
@@ -436,11 +439,10 @@ export function montaValutazione() {
     if (estero()) {
       // Fuori Italia non c'e' un codice di controllo comune: ogni registro ha il suo formato
       piva.value = piva.value.replace(/[^A-Za-z0-9./\- ]/g, '').slice(0, 32);
-      cerca.disabled = piva.value.trim().length < 4;
-      return;
+    } else {
+      piva.value = piva.value.replace(/\D/g, '').slice(0, 11);
     }
-    piva.value = piva.value.replace(/\D/g, '').slice(0, 11);
-    cerca.disabled = piva.value.length !== 11;
+    cerca.disabled = inCorso || !valido();
   });
 
   const avviaEstero = async () => {
@@ -461,8 +463,22 @@ export function montaValutazione() {
     document.title = `Scheda ${(r.ragioneSociale ?? 'estera').trim()} - ${id}`;
   };
 
+  // Il pulsante restava attivo per tutti gli otto secondi della scheda: un doppio
+  // click, o Invio seguito da click, lanciava due schede complete e le pagava
+  // entrambe (16/09, 04154590162). Finche' una ricerca e' in volo non ne parte un'altra.
   const avvia = async () => {
-    if (estero()) return avviaEstero();
+    if (inCorso) return;
+    inCorso = true;
+    cerca.disabled = true;
+    try {
+      await (estero() ? avviaEstero() : avviaItalia());
+    } finally {
+      inCorso = false;
+      cerca.disabled = !valido();
+    }
+  };
+
+  const avviaItalia = async () => {
     $('msg').textContent = 'Interrogazione in corso…';
     $('scheda').innerHTML = '';
     const r = await api(`/api/azienda?piva=${piva.value}`).catch((e) => ({ errore: String(e) }));
