@@ -18,7 +18,7 @@ import { conEsito, type EsitoVerifica, type RegistroVerifiche, type TipoVerifica
 
 // L'SDK Blob legge process.env, che in dev Astro non popola sempre: passiamo
 // il token esplicitamente cosi' cache e registro costi funzionano anche in locale.
-const blobToken = () => import.meta.env.BLOB_READ_WRITE_TOKEN as string | undefined;
+export const blobToken = () => import.meta.env.BLOB_READ_WRITE_TOKEN as string | undefined;
 
 const OAUTH = 'https://oauth.openapi.com';
 const COMPANY = 'https://company.openapi.com';
@@ -428,7 +428,7 @@ export async function entroIlTetto(servizio: Servizio, sorgente: Sorgente = 'sit
 
 // --- cache anagrafica --------------------------------------------------------
 // 30 giorni: un bilancio non cambia in un mese e ogni miss costa 0,81 €.
-const TTL_CACHE = 30 * 24 * 60 * 60 * 1000;
+export const TTL_CACHE = 30 * 24 * 60 * 60 * 1000;
 
 async function dallaCache(piva: string): Promise<any | null> {
   try {
@@ -632,7 +632,7 @@ export async function esitoReportPersona(id: string): Promise<{ pronto: boolean;
 // portato a nuovo. E' un difetto loro, ma e' costante: qui lo trattiamo per
 // quello che e', cioe' l'utile.
 
-const TTL_RICERCA = 30 * 24 * 60 * 60 * 1000;
+export const TTL_RICERCA = 30 * 24 * 60 * 60 * 1000;
 
 export interface RicercaBase {
   trovata: boolean;
@@ -903,7 +903,7 @@ function normalizzaEstera(d: any, paese: string, id: string, fonte: RicercaEster
 }
 
 /** Chiave di cache: l'identificativo puo' contenere punti e barre (il CNPJ brasiliano) */
-const chiaveEstera = (paese: string, id: string) =>
+export const chiaveEstera = (paese: string, id: string) =>
   `openapi/estero/${paese.toUpperCase()}-${id.replace(/[^A-Za-z0-9]/g, '')}.json`;
 
 /**

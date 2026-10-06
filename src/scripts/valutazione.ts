@@ -494,8 +494,80 @@ function rendiSchedaEstera(d: any): string {
   </div>`;
 }
 
+// --- ricerche ultimi 30 giorni -----------------------------------------------
+// L'elenco arriva da /api/ricerche-recenti, che legge solo la cache: un clic su
+// una riga riapre la scheda senza spendere.
+
+/** Data di un istante (non di una mezzanotte, come dataIt): fuso italiano esplicito. */
+const giornoIt = (iso: string) =>
+  new Date(iso).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'Europe/Rome' });
+
+function rendiRecenti(r: any): string {
+  if (!r.totale) return '<p class="val-msg" style="margin:0">Nessuna ricerca negli ultimi 30 giorni.</p>';
+  const righe = (r.voci as any[]).map((v) => {
+    // per difetto: pagata ieri fa 29 giorni, e la data sotto lo conferma
+    const giorni = Math.max(0, Math.floor((Date.parse(v.scade) - Date.now()) / 864e5));
+    const i = SCALA.indexOf(v.rating ?? '');
+    const rating = i >= 0
+      ? `<span class="rec-rat"><i style="background:${COLORI[i]}"></i>${esc(v.rating)}</span>`
+      : `<span class="vuoto" title="${v.tipo === 'estero' ? "all'estero non c'è punteggio di rischio" : 'nessuna classe assegnata'}">—</span>`;
+    const sede = v.tipo === 'estero' ? esc(nomePaese(v.paese)) : (v.sede ? esc(v.sede) : '<span class="vuoto">—</span>');
+    const nome = v.ragioneSociale ? esc(v.ragioneSociale) : '<span class="vuoto">scheda senza nome</span>';
+    return `<tr data-paese="${esc(v.paese)}" data-id="${esc(v.id)}">
+      <td><button type="button" class="rec-apri">${nome}</button><br><span class="cf">${v.tipo === 'estero' ? `${esc(v.paese)} · ` : ''}${esc(v.id)}</span></td>
+      <td class="rec-opz">${sede}</td>
+      <td>${rating}</td>
+      <td class="num rec-opz">${giornoIt(v.analizzata)}</td>
+      <td class="num">${giorni === 0 ? 'ultimo giorno' : giorni === 1 ? '1 giorno' : `${giorni} giorni`}<span class="rec-giorni">fino al ${giornoIt(v.scade)}</span></td>
+    </tr>`;
+  }).join('');
+  return `<table class="rec"><thead><tr><th>Azienda</th><th class="rec-opz">Sede</th><th>Rating</th><th class="num rec-opz">Analizzata il</th><th class="num">In cache</th></tr></thead><tbody>${righe}</tbody></table>`;
+}
+
+function rendiPaginatore(r: any): string {
+  if (!r.totale) return '';
+  if (r.pagine <= 1) return `<span>${r.totale} ${r.totale === 1 ? 'ricerca' : 'ricerche'}</span>`;
+  const da = (r.pagina - 1) * r.perPagina + 1, a = da + r.voci.length - 1;
+  const freccia = (p: number, segno: string, etichetta: string, spenta: boolean) =>
+    `<button type="button" class="val-rec__fr" data-pagina="${p}" aria-label="${etichetta}"${spenta ? ' disabled' : ''}>${segno}</button>`;
+  return freccia(r.pagina - 1, '‹', 'Pagina precedente', r.pagina <= 1)
+    + `<span>${da === a ? da : `${da}–${a}`} di ${r.totale}</span>`
+    + freccia(r.pagina + 1, '›', 'Pagina successiva', r.pagina >= r.pagine);
+}
+
+let paginaRecenti = 1;
+let giroRecenti = 0;   // due clic veloci sulle frecce: vince l'ultima risposta chiesta, non l'ultima arrivata
+
+async function caricaRecenti(pagina: number) {
+  const giro = ++giroRecenti;
+  const lista = $('recentiLista');
+  if (!lista.innerHTML) lista.innerHTML = '<p class="val-msg" style="margin:0">Carico le ricerche…</p>';
+  const r = await api(`/api/ricerche-recenti?pagina=${pagina}`).catch((e) => ({ errore: String(e) }));
+  if (giro !== giroRecenti) return;
+  if (r?.errore) {
+    lista.innerHTML = `<p class="val-msg" style="margin:0">Non riesco a leggere le ricerche recenti: ${esc(r.errore)}</p>`;
+    $('recentiPag').innerHTML = '';
+    return;
+  }
+  paginaRecenti = r.pagina;
+  lista.innerHTML = rendiRecenti(r);
+  $('recentiPag').innerHTML = rendiPaginatore(r);
+}
+
 export function montaValutazione() {
   D = (window as any).__VAL__;
+  const titoloPagina = document.title;
+  const recenti = $('recenti'), tornaRecenti = $('tornaRecenti');
+  // l'elenco si ricarica a ogni ritorno: una scheda appena pagata deve comparire in cima
+  const mostraRecenti = () => {
+    recenti.style.display = 'block';
+    tornaRecenti.style.display = 'none';
+    caricaRecenti(paginaRecenti);
+  };
+  const nascondiRecenti = () => {
+    recenti.style.display = 'none';
+    tornaRecenti.style.display = 'inline-flex';
+  };
   chiave = localStorage.getItem(CHIAVE_LS) ?? '';
   const gate = $('gate'), app = $('app');
   if (chiave) { gate.style.display = 'none'; app.style.display = 'block'; }
@@ -507,6 +579,7 @@ export function montaValutazione() {
     localStorage.setItem(CHIAVE_LS, v);
     gate.style.display = 'none';
     app.style.display = 'block';
+    mostraRecenti();
   };
   $('entra').addEventListener('click', entra);
   $('chiave').addEventListener('keydown', (e) => { if ((e as KeyboardEvent).key === 'Enter') entra(); });
@@ -581,6 +654,7 @@ export function montaValutazione() {
     const btnPdfEstero = $('pdf');
     if (btnPdfEstero) btnPdfEstero.style.display = 'none';
     $('scheda').innerHTML = rendiSchedaEstera({ ...r, identificativoMostrato: id });
+    nascondiRecenti();
     document.title = `Scheda ${(r.ragioneSociale ?? 'estera').trim()} - ${id}`;
   };
 
@@ -608,6 +682,7 @@ export function montaValutazione() {
     $('msg').textContent = r.daCache ? 'Dati da cache, nessun costo.' : '';
     schedaCorrente = r;
     $('scheda').innerHTML = rendiScheda(r);
+    nascondiRecenti();
     collega();
     // Il browser propone il titolo del documento come nome del PDF salvato
     const rs = (r.full?.companyDetails?.companyName ?? r.advanced?.companyName ?? 'scheda').trim();
@@ -625,4 +700,36 @@ export function montaValutazione() {
   };
   cerca.addEventListener('click', avvia);
   piva.addEventListener('keydown', (e) => { if ((e as KeyboardEvent).key === 'Enter' && !cerca.disabled) avvia(); });
+
+  // Clic su una ricerca recente: paese e codice tornano nei campi e la scheda
+  // arriva dalla cache, come se l'avessi digitata
+  $('recentiLista').addEventListener('click', (e) => {
+    const tr = (e.target as HTMLElement).closest<HTMLElement>('tr[data-id]');
+    if (!tr) return;
+    const cod = tr.dataset.paese ?? 'IT';
+    if (![...paese.options].some((o) => o.value === cod)) {
+      $('msg').textContent = `Il paese ${cod} non è nel menu di questo strumento.`;
+      return;
+    }
+    paese.value = cod;
+    paese.dispatchEvent(new Event('change'));   // formato e lunghezza del campo seguono il paese
+    piva.value = tr.dataset.id ?? '';
+    cerca.disabled = false;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    avvia();
+  });
+  $('recentiPag').addEventListener('click', (e) => {
+    const b = (e.target as HTMLElement).closest<HTMLButtonElement>('button[data-pagina]');
+    if (b && !b.disabled) caricaRecenti(Number(b.dataset.pagina));
+  });
+  tornaRecenti.addEventListener('click', () => {
+    schedaCorrente = null;
+    $('scheda').innerHTML = '';
+    $('msg').textContent = '';
+    $('pdf').style.display = 'none';
+    document.title = titoloPagina;
+    mostraRecenti();
+  });
+
+  if (chiave) mostraRecenti();
 }
