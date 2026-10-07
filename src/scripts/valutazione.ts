@@ -3,6 +3,7 @@
 // I dizionari (etichette, ruoli, valori, codici di bilancio) arrivano dalla pagina
 // su window.__VAL__: sono dati generati, non vanno riscritti a mano.
 
+import { montaDocumenti } from './documenti-ufficiali';
 import { PAESI_SEPA, PAESI_MONDO, FORMATO_ID, nomePaese } from '../data/paesi';
 import { leggiReport, sintesiReport } from '../lib/report-persona';
 
@@ -249,6 +250,9 @@ export function rendiScheda(s: any): string {
   h += `<div class="blocco"><div class="blocco-tit">Eventi negativi sull'azienda</div>
     <div id="negAzienda" data-id="${esc(negAz?.pronto ? '' : (negAz?.id ?? s.negativitaId ?? ''))}">${
       negAz?.pronto ? esitoNeg(negAz.dati) + giaVerificata(negAz.avviata) : '<span class="attesa">verifica in corso…</span>'}</div></div>`;
+
+  // visura e bilanci depositati: il pannello si riempie da solo, vedi documenti-ufficiali.ts
+  h += `<div class="blocco doc-uff"><div class="blocco-tit">Documenti ufficiali</div><div id="docUfficiali"></div></div>`;
 
   // soci
   const soci = s.soci ?? [];
@@ -684,6 +688,8 @@ export function montaValutazione() {
     $('scheda').innerHTML = rendiScheda(r);
     nascondiRecenti();
     collega();
+    const du = $('docUfficiali');
+    if (du) montaDocumenti(du, r.piva, api, () => chiave);
     // Il browser propone il titolo del documento come nome del PDF salvato
     const rs = (r.full?.companyDetails?.companyName ?? r.advanced?.companyName ?? 'scheda').trim();
     document.title = `Scheda ${rs} - ${piva.value}`;

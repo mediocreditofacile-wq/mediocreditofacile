@@ -47,6 +47,13 @@ export const COSTI = {
   'IT-negativita': 0.45,
   'IT-negativita-dettaglio': 0.75,
   'IT-report-persona': 3.60,
+  // Documenti ufficiali via DocuEngine (vedi documenti-ufficiali.ts). Prefisso DOC-
+  // e non DE-, che nel registro e' gia' la Germania.
+  'DOC-visura-capitale': 4.90,
+  'DOC-visura-persone': 3.40,
+  'DOC-visura-individuale': 2.90,
+  'DOC-bilancio-ricerca': 0.10,
+  'DOC-bilancio': 4.40,
 } as const;
 export type Servizio = keyof typeof COSTI;
 
@@ -93,6 +100,10 @@ const SCOPES = [
   'GET:risk.openapi.com/IT-negativita',
   'POST:risk.openapi.com/IT-report-persona',
   'GET:risk.openapi.com/IT-report-persona',
+  'GET:docuengine.openapi.com/documents',
+  'POST:docuengine.openapi.com/requests',
+  'GET:docuengine.openapi.com/requests',
+  'PATCH:docuengine.openapi.com/requests',
 ];
 
 function credenziali() {
@@ -232,6 +243,14 @@ async function chiama(
     const dati = Array.isArray(body?.data) ? body.data[0] ?? null : body?.data ?? null;
     return { trovato: dati != null, dati, lista: Array.isArray(body?.data) ? body.data : null };
   }
+}
+
+/**
+ * La stessa chiamata, per i moduli che parlano con altri prodotti Openapi
+ * (DocuEngine): registro spesa, rifiuti del token e ritentativi restano quelli.
+ */
+export function chiamaOpenapi(url: string, servizio: Servizio, init?: RequestInit): Promise<any> {
+  return chiama(url, servizio, init);
 }
 
 // --- registro spesa ----------------------------------------------------------
@@ -442,6 +461,11 @@ async function dallaCache(piva: string): Promise<any | null> {
   } catch {
     return null;
   }
+}
+
+/** La scheda gia' pagata, se c'e': nessuna chiamata Openapi. */
+export function schedaDallaCache(piva: string): Promise<any | null> {
+  return dallaCache(piva);
 }
 
 async function inCache(piva: string, dati: any) {
