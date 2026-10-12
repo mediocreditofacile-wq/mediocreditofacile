@@ -8,8 +8,7 @@ import VerificaCliente from './VerificaCliente';
 // quello che il cliente spende oggi di energia.
 //
 // Nessun numero nuovo: canone dalla tabella Grenke ESG++++ (src/data/esg.ts, con
-// le durate lunghe solo dove la tabella le prevede: 72 mesi da 8.001 euro, 84 da
-// 40.001), bilancio energetico dal modello condiviso di Arca Energia ed Econocom
+// le durate lunghe solo dove la tabella le prevede: 84 mesi da 40.001 euro), bilancio energetico dal modello condiviso di Arca Energia ed Econocom
 // PA (src/data/bp-fotovoltaico.ts). Qui c'e' solo il confronto.
 //
 // Il conto: spesa di domani = bolletta che resta + canone - energia ceduta in rete.

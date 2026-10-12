@@ -18,9 +18,9 @@ describe('tabella ESG', () => {
     expect(Math.round(30_000 * 2.032) / 100).toBe(609.6);
   });
 
-  it('50.000 euro a 84 mesi danno 767,50 (fascia 40.001-80.000, 1,535%)', () => {
-    expect(TABELLA_ESG.coefficiente(50_000, 84)).toBe(1.535);
-    expect(Math.round(50_000 * 1.535) / 100).toBe(767.5);
+  it('50.000 euro a 84 mesi danno 789,00 (fascia 40.001-80.000, 1,578%)', () => {
+    expect(TABELLA_ESG.coefficiente(50_000, 84)).toBe(1.578);
+    expect(Math.round(50_000 * 1.578) / 100).toBe(789);
   });
 
   it('gli 84 mesi partono dai 40.001 euro', () => {

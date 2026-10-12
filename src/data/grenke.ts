@@ -1,3 +1,5 @@
+import { getEsgCoeff } from './esg';
+
 // --- Coefficienti Grenke reali (tabella Sputnik++++, pagamento trimestrale) ---
 // Fonte: PDF "Tabella SPUTNIK ++++" del kit ReteRent (documento del 26/05/2025),
 // riscontrato il 23/09/2026 sul simulatore ReteRent (endpoint quick-quotation,
@@ -138,18 +140,13 @@ export function getCoeff(valore: number, durata: number): number | null {
   return fascia ? fascia.c : null;
 }
 
-// Coefficiente con aggiustamento per durate 72/84 mesi (solo fotovoltaico)
-// Per 72 e 84 mesi non esistono coefficienti Grenke standard:
-// si usa il coefficiente della durata 60 con una riduzione proporzionale
+// Coefficiente per durata. Sputnik arriva a 60 mesi: i 72 e gli 84 (offerti solo sul
+// fotovoltaico) si leggono dalla tabella Grenke ESG++++, che li prevede davvero.
+// Fino al 12/10/2026 qui erano una stima (60 mesi x 0,88 e x 0,79): vietata dalla regola
+// dei coefficienti. ESG non quota sopra i 240.000 euro e gli 84 mesi partono da 40.001:
+// fuori da li' torna null, e il simulatore lo dice invece di inventare un canone.
 export function getAdjustedCoeff(valore: number, durata: number): number | null {
-  if (durata === 72) {
-    const c = getCoeff(valore, 60);
-    return c ? c * 0.88 : null;
-  }
-  if (durata === 84) {
-    const c = getCoeff(valore, 60);
-    return c ? c * 0.79 : null;
-  }
+  if (durata === 72 || durata === 84) return getEsgCoeff(valore, durata);
   return getCoeff(valore, durata);
 }
 

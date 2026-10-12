@@ -925,8 +925,9 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
   function aggiornaDurate() {
     const importo = Number(($('importo') as HTMLInputElement).value) || 0;
     const sel = $('durata') as HTMLSelectElement;
-    // Soglie della tabella: 72 mesi da 8.001 euro, 84 da 40.001.
-    const SOGLIE: Record<number, number> = { 72: 8001, 84: 40001 };
+    // Soglia della tabella ESG++++: 84 mesi "non previsto sotto 40.000 euro".
+    // I 72 mesi coprono tutte le fasce (PDF del kit, riletto il 12/10/2026).
+    const SOGLIE: Record<number, number> = { 84: 40001 };
     const spente: number[] = [];
     for (const opt of Array.from(sel.options)) {
       const mesi = Number(opt.value);

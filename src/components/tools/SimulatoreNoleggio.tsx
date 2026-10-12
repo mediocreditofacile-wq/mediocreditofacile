@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'preact/hooks';
 import { RISCATTI, DURATE_BASE, DURATE_FOTOVOLTAICO, getAdjustedCoeff, getPioneerCoeff, eur } from '../../data/grenke';
+import { ESG_MIN, ESG_MAX } from '../../data/esg';
 import './simulatore-noleggio.css';
 
 // Maggiorazione per pagamento mensile (fonte: Guida Operativa Grenke)
@@ -70,6 +71,14 @@ export default function SimulatoreNoleggio() {
       risparmioLiquidita: valore,
     };
   }, [calcolato, valore, durata, tipologia, riscattoPerc, isSoftware, isNonDisponibile, frequenza]);
+
+  // 72 e 84 mesi stanno sulla tabella ESG++++, che ha un suo intervallo di importi:
+  // fuori da li' non c'e' un canone da mostrare, e va detto perche'.
+  const durataEsg = durata === 72 || durata === 84;
+  const esgDa = durata === 84 ? 40001 : ESG_MIN;
+  const fuoriTabellaEsg =
+    calcolato && !isSoftware && !isNonDisponibile && durataEsg && valore >= 500 &&
+    getAdjustedCoeff(valore, durata) === null;
 
   // Gestione input valore con validazione
   const handleValoreChange = (e: Event) => {
@@ -224,6 +233,12 @@ export default function SimulatoreNoleggio() {
             <p>La combinazione <strong>{tipologia}</strong> con durata <strong>{durata} mesi</strong> non
             è disponibile. Prova a cambiare la durata.</p>
           </div>
+        ) : fuoriTabellaEsg ? (
+          <div class="sim__message">
+            <span class="material-icons-outlined sim__message-icon">info</span>
+            <p>A <strong>{durata} mesi</strong> il noleggio si quota sulla tabella Grenke ESG++++,
+            da {eur(esgDa)} a {eur(ESG_MAX)}. Cambia la durata o l'importo.</p>
+          </div>
         ) : risultati ? (
           <>
             <h3 class="sim__results-title">Il tuo preventivo</h3>
@@ -264,9 +279,9 @@ export default function SimulatoreNoleggio() {
               }
               <p>* Assicurazione obbligatoria non inclusa nei coefficienti indicati.</p>
               <p>* Coefficienti indicativi per noleggio operativo.{isSoftware ? ' Riscatto non previsto per Software.' : ''}</p>
-              {(durata === 72 || durata === 84) && (
-                <p>* Per durate di {durata} mesi i coefficienti sono stimati. Richiedi un preventivo
-                personalizzato per l'importo esatto.</p>
+              {durataEsg && (
+                <p>* A {durata} mesi il canone è calcolato sulla tabella Grenke ESG++++ dedicata
+                al fotovoltaico{durata === 84 ? ', disponibile da 40.001 euro' : ''}.</p>
               )}
             </div>
           </>

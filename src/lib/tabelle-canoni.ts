@@ -74,10 +74,9 @@ export const TABELLA_PAGARENT: TabellaCanoni = {
  * Grenke ESG++++, la tabella dedicata al fotovoltaico (fonte: Tabella ESG
  * ++++.pdf, kit collaboratore Grenke/ReteRent), gia' in src/data/esg.ts.
  *
- * Le durate lunghe non esistono su tutti gli importi: i 72 mesi partono da
- * 8.001 euro e gli 84 da 40.001. Su Green-Go, che lavora tra 15.000 e 60.000,
- * i 72 ci sono sempre e gli 84 compaiono sopra i 40.000: e' voluto, non e' un
- * buco. I 24 mesi restano fuori: su un impianto fotovoltaico non hanno senso
+ * Gli 84 mesi non esistono sotto i 40.001 euro ("non previsto" sul PDF); i 72
+ * coprono tutte le fasce. Su Green-Go, che lavora tra 15.000 e 60.000, gli 84
+ * compaiono sopra i 40.000: e' voluto, non e' un buco. I 24 mesi restano fuori: su un impianto fotovoltaico non hanno senso
  * commerciale, il canone non e' mai coperto dal risparmio in bolletta.
  */
 const DURATE_ESG = [36, 48, 60, 72, 84];
