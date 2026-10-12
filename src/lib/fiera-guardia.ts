@@ -35,7 +35,7 @@ function numero(chiave: string, difetto: number): number {
 
 /** Fine del periodo gratuito. 'AAAA-MM-GG' vale fino a fine giornata, ora italiana. */
 export function fineFiera(): number {
-  const v = (env('FIERA_FINE') ?? '2026-10-04').trim();
+  const v = (env('FIERA_FINE') ?? '2026-10-24').trim();
   const iso = /^\d{4}-\d{2}-\d{2}$/.test(v) ? `${v}T23:59:59+02:00` : v;
   const t = Date.parse(iso);
   return Number.isFinite(t) ? t : 0;

@@ -22,6 +22,13 @@ interface Props {
   descrizione?: string;
   /** Arco delle durate nella seconda riga dell'apertura */
   arcoDurate?: string;
+  /**
+   * Calendario delle fiere: nel giorno indicato (ora italiana) il WhatsApp dice
+   * "ci siamo visti a <nome>" e il lead porta quella fonte. Gli altri giorni
+   * valgono `waTesto` e `fonte`. Lo sceglie il browser, perche' la pagina e'
+   * statica e un testo scritto in build sarebbe gia' vecchio il giorno dopo.
+   */
+  fiere?: { giorno: string; nome: string; fonte: string }[];
 }
 
 const {
@@ -33,6 +40,7 @@ const {
   suggerimentoNote = 'Moduli, inverter, accumuli, impianti chiavi in mano...',
   descrizione = 'Noleggio operativo e leasing per i clienti dei fornitori. Salva il contatto di Alberto Amà.',
   arcoDurate = '24-60',
+  fiere = [],
 } = Astro.props;
 const WA_TESTO = waTesto;
 const waBase = 'https://wa.me/393939957840';
@@ -241,7 +249,7 @@ const waBase = 'https://wa.me/393939957840';
         <h2>{titoloModulo}</h2>
         <p class="sub">{sottotitoloModulo}</p>
 
-        <input type="hidden" name="fonte" value={fonte} />
+        <input type="hidden" name="fonte" id="fonte" value={fonte} />
         <input type="hidden" name="variante" value="fiera" />
         <input type="hidden" name="sorgente" id="sorgente" value="" />
         <input type="hidden" name="importo_simulato" id="sim_importo" value="" />
@@ -306,8 +314,20 @@ const waBase = 'https://wa.me/393939957840';
     <a href="https://www.mediocreditofacile.it">mediocreditofacile.it</a> · <a href="/privacy">Privacy</a>
   </footer>
 
-  <script is:inline define:vars={{ WA_TESTO, waBase }}>
+  <script is:inline define:vars={{ WA_TESTO, waBase, fiere }}>
     (function () {
+      // La fiera del giorno, in ora italiana: cambia il WhatsApp e la fonte del lead
+      var waTesto = WA_TESTO;
+      try {
+        var oggi = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Rome' }).format(new Date());
+        var fiera = (fiere || []).filter(function (x) { return x.giorno === oggi; })[0];
+        if (fiera) {
+          waTesto = 'Ciao Alberto, ci siamo visti a ' + fiera.nome;
+          document.getElementById('fonte').value = fiera.fonte;
+          document.getElementById('wa').href = waBase + '?text=' + encodeURIComponent(waTesto);
+        }
+      } catch (e) {}
+
       // Evento GTM solo se il container c'e': la pagina non dipende mai da GTM
       function evento(nome, extra) {
         if (window.dataLayer && typeof window.dataLayer.push === 'function') {
@@ -357,7 +377,7 @@ const waBase = 'https://wa.me/393939957840';
 
       function linkWhatsApp() {
         var f = form.elements;
-        var righe = [WA_TESTO + '.'];
+        var righe = [waTesto + '.'];
         if (f.nome.value) righe.push('Sono ' + f.nome.value.trim() + (f.azienda.value ? ', ' + f.azienda.value.trim() : '') + '.');
         if (f.piva.value) righe.push('P.IVA ' + f.piva.value);
         if (f.cosa_vendi.value) righe.push('Vendo: ' + f.cosa_vendi.value.trim());

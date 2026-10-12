@@ -1,15 +1,25 @@
 ---
-// Atterraggio del QR stampato su biglietti da visita e volantino, versione
-// fotovoltaico per SSEC 2026 (Fiera di Vicenza, 22-23 settembre). Chi apre e' un
-// fornitore del fotovoltaico: qui vede il canone del noleggio contro la bolletta
-// del suo cliente, e puo' verificare il cliente con la partita IVA.
+// Atterraggio del QR stampato su biglietti da visita e volantino. Nata per SSEC
+// 2026 (Fiera di Vicenza, 22-23 settembre) nella versione fotovoltaico: chi apre
+// vede il canone del noleggio contro la bolletta del suo cliente, e puo'
+// verificare il cliente con la partita IVA.
 // Guscio, vCard e modulo stanno in FieraLayout, condiviso con /fiera2.
+//
+// Dal 12/10/2026 il QR e' lo stesso per tutte le fiere: WhatsApp e fonte del lead
+// prendono il nome della fiera del giorno da FIERE, gli altri giorni restano
+// "in fiera" e fiera-qr. Per una fiera nuova si aggiunge una riga qui.
 import FieraLayout from '../layouts/FieraLayout.astro';
 import BusinessPlanFiera from '../components/fiera/BusinessPlanFiera.tsx';
+
+const FIERE = [
+  { giorno: '2026-10-15', nome: 'BI-MU', fonte: 'fiera-bimu-2026' },
+  { giorno: '2026-10-16', nome: 'TTG', fonte: 'fiera-ttg-2026' },
+];
 ---
 <FieraLayout
-  fonte="fiera-ssec-2026"
-  waTesto="Ciao Alberto, ci siamo visti a SSEC"
+  fonte="fiera-qr"
+  waTesto="Ciao Alberto, ci siamo visti in fiera"
+  fiere={FIERE}
   titoloModulo="Ti mando il business plan del tuo cliente"
   sottotitoloModulo="Rispondo entro 24 ore con il prospetto completo."
   etichettaNote="Note sull'impianto o sul cliente"
