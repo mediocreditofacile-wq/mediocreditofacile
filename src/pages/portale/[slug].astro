@@ -1,0 +1,441 @@
+---
+/**
+ * Motore dei portali fornitore — /portale/<slug>
+ *
+ * Un portale solo, una carrozzeria per fornitore. Quello che cambia da un
+ * fornitore all'altro (nome, colori, catalogo, settore, partner del leasing,
+ * soglie, budget delle ricerche) sta nel database: app.fornitore,
+ * app.carrozzeria, app.catalogo_voce. Aggiungere un fornitore non chiede
+ * codice nuovo, chiede righe nuove.
+ *
+ * Il percorso dell'agente:
+ *   1. Cliente: partita IVA, scheda di merito ridotta col semaforo
+ *   2. Info aggiuntive: soci, amministratori, bilancio riclassificato, indici
+ *   3. Proposte: pacchetto del catalogo, prezzo trattato, noleggio e leasing,
+ *      business plan energetico sui fornitori fotovoltaico
+ *   4. Preventivo PDF e pratica con i documenti
+ *
+ * La pagina gira sul server (prerender = false) solo per vestire il gate col
+ * nome e il colore del fornitore. Dopo e' un guscio: calcoli, coefficienti,
+ * listini e dati dei clienti stanno dietro le API del motore (/api/motore/*),
+ * che ricavano il fornitore dalla sessione e non dai parametri.
+ *
+ * Sul nascere e' il seguito del tool Marotta, che resta com'e' e va per la sua
+ * strada: questo e' il motore su cui montare il prossimo "Marotta di turno".
+ */
+import Icon from '../../components/Icon.astro';
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import { carrozzeriaDaSlug } from '../../lib/motore/carrozzeria';
+
+export const prerender = false;
+
+const slug = String(Astro.params.slug ?? '');
+const c = /^[a-z0-9][a-z0-9-]{1,60}$/.test(slug) ? await carrozzeriaDaSlug(slug).catch(() => null) : null;
+if (!c) return new Response('Portale non trovato', { status: 404 });
+
+// Il colore della testata e' il marchio del fornitore. Se manca, quello MCF.
+const coloreValido = (v: string | null) => (v && /^#[0-9a-fA-F]{6}$/.test(v) ? v : null);
+const colore = coloreValido(c.brand.colore) ?? '#664CCD';
+const fotovoltaico = c.settore === 'fotovoltaico';
+---
+<ToolLayout
+  title={`Portale ${c.nome} | Mediocredito Facile`}
+  description={`Portale riservato ${c.nome}: valutazione del cliente e proposte di noleggio operativo e leasing.`}
+  noindex={true}
+  breadcrumbs={[{ name: `Portale ${c.nome}`, href: `/portale/${c.slug}` }]}
+>
+  <div class="mt" id="motore" data-slug={c.slug} data-settore={c.settore} style={`--carrozzeria:${colore}`}>
+    <!-- Gate: login, recupero, nuova password, invito, richiesta di accesso -->
+    <div id="gate" class="mt-gate">
+      <div class="mt-gate__card">
+        <div class="mt-gate__testa">
+          <img src="/images/logo-mediocreditofacile.webp" alt="Mediocredito Facile" class="mt-gate__logo" />
+          <span class="mt-gate__x">&times;</span>
+          <span class="mt-gate__fornitore">{c.nome}</span>
+        </div>
+
+        <div id="vista-login">
+          <p class="mt-eyebrow">Portale riservato</p>
+          <p class="mt-gate__desc">
+            Verifica il cliente con la partita IVA, scegli dal catalogo e porta via le proposte di noleggio
+            operativo e di leasing da consegnare.
+          </p>
+          <div class="mt-gate__form">
+            <input type="email" id="login-email" class="mt-input" placeholder="La tua email" autocomplete="username" />
+            <input type="password" id="login-pwd" class="mt-input" placeholder="Password" autocomplete="current-password" />
+            <button id="login-btn" class="mt-btn">Accedi</button>
+          </div>
+          <p class="mt-gate__link-riga">
+            <button type="button" id="vai-recupero" class="mt-link">Ho dimenticato la password</button>
+            <span aria-hidden="true">·</span>
+            <button type="button" id="vai-richiesta" class="mt-link">Non ho un accesso</button>
+          </p>
+        </div>
+
+        <div id="vista-recupero" hidden>
+          <p class="mt-eyebrow">Password dimenticata</p>
+          <p class="mt-gate__desc">Inserisci la tua email: ti arriva un link per sceglierne una nuova. Vale un'ora.</p>
+          <div class="mt-gate__form">
+            <input type="email" id="recupero-email" class="mt-input" placeholder="La tua email" autocomplete="username" />
+            <button id="recupero-btn" class="mt-btn">Mandami il link</button>
+          </div>
+          <p class="mt-gate__link-riga"><button type="button" id="torna-login" class="mt-link">Torna all'accesso</button></p>
+        </div>
+
+        <div id="vista-nuova-password" hidden>
+          <p class="mt-eyebrow">Scegli la nuova password</p>
+          <p class="mt-gate__desc">Almeno dieci caratteri. È personale, non va condivisa.</p>
+          <div class="mt-gate__form">
+            <input type="password" id="nuova-pwd" class="mt-input" placeholder="Nuova password" autocomplete="new-password" />
+            <button id="nuova-pwd-btn" class="mt-btn">Salva e accedi</button>
+          </div>
+        </div>
+
+        <div id="vista-invito" hidden>
+          <p class="mt-eyebrow">Attiva il tuo accesso</p>
+          <p class="mt-gate__desc" id="invito-desc"></p>
+          <div class="mt-gate__form">
+            <input type="text" id="invito-nome" class="mt-input" placeholder="Nome e cognome" autocomplete="name" />
+            <input type="password" id="invito-pwd" class="mt-input" placeholder="Scegli una password" autocomplete="new-password" />
+            <button id="invito-btn" class="mt-btn">Entra nel portale</button>
+          </div>
+          <p class="mt-nota" id="invito-nota"></p>
+        </div>
+
+        <div id="vista-richiesta" hidden>
+          <p class="mt-eyebrow">Richiedi l'accesso</p>
+          <p class="mt-gate__desc">
+            Lascia i tuoi dati: la richiesta arriva al referente della rete, che attiva l'accesso. Ricevi
+            l'invito via email e scegli tu la password.
+          </p>
+          <div class="mt-gate__form">
+            <input type="text" id="req-nome" class="mt-input" placeholder="Nome e cognome" autocomplete="name" />
+            <input type="text" id="req-azienda" class="mt-input" placeholder="Azienda" autocomplete="organization" />
+            <input type="email" id="req-email" class="mt-input" placeholder="Email" autocomplete="email" />
+            <input type="tel" id="req-telefono" class="mt-input" placeholder="Telefono (facoltativo)" autocomplete="tel" />
+            <input type="text" id="req-sito" class="mt-honey" tabindex="-1" autocomplete="off" aria-hidden="true" />
+            <button id="req-btn" class="mt-btn">Invia la richiesta</button>
+          </div>
+          <p class="mt-gate__link-riga"><button type="button" id="torna-login-2" class="mt-link">Ho già un accesso</button></p>
+        </div>
+
+        <p id="gate-errore" class="mt-msg mt-msg--errore" hidden></p>
+        <p id="gate-ok" class="mt-msg mt-msg--ok" hidden></p>
+      </div>
+    </div>
+
+    <!-- Portale -->
+    <div id="tool" class="mt-tool" hidden>
+      <header class="mt-testa">
+        <div class="mt-testa__marchi">
+          <img src="/images/logo-mediocreditofacile.webp" alt="Mediocredito Facile" class="mt-testa__logo" />
+          <span class="mt-testa__sep" aria-hidden="true"></span>
+          <span class="mt-testa__fornitore">{c.nome}</span>
+        </div>
+        <div class="mt-testa__destra">
+          <span id="chi-sono" class="mt-testa__chi"></span>
+          <button id="logout-btn" class="mt-testa__esci"><Icon name="logout" size={16} /> Esci</button>
+        </div>
+      </header>
+
+      {c.demo && (
+        <p class="mt-demo">
+          Portale dimostrativo: il fornitore e i prezzi del catalogo sono di prova. Le valutazioni dei clienti e i
+          canoni sono veri.
+        </p>
+      )}
+
+      <nav class="mt-tabs" role="tablist" aria-label="Sezioni del portale">
+        <button role="tab" class="mt-tab" data-tab="cliente" aria-selected="true">Cliente</button>
+        <button role="tab" class="mt-tab" data-tab="info" aria-selected="false">Info aggiuntive</button>
+        <button role="tab" class="mt-tab" data-tab="proposte" aria-selected="false">Proposte</button>
+        <button role="tab" class="mt-tab" data-tab="pratiche" aria-selected="false">Pratiche</button>
+        <button role="tab" class="mt-tab" data-tab="storico" aria-selected="false">Storico</button>
+        <button role="tab" class="mt-tab" data-tab="rete" aria-selected="false" hidden>La tua rete</button>
+        <button role="tab" class="mt-tab" data-tab="mcf" aria-selected="false" hidden>Pannello MCF</button>
+      </nav>
+
+      <!-- 1. Cliente -->
+      <section class="mt-pannello" data-pannello="cliente" role="tabpanel">
+        <h1 class="mt-h1">Verifica il cliente</h1>
+        <p class="mt-lead">
+          Inserisci la partita IVA del cliente: arrivano anagrafica, bilancio e una prima valutazione. Il
+          semaforo definitivo si accende quando scegli il {fotovoltaico ? 'pacchetto' : 'bene'} e il prezzo.
+        </p>
+        <div class="mt-cerca">
+          <input type="text" id="piva" class="mt-input" inputmode="numeric" maxlength="13" placeholder="Partita IVA, 11 cifre" autocomplete="off" />
+          <button id="cerca-btn" class="mt-btn">Verifica</button>
+        </div>
+        <p id="cerca-msg" class="mt-msg" hidden></p>
+        <div id="scheda"></div>
+      </section>
+
+      <!-- 2. Info aggiuntive -->
+      <section class="mt-pannello" data-pannello="info" role="tabpanel" hidden>
+        <h2 class="mt-h2">Info aggiuntive</h2>
+        <p class="mt-lead">
+          Soci, amministratori e bilancio riclassificato dell'azienda verificata. Sono i dati del Registro imprese,
+          utili a capire con chi si parla prima di presentare l'offerta.
+        </p>
+        <div id="info"><p class="mt-vuoto">Verifica prima un cliente nella sezione Cliente.</p></div>
+      </section>
+
+      <!-- 3. Proposte -->
+      <section class="mt-pannello" data-pannello="proposte" role="tabpanel" hidden>
+        <h2 class="mt-h2">Proposte</h2>
+        <p id="proposte-cliente" class="mt-lead">Verifica prima un cliente nella sezione Cliente.</p>
+
+        <div id="proposte-corpo" hidden>
+          <h3 class="mt-h3">{fotovoltaico ? 'Scegli il pacchetto' : 'Scegli dal catalogo'}</h3>
+          <div id="catalogo" class="mt-catalogo"></div>
+
+          <div class="mt-griglia">
+            <label class="mt-campo">
+              <span>Prezzo trattato, IVA esclusa</span>
+              <input type="number" id="prezzo" class="mt-input" min="1" step="100" />
+              <small id="prezzo-listino" class="mt-nota"></small>
+            </label>
+            {fotovoltaico && (
+              <>
+                <label class="mt-campo">
+                  <span>Provincia dell'impianto</span>
+                  <input type="text" id="bp-provincia" class="mt-input" maxlength="2" placeholder="VI" />
+                </label>
+                <label class="mt-campo">
+                  <span>Comune</span>
+                  <input type="text" id="bp-comune" class="mt-input" maxlength="80" placeholder="facoltativo" />
+                </label>
+                <label class="mt-campo">
+                  <span>Consumo annuo da bolletta, kWh</span>
+                  <input type="number" id="bp-consumo" class="mt-input" min="0" step="100" placeholder="facoltativo" />
+                </label>
+                <label class="mt-campo">
+                  <span>Prezzo energia, euro al kWh</span>
+                  <input type="number" id="bp-prezzo-kwh" class="mt-input" min="0" step="0.01" placeholder="facoltativo" />
+                </label>
+                <label class="mt-campo">
+                  <span>Profilo dei consumi</span>
+                  <select id="bp-profilo" class="mt-input">
+                    <option value="diurno">Diurno, orari d'ufficio</option>
+                    <option value="h24">Continuo, anche di notte</option>
+                  </select>
+                </label>
+                <label class="mt-campo">
+                  <span>Durata del business plan</span>
+                  <select id="bp-durata" class="mt-input"><option value="">Consigliata</option></select>
+                </label>
+              </>
+            )}
+          </div>
+          {fotovoltaico && (
+            <div id="bp-agevolazioni" class="mt-toggle-riga" hidden>
+              <label class="mt-toggle" id="lab-sabatini"><input type="checkbox" id="bp-sabatini" checked /> Nuova Sabatini sul leasing</label>
+              <label class="mt-toggle" id="lab-iper"><input type="checkbox" id="bp-iper" checked /> Iperammortamento sul leasing</label>
+            </div>
+          )}
+
+          <div id="proposte-esito"></div>
+        </div>
+      </section>
+
+      <!-- 4. Pratiche -->
+      <section class="mt-pannello" data-pannello="pratiche" role="tabpanel" hidden>
+        <h2 class="mt-h2">Pratiche</h2>
+        <div id="pratiche"><p class="mt-vuoto">Nessuna pratica ancora.</p></div>
+      </section>
+
+      <!-- 5. Storico -->
+      <section class="mt-pannello" data-pannello="storico" role="tabpanel" hidden>
+        <h2 class="mt-h2">Storico</h2>
+        <p id="storico-sub" class="mt-lead"></p>
+        <div id="storico"></div>
+      </section>
+
+      <!-- 6. La rete: referente e MCF -->
+      <section class="mt-pannello" data-pannello="rete" role="tabpanel" hidden>
+        <h2 class="mt-h2">La tua rete</h2>
+        <p class="mt-lead">
+          Apri un accesso personale a ogni agente: riceve un invito via email e sceglie la sua password. Chi esce
+          dalla rete si sospende, i suoi preventivi restano.
+        </p>
+        <div id="richieste-blocco" hidden>
+          <h3 class="mt-h3">Richieste in attesa</h3>
+          <div id="richieste"></div>
+        </div>
+        <h3 class="mt-h3">Invita un agente</h3>
+        <div class="mt-griglia">
+          <label class="mt-campo"><span>Nome e cognome</span><input type="text" id="inv-nome" class="mt-input" /></label>
+          <label class="mt-campo"><span>Email</span><input type="email" id="inv-email" class="mt-input" /></label>
+        </div>
+        <div class="mt-azioni">
+          <button id="inv-btn" class="mt-btn">Metti in coda l'invito</button>
+          <button type="button" id="inv-ora" class="mt-link">manda subito il prossimo scaglione</button>
+        </div>
+        <p id="rete-msg" class="mt-msg" hidden></p>
+        <h3 class="mt-h3">Chi lavora sul portale</h3>
+        <div id="membri"></div>
+        <h3 class="mt-h3">Inviti</h3>
+        <div id="inviti"></div>
+      </section>
+
+      <!-- 7. Pannello MCF -->
+      <section class="mt-pannello" data-pannello="mcf" role="tabpanel" hidden>
+        <h2 class="mt-h2">Pannello MCF</h2>
+        <div id="mcf"></div>
+      </section>
+    </div>
+  </div>
+</ToolLayout>
+
+<script>
+  import { avviaPortale } from '../../scripts/motore/portale';
+  avviaPortale();
+</script>
+
+<style is:global>
+  /* Il markup delle sezioni nasce via innerHTML: lo stile scoped di Astro non
+     lo raggiungerebbe, quindi tutto sta qui, sotto il prefisso .mt */
+  .mt {
+    --mt-primary: #FE6F3A;
+    --mt-accent: #664CCD;
+    --mt-black: #0F1020;
+    --mt-charcoal: #444451;
+    --mt-taupe: #787782;
+    --mt-platinum: #E1DEE3;
+    --mt-ghost: #F8F7FA;
+    font-family: 'Manrope', system-ui, -apple-system, sans-serif;
+    color: var(--mt-charcoal);
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 32px 24px 96px;
+  }
+  .mt [hidden] { display: none !important; }
+  .mt-eyebrow { font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mt-accent); margin: 0 0 8px; }
+  .mt-h1 { font-size: 2rem; font-weight: 800; line-height: 1.15; letter-spacing: -0.02em; color: var(--mt-primary); margin: 0 0 12px; }
+  .mt-h2 { font-size: 1.5rem; font-weight: 700; line-height: 1.25; letter-spacing: -0.01em; color: var(--mt-primary); margin: 0 0 12px; }
+  .mt-h3 { font-size: 1.25rem; font-weight: 600; color: var(--mt-black); margin: 32px 0 12px; }
+  .mt-lead { font-size: 1.0625rem; line-height: 1.55; max-width: 68ch; margin: 0 0 24px; }
+  .mt-nota, .mt-vuoto { font-size: 14px; color: var(--mt-taupe); line-height: 1.5; }
+  .mt-vuoto { padding: 24px; border: 1px dashed var(--mt-platinum); border-radius: 10px; }
+
+  .mt-input {
+    width: 100%; font: inherit; font-size: 16px; color: var(--mt-black);
+    border: 1px solid var(--mt-platinum); border-radius: 6px; padding: 10px 14px; background: #fff;
+  }
+  .mt-input:focus { outline: none; border-color: var(--mt-primary); }
+  .mt-btn {
+    font: inherit; font-weight: 600; color: #fff; background: var(--mt-primary); border: 0;
+    border-radius: 10px; padding: 12px 24px; cursor: pointer; white-space: nowrap;
+  }
+  .mt-btn:hover { filter: brightness(0.92); }
+  .mt-btn:disabled { opacity: 0.55; cursor: wait; }
+  .mt-btn--secondario { background: transparent; color: var(--mt-primary); border: 1.5px solid var(--mt-primary); }
+  .mt-btn--secondario:hover { background: rgba(254, 111, 58, 0.08); filter: none; }
+  .mt-link { font: inherit; font-weight: 600; color: var(--mt-accent); background: none; border: 0; padding: 0; cursor: pointer; }
+  .mt-link:hover { text-decoration: underline; text-underline-offset: 3px; }
+  .mt :focus-visible { outline: 2px solid var(--mt-accent); outline-offset: 2px; }
+  .mt-honey { position: absolute; left: -9999px; }
+
+  .mt-msg { font-size: 15px; padding: 12px 16px; border-radius: 6px; margin: 16px 0 0; border-left: 3px solid var(--mt-accent); background: var(--mt-ghost); }
+  .mt-msg--errore { border-left-color: #B23A12; color: #8A2D0E; }
+  .mt-msg--ok { border-left-color: var(--mt-accent); }
+
+  /* gate */
+  .mt-gate { display: flex; justify-content: center; padding: 48px 0; }
+  .mt-gate__card { width: 100%; max-width: 440px; background: #fff; border: 1px solid var(--mt-platinum); border-top: 4px solid var(--carrozzeria); border-radius: 16px; padding: 32px; }
+  .mt-gate__testa { display: flex; align-items: center; gap: 12px; padding-bottom: 20px; margin-bottom: 20px; border-bottom: 1px solid var(--mt-platinum); }
+  .mt-gate__logo { height: 36px; width: auto; }
+  .mt-gate__x { color: var(--mt-taupe); }
+  .mt-gate__fornitore { font-weight: 700; color: var(--carrozzeria); }
+  .mt-gate__desc { font-size: 15px; line-height: 1.55; margin: 0 0 20px; }
+  .mt-gate__form { display: grid; gap: 12px; }
+  .mt-gate__link-riga { display: flex; gap: 8px; flex-wrap: wrap; margin: 16px 0 0; font-size: 14px; color: var(--mt-taupe); }
+
+  /* testata */
+  .mt-testa { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; padding: 16px 24px; border-radius: 16px; background: var(--carrozzeria); color: #fff; }
+  .mt-testa__marchi { display: flex; align-items: center; gap: 16px; }
+  .mt-testa__logo { height: 36px; width: auto; background: #fff; border-radius: 6px; padding: 4px 8px; }
+  .mt-testa__sep { width: 1px; height: 28px; background: rgba(255, 255, 255, 0.5); }
+  .mt-testa__fornitore { font-weight: 700; font-size: 1.125rem; }
+  .mt-testa__destra { display: flex; align-items: center; gap: 16px; font-size: 14px; }
+  .mt-testa__esci { font: inherit; font-weight: 600; color: #fff; background: transparent; border: 1.5px solid rgba(255, 255, 255, 0.7); border-radius: 10px; padding: 6px 14px; cursor: pointer; display: inline-flex; gap: 6px; align-items: center; }
+  .mt-demo { margin: 16px 0 0; padding: 12px 16px; border: 1px solid var(--mt-platinum); border-left: 3px solid var(--mt-primary); border-radius: 6px; font-size: 14px; }
+
+  /* tab */
+  .mt-tabs { display: flex; gap: 4px; flex-wrap: wrap; margin: 24px 0 32px; border-bottom: 1px solid var(--mt-platinum); }
+  .mt-tab { font: inherit; font-weight: 600; font-size: 15px; color: var(--mt-taupe); background: none; border: 0; border-bottom: 3px solid transparent; padding: 10px 14px; cursor: pointer; margin-bottom: -1px; }
+  .mt-tab[aria-selected="true"] { color: var(--mt-black); border-bottom-color: var(--carrozzeria); }
+  .mt-tab:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* ricerca */
+  .mt-cerca { display: flex; gap: 12px; max-width: 520px; }
+
+  /* card e blocchi */
+  .mt-card { background: #fff; border: 1px solid var(--mt-platinum); border-radius: 16px; padding: 24px; margin-top: 24px; }
+  .mt-card--evidenza { border: 1.5px solid var(--mt-primary); }
+  .mt-card__testa { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; align-items: flex-start; }
+  .mt-rs { font-size: 1.375rem; font-weight: 700; color: var(--mt-black); margin: 0; }
+  .mt-meta { font-size: 14px; color: var(--mt-taupe); margin: 4px 0 0; line-height: 1.6; }
+  .mt-cifre { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-top: 24px; }
+  .mt-cifra { border-top: 1px solid var(--mt-platinum); padding-top: 12px; }
+  .mt-cifra__et { font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mt-accent); }
+  .mt-cifra__val { font-size: 1.25rem; font-weight: 700; color: var(--mt-black); font-variant-numeric: tabular-nums; margin-top: 4px; }
+  .mt-cifra__sub { font-size: 13px; color: var(--mt-taupe); margin-top: 2px; }
+
+  /* semaforo: comunicato con testo e un segno, non con verde e rosso da bootstrap */
+  .mt-semaforo { display: flex; gap: 16px; align-items: flex-start; padding: 16px; border-radius: 10px; background: var(--mt-ghost); margin-top: 24px; }
+  .mt-semaforo__luce { flex: none; width: 14px; height: 14px; border-radius: 999px; margin-top: 5px; }
+  .mt-semaforo--verde .mt-semaforo__luce { background: #2E7D4F; }
+  .mt-semaforo--giallo .mt-semaforo__luce { background: #D9A400; }
+  .mt-semaforo--rosso .mt-semaforo__luce { background: #B23A12; }
+  .mt-semaforo__tit { font-weight: 700; color: var(--mt-black); margin: 0 0 4px; }
+  .mt-criteri { list-style: none; padding: 0; margin: 8px 0 0; font-size: 14px; display: grid; gap: 4px; }
+  .mt-criteri li::before { content: '–'; color: var(--mt-accent); margin-right: 8px; }
+  .mt-criteri .ko { color: #8A2D0E; }
+
+  .mt-rating { display: flex; gap: 3px; margin-top: 8px; }
+  .mt-rating span { flex: 1; height: 8px; border-radius: 2px; background: var(--mt-platinum); }
+  .mt-rating span.on { background: var(--mt-accent); }
+
+  /* tabelle */
+  .mt-tabella { width: 100%; border-collapse: collapse; font-size: 15px; font-variant-numeric: tabular-nums; }
+  .mt-tabella th { background: var(--mt-primary); color: #fff; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; text-align: left; padding: 10px 12px; }
+  .mt-tabella td { padding: 10px 12px; border-bottom: 1px solid var(--mt-platinum); vertical-align: top; }
+  .mt-tabella tbody tr:nth-child(even) td { background: var(--mt-ghost); }
+  .mt-tabella .num { text-align: right; white-space: nowrap; }
+  .mt-tabella th.num { text-align: right; }
+  .mt-tabella tr.scelta td { font-weight: 700; color: var(--mt-black); }
+  .mt-tabella tr.sotto td { font-weight: 600; color: var(--mt-accent); background: #fff; padding-top: 16px; }
+  .mt-tabella tr.spenta td { color: var(--mt-taupe); }
+  .mt-scorri { overflow-x: auto; }
+  .mt-id { font-size: 13px; color: var(--mt-taupe); }
+  .mt details { border-top: 1px solid var(--mt-platinum); padding: 12px 0; }
+  .mt summary { cursor: pointer; font-weight: 600; color: var(--mt-black); }
+
+  /* proposte */
+  .mt-catalogo { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; margin-bottom: 24px; }
+  .mt-voce { text-align: left; font: inherit; background: #fff; border: 1px solid var(--mt-platinum); border-radius: 10px; padding: 16px; cursor: pointer; }
+  .mt-voce[aria-pressed="true"] { border: 1.5px solid var(--mt-primary); }
+  .mt-voce__nome { font-weight: 700; color: var(--mt-black); display: block; }
+  .mt-voce__prezzo { font-variant-numeric: tabular-nums; color: var(--mt-charcoal); display: block; margin-top: 6px; }
+  .mt-griglia { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px 24px; }
+  .mt-campo { display: grid; gap: 6px; font-size: 14px; font-weight: 600; color: var(--mt-black); }
+  .mt-campo small { font-weight: 400; }
+  .mt-toggle-riga { display: flex; gap: 24px; flex-wrap: wrap; margin-top: 16px; font-size: 15px; }
+  .mt-toggle { display: inline-flex; gap: 8px; align-items: center; cursor: pointer; }
+  .mt-due { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; }
+  .mt-kpi { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin: 24px 0; }
+  .mt-kpi__card { border: 1px solid var(--mt-platinum); border-radius: 10px; padding: 16px; }
+  .mt-kpi__num { display: block; font-size: 1.5rem; font-weight: 700; color: var(--mt-black); font-variant-numeric: tabular-nums; }
+  .mt-kpi__et { display: block; font-size: 14px; color: var(--mt-taupe); margin-top: 4px; }
+  .mt-avvisi { margin: 16px 0 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+  .mt-avvisi li { font-size: 14px; padding: 10px 14px; border-left: 3px solid var(--mt-primary); background: var(--mt-ghost); border-radius: 6px; }
+  .mt-azioni { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; margin-top: 24px; }
+
+  @media (max-width: 640px) {
+    .mt { padding: 16px 16px 48px; }
+    .mt-cerca { flex-direction: column; }
+    .mt-testa { padding: 16px; }
+    .mt-tab { padding: 10px 8px; font-size: 14px; }
+  }
+</style>

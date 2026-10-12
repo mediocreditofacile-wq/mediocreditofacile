@@ -1,11 +1,17 @@
 // Applica i file .sql di scripts/sql in ordine di nome.
 // Sono idempotenti (IF NOT EXISTS), quindi rilanciarli non fa danni.
 //
-// Uso: npm run db:sql
+// Uso: npm run db:sql              database di produzione
+//      npm run db:sql -- --prova   branch Neon di prova (DATABASE_URL_TEST)
 
 import { readdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { getPool } from '../src/lib/db';
+
+if (process.argv.includes('--prova')) {
+  if (!process.env.DATABASE_URL_TEST) throw new Error('DATABASE_URL_TEST mancante in .env.local');
+  process.env.DATABASE_URL = process.env.DATABASE_URL_TEST;
+}
+const { getPool } = await import('../src/lib/db');
 
 const dir = join(process.cwd(), 'scripts', 'sql');
 const files = (await readdir(dir)).filter((f) => f.endsWith('.sql')).sort();

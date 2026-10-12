@@ -198,6 +198,40 @@ describe.runIf(HA_DB)('accesso incrociato fra due fornitori', () => {
     if (!esito.ok) expect(esito.risposta.status).toBe(403);
   });
 
+  it('un agente di due fornitori entra in quello che chiede, e solo fra i suoi', async () => {
+    await query(
+      `INSERT INTO "member" (id, "organizationId", "userId", role, "createdAt")
+       VALUES ($1,$2,$3,'agente', now())`,
+      [`mem2-${SUFFISSO}`, FORN_B.org, userIdA],
+    );
+    try {
+      const suB = await richiediSessione(richiesta('http://localhost:4321/api/x'), { slugRichiesto: FORN_B.slug });
+      expect(suB.ok).toBe(true);
+      if (suB.ok) expect(suB.contesto.fornitoreSlug).toBe(FORN_B.slug);
+
+      // senza indicazione resta il primo rapporto, come prima
+      const senza = await richiediSessione(richiesta('http://localhost:4321/api/x'));
+      if (senza.ok) expect(senza.contesto.fornitoreSlug).toBe(FORN_A.slug);
+
+      // un fornitore che non e' fra i suoi resta chiuso
+      const altro = await richiediSessione(richiesta('http://localhost:4321/api/x'), { slugRichiesto: 'green-go' });
+      expect(altro.ok).toBe(false);
+
+      // sospeso su B, B si chiude e A resta aperto
+      await query(
+        `INSERT INTO app.membro_stato (organization_id, user_id, attivo) VALUES ($1,$2,false)`,
+        [FORN_B.org, userIdA],
+      );
+      const sospeso = await richiediSessione(richiesta('http://localhost:4321/api/x'), { slugRichiesto: FORN_B.slug });
+      expect(sospeso.ok).toBe(false);
+      const suA = await richiediSessione(richiesta('http://localhost:4321/api/x'), { slugRichiesto: FORN_A.slug });
+      expect(suA.ok).toBe(true);
+    } finally {
+      await query(`DELETE FROM app.membro_stato WHERE organization_id = $1 AND user_id = $2`, [FORN_B.org, userIdA]);
+      await query(`DELETE FROM "member" WHERE id = $1`, [`mem2-${SUFFISSO}`]);
+    }
+  });
+
   it('un agente puo creare preventivi', async () => {
     const esito = await richiediSessione(richiesta('http://localhost:4321/api/x'), {
       permesso: { preventivo: ['crea'] },

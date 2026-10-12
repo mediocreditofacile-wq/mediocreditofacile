@@ -59,36 +59,11 @@ function escapeHtml(value: string): string {
   });
 }
 
-// Checklist documenti: base sempre richiesta, reddituali sopra 10.000 €
-// differenziati per forma giuridica (stessa logica dell'area Edilizia GIERRE).
-export function buildChecklist(formaGiuridica: string, importoNum: number, extra: string[] = []): string[] {
-  const base = [
-    'Visura camerale (o visura ditta individuale)',
-    'Carta d\'identita\' del legale rappresentante / titolare',
-    'Tessera sanitaria / codice fiscale',
-    'Coordinate IBAN aziendali',
-    'Email aziendale',
-    'Cellulare del referente',
-    ...extra,
-  ];
-
-  if (importoNum <= 10000) return base;
-
-  const fg = formaGiuridica.toLowerCase();
-  if (fg.includes('individuale') || fg.includes('autonomo') || fg === 'di') {
-    return [
-      ...base,
-      'Ultime 2 dichiarazioni dei redditi (Modello Unico)',
-      'Situazione contabile aggiornata 2025',
-    ];
-  }
-
-  return [
-    ...base,
-    'Ultimi 2 bilanci depositati',
-    'Bilancio definitivo 2025 (anche pre-deposito)',
-  ];
-}
+// La checklist sta in un modulo puro (src/lib/checklist-pratica.ts) perche'
+// la usa anche il browser del motore dei portali: qui si riesporta, cosi' gli
+// endpoint dei portali partner non cambiano.
+export { buildChecklist } from './checklist-pratica';
+import { buildChecklist } from './checklist-pratica';
 
 // Id pratica leggibile: <PREFISSO>-AAAAMMGG-HHMMSS (ora italiana)
 function generaId(prefisso: string): string {

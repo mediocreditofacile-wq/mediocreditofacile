@@ -12,6 +12,7 @@
     "db:migrate": "tsx --env-file=.env.local scripts/db-migrate.ts",
     "db:sql": "tsx --env-file=.env.local scripts/db-sql.ts",
     "seed:green-go": "tsx --env-file=.env.local scripts/seed-green-go.ts",
+    "seed:motore-demo": "tsx --env-file=.env.local scripts/seed-motore-demo.ts",
     "guide:carica": "tsx --env-file=.env.local scripts/carica-guide.ts",
     "visibilita:ai": "node scripts/visibilita-ai/monitor.mjs",
     "controlla:anonimato": "node scripts/controlla-anonimato.mjs"

@@ -5,6 +5,7 @@
 
 import { allegatiGuide } from './guide';
 import { escapeHtml, inviaMail, layoutMail, type EsitoMail } from './mail-portale';
+import { percorsoPortale } from './percorso-portale';
 
 export async function mailInvito(opts: {
   a: string;
@@ -16,7 +17,7 @@ export async function mailInvito(opts: {
   /** Cambia il testo: al referente non si dice di chiedere al suo referente */
   ruolo?: string;
 }): Promise<EsitoMail> {
-  const url = `${opts.baseUrl}/tools/${opts.slug}?invito=${encodeURIComponent(opts.invitationId)}`;
+  const url = `${opts.baseUrl}${percorsoPortale(opts.slug)}?invito=${encodeURIComponent(opts.invitationId)}`;
   const referente = opts.ruolo === 'referente';
 
   const cosaPuoiFare = referente

@@ -157,17 +157,39 @@ export async function richiediSessione(
       if (suo) fornitore = await fornitoreDaOrg(suo.organizationId);
     }
   } else {
-    // Si prende il primo rapporto ATTIVO: un agente sospeso da un fornitore
-    // resta un agente valido per gli altri, perche' e' plurimandatario.
-    const membro = await queryUna<{ organizationId: string; role: string }>(
-      `SELECT m."organizationId", m."role" FROM "member" m
-         LEFT JOIN app.membro_stato ms
-           ON ms.organization_id = m."organizationId" AND ms.user_id = m."userId"
-        WHERE m."userId" = $1 AND COALESCE(ms.attivo, true) = true
-        ORDER BY m."createdAt" ASC
-        LIMIT 1`,
-      [utente.id],
-    );
+    // Si prende un rapporto ATTIVO: un agente sospeso da un fornitore resta
+    // un agente valido per gli altri, perche' e' plurimandatario. Se la pagina
+    // indica il fornitore, si cerca il rapporto con QUEL fornitore fra quelli
+    // dell'utente: un agente di due carrozzerie entra in quella che ha aperto.
+    // Il parametro sceglie fra i rapporti che la sessione ha gia', non ne crea:
+    // se fra i suoi non c'e', la richiesta si rifiuta.
+    const membro = opzioni.slugRichiesto
+      ? await queryUna<{ organizationId: string; role: string }>(
+          `SELECT m."organizationId", m."role" FROM "member" m
+             JOIN app.fornitore f ON f.organization_id = m."organizationId"
+             LEFT JOIN app.membro_stato ms
+               ON ms.organization_id = m."organizationId" AND ms.user_id = m."userId"
+            WHERE m."userId" = $1 AND f.slug = $2 AND COALESCE(ms.attivo, true) = true
+            LIMIT 1`,
+          [utente.id, opzioni.slugRichiesto],
+        )
+      : await queryUna<{ organizationId: string; role: string }>(
+          `SELECT m."organizationId", m."role" FROM "member" m
+             LEFT JOIN app.membro_stato ms
+               ON ms.organization_id = m."organizationId" AND ms.user_id = m."userId"
+            WHERE m."userId" = $1 AND COALESCE(ms.attivo, true) = true
+            ORDER BY m."createdAt" ASC
+            LIMIT 1`,
+          [utente.id],
+        );
+    if (!membro && opzioni.slugRichiesto) {
+      console.warn(JSON.stringify({
+        event: 'accesso_incrociato_rifiutato',
+        userId: utente.id,
+        richiesto: opzioni.slugRichiesto,
+      }));
+      return { ok: false, risposta: json({ ok: false, error: 'fornitore_non_tuo' }, 403) };
+    }
     if (!membro) {
       // O non e' membro di nulla, o e' stato sospeso ovunque: al portale
       // interessa il risultato, non la differenza.

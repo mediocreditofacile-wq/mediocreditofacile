@@ -25,6 +25,7 @@ import { defaultStatements, ownerAc } from 'better-auth/plugins/organization/acc
 import { env, getPool, queryUna } from './db';
 import { inviaMail, layoutMail, escapeHtml } from './mail-portale';
 import { mailInvito } from './mail-invito';
+import { percorsoPortale } from './percorso-portale';
 
 /**
  * Permessi del portale. Non usiamo i ruoli predefiniti owner/admin/member
@@ -62,8 +63,8 @@ export const BASE_URL = env('BETTER_AUTH_URL') ?? 'http://localhost:4321';
 
 /**
  * Il portale su cui rimandare un utente. Lo slug dell'organizzazione coincide
- * con lo slug del portale (green-go -> /tools/green-go), cosi' il link vale
- * anche per i fornitori che aggiungeremo dopo.
+ * con lo slug del portale: green-go -> /tools/green-go, i fornitori sul motore
+ * -> /portale/<slug> (src/lib/percorso-portale.ts).
  */
 async function urlPortale(userId: string): Promise<string> {
   const riga = await queryUna<{ slug: string }>(
@@ -74,7 +75,7 @@ async function urlPortale(userId: string): Promise<string> {
       LIMIT 1`,
     [userId],
   );
-  return `${BASE_URL}/tools/${riga?.slug ?? 'green-go'}`;
+  return `${BASE_URL}${percorsoPortale(riga?.slug ?? 'green-go')}`;
 }
 
 export const auth = betterAuth({

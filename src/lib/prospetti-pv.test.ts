@@ -223,9 +223,14 @@ describe('payload per il microservizio PDF', () => {
       'riscatto_leasing', 'sabatini_pct', 'costo_sabatini', 'iper_pct', 'costo_40',
       'testo_ipotesi', 'testo_ipotesi_breve', 'testo_copertura', 'testo_grafico1',
       'fornitore_nome', 'fornitore_citta', 'includi_sabatini', 'includi_iper',
-      'ramo', 'con_leasing', 'brand',
+      'ramo', 'con_leasing', 'brand', 'leasing_esterno',
     ];
     expect(Object.keys(payload).sort()).toEqual(attese.sort());
+  });
+
+  it('senza leasing esterno il campo resta vuoto e il leasing e\' quello di confronto', () => {
+    expect(payload.leasing_esterno).toBeUndefined();
+    expect(payload.tasso_leasing).toBe(0.06);
   });
 
   it('senza opzioni resta il prospetto InnovaLux, identico a prima', () => {
@@ -320,5 +325,52 @@ describe('payload per il microservizio PDF', () => {
     const p = buildPayloadPdf(input, calcolaPreventivo(input)) as Record<string, string>;
     expect(p.testo_ipotesi).toContain('dati di consumo reali del cliente');
     expect(p.testo_ipotesi).not.toContain('in assenza dei dati');
+  });
+});
+
+describe('leasing calcolato dal partner (motore dei portali)', () => {
+  // Valori finti ma coerenti: quello che conta e' che il motore li prenda
+  // cosi' come sono, senza rifarli al 6 per cento.
+  const esterno = (durata: number) => ({
+    durata,
+    rata: 1500.5,
+    numRate: durata - 1,
+    anticipoPerc: 10,
+    anticipo: 8798,
+    riscattoPerc: 1,
+    riscatto: 879.8,
+    speseIstruttoria: 400,
+    speseIncassoRata: 5,
+    totale: 8798 + 1500.5 * (durata - 1) + 879.8 + 400 + 5 * (durata - 1),
+  });
+
+  it('usa la rata e il totale che riceve, alla durata che sceglie lui', () => {
+    const c = calcolaPreventivo(NUOVA_ERA, undefined, { leasing: esterno });
+    expect(c.rataLeasing).toBe(1500.5);
+    expect(c.riscattoLeasing).toBe(879.8);
+    expect(c.totLeasing).toBe(esterno(60).totale);
+    expect(c.interessi).toBe(esterno(60).totale - NUOVA_ERA.importo);
+    expect(c.leasingEsterno?.durata).toBe(c.durata);
+  });
+
+  it('il noleggio non cambia: il leasing esterno tocca solo il ramo leasing', () => {
+    const senza = calcolaPreventivo(NUOVA_ERA);
+    const con = calcolaPreventivo(NUOVA_ERA, undefined, { leasing: esterno });
+    expect(con.canoni).toEqual(senza.canoni);
+    expect(con.costoNettoNol).toBe(senza.costoNettoNol);
+  });
+
+  it('il leasing esterno viaggia nel payload del PDF', () => {
+    const c = calcolaPreventivo(NUOVA_ERA, undefined, { leasing: esterno });
+    const p = buildPayloadPdf(NUOVA_ERA, c, { separati: true, conLeasing: true }) as Record<string, any>;
+    expect(p.con_leasing).toBe(true);
+    expect(p.leasing_esterno).toMatchObject({ rata: 1500.5, num_rate: 59, anticipo_pct: 10, spese_istruttoria: 400 });
+  });
+
+  it('la soglia del leasing si puo\' sostituire', () => {
+    const c = calcolaPreventivo(B_SERVICE);
+    // B Service sta sotto gli 80.000 di Green-Go: di suo il leasing non esce
+    expect(buildPayloadPdf(B_SERVICE, c, { separati: true }).con_leasing).toBe(false);
+    expect(buildPayloadPdf(B_SERVICE, c, { separati: true, conLeasing: true }).con_leasing).toBe(true);
   });
 });

@@ -4,15 +4,41 @@
     {
       "name": "marotta-static",
       "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "8765", "--directory", "/Users/alberto/dev/marotta-tool"],
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8765",
+        "--directory",
+        "/Users/alberto/dev/marotta-tool"
+      ],
       "port": 8765
     },
     {
       "name": "mcf-dev",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
       "port": 4321,
       "autoPort": true
+    },
+    {
+      "name": "mcf-dev-prova",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": [
+        "scripts/dev-prova.sh"
+      ],
+      "port": 4321
+    },
+    {
+      "name": "pdf-locale",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": [
+        "-c",
+        "cd /Users/alberto/dev/mcf-prospetti-pv && PROSPETTI_TOKEN=dev-token MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python scripts/serve_locale.py"
+      ],
+      "port": 8787
     }
   ]
 }

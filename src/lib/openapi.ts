@@ -64,10 +64,17 @@ export const LISTINO_OLTRE_FRANCHIGIA: Partial<Record<Servizio, number>> = {
 /**
  * Chi ha originato la chiamata. 'sito' sono gli strumenti interni e il tool
  * Marotta (il default, e il percorso storico del registro); 'fiera' e' la
- * pagina /fiera. Tetti separati: un picco in padiglione non deve mangiare il
- * budget che serve a una pratica vera.
+ * pagina /fiera; 'carrozzeria/<slug>' e' un fornitore sul motore dei portali,
+ * uno per uno. Tetti separati: un picco in padiglione o un fornitore che
+ * esagera non devono mangiare il budget che serve a una pratica vera.
  */
-export type Sorgente = 'sito' | 'fiera';
+export type Sorgente = 'sito' | 'fiera' | `carrozzeria/${string}`;
+
+/** Sorgente di un fornitore sul motore. Lo slug finisce in un percorso: si valida. */
+export function sorgenteCarrozzeria(slug: string): Sorgente {
+  if (!/^[a-z0-9][a-z0-9-]{1,60}$/.test(slug)) throw new Error(`slug carrozzeria non valido: ${slug}`);
+  return `carrozzeria/${slug}`;
+}
 
 const SCOPES = [
   'GET:company.openapi.com/IT-start',
@@ -263,12 +270,15 @@ export interface ConsumoParziale {
   perServizio: Record<string, number>;
 }
 
+/** Sito e fiera ci sono sempre; le carrozzerie compaiono quando hanno speso */
+export type ConsumoPerSorgente = { sito: ConsumoParziale; fiera: ConsumoParziale } & Record<string, ConsumoParziale>;
+
 export interface Consumo extends ConsumoParziale {
   mese: string;
   /** Quante chiamate per ciascun servizio: serve al tetto sulla ricerca gratuita */
   perServizio: Record<string, number>;
   /** Lo stesso conto diviso per chi ha originato la chiamata */
-  perSorgente: Record<Sorgente, ConsumoParziale>;
+  perSorgente: ConsumoPerSorgente;
   /** Somma del solo registro a listino, per confronto */
   registrato: number;
   /** Gia' fatturato da Openapi nel mese; null se il wallet non ha risposto */
@@ -278,6 +288,18 @@ export interface Consumo extends ConsumoParziale {
 }
 
 const vuoto = (): ConsumoParziale => ({ chiamate: 0, totale: 0, perServizio: {} });
+
+/**
+ * Sorgente dal percorso del blob, gia' privato del nome del file:
+ *   openapi/costi/<mese>/                     -> 'sito' (il percorso storico)
+ *   openapi/costi/<mese>/fiera/               -> 'fiera'
+ *   openapi/costi/<mese>/carrozzeria/<slug>/  -> 'carrozzeria/<slug>'
+ */
+export function sorgenteDaPercorso(parti: string[]): Sorgente {
+  if (parti[3] === 'fiera') return 'fiera';
+  if (parti[3] === 'carrozzeria' && parti[4]) return `carrozzeria/${parti[4]}`;
+  return 'sito';
+}
 
 // --- addebiti reali dal wallet -------------------------------------------------
 // Il registro vede solo le chiamate che passano da chiama(), e a prezzo di listino.
@@ -336,17 +358,17 @@ export async function spesaDelMese(mese?: string): Promise<Consumo> {
     const ultimoAddebito = uscite.reduce((max, t) => Math.max(max, new Date(t.createdAt).getTime()), 0);
 
     const tutto = vuoto();
-    const perSorgente: Record<Sorgente, ConsumoParziale> = { sito: vuoto(), fiera: vuoto() };
+    const perSorgente: ConsumoPerSorgente = { sito: vuoto(), fiera: vuoto() };
     let inAttesa = 0;
     for (const b of blobs) {
       const parti = b.pathname.split('/');
       const nome = parti.pop() ?? '';
-      // openapi/costi/<mese>/<file> e' 'sito'; openapi/costi/<mese>/fiera/<file> e' 'fiera'
-      const sorgente: Sorgente = parti.length > 3 && parti[3] === 'fiera' ? 'fiera' : 'sito';
+      const sorgente = sorgenteDaPercorso(parti);
       const quando = Number(nome.match(/^\d+/)?.[0] ?? 0);
       const servizio = nome.replace(/^\d+-/, '').replace(/-[a-zA-Z0-9]+\.json$/, '.json').replace(/\.json$/, '');
       const costo = (COSTI as Record<string, number>)[servizio] ?? 0;
       if (quando > ultimoAddebito) inAttesa += costo;
+      perSorgente[sorgente] ??= vuoto();
       for (const c of [tutto, perSorgente[sorgente]]) {
         c.chiamate += 1;
         c.totale += costo;
@@ -356,13 +378,16 @@ export async function spesaDelMese(mese?: string): Promise<Consumo> {
     const registrato = tutto.totale;
 
     // Il wallet non sa chi ha fatto la chiamata: la riconciliazione vale per il
-    // totale. Il conto della fiera resta sul registro, e quello del sito prende
+    // totale. Fiera e carrozzerie restano sul loro registro, e il sito prende
     // il resto del reale, mai meno di quanto il suo registro ha gia' visto.
     if (addebitato != null) {
       tutto.totale = addebitato + inAttesa;
-      perSorgente.sito.totale = Math.max(perSorgente.sito.totale, tutto.totale - perSorgente.fiera.totale);
+      const altri = Object.entries(perSorgente)
+        .filter(([k]) => k !== 'sito')
+        .reduce((s, [, c]) => s + c.totale, 0);
+      perSorgente.sito.totale = Math.max(perSorgente.sito.totale, tutto.totale - altri);
     }
-    for (const c of [tutto, perSorgente.sito, perSorgente.fiera]) c.totale = Math.round(c.totale * 100) / 100;
+    for (const c of [tutto, ...Object.values(perSorgente)]) c.totale = Math.round(c.totale * 100) / 100;
     const dato: Consumo = {
       mese: m,
       ...tutto,
@@ -407,10 +432,16 @@ export interface EsitoTetto {
  * Controlla se c'e' ancora budget per una chiamata a un dato servizio.
  * Conta solo le chiamate della sorgente indicata: la fiera ha il suo tetto
  * (vedi src/lib/fiera-guardia.ts) e non consuma quello degli strumenti.
+ * Una carrozzeria passa il suo tetto in euro, che sta nel database
+ * (app.carrozzeria.tetto_mese_euro) e non nelle variabili d'ambiente.
  */
-export async function entroIlTetto(servizio: Servizio, sorgente: Sorgente = 'sito'): Promise<EsitoTetto> {
+export async function entroIlTetto(
+  servizio: Servizio,
+  sorgente: Sorgente = 'sito',
+  tettoEuro?: number,
+): Promise<EsitoTetto> {
   const consumo = await spesaDelMese();
-  const mio = consumo.perSorgente[sorgente];
+  const mio = consumo.perSorgente[sorgente] ?? vuoto();
   if (COSTI[servizio] === 0) {
     const tetto = numeroEnv('OPENAPI_TETTO_RICERCHE', 400);
     const fatte = mio.perServizio[servizio] ?? 0;
@@ -419,7 +450,7 @@ export async function entroIlTetto(servizio: Servizio, sorgente: Sorgente = 'sit
     }
     return { ok: true, consumo };
   }
-  const tetto = numeroEnv('OPENAPI_TETTO_MESE', 30);
+  const tetto = tettoEuro != null && tettoEuro >= 0 ? tettoEuro : numeroEnv('OPENAPI_TETTO_MESE', 30);
   if (mio.totale >= tetto) {
     return { ok: false, motivo: `tetto di spesa del mese raggiunto (${mio.totale} / ${tetto} euro)`, consumo };
   }
@@ -442,6 +473,16 @@ async function dallaCache(piva: string): Promise<any | null> {
   } catch {
     return null;
   }
+}
+
+/**
+ * Scheda completa solo se e' gia' in cache, senza chiamare nessuno. Serve a
+ * riaprire una ricerca dallo storico: se la cache e' scaduta si rifa' la
+ * ricerca da capo, e allora si paga, ma lo decide chi la fa.
+ */
+export async function schedaSoloCache(piva: string): Promise<SchedaAzienda | null> {
+  const cached = await dallaCache(piva);
+  return cached ? { ...cached, daCache: true } : null;
 }
 
 async function inCache(piva: string, dati: any) {
@@ -515,7 +556,13 @@ export interface SchedaAzienda {
  * La verifica eventi negativi sull'azienda parte qui ma e' asincrona: torna l'id
  * e l'esito si recupera dopo con esitoNegativita().
  */
-export function schedaAzienda(piva: string, opts: { conNegativita?: boolean } = {}): Promise<SchedaAzienda> {
+export interface OpzioniScheda {
+  conNegativita?: boolean;
+  /** A chi si addebitano le chiamate. Default 'sito' (gli strumenti interni). */
+  sorgente?: Sorgente;
+}
+
+export function schedaAzienda(piva: string, opts: OpzioniScheda = {}): Promise<SchedaAzienda> {
   // La cache si scrive solo a scheda finita, circa otto secondi dopo: due richieste
   // ravvicinate sulla stessa partita IVA la trovano vuota tutte e due e pagano
   // due volte. E' successo il 16/09 su 04154590162 (due schede a un secondo di
@@ -531,23 +578,24 @@ export function schedaAzienda(piva: string, opts: { conNegativita?: boolean } = 
 
 const schedeInCorso = new Map<string, Promise<SchedaAzienda>>();
 
-async function caricaScheda(piva: string, opts: { conNegativita?: boolean }): Promise<SchedaAzienda> {
+async function caricaScheda(piva: string, opts: OpzioniScheda): Promise<SchedaAzienda> {
   const cached = await dallaCache(piva);
   if (cached) return { ...cached, daCache: true };
 
-  const full = await chiama(`${COMPANY}/IT-full/${piva}`, 'IT-full');
+  const sorgente = opts.sorgente ?? 'sito';
+  const full = await chiama(`${COMPANY}/IT-full/${piva}`, 'IT-full', undefined, sorgente);
   if (!full.trovato) return { trovata: false, piva, full: null, advanced: null, score: null, soci: [] };
 
   // advanced serve per PEC, ATECO e data di inizio attivita', che in full non ci sono
   const [advanced, score, soci] = await Promise.all([
-    chiama(`${COMPANY}/IT-advanced/${piva}`, 'IT-advanced').catch(() => ({ dati: null })),
-    chiama(`${RISK}/IT-creditscore-advanced/${piva}`, 'IT-creditscore-advanced').catch(() => ({ dati: null })),
-    chiama(`${COMPANY}/IT-shareholders/${piva}`, 'IT-shareholders').catch(() => ({ lista: [] })),
+    chiama(`${COMPANY}/IT-advanced/${piva}`, 'IT-advanced', undefined, sorgente).catch(() => ({ dati: null })),
+    chiama(`${RISK}/IT-creditscore-advanced/${piva}`, 'IT-creditscore-advanced', undefined, sorgente).catch(() => ({ dati: null })),
+    chiama(`${COMPANY}/IT-shareholders/${piva}`, 'IT-shareholders', undefined, sorgente).catch(() => ({ lista: [] })),
   ]);
 
   let negativitaId: string | null = null;
   if (opts.conNegativita) {
-    negativitaId = await avviaNegativita(piva).catch(() => null);
+    negativitaId = await avviaNegativita(piva, sorgente).catch(() => null);
     // l'id si salva subito: se la pagina si ricarica durante l'attesa, l'esito resta recuperabile
     if (negativitaId) {
       await scriviVerifica(piva, 'negativita', { id: negativitaId, avviata: new Date().toISOString(), pronto: false })
@@ -569,16 +617,16 @@ async function caricaScheda(piva: string, opts: { conNegativita?: boolean }): Pr
 }
 
 /** Avvia la verifica eventi negativi su una partita IVA o un codice fiscale. */
-export async function avviaNegativita(cfPiva: string): Promise<string | null> {
+export async function avviaNegativita(cfPiva: string, sorgente: Sorgente = 'sito'): Promise<string | null> {
   const r = await chiama(`${RISK}/IT-negativita`, 'IT-negativita', {
     method: 'POST',
     body: JSON.stringify({ cf_piva: cfPiva }),
-  });
+  }, sorgente);
   return (r as any).dati?.id ?? null;
 }
 
 /** Esito della verifica. Finche' e' in lavorazione torna {pronto:false}. */
-export async function esitoNegativita(id: string): Promise<{ pronto: boolean; dati?: any }> {
+export async function esitoNegativita(id: string, sorgente: Sorgente = 'sito'): Promise<{ pronto: boolean; dati?: any }> {
   const token = await getToken();
   const res = await fetch(`${RISK}/IT-negativita/${id}/dettaglio`, {
     headers: { Authorization: `Bearer ${token}` },
@@ -588,7 +636,7 @@ export async function esitoNegativita(id: string): Promise<{ pronto: boolean; da
     // il dettaglio si paga solo quando c'e' davvero qualcosa da leggere
     const d = body.data ?? {};
     const qualcosa = d.presenzaProtesti || d.presenzaPregiudizievoli || d.presenzaProcedure;
-    if (qualcosa) await registraCosto('IT-negativita-dettaglio');
+    if (qualcosa) await registraCosto('IT-negativita-dettaglio', sorgente);
     return { pronto: true, dati: d };
   }
   return { pronto: false };

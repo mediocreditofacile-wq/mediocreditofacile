@@ -63,9 +63,39 @@ export interface OpzioniProspetto {
   separati?: boolean;
   /** Marchio del fornitore, solo sul prospetto di noleggio */
   brand?: { colore: string; accento?: string; nome: string; logo_b64?: string };
+  /**
+   * Leasing calcolato fuori da qui, col modello vero del partner
+   * (src/data/leasing.ts), al posto del francese al 6 per cento di confronto.
+   * Lo usa il motore dei portali: la rata che l'agente vede a schermo e' la
+   * stessa che finisce nel business plan e nel PDF. Riceve la durata scelta,
+   * che qui dentro si decide (durata consigliata), e torna null se il partner
+   * su quella durata non quota. Senza questa opzione nulla cambia.
+   */
+  leasing?: (durata: number) => LeasingEsterno | null;
+  /**
+   * Il prospetto di leasing esce? Default: la soglia di Green-Go
+   * (leasingPercorribile). Il motore la sostituisce con quella della carrozzeria.
+   */
+  conLeasing?: boolean;
 }
 
-export const OPZIONI_INNOVALUX: Omit<Required<OpzioniProspetto>, 'brand'> = {
+/** Leasing gia' calcolato dal modello del partner, per durata */
+export interface LeasingEsterno {
+  durata: number;
+  rata: number;
+  /** Rate dopo l'anticipo: il primo mese e' l'anticipo */
+  numRate: number;
+  anticipoPerc: number;
+  anticipo: number;
+  riscattoPerc: number;
+  riscatto: number;
+  speseIstruttoria: number;
+  speseIncassoRata: number;
+  /** anticipo + rate + riscatto + istruttoria + incassi */
+  totale: number;
+}
+
+export const OPZIONI_INNOVALUX: Omit<Required<OpzioniProspetto>, 'brand' | 'leasing' | 'conLeasing'> = {
   fornitoreNome: 'InnovaLux S.r.l.',
   fornitoreCitta: 'Milano',
   fornitoreEtichetta: 'InnovaLux',
@@ -136,6 +166,8 @@ export interface Calcolo {
   riscattoLeasing: number;
   totLeasing: number;
   interessi: number;
+  /** Presente solo quando il leasing arriva dal modello del partner */
+  leasingEsterno: LeasingEsterno | null;
   // agevolazioni
   sabatini: number;
   sabatiniNetto: number;
@@ -277,12 +309,26 @@ export function calcolaPreventivo(
   const fiscoNol = iresNol + irapNol;
   const costoNettoNol = totCanoni + riscatto - fiscoNol;
 
-  // === Leasing di confronto: francese con valore finale attualizzato ===
-  const i = LEASING_TASSO / 12;
-  const fv = imp * LEASING_RISCATTO;
-  const af = (1 - Math.pow(1 + i, -durata)) / i;
-  const rataLeasing = r2((imp - fv / Math.pow(1 + i, durata)) / af);
-  const totLeasing = rataLeasing * durata + fv;
+  // === Leasing ===
+  // Dal modello del partner quando il chiamante lo passa (motore dei portali),
+  // altrimenti il francese di confronto con valore finale attualizzato.
+  const leasingEsterno = opzioni.leasing?.(durata) ?? null;
+  let rataLeasing: number;
+  let fv: number;
+  let totLeasing: number;
+  if (leasingEsterno) {
+    rataLeasing = leasingEsterno.rata;
+    fv = leasingEsterno.riscatto;
+    totLeasing = leasingEsterno.totale;
+  } else {
+    const i = LEASING_TASSO / 12;
+    fv = imp * LEASING_RISCATTO;
+    const af = (1 - Math.pow(1 + i, -durata)) / i;
+    rataLeasing = r2((imp - fv / Math.pow(1 + i, durata)) / af);
+    totLeasing = rataLeasing * durata + fv;
+  }
+  // Col leasing del partner qui dentro ci sono anche istruttoria e incassi:
+  // sono costi deducibili come gli interessi, e il confronto li deve vedere.
   const interessi = totLeasing - imp;
 
   // === Agevolazioni (solo ramo leasing) ===
@@ -333,6 +379,7 @@ export function calcolaPreventivo(
     riscattoLeasing: fv,
     totLeasing,
     interessi,
+    leasingEsterno,
     sabatini,
     sabatiniNetto: sabatini - costoSabatini,
     iresIper,
@@ -511,7 +558,23 @@ export function buildPayloadPdf(
     // 'separati' fa uscire due documenti; 'tutto' e' il documento unico storico
     ramo: o.separati ? 'separati' : 'tutto',
     // Il prospetto di leasing esiste solo sopra la soglia commerciale
-    con_leasing: o.separati ? leasingPercorribile(input.importo) : false,
+    con_leasing: o.separati ? (opzioni.conLeasing ?? leasingPercorribile(input.importo)) : false,
+    // Leasing del partner gia' calcolato: il microservizio lo stampa cosi'
+    // com'e' invece di rifarlo al 6 per cento. Assente, nulla cambia.
+    leasing_esterno: c.leasingEsterno
+      ? {
+          durata: c.leasingEsterno.durata,
+          rata: c.leasingEsterno.rata,
+          num_rate: c.leasingEsterno.numRate,
+          anticipo_pct: c.leasingEsterno.anticipoPerc,
+          anticipo: c.leasingEsterno.anticipo,
+          riscatto_pct: c.leasingEsterno.riscattoPerc,
+          riscatto: c.leasingEsterno.riscatto,
+          spese_istruttoria: c.leasingEsterno.speseIstruttoria,
+          spese_incasso_rata: c.leasingEsterno.speseIncassoRata,
+          totale: c.leasingEsterno.totale,
+        }
+      : undefined,
     brand: opzioni.brand,
     rif_impianto: `${input.cliente}, ${euro(input.kwp, 0)} kWp${input.kwh_accumulo ? ` + ${euro(input.kwh_accumulo, 0)} kWh` : ''}`,
     rif_contratto: input.rif_preventivo || 'Preventivo InnovaLux',

@@ -38,10 +38,17 @@ export async function GET({ request }: { request: Request }) {
     `SELECT u.id, u.name AS nome, u.email, m.role AS ruolo, m."createdAt" AS dal,
             COALESCE(ms.attivo, true) AS attivo,
             u.banned AS bloccato_mcf,
-            (SELECT count(*) FROM app.preventivo p
-               WHERE p.user_id = u.id AND p.organization_id = m."organizationId") AS preventivi,
-            (SELECT max(p.creato) FROM app.preventivo p
-               WHERE p.user_id = u.id AND p.organization_id = m."organizationId") AS ultimo_preventivo
+            -- i prospetti di Green-Go (app.preventivo) e i preventivi del motore
+            -- dei portali (app.proposta): ogni fornitore ha righe in una sola delle due
+            ((SELECT count(*) FROM app.preventivo p
+               WHERE p.user_id = u.id AND p.organization_id = m."organizationId")
+             + (SELECT count(*) FROM app.proposta q
+               WHERE q.user_id = u.id AND q.organization_id = m."organizationId")) AS preventivi,
+            GREATEST(
+              (SELECT max(p.creato) FROM app.preventivo p
+                WHERE p.user_id = u.id AND p.organization_id = m."organizationId"),
+              (SELECT max(q.creato) FROM app.proposta q
+                WHERE q.user_id = u.id AND q.organization_id = m."organizationId")) AS ultimo_preventivo
        FROM "member" m
        JOIN "user" u ON u.id = m."userId"
        LEFT JOIN app.membro_stato ms
