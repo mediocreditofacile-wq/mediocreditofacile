@@ -12,6 +12,7 @@
 // la stessa cosa: sullo stesso impianto danno canoni diversi.
 
 import { ESG_MAX, ESG_MIN, esgPrezzoDaCanone, getEsgCoeff } from '../data/esg';
+import { GRENKE_COEFFS, RISCATTI, getCoeff } from '../data/grenke';
 import { pagarentPrezzoDaRata } from '../data/pagarent';
 import {
   DURATE as DURATE_PAGARENT,
@@ -21,7 +22,7 @@ import {
   coefficiente as coeffPagarent,
 } from './prospetti-pv-coefficienti';
 
-export type IdTabella = 'pagarent' | 'esg';
+export type IdTabella = 'pagarent' | 'esg' | 'sputnik';
 
 export interface TabellaCanoni {
   id: IdTabella;
@@ -43,6 +44,12 @@ export interface TabellaCanoni {
   durateDisponibili(importo: number): number[];
   /** L'importo si puo' quotare su questa tabella? */
   quotabile(importo: number): boolean;
+  /**
+   * Condizioni del listino da dire accanto al canone (fatturazione,
+   * assicurazione, spese fuori canone). Senza nomi di operatori: finisce a
+   * schermo e nei preventivi del motore dei portali.
+   */
+  nota?: string;
 }
 
 /**
@@ -52,6 +59,8 @@ export interface TabellaCanoni {
  */
 export const TABELLA_PAGARENT: TabellaCanoni = {
   id: 'pagarent',
+  // src/data/pagarent.ts: istruttoria e assicurazione fuori dal canone
+  nota: 'Canone mensile. Istruttoria di 100 euro una tantum; assicurazione all risk facoltativa, fuori dal canone.',
   durate: DURATE_PAGARENT,
   riscatto: RISCATTO_PAGARENT,
   importoMin: PAGARENT_MIN,
@@ -95,6 +104,8 @@ const RISCATTO_ESG: Record<number, number> = { 36: 6, 48: 4, 60: 3, 72: 3, 84: 3
 
 export const TABELLA_ESG: TabellaCanoni = {
   id: 'esg',
+  // Condizioni del PDF ESG++++ del kit
+  nota: 'Fatturazione trimestrale anticipata. Assicurazione obbligatoria, non compresa nel canone.',
   durate: DURATE_ESG,
   riscatto: RISCATTO_ESG,
   importoMin: ESG_MIN,
@@ -113,9 +124,56 @@ export const TABELLA_ESG: TabellaCanoni = {
   },
 };
 
+/**
+ * Grenke Sputnik++++, la tabella dei beni strumentali in genere (src/data/grenke.ts:
+ * PDF del kit ReteRent del 26/05/2025, riscontrato sul simulatore il 23/09/2026).
+ * E' il listino dei fornitori del motore che non fanno fotovoltaico: attrezzature
+ * e forniture per hotel, macchine, hardware. Si ferma a 60 mesi.
+ *
+ * Riscatti: quelli di "Altri Beni Strumentali" del tariffario Grenke in grenke.ts,
+ * gli stessi del simulatore noleggio pubblico. Sono valori medi indicativi: il
+ * prezzo effettivo si definisce a fine contratto sullo stato del bene.
+ */
+const DURATE_SPUTNIK = [24, 30, 36, 48, 60];
+const RISCATTO_SPUTNIK: Record<number, number> = Object.fromEntries(
+  DURATE_SPUTNIK.map((m) => [m, RISCATTI['Altri Beni Strumentali'][m] ?? 0]),
+);
+const SPUTNIK_MIN = 500;
+const SPUTNIK_MAX = 500_000;
+
+export const TABELLA_SPUTNIK: TabellaCanoni = {
+  id: 'sputnik',
+  durate: DURATE_SPUTNIK,
+  riscatto: RISCATTO_SPUTNIK,
+  importoMin: SPUTNIK_MIN,
+  importoMax: SPUTNIK_MAX,
+  // Condizioni Grenke: trimestrale anticipato, polizza esclusa dai coefficienti
+  nota: 'Fatturazione trimestrale anticipata. Assicurazione obbligatoria, non compresa nel canone.',
+  coefficiente: (importo, durata) =>
+    importo >= SPUTNIK_MIN && importo <= SPUTNIK_MAX ? getCoeff(importo, durata) : null,
+  prezzoDaCanone(canone, durata) {
+    // Il coefficiente dipende dalla fascia: si prova ogni fascia e si tiene
+    // quella in cui il prezzo ricavato ricade davvero (come esgPrezzoDaCanone)
+    const fasce = GRENKE_COEFFS[durata];
+    if (!fasce || canone <= 0) return null;
+    for (const f of fasce) {
+      const prezzo = (canone / f.c) * 100;
+      if (prezzo >= f.da && prezzo <= f.a) return prezzo;
+    }
+    return null;
+  },
+  durateDisponibili(importo) {
+    return DURATE_SPUTNIK.filter((m) => TABELLA_SPUTNIK.coefficiente(importo, m) !== null);
+  },
+  quotabile(importo) {
+    return importo >= SPUTNIK_MIN && importo <= SPUTNIK_MAX && DURATE_SPUTNIK.some((m) => getCoeff(importo, m) !== null);
+  },
+};
+
 export const TABELLE: Record<IdTabella, TabellaCanoni> = {
   pagarent: TABELLA_PAGARENT,
   esg: TABELLA_ESG,
+  sputnik: TABELLA_SPUTNIK,
 };
 
 /** Tabella di default: PagaRent, cosi' chi non passa niente non cambia comportamento */

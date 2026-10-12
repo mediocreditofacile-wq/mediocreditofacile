@@ -7,7 +7,10 @@ import { inputCorrente } from './proposte';
 import { bottoneDoc, caricaStorico } from './storico';
 
 const ETICHETTA_DOC = (nome: string) =>
-  /leasing/i.test(nome) ? 'Prospetto di leasing' : /infografic/i.test(nome) ? 'Infografico del noleggio' : 'Prospetto di noleggio';
+  /leasing/i.test(nome) ? 'Prospetto di leasing'
+    : /infografic/i.test(nome) ? 'Infografico del noleggio'
+    : /preventivo-noleggio/i.test(nome) ? 'Preventivo di noleggio'
+    : 'Prospetto di noleggio';
 
 function rendiAzioni() {
   const box = document.getElementById('proposte-azioni');
@@ -15,7 +18,7 @@ function rendiAzioni() {
   if (!box || !esito) return;
   const fv = stato.settore === 'fotovoltaico';
   box.innerHTML = `
-    ${esito.bloccate ? '' : `<button type="button" class="mt-btn" id="genera-btn">${fv ? 'Genera i prospetti PDF' : 'Salva il preventivo'}</button>`}
+    ${esito.bloccate ? '' : `<button type="button" class="mt-btn" id="genera-btn">${fv ? 'Genera i prospetti PDF' : 'Genera il preventivo PDF'}</button>`}
     <button type="button" class="mt-btn ${esito.bloccate ? '' : 'mt-btn--secondario'}" id="pratica-btn">Carica la pratica</button>
     <div id="genera-esito" style="flex-basis:100%"></div>`;
 }
@@ -28,7 +31,7 @@ async function genera(btn: HTMLButtonElement) {
   btn.textContent = 'Preparo i documenti...';
   const { res, corpo } = await apiJson('/api/motore/preventivo', { method: 'POST', body: JSON.stringify(input) });
   btn.disabled = false;
-  btn.textContent = stato.settore === 'fotovoltaico' ? 'Genera di nuovo' : 'Salva di nuovo';
+  btn.textContent = 'Genera di nuovo';
   if (!res.ok || !corpo?.ok) {
     box.innerHTML = '<p class="mt-msg"></p>';
     return messaggio(box.firstElementChild as HTMLElement, traduci(corpo?.error ?? ''), false);
@@ -41,9 +44,7 @@ async function genera(btn: HTMLButtonElement) {
       ${docs.length
         ? `<p class="mt-nota" style="margin:0 0 8px">Da consegnare al cliente. Restano riscaricabili dallo Storico.</p>
            <p>${docs.map((d) => bottoneDoc(d, ETICHETTA_DOC(d.nome))).join(' · ')}</p>`
-        : `<p class="mt-nota" style="margin:0">${stato.settore === 'fotovoltaico'
-            ? 'I PDF non sono pronti: il servizio di generazione non ha risposto. Il preventivo è salvato, riprova tra qualche minuto.'
-            : 'Preventivo salvato nello storico.'}</p>`}
+        : `<p class="mt-nota" style="margin:0">I PDF non sono pronti: la generazione non è andata a buon fine. Il preventivo è salvato, riprova tra qualche minuto.</p>`}
     </div>`;
   void caricaStorico();
 }

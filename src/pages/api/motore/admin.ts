@@ -21,7 +21,7 @@ import { corpoJson, json, sessioneMotore } from '../../../lib/motore/sessione';
 import { spesaDelMese } from '../../../lib/openapi';
 
 const PARTNER = ['sella', 'alba', 'credem'];
-const LISTINI = ['esg', 'pagarent'];
+const LISTINI = ['esg', 'pagarent', 'sputnik'];
 const COLORE = /^#[0-9a-fA-F]{6}$/;
 
 const numero = (v: unknown) => {
@@ -80,7 +80,11 @@ export async function GET({ request }: { request: Request }) {
     // dei partner sono ratio interna e il browser degli agenti non li scarica
     opzioni: {
       partner: PARTNER.map((p) => ({ valore: p, etichetta: p[0].toUpperCase() + p.slice(1) })),
-      listini: [{ valore: 'esg', etichetta: 'Grenke ESG++++' }, { valore: 'pagarent', etichetta: 'PagaRent' }],
+      listini: [
+        { valore: 'esg', etichetta: 'Grenke ESG++++ (fotovoltaico)' },
+        { valore: 'sputnik', etichetta: 'Grenke Sputnik++++ (beni strumentali)' },
+        { valore: 'pagarent', etichetta: 'PagaRent' },
+      ],
     },
     catalogo: await catalogo(c.slug, false),
     spesa: { mese: spesa.mese, euro: mia.totale, chiamate: mia.chiamate, perServizio: mia.perServizio },

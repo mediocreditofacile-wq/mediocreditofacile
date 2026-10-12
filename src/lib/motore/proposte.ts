@@ -65,6 +65,8 @@ export interface EsitoProposte {
   motivoNoLeasing: string | null;
   /** Perche' il noleggio non c'e', se non c'e' */
   motivoNoNoleggio: string | null;
+  /** Condizioni del listino del noleggio (fatturazione, assicurazione), senza nomi */
+  notaNoleggio: string | null;
   avvisi: string[];
 }
 
@@ -147,6 +149,7 @@ export function calcolaProposte(
     leasing: [],
     motivoNoLeasing: null,
     motivoNoNoleggio: null,
+    notaNoleggio: getTabella(carrozzeria.tabellaCanoni).nota ?? null,
     avvisi,
   };
 

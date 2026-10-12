@@ -9,6 +9,7 @@
 // senza dare errore. Gli utenti hanno scritture concorrenti, le pratiche no.
 
 import pg from 'pg';
+import { Pool as PoolWebSocket, neonConfig } from '@neondatabase/serverless';
 
 /** Env leggibile sia da Astro (import.meta.env) sia dai comandi node (process.env) */
 export function env(nome: string): string | undefined {
@@ -27,6 +28,15 @@ export function getPool(): pg.Pool {
   if (pool) return pool;
   const connectionString = env('DATABASE_URL');
   if (!connectionString) throw new Error('DATABASE_URL non configurata');
+  // Solo per lo sviluppo: da certe reti Postgres diretto sulla 5432 cade
+  // durante l'handshake (ECONNRESET, ottobre 2026). La stessa connessione
+  // passa via WebSocket sulla 443 col driver di Neon, che ha la stessa
+  // interfaccia del Pool di pg. In produzione la variabile non c'e'.
+  if (env('DB_VIA_WEBSOCKET') === '1') {
+    neonConfig.webSocketConstructor = globalThis.WebSocket;
+    pool = new PoolWebSocket({ connectionString, max: 5 }) as unknown as pg.Pool;
+    return pool;
+  }
   pool = new pg.Pool({
     connectionString,
     max: 5,

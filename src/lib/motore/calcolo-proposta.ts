@@ -119,6 +119,7 @@ export function esitoPerSchermo(c: CalcoloProposta) {
     leasing: esito.leasing,
     motivoNoLeasing: esito.motivoNoLeasing,
     motivoNoNoleggio: esito.motivoNoNoleggio,
+    notaNoleggio: esito.notaNoleggio,
     avvisi: esito.avvisi,
     bp: c.bp ? bpPerSchermo(c.bp) : null,
   };

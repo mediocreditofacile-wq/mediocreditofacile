@@ -14,4 +14,6 @@ if curl -s -m 1 http://127.0.0.1:8787/api/prospetti >/dev/null 2>&1; then
   export PROSPETTI_TOKEN="dev-token"
   echo "prospetti PDF: microservizio locale"
 fi
+# Da alcune reti Postgres diretto non passa: DB_VIA_WEBSOCKET=1 usa la 443
+# (vedi src/lib/db.ts). Si attiva da fuori: DB_VIA_WEBSOCKET=1 sh scripts/dev-prova.sh
 DATABASE_URL="$URL" exec npx astro dev "$@"

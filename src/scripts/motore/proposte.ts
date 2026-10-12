@@ -101,7 +101,8 @@ function tabellaNoleggio(r: any): string {
           <td class="num">${euro(n.totale)}</td></tr>`)
         .join('')}</tbody>
     </table></div>
-    <p class="mt-nota">Zero anticipo, canone deducibile, Centrale Rischi non impegnata. Il riscatto è un valore medio indicativo.</p>`;
+    <p class="mt-nota">Zero anticipo, canone deducibile, Centrale Rischi non impegnata. Il riscatto è un valore medio indicativo.${
+      r.notaNoleggio ? ` ${esc(r.notaNoleggio)}` : ''}</p>`;
 }
 
 function tabellaLeasing(r: any): string {

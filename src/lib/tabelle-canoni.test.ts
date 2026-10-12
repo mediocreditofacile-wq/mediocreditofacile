@@ -138,3 +138,39 @@ describe('getTabella', () => {
     expect(getTabella(null)).toBe(TABELLA_PAGARENT);
   });
 });
+
+// Grenke Sputnik++++ sul motore dei portali: i fornitori che non fanno fotovoltaico.
+// Canoni attesi ricalcolati a mano dalla tabella di src/data/grenke.ts.
+describe('tabella Sputnik', () => {
+  it('durate da 24 a 60 mesi, coi riscatti degli altri beni strumentali', async () => {
+    const { TABELLA_SPUTNIK } = await import('./tabelle-canoni');
+    expect(TABELLA_SPUTNIK.durate).toEqual([24, 30, 36, 48, 60]);
+    expect(TABELLA_SPUTNIK.riscatto).toEqual({ 24: 10, 30: 6, 36: 6, 48: 4, 60: 3 });
+  });
+
+  it('18.000 euro a 60 mesi danno 404,28 (fascia 12.001-25.000, 2,246%)', async () => {
+    const { TABELLA_SPUTNIK } = await import('./tabelle-canoni');
+    expect(TABELLA_SPUTNIK.coefficiente(18_000, 60)).toBe(2.246);
+    expect(Math.round(18_000 * 2.246) / 100).toBe(404.28);
+  });
+
+  it('quota da 500 a 500.000 euro, fuori no', async () => {
+    const { TABELLA_SPUTNIK } = await import('./tabelle-canoni');
+    expect(TABELLA_SPUTNIK.quotabile(500)).toBe(true);
+    expect(TABELLA_SPUTNIK.quotabile(499)).toBe(false);
+    expect(TABELLA_SPUTNIK.quotabile(500_001)).toBe(false);
+    expect(TABELLA_SPUTNIK.coefficiente(600_000, 60)).toBeNull();
+  });
+
+  it('dal canone torna al prezzo nella fascia giusta', async () => {
+    const { TABELLA_SPUTNIK } = await import('./tabelle-canoni');
+    expect(TABELLA_SPUTNIK.prezzoDaCanone(404.28, 60)).toBeCloseTo(18_000, 0);
+  });
+
+  it('dice le condizioni del listino senza nominare la societa', async () => {
+    const { TABELLA_SPUTNIK } = await import('./tabelle-canoni');
+    expect(TABELLA_SPUTNIK.nota).toMatch(/trimestrale anticipata/);
+    expect(TABELLA_SPUTNIK.nota).not.toMatch(/grenke|sputnik/i);
+    expect(getTabella('sputnik')).toBe(TABELLA_SPUTNIK);
+  });
+});

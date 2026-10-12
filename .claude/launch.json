@@ -39,6 +39,15 @@
         "cd /Users/alberto/dev/mcf-prospetti-pv && PROSPETTI_TOKEN=dev-token MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python scripts/serve_locale.py"
       ],
       "port": 8787
+    },
+    {
+      "name": "mcf-dev-prova-ws",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": [
+        "-c",
+        "DB_VIA_WEBSOCKET=1 sh scripts/dev-prova.sh"
+      ],
+      "port": 4321
     }
   ]
 }

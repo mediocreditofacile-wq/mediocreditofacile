@@ -15,12 +15,14 @@
     "seed:motore-demo": "tsx --env-file=.env.local scripts/seed-motore-demo.ts",
     "guide:carica": "tsx --env-file=.env.local scripts/carica-guide.ts",
     "visibilita:ai": "node scripts/visibilita-ai/monitor.mjs",
-    "controlla:anonimato": "node scripts/controlla-anonimato.mjs"
+    "controlla:anonimato": "node scripts/controlla-anonimato.mjs",
+    "seed:motore-fas-italia": "tsx --env-file=.env.local scripts/seed-motore-fas-italia.ts"
   },
   "dependencies": {
     "@astrojs/preact": "^4.1.3",
     "@astrojs/sitemap": "^3.7.1",
     "@astrojs/vercel": "^9.0.4",
+    "@neondatabase/serverless": "^1.2.0",
     "@vercel/blob": "^2.5.0",
     "astro": "^5.17.1",
     "better-auth": "^1.7.3",

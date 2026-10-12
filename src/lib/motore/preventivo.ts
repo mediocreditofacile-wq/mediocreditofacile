@@ -10,6 +10,9 @@
 //    motore delle proposte ha proposto il leasing
 // Il leasing viaggia gia' calcolato (leasing_esterno): il microservizio lo
 // stampa cosi' com'e', senza rifarlo al tasso fisso di confronto.
+// Sugli altri settori i documenti li fa pdf-generico.ts, qui dentro la funzione:
+// preventivo di noleggio col nome del fornitore e, se c'e' il leasing, prospetto
+// di leasing a marchio MCF con l'iscrizione OAM.
 //
 // Se il microservizio non risponde il preventivo NON fallisce: la proposta si
 // salva lo stesso, la mail parte senza allegati e il portale lo dice.
@@ -21,12 +24,13 @@ import { generaPdf, salvaPdf, type DocumentoGenerato } from '../preventivi-pv';
 import { buildPayloadPdf, euro } from '../prospetti-pv';
 import { getTabella } from '../tabelle-canoni';
 import { esitoPerSchermo, type CalcoloProposta } from './calcolo-proposta';
+import { documentiGenerici } from './pdf-generico';
 import { tabellaConMarkup } from './proposte';
 import { generaId, type EsitoMotore } from './sessione';
 
 type Sessione = Extract<EsitoMotore, { ok: true }>;
 
-export const NOTA_DEMO = 'Documento dimostrativo: fornitore e prezzi di prova';
+export const NOTA_DEMO = 'Documento dimostrativo: catalogo e importi di esempio';
 
 export interface EsitoPreventivo {
   ok: boolean;
@@ -36,11 +40,16 @@ export interface EsitoPreventivo {
   documenti?: { nome: string; pathname: string }[];
 }
 
-/** I PDF del fotovoltaico, oppure nessuno sugli altri settori */
+/** I prospetti del microservizio sul fotovoltaico, i preventivi generici sugli altri settori */
 async function documentiPdf(e: Sessione, c: CalcoloProposta, id: string) {
   const { carrozzeria } = e;
   const bp = c.bp;
-  if (carrozzeria.settore !== 'fotovoltaico' || !bp) {
+  if (carrozzeria.settore !== 'fotovoltaico') {
+    const pdf = documentiGenerici(c, carrozzeria, id);
+    const documenti = await salvaPdf(carrozzeria.slug, id, pdf);
+    return { documenti, allegati: pdf, attesi: pdf.length, err: documenti.length === pdf.length ? undefined : 'salvataggio_pdf' };
+  }
+  if (!bp) {
     return { documenti: [] as DocumentoGenerato[], allegati: [] as { filename: string; contenuto: string }[], attesi: 0, err: 'pdf_non_previsto' };
   }
   const brand = await brandFornitore({
@@ -123,6 +132,8 @@ async function mailMcf(e: Sessione, c: CalcoloProposta, id: string, allegati: { 
         ${b ? riga('Noleggio scelto', `${b.durata} mesi, ${eur(b.canone, 2)} al mese`) : ''}
         ${b?.leasingEsterno ? riga('Leasing', `${b.durata} mesi, anticipo ${b.leasingEsterno.anticipoPerc}%, rata ${eur(b.leasingEsterno.rata, 2)}`) : ''}
         ${b ? riga('Copertura del canone', `${euro(b.coperturaCanone * 100, 0)}%`) : ''}
+        ${!b && c.esito.noleggio.length ? riga('Noleggio', c.esito.noleggio.map((n) => `${n.durata} mesi ${eur(n.canone, 2)}`).join(' · ')) : ''}
+        ${!b && c.esito.leasing.length ? riga('Leasing', c.esito.leasing.map((l) => `${l.durata} mesi ${eur(l.rata, 2)}`).join(' · ')) : ''}
       </table>
       ${allegati.length ? '' : `<p style="font-size:14px;color:#8A2D0E;margin:16px 0 0">I PDF non sono allegati: il servizio di generazione non ha risposto o il settore non li prevede. I numeri restano validi.</p>`}
     `),
