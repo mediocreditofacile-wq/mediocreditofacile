@@ -183,6 +183,8 @@ Nasce quando il tool Marotta ha preso la sua strada: il tool resta com'e' (file 
 
 **Ordine di pubblicazione, obbligatorio**: (1) `npm run db:sql` sulla produzione, perche' `/api/portale-utenti` di Green-Go ora conta anche `app.proposta` e senza la tabella si rompe; (2) deploy del microservizio `mcf-prospetti-pv` (smoke test prima); (3) push del sito; (4) `npm run seed:motore-demo` sulla produzione.
 
+**Pubblicato il 12/10/2026**, in quell'ordine: SQL 008 in produzione, microservizio con `leasing_esterno` e `nota_demo` (commit `3915df1`, deploy `vercel --prod`), sito, seed del demo (`/portale/demo-fotovoltaico`, admin MCF collegato come referente). Da quella rete Postgres diretto sulla 5432 cadeva durante l'handshake (ECONNRESET, anche se la porta risponde), quindi migrazione e seed sono passati dall'endpoint HTTP di Neon (`https://<host>/sql`, header `Neon-Connection-String`, porta 443) con le stesse istruzioni degli script. Se capita di nuovo, e' la strada. Il microservizio continua a non avere un remote git: la sua unica copia oltre al Mac e' il sorgente caricato su Vercel.
+
 ## Prospetti fotovoltaico — motore di calcolo e microservizio PDF
 
 Alimentano il portale InnovaLux e sono pensati per essere riusati da altri fornitori fotovoltaico.
