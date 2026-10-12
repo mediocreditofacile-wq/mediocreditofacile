@@ -346,15 +346,18 @@ export const ALBA: PartnerLeasing = {
 };
 
 // ──────────────────────────────────────────────────────────────────────────
-// CAMPAGNA ALBA — Easy Lease (valida fino al 30/06/2026)
-// Comunicazione Help Desk Leasing Alba di maggio 2026.
+// CAMPAGNA ALBA — Easy Lease (prorogata al 30/10/2026)
+// Comunicazione Help Desk Leasing Alba di maggio 2026, scadenza originaria 30/06/2026;
+// proroga al 30/10/2026 comunicata da Alberto il 12/10/2026.
 // Condizioni dedicate alla rete segnalatori MCF.
+// Dal 12/10/2026 la scadenza si controlla da sola (easyLeaseInCorso): il giorno dopo
+// la promo sparisce dai simulatori. Se arriva un'altra proroga, si sposta `scadenza`.
 // ──────────────────────────────────────────────────────────────────────────
 export const ALBA_EASY_LEASE = {
   attiva: true,
   nome: 'Easy Lease',
-  scadenza: '2026-06-30',
-  scadenzaLabel: '30 giugno 2026',
+  scadenza: '2026-10-30',
+  scadenzaLabel: '30 ottobre 2026',
   importoMax: 200_000,
   prodottiAmmessi: ['strumentale-generico'] as const,
   // Override delle condizioni standard ALBA quando la campagna si applica:
@@ -398,12 +401,21 @@ export function compensoLoMartire(partner: PartnerLeasing, importo: number, tipo
 }
 
 /**
+ * La campagna e' in corso: accesa e non oltre la scadenza, che vale fino a fine giornata.
+ * Stessa regola di agevolazioneAttiva(): il controllo gira nel browser a ogni visita.
+ * Fino al 12/10/2026 la data non si controllava, e la promo e' rimasta a video
+ * con la scadenza del 30 giugno ormai passata.
+ */
+export function easyLeaseInCorso(adesso: Date = new Date()): boolean {
+  if (!ALBA_EASY_LEASE.attiva) return false;
+  return adesso <= new Date(`${ALBA_EASY_LEASE.scadenza}T23:59:59`);
+}
+
+/**
  * Verifica se la campagna Easy Lease è applicabile a un dato partner+importo+tipologia.
- * NB: non controlla la data di scadenza (lasciamo che la pagina mostri la promo finché
- * Alberto non aggiorna `attiva: false` o sposta la scadenza).
  */
 export function easyLeaseEligibile(partner: PartnerLeasing, importo: number, tipologia: TipologiaBene): boolean {
-  if (!ALBA_EASY_LEASE.attiva) return false;
+  if (!easyLeaseInCorso()) return false;
   if (partner.key !== 'alba') return false;
   if (importo <= 0 || importo > ALBA_EASY_LEASE.importoMax) return false;
   if (!ALBA_EASY_LEASE.prodottiAmmessi.includes(tipologia)) return false;

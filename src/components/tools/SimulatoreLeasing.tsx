@@ -12,6 +12,7 @@ import {
   COMPENSO_LOMARTIRE_ALBA_PROMO_PERC,
   compensoLoMartire,
   easyLeaseEligibile,
+  easyLeaseInCorso,
   getCondizioniPerDurata,
   getCondizioneFornitori,
   calcolaRataLeasingPartner,
@@ -139,7 +140,7 @@ export default function SimulatoreLeasing({ varianteFornitori = false, varianteL
   // --- Easy Lease (Alba) ---
   const easyLeaseDisponibile = easyLeaseEligibile(partner, importo, tipologia);
   const easyLeaseAttiva = easyLeaseDisponibile && !easyLeaseManualOff;
-  const albaSoprasoglia = partner.key === 'alba' && importo > ALBA_EASY_LEASE.importoMax;
+  const albaSoprasoglia = partner.key === 'alba' && easyLeaseInCorso() && importo > ALBA_EASY_LEASE.importoMax;
 
   // Override anticipo + spese istruttoria quando la campagna è attiva
   const anticipoEffettivo = easyLeaseAttiva ? ALBA_EASY_LEASE.override.anticipoPerc : anticipoPerc;
@@ -363,7 +364,7 @@ export default function SimulatoreLeasing({ varianteFornitori = false, varianteL
             <span class="simlea__partner-meta">
               Da {eur(p.importoMin)} • Istruttoria {eur(p.speseIstruttoria)}
             </span>
-            {p.key === 'alba' && ALBA_EASY_LEASE.attiva && (
+            {p.key === 'alba' && easyLeaseInCorso() && (
               <span class="simlea__partner-promo">Promo Easy Lease attiva</span>
             )}
           </button>
