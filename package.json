@@ -16,7 +16,8 @@
     "guide:carica": "tsx --env-file=.env.local scripts/carica-guide.ts",
     "visibilita:ai": "node scripts/visibilita-ai/monitor.mjs",
     "controlla:anonimato": "node scripts/controlla-anonimato.mjs",
-    "seed:motore-fas-italia": "tsx --env-file=.env.local scripts/seed-motore-fas-italia.ts"
+    "seed:motore-fas-italia": "tsx --env-file=.env.local scripts/seed-motore-fas-italia.ts",
+    "seed:stilo": "tsx --env-file=.env.local scripts/seed-stilo.ts"
   },
   "dependencies": {
     "@astrojs/preact": "^4.1.3",

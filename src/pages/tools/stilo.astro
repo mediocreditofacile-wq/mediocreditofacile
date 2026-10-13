@@ -3,11 +3,14 @@ import Icon from '../../components/Icon.astro';
 /**
  * Portale Partner STILO S.R.L. — /tools/stilo
  * Stessa struttura del portale Expo Energia (stesso motore condiviso):
- * - login con email + password (account del referente commerciale Paolo Bonardi)
+ * - accessi personali (Better Auth, come Green-Go) dal 13/10/2026: Paolo Bonardi e'
+ *   il referente e vede tutte le pratiche, i collaboratori che invita vedono solo
+ *   le proprie, MCF entra da admin. Prima c'era una password condivisa.
  * - dashboard con card in stile ReteRent (Simulazioni / Preventivi / Richieste)
  * - simulatore su tabella Pioneer: centralini telefonici e hardware di rete
  * - form di caricamento pratica con checklist documenti dinamica e upload allegati
- * Lead vanno a /api/submit-stilo (mail dettagliata + Zapier).
+ * Lead vanno a /api/submit-stilo (mail dettagliata + Zapier), lista e documenti
+ * da /api/portale-pratiche, upload da /api/portale-upload.
  *
  * Ratio interna (non esposta in pagina): STILO e' attivabile su due canali,
  * BCC Rent & Lease (rapida su telefonia e server, esclude Horeca ed edilizia)
@@ -23,7 +26,7 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
   noindex={true}
   breadcrumbs={[{ name: 'Portale STILO', href: '/tools/stilo' }]}
 >
-  <!-- Gate login -->
+  <!-- Gate: accesso personale, recupero password, attivazione invito (src/scripts/motore/gate.ts) -->
   <div id="gate" class="gate">
     <div class="gate__card">
       <div class="gate__logos">
@@ -32,22 +35,62 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
         <span class="gate__partner-name">STILO S.R.L.</span>
       </div>
       <div class="gate__divider"></div>
-      <p class="gate__label">Portale Riservato Partner</p>
-      <p class="gate__desc">Simulazione canoni di noleggio operativo per centralini telefonici e hardware di rete, e caricamento pratiche cliente.</p>
-      <div class="gate__form">
-        <input type="email" id="gate-user" class="gate__input" placeholder="Email" autocomplete="username" />
-        <input type="password" id="gate-pwd" class="gate__input" placeholder="Password" autocomplete="current-password" />
-        <button id="gate-btn" class="gate__btn">
-          <Icon name="lock_open" />
-          Accedi
-        </button>
+
+      <div id="vista-login">
+        <p class="gate__label">Portale Riservato Partner</p>
+        <p class="gate__desc">Simulazione canoni di noleggio operativo per centralini telefonici e hardware di rete, e caricamento pratiche cliente.</p>
+        <div class="gate__form">
+          <input type="email" id="login-email" class="gate__input" placeholder="La tua email" autocomplete="username" />
+          <input type="password" id="login-pwd" class="gate__input" placeholder="Password" autocomplete="current-password" />
+          <button id="login-btn" class="gate__btn">
+            <Icon name="lock_open" />
+            Accedi
+          </button>
+        </div>
+        <p class="gate__links"><button type="button" id="vai-recupero" class="gate__link">Ho dimenticato la password</button></p>
+        <p class="gate__nota">
+          Dal 13 ottobre ognuno entra con il proprio accesso, non più con la password comune. Se non l'hai
+          ancora attivato, cerca nella posta l'invito di Mediocredito Facile.
+        </p>
       </div>
-      <p id="gate-error" class="gate__error" hidden>Email o password non corretti</p>
+
+      <div id="vista-recupero" hidden>
+        <p class="gate__label">Password dimenticata</p>
+        <p class="gate__desc">Inserisci la tua email: ti arriva un link per sceglierne una nuova. Vale un'ora.</p>
+        <div class="gate__form">
+          <input type="email" id="recupero-email" class="gate__input" placeholder="La tua email" autocomplete="username" />
+          <button id="recupero-btn" class="gate__btn">Mandami il link</button>
+        </div>
+        <p class="gate__links"><button type="button" id="torna-login" class="gate__link">Torna all'accesso</button></p>
+      </div>
+
+      <div id="vista-nuova-password" hidden>
+        <p class="gate__label">Scegli la nuova password</p>
+        <p class="gate__desc">Almeno dieci caratteri. È personale, non va condivisa.</p>
+        <div class="gate__form">
+          <input type="password" id="nuova-pwd" class="gate__input" placeholder="Nuova password" autocomplete="new-password" />
+          <button id="nuova-pwd-btn" class="gate__btn">Salva e accedi</button>
+        </div>
+      </div>
+
+      <div id="vista-invito" hidden>
+        <p class="gate__label">Attiva il tuo accesso</p>
+        <p class="gate__desc" id="invito-desc"></p>
+        <div class="gate__form">
+          <input type="text" id="invito-nome" class="gate__input" placeholder="Nome e cognome" autocomplete="name" />
+          <input type="password" id="invito-pwd" class="gate__input" placeholder="Scegli una password" autocomplete="new-password" />
+          <button id="invito-btn" class="gate__btn">Entra nel portale</button>
+        </div>
+        <p class="gate__nota" id="invito-nota"></p>
+      </div>
+
+      <p id="gate-errore" class="gate__error" hidden></p>
+      <p id="gate-ok" class="gate__ok" hidden></p>
     </div>
   </div>
 
   <!-- Portale (nascosto fino ad autenticazione) -->
-  <div id="tool" class="st" style="display:none !important;">
+  <div id="tool" class="st" hidden>
     <!-- Header co-branded -->
     <div class="st__header">
       <div class="st__header-brand">
@@ -58,10 +101,13 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
           <span class="st__partner-label">STILO S.R.L.</span>
         </div>
       </div>
-      <button id="logout-btn" class="st__logout">
-        <Icon name="logout" />
-        Esci
-      </button>
+      <div class="st__header-destra">
+        <span id="chi-sono" class="st__chi"></span>
+        <button id="logout-btn" class="st__logout">
+          <Icon name="logout" />
+          Esci
+        </button>
+      </div>
     </div>
 
     <!-- Riga codice partner, come il "Codice Convenzione" ReteRent -->
@@ -85,7 +131,7 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
         <p class="st__card-desc">Trasmetti la pratica con i documenti del cliente allegati e controlla lo stato di quelle già inviate.</p>
         <span>
           <a class="st__card-link" href="#pratica">Carica una pratica &raquo;</a><br />
-          <a class="st__card-link" href="#richieste">Lista richieste &raquo;</a>
+          <a class="st__card-link" href="#lista-pratiche">Lista richieste &raquo;</a>
         </span>
       </div>
       <a href="#documenti" class="st__card">
@@ -322,14 +368,14 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
       </form>
     </section>
 
-    <!-- 3. Le tue richieste -->
-    <section id="richieste" class="st__section">
+    <!-- 3. Le tue richieste (id diverso da "richieste": quello e' delle richieste di accesso della rete) -->
+    <section id="lista-pratiche" class="st__section">
       <header class="st__section-head">
         <span class="st__section-num">3</span>
         <div>
           <h2 class="st__section-title">Le tue richieste</h2>
-          <p class="st__section-sub">
-            Tutte le pratiche trasmesse, con documenti e stato di avanzamento. Lo stato viene aggiornato da Mediocredito Facile man mano che la pratica avanza.
+          <p class="st__section-sub" id="richieste-sub">
+            Le pratiche trasmesse, con documenti e stato di avanzamento. Lo stato lo aggiorna Mediocredito Facile man mano che la pratica avanza.
           </p>
         </div>
       </header>
@@ -346,106 +392,117 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
         <p class="st__richieste-empty">Caricamento in corso...</p>
       </div>
     </section>
+
+    <!-- 4. La tua rete: solo referente e MCF (src/scripts/motore/rete.ts, API /api/portale-utenti) -->
+    <section id="rete" class="st__section" hidden>
+      <header class="st__section-head">
+        <span class="st__section-num">4</span>
+        <div>
+          <h2 class="st__section-title">La tua rete</h2>
+          <p class="st__section-sub">
+            Chi lavora sul portale per STILO. Ogni collaboratore riceve un invito via email, sceglie la propria
+            password e vede solo le pratiche che carica; tu le vedi tutte. Da qui lo inviti e, quando serve,
+            sospendi il suo accesso.
+          </p>
+        </div>
+      </header>
+
+      <div class="st__form-block">
+        <h3 class="st__form-block-title">Invita un collaboratore</h3>
+        <div class="st__grid">
+          <label class="st__field">
+            <span class="st__field-label">Nome e cognome</span>
+            <input type="text" id="inv-nome" autocomplete="off" />
+          </label>
+          <label class="st__field">
+            <span class="st__field-label">Email</span>
+            <input type="email" id="inv-email" autocomplete="off" />
+          </label>
+        </div>
+        <div class="st__rete-azioni">
+          <button type="button" id="inv-btn" class="st__refresh">
+            <Icon name="send" />
+            Invita
+          </button>
+          <span class="st__rete-nota">L'invito parte col giro delle 7; per mandarlo subito usa "Manda ora" nella lista qui sotto.</span>
+        </div>
+        <p id="rete-msg" class="mt-msg" hidden></p>
+      </div>
+
+      <div id="richieste-blocco" hidden>
+        <h3 class="st__rete-titolo">Richieste di accesso</h3>
+        <div id="richieste"></div>
+      </div>
+      <h3 class="st__rete-titolo">Chi ha accesso</h3>
+      <div id="membri"></div>
+      <h3 class="st__rete-titolo">Inviti</h3>
+      <div id="inviti"></div>
+    </section>
   </div>
 </ToolLayout>
 
 <script>
   import { upload } from '@vercel/blob/client';
   import { initBeniRows } from '../../scripts/beni-rows';
+  import { apiJson, stato as statoPortale } from '../../scripts/motore/comune';
+  import { avviaGate } from '../../scripts/motore/gate';
+  import { caricaRete, montaRete } from '../../scripts/motore/rete';
 
-  // Due account sul gate:
-  //  - partner: Paolo Bonardi (STILO) — credenziali fisse
-  //  - admin: Alberto — email MCF + chiave admin, verificata SERVER-SIDE
-  //    contro la env var EXPO_PORTAL_ADMIN_KEY (la chiave non sta nel sorgente)
+  // Accessi personali dal 13/10/2026, come Green-Go: ognuno entra con la sua
+  // email e la password scelta dall'invito. Il ruolo e le pratiche visibili li
+  // decide il server dalla sessione (/api/portale-pratiche): qui non c'e'
+  // nessuna password e nessun controllo che conti, solo cosa mostrare.
+  //  - referente (Paolo Bonardi): tutte le pratiche STILO e la sezione rete
+  //  - agente (i collaboratori che invita): solo le pratiche che carica
+  //  - admin (MCF): tutto, e cambia gli stati
   const PARTNER = 'stilo';
-  const USER_EMAIL = 'bonardipaolo@gmail.com';
-  const PASSWORD = 'stilosrl';
-  const ADMIN_EMAIL = 'mediocreditofacile@gmail.com';
-  const KEY = 'mcf_stilo_auth';
+  const PERCORSO = '/tools/stilo';
+  const URL_PRATICHE = `/api/portale-pratiche?partner=${PARTNER}`;
 
-  type Session = { role: 'partner' | 'admin'; key: string };
-  let session: Session | null = null;
+  type Accesso = {
+    ruolo: 'admin' | 'referente' | 'agente';
+    vedeTutto: boolean;
+    utente: { id: string; nome: string; email: string };
+  };
+  let accesso: Accesso | null = null;
 
   const gate = document.getElementById('gate')!;
   const tool = document.getElementById('tool')!;
-  const gateUser = document.getElementById('gate-user') as HTMLInputElement;
-  const gatePwd = document.getElementById('gate-pwd') as HTMLInputElement;
-  const gateBtn = document.getElementById('gate-btn') as HTMLButtonElement;
-  const gateError = document.getElementById('gate-error')!;
-  const logoutBtn = document.getElementById('logout-btn')!;
 
-  function showTool() {
-    gate.style.display = 'none';
-    tool.style.cssText = '';
-    tool.classList.toggle('st--admin', session?.role === 'admin');
-    // Deferita: al primo accesso lo script sta ancora valutando le const
-    // della sezione richieste (TDZ), quindi si aspetta il tick successivo
-    setTimeout(() => void loadRichieste(), 0);
-  }
-  function showGate() { gate.style.display = ''; tool.style.cssText = 'display:none !important;'; }
+  // La sessione della vecchia password condivisa non serve piu'
+  try { localStorage.removeItem('mcf_stilo_auth'); } catch { /* storage bloccato */ }
 
-  function loadSession(): Session | null {
-    const raw = localStorage.getItem(KEY);
-    if (!raw) return null;
-    if (raw === 'ok') return { role: 'partner', key: PASSWORD }; // retrocompatibilita'
-    try {
-      const s = JSON.parse(raw);
-      if (s && (s.role === 'partner' || s.role === 'admin') && typeof s.key === 'string') return s;
-    } catch { /* sessione corrotta: si rifa' il login */ }
-    return null;
+  /** La sessione e' scaduta mentre si lavorava: si torna all'accesso, il modulo resta compilato */
+  function sessioneScaduta() {
+    accesso = null;
+    tool.hidden = true;
+    gate.hidden = false;
   }
 
-  session = loadSession();
-  if (session) showTool();
+  let reteMontata = false;
 
-  function gateFail(msg: string, userBad: boolean, pwdBad: boolean) {
-    gateError.textContent = msg;
-    gateError.hidden = false;
-    gateUser.classList.toggle('gate__input--error', userBad);
-    gatePwd.classList.toggle('gate__input--error', pwdBad);
-  }
+  /** Chiamata dal gate quando /api/portale-pratiche risponde ok */
+  function entra(corpo: any) {
+    accesso = { ruolo: corpo.ruolo, vedeTutto: Boolean(corpo.vedeTutto), utente: corpo.utente };
+    statoPortale.slug = PARTNER;
+    statoPortale.ruolo = corpo.ruolo;
+    statoPortale.vedeTutto = accesso.vedeTutto;
+    statoPortale.utente = corpo.utente;
 
-  gateBtn.addEventListener('click', async () => {
-    const email = gateUser.value.trim().toLowerCase();
-    const pwd = gatePwd.value.trim();
+    const etichetta = corpo.ruolo === 'referente' ? ' · referente' : corpo.ruolo === 'admin' ? ' · MCF' : '';
+    document.getElementById('chi-sono')!.textContent = `${corpo.utente?.nome || corpo.utente?.email || ''}${etichetta}`;
+    document.getElementById('richieste-sub')!.textContent = accesso.vedeTutto
+      ? 'Tutte le pratiche STILO, con chi le ha caricate, i documenti e lo stato. Lo stato lo aggiorna Mediocredito Facile man mano che la pratica avanza.'
+      : 'Le pratiche che hai caricato tu, con documenti e stato. Lo stato lo aggiorna Mediocredito Facile man mano che la pratica avanza.';
 
-    if (email === USER_EMAIL && pwd.toLowerCase() === PASSWORD) {
-      session = { role: 'partner', key: PASSWORD };
-    } else if (email === ADMIN_EMAIL && pwd) {
-      // Verifica della chiave admin lato server
-      gateBtn.disabled = true;
-      gateBtn.textContent = 'Verifica...';
-      try {
-        const res = await fetch(`/api/pratiche-expo?partner=${PARTNER}`, { headers: { Authorization: `Bearer ${pwd}` } });
-        const json = await res.json();
-        if (res.ok && json.ok && json.ruolo === 'admin') {
-          session = { role: 'admin', key: pwd };
-        } else {
-          gateFail('Chiave admin non valida', false, true);
-        }
-      } catch {
-        gateFail('Verifica non riuscita, riprova', false, false);
-      }
-      gateBtn.disabled = false;
-      gateBtn.innerHTML = '<span class="material-icons-outlined">lock_open</span> Accedi';
-    } else {
-      gateFail('Email o password non corretti', email !== USER_EMAIL && email !== ADMIN_EMAIL, true);
+    const rete = document.getElementById('rete')!;
+    rete.hidden = !accesso.vedeTutto;
+    if (accesso.vedeTutto) {
+      if (!reteMontata) { montaRete({ conPreventivi: false }); reteMontata = true; }
+      void caricaRete();
     }
-
-    if (session) {
-      localStorage.setItem(KEY, JSON.stringify(session));
-      gateError.hidden = true;
-      gateUser.classList.remove('gate__input--error');
-      gatePwd.classList.remove('gate__input--error');
-      showTool();
-    }
-  });
-  gateUser.addEventListener('keydown', (e) => { if (e.key === 'Enter') gateBtn.click(); });
-  gatePwd.addEventListener('keydown', (e) => { if (e.key === 'Enter') gateBtn.click(); });
-  logoutBtn.addEventListener('click', () => {
-    localStorage.removeItem(KEY); session = null; showGate();
-    gateUser.value = ''; gatePwd.value = ''; gateError.hidden = true;
-  });
+    renderRichieste(corpo.pratiche ?? []);
+  }
 
   // === Checklist dinamica (stessa logica dell'area Edilizia GIERRE) ===
   const formaGiuridica = document.getElementById('forma-giuridica') as HTMLSelectElement;
@@ -564,7 +621,7 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
     feedback.classList.remove('st__feedback--ok', 'st__feedback--err');
 
     if (!form.reportValidity()) return;
-    if (!session) { showGate(); return; }
+    if (!accesso) { sessioneScaduta(); return; }
 
     submitBtn.disabled = true;
 
@@ -576,10 +633,11 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
         const f = selectedFiles[i];
         submitBtn.textContent = `Carico documento ${i + 1}/${selectedFiles.length}...`;
         const safeName = f.name.replace(/[^\w.\- ]/g, '_');
-        const result = await upload(`pratiche/${PARTNER}/docs/${batch}/${safeName}`, f, {
+        // Una cartella per persona: all'invio il server accetta solo documenti di quella
+        const result = await upload(`pratiche/${PARTNER}/docs/${accesso.utente.id}/${batch}/${safeName}`, f, {
           access: 'private',
-          handleUploadUrl: '/api/blob-upload',
-          clientPayload: JSON.stringify({ auth: session.key, partner: PARTNER }),
+          handleUploadUrl: '/api/portale-upload',
+          clientPayload: JSON.stringify({ partner: PARTNER }),
         });
         documenti.push({ nome: f.name, pathname: result.pathname, size: f.size });
       }
@@ -596,7 +654,15 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
     try {
       const fd = new FormData(form);
       fd.set('documenti', JSON.stringify(documenti));
-      const res = await fetch('/api/submit-stilo', { method: 'POST', body: fd });
+      const res = await fetch('/api/submit-stilo', { method: 'POST', body: fd, credentials: 'same-origin' });
+      if (res.status === 401) {
+        feedback.textContent = 'La sessione è scaduta. Rientra con la tua password e premi di nuovo Invia: i dati del modulo restano.';
+        feedback.classList.add('st__feedback--err');
+        feedback.hidden = false;
+        resetSubmitBtn();
+        sessioneScaduta();
+        return;
+      }
       const json = await res.json();
       if (res.ok && json.ok) {
         feedback.textContent = `Pratica ${json.id ?? ''} ricevuta${documenti.length ? ` con ${documenti.length} documenti` : ''}. Ti richiamiamo al numero indicato; segui lo stato nella lista qui sotto.`;
@@ -644,11 +710,10 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
 
   // Download di un documento dallo store privato: fetch autenticata + objectURL
   async function downloadDoc(pathname: string, nome: string) {
-    if (!session) return;
+    if (!accesso) return;
     try {
-      const res = await fetch(`/api/pratica-doc?path=${encodeURIComponent(pathname)}`, {
-        headers: { Authorization: `Bearer ${session.key}` },
-      });
+      const res = await fetch(`${URL_PRATICHE}&doc=${encodeURIComponent(pathname)}`, { credentials: 'same-origin' });
+      if (res.status === 401) { sessioneScaduta(); return; }
       if (!res.ok) throw new Error('download_failed');
       const blob = await res.blob();
       const a = document.createElement('a');
@@ -662,16 +727,14 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
   }
 
   async function aggiornaStato(id: string, stato: string, select: HTMLSelectElement) {
-    if (!session || session.role !== 'admin') return;
+    if (accesso?.ruolo !== 'admin') return;
     select.disabled = true;
     try {
-      const res = await fetch('/api/pratiche-expo', {
+      const { res, corpo } = await apiJson('/api/portale-pratiche', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.key}` },
         body: JSON.stringify({ id, stato, partner: PARTNER }),
       });
-      const json = await res.json();
-      if (!res.ok || !json.ok) throw new Error('update_failed');
+      if (!res.ok || !corpo?.ok) throw new Error('update_failed');
       select.className = `st__stato-select ${STATO_CLASS[stato] ?? ''}`;
     } catch {
       alert('Aggiornamento stato non riuscito. Riprova.');
@@ -681,18 +744,13 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
   }
 
   async function loadRichieste() {
-    if (!session) return;
+    if (!accesso) return;
     richiesteInfo.textContent = '';
     try {
-      const res = await fetch(`/api/pratiche-expo?partner=${PARTNER}`, { headers: { Authorization: `Bearer ${session.key}` } });
-      const json = await res.json();
-      if (res.status === 401) {
-        // Sessione non piu' valida (es. chiave admin cambiata): si rifa' il login
-        localStorage.removeItem(KEY); session = null; showGate();
-        return;
-      }
-      if (!res.ok || !json.ok) throw new Error(json.error || 'list_failed');
-      renderRichieste(json.pratiche ?? []);
+      const { res, corpo } = await apiJson(URL_PRATICHE);
+      if (res.status === 401) { sessioneScaduta(); return; }
+      if (!res.ok || !corpo?.ok) throw new Error(corpo?.error || 'list_failed');
+      renderRichieste(corpo.pratiche ?? []);
     } catch (err) {
       richiesteWrap.innerHTML = '<p class="st__richieste-empty">Impossibile caricare le richieste in questo momento. Premi Aggiorna per riprovare.</p>';
     }
@@ -700,17 +758,22 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
 
   function renderRichieste(pratiche: any[]) {
     if (!pratiche.length) {
-      richiesteWrap.innerHTML = '<p class="st__richieste-empty">Nessuna richiesta inviata finora. La prima pratica che carichi comparira\' qui.</p>';
+      richiesteInfo.textContent = '';
+      richiesteWrap.innerHTML = accesso?.vedeTutto
+        ? '<p class="st__richieste-empty">Nessuna richiesta inviata finora. La prima pratica caricata comparirà qui.</p>'
+        : '<p class="st__richieste-empty">Non hai ancora caricato pratiche. La prima che carichi comparirà qui.</p>';
       return;
     }
     richiesteInfo.textContent = `${pratiche.length} richieste`;
 
-    const isAdmin = session?.role === 'admin';
+    const isAdmin = accesso?.ruolo === 'admin';
+    // Chi vede tutta STILO vede anche chi ha caricato cosa; l'agente vede solo le sue
+    const conAutore = Boolean(accesso?.vedeTutto);
     const table = document.createElement('table');
     table.className = 'st__table st__table--richieste';
     table.innerHTML = `
       <thead>
-        <tr><th>Data</th><th>Pratica</th><th>Cliente</th><th>Bene</th><th>Importo</th><th>Documenti</th><th>Stato</th></tr>
+        <tr><th>Data</th><th>Pratica</th>${conAutore ? '<th>Caricata da</th>' : ''}<th>Cliente</th><th>Bene</th><th>Importo</th><th>Documenti</th><th>Stato</th></tr>
       </thead>`;
     const tbody = document.createElement('tbody');
 
@@ -754,6 +817,8 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
       const cells = [
         dataFmt(p.creato),
         p.id ?? '-',
+        // Le pratiche caricate prima degli accessi personali non hanno autore
+        ...(conAutore ? [p.autore ? (p.autore.nome || p.autore.email) : '—'] : []),
         p.cliente?.ragione_sociale ?? '-',
         `${p.bene?.tipologia ?? '-'} — ${p.bene?.descrizione ?? ''}`.slice(0, 60),
         `${eurFmt(p.bene?.importo ?? '')} / ${p.bene?.durata ?? '-'} mesi`,
@@ -773,6 +838,9 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
   }
 
   refreshBtn.addEventListener('click', () => void loadRichieste());
+
+  // Ultima cosa: il gate. Se la sessione c'e' gia', entra senza chiedere niente.
+  void avviaGate(entra, { percorso: PERCORSO, urlSessione: URL_PRATICHE });
 </script>
 
 <style>
@@ -812,7 +880,7 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
     transition: border-color 0.2s, box-shadow 0.2s;
   }
   .gate__input:focus { outline: none; border-color: #FE6F3A; box-shadow: 0 0 0 3px rgba(254, 111, 58, 0.12); background: #fff; }
-  .gate__input--error { border-color: #ef4444; }
+  .gate[hidden] { display: none; }
   .gate__btn {
     padding: 0.8rem 1.5rem;
     background: linear-gradient(135deg, #FE6F3A, #664CCD);
@@ -822,7 +890,16 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
     display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;
   }
   .gate__btn:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(254, 111, 58, 0.28); }
-  .gate__error { color: #ef4444; font-size: 0.82rem; margin-top: 0.75rem; }
+  .gate__btn:disabled { opacity: 0.6; cursor: wait; transform: none; }
+  .gate__error { color: #b91c1c; font-size: 0.85rem; margin-top: 0.75rem; }
+  .gate__ok { color: #047857; font-size: 0.85rem; margin-top: 0.75rem; }
+  .gate__links { margin: 0.9rem 0 0; font-size: 0.85rem; }
+  .gate__link {
+    background: none; border: 0; padding: 0; cursor: pointer;
+    font-family: var(--font-family); font-size: 0.85rem; font-weight: 600; color: #664CCD;
+  }
+  .gate__link:hover { text-decoration: underline; text-underline-offset: 3px; }
+  .gate__nota { font-size: 0.8rem; color: #787782; line-height: 1.5; margin: 1rem 0 0; }
 
   /* === Portale === */
   .st { max-width: var(--max-width); margin: 0 auto; padding: 0 1.5rem 4rem; }
@@ -847,6 +924,16 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
     display: flex; align-items: center; gap: 0.3rem;
   }
   .st__logout:hover { border-color: #FE6F3A; color: #FE6F3A; }
+  .st__header-destra { display: flex; align-items: center; gap: 0.85rem; }
+  .st__chi { font-size: 0.85rem; color: #444451; }
+
+  /* La tua rete */
+  .st__rete-azioni { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; margin-top: 1rem; }
+  .st__rete-nota { font-size: 0.82rem; color: #787782; }
+  .st__rete-titolo {
+    font-size: 0.78rem; font-weight: 800; color: #664CCD;
+    text-transform: uppercase; letter-spacing: 0.1em; margin: 1.75rem 0 0.75rem;
+  }
 
   /* Codice partner + dashboard */
   .st__conv { font-size: 0.9rem; color: #787782; margin: 1.5rem 0 0.4rem; }
@@ -1032,24 +1119,6 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
     background: #f8fafc; border: 1px solid #E1DEE3; border-radius: 10px;
     padding: 1.25rem; font-size: 0.9rem; color: #64748b; margin: 0;
   }
-  .st__table--richieste { min-width: 760px; }
-  .st__table--richieste td { vertical-align: top; }
-  .st__doc-link { display: block; color: #664CCD; font-size: 0.83rem; text-decoration: underline; margin-bottom: 0.2rem; }
-
-  /* Badge stato */
-  .st__stato {
-    display: inline-block; padding: 0.25rem 0.7rem; border-radius: 999px;
-    font-size: 0.76rem; font-weight: 700; white-space: nowrap;
-  }
-  .st__stato-select {
-    padding: 0.35rem 0.5rem; border-radius: 8px; border: 1.5px solid #E1DEE3;
-    font-family: var(--font-family); font-size: 0.8rem; font-weight: 700; cursor: pointer;
-  }
-  .st__stato--ricevuta { background: #f1f5f9; color: #475569; }
-  .st__stato--lavorazione { background: #eff6ff; color: #1d4ed8; }
-  .st__stato--delibera { background: #fffbeb; color: #b45309; }
-  .st__stato--approvata { background: #ecfdf5; color: #047857; }
-  .st__stato--declinata { background: #fef2f2; color: #b91c1c; }
 
   /* Feedback */
   .st__feedback {
@@ -1069,6 +1138,7 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
     .gate__logo { height: 32px; }
 
     .st__header-brand { gap: 0.65rem; }
+    .st__chi { display: none; }
     .st__logo { height: 28px; }
     .st__cards { grid-template-columns: 1fr; }
     .st__form-block { padding: 1.25rem; }
@@ -1082,4 +1152,73 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
     .st__submit-row { flex-direction: column; align-items: stretch; }
     .st__submit { justify-content: center; }
   }
+</style>
+
+<style is:global>
+  /* La lista richieste e la sezione rete si costruiscono a runtime (createElement,
+     innerHTML): gli elementi non hanno l'attributo data-astro-cid, quindi le
+     regole scoped qui sopra non li raggiungono. Stanno qui, prefissate. */
+
+  /* Lista richieste */
+  #richieste-wrap .st__richieste-empty {
+    background: #f8fafc; border: 1px solid #E1DEE3; border-radius: 10px;
+    padding: 1.25rem; font-size: 0.9rem; color: #64748b; margin: 0;
+  }
+  #richieste-wrap .st__table {
+    width: 100%; min-width: 760px; border-collapse: collapse; font-size: 0.9rem;
+    border: 1px solid #E1DEE3; border-radius: 10px; overflow: hidden;
+  }
+  #richieste-wrap .st__table thead { background: #f8fafc; }
+  #richieste-wrap .st__table th {
+    text-align: left; padding: 0.75rem 1rem;
+    font-size: 0.78rem; font-weight: 700; color: #444451;
+    text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #E1DEE3;
+  }
+  #richieste-wrap .st__table td {
+    padding: 0.75rem 1rem; border-bottom: 1px solid #f1f1f3;
+    color: #0F1020; line-height: 1.4; vertical-align: top;
+  }
+  #richieste-wrap .st__table tbody tr:last-child td { border-bottom: none; }
+  #richieste-wrap .st__table td:nth-child(2) { white-space: nowrap; }
+  #richieste-wrap .st__doc-link { display: block; color: #664CCD; font-size: 0.83rem; text-decoration: underline; margin-bottom: 0.2rem; }
+  #richieste-wrap .st__stato {
+    display: inline-block; padding: 0.25rem 0.7rem; border-radius: 999px;
+    font-size: 0.76rem; font-weight: 700; white-space: nowrap;
+  }
+  #richieste-wrap .st__stato-select {
+    padding: 0.35rem 0.5rem; border-radius: 8px; border: 1.5px solid #E1DEE3;
+    font-family: var(--font-family); font-size: 0.8rem; font-weight: 700; cursor: pointer;
+  }
+  #richieste-wrap .st__stato--ricevuta { background: #f1f5f9; color: #475569; }
+  #richieste-wrap .st__stato--lavorazione { background: #eff6ff; color: #1d4ed8; }
+  #richieste-wrap .st__stato--delibera { background: #fffbeb; color: #b45309; }
+  #richieste-wrap .st__stato--approvata { background: #ecfdf5; color: #047857; }
+  #richieste-wrap .st__stato--declinata { background: #fef2f2; color: #b91c1c; }
+
+  /* La tua rete: classi del pannello del motore (src/scripts/motore/rete.ts) */
+  #rete .mt-scorri { overflow-x: auto; }
+  #rete .mt-tabella { width: 100%; border-collapse: collapse; font-size: 0.9rem; font-variant-numeric: tabular-nums; }
+  #rete .mt-tabella th {
+    text-align: left; padding: 0.65rem 0.85rem; background: #f8fafc;
+    font-size: 0.75rem; font-weight: 700; color: #444451;
+    text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #E1DEE3;
+  }
+  #rete .mt-tabella td { padding: 0.65rem 0.85rem; border-bottom: 1px solid #f1f1f3; color: #0F1020; vertical-align: top; }
+  #rete .mt-tabella tr.spenta td { color: #787782; }
+  #rete .mt-id { font-size: 0.8rem; color: #787782; }
+  #rete .mt-vuoto {
+    font-size: 0.9rem; color: #787782; margin: 0;
+    padding: 1rem 1.25rem; border: 1px dashed #E1DEE3; border-radius: 10px;
+  }
+  #rete .mt-link {
+    background: none; border: 0; padding: 0; cursor: pointer;
+    font-family: var(--font-family); font-size: 0.85rem; font-weight: 600; color: #664CCD;
+  }
+  #rete .mt-link:hover { text-decoration: underline; text-underline-offset: 3px; }
+  #rete .mt-link:disabled { opacity: 0.5; cursor: wait; }
+  #rete .mt-msg {
+    font-size: 0.88rem; padding: 0.7rem 1rem; border-radius: 8px; margin: 1rem 0 0;
+    border-left: 3px solid #664CCD; background: #F8F7FA; color: #0F1020;
+  }
+  #rete .mt-msg--errore { border-left-color: #B23A12; color: #8A2D0E; }
 </style>

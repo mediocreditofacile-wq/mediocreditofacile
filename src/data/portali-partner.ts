@@ -16,6 +16,12 @@ export interface PortalePartner {
   password: string;
   /** Prefisso della pratica: EE- Expo Energia, ST- Stilo, FS- Full Service, UD- Unidima, EC- Extreme Computer */
   prefissoPratica: string;
+  /**
+   * Il portale e' passato agli accessi personali (Better Auth, vedi
+   * src/lib/pratiche-nominali.ts): la password condivisa non apre piu' niente,
+   * resta valida solo la chiave admin dei link nelle mail di notifica.
+   */
+  accessoNominale?: boolean;
 }
 
 export const PORTALI_PARTNER: Record<string, PortalePartner> = {
@@ -28,8 +34,10 @@ export const PORTALI_PARTNER: Record<string, PortalePartner> = {
   stilo: {
     slug: 'stilo',
     nome: 'STILO S.R.L.',
+    // Password storica, spenta dal 13/10/2026: STILO entra con accessi personali
     password: 'stilosrl',
     prefissoPratica: 'ST',
+    accessoNominale: true,
   },
   'full-service': {
     slug: 'full-service',
@@ -80,7 +88,8 @@ export function pathPreventivi(slug: string): string {
 
 /**
  * Autorizzazione di una richiesta: ritorna il ruolo se la chiave e' valida.
- * - password del partner -> 'partner' (vede solo le proprie pratiche)
+ * - password del partner -> 'partner' (vede solo le proprie pratiche), ma non
+ *   sui portali ad accesso nominale, dove chi la conosce ancora non entra
  * - EXPO_PORTAL_ADMIN_KEY -> 'admin' (vede tutto e aggiorna gli stati)
  */
 export function ruoloDaChiave(
@@ -89,6 +98,7 @@ export function ruoloDaChiave(
   adminKey: string | undefined,
 ): 'partner' | 'admin' | null {
   if (adminKey && chiave === adminKey) return 'admin';
+  if (partner.accessoNominale) return null;
   if (chiave && chiave === partner.password) return 'partner';
   return null;
 }

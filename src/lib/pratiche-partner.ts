@@ -12,6 +12,7 @@
 
 import { put } from '@vercel/blob';
 import { pathPrefix, type PortalePartner } from '../data/portali-partner';
+import type { AutorePratica } from './pratiche-visibilita';
 
 export interface DocumentoPratica {
   nome: string;
@@ -50,6 +51,13 @@ export interface OpzioniPratica {
   documentiExtra?: string[];
   /** Riga di lavorazione interna in fondo alla mail: dove va caricata la pratica */
   notaLavorazione: string;
+  /**
+   * Chi ha caricato la pratica, sui portali ad accesso nominale. Finisce nel
+   * record (e decide chi la rivede: src/lib/pratiche-visibilita.ts) e nella mail.
+   */
+  autore?: AutorePratica;
+  /** Cartella da cui si accettano i documenti. Default: quella del partner */
+  cartellaDocumenti?: string;
 }
 
 function escapeHtml(value: string): string {
@@ -78,6 +86,7 @@ async function savePraticaRecord(
   id: string,
   lead: PraticaLead,
   documenti: DocumentoPratica[],
+  autore?: AutorePratica,
 ): Promise<{ ok: boolean; err?: string }> {
   const token = import.meta.env.BLOB_READ_WRITE_TOKEN as string | undefined;
   if (!token) return { ok: false, err: 'blob_token_missing' };
@@ -110,6 +119,7 @@ async function savePraticaRecord(
     beni: lead.beni,
     note: lead.note,
     documenti,
+    ...(autore ? { autore } : {}),
   };
 
   try {
@@ -135,6 +145,7 @@ async function sendResendEmail(
   id: string,
   documenti: DocumentoPratica[],
   notaLavorazione: string,
+  autore?: AutorePratica,
 ): Promise<{ ok: boolean; err?: string }> {
   const key = import.meta.env.RESEND_API_KEY as string | undefined;
   if (!key) return { ok: false, err: 'resend_key_missing' };
@@ -178,6 +189,10 @@ async function sendResendEmail(
           Portale Partner ${escapeHtml(partner.nome)} — Pratica ${escapeHtml(id)}
         </p>
         <h2 style="color:#664CCD;margin:0 0 16px">Nuova pratica caricata dal partner</h2>
+        ${autore ? `
+          <p style="font-size:14px;color:#444451;margin:0 0 16px">
+            Caricata da <strong>${escapeHtml(autore.nome || autore.email)}</strong> (${escapeHtml(autore.email)})
+          </p>` : ''}
 
         <h3 style="color:#0F1020;font-size:15px;margin:20px 0 8px">Dati cliente finale</h3>
         <table style="font-size:14px;border-collapse:collapse;width:100%">
@@ -361,7 +376,8 @@ export async function gestisciPratica(
     const parsed = JSON.parse((data.get('documenti') as string | null) ?? '[]');
     if (Array.isArray(parsed)) {
       documenti = parsed
-        .filter((d) => d && typeof d.pathname === 'string' && d.pathname.startsWith(pathPrefix(partner.slug)))
+        .filter((d) => d && typeof d.pathname === 'string' &&
+          d.pathname.startsWith(opzioni.cartellaDocumenti ?? pathPrefix(partner.slug)) && !d.pathname.includes('..'))
         .map((d) => ({
           nome: String(d.nome ?? d.pathname.split('/').pop()),
           pathname: String(d.pathname),
@@ -381,10 +397,11 @@ export async function gestisciPratica(
   data.set('nome', `${lead.ragione_sociale} — ${partner.nome} (partner)`);
   data.set('fonte', partner.slug);
   data.set('pratica_id', id);
+  if (opzioni.autore) data.set('caricata_da', `${opzioni.autore.nome} <${opzioni.autore.email}>`);
 
   const [recordResult, mailResult, zapierResult] = await Promise.all([
-    savePraticaRecord(partner, id, lead, documenti),
-    sendResendEmail(partner, lead, checklist, id, documenti, opzioni.notaLavorazione),
+    savePraticaRecord(partner, id, lead, documenti, opzioni.autore),
+    sendResendEmail(partner, lead, checklist, id, documenti, opzioni.notaLavorazione, opzioni.autore),
     sendZapierWebhook(data),
   ]);
 
@@ -398,6 +415,7 @@ export async function gestisciPratica(
     importo: lead.importo,
     durata: lead.durata,
     documenti: documenti.length,
+    caricata_da: opzioni.autore?.userId,
     record_ok: recordResult.ok,
     mail_ok: mailResult.ok,
     zapier_ok: zapierResult.ok,

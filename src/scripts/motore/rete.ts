@@ -1,6 +1,9 @@
 // La rete del fornitore: richieste di accesso, agenti, inviti. Solo referente
 // e MCF. Parla con /api/portale-utenti, la stessa API di Green-Go: agisce
 // sempre e solo sull'organizzazione della sessione.
+//
+// La monta anche /tools/stilo, dove non ci sono preventivi da contare: li' la
+// colonna si spegne con montaRete({ conPreventivi: false }).
 
 import { $, apiJson, data, esc, messaggio, stato, traduci } from './comune';
 
@@ -13,7 +16,9 @@ const urlUtenti = () => `/api/portale-utenti?partner=${encodeURIComponent(stato.
 const post = (corpo: Record<string, unknown>) =>
   apiJson('/api/portale-utenti', { method: 'POST', body: JSON.stringify({ ...corpo, partner: stato.slug }) });
 
-async function carica() {
+let conPreventivi = true;
+
+export async function caricaRete() {
   const { res, corpo } = await apiJson(urlUtenti());
   if (!res.ok || !corpo?.ok) return;
   rendiRichieste(corpo.richieste ?? []);
@@ -41,11 +46,11 @@ function rendiMembri(membri: any[]) {
   $('membri').innerHTML = !membri.length
     ? '<p class="mt-vuoto">Ancora nessuno oltre a te.</p>'
     : `<div class="mt-scorri"><table class="mt-tabella">
-      <thead><tr><th>Persona</th><th>Ruolo</th><th class="num">Preventivi</th><th>Stato</th><th></th></tr></thead>
+      <thead><tr><th>Persona</th><th>Ruolo</th>${conPreventivi ? '<th class="num">Preventivi</th>' : ''}<th>Stato</th><th></th></tr></thead>
       <tbody>${membri.map((m) => `<tr class="${m.attivo ? '' : 'spenta'}">
         <td>${esc(m.nome || '—')}<br><span class="mt-id">${esc(m.email)}</span></td>
-        <td>${m.ruolo === 'referente' ? 'Referente' : 'Agente'}</td>
-        <td class="num">${esc(m.preventivi)}</td>
+        <td>${m.ruolo === 'referente' ? 'Referente' : conPreventivi ? 'Agente' : 'Collaboratore'}</td>
+        ${conPreventivi ? `<td class="num">${esc(m.preventivi)}</td>` : ''}
         <td>${m.attivo ? 'Attivo' : 'Sospeso'}</td>
         <td>${m.id === stato.utente?.id
           ? '<span class="mt-id">sei tu</span>'
@@ -66,7 +71,8 @@ function rendiInviti(inviti: any[]) {
       </tr>`).join('')}</tbody></table></div>`;
 }
 
-export function montaRete() {
+export function montaRete(opzioni: { conPreventivi?: boolean } = {}) {
+  conPreventivi = opzioni.conPreventivi ?? true;
   const box = $('rete-msg');
   $('inv-btn').addEventListener('click', async () => {
     const nome = $<HTMLInputElement>('inv-nome').value.trim();
@@ -77,14 +83,16 @@ export function montaRete() {
     messaggio(box, `${nome} è in coda. L'invito parte col prossimo scaglione.`, true);
     $<HTMLInputElement>('inv-nome').value = '';
     $<HTMLInputElement>('inv-email').value = '';
-    void carica();
+    void caricaRete();
   });
 
-  $('inv-ora').addEventListener('click', async () => {
+  // Manda il prossimo scaglione di TUTTA la coda, non solo di questo fornitore:
+  // la pagina che non lo vuole esporre non mette il bottone.
+  $('inv-ora')?.addEventListener('click', async () => {
     const { res, corpo } = await post({ azione: 'svuota_coda' });
     if (!res.ok || !corpo?.ok) return messaggio(box, traduci(corpo?.error ?? ''), false);
     messaggio(box, `Inviti partiti: ${corpo.inviati}. Rimandati: ${corpo.rimandati}. Non partiti: ${corpo.falliti}.`, corpo.falliti === 0);
-    void carica();
+    void caricaRete();
   });
 
   document.addEventListener('click', async (e) => {
@@ -99,15 +107,15 @@ export function montaRete() {
     const { res, corpo } = await post(corpoReq);
     el.disabled = false;
     if (!res.ok || !corpo?.ok) {
-      void carica();
+      void caricaRete();
       return messaggio(box, traduci(corpo?.error ?? ''), false);
     }
     if (el.dataset.invito) messaggio(box, "L'invito è partito.", true);
     if (el.dataset.richiesta) messaggio(box, corpo.approvata ? "Approvata: l'invito è in coda." : 'Richiesta archiviata.', true);
-    void carica();
+    void caricaRete();
   });
 
   document.addEventListener('mt:tab', (e) => {
-    if ((e as CustomEvent).detail === 'rete') void carica();
+    if ((e as CustomEvent).detail === 'rete') void caricaRete();
   });
 }

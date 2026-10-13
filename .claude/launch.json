@@ -48,6 +48,15 @@
         "DB_VIA_WEBSOCKET=1 sh scripts/dev-prova.sh"
       ],
       "port": 4321
+    },
+    {
+      "name": "mcf-dev-prova-senza-mail",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": [
+        "-c",
+        "RESEND_API_KEY= ZAPIER_WEBHOOK_URL= sh scripts/dev-prova.sh"
+      ],
+      "port": 4321
     }
   ]
 }
