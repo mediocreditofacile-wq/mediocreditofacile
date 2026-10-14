@@ -121,7 +121,7 @@ describe('righeEventi', () => {
     ]]);
   });
   it('presenza senza dettaglio: lo dice', () => {
-    expect(righeEventi(leggiEventiNegativi({ presenzaProtesti: true }))).toEqual([['Protesti', 'presenti, dettaglio non conservato']]);
+    expect(righeEventi(leggiEventiNegativi({ presenzaProtesti: true }))).toEqual([['Protesti', 'presenti, dettaglio non disponibile']]);
   });
   it('verifica pulita: nessuna riga', () => {
     expect(righeEventi(leggiEventiNegativi({ presenzaProtesti: false }))).toEqual([]);
@@ -202,6 +202,34 @@ describe('leggiVisuraProtesti', () => {
     const j = visura(TRE) as any;
     j.Dati.EventiNegativiImpresa.ElencoOmonimieProtesti = { flagPresenza: 'S' };
     expect(leggiVisuraProtesti(j)!.sintesi.omonimie).toBe(true);
+  });
+
+  // Forma della visura protesti persona fisica (prima visura, 14/10/2026), dati inventati
+  const persona = (flag: string, semaforo: string) => ({
+    Dati: {
+      EventiNegativiPersona: {
+        InfoPersona: { Nominativo: { cognome: 'ROSSI', nome: 'MARIO', valore: 'ROSSI MARIO' }, CodiceFiscale: 'RSSMRA80A01H501U', DatiNascita: '' },
+        Sintesi: { Globale: { semaforo }, Protesti: { semaforo } },
+        ElencoProtesti: { flagPresenza: flag },
+        ElencoOmonimieProtesti: { flagPresenza: 'N' },
+      },
+      ElencoDettagli: { Dettaglio: [{ id: 'id-pratica', valore: 'x' }] },
+    },
+  });
+
+  it('visura persona pulita: nessun protesto', () => {
+    const v = leggiVisuraProtesti(persona('N', 'V'))!;
+    expect(v.presenzaProtesti).toBe(false);
+    expect(v.dettaglioDisponibile).toBe(true);
+    expect(v.sintesi).toMatchObject({ effetti: 0, semaforo: 'V', omonimie: false });
+  });
+
+  it('visura persona con protesti segnalati ma elenco illeggibile: presenti, senza dettaglio', () => {
+    const v = leggiVisuraProtesti(persona('S', 'R'))!;
+    expect(v.presenzaProtesti).toBe(true);
+    expect(v.dettaglioDisponibile).toBe(false);
+    expect(sintesiEventi(v)).toBe('protesti');
+    expect(righeEventi(v)).toEqual([['Protesti', 'presenti, dettaglio non disponibile']]);
   });
 
   it('struttura sconosciuta: null, mai un falso "nessun protesto"', () => {

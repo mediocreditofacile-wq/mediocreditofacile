@@ -244,11 +244,11 @@ export function righeEventi(e: EventiNegativi | null): [string, string][] {
       righe.push([chiave, valore]);
     }
   }
-  if (e.presenzaProtesti && !e.effetti) righe.push(['Protesti', 'presenti, dettaglio non conservato']);
+  if (e.presenzaProtesti && !e.effetti) righe.push(['Protesti', 'presenti, dettaglio non disponibile']);
   e.pregiudizievoli.forEach((v, i) => righe.push([`Pregiudizievole ${i + 1}`, v.campi.map(([k, x]) => `${k}: ${x}`).join(' · ')]));
-  if (e.presenzaPregiudizievoli && !e.pregiudizievoli.length) righe.push(['Pregiudizievoli', 'presenti, dettaglio non conservato']);
+  if (e.presenzaPregiudizievoli && !e.pregiudizievoli.length) righe.push(['Pregiudizievoli', 'presenti, dettaglio non disponibile']);
   e.procedure.forEach((v, i) => righe.push([`Procedura ${i + 1}`, v.campi.map(([k, x]) => `${k}: ${x}`).join(' · ')]));
-  if (e.presenzaProcedure && !e.procedure.length) righe.push(['Procedure concorsuali', 'presenti, dettaglio non conservato']);
+  if (e.presenzaProcedure && !e.procedure.length) righe.push(['Procedure concorsuali', 'presenti, dettaglio non disponibile']);
   return righe;
 }
 
@@ -359,16 +359,22 @@ export function leggiVisuraProtesti(json: any): VisuraProtesti | null {
   const tutti = protesti.flatMap((p) => p.effetti);
   const s = radice.Sintesi?.Protesti ?? {};
   const effetti = numero(s.totEffetti) ?? tutti.length;
+  // La visura persona non ha i totali in sintesi, solo { flagPresenza } sull'elenco e il
+  // semaforo (verificato il 14/10/2026 su una visura pulita: 'N' e 'V'). Se il Registro
+  // dice che ci sono protesti e l'elenco non si legge, si dice "presenti senza
+  // dettaglio": mai un "nessun protesto" sbagliato.
+  const segnalati = testo(radice.ElencoProtesti?.flagPresenza).toUpperCase() === 'S'
+    || testo(s.semaforo).toUpperCase() === 'R';
   // { flagPresenza: 'N' } quando non ce ne sono; con 'S' arriva anche l'elenco, di forma non ancora vista
   const om = radice.ElencoOmonimieProtesti ?? {};
   const omonimie = testo(om.flagPresenza).toUpperCase() === 'S' || Object.keys(om).some((k) => k !== 'flagPresenza');
 
   return {
-    presenzaProtesti: effetti > 0 || tutti.length > 0,
+    presenzaProtesti: effetti > 0 || tutti.length > 0 || segnalati,
     presenzaPregiudizievoli: false,
     presenzaProcedure: false,
     // la sintesi dice quanti effetti ci sono: se l'elenco ne ha meno, qualcosa non e' stato letto
-    dettaglioDisponibile: tutti.length >= effetti,
+    dettaglioDisponibile: tutti.length >= effetti && !(segnalati && !tutti.length),
     protesti,
     pregiudizievoli: [],
     procedure: [],

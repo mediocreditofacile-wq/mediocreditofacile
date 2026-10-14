@@ -47,7 +47,7 @@ export function htmlEventi(e: EventiNegativi | null): string {
       + '<p class="ev-sub">Campi riportati come li restituisce la fonte: è la prima procedura che vediamo, la forma non è ancora interpretata.</p>';
   }
   if (!e.dettaglioDisponibile) {
-    h += '<p class="ev-sub">Il registro conserva solo la presenza dell\'evento, non il dettaglio: per leggerlo serve la visura protesti ufficiale.</p>';
+    h += '<p class="ev-sub">L\'evento risulta presente ma il dettaglio non è leggibile da qui: per i protesti fa fede il PDF della visura protesti ufficiale.</p>';
   }
   return h;
 }
