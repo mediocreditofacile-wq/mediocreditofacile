@@ -28,6 +28,18 @@ export const VISURA: Record<TipoVisura, { documentId: string; prezzo: number; no
 export const BILANCIO = { documentId: '667443c29e6f0e447bc265aa', ricerca: 0.1, documento: 4.4 };
 
 /**
+ * Visura del Registro informatico dei protesti, letta dal catalogo il 14/10/2026.
+ * Per l'azienda si chiede come la visura camerale (REA + Camera di Commercio), per
+ * la persona fisica con nome, cognome e codice fiscale. Esistono anche le versioni
+ * "protesti e pregiudizievoli" a 3,70 (69b97197327b41417c838fb4 azienda,
+ * 69b96bc0327b41417c838fb1 persona): non le usiamo, scelta di Alberto del 14/10/2026.
+ */
+export const PROTESTI = {
+  azienda: { documentId: '69b97173327b41417c838fb3', prezzo: 0.9, nome: 'Visura protesti azienda' },
+  persona: { documentId: '69b96b74327b41417c838fb0', prezzo: 0.9, nome: 'Visura protesti persona fisica' },
+};
+
+/**
  * Codici di forma giuridica (tabella IT-legalforms di Openapi, letta il 07/10/2026)
  * che non sono societa' di capitali. Tutto il resto (SRL, SRLS, SPA, cooperative,
  * consorzi) va sulla visura delle societa' di capitali.
@@ -124,6 +136,12 @@ export interface OrdineBilancio extends OrdineDocumento {
   balanceSheetId: string;
 }
 
+export interface OrdineProtestiPersona extends OrdineDocumento {
+  cf: string;
+  /** "Nome Cognome", per il nome del file */
+  nome: string;
+}
+
 export interface RicercaBilanci {
   richiestaId: string;
   quando: string;
@@ -139,10 +157,17 @@ export interface IndiceDocumenti {
   /** Per balanceSheetId */
   bilanci?: Record<string, OrdineBilancio>;
   ricerca?: RicercaBilanci;
+  /** Visura protesti dell'azienda */
+  protesti?: OrdineDocumento;
+  /** Visure protesti di soci e amministratori, per codice fiscale */
+  protestiPersone?: Record<string, OrdineProtestiPersona>;
 }
 
 /** 30 giorni per la visura, come scheda e verifiche: oltre, la fotografia e' vecchia. */
 export const TTL_VISURA = 30 * 24 * 60 * 60 * 1000;
+
+/** Anche la visura protesti vale 30 giorni: un protesto nuovo si iscrive in poche settimane. */
+export const TTL_PROTESTI = TTL_VISURA;
 
 /**
  * Un ordine fermo da un'ora non arrivera' piu': si accetta di ripagarlo,
@@ -211,4 +236,58 @@ export function anniValidi(ricerca: RicercaBilanci | undefined, adesso = Date.no
 export function nomeFile(ragioneSociale: string, etichetta: string, estensione: string): string {
   const rs = String(ragioneSociale ?? '').replace(/[^\w\s.-]/g, '').replace(/\s+/g, ' ').trim().slice(0, 60) || 'azienda';
   return `${etichetta} - ${rs}.${estensione.replace(/^\./, '') || 'pdf'}`;
+}
+
+// --- soci e amministratori ---------------------------------------------------------
+// Chi puo' avere una visura protesti da persona fisica. Si ricava dalla scheda gia'
+// pagata, mai dal browser: nome, cognome e codice fiscale decidono che cosa si paga.
+
+export interface PersonaScheda {
+  cf: string;
+  nome: string;
+  cognome: string;
+  /** Quota del socio, se e' socio */
+  quota: number | null;
+  amministratore: boolean;
+  legaleRappresentante: boolean;
+  /** Codice fiscale a 16 caratteri con nome e cognome: si puo' chiedere la visura persona */
+  personaFisica: boolean;
+}
+
+/** Codice fiscale di persona fisica: 16 caratteri, lettere e cifre. */
+export const cfPersonaFisica = (cf: string) => /^[A-Z0-9]{16}$/.test(String(cf ?? '').trim().toUpperCase());
+
+/**
+ * Soci e amministratori della scheda, uno per codice fiscale: la stessa persona
+ * e' spesso socio e amministratore insieme. I soci societa' (codice a 11 cifre)
+ * restano in elenco ma senza visura persona.
+ */
+export function personeDallaScheda(scheda: any): PersonaScheda[] {
+  const mappa = new Map<string, PersonaScheda>();
+  const prendi = (cf: string, nome: string, cognome: string) => {
+    const k = String(cf ?? '').trim().toUpperCase();
+    if (!k) return null;
+    let p = mappa.get(k);
+    if (!p) {
+      p = { cf: k, nome: '', cognome: '', quota: null, amministratore: false, legaleRappresentante: false, personaFisica: false };
+      mappa.set(k, p);
+    }
+    if (!p.nome && nome) p.nome = String(nome).trim();
+    if (!p.cognome && cognome) p.cognome = String(cognome).trim();
+    p.personaFisica = cfPersonaFisica(k) && !!p.nome && !!p.cognome;
+    return p;
+  };
+  for (const x of scheda?.soci ?? []) {
+    const cf = String(x?.taxCode ?? '');
+    // un socio societa' ha la ragione sociale in companyName e niente nome e cognome
+    const p = cfPersonaFisica(cf) ? prendi(cf, x?.name, x?.surname) : prendi(cf, x?.companyName, '');
+    if (p && x?.percentShare != null && Number.isFinite(Number(x.percentShare))) p.quota = Number(x.percentShare);
+  }
+  for (const m of scheda?.full?.managers ?? []) {
+    const p = prendi(String(m?.taxCode ?? ''), m?.name, m?.surname);
+    if (!p) continue;
+    p.amministratore = true;
+    if (m?.isLegalRepresentative) p.legaleRappresentante = true;
+  }
+  return [...mappa.values()];
 }

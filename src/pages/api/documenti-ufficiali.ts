@@ -10,6 +10,13 @@ export const prerender = false;
  *   POST /api/documenti-ufficiali {azione:'visura', piva}          -> ordina (o riusa) la visura
  *   POST /api/documenti-ufficiali {azione:'cerca-bilanci', piva}   -> elenco degli esercizi (0,10)
  *   POST /api/documenti-ufficiali {azione:'bilancio', piva, id}    -> ordina (o riusa) un esercizio
+ *   GET  /api/documenti-ufficiali?piva=...&stato=protesti          -> avanza l'attesa della visura protesti
+ *   GET  /api/documenti-ufficiali?piva=...&stato=protesti-persona&cf=...
+ *   POST /api/documenti-ufficiali {azione:'protesti', piva}        -> visura protesti dell'azienda (0,90)
+ *   POST /api/documenti-ufficiali {azione:'protesti-persona', piva, cf} -> visura protesti di un socio o amministratore (0,90)
+ *
+ * L'archivio porta anche il dettaglio della verifica eventi negativi gia' pagata
+ * (azienda, soci e amministratori), letto dal registro: nessuna chiamata Openapi.
  *
  * Bearer VALUTAZIONE_KEY come il resto dello strumento: ogni POST puo' spendere.
  * La logica sta in src/lib/docuengine.ts e src/lib/documenti-ufficiali.ts.
@@ -18,8 +25,10 @@ export const prerender = false;
 import {
   leggiIndice, datiAzienda, ordinaVisura, statoVisura, cercaBilanci, ordinaBilancio,
   statoBilancio, anniInArchivio, percorsoAmmesso, leggiFile,
+  ordinaProtesti, statoProtesti, ordinaProtestiPersona, statoProtestiPersona, datiVisuraProtesti,
 } from '../../lib/docuengine';
-import { VISURA, BILANCIO, nomeFile } from '../../lib/documenti-ufficiali';
+import { VISURA, BILANCIO, PROTESTI, nomeFile } from '../../lib/documenti-ufficiali';
+import { esitiVerifiche } from '../../lib/openapi';
 
 function autorizzato(request: Request): boolean {
   const atteso = import.meta.env.VALUTAZIONE_KEY as string;
@@ -36,10 +45,20 @@ function json(body: unknown, status = 200) {
 
 const normPiva = (v: unknown) => String(v ?? '').replace(/\D/g, '');
 const pivaValida = (p: string) => /^\d{11}$/.test(p);
+const normCf = (v: unknown) => String(v ?? '').trim().toUpperCase();
+const cfValido = (cf: string) => /^[A-Z0-9]{16}$/.test(cf);
 
-/** Quello che serve alla pagina per disegnare i due pannelli. */
+/** Quello che serve alla pagina per disegnare i pannelli. */
 async function archivio(piva: string) {
   const [indice, az] = await Promise.all([leggiIndice(piva), datiAzienda(piva)]);
+  const persone = az?.persone ?? [];
+  // esiti gia' pagati della verifica eventi negativi e contenuto delle visure protesti
+  // gia' scaricate: solo blob, mai Openapi
+  const [reg, visuraAzienda, ...visurePersone] = await Promise.all([
+    esitiVerifiche([piva, ...persone.map((p) => p.cf)]).catch(() => ({} as Record<string, any>)),
+    datiVisuraProtesti(indice.protesti).catch(() => null),
+    ...persone.map((p) => datiVisuraProtesti(indice.protestiPersone?.[p.cf]).catch(() => null)),
+  ]);
   return {
     piva,
     azienda: az && {
@@ -52,12 +71,39 @@ async function archivio(piva: string) {
       visura: az ? VISURA[az.tipoVisura].prezzo : null,
       ricercaBilanci: BILANCIO.ricerca,
       bilancio: BILANCIO.documento,
+      protesti: PROTESTI.azienda.prezzo,
+      protestiPersona: PROTESTI.persona.prezzo,
     },
     visura: indice.visura ?? null,
     bilanci: indice.bilanci ?? {},
     anni: anniInArchivio(indice),
     ricercaQuando: indice.ricerca?.quando ?? null,
+    protesti: {
+      ordine: indice.protesti ?? null,
+      visura: visuraAzienda,
+      negativita: reg[piva]?.negativita ?? null,
+      persone: persone.map((p, i) => ({
+        ...p,
+        negativita: reg[p.cf]?.negativita ?? null,
+        ordine: indice.protestiPersone?.[p.cf] ?? null,
+        visura: visurePersone[i],
+      })),
+    },
   };
+}
+
+/** "Visura - X.pdf", "Bilancio 2024 - X.pdf", "Visura protesti Mario Rossi - X.pdf" */
+async function etichettaFile(piva: string, file: string): Promise<{ etichetta: string; ragioneSociale: string }> {
+  const az = await datiAzienda(piva);
+  const ragioneSociale = az?.ragioneSociale ?? piva;
+  if (file.includes('/visura-')) return { etichetta: 'Visura', ragioneSociale };
+  if (file.includes('/protesti-')) {
+    const cf = file.match(/\/protesti-([A-Z0-9]{16})-/)?.[1];
+    const p = cf ? az?.persone.find((x) => x.cf === cf) : null;
+    const chi = p ? ` ${p.nome} ${p.cognome}`.toLowerCase().replace(/(^|[\s'’-])(\p{L})/gu, (_, a, b) => a + b.toUpperCase()) : cf ? ` ${cf}` : '';
+    return { etichetta: `Visura protesti${chi}`, ragioneSociale };
+  }
+  return { etichetta: `Bilancio ${file.match(/bilancio-(\d{4})/)?.[1] ?? ''}`.trim(), ragioneSociale };
 }
 
 export async function GET({ request }: { request: Request }) {
@@ -73,11 +119,9 @@ export async function GET({ request }: { request: Request }) {
       const b = await leggiFile(file);
       if (!b?.stream) return json({ errore: 'documento non trovato' }, 404);
       // Nome leggibile per la cartella pratica: "Visura - RAGIONE SOCIALE.pdf"
-      const az = await datiAzienda(piva);
       const est = file.split('.').pop() ?? 'pdf';
-      const etichetta = file.includes('/visura-') ? 'Visura'
-        : `Bilancio ${file.match(/bilancio-(\d{4})/)?.[1] ?? ''}`.trim();
-      const nome = nomeFile(az?.ragioneSociale ?? piva, etichetta, est);
+      const { etichetta, ragioneSociale } = await etichettaFile(piva, file);
+      const nome = nomeFile(ragioneSociale, etichetta, est);
       return new Response(b.stream, {
         headers: {
           'Content-Type': b.blob?.contentType ?? 'application/pdf',
@@ -93,6 +137,12 @@ export async function GET({ request }: { request: Request }) {
       const id = String(url.searchParams.get('id') ?? '');
       if (!id) return json({ errore: 'esercizio mancante' }, 400);
       return json({ ordine: await statoBilancio(piva, id) });
+    }
+    if (stato === 'protesti') return json({ ordine: await statoProtesti(piva) });
+    if (stato === 'protesti-persona') {
+      const cf = normCf(url.searchParams.get('cf'));
+      if (!cfValido(cf)) return json({ errore: 'codice fiscale non valido' }, 400);
+      return json({ ordine: await statoProtestiPersona(piva, cf) });
     }
     return json(await archivio(piva));
   } catch (err) {
@@ -116,6 +166,12 @@ export async function POST({ request }: { request: Request }) {
       const id = String(body?.id ?? '');
       if (!/^\d+$/.test(id)) return json({ errore: 'esercizio non valido' }, 400);
       return json(await ordinaBilancio(piva, id));
+    }
+    if (azione === 'protesti') return json(await ordinaProtesti(piva));
+    if (azione === 'protesti-persona') {
+      const cf = normCf(body?.cf);
+      if (!cfValido(cf)) return json({ errore: 'codice fiscale non valido' }, 400);
+      return json(await ordinaProtestiPersona(piva, cf));
     }
     return json({ errore: 'azione non riconosciuta' }, 400);
   } catch (err) {

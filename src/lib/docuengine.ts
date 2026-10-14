@@ -1,4 +1,4 @@
-// Documenti ufficiali (visura camerale e bilancio depositato) via Openapi DocuEngine.
+// Documenti ufficiali (visura camerale, bilancio depositato, visura protesti) via Openapi DocuEngine.
 // SERVER-ONLY: passa dal token Openapi e dallo store Blob privato.
 //
 // Flusso DocuEngine, verificato su una richiesta vera il 07/10/2026:
@@ -17,11 +17,12 @@
 import { put, get, list } from '@vercel/blob';
 import { chiamaOpenapi, getToken, schedaDallaCache, type Servizio } from './openapi';
 import {
-  VISURA, BILANCIO, TTL_VISURA, tipoVisura, anniDaRicerca, avanzamento, decidi,
-  resultIdRiusabile, anniValidi,
+  VISURA, BILANCIO, PROTESTI, TTL_VISURA, TTL_PROTESTI, tipoVisura, anniDaRicerca, avanzamento, decidi,
+  resultIdRiusabile, anniValidi, personeDallaScheda,
   type IndiceDocumenti, type OrdineDocumento, type OrdineVisura, type OrdineBilancio,
-  type FileArchiviato, type AnnoBilancio, type TipoVisura,
+  type OrdineProtestiPersona, type FileArchiviato, type AnnoBilancio, type TipoVisura, type PersonaScheda,
 } from './documenti-ufficiali';
+import { leggiVisuraProtesti, type VisuraProtesti } from './eventi-negativi';
 
 const DOCUENGINE = 'https://docuengine.openapi.com';
 const blobToken = () => import.meta.env.BLOB_READ_WRITE_TOKEN as string | undefined;
@@ -99,6 +100,8 @@ export interface DatiAzienda {
   formaCodice: string | null;
   formaDescrizione: string | null;
   tipoVisura: TipoVisura;
+  /** Soci e amministratori, per le visure protesti da persona fisica */
+  persone: PersonaScheda[];
 }
 
 export async function datiAzienda(piva: string): Promise<DatiAzienda | null> {
@@ -115,6 +118,7 @@ export async function datiAzienda(piva: string): Promise<DatiAzienda | null> {
     formaCodice,
     formaDescrizione: A.detailedLegalForm?.description ?? null,
     tipoVisura: tipoVisura(formaCodice),
+    persone: personeDallaScheda(s),
   };
 }
 
@@ -304,6 +308,107 @@ export async function statoBilancio(piva: string, balanceSheetId: string): Promi
   }
   if (nuovo.stato === 'pronto') console.log(JSON.stringify({ evento: 'bilancio_pronto', piva, anno: nuovo.anno, id: nuovo.richiestaId }));
   return nuovo;
+}
+
+// --- visura protesti --------------------------------------------------------------
+// Stesso giro della visura camerale: ordine, attesa, file nello store privato.
+// L'azienda si chiede con REA e Camera di Commercio, la persona con nome, cognome e
+// codice fiscale. Tutti e tre arrivano dalla scheda gia' pagata, mai dal browser.
+//
+// Le visure delle persone stanno nell'archivio dell'azienda da cui sono state
+// chieste: la stessa persona vista da un'altra azienda entro 30 giorni si ripaga
+// (0,90). E' il prezzo di non avere un secondo archivio per codice fiscale.
+
+/** Apre una richiesta DocuEngine a pagamento e torna l'ordine in attesa. */
+async function nuovaRichiesta(documentId: string, search: Record<string, string>, servizio: Servizio): Promise<OrdineDocumento> {
+  const r = await chiamaOpenapi(`${DOCUENGINE}/requests`, servizio, {
+    method: 'POST',
+    body: JSON.stringify({ documentId, search }),
+  });
+  const id = r?.dati?.id;
+  if (!id) throw new Error('DocuEngine non ha restituito un id per la richiesta');
+  return {
+    richiestaId: String(id),
+    avviato: new Date().toISOString(),
+    stato: 'attesa',
+    statoDocuengine: String(r.dati.state ?? ''),
+  };
+}
+
+const prefissoProtesti = (o: OrdineDocumento) => `protesti-${o.avviato.slice(0, 10)}`;
+const prefissoProtestiPersona = (o: OrdineProtestiPersona) => `protesti-${o.cf}-${o.avviato.slice(0, 10)}`;
+
+export async function ordinaProtesti(piva: string): Promise<{ ordine: OrdineDocumento; daArchivio: boolean }> {
+  const az = await datiAzienda(piva);
+  if (!az) throw new Error('Apri prima la scheda dell\'azienda: REA e Camera di Commercio arrivano da li\'');
+  if (!az.rea || !az.cciaa) throw new Error('La scheda non riporta numero REA e Camera di Commercio: la visura protesti non si puo\' chiedere');
+
+  const indice = await leggiIndice(piva);
+  const d = decidi(indice.protesti, TTL_PROTESTI);
+  if (d.azione === 'archivio') return { ordine: d.ordine, daArchivio: true };
+  if (d.azione === 'attendi') return { ordine: await statoProtesti(piva), daArchivio: false };
+
+  const ordine = await nuovaRichiesta(PROTESTI.azienda.documentId, { field0: az.rea, field1: az.cciaa }, 'DOC-protesti');
+  await aggiornaIndice(piva, (i) => { i.protesti = ordine; });
+  console.log(JSON.stringify({ evento: 'protesti_ordinati', piva, id: ordine.richiestaId, motivo: d.motivo }));
+  return { ordine, daArchivio: false };
+}
+
+export async function statoProtesti(piva: string): Promise<OrdineDocumento> {
+  const indice = await leggiIndice(piva);
+  if (!indice.protesti) throw new Error('Nessuna visura protesti ordinata per questa partita IVA');
+  if (indice.protesti.stato !== 'attesa') return indice.protesti;
+  const nuovo = await avanza(piva, indice.protesti, prefissoProtesti(indice.protesti));
+  if (nuovo.stato !== 'attesa' || nuovo.statoDocuengine !== indice.protesti.statoDocuengine) {
+    await aggiornaIndice(piva, (i) => { if (i.protesti?.richiestaId === nuovo.richiestaId) i.protesti = nuovo; });
+  }
+  if (nuovo.stato === 'pronto') console.log(JSON.stringify({ evento: 'protesti_pronti', piva, id: nuovo.richiestaId }));
+  return nuovo;
+}
+
+export async function ordinaProtestiPersona(piva: string, cf: string): Promise<{ ordine: OrdineProtestiPersona; daArchivio: boolean }> {
+  const az = await datiAzienda(piva);
+  if (!az) throw new Error('Apri prima la scheda dell\'azienda: soci e amministratori arrivano da li\'');
+  const p = az.persone.find((x) => x.cf === cf);
+  if (!p) throw new Error('Il codice fiscale non e\' tra i soci e gli amministratori di questa scheda');
+  if (!p.personaFisica) throw new Error('La visura protesti da persona fisica si chiede solo per le persone, non per i soci societa\'');
+
+  const indice = await leggiIndice(piva);
+  const d = decidi(indice.protestiPersone?.[cf], TTL_PROTESTI);
+  if (d.azione === 'archivio') return { ordine: d.ordine as OrdineProtestiPersona, daArchivio: true };
+  if (d.azione === 'attendi') return { ordine: await statoProtestiPersona(piva, cf), daArchivio: false };
+
+  const base = await nuovaRichiesta(PROTESTI.persona.documentId, { field0: p.nome, field1: p.cognome, field2: cf }, 'DOC-protesti-persona');
+  const ordine: OrdineProtestiPersona = { ...base, cf, nome: `${p.nome} ${p.cognome}` };
+  await aggiornaIndice(piva, (i) => { i.protestiPersone = { ...(i.protestiPersone ?? {}), [cf]: ordine }; });
+  console.log(JSON.stringify({ evento: 'protesti_persona_ordinati', piva, cf, id: ordine.richiestaId, motivo: d.motivo }));
+  return { ordine, daArchivio: false };
+}
+
+export async function statoProtestiPersona(piva: string, cf: string): Promise<OrdineProtestiPersona> {
+  const indice = await leggiIndice(piva);
+  const attuale = indice.protestiPersone?.[cf];
+  if (!attuale) throw new Error('Nessuna visura protesti ordinata per questa persona');
+  if (attuale.stato !== 'attesa') return attuale;
+  const nuovo = (await avanza(piva, attuale, prefissoProtestiPersona(attuale))) as OrdineProtestiPersona;
+  if (nuovo.stato !== 'attesa' || nuovo.statoDocuengine !== attuale.statoDocuengine) {
+    await aggiornaIndice(piva, (i) => {
+      if (i.protestiPersone?.[cf]?.richiestaId === nuovo.richiestaId) i.protestiPersone[cf] = nuovo;
+    });
+  }
+  if (nuovo.stato === 'pronto') console.log(JSON.stringify({ evento: 'protesti_persona_pronti', piva, cf, id: nuovo.richiestaId }));
+  return nuovo;
+}
+
+/**
+ * Il contenuto di una visura protesti gia' scaricata, letto dal JSON che DocuEngine
+ * consegna insieme al PDF. null se la visura non c'e' o il file non si legge.
+ */
+export async function datiVisuraProtesti(ordine: OrdineDocumento | undefined | null): Promise<VisuraProtesti | null> {
+  if (ordine?.stato !== 'pronto') return null;
+  const json = ordine.file?.find((f) => f.percorso.endsWith('.json') || f.mime.includes('json'));
+  if (!json) return null;
+  return leggiVisuraProtesti(await leggiJson(json.percorso));
 }
 
 // --- consegna --------------------------------------------------------------------

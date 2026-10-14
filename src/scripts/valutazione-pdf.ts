@@ -8,6 +8,7 @@
 // Funzione pura: non tocca il DOM, cosi' la si puo' provare anche fuori dal browser.
 
 import { leggiReport, sintesiReport } from '../lib/report-persona';
+import { leggiEventiNegativi, sintesiEventi, conEventi, righeEventi, senzaProtesti, confrontoVerificaVisura } from '../lib/eventi-negativi';
 
 const SCALA = ['A1', 'A2', 'A3', 'B1', 'B2', 'B3', 'C1', 'C2', 'C3'];
 const COLORI: [number, number, number][] = [
@@ -205,13 +206,28 @@ export async function creaPdfScheda(s: any, D: Dizionari) {
   const V: Record<string, any> = s.verifiche ?? {};
   const regAz = V[String(piva).toUpperCase()]?.negativita;
   const n = s.negativita ?? (regAz?.pronto ? regAz.dati : null);
-  const testoNeg = (d: any) =>
-    [d.presenzaProtesti && 'protesti', d.presenzaPregiudizievoli && 'pregiudizievoli', d.presenzaProcedure && 'procedure concorsuali'].filter(Boolean).join(', ') || 'nessun evento rilevato';
+  const testoNeg = (d: any) => sintesiEventi(leggiEventiNegativi(d));
   const esito = n
     ? testoNeg(n) + (regAz?.pronto && regAz.avviata ? ` (verificata il ${dataIt(regAz.avviata)})` : '')
     : 'verifica non conclusa al momento della stampa';
-  doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); setCol(NERO);
-  pagina(8); doc.text(esito, L, y); y += 8;
+  // Una riga di testo a capo automatico, per esiti e avvisi
+  const paragrafo = (t: string, col: [number, number, number] = NERO) => {
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); setCol(col);
+    const righe = doc.splitTextToSize(t, R - L) as string[];
+    pagina(righe.length * 4 + 4); doc.text(righe, L, y); y += righe.length * 4 + 3;
+  };
+  paragrafo(`Verifica eventi negativi: ${esito}`);
+  const eAz = n ? leggiEventiNegativi(n) : null;
+  // se la visura protesti e' in archivio i protesti si stampano da li': fa fede il Registro
+  const vAz = s.protestiUfficiali?.azienda ?? null;
+  if (vAz) {
+    paragrafo(`Visura protesti del ${vAz.data} (Registro informatico dei protesti): ${sintesiEventi(vAz.dati)}`);
+    if (conEventi(vAz.dati)) coppie(righeEventi(vAz.dati));
+    const conf = confrontoVerificaVisura(eAz, vAz.dati);
+    if (conf) paragrafo(conf, GRIGIO);
+  }
+  const resto = vAz ? senzaProtesti(eAz) : eAz;
+  if (conEventi(resto)) coppie(righeEventi(resto));
 
   // ---------- soci ----------
   const soci = s.soci ?? [];
@@ -261,17 +277,35 @@ export async function creaPdfScheda(s: any, D: Dizionari) {
   const persone = new Map<string, string>();
   soci.forEach((x: any) => { if (x.taxCode) persone.set(String(x.taxCode).toUpperCase(), x.companyName || `${x.name ?? ''} ${x.surname ?? ''}`.trim()); });
   mg.forEach((m: any) => { if (m.taxCode) persone.set(String(m.taxCode).toUpperCase(), `${m.name ?? ''} ${m.surname ?? ''}`.trim()); });
-  const verificate = [...persone].filter(([cf]) => V[cf]?.negativita?.pronto || V[cf]?.report?.pronto);
+  const visurePersone: Record<string, any> = s.protestiUfficiali?.persone ?? {};
+  const verificate = [...persone].filter(([cf]) => V[cf]?.negativita?.pronto || V[cf]?.report?.pronto || visurePersone[cf]);
   if (verificate.length) {
     titolo('Verifiche su soci e amministratori');
     coppie(verificate.map(([cf, nm]) => {
-      const r = V[cf];
+      const r = V[cf] ?? {};
       const parti: string[] = [];
       if (r.negativita?.pronto) parti.push(`eventi negativi: ${testoNeg(r.negativita.dati)} (${dataIt(r.negativita.avviata) ?? ''})`);
+      if (visurePersone[cf]) parti.push(`visura protesti: ${sintesiEventi(visurePersone[cf].dati)} (${visurePersone[cf].data})`);
       const rep = r.report?.pronto ? leggiReport(r.report.dati) : null;
       if (rep) parti.push(`report: ${sintesiReport(rep)} (${dataIt(r.report.avviata) ?? ''})`);
       return [`${nm}\n${cf}`, parti.join('\n')] as [string, string];
     }));
+
+    // il dettaglio degli eventi negativi di chi ne ha, protesti dalla visura se c'e'
+    verificate.forEach(([cf, nm]) => {
+      const e = V[cf]?.negativita?.pronto ? leggiEventiNegativi(V[cf].negativita.dati) : null;
+      const vis = visurePersone[cf] ?? null;
+      if (!conEventi(e) && !conEventi(vis?.dati)) return;
+      titolo(`Eventi negativi: ${nm}`);
+      if (vis) {
+        paragrafo(`Visura protesti del ${vis.data}: ${sintesiEventi(vis.dati)}`);
+        if (conEventi(vis.dati)) coppie(righeEventi(vis.dati));
+        const conf = confrontoVerificaVisura(e, vis.dati);
+        if (conf) paragrafo(conf, GRIGIO);
+      }
+      const altri = vis ? senzaProtesti(e) : e;
+      if (conEventi(altri)) coppie(righeEventi(altri));
+    });
 
     // un blocco per ogni report persona
     verificate.forEach(([cf, nm]) => {

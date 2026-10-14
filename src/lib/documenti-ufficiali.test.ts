@@ -5,7 +5,8 @@
 import { describe, expect, it } from 'vitest';
 import {
   tipoVisura, anniDaRicerca, avanzamento, decidi, resultIdRiusabile, anniValidi, nomeFile,
-  TTL_VISURA, ATTESA_MAX_DOC, VITA_RICERCA, TTL_ELENCO_ANNI, VISURA,
+  personeDallaScheda, cfPersonaFisica,
+  TTL_VISURA, ATTESA_MAX_DOC, VITA_RICERCA, TTL_ELENCO_ANNI, VISURA, PROTESTI,
   type OrdineDocumento, type RicercaBilanci,
 } from './documenti-ufficiali';
 
@@ -127,5 +128,49 @@ describe('nomeFile', () => {
   it('nome leggibile senza caratteri che rompono il file system', () => {
     expect(nomeFile('LOGSTOR ITALIA S.R.L.', 'Bilancio 2025', 'pdf')).toBe('Bilancio 2025 - LOGSTOR ITALIA S.R.L..pdf');
     expect(nomeFile('A/B "C"', 'Visura', '.pdf')).toBe('Visura - AB C.pdf');
+  });
+});
+
+describe('visura protesti', () => {
+  it('i prezzi seguono il catalogo letto il 14/10/2026', () => {
+    expect([PROTESTI.azienda.prezzo, PROTESTI.persona.prezzo]).toEqual([0.9, 0.9]);
+  });
+
+  // Forma dei campi della scheda reale; nomi e codici inventati
+  const scheda = {
+    soci: [
+      { companyName: 'MARIO ROSSI', name: 'MARIO', surname: 'ROSSI', taxCode: 'RSSMRA80A01H501U', percentShare: 80 },
+      { companyName: 'BETA HOLDING SRL', name: null, surname: null, taxCode: '01234567890', percentShare: 20 },
+    ],
+    full: { managers: [
+      { name: 'MARIO', surname: 'ROSSI', taxCode: 'rssmra80a01h501u', isLegalRepresentative: true },
+      { name: 'ANNA', surname: 'BIANCHI', taxCode: 'BNCNNA75B41F205X', isLegalRepresentative: false },
+    ] },
+  };
+
+  it('una riga per codice fiscale, anche se la persona e\' socio e amministratore', () => {
+    const p = personeDallaScheda(scheda);
+    expect(p.map((x) => x.cf)).toEqual(['RSSMRA80A01H501U', '01234567890', 'BNCNNA75B41F205X']);
+    expect(p[0]).toMatchObject({ nome: 'MARIO', cognome: 'ROSSI', quota: 80, amministratore: true, legaleRappresentante: true, personaFisica: true });
+    expect(p[2]).toMatchObject({ quota: null, amministratore: true, legaleRappresentante: false, personaFisica: true });
+  });
+
+  it('il socio societa\' resta in elenco ma senza visura persona', () => {
+    const socio = personeDallaScheda(scheda)[1];
+    expect(socio).toMatchObject({ nome: 'BETA HOLDING SRL', quota: 20, personaFisica: false });
+  });
+
+  it('senza nome o cognome la visura persona non si chiede', () => {
+    const p = personeDallaScheda({ soci: [{ name: 'MARIO', surname: '', taxCode: 'RSSMRA80A01H501U' }] });
+    expect(p[0].personaFisica).toBe(false);
+  });
+
+  it('codice fiscale di persona: 16 caratteri', () => {
+    expect(cfPersonaFisica('RSSMRA80A01H501U')).toBe(true);
+    expect(cfPersonaFisica('01234567890')).toBe(false);
+  });
+
+  it('scheda vuota: nessuno', () => {
+    expect(personeDallaScheda(null)).toEqual([]);
   });
 });

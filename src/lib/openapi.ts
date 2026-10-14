@@ -54,6 +54,8 @@ export const COSTI = {
   'DOC-visura-individuale': 2.90,
   'DOC-bilancio-ricerca': 0.10,
   'DOC-bilancio': 4.40,
+  'DOC-protesti': 0.90,
+  'DOC-protesti-persona': 0.90,
 } as const;
 export type Servizio = keyof typeof COSTI;
 

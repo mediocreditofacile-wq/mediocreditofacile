@@ -6,6 +6,8 @@
 import { montaDocumenti } from './documenti-ufficiali';
 import { PAESI_SEPA, PAESI_MONDO, FORMATO_ID, nomePaese } from '../data/paesi';
 import { leggiReport, sintesiReport } from '../lib/report-persona';
+import { leggiEventiNegativi, sintesiEventi, conEventi, confrontoVerificaVisura, senzaProtesti } from '../lib/eventi-negativi';
+import { htmlEventi } from './eventi-negativi-html';
 
 type Dizionari = {
   CODICI: Record<string, string>;
@@ -134,10 +136,12 @@ function barraAzione(gruppo: string, azioni: [string, string, number][]): string
 // Arrivano gia' allegati alla scheda (s.verifiche, per codice fiscale) quando sono
 // stati pagati in passato, oppure dal polling quando si lanciano adesso.
 
+// Dal 14/10/2026 l'esito dice che cosa c'e' ("protesto: assegno da 10.000 €"),
+// non solo "protesti": il dettaglio era gia' pagato e restava nel registro.
 const esitoNeg = (d: any) => {
   if (!d) return '<span class="vuoto">nessuna risposta</span>';
-  const v = [d.presenzaProtesti && 'protesti', d.presenzaPregiudizievoli && 'pregiudizievoli', d.presenzaProcedure && 'procedure'].filter(Boolean);
-  return v.length ? `<span class="esito-si">${v.join(', ')}</span>` : '<span class="esito-no">nessun evento</span>';
+  const e = leggiEventiNegativi(d);
+  return `<span class="${conEventi(e) ? 'esito-si' : 'esito-no'}">${esc(sintesiEventi(e))}</span>`;
 };
 
 const giaVerificata = (avviata?: string) =>
@@ -188,13 +192,41 @@ function bloccoReport(d: any, avviata?: string): string {
   </details>`;
 }
 
-const rigaReport = (cf: string, colonne: number, d: any, avviata?: string) =>
-  `<tr class="rep-riga" data-cf="${esc(cf)}"><td colspan="${colonne}">${bloccoReport(d, avviata)}</td></tr>`;
+/**
+ * Blocco espandibile col dettaglio eventi negativi della persona, se ce n'e'. Se la
+ * visura protesti della persona e' gia' in archivio, i protesti si leggono da li'.
+ */
+function bloccoEventi(d: any, avviata?: string, visura?: { dati: any; data: string } | null): string {
+  const e = d ? leggiEventiNegativi(d) : null;
+  const v = visura?.dati ?? null;
+  if (!conEventi(e) && !conEventi(v)) return '';
+  if (v) {
+    const altri = senzaProtesti(e);
+    const conf = confrontoVerificaVisura(e, v);
+    return `<details class="rep" open><summary>Visura protesti del ${esc(visura!.data)}: ${esc(sintesiEventi(v))}</summary>
+      ${conEventi(v) ? htmlEventi(v) : ''}${conEventi(altri) ? htmlEventi(altri) : ''}
+      ${conf ? `<p>${esc(conf)}</p>` : ''}
+    </details>`;
+  }
+  return `<details class="rep" open><summary>Eventi negativi${avviata ? ` del ${dataIt(avviata) ?? ''}` : ''}: ${esc(sintesiEventi(e))}</summary>
+    ${htmlEventi(e)}
+    <p>La visura protesti ufficiale di questa persona si ordina dalla scheda Protesti dei documenti ufficiali.</p>
+  </details>`;
+}
 
-const rigaSel = (gruppo: string, cf: string, nome: string, celle: string, reg: any, colonne: number, extra = '') => {
-  const riga = `<tr><td class="ck"><input type="checkbox" class="pick" data-gruppo="${gruppo}" data-cf="${esc(cf)}" data-nome="${esc(nome)}" data-colonne="${colonne}"${extra}></td>${celle}<td class="num esito" data-cf="${esc(cf)}">${cellaEsito(reg)}</td></tr>`;
-  return reg?.report?.pronto ? riga + rigaReport(cf, colonne, reg.report.dati, reg.report.avviata) : riga;
-};
+/** Riga sotto la persona con i dettagli gia' pagati: eventi negativi e report. Vuota se non c'e' niente. */
+function rigaDettagli(cf: string, colonne: number, reg: any): string {
+  const visura = schedaCorrente?.protestiUfficiali?.persone?.[cf] ?? null;
+  const neg = reg?.negativita?.pronto || visura
+    ? bloccoEventi(reg?.negativita?.pronto ? reg.negativita.dati : null, reg?.negativita?.avviata, visura)
+    : '';
+  const rep = reg?.report?.pronto ? bloccoReport(reg.report.dati, reg.report.avviata) : '';
+  return neg || rep ? `<tr class="rep-riga" data-cf="${esc(cf)}"><td colspan="${colonne}">${neg}${rep}</td></tr>` : '';
+}
+
+const rigaSel = (gruppo: string, cf: string, nome: string, celle: string, reg: any, colonne: number, extra = '') =>
+  `<tr><td class="ck"><input type="checkbox" class="pick" data-gruppo="${gruppo}" data-cf="${esc(cf)}" data-nome="${esc(nome)}" data-colonne="${colonne}"${extra}></td>${celle}<td class="num esito" data-cf="${esc(cf)}">${cellaEsito(reg)}</td></tr>`
+  + rigaDettagli(cf, colonne, reg);
 
 export function rendiScheda(s: any): string {
   const F = s.full ?? {}, A = s.advanced ?? {}, CS = s.score ?? {};
@@ -247,9 +279,12 @@ export function rendiScheda(s: any): string {
 
   // eventi negativi azienda: dal registro se gia' concluso, altrimenti si riempiono da soli
   const negAz = reg(s.piva)?.negativita;
+  // la visura protesti, se in archivio, arriva col pannello dei documenti e va sopra: fa fede lei
   h += `<div class="blocco"><div class="blocco-tit">Eventi negativi sull'azienda</div>
+    <div id="visuraAzienda"></div>
     <div id="negAzienda" data-id="${esc(negAz?.pronto ? '' : (negAz?.id ?? s.negativitaId ?? ''))}">${
-      negAz?.pronto ? esitoNeg(negAz.dati) + giaVerificata(negAz.avviata) : '<span class="attesa">verifica in corso…</span>'}</div></div>`;
+      negAz?.pronto ? esitoNeg(negAz.dati) + giaVerificata(negAz.avviata) : '<span class="attesa">verifica in corso…</span>'}</div>
+    <button type="button" class="doc-link neg-apri" data-apri-protesti>Dettaglio e visura protesti</button></div>`;
 
   // visura e bilanci depositati: il pannello si riempie da solo, vedi documenti-ufficiali.ts
   h += `<div class="blocco doc-uff"><div class="blocco-tit">Documenti ufficiali</div><div id="docUfficiali"></div></div>`;
@@ -363,20 +398,65 @@ function registra(cf: string, tipo: 'negativita' | 'report', voce: any) {
   schedaCorrente.verifiche[cf] = { ...(schedaCorrente.verifiche[cf] ?? { cf }), [tipo]: voce };
 }
 
+/** Ridisegna la riga dei dettagli sotto ogni riga della persona, dalla scheda in memoria. */
+function aggiornaDettagli(cf: string) {
+  const reg = schedaCorrente?.verifiche?.[cf];
+  document.querySelectorAll<HTMLInputElement>(`.pick[data-cf="${cf}"]`).forEach((c) => {
+    const tr = c.closest('tr')!;
+    if (tr.nextElementSibling?.matches(`tr.rep-riga[data-cf="${cf}"]`)) tr.nextElementSibling.remove();
+    const html = rigaDettagli(cf, Number(c.dataset.colonne ?? 4), reg);
+    if (html) tr.insertAdjacentHTML('afterend', html);
+  });
+}
+
+/**
+ * Le visure protesti gia' in archivio arrivano col pannello dei documenti ufficiali:
+ * la scheda le tiene in memoria (servono al PDF), aggiorna la riga dell'azienda e
+ * il dettaglio sotto soci e amministratori.
+ */
+function visureDaArchivio(piva: string, arch: any) {
+  if (!schedaCorrente || schedaCorrente.piva !== piva) return;
+  const pr = arch?.protesti ?? {};
+  const giorno = (o: any) => (o?.concluso || o?.avviato ? new Date(o.concluso ?? o.avviato).toLocaleDateString('it-IT') : '');
+  const persone: Record<string, any> = {};
+  for (const p of pr.persone ?? []) if (p.visura) persone[p.cf] = { dati: p.visura, data: giorno(p.ordine) };
+  const prima = JSON.stringify(schedaCorrente.protestiUfficiali?.persone ?? {});
+  schedaCorrente.protestiUfficiali = {
+    azienda: pr.visura ? { dati: pr.visura, data: giorno(pr.ordine) } : null,
+    persone,
+  };
+
+  const box = document.getElementById('visuraAzienda');
+  if (box) {
+    const v = pr.visura;
+    const neg = schedaCorrente.verifiche?.[piva]?.negativita;
+    const conf = v ? confrontoVerificaVisura(neg?.pronto ? leggiEventiNegativi(neg.dati) : null, v) : null;
+    box.innerHTML = v
+      ? `<div><span class="${conEventi(v) ? 'esito-si' : 'esito-no'}">${esc(sintesiEventi(v))}</span><span class="gia">dalla visura protesti del ${esc(giorno(pr.ordine))}</span></div>`
+        + (conf ? `<p class="prot-avviso">${esc(conf)}</p>` : '')
+      : '';
+    document.getElementById('negAzienda')?.classList.toggle('secondaria', !!v);
+  }
+  // il dettaglio sotto le persone cambia solo se sono cambiate le loro visure
+  if (JSON.stringify(persone) !== prima) {
+    for (const cf of new Set([...Object.keys(persone), ...Object.keys(JSON.parse(prima))])) aggiornaDettagli(cf);
+  }
+}
+
+/** La scheda Protesti dei documenti ufficiali rilegge il registro. */
+const avvisaDocumenti = () => document.getElementById('docUfficiali')?.dispatchEvent(new CustomEvent('verifiche-aggiornate'));
+
 function mostraNeg(cf: string, id: string, d: any, avviata?: string) {
   scrivi(cf, 'e-neg', esitoNeg(d) + giaVerificata(avviata));
   registra(cf, 'negativita', { id, avviata, pronto: true, dati: d });
+  aggiornaDettagli(cf);
+  avvisaDocumenti();
 }
 
 function mostraReport(cf: string, id: string, d: any, avviata?: string) {
   scrivi(cf, 'e-rep', esitoReport(d, avviata));
   registra(cf, 'report', { id, avviata, pronto: true, dati: d });
-  // blocco espandibile sotto ogni riga della persona, rimpiazzando quello vecchio
-  document.querySelectorAll<HTMLInputElement>(`.pick[data-cf="${cf}"]`).forEach((c) => {
-    const tr = c.closest('tr')!;
-    if (tr.nextElementSibling?.matches(`tr.rep-riga[data-cf="${cf}"]`)) tr.nextElementSibling.remove();
-    tr.insertAdjacentHTML('afterend', rigaReport(cf, Number(c.dataset.colonne ?? 4), d, avviata));
-  });
+  aggiornaDettagli(cf);
 }
 
 /** Segue una verifica fino all'esito, o fino al messaggio di attesa. */
@@ -391,6 +471,15 @@ function segui(tipo: 'negativita' | 'report', cf: string, id: string) {
 function collega() {
   document.querySelectorAll<HTMLInputElement>('.pick').forEach((c) =>
     c.addEventListener('change', () => aggiornaCosto(c.dataset.gruppo!)));
+
+  // dal blocco eventi negativi alla scheda Protesti dei documenti ufficiali
+  document.querySelectorAll<HTMLButtonElement>('[data-apri-protesti]').forEach((b) =>
+    b.addEventListener('click', () => {
+      const du = document.getElementById('docUfficiali');
+      if (!du) return;
+      du.dispatchEvent(new CustomEvent('apri-scheda', { detail: 'protesti' }));
+      du.closest('.blocco')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }));
 
   document.querySelectorAll<HTMLButtonElement>('.val-btn[data-gruppo]').forEach((b) =>
     b.addEventListener('click', async () => {
@@ -689,7 +778,7 @@ export function montaValutazione() {
     nascondiRecenti();
     collega();
     const du = $('docUfficiali');
-    if (du) montaDocumenti(du, r.piva, api, () => chiave);
+    if (du) montaDocumenti(du, r.piva, api, () => chiave, (arch) => visureDaArchivio(r.piva, arch));
     // Il browser propone il titolo del documento come nome del PDF salvato
     const rs = (r.full?.companyDetails?.companyName ?? r.advanced?.companyName ?? 'scheda').trim();
     document.title = `Scheda ${rs} - ${piva.value}`;
@@ -700,7 +789,12 @@ export function montaValutazione() {
     const negAz = r.verifiche?.[r.piva]?.negativita;
     if (negAz?.pronto) schedaCorrente.negativita = negAz.dati;   // gia' in registro, mostrata da rendiScheda
     else if (na?.dataset.id) attendi(na.dataset.id, 'negativita', r.piva,
-      (d, avviata) => { na.innerHTML = esitoNeg(d) + giaVerificata(avviata); if (schedaCorrente) schedaCorrente.negativita = d; },
+      (d, avviata) => {
+        na.innerHTML = esitoNeg(d) + giaVerificata(avviata);
+        if (schedaCorrente) schedaCorrente.negativita = d;
+        registra(r.piva, 'negativita', { id: na.dataset.id, avviata, pronto: true, dati: d });
+        avvisaDocumenti();
+      },
       () => { na.innerHTML = IN_LAVORAZIONE; });
     else if (na) na.innerHTML = '<span class="vuoto">non avviata</span>';
   };

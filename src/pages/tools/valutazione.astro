@@ -176,6 +176,32 @@ const datiClient = { CODICI, ETICHETTE, RUOLI, VALORI };
   .val .doc-tab-anni .val-btn { padding: 8px 16px; font-size: .875rem; }
   .val .gia { display: block; font-size: .75rem; color: #787782; font-weight: 400; margin-top: 2px; }
 
+  /* --- Protesti: scheda dei documenti ufficiali e dettaglio sotto le persone --- */
+  .val .doc-allarme { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #A31515; vertical-align: 2px; margin-left: 4px; }
+  .val .prot-sez { width: 100%; display: flex; flex-direction: column; align-items: flex-start; gap: 10px; padding-bottom: 20px; }
+  .val .prot-sez + .prot-sez { border-top: 1px solid #E1DEE3; padding-top: 20px; }
+  .val .prot-tit { font-size: .875rem; font-weight: 700; color: #0F1020; }
+  .val .ev-scroll { width: 100%; overflow-x: auto; }
+  .val .ev-tab { width: 100%; font-size: .875rem; }
+  .val .ev-tab td { vertical-align: top; }
+  .val .ev-tab th.num, .val .ev-tab td.num { white-space: nowrap; }
+  .val .ev-tab tr.ev-tot td { font-weight: 700; color: #0F1020; background: #fff; border-top: 1.5px solid #664CCD; }
+  .val .ev-tab--kv td:first-child { color: #787782; width: 40%; }
+  .val .ev-sub { display: inline-block; font-size: .75rem; color: #787782; font-weight: 400; line-height: 1.4; margin-top: 2px; }
+  .val .ev-h { font-size: .75rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: #0F1020; margin: 12px 0 6px; }
+  .val table.prot-pers td { vertical-align: top; }
+  .val table.prot-pers td.num .val-btn { padding: 8px 16px; font-size: .875rem; }
+  .val table.prot-pers td.num .doc-riga { justify-content: flex-end; }
+  .val table.prot-pers tr.prot-det td { background: #fff !important; padding: 0 16px 16px; }
+  .val .neg-apri { margin-top: 10px; }
+  .val .prot-avviso { font-size: .875rem; line-height: 1.5; color: #0F1020; background: #FFF4EF; border-left: 3px solid #FE6F3A; padding: 10px 14px; margin: 0; max-width: 760px; }
+  .val .prot-verifica { font-size: .875rem; color: #444451; margin-top: 4px; }
+  .val #visuraAzienda:empty { display: none; }
+  .val #visuraAzienda { margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px; }
+  .val #negAzienda.secondaria { font-size: .875rem; }
+  .val #negAzienda.secondaria::before { content: 'Verifica eventi negativi: '; color: #787782; }
+  .val #negAzienda.secondaria .esito-si, .val #negAzienda.secondaria .esito-no { font-weight: 600; }
+
   /* --- Report persona, espandibile sotto la riga --- */
   .val tr.rep-riga td { background: #fff !important; padding: 0 16px 16px 50px; }
   .val details.rep summary { cursor: pointer; color: #664CCD; font-weight: 600; font-size: .875rem; padding: 8px 0; }
@@ -214,7 +240,7 @@ const datiClient = { CODICI, ETICHETTE, RUOLI, VALORI };
     .val .scheda { border: none; border-radius: 0; margin: 0; }
     .val .scheda-body { padding: 0; }
     /* i comandi delle verifiche non hanno senso su carta, l'esito si' */
-    .val .azione, .val table.sel td.ck, .val table.sel th.ck, .val .doc-uff { display: none !important; }
+    .val .azione, .val table.sel td.ck, .val table.sel th.ck, .val .doc-uff, .val .neg-apri { display: none !important; }
     .val .blocco { break-inside: auto; padding: 16px 0; }
     .val .blocco-tit, .val h4 { break-after: avoid; }
     .val table { break-inside: auto; font-size: 8.5pt; }
