@@ -56,10 +56,20 @@ export const QUOTA_INDICAZIONE_MASSIMA = 0.15;
 /** Tetto dell'indicazione, qualunque sia il volume d'affari (Alberto, 15/10/2026) */
 export const TETTO_INDICAZIONE_MASSIMA = 199_000;
 
-/** Il 15% del volume d'affari, per difetto alle centinaia di euro, mai oltre il tetto */
-function indicazioneMassima(volumeAffari: number | null): number | null {
-  if (volumeAffari === null || !(volumeAffari > 0)) return null;
-  return Math.min(Math.floor((volumeAffari * QUOTA_INDICAZIONE_MASSIMA) / 100) * 100, TETTO_INDICAZIONE_MASSIMA);
+/**
+ * Il piu' basso fra il 15% del volume d'affari, il patrimonio netto e il tetto,
+ * per difetto alle centinaia di euro. L'importo non puo' superare il patrimonio
+ * (Alberto, 15/10/2026): sulle societa' di capitali, senza patrimonio o con
+ * patrimonio a zero o negativo l'indicazione non c'e', perche' il limite non si
+ * rispetta o non si puo' verificare. Ditte individuali e societa' di persone di
+ * solito non hanno il patrimonio nella scheda: li' valgono 15% e tetto.
+ */
+function indicazioneMassima(d: DatiLocatore, capitali: boolean): number | null {
+  if (d.volumeAffari === null || !(d.volumeAffari > 0)) return null;
+  if (d.patrimonioNetto === null ? capitali : d.patrimonioNetto <= 0) return null;
+  const limiti = [d.volumeAffari * QUOTA_INDICAZIONE_MASSIMA, TETTO_INDICAZIONE_MASSIMA];
+  if (d.patrimonioNetto !== null) limiti.push(d.patrimonioNetto);
+  return Math.floor(Math.min(...limiti) / 100) * 100;
 }
 
 export const ETICHETTA_LOCATORE: Record<ColoreLocatore, string> = {
@@ -169,7 +179,7 @@ export function valutaLocatore(
   const esito = (semaforo: ColoreLocatore, etichetta = ETICHETTA_LOCATORE[semaforo]): EsitoLocatore => ({
     semaforo, etichetta, righe, criteri, eventi,
     provvisorio: eventi === 'in-verifica' && semaforo !== 'rosso',
-    indicazioneMassima: importo === null && semaforo !== 'rosso' ? indicazioneMassima(d.volumeAffari) : null,
+    indicazioneMassima: importo === null && semaforo !== 'rosso' ? indicazioneMassima(d, capitali) : null,
   });
 
   // 1. Rosso Difficile: prevale su tutto

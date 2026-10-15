@@ -149,6 +149,22 @@ describe('indicazione massima importo finanziabile', () => {
     expect(v({ volumeAffari: 1_326_667 }, null).indicazioneMassima).toBe(199_000);
     expect(v({ volumeAffari: 5_000_000 }, null).indicazioneMassima).toBe(199_000);
   });
+  it('non supera il patrimonio netto', () => {
+    expect(v({ volumeAffari: 1_241_373, patrimonioNetto: 120_000 }, null).indicazioneMassima).toBe(120_000);
+    expect(v({ volumeAffari: 1_241_373, patrimonioNetto: 150_050 }, null).indicazioneMassima).toBe(150_000);
+    // patrimonio sopra il 15%: decide il volume d'affari
+    expect(v({ volumeAffari: 1_241_373, patrimonioNetto: 316_954 }, null).indicazioneMassima).toBe(186_200);
+    // patrimonio sopra il tetto: decide il tetto
+    expect(v({ volumeAffari: 5_000_000, patrimonioNetto: 900_000 }, null).indicazioneMassima).toBe(199_000);
+  });
+  it('societa di capitali senza patrimonio, o a zero o negativo: niente indicazione', () => {
+    expect(v({ patrimonioNetto: null }, null).indicazioneMassima).toBeNull();
+    expect(v({ patrimonioNetto: 0 }, null).indicazioneMassima).toBeNull();
+    expect(v({ patrimonioNetto: -40_000 }, null).indicazioneMassima).toBeNull();
+  });
+  it('ditta individuale senza patrimonio: 15% e tetto', () => {
+    expect(v({ formaCodice: 'DI', patrimonioNetto: null }, null).indicazioneMassima).toBe(127_500);
+  });
   it('con un importo in valutazione non si mostra: risponde il semaforo', () => {
     expect(v({}, 3500).indicazioneMassima).toBeNull();
   });
