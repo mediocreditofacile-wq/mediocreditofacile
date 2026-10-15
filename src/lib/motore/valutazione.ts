@@ -61,6 +61,7 @@ export function semaforoPerSchermo(v: Valutazione) {
       provvisorio: v.locatore.provvisorio,
       eventi: v.locatore.eventi as StatoEventi | null,
       indicazioneMassima: v.locatore.indicazioneMassima,
+      indicazioneBase: v.locatore.indicazioneBase as string | null,
     };
   }
   return {
@@ -72,5 +73,6 @@ export function semaforoPerSchermo(v: Valutazione) {
     provvisorio: false,
     eventi: null as StatoEventi | null,
     indicazioneMassima: null as number | null,
+    indicazioneBase: null as string | null,
   };
 }

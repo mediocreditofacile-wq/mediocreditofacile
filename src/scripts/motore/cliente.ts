@@ -6,6 +6,7 @@
 // amministratori, anagrafica estesa, indici e bilancio riclassificato. Gli
 // eventi negativi non arrivano mai qui: li vede solo MCF, all'invio della pratica.
 
+import { spiegazioneIndicazione } from '../../lib/motore/spiegazione-indicazione';
 import { $, api, apiJson, apriTab, esc, ETICHETTA_SEMAFORO, euro, messaggio, num, stato, traduci } from './comune';
 
 const SCALA = ['A1', 'A2', 'A3', 'B1', 'B2', 'B3', 'C1', 'C2', 'C3'];
@@ -29,6 +30,12 @@ export function bloccoSemaforo(credito: any, titolo: string, nota = ''): string 
         <p class="mt-nota" style="margin:8px 0 0">Valutazione indicativa, non è una delibera.${nota ? ` ${esc(nota)}` : ''}</p>
       </div>
     </div>`;
+}
+
+/** Dopo la linea del Registro: fin dove arriva il noleggio. Vuota senza indicazione */
+function fraseNoleggio(credito: any): string {
+  if (credito?.indicazioneMassima == null) return '';
+  return ` Con il noleggio può arrivare fino a <strong>${euro(credito.indicazioneMassima)}</strong>, ${esc(spiegazioneIndicazione(credito.indicazioneBase))}.`;
 }
 
 function cifra(et: string, val: string, sub = '') {
@@ -62,7 +69,7 @@ function rendiScheda(s: any, credito: any): string {
         ${cifra('Rating', s.rating ? `${esc(s.rating.classe)} <small class="mt-id">classe ${s.rating.posizione} di 9</small>` : '—',
           s.rating ? `${esc(s.rating.descrizione ?? '')}${rating}` : 'nessuna classe assegnata')}
       </div>
-      ${s.lineaCreditoConsigliata ? `<p class="mt-nota" style="margin:16px 0 0">Linea di credito commerciale consigliata dal Registro: ${euro(s.lineaCreditoConsigliata)}. Il rating è informativo e non entra nel semaforo.</p>` : ''}
+      ${s.lineaCreditoConsigliata ? `<p class="mt-nota" style="margin:16px 0 0">Linea di credito commerciale consigliata dal Registro: ${euro(s.lineaCreditoConsigliata)}.<span id="frase-noleggio">${fraseNoleggio(credito)}</span> Il rating è informativo e non entra nel semaforo.</p>` : ''}
       <div id="scheda-semaforo">${bloccoSemaforo(credito, 'Prima valutazione', credito?.etichetta ? '' : 'Senza importo pesano solo utile e anni di attività: il rapporto con il fatturato arriva col prezzo.')}</div>
       <p class="mt-nota" style="margin:16px 0 0">Soci, amministratori e bilancio completo sono nel tab <button type="button" class="mt-link" data-vai="info">Info aggiuntive</button>.</p>
     </article>`;
@@ -125,6 +132,9 @@ function aspettaEventi(ricercaId: string, giro = 0) {
     stato.ricerca.eventi = corpo.eventi;
     const box = document.getElementById('scheda-semaforo');
     if (box) box.innerHTML = bloccoSemaforo(corpo.credito, 'Prima valutazione');
+    // Se gli eventi spengono l'indicazione (rosso), sparisce anche la frase sul noleggio
+    const frase = document.getElementById('frase-noleggio');
+    if (frase) frase.innerHTML = fraseNoleggio(corpo.credito);
     if (corpo.eventi === 'in-verifica' && giro < 12) aspettaEventi(ricercaId, giro + 1);
     else document.dispatchEvent(new CustomEvent('mt:eventi'));
   }, 10_000);

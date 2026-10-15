@@ -43,7 +43,15 @@ export interface EsitoLocatore {
    * e fuori dal rosso. Null quando non si mostra.
    */
   indicazioneMassima: number | null;
+  /** Quale limite ha deciso l'indicazione, per spiegarla all'agente. Null senza indicazione */
+  indicazioneBase: BaseIndicazione | null;
 }
+
+export type BaseIndicazione = 'volume' | 'patrimonio' | 'tetto';
+
+// La spiegazione sta in un file senza dipendenze: la pagina la importa senza
+// portarsi dietro il resto del modulo (e i prezzi dei documenti ufficiali)
+export { spiegazioneIndicazione } from './spiegazione-indicazione';
 
 /**
  * Quota del volume d'affari per l'indicazione massima importo finanziabile.
@@ -64,12 +72,15 @@ export const TETTO_INDICAZIONE_MASSIMA = 199_000;
  * rispetta o non si puo' verificare. Ditte individuali e societa' di persone di
  * solito non hanno il patrimonio nella scheda: li' valgono 15% e tetto.
  */
-function indicazioneMassima(d: DatiLocatore, capitali: boolean): number | null {
+function indicazioneMassima(d: DatiLocatore, capitali: boolean): { valore: number; base: BaseIndicazione } | null {
   if (d.volumeAffari === null || !(d.volumeAffari > 0)) return null;
   if (d.patrimonioNetto === null ? capitali : d.patrimonioNetto <= 0) return null;
-  const limiti = [d.volumeAffari * QUOTA_INDICAZIONE_MASSIMA, TETTO_INDICAZIONE_MASSIMA];
-  if (d.patrimonioNetto !== null) limiti.push(d.patrimonioNetto);
-  return Math.floor(Math.min(...limiti) / 100) * 100;
+  // A parita' vince il volume d'affari, poi il patrimonio: e' il limite che si spiega meglio
+  const limiti: [number, BaseIndicazione][] = [[d.volumeAffari * QUOTA_INDICAZIONE_MASSIMA, 'volume']];
+  if (d.patrimonioNetto !== null) limiti.push([d.patrimonioNetto, 'patrimonio']);
+  limiti.push([TETTO_INDICAZIONE_MASSIMA, 'tetto']);
+  const [minimo, base] = limiti.reduce((a, b) => (b[0] < a[0] ? b : a));
+  return { valore: Math.floor(minimo / 100) * 100, base };
 }
 
 export const ETICHETTA_LOCATORE: Record<ColoreLocatore, string> = {
@@ -176,11 +187,15 @@ export function valutaLocatore(
     ok: eventi === 'presenti' ? false : eventi === 'assenti' ? true : null,
   });
 
-  const esito = (semaforo: ColoreLocatore, etichetta = ETICHETTA_LOCATORE[semaforo]): EsitoLocatore => ({
-    semaforo, etichetta, righe, criteri, eventi,
-    provvisorio: eventi === 'in-verifica' && semaforo !== 'rosso',
-    indicazioneMassima: importo === null && semaforo !== 'rosso' ? indicazioneMassima(d, capitali) : null,
-  });
+  const esito = (semaforo: ColoreLocatore, etichetta = ETICHETTA_LOCATORE[semaforo]): EsitoLocatore => {
+    const ind = importo === null && semaforo !== 'rosso' ? indicazioneMassima(d, capitali) : null;
+    return {
+      semaforo, etichetta, righe, criteri, eventi,
+      provvisorio: eventi === 'in-verifica' && semaforo !== 'rosso',
+      indicazioneMassima: ind?.valore ?? null,
+      indicazioneBase: ind?.base ?? null,
+    };
+  };
 
   // 1. Rosso Difficile: prevale su tutto
   const volumeNonPositivo = bilancio && d.volumeAffari !== null && d.volumeAffari <= 0;

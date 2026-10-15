@@ -7,6 +7,7 @@ import {
   classeForma,
   mesiDiAttivita,
   RIGA_PERCORSO_PARALLELO,
+  spiegazioneIndicazione,
   valutaLocatore,
   type DatiLocatore,
 } from './semaforo-locatore';
@@ -175,5 +176,30 @@ describe('indicazione massima importo finanziabile', () => {
   });
   it('senza volume d affari non si inventa', () => {
     expect(v({ volumeAffari: null, annoBilancio: null, patrimonioNetto: null }, null).indicazioneMassima).toBeNull();
+  });
+});
+
+describe('quale limite decide l indicazione', () => {
+  it('il 15% del volume d affari', () => {
+    expect(v({ volumeAffari: 318_084, patrimonioNetto: 420_775 }, null).indicazioneBase).toBe('volume');
+  });
+  it('il patrimonio netto', () => {
+    expect(v({ volumeAffari: 677_989, patrimonioNetto: 85_276 }, null).indicazioneBase).toBe('patrimonio');
+  });
+  it('il tetto', () => {
+    expect(v({ volumeAffari: 2_945_472, patrimonioNetto: 430_425 }, null).indicazioneBase).toBe('tetto');
+  });
+  it('senza indicazione, nessun limite', () => {
+    expect(v({}, 3500).indicazioneBase).toBeNull();
+    expect(v({ cessata: true }, null).indicazioneBase).toBeNull();
+  });
+});
+
+describe('spiegazione accanto alla linea del Registro', () => {
+  it('dice quale limite ha deciso', () => {
+    expect(spiegazioneIndicazione('volume')).toBe('cioè il 15% del fatturato');
+    expect(spiegazioneIndicazione('patrimonio')).toBe('cioè il patrimonio netto');
+    expect(spiegazioneIndicazione('tetto')).toBe('cioè il tetto previsto per il noleggio');
+    expect(spiegazioneIndicazione(null)).toBe('');
   });
 });
