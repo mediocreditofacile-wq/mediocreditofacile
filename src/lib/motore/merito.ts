@@ -297,6 +297,16 @@ export function leggiScheda(s: SchedaAzienda): LetturaScheda {
 
 /** I numeri della ricerca nella forma del semaforo del locatore. Le ricerche vecchie non hanno forma e stato: restano dati mancanti. */
 export function datiLocatore(d: Partial<DatiCreditoMotore>): DatiLocatore {
+  // Volume, patrimonio e utile tutti a zero: e' un bilancio non depositato, non una
+  // societa' ferma (stessa regola di normalizza() in openapi.ts). Una societa' ferma
+  // vera ha volume zero ma patrimonio e perdita: quella resta un dato.
+  const tuttoZero = d.fatturato === 0 && (d.patrimonioNetto ?? 0) === 0 && (d.utile ?? 0) === 0;
+  if (tuttoZero) {
+    return {
+      formaCodice: d.formaCodice ?? null, attiva: d.attiva ?? null, cessata: d.cessata ?? false,
+      inizioAttivita: d.inizioAttivita ?? null, volumeAffari: null, patrimonioNetto: null, annoBilancio: null,
+    };
+  }
   return {
     formaCodice: d.formaCodice ?? null,
     attiva: d.attiva ?? null,

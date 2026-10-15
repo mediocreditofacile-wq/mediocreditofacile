@@ -12,6 +12,7 @@ export const prerender = false;
 
 import { queryUna } from '../../../lib/db';
 import { ricercaVisibile } from '../../../lib/motore/calcolo-proposta';
+import { prodottoAmmesso } from '../../../lib/motore/carrozzeria';
 import { creaPratica, documentiDellaBozza, bozzaValida, FORME } from '../../../lib/motore/pratica';
 import { corpoJson, filtroVisibilita, json, sessioneMotore } from '../../../lib/motore/sessione';
 
@@ -51,7 +52,8 @@ export async function POST({ request }: { request: Request }) {
       ricerca,
       propostaId,
       bozza,
-      prodotto: corpo.prodotto === 'leasing' ? 'leasing' : 'noleggio',
+      // Col leasing spento sulla carrozzeria (Duplex) si carica solo noleggio, qualunque cosa mandi il browser
+      prodotto: prodottoAmmesso(e.carrozzeria, corpo.prodotto),
       durata,
       importo,
       formaGiuridica: (FORME as readonly string[]).includes(forma) ? forma : 'Altro',

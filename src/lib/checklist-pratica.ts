@@ -9,7 +9,7 @@
 export function buildChecklist(formaGiuridica: string, importoNum: number, extra: string[] = []): string[] {
   const base = [
     'Visura camerale (o visura ditta individuale)',
-    'Carta d\'identita\' del legale rappresentante / titolare',
+    "Carta d'identità del legale rappresentante / titolare",
     'Tessera sanitaria / codice fiscale',
     'Coordinate IBAN aziendali',
     'Email aziendale',

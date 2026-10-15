@@ -28,6 +28,7 @@ import {
   sorgenteCarrozzeria,
 } from '../openapi';
 import { BASE_URL } from '../auth';
+import { codiceVerifica } from './eventi-stato';
 import { percorsoPortale } from '../percorso-portale';
 import { decidiVerifica } from '../verifiche-cache';
 import { euro } from '../prospetti-pv';
@@ -114,7 +115,7 @@ export interface InputPratica {
 export async function creaPratica(e: Sessione, p: InputPratica): Promise<string> {
   const { contesto, carrozzeria } = e;
   const checklist = buildChecklist(p.formaGiuridica, p.importo, carrozzeria.documentiExtra);
-  const negativita = await negativitaAllInvio(e, p.ricerca.piva);
+  const negativita = await negativitaAllInvio(e, codiceVerifica(p.ricerca));
   const adesso = new Date().toISOString();
   const dati = {
     prodotto: p.prodotto,

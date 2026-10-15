@@ -28,6 +28,7 @@ export async function GET({ request }: { request: Request }) {
       settore: c.settore,
       etichettaBene: c.etichettaBene,
       sogliaLeasing: c.sogliaLeasing,
+      leasing: c.leasing,
       demo: c.demo,
       colore: c.brand.colore,
       accento: c.brand.accento,

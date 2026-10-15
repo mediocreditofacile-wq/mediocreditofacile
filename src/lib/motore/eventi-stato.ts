@@ -21,6 +21,12 @@ export interface EventiRicerca {
 /** Quanto il server segue l'esito in background dopo la ricerca */
 export const ATTESA_EVENTI_MS = 90_000;
 export const PASSO_EVENTI_MS = 10_000;
+/**
+ * Da quando una ricerca riaperta puo' leggere l'esito su Openapi: dopo il giro in
+ * background, con due passi di margine. Senza margine l'ultima lettura del server e
+ * quella della pagina cadono insieme, e il dettaglio degli eventi si paga a ogni lettura.
+ */
+export const RILETTURA_DOPO_MS = ATTESA_EVENTI_MS + 2 * PASSO_EVENTI_MS;
 
 /** Partita IVA, oppure il codice fiscale del titolare sulle ditte individuali */
 export function bersaglioEventi(piva: string, formaCodice: string | null, taxCode: unknown): string {
@@ -41,9 +47,18 @@ export function statoDaEsito(dati: any): 'presenti' | 'assenti' {
 export function serveControllo(ev: EventiRicerca | null, adesso: number = Date.now()): boolean {
   if (!ev?.id) return false;
   if (ev.stato !== 'in-verifica' && ev.stato !== 'non-pervenuti') return false;
-  return adesso - new Date(ev.avviata ?? 0).getTime() > ATTESA_EVENTI_MS;
+  return adesso - new Date(ev.avviata ?? 0).getTime() > RILETTURA_DOPO_MS;
 }
 
 export function eventiNonAvviati(codice: string): EventiRicerca {
   return { stato: 'non-avviata', id: null, avviata: null, chiusa: null, codice, daRegistro: false, mail: 'non-serve' };
+}
+
+/**
+ * Su che codice cercare la verifica eventi all'invio della pratica: lo stesso della
+ * ricerca (sulle ditte individuali il codice fiscale del titolare), cosi' il registro
+ * la trova e non si ripaga.
+ */
+export function codiceVerifica(ricerca: { piva: string; eventi: EventiRicerca | null }): string {
+  return ricerca.eventi?.codice || ricerca.piva;
 }

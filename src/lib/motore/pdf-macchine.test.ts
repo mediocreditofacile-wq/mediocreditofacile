@@ -71,6 +71,9 @@ describe('preventivo macchine', () => {
     const d340 = JSON.stringify(contenutoMacchine(calcolo('DUPLEX-340-CAVO', 1931), K, 'DX-1', AGENTE, OGGI));
     expect(d340).toContain('la quota minima fatturabile è 115 euro');
   });
+  it('accenti veri, non apostrofi', () => {
+    expect(testo).not.toMatch(/[aeiou]'/i);
+  });
   it('niente locatore, coefficienti o semaforo', () => {
     expect(testo).not.toMatch(/grenke|reterent|coeffic|sputnik|semaforo|verde|giallo/i);
   });

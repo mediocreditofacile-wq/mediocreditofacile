@@ -2,7 +2,7 @@
 // nuove lasciano gli altri fornitori esattamente com'erano.
 
 import { describe, expect, it } from 'vitest';
-import { carrozzeriaDaRiga, type RigaCarrozzeria } from './carrozzeria';
+import { carrozzeriaDaRiga, prodottoAmmesso, type RigaCarrozzeria } from './carrozzeria';
 
 const RIGA: RigaCarrozzeria = {
   slug: 'x', nome: 'X', citta: null, prefisso: 'XX', organization_id: 'org', tabella_canoni: 'sputnik',
@@ -35,5 +35,15 @@ describe('carrozzeria dalla riga', () => {
     expect(c.settore).toBe('generico');
     expect(c.regoleSemaforo).toBe('credit-policy');
     expect(c.tabellaAlternativa).toBeNull();
+  });
+});
+
+describe('prodotto della pratica', () => {
+  it('col leasing spento si carica solo noleggio', () => {
+    expect(prodottoAmmesso(carrozzeriaDaRiga({ ...RIGA, leasing: false }), 'leasing')).toBe('noleggio');
+  });
+  it('col leasing acceso si rispetta la scelta', () => {
+    expect(prodottoAmmesso(carrozzeriaDaRiga(RIGA), 'leasing')).toBe('leasing');
+    expect(prodottoAmmesso(carrozzeriaDaRiga(RIGA), 'altro')).toBe('noleggio');
   });
 });

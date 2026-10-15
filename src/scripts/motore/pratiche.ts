@@ -76,7 +76,7 @@ function rendiModulo() {
         <label class="mt-campo"><span>Prodotto</span>
           <select id="pr-prodotto" class="mt-input">
             <option value="noleggio" ${prodotto === 'noleggio' ? 'selected' : ''}>Noleggio operativo</option>
-            <option value="leasing" ${prodotto === 'leasing' ? 'selected' : ''}>Leasing finanziario</option>
+            ${stato.carrozzeria?.leasing === false ? '' : `<option value="leasing" ${prodotto === 'leasing' ? 'selected' : ''}>Leasing finanziario</option>`}
           </select></label>
         <label class="mt-campo"><span>Durata</span><select id="pr-durata" class="mt-input"></select></label>
         <label class="mt-campo"><span>Importo, IVA esclusa</span>

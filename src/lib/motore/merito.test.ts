@@ -122,3 +122,18 @@ describe('dati per il semaforo del locatore', () => {
     expect(d.cessata).toBe(false);
   });
 });
+
+describe('bilancio tutto a zero', () => {
+  const base = { formaCodice: 'SR', attiva: true, cessata: false, inizioAttivita: '2010-01-01', annoBilancio: 2025 };
+  it('volume, patrimonio e utile a zero valgono come bilancio non depositato', () => {
+    const d = datiLocatore({ ...base, fatturato: 0, patrimonioNetto: 0, utile: 0 });
+    expect(d.annoBilancio).toBeNull();
+    expect(d.volumeAffari).toBeNull();
+    expect(d.patrimonioNetto).toBeNull();
+  });
+  it('volume zero con patrimonio e perdita resta un dato vero (societa ferma)', () => {
+    const d = datiLocatore({ ...base, fatturato: 0, patrimonioNetto: 9092, utile: -907, annoBilancio: 2024 });
+    expect(d.volumeAffari).toBe(0);
+    expect(d.annoBilancio).toBe(2024);
+  });
+});

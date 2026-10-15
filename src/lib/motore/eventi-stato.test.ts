@@ -2,7 +2,7 @@
 // verifica, come si legge l'esito, quando una ricerca riaperta interroga Openapi.
 
 import { describe, expect, it } from 'vitest';
-import { ATTESA_EVENTI_MS, bersaglioEventi, eventiNonAvviati, serveControllo, statoDaEsito, type EventiRicerca } from './eventi-stato';
+import { ATTESA_EVENTI_MS, bersaglioEventi, codiceVerifica, eventiNonAvviati, RILETTURA_DOPO_MS, serveControllo, statoDaEsito, type EventiRicerca } from './eventi-stato';
 
 describe('bersaglio della verifica', () => {
   it('partita IVA sulle società', () => {
@@ -34,13 +34,30 @@ describe('ricerca riaperta', () => {
   it('dentro i 90 secondi risponde il database', () => {
     expect(serveControllo(base, t0 + ATTESA_EVENTI_MS - 1)).toBe(false);
   });
-  it('dopo i 90 secondi una lettura su Openapi', () => {
-    expect(serveControllo(base, t0 + ATTESA_EVENTI_MS + 1)).toBe(true);
+  it('nel margine dopo i 90 secondi risponde ancora il database', () => {
+    // l'ultimo giro del server e la pagina non devono leggere insieme: il dettaglio si paga a ogni lettura
+    expect(serveControllo(base, t0 + ATTESA_EVENTI_MS + 15_000)).toBe(false);
+  });
+  it('finito il giro in background, con margine, una lettura su Openapi', () => {
+    expect(serveControllo(base, t0 + RILETTURA_DOPO_MS + 1)).toBe(true);
     expect(serveControllo({ ...base, stato: 'non-pervenuti' }, t0 + 10 * 60_000)).toBe(true);
   });
   it('esito chiuso o verifica mai partita: niente da leggere', () => {
     expect(serveControllo({ ...base, stato: 'assenti' }, t0 + 10 * 60_000)).toBe(false);
     expect(serveControllo(eventiNonAvviati('01234567890'), t0 + 10 * 60_000)).toBe(false);
     expect(serveControllo(null)).toBe(false);
+  });
+});
+
+describe('codice della verifica alla pratica', () => {
+  const ev: EventiRicerca = {
+    stato: 'assenti', id: 'neg-1', avviata: '2026-10-15T10:00:00.000Z', chiusa: '2026-10-15T10:00:30.000Z',
+    codice: 'RSSMRA70A01L840X', daRegistro: false, mail: 'mandata',
+  };
+  it('lo stesso della ricerca: sulle ditte il codice fiscale del titolare', () => {
+    expect(codiceVerifica({ piva: '01234567890', eventi: ev })).toBe('RSSMRA70A01L840X');
+  });
+  it('senza eventi salvati: la partita IVA', () => {
+    expect(codiceVerifica({ piva: '01234567890', eventi: null })).toBe('01234567890');
   });
 });

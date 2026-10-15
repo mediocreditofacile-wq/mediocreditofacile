@@ -165,3 +165,8 @@ export async function voceCatalogo(slug: string, codice: string): Promise<VoceCa
   );
   return r ? voce(r) : null;
 }
+
+/** Il prodotto di una pratica: col leasing spento sulla carrozzeria si carica solo noleggio */
+export function prodottoAmmesso(k: Carrozzeria, richiesto: unknown): 'noleggio' | 'leasing' {
+  return richiesto === 'leasing' && k.leasing ? 'leasing' : 'noleggio';
+}
