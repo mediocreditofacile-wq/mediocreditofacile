@@ -37,6 +37,7 @@ if (!c) return new Response('Portale non trovato', { status: 404 });
 const coloreValido = (v: string | null) => (v && /^#[0-9a-fA-F]{6}$/.test(v) ? v : null);
 const colore = coloreValido(c.brand.colore) ?? '#664CCD';
 const fotovoltaico = c.settore === 'fotovoltaico';
+const macchine = c.settore === 'macchine';
 ---
 <ToolLayout
   title={`Portale ${c.nome} | Mediocredito Facile`}
@@ -160,7 +161,7 @@ const fotovoltaico = c.settore === 'fotovoltaico';
         <h1 class="mt-h1">Verifica il cliente</h1>
         <p class="mt-lead">
           Inserisci la partita IVA del cliente: arrivano anagrafica, bilancio e una prima valutazione. Il
-          semaforo definitivo si accende quando scegli il {fotovoltaico ? 'pacchetto' : 'bene'} e il prezzo.
+          semaforo definitivo si accende quando scegli {fotovoltaico ? 'il pacchetto' : macchine ? 'la macchina' : 'il bene'} e il prezzo.
         </p>
         <div class="mt-cerca">
           <input type="text" id="piva" class="mt-input" inputmode="numeric" maxlength="13" placeholder="Partita IVA, 11 cifre" autocomplete="off" />
@@ -388,6 +389,10 @@ const fotovoltaico = c.settore === 'fotovoltaico';
   .mt-semaforo--verde .mt-semaforo__luce { background: #2E7D4F; }
   .mt-semaforo--giallo .mt-semaforo__luce { background: #D9A400; }
   .mt-semaforo--rosso .mt-semaforo__luce { background: #B23A12; }
+  .mt-semaforo--verde-scuro .mt-semaforo__luce { background: #1F6033; }
+  .mt-semaforo--verde-chiaro .mt-semaforo__luce { background: #6FA86A; }
+  .mt-semaforo--provvisorio .mt-semaforo__luce { opacity: .55; }
+  .mt-righe { margin: 4px 0 8px; padding-left: 18px; font-size: 14px; color: var(--mt-black); }
   .mt-semaforo__tit { font-weight: 700; color: var(--mt-black); margin: 0 0 4px; }
   .mt-criteri { list-style: none; padding: 0; margin: 8px 0 0; font-size: 14px; display: grid; gap: 4px; }
   .mt-criteri li::before { content: '–'; color: var(--mt-accent); margin-right: 8px; }

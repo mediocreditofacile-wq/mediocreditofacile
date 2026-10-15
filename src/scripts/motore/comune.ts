@@ -11,7 +11,7 @@ export interface Stato {
   carrozzeria: any;
   catalogo: any[];
   /** La ricerca su cui si sta lavorando */
-  ricerca: { id: string; scheda: any; info: any; credito: any } | null;
+  ricerca: { id: string; scheda: any; info: any; credito: any; eventi?: string | null } | null;
   /** L'ultima proposta calcolata, con l'input che l'ha prodotta */
   proposta: { input: any; esito: any } | null;
   /** L'ultimo preventivo salvato su questa ricerca: la pratica ci si aggancia */
@@ -88,6 +88,7 @@ const MESSAGGI: Record<string, string> = {
   nessuna_pratica: 'Seleziona almeno una pratica.',
   voce_non_valida: 'Alla voce mancano codice, nome o prezzo.',
   azione_sconosciuta: 'Operazione non riconosciuta.',
+  accessorio_non_valido: 'Un accessorio non è più disponibile o non è di questa macchina: rifai la scelta.',
 };
 export const traduci = (codice: string) => MESSAGGI[codice] ?? 'Qualcosa non ha funzionato. Riprova.';
 
@@ -125,6 +126,8 @@ export function apriTab(nome: string) {
 }
 
 export const ETICHETTA_SEMAFORO: Record<string, string> = {
+  'verde-scuro': 'In linea con i criteri',
+  'verde-chiaro': 'Buone basi',
   verde: 'Verosimile',
   giallo: 'Da istruire',
   rosso: 'Difficile',

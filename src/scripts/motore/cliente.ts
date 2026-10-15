@@ -12,14 +12,17 @@ const SCALA = ['A1', 'A2', 'A3', 'B1', 'B2', 'B3', 'C1', 'C2', 'C3'];
 
 export function bloccoSemaforo(credito: any, titolo: string, nota = ''): string {
   const s = credito?.semaforo ?? 'giallo';
+  const etichetta = credito?.etichetta ?? ETICHETTA_SEMAFORO[s] ?? s;
   const criteri = (credito?.criteri ?? [])
     .map((c: any) => `<li class="${c.ok === false ? 'ko' : ''}">${esc(c.nome)}: ${esc(c.valore)}${c.ok === false ? ' (da guardare)' : ''}</li>`)
     .join('');
+  const righe = (credito?.righe ?? []).map((r: string) => `<li>${esc(r)}</li>`).join('');
   return `
-    <div class="mt-semaforo mt-semaforo--${esc(s)}">
+    <div class="mt-semaforo mt-semaforo--${esc(s)}${credito?.provvisorio ? ' mt-semaforo--provvisorio' : ''}">
       <span class="mt-semaforo__luce" aria-hidden="true"></span>
       <div>
-        <p class="mt-semaforo__tit">${esc(titolo)}: ${ETICHETTA_SEMAFORO[s] ?? esc(s)}</p>
+        <p class="mt-semaforo__tit">${esc(titolo)}: ${esc(etichetta)}${credito?.provvisorio ? ' <span class="mt-id">provvisorio</span>' : ''}</p>
+        ${righe ? `<ul class="mt-righe">${righe}</ul>` : ''}
         <ul class="mt-criteri">${criteri}</ul>
         ${credito?.massimale != null ? `<p class="mt-nota" style="margin:8px 0 0">Massimale finanziabile stimato: ${euro(credito.massimale)}.</p>` : ''}
         <p class="mt-nota" style="margin:8px 0 0">Valutazione indicativa, non è una delibera.${nota ? ` ${esc(nota)}` : ''}</p>
@@ -59,7 +62,7 @@ function rendiScheda(s: any, credito: any): string {
           s.rating ? `${esc(s.rating.descrizione ?? '')}${rating}` : 'nessuna classe assegnata')}
       </div>
       ${s.lineaCreditoConsigliata ? `<p class="mt-nota" style="margin:16px 0 0">Linea di credito commerciale consigliata dal Registro: ${euro(s.lineaCreditoConsigliata)}. Il rating è informativo e non entra nel semaforo.</p>` : ''}
-      ${bloccoSemaforo(credito, 'Prima valutazione', 'Senza importo pesano solo utile e anni di attività: il rapporto con il fatturato arriva col prezzo.')}
+      <div id="scheda-semaforo">${bloccoSemaforo(credito, 'Prima valutazione', credito?.etichetta ? '' : 'Senza importo pesano solo utile e anni di attività: il rapporto con il fatturato arriva col prezzo.')}</div>
       <p class="mt-nota" style="margin:16px 0 0">Soci, amministratori e bilancio completo sono nel tab <button type="button" class="mt-link" data-vai="info">Info aggiuntive</button>.</p>
     </article>`;
 }
@@ -104,14 +107,37 @@ function rendiInfo(info: any, scheda: any): string {
     <details><summary>Apri l'anagrafica</summary>${tabellaRighe(info.anagrafica)}</details>`;
 }
 
+let attesaEventi: ReturnType<typeof setTimeout> | undefined;
+
+/**
+ * Eventi negativi "in verifica": la pagina richiede l'esito ogni dieci secondi
+ * (dal database, non da Openapi) e ridisegna il semaforo quando cambia. Si ferma
+ * quando arriva un esito, dopo due minuti, o se nel frattempo si cerca un altro cliente.
+ */
+function aspettaEventi(ricercaId: string, giro = 0) {
+  clearTimeout(attesaEventi);
+  attesaEventi = setTimeout(async () => {
+    if (stato.ricerca?.id !== ricercaId) return;
+    const { res, corpo } = await apiJson(api('merito', { id: ricercaId, eventi: '1' }));
+    if (stato.ricerca?.id !== ricercaId || !res.ok || !corpo?.ok) return;
+    stato.ricerca.credito = corpo.credito;
+    stato.ricerca.eventi = corpo.eventi;
+    const box = document.getElementById('scheda-semaforo');
+    if (box) box.innerHTML = bloccoSemaforo(corpo.credito, 'Prima valutazione');
+    if (corpo.eventi === 'in-verifica' && giro < 12) aspettaEventi(ricercaId, giro + 1);
+    else document.dispatchEvent(new CustomEvent('mt:eventi'));
+  }, 10_000);
+}
+
 /** Mette la ricerca al centro del portale: scheda, info, proposte */
-export function usaRicerca(r: { ricercaId: string; scheda: any; info: any; credito: any }) {
-  stato.ricerca = { id: r.ricercaId, scheda: r.scheda, info: r.info, credito: r.credito };
+export function usaRicerca(r: { ricercaId: string; scheda: any; info: any; credito: any; eventi?: string | null }) {
+  stato.ricerca = { id: r.ricercaId, scheda: r.scheda, info: r.info, credito: r.credito, eventi: r.eventi ?? null };
   stato.proposta = null;
   stato.ultimoPreventivo = null;
   $('scheda').innerHTML = rendiScheda(r.scheda, r.credito);
   $('info').innerHTML = rendiInfo(r.info, r.scheda);
   document.dispatchEvent(new CustomEvent('mt:ricerca'));
+  if (r.eventi === 'in-verifica') aspettaEventi(r.ricercaId);
 }
 
 export async function riapriRicerca(id: string) {
