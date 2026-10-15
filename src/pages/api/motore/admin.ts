@@ -17,37 +17,15 @@ export const prerender = false;
 
 import { query } from '../../../lib/db';
 import { catalogo } from '../../../lib/motore/carrozzeria';
+import { leggiVoce, numero, testo, type Voce } from '../../../lib/motore/catalogo-import';
 import { corpoJson, json, sessioneMotore } from '../../../lib/motore/sessione';
 import { spesaDelMese } from '../../../lib/openapi';
 
 const PARTNER = ['sella', 'alba', 'credem'];
-const LISTINI = ['esg', 'pagarent', 'sputnik'];
+const SETTORI = ['fotovoltaico', 'generico', 'macchine'];
+const LISTINI = ['esg', 'pagarent', 'sputnik', 'sputnik-duplex', 'grace-duplex'];
+const REGOLE = ['credit-policy', 'locatore'];
 const COLORE = /^#[0-9a-fA-F]{6}$/;
-
-const numero = (v: unknown) => {
-  if (typeof v === 'number') return Number.isFinite(v) ? v : NaN;
-  const s = String(v ?? '').trim().replace(/[€\s]/g, '');
-  return parseFloat(s.includes(',') ? s.replace(/\./g, '').replace(',', '.') : s);
-};
-const testo = (v: unknown, max = 200) => String(v ?? '').trim().slice(0, max);
-
-interface Voce { codice: string; nome: string; descrizione: string | null; prezzo: number; attributi: Record<string, unknown> }
-
-/** Una riga del catalogo, validata. Null se non regge. */
-function leggiVoce(r: Record<string, unknown>): Voce | null {
-  const codice = testo(r.codice, 40).toUpperCase().replace(/\s+/g, '-');
-  const nome = testo(r.nome, 160);
-  const prezzo = numero(r.prezzo);
-  if (!codice || !nome || !(prezzo > 0) || prezzo > 10_000_000) return null;
-  const attributi: Record<string, unknown> = {};
-  const kwp = numero(r.kwp);
-  const kwh = numero(r.kwh_accumulo ?? r.accumulo);
-  if (kwp > 0) attributi.kwp = kwp;
-  if (kwh >= 0 && Number.isFinite(kwh)) attributi.kwh_accumulo = kwh;
-  const inst = testo(r.installazione, 20).toLowerCase();
-  if (['tetto', 'pensilina', 'terra'].includes(inst)) attributi.installazione = inst;
-  return { codice, nome, descrizione: testo(r.descrizione, 400) || null, prezzo: Math.round(prezzo * 100) / 100, attributi };
-}
 
 async function salvaVoce(slug: string, v: Voce) {
   await query(
@@ -75,6 +53,7 @@ export async function GET({ request }: { request: Request }) {
       sogliaLeasing: c.sogliaLeasing, tettoMeseEuro: c.tettoMeseEuro, demo: c.demo,
       documentiExtra: c.documentiExtra, tabellaCanoni: c.tabellaCanoni,
       colore: c.brand.colore, accento: c.brand.accento, attivo: c.attivo,
+      tabellaAlternativa: c.tabellaAlternativa, regoleSemaforo: c.regoleSemaforo, leasing: c.leasing,
     },
     // Le scelte possibili arrivano da qui e non dal codice della pagina: i nomi
     // dei partner sono ratio interna e il browser degli agenti non li scarica
@@ -84,6 +63,12 @@ export async function GET({ request }: { request: Request }) {
         { valore: 'esg', etichetta: 'Grenke ESG++++ (fotovoltaico)' },
         { valore: 'sputnik', etichetta: 'Grenke Sputnik++++ (beni strumentali)' },
         { valore: 'pagarent', etichetta: 'PagaRent' },
+        { valore: 'sputnik-duplex', etichetta: 'Grenke Sputnik++++ Duplex (tradizionale)' },
+        { valore: 'grace-duplex', etichetta: 'Grenke Grace Period Duplex' },
+      ],
+      regole: [
+        { valore: 'credit-policy', etichetta: 'Credit policy (tool Marotta)' },
+        { valore: 'locatore', etichetta: 'Criteri del locatore' },
       ],
     },
     catalogo: await catalogo(c.slug, false),
@@ -110,10 +95,15 @@ export async function POST({ request }: { request: Request }) {
       : e.carrozzeria.documentiExtra;
     await query(
       `UPDATE app.carrozzeria SET settore = $2, etichetta_bene = $3, partner_leasing = $4, soglia_leasing = $5,
-              tetto_mese_euro = $6, demo = $7, documenti_extra = $8, aggiornato = now() WHERE slug = $1`,
-      [slug, k.settore === 'fotovoltaico' ? 'fotovoltaico' : 'generico', testo(k.etichettaBene, 80) || e.carrozzeria.etichettaBene,
-       partner, soglia >= 0 ? soglia : e.carrozzeria.sogliaLeasing, tetto >= 0 ? tetto : e.carrozzeria.tettoMeseEuro,
-       Boolean(k.demo), JSON.stringify(extra)],
+              tetto_mese_euro = $6, demo = $7, documenti_extra = $8, tabella_alternativa = $9,
+              regole_semaforo = $10, leasing = $11, aggiornato = now() WHERE slug = $1`,
+      [slug, SETTORI.includes(String(k.settore)) ? String(k.settore) : 'generico',
+       testo(k.etichettaBene, 80) || e.carrozzeria.etichettaBene, partner,
+       soglia >= 0 ? soglia : e.carrozzeria.sogliaLeasing, tetto >= 0 ? tetto : e.carrozzeria.tettoMeseEuro,
+       Boolean(k.demo), JSON.stringify(extra),
+       LISTINI.includes(String(k.tabellaAlternativa)) ? String(k.tabellaAlternativa) : null,
+       REGOLE.includes(String(k.regoleSemaforo)) ? String(k.regoleSemaforo) : e.carrozzeria.regoleSemaforo,
+       k.leasing === undefined ? e.carrozzeria.leasing : Boolean(k.leasing)],
     );
     await query(
       `UPDATE app.fornitore SET tabella_canoni = $2, brand_colore = $3, brand_accento = $4 WHERE slug = $1`,

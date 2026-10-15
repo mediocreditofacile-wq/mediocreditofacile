@@ -18,6 +18,9 @@ const SINONIMI: Record<string, string> = {
   accumulo: 'kwh_accumulo', kwh: 'kwh_accumulo', kwh_accumulo: 'kwh_accumulo', batteria: 'kwh_accumulo',
   descrizione: 'descrizione', note: 'descrizione',
   installazione: 'installazione',
+  famiglia: 'famiglia', modello: 'famiglia',
+  allestimento: 'allestimento', alimentazione: 'allestimento',
+  tipo: 'tipo', passo: 'passo', step: 'passo', massimo: 'massimo', max: 'massimo', nota: 'nota',
 };
 
 /** Righe incollate da Excel -> oggetti. Le colonne si riconoscono dall'intestazione. */
@@ -41,6 +44,7 @@ function rendi() {
   const c = dati.config;
   const s = dati.spesa;
   const fv = c.settore === 'fotovoltaico';
+  const mc = c.settore === 'macchine';
   $('mcf').innerHTML = `
     <article class="mt-card">
       <p class="mt-semaforo__tit">Ricerche del mese</p>
@@ -52,10 +56,15 @@ function rendi() {
     <div class="mt-griglia">
       <label class="mt-campo"><span>Settore</span><select id="cf-settore" class="mt-input">
         <option value="fotovoltaico" ${fv ? 'selected' : ''}>Fotovoltaico, con business plan</option>
-        <option value="generico" ${fv ? '' : 'selected'}>Generico</option></select></label>
+        <option value="macchine" ${mc ? 'selected' : ''}>Macchine, con accessori e consegna</option>
+        <option value="generico" ${!fv && !mc ? 'selected' : ''}>Generico</option></select></label>
       <label class="mt-campo"><span>Etichetta del bene</span><input id="cf-etichetta" class="mt-input" value="${esc(c.etichettaBene)}" /></label>
       <label class="mt-campo"><span>Listino del noleggio</span><select id="cf-listino" class="mt-input">
         ${opzioni(dati.opzioni?.listini, c.tabellaCanoni)}</select></label>
+      <label class="mt-campo"><span>Listino affiancato</span><select id="cf-alternativa" class="mt-input">
+        <option value="">Nessuno</option>${opzioni(dati.opzioni?.listini, c.tabellaAlternativa ?? '')}</select></label>
+      <label class="mt-campo"><span>Regole del semaforo</span><select id="cf-regole" class="mt-input">
+        ${opzioni(dati.opzioni?.regole, c.regoleSemaforo)}</select></label>
       <label class="mt-campo"><span>Partner del leasing</span><select id="cf-partner" class="mt-input">
         ${opzioni(dati.opzioni?.partner, c.partnerLeasing)}</select></label>
       <label class="mt-campo"><span>Leasing da, euro (0 = sempre)</span><input id="cf-soglia" type="number" min="0" step="1000" class="mt-input" value="${esc(c.sogliaLeasing)}" /></label>
@@ -66,22 +75,24 @@ function rendi() {
     <label class="mt-campo" style="margin-top:16px"><span>Documenti in più nella checklist, uno per riga</span>
       <textarea id="cf-extra" class="mt-input" rows="3">${esc((c.documentiExtra ?? []).join('\n'))}</textarea></label>
     <label class="mt-toggle" style="margin-top:12px"><input type="checkbox" id="cf-demo" ${c.demo ? 'checked' : ''} /> Portale dimostrativo (scritto a video e nei PDF)</label>
+    <label class="mt-toggle" style="margin-top:12px"><input type="checkbox" id="cf-leasing" ${c.leasing !== false ? 'checked' : ''} /> Proponi anche il leasing</label>
     <div class="mt-azioni"><button type="button" id="cf-salva" class="mt-btn">Salva la configurazione</button></div>
     <p id="cf-msg" class="mt-msg" hidden></p>
 
     <h3 class="mt-h3">Catalogo</h3>
     <div class="mt-scorri"><table class="mt-tabella">
-      <thead><tr><th>Codice</th><th>Nome</th>${fv ? '<th class="num">kWp</th><th class="num">Accumulo</th>' : ''}<th class="num">Prezzo</th><th>Stato</th></tr></thead>
+      <thead><tr><th>Codice</th><th>Nome</th>${fv ? '<th class="num">kWp</th><th class="num">Accumulo</th>' : ''}${mc ? '<th>Famiglia</th><th>Tipo</th>' : ''}<th class="num">Prezzo</th><th>Stato</th></tr></thead>
       <tbody>${dati.catalogo.map((v: any) => `<tr class="${v.attivo ? '' : 'spenta'}">
         <td>${esc(v.codice)}</td><td>${esc(v.nome)}</td>
         ${fv ? `<td class="num">${v.attributi?.kwp != null ? num(v.attributi.kwp) : '—'}</td><td class="num">${v.attributi?.kwh_accumulo ? `${num(v.attributi.kwh_accumulo)} kWh` : '—'}</td>` : ''}
+        ${mc ? `<td>${esc(v.attributi?.famiglia ?? '—')}</td><td>${v.attributi?.tipo === 'accessorio' ? `accessorio${v.attributi.passo > 1 ? `, a ${v.attributi.passo}` : ''}, max ${v.attributi.massimo}` : esc(v.attributi?.allestimento ?? 'macchina')}</td>` : ''}
         <td class="num">${euro(v.prezzo)}</td>
         <td><button type="button" class="mt-link" data-voce-stato="${esc(v.codice)}" data-attivo="${v.attivo ? '0' : '1'}">${v.attivo ? 'Spegni' : 'Riaccendi'}</button></td>
       </tr>`).join('')}</tbody></table></div>
 
     <h3 class="mt-h3">Importa da Excel</h3>
     <p class="mt-nota" style="margin-top:0">Copia le righe dal foglio, intestazione compresa, e incollale qui. Colonne riconosciute: codice, nome,
-      prezzo${fv ? ', kwp, accumulo, installazione' : ''}, descrizione. Lo stesso codice aggiorna la voce, non la duplica.</p>
+      prezzo${fv ? ', kwp, accumulo, installazione' : ''}${mc ? ', famiglia, allestimento (cavo, batteria, steam), tipo (accessorio), passo, massimo, nota' : ''}, descrizione. Lo stesso codice aggiorna la voce, non la duplica.</p>
     <textarea id="cf-incolla" class="mt-input" rows="6" placeholder="codice&#9;nome&#9;prezzo${fv ? '&#9;kwp&#9;accumulo' : ''}"></textarea>
     <div class="mt-azioni">
       <button type="button" id="cf-importa" class="mt-btn mt-btn--secondario">Importa le righe</button>
@@ -129,6 +140,8 @@ export function montaAdmin() {
           partnerLeasing: val('cf-partner'), sogliaLeasing: Number(val('cf-soglia')), tettoMeseEuro: Number(val('cf-tetto')),
           colore: val('cf-colore'), accento: val('cf-accento'), demo: $<HTMLInputElement>('cf-demo').checked,
           documentiExtra: val('cf-extra').split('\n').map((x) => x.trim()).filter(Boolean),
+          tabellaAlternativa: val('cf-alternativa'), regoleSemaforo: val('cf-regole'),
+          leasing: $<HTMLInputElement>('cf-leasing').checked,
         },
       });
       if (!res.ok || !corpo?.ok) return messaggio($('cf-msg'), traduci(corpo?.error ?? ''), false);
