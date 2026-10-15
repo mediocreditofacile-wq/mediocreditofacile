@@ -11,7 +11,10 @@
 import { query, queryUna } from '../db';
 import { PARTNERS_LEASING, type PartnerLeasing } from '../../data/leasing';
 
-export type Settore = 'fotovoltaico' | 'generico';
+export type Settore = 'fotovoltaico' | 'generico' | 'macchine';
+/** Regole del semaforo: credit policy del tool Marotta, oppure criteri del locatore (Duplex) */
+export type RegoleSemaforo = 'credit-policy' | 'locatore';
+const SETTORI: Settore[] = ['fotovoltaico', 'generico', 'macchine'];
 
 export interface Carrozzeria {
   slug: string;
@@ -31,6 +34,11 @@ export interface Carrozzeria {
   demo: boolean;
   documentiExtra: string[];
   attivo: boolean;
+  /** Listino del noleggio affiancato al principale (la Grace Period di Duplex). Null = nessuno */
+  tabellaAlternativa: string | null;
+  regoleSemaforo: RegoleSemaforo;
+  /** false = solo noleggio operativo */
+  leasing: boolean;
 }
 
 export interface VoceCatalogo {
@@ -45,7 +53,7 @@ export interface VoceCatalogo {
   attivo: boolean;
 }
 
-interface RigaCarrozzeria {
+export interface RigaCarrozzeria {
   slug: string;
   nome: string;
   citta: string | null;
@@ -63,17 +71,20 @@ interface RigaCarrozzeria {
   tetto_mese_euro: string;
   demo: boolean;
   documenti_extra: unknown;
+  tabella_alternativa: string | null;
+  regole_semaforo: string;
+  leasing: boolean;
 }
 
 const SELECT = `
   SELECT f.slug, f.nome, f.citta, f.prefisso, f.organization_id, f.tabella_canoni,
          f.brand_logo, f.brand_colore, f.brand_accento, f.attivo,
          c.settore, c.etichetta_bene, c.partner_leasing, c.soglia_leasing,
-         c.tetto_mese_euro, c.demo, c.documenti_extra
+         c.tetto_mese_euro, c.demo, c.documenti_extra, c.tabella_alternativa, c.regole_semaforo, c.leasing
     FROM app.fornitore f
     JOIN app.carrozzeria c ON c.slug = f.slug`;
 
-function daRiga(r: RigaCarrozzeria): Carrozzeria {
+export function carrozzeriaDaRiga(r: RigaCarrozzeria): Carrozzeria {
   const partner = PARTNERS_LEASING.find((p) => p.key === r.partner_leasing)?.key ?? 'alba';
   return {
     slug: r.slug,
@@ -83,7 +94,7 @@ function daRiga(r: RigaCarrozzeria): Carrozzeria {
     organizationId: r.organization_id,
     tabellaCanoni: r.tabella_canoni,
     brand: { logo: r.brand_logo, colore: r.brand_colore, accento: r.brand_accento },
-    settore: r.settore === 'fotovoltaico' ? 'fotovoltaico' : 'generico',
+    settore: SETTORI.includes(r.settore as Settore) ? (r.settore as Settore) : 'generico',
     etichettaBene: r.etichetta_bene,
     partnerLeasing: partner,
     sogliaLeasing: Number(r.soglia_leasing) || 0,
@@ -91,18 +102,21 @@ function daRiga(r: RigaCarrozzeria): Carrozzeria {
     demo: r.demo,
     documentiExtra: Array.isArray(r.documenti_extra) ? (r.documenti_extra as unknown[]).map(String) : [],
     attivo: r.attivo,
+    tabellaAlternativa: r.tabella_alternativa || null,
+    regoleSemaforo: r.regole_semaforo === 'locatore' ? 'locatore' : 'credit-policy',
+    leasing: r.leasing !== false,
   };
 }
 
 export async function carrozzeriaDaSlug(slug: string): Promise<Carrozzeria | null> {
   const r = await queryUna<RigaCarrozzeria>(`${SELECT} WHERE f.slug = $1`, [slug]);
-  return r ? daRiga(r) : null;
+  return r ? carrozzeriaDaRiga(r) : null;
 }
 
 /** Tutte le carrozzerie, per il pannello MCF */
 export async function elencoCarrozzerie(): Promise<Carrozzeria[]> {
   const righe = await query<RigaCarrozzeria>(`${SELECT} ORDER BY f.nome`);
-  return righe.map(daRiga);
+  return righe.map(carrozzeriaDaRiga);
 }
 
 /** Il partner leasing della carrozzeria, come oggetto di src/data/leasing.ts */
