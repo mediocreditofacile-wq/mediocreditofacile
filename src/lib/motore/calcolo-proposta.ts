@@ -106,12 +106,16 @@ export async function calcolaProposta(
 /** Quello che dell'esito va allo schermo */
 export function esitoPerSchermo(c: CalcoloProposta) {
   const { esito } = c;
+  const sem = esito.locatore
+    ? { etichetta: esito.locatore.etichetta as string | null, righe: esito.locatore.righe, criteri: esito.locatore.criteri as unknown[],
+        massimale: null as number | null, provvisorio: esito.locatore.provvisorio, eventi: esito.locatore.eventi as string | null }
+    : { etichetta: null as string | null, righe: [] as string[], criteri: (esito.credito?.criteri ?? []) as unknown[],
+        massimale: esito.credito?.massimale ?? null, provvisorio: false, eventi: null as string | null };
   return {
     importo: c.prezzo,
     listino: c.voce.prezzo,
     semaforo: esito.semaforo,
-    criteri: esito.credito.criteri,
-    massimale: esito.credito.massimale,
+    ...sem,
     anticipoRichiesto: esito.anticipoRichiesto,
     markup: esito.markup,
     bloccate: esito.bloccate,

@@ -94,7 +94,7 @@ export function businessPlan(
   const conLeasing = proposte.leasing.length > 0;
   const sabatini = conLeasing && agevolazioneAttiva('sabatini');
   const iper = conLeasing && agevolazioneAttiva('iperammortamento');
-  const { partner, anticipoPerc, markup } = condizioniLeasing(carrozzeria, proposte.credito);
+  const { partner, anticipoPerc, markup } = condizioniLeasing(carrozzeria, { anticipo: proposte.anticipoRichiesto, markup: proposte.markup });
 
   const opzioni: OpzioniProspetto = {
     ...opzioniPdf,

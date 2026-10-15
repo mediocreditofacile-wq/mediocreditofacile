@@ -19,7 +19,7 @@
 // spread medio commerciale della variante fornitori. Sotto la soglia della
 // carrozzeria il leasing non si propone.
 
-import { valutaCredito, type DatiCredito, type EsitoCredito, type Semaforo } from '../credit-policy';
+import type { DatiCredito, EsitoCredito } from '../credit-policy';
 import { getTabella, type TabellaCanoni } from '../tabelle-canoni';
 import type { LeasingEsterno } from '../prospetti-pv';
 import {
@@ -28,6 +28,8 @@ import {
   type PartnerLeasing,
 } from '../../data/leasing';
 import { partnerLeasingDi, type Carrozzeria } from './carrozzeria';
+import type { EsitoLocatore, StatoEventi } from './semaforo-locatore';
+import { valuta } from './valutazione';
 
 /** Anticipo di partenza del leasing, come sul tool Marotta e sul simulatore leasing */
 export const LEASING_ANTICIPO_BASE = 10;
@@ -51,8 +53,10 @@ export interface PropostaNoleggio {
 
 export interface EsitoProposte {
   importo: number;
-  semaforo: Semaforo;
-  credito: EsitoCredito;
+  /** 'verde' | 'giallo' | 'rosso', oppure i quattro colori del locatore */
+  semaforo: string;
+  credito: EsitoCredito | null;
+  locatore: EsitoLocatore | null;
   /** Maggiorazione applicata a canoni e rate, in % */
   markup: number;
   /** Anticipo minimo chiesto dalla valutazione, in % */
@@ -118,8 +122,8 @@ export function leasingPartner(
   };
 }
 
-/** Le condizioni del leasing per una carrozzeria, dato l'esito del credito */
-export function condizioniLeasing(carrozzeria: Carrozzeria, credito: EsitoCredito) {
+/** Le condizioni del leasing per una carrozzeria, dato l'esito della valutazione */
+export function condizioniLeasing(carrozzeria: Carrozzeria, credito: { anticipo: number; markup: number }) {
   return {
     partner: partnerLeasingDi(carrozzeria),
     anticipoPerc: Math.max(LEASING_ANTICIPO_BASE, credito.anticipo),
@@ -135,15 +139,17 @@ export function calcolaProposte(
   bilancio: DatiBilancio,
   carrozzeria: Carrozzeria,
   oggi?: Date,
+  eventi: StatoEventi = 'non-avviata',
 ): EsitoProposte {
-  const credito = valutaCredito({ ...bilancio, importo, oggi });
+  const v = valuta(carrozzeria, bilancio, importo, eventi, oggi);
   const avvisi: string[] = [];
   const base: EsitoProposte = {
     importo,
-    semaforo: credito.semaforo,
-    credito,
-    markup: credito.markup,
-    anticipoRichiesto: credito.anticipo,
+    semaforo: v.semaforo,
+    credito: v.credito,
+    locatore: v.locatore,
+    markup: v.markup,
+    anticipoRichiesto: v.anticipo,
     bloccate: false,
     noleggio: [],
     leasing: [],
@@ -153,7 +159,7 @@ export function calcolaProposte(
     avvisi,
   };
 
-  if (credito.semaforo === 'rosso') {
+  if (v.blocca) {
     return {
       ...base,
       bloccate: true,
@@ -163,7 +169,7 @@ export function calcolaProposte(
   }
 
   // --- noleggio operativo ---
-  const tabella = tabellaConMarkup(getTabella(carrozzeria.tabellaCanoni), credito.markup);
+  const tabella = tabellaConMarkup(getTabella(carrozzeria.tabellaCanoni), v.markup);
   if (!tabella.quotabile(importo)) {
     base.motivoNoNoleggio =
       `Il noleggio si quota da ${euroTesto(tabella.importoMin)} a ${euroTesto(tabella.importoMax)} euro.`;
@@ -174,32 +180,36 @@ export function calcolaProposte(
       const riscatto = r2((importo * riscattoPerc) / 100);
       base.noleggio.push({ durata, canone, riscattoPerc, riscatto, totale: r2(canone * durata + riscatto) });
     }
-    if (credito.anticipo > 0) {
+    if (v.anticipo > 0) {
       avvisi.push(
-        `La valutazione chiede un anticipo del ${credito.anticipo}%: il noleggio parte da zero anticipo. ` +
+        `La valutazione chiede un anticipo del ${v.anticipo}%: il noleggio parte da zero anticipo. ` +
         'Proponi il leasing o senti Mediocredito Facile prima di presentare il canone.',
       );
     }
   }
 
   // --- leasing finanziario ---
-  const { partner, anticipoPerc, markup } = condizioniLeasing(carrozzeria, credito);
-  if (carrozzeria.sogliaLeasing > 0 && importo < carrozzeria.sogliaLeasing) {
-    base.motivoNoLeasing = `Sotto ${euroTesto(carrozzeria.sogliaLeasing)} euro il leasing non si propone su questo catalogo.`;
-  } else if (importo < partner.importoMin) {
-    base.motivoNoLeasing = `Sotto ${euroTesto(partner.importoMin)} euro il leasing non si fa.`;
+  if (!carrozzeria.leasing) {
+    base.motivoNoLeasing = 'Su questo portale si propone solo il noleggio operativo.';
   } else {
-    for (const durata of DURATE_LEASING_MOTORE) {
-      const l = leasingPartner(partner, importo, durata, anticipoPerc, markup);
-      if (l) base.leasing.push(l);
-    }
-    if (anticipoPerc > LEASING_ANTICIPO_BASE) {
-      avvisi.push(`Anticipo del leasing portato al ${anticipoPerc}% dalla valutazione del cliente.`);
+    const { partner, anticipoPerc, markup } = condizioniLeasing(carrozzeria, v);
+    if (carrozzeria.sogliaLeasing > 0 && importo < carrozzeria.sogliaLeasing) {
+      base.motivoNoLeasing = `Sotto ${euroTesto(carrozzeria.sogliaLeasing)} euro il leasing non si propone su questo catalogo.`;
+    } else if (importo < partner.importoMin) {
+      base.motivoNoLeasing = `Sotto ${euroTesto(partner.importoMin)} euro il leasing non si fa.`;
+    } else {
+      for (const durata of DURATE_LEASING_MOTORE) {
+        const l = leasingPartner(partner, importo, durata, anticipoPerc, markup);
+        if (l) base.leasing.push(l);
+      }
+      if (anticipoPerc > LEASING_ANTICIPO_BASE) {
+        avvisi.push(`Anticipo del leasing portato al ${anticipoPerc}% dalla valutazione del cliente.`);
+      }
     }
   }
 
-  if (credito.markup > 0) {
-    avvisi.push(`Canoni e rate maggiorati dello ${credito.markup.toLocaleString('it-IT')}% dalla valutazione del cliente.`);
+  if (v.markup > 0) {
+    avvisi.push(`Canoni e rate maggiorati dello ${v.markup.toLocaleString('it-IT')}% dalla valutazione del cliente.`);
   }
   return base;
 }
