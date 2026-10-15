@@ -53,10 +53,13 @@ export interface EsitoLocatore {
  */
 export const QUOTA_INDICAZIONE_MASSIMA = 0.15;
 
-/** Il 15% del volume d'affari, per difetto alle centinaia di euro */
+/** Tetto dell'indicazione, qualunque sia il volume d'affari (Alberto, 15/10/2026) */
+export const TETTO_INDICAZIONE_MASSIMA = 199_000;
+
+/** Il 15% del volume d'affari, per difetto alle centinaia di euro, mai oltre il tetto */
 function indicazioneMassima(volumeAffari: number | null): number | null {
   if (volumeAffari === null || !(volumeAffari > 0)) return null;
-  return Math.floor((volumeAffari * QUOTA_INDICAZIONE_MASSIMA) / 100) * 100;
+  return Math.min(Math.floor((volumeAffari * QUOTA_INDICAZIONE_MASSIMA) / 100) * 100, TETTO_INDICAZIONE_MASSIMA);
 }
 
 export const ETICHETTA_LOCATORE: Record<ColoreLocatore, string> = {

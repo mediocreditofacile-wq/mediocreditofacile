@@ -144,6 +144,11 @@ describe('indicazione massima importo finanziabile', () => {
     expect(v({ volumeAffari: 1_241_373 }, null).indicazioneMassima).toBe(186_200);
     expect(v({}, null).indicazioneMassima).toBe(127_500);
   });
+  it('non supera mai 199.000 euro', () => {
+    expect(v({ volumeAffari: 1_326_666 }, null).indicazioneMassima).toBe(198_900);
+    expect(v({ volumeAffari: 1_326_667 }, null).indicazioneMassima).toBe(199_000);
+    expect(v({ volumeAffari: 5_000_000 }, null).indicazioneMassima).toBe(199_000);
+  });
   it('con un importo in valutazione non si mostra: risponde il semaforo', () => {
     expect(v({}, 3500).indicazioneMassima).toBeNull();
   });
