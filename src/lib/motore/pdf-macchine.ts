@@ -9,7 +9,7 @@
 
 import { ASSICURAZIONE_MINIMA, ASSICURAZIONE_PERC } from '../../data/duplex-costi';
 import { buildChecklist } from '../checklist-pratica';
-import { dataEstesa } from '../duplex-calendario';
+import { dataEstesaDaIso as giorno } from '../duplex-calendario';
 import type { CalcoloProposta } from './calcolo-proposta';
 import type { Carrozzeria } from './carrozzeria';
 import { dataItaliana, disegna, euro, NOTA_DEMO_PDF, type Blocco, type Documento } from './pdf-generico';
@@ -21,10 +21,6 @@ const PIEDE_MACCHINE =
   'di locazione, soggetto a delibera della società di locazione.';
 
 /** "2027-01-01" -> "1° gennaio 2027" */
-const giorno = (iso: string) => {
-  const [a, m, g] = iso.split('-').map(Number);
-  return dataEstesa(new Date(a, m - 1, g));
-};
 
 function colonna(p: Pagamento, grazia: boolean) {
   return {

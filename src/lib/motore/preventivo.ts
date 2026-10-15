@@ -19,6 +19,7 @@
 
 import { brandFornitore } from '../brand-fornitore';
 import { query } from '../db';
+import { dataEstesaDaIso } from '../duplex-calendario';
 import { DESTINATARIO_MCF, escapeHtml, inviaMail, layoutMail } from '../mail-portale';
 import { generaPdf, salvaPdf, type DocumentoGenerato } from '../preventivi-pv';
 import { buildPayloadPdf, euro } from '../prospetti-pv';
@@ -147,7 +148,7 @@ async function mailMcf(e: Sessione, c: CalcoloProposta, id: string, allegati: { 
         ${riga(mc ? 'Configurazione' : 'Offerta', mc ? c.descrizione : `${c.voce.nome} (${c.voce.codice})`)}
         ${riga('Prezzo trattato', `${eur(c.prezzo)} (listino ${eur(mc?.listino ?? c.voce.prezzo)})`)}
         ${mc ? riga('Noleggio scelto', `${mc.durata} mesi: ${mc.tradizionale ? `${eur(mc.tradizionale.canone, 2)} tradizionale` : 'tradizionale fuori listino'}${mc.alternativa ? `, ${eur(mc.alternativa.canone, 2)} ${mc.nomeAlternativa}` : ''}`) : ''}
-        ${mc ? riga('Consegna prevista', mc.consegna) : ''}
+        ${mc ? riga('Consegna prevista', dataEstesaDaIso(mc.consegna)) : ''}
         ${b ? riga('Noleggio scelto', `${b.durata} mesi, ${eur(b.canone, 2)} al mese`) : ''}
         ${b?.leasingEsterno ? riga('Leasing', `${b.durata} mesi, anticipo ${b.leasingEsterno.anticipoPerc}%, rata ${eur(b.leasingEsterno.rata, 2)}`) : ''}
         ${b ? riga('Copertura del canone', `${euro(b.coperturaCanone * 100, 0)}%`) : ''}

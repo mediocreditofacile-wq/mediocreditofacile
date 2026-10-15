@@ -3,7 +3,7 @@
 // Il conto lo fa il server (/api/motore/proposte): qui si raccolgono le scelte e
 // si disegna quello che torna. Ogni cambio rifa' il conto dopo una breve pausa.
 
-import { dataEstesa } from '../../lib/duplex-calendario';
+import { dataEstesaDaIso as giorno } from '../../lib/duplex-calendario';
 import { bloccoSemaforo } from './cliente';
 import { $, apiJson, esc, euro, stato, traduci } from './comune';
 import { cambiaQuantita, ETICHETTA_ALLESTIMENTO, famiglie, listinoConfigurazione, type Famiglia, type VoceVista } from './macchine-catalogo';
@@ -12,10 +12,6 @@ const pad = (n: number) => String(n).padStart(2, '0');
 const oggiIso = () => {
   const d = new Date();
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-};
-const giorno = (iso: string) => {
-  const [a, m, g] = iso.split('-').map(Number);
-  return dataEstesa(new Date(a, m - 1, g));
 };
 
 let famigliaScelta: Famiglia | null = null;

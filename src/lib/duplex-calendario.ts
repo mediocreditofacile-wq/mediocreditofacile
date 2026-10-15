@@ -93,6 +93,12 @@ export function dataEstesa(d: Date): string {
   return `${giorno} ${MESI[d.getMonth()]} ${d.getFullYear()}`;
 }
 
+/** "2026-10-15" -> "15 ottobre 2026". Letta come giorno di calendario, non come mezzanotte UTC */
+export function dataEstesaDaIso(iso: string): string {
+  const [a, m, g] = iso.split('-').map(Number);
+  return dataEstesa(new Date(a, m - 1, g));
+}
+
 export function meseAnno(d: Date): string {
   return `${MESI[d.getMonth()]} ${d.getFullYear()}`;
 }

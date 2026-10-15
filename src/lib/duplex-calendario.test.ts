@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { aMeseAnno, calendarioPagamenti, finestreConsegna, inizioTrimestreSuccessivo } from './duplex-calendario';
+import { aMeseAnno, calendarioPagamenti, dataEstesaDaIso, finestreConsegna, inizioTrimestreSuccessivo } from './duplex-calendario';
 
 const d = (s: string) => {
   const [y, m, g] = s.split('-').map(Number);
@@ -70,5 +70,18 @@ describe('preposizione davanti al mese', () => {
     expect(aMeseAnno(d('2027-10-01'))).toBe('a ottobre 2027');
     expect(aMeseAnno(d('2027-01-01'))).toBe('a gennaio 2027');
     expect(aMeseAnno(d('2027-07-01'))).toBe('a luglio 2027');
+  });
+});
+
+describe('data per esteso da AAAA-MM-GG', () => {
+  it('scrive giorno, mese e anno in italiano', () => {
+    expect(dataEstesaDaIso('2026-10-15')).toBe('15 ottobre 2026');
+  });
+  it('il primo del mese con l ordinale', () => {
+    expect(dataEstesaDaIso('2027-01-01')).toBe('1° gennaio 2027');
+  });
+  it('legge la data come giorno di calendario, senza fuso orario', () => {
+    // new Date('2026-12-31') e' mezzanotte UTC: a ovest di Greenwich sarebbe il 30
+    expect(dataEstesaDaIso('2026-12-31')).toBe('31 dicembre 2026');
   });
 });

@@ -25,7 +25,7 @@
  */
 import Icon from '../../components/Icon.astro';
 import ToolLayout from '../../layouts/ToolLayout.astro';
-import { carrozzeriaDaSlug } from '../../lib/motore/carrozzeria';
+import { carrozzeriaDaSlug, proposteOfferte } from '../../lib/motore/carrozzeria';
 
 export const prerender = false;
 
@@ -41,7 +41,7 @@ const macchine = c.settore === 'macchine';
 ---
 <ToolLayout
   title={`Portale ${c.nome} | Mediocredito Facile`}
-  description={`Portale riservato ${c.nome}: valutazione del cliente e proposte di noleggio operativo e leasing.`}
+  description={`Portale riservato ${c.nome}: valutazione del cliente e ${proposteOfferte(c)}.`}
   noindex={true}
   breadcrumbs={[{ name: `Portale ${c.nome}`, href: `/portale/${c.slug}` }]}
 >
@@ -58,8 +58,8 @@ const macchine = c.settore === 'macchine';
         <div id="vista-login">
           <p class="mt-eyebrow">Portale riservato</p>
           <p class="mt-gate__desc">
-            Verifica il cliente con la partita IVA, scegli dal catalogo e porta via le proposte di noleggio
-            operativo e di leasing da consegnare.
+            Verifica il cliente con la partita IVA, scegli dal catalogo e porta via le {proposteOfferte(c)}
+            da consegnare.
           </p>
           <div class="mt-gate__form">
             <input type="email" id="login-email" class="mt-input" placeholder="La tua email" autocomplete="username" />
@@ -194,7 +194,7 @@ const macchine = c.settore === 'macchine';
           <div class="mt-griglia">
             <label class="mt-campo">
               <span>{macchine ? 'Prezzo, IVA esclusa' : 'Prezzo trattato, IVA esclusa'}</span>
-              <input type="number" id="prezzo" class="mt-input" min="1" step="100" />
+              <input type="number" id="prezzo" class="mt-input" min="1" step="any" />
               <small id="prezzo-listino" class="mt-nota"></small>
             </label>
             {fotovoltaico && (

@@ -170,3 +170,8 @@ export async function voceCatalogo(slug: string, codice: string): Promise<VoceCa
 export function prodottoAmmesso(k: Carrozzeria, richiesto: unknown): 'noleggio' | 'leasing' {
   return richiesto === 'leasing' && k.leasing ? 'leasing' : 'noleggio';
 }
+
+/** Cosa porta via l'agente, per la pagina di accesso: il leasing solo se la carrozzeria lo propone */
+export function proposteOfferte(k: Pick<Carrozzeria, 'leasing'>): string {
+  return k.leasing ? 'proposte di noleggio operativo e di leasing' : 'proposte di noleggio operativo';
+}

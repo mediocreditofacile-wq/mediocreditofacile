@@ -2,40 +2,14 @@
 // Lo vede solo l'admin MCF; le API lo ricontrollano comunque.
 //
 // L'import del catalogo legge le righe copiate da Excel: prima riga con le
-// intestazioni (codice, nome, prezzo, kwp, accumulo, descrizione,
-// installazione), separatore tabulazione, punto e virgola o virgola.
+// intestazioni, separatore tabulazione, punto e virgola o virgola. Le colonne
+// riconosciute stanno in src/lib/motore/catalogo-import.ts.
 
 import { $, api, apiJson, esc, euro, messaggio, num, stato, traduci } from './comune';
 import { aggiornaCatalogo } from './proposte';
+import { leggiIncollato } from '../../lib/motore/catalogo-import';
 
 let dati: any = null;
-
-const SINONIMI: Record<string, string> = {
-  codice: 'codice', cod: 'codice', sku: 'codice',
-  nome: 'nome', descrizione_breve: 'nome', prodotto: 'nome', pacchetto: 'nome',
-  prezzo: 'prezzo', listino: 'prezzo', importo: 'prezzo',
-  kwp: 'kwp', potenza: 'kwp',
-  accumulo: 'kwh_accumulo', kwh: 'kwh_accumulo', kwh_accumulo: 'kwh_accumulo', batteria: 'kwh_accumulo',
-  descrizione: 'descrizione', note: 'descrizione',
-  installazione: 'installazione',
-  famiglia: 'famiglia', modello: 'famiglia',
-  allestimento: 'allestimento', alimentazione: 'allestimento',
-  tipo: 'tipo', passo: 'passo', step: 'passo', massimo: 'massimo', max: 'massimo', nota: 'nota',
-};
-
-/** Righe incollate da Excel -> oggetti. Le colonne si riconoscono dall'intestazione. */
-export function leggiIncollato(testo: string): Record<string, string>[] {
-  const righe = testo.split(/\r?\n/).map((r) => r.trimEnd()).filter((r) => r.trim());
-  if (righe.length < 2) return [];
-  const sep = righe[0].includes('\t') ? '\t' : righe[0].includes(';') ? ';' : ',';
-  const testata = righe[0].split(sep).map((h) => SINONIMI[h.trim().toLowerCase().replace(/[^a-z_]/g, '')] ?? '');
-  return righe.slice(1).map((r) => {
-    const celle = r.split(sep);
-    const o: Record<string, string> = {};
-    testata.forEach((k, i) => { if (k) o[k] = (celle[i] ?? '').trim(); });
-    return o;
-  });
-}
 
 const opzioni = (lista: { valore: string; etichetta: string }[] | undefined, scelto: string) =>
   (lista ?? []).map((o) => `<option value="${esc(o.valore)}" ${o.valore === scelto ? 'selected' : ''}>${esc(o.etichetta)}</option>`).join('');

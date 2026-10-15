@@ -2,7 +2,7 @@
 // e quelle nuove del settore macchine.
 
 import { describe, expect, it } from 'vitest';
-import { leggiVoce } from './catalogo-import';
+import { leggiIncollato, leggiVoce } from './catalogo-import';
 
 describe('righe del catalogo', () => {
   it('macchina con famiglia e allestimento', () => {
@@ -27,5 +27,22 @@ describe('righe del catalogo', () => {
     expect(leggiVoce({ nome: 'X', prezzo: '10' })).toBeNull();
     expect(leggiVoce({ codice: 'X', prezzo: '10' })).toBeNull();
     expect(leggiVoce({ codice: 'X', nome: 'X', prezzo: '0' })).toBeNull();
+  });
+});
+
+describe('righe incollate da Excel, colonna note', () => {
+  const voce = (testo: string) => leggiVoce(leggiIncollato(testo)[0]);
+  it('sugli accessori la colonna note diventa la nota', () => {
+    const v = voce('codice\tnome\tprezzo\tfamiglia\ttipo\tpasso\tmassimo\tnote\nUX-MICROFIBRA\tSpazzola microfibra\t119\tUltrax 45\taccessorio\t2\t4\tin coppia');
+    expect(v?.attributi.nota).toBe('in coppia');
+    expect(v?.descrizione).toBeNull();
+  });
+  it('su una voce senza descrizione la colonna note resta la descrizione, come prima', () => {
+    expect(voce('codice;nome;prezzo;note\nPV-20;Impianto 20 kWp;24000;Moduli monocristallini')?.descrizione).toBe('Moduli monocristallini');
+  });
+  it('con descrizione e note sulla stessa macchina vince la descrizione', () => {
+    const v = voce('codice;nome;prezzo;famiglia;descrizione;note\nULTRAX-45;Ultrax 45;4290;Ultrax 45;Lavasciuga compatta;da magazzino');
+    expect(v?.descrizione).toBe('Lavasciuga compatta');
+    expect(v?.attributi.nota).toBeUndefined();
   });
 });
