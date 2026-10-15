@@ -4,6 +4,17 @@
 // Servono al simulatore Duplex e al preventivo PDF che l'agente manda al cliente:
 // stanno qui e non nei componenti perche' i due devono dire la stessa cifra.
 
+/**
+ * Canone mensile ai centesimi, da imponibile e coefficiente in percentuale.
+ * Si moltiplica per la percentuale e si ripulisce l'errore della virgola mobile prima
+ * di arrotondare: 3.500 x 2,287% fa 80,045 e il contratto dice 80,05. Dividendo il
+ * coefficiente per 100 prima della moltiplicazione usciva 80,04499... e il portale
+ * mostrava 80,04, un centesimo sotto il contratto.
+ */
+export function canoneDaCoefficiente(imponibile: number, coeffPerc: number): number {
+  return Math.round(Number((imponibile * coeffPerc).toFixed(6))) / 100;
+}
+
 /** Spese di istruttoria una tantum, per fascia di imponibile. */
 export function speseIstruttoria(imponibile: number): number {
   if (imponibile <= 12_500) return 75;

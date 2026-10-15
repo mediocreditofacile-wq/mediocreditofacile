@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { calendarioPagamenti, finestreConsegna, inizioTrimestreSuccessivo } from './duplex-calendario';
+import { aMeseAnno, calendarioPagamenti, finestreConsegna, inizioTrimestreSuccessivo } from './duplex-calendario';
 
 const d = (s: string) => {
   const [y, m, g] = s.split('-').map(Number);
@@ -60,5 +60,15 @@ describe('finestre di consegna rispetto a oggi', () => {
     expect(iso(poi.dal)).toBe('2026-10-01');
     expect(iso(poi.al)).toBe('2026-12-31');
     expect(iso(poi.pagaGrace)).toBe('2027-04-01');
+  });
+});
+
+describe('preposizione davanti al mese', () => {
+  it('ad aprile e ad agosto; a ottobre, a gennaio e a luglio', () => {
+    expect(aMeseAnno(d('2027-04-01'))).toBe('ad aprile 2027');
+    expect(aMeseAnno(d('2027-08-01'))).toBe('ad agosto 2027');
+    expect(aMeseAnno(d('2027-10-01'))).toBe('a ottobre 2027');
+    expect(aMeseAnno(d('2027-01-01'))).toBe('a gennaio 2027');
+    expect(aMeseAnno(d('2027-07-01'))).toBe('a luglio 2027');
   });
 });

@@ -2,9 +2,9 @@
 // Hero della landing Duplex. Foto Ultrax 45 in placeholder finche' non arriva il file vero.
 // La data da cui si paga (tabella Grace Period) si ricalcola nel browser a ogni apertura:
 // il testo scritto in build e' solo il ripiego se lo script non gira.
-import { finestreConsegna, dataEstesa, meseAnno } from '../../lib/duplex-calendario';
+import { finestreConsegna, dataEstesa, aMeseAnno } from '../../lib/duplex-calendario';
 const [ora] = finestreConsegna(new Date());
-const fraseBuild = `Se la macchina arriva entro il ${dataEstesa(ora.al).replace(/ \d{4}$/, '')}, inizi a pagare a ${meseAnno(ora.pagaGrace)}.`;
+const fraseBuild = `Se la macchina arriva entro il ${dataEstesa(ora.al).replace(/ \d{4}$/, '')}, inizi a pagare ${aMeseAnno(ora.pagaGrace)}.`;
 ---
 
 <section class="dx-hero" id="top">
@@ -30,11 +30,11 @@ const fraseBuild = `Se la macchina arriva entro il ${dataEstesa(ora.al).replace(
 </section>
 
 <script>
-  import { finestreConsegna, dataEstesa, meseAnno } from '../../lib/duplex-calendario';
+  import { finestreConsegna, dataEstesa, aMeseAnno } from '../../lib/duplex-calendario';
   const el = document.getElementById('dx-hero-paga');
   if (el) {
     const [ora] = finestreConsegna(new Date());
-    el.textContent = `Se la macchina arriva entro il ${dataEstesa(ora.al).replace(/ \d{4}$/, '')}, inizi a pagare a ${meseAnno(ora.pagaGrace)}.`;
+    el.textContent = `Se la macchina arriva entro il ${dataEstesa(ora.al).replace(/ \d{4}$/, '')}, inizi a pagare ${aMeseAnno(ora.pagaGrace)}.`;
   }
 </script>
 

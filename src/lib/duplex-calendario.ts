@@ -97,6 +97,12 @@ export function meseAnno(d: Date): string {
   return `${MESI[d.getMonth()]} ${d.getFullYear()}`;
 }
 
+/** "a gennaio 2027", ma "ad aprile 2027": la d eufonica solo davanti alla stessa vocale (aprile, agosto). */
+export function aMeseAnno(d: Date): string {
+  const mese = MESI[d.getMonth()];
+  return `${mese.startsWith('a') ? 'ad' : 'a'} ${mese} ${d.getFullYear()}`;
+}
+
 /** "gennaio-marzo 2027" per il trimestre che inizia alla data indicata. */
 export function trimestreEsteso(d: Date): string {
   const fine = new Date(d.getFullYear(), d.getMonth() + 2, 1);

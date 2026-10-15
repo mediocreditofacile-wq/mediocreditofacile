@@ -4,6 +4,7 @@ import accessoriDB from '../../data/duplex-accessori.json';
 import { coefficienteGrace, graceDisponibile } from '../../data/duplex-grace';
 import { coefficienteSputnik } from '../../data/duplex-sputnik';
 import {
+  canoneDaCoefficiente,
   polizzaAnnua,
   riscatto,
   speseIstruttoria,
@@ -166,15 +167,16 @@ export default function DuplexSimulator() {
   // pagina si chiama "tradizionale") e Grace Period. Tutte e due vanno a fasce di importo.
   // Il canone e' sempre "nudo": manutenzione e assicurazione non ci stanno dentro.
   // La polizza all risk si fattura a parte (vedi duplex-costi.ts).
+  // Coefficienti in percentuale, come nelle tabelle: il canone lo fa canoneDaCoefficiente().
   const cSputnik = coefficienteSputnik(prezzoFinale, durata);
-  const coeffTradizionale = (cSputnik ?? 0) / 100;
+  const cTradizionale = cSputnik ?? 0;
   const cGrace = coefficienteGrace(prezzoFinale, durata);
   const graceApplicabile = cGrace !== null;
   const tabellaEffettiva: TabellaCanoni = tabella === 'grace' && graceApplicabile ? 'grace' : 'tradizionale';
-  const coefficiente = tabellaEffettiva === 'grace' ? (cGrace as number) / 100 : coeffTradizionale;
+  const coefficiente = tabellaEffettiva === 'grace' ? (cGrace as number) : cTradizionale;
   // Ai centesimi, non all'intero: su certe macchine il coefficiente da 60,37 e
   // arrotondando a 60 il preventivo prometterebbe meno di quanto dira' il contratto.
-  const canoneMensile = Math.round(prezzoFinale * coefficiente * 100) / 100;
+  const canoneMensile = canoneDaCoefficiente(prezzoFinale, coefficiente);
   const calendario = useMemo(
     () => calendarioPagamenti(daIso(consegna), canoneMensile, durata, tabellaEffettiva),
     [consegna, canoneMensile, durata, tabellaEffettiva],
@@ -185,8 +187,8 @@ export default function DuplexSimulator() {
     () => calendarioPagamenti(daIso(consegna), canoneMensile, durata, tabellaAlternativa),
     [consegna, canoneMensile, durata, tabellaAlternativa],
   );
-  const coeffAlternativo = tabellaEffettiva === 'grace' ? coeffTradizionale : (cGrace ?? 0) / 100;
-  const canoneAlternativo = Math.round(prezzoFinale * coeffAlternativo * 100) / 100;
+  const coeffAlternativo = tabellaEffettiva === 'grace' ? cTradizionale : (cGrace ?? 0);
+  const canoneAlternativo = canoneDaCoefficiente(prezzoFinale, coeffAlternativo);
   const ultimoGiornoFinestra = new Date(
     calendario.inizioLocazione.getFullYear(),
     calendario.inizioLocazione.getMonth(),
@@ -288,7 +290,9 @@ export default function DuplexSimulator() {
           <div style="font-size:25px;font-weight:800;color:${BLU};line-height:1.1;">${euroPdf(canone)} euro <span style="font-size:12px;font-weight:600;color:#666;">al mese</span></div>
           <div style="font-size:11.5px;color:#444;line-height:1.5;margin-top:6px;">
             Fattura trimestrale anticipata di <b style="color:${BLU}">${euroPdf(canone * 3)} euro</b>.
-            Con consegna il ${dataEstesa(cal.consegna)}, la prima fattura arriva il <b style="color:${BLU}">${dataEstesa(cal.primaFattura)}</b>.
+            ${grace
+              ? `Con consegna il ${dataEstesa(cal.consegna)}, pro rata e primo trimestre vanno in coda al contratto: la prima fattura arriva il <b style="color:${BLU}">${dataEstesa(cal.primaFattura)}</b>.`
+              : `Con consegna il ${dataEstesa(cal.consegna)}, il pro rata si fattura alla consegna e la prima fattura trimestrale arriva il <b style="color:${BLU}">${dataEstesa(cal.primaFattura)}</b>.`}
           </div>
         </div>`;
 
@@ -415,7 +419,7 @@ export default function DuplexSimulator() {
     <section class="dx-sim" id="simulatore">
       <div class="dx-sim__inner">
         <h2 class="dx-sim__title">Calcola il tuo canone</h2>
-        <p class="dx-sim__sub">Configurazione macchina, durata, servizi inclusi. Il canone aggiorna in tempo reale.</p>
+        <p class="dx-sim__sub">Scegli macchina, accessori, durata e tabella. Il canone si aggiorna a ogni scelta.</p>
 
         <div class="dx-sim__grid">
           {/* COLONNA SINISTRA: input */}
