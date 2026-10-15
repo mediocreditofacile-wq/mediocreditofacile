@@ -5,7 +5,10 @@
 
 import { queryUna } from '../db';
 import { businessPlan, bpPerSchermo, type InputBp } from './bp-fotovoltaico';
-import { voceCatalogo, type Carrozzeria, type VoceCatalogo } from './carrozzeria';
+import { getTabella, tabellaSeEsiste } from '../tabelle-canoni';
+import { catalogo, voceCatalogo, type Carrozzeria, type VoceCatalogo } from './carrozzeria';
+import type { EventiRicerca } from './eventi-stato';
+import { calcolaMacchine, dataConsegna, esitoDaMacchine, validaConfigurazione, type EsitoMacchine } from './proposte-macchine';
 import type { DatiCreditoMotore, SchedaRidotta } from './merito';
 import { calcolaProposte, type EsitoProposte } from './proposte';
 import { filtroVisibilita, json, type EsitoMotore } from './sessione';
@@ -27,6 +30,8 @@ export interface RicercaSalvata {
   piva: string;
   ragione_sociale: string | null;
   dati_credito: { dati: DatiCreditoMotore; scheda: SchedaRidotta };
+  /** Eventi negativi della ricerca, sui fornitori col semaforo del locatore */
+  eventi: EventiRicerca | null;
 }
 
 /** La ricerca, se l'utente la puo' vedere */
@@ -36,7 +41,7 @@ export async function ricercaVisibile(
 ): Promise<RicercaSalvata | null> {
   const { where, valori } = filtroVisibilita(e, '', 2);
   return queryUna<RicercaSalvata>(
-    `SELECT id, piva, ragione_sociale, dati_credito FROM app.ricerca_merito WHERE id = $1 AND ${where}`,
+    `SELECT id, piva, ragione_sociale, dati_credito, eventi FROM app.ricerca_merito WHERE id = $1 AND ${where}`,
     [id, ...valori],
   );
 }
@@ -53,6 +58,10 @@ export interface CalcoloProposta {
   esito: EsitoProposte;
   bp: ReturnType<typeof businessPlan>;
   inputBp: InputBp;
+  /** Cosa si propone, in una riga: la voce, oppure macchina e accessori */
+  descrizione: string;
+  /** Solo sul settore macchine */
+  macchine: EsitoMacchine | null;
 }
 
 /**
@@ -66,6 +75,7 @@ export async function calcolaProposta(
   const carrozzeria: Carrozzeria = e.carrozzeria;
   const ricerca = await ricercaVisibile(e, String(corpo.ricercaId ?? ''));
   if (!ricerca) return { ok: false, risposta: json({ ok: false, error: 'ricerca_non_trovata' }, 404) };
+  if (carrozzeria.settore === 'macchine') return calcolaPropostaMacchine(carrozzeria, ricerca, corpo);
 
   const voce = await voceCatalogo(carrozzeria.slug, String(corpo.codice ?? ''));
   if (!voce || !voce.attivo) return { ok: false, risposta: json({ ok: false, error: 'voce_non_trovata' }, 404) };
@@ -73,7 +83,7 @@ export async function calcolaProposta(
   const prezzo = Math.round((numero(corpo.prezzo) || voce.prezzo) * 100) / 100;
   if (prezzo <= 0 || prezzo > PREZZO_MAX) return { ok: false, risposta: json({ ok: false, error: 'prezzo_non_valido' }, 400) };
 
-  const esito = calcolaProposte(prezzo, ricerca.dati_credito.dati, carrozzeria);
+  const esito = calcolaProposte(prezzo, ricerca.dati_credito.dati, carrozzeria, undefined, ricerca.eventi?.stato ?? 'non-avviata');
 
   const b = (corpo.bp ?? {}) as Record<string, unknown>;
   const inputBp: InputBp = {
@@ -100,7 +110,35 @@ export async function calcolaProposta(
       )
     : null;
 
-  return { ok: true, calcolo: { ricerca, voce, prezzo, esito, bp, inputBp } };
+  return { ok: true, calcolo: { ricerca, voce, prezzo, esito, bp, inputBp, descrizione: voce.nome, macchine: null } };
+}
+
+/** Settore macchine: configurazione ricontrollata sul catalogo, poi canoni, date e costi */
+async function calcolaPropostaMacchine(
+  k: Carrozzeria,
+  ricerca: RicercaSalvata,
+  corpo: Record<string, unknown>,
+): Promise<{ ok: true; calcolo: CalcoloProposta } | { ok: false; risposta: Response }> {
+  const voci = await catalogo(k.slug);
+  const v = validaConfigurazione(voci, {
+    codice: String(corpo.codice ?? ''),
+    accessori: (corpo.accessori && typeof corpo.accessori === 'object' ? corpo.accessori : {}) as Record<string, unknown>,
+  });
+  if (!v.ok) return { ok: false, risposta: json({ ok: false, error: v.error }, v.error === 'voce_non_trovata' ? 404 : 400) };
+
+  const prezzo = Math.round((numero(corpo.prezzo) || v.conf.listino) * 100) / 100;
+  if (prezzo <= 0 || prezzo > PREZZO_MAX) return { ok: false, risposta: json({ ok: false, error: 'prezzo_non_valido' }, 400) };
+
+  const tab = getTabella(k.tabellaCanoni);
+  const alt = tabellaSeEsiste(k.tabellaAlternativa);
+  const chiesta = Math.round(numero(corpo.durata));
+  const durata = tab.durate.includes(chiesta) ? chiesta : tab.durate[tab.durate.length - 1];
+  const macchine = calcolaMacchine(v.conf, prezzo, durata, dataConsegna(corpo.consegna), tab, alt);
+  const esito = esitoDaMacchine(macchine, ricerca.dati_credito.dati, k, tab, ricerca.eventi?.stato ?? 'non-avviata');
+  return {
+    ok: true,
+    calcolo: { ricerca, voce: v.conf.macchina, prezzo, esito, bp: null, inputBp: {} as InputBp, descrizione: v.conf.descrizione, macchine },
+  };
 }
 
 /** Quello che dell'esito va allo schermo */
@@ -113,7 +151,7 @@ export function esitoPerSchermo(c: CalcoloProposta) {
         massimale: esito.credito?.massimale ?? null, provvisorio: false, eventi: null as string | null };
   return {
     importo: c.prezzo,
-    listino: c.voce.prezzo,
+    listino: c.macchine?.listino ?? c.voce.prezzo,
     semaforo: esito.semaforo,
     ...sem,
     anticipoRichiesto: esito.anticipoRichiesto,
@@ -126,6 +164,7 @@ export function esitoPerSchermo(c: CalcoloProposta) {
     notaNoleggio: esito.notaNoleggio,
     avvisi: esito.avvisi,
     bp: c.bp ? bpPerSchermo(c.bp) : null,
+    macchine: c.macchine,
   };
 }
 
