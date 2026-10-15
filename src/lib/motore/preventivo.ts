@@ -86,7 +86,6 @@ async function documentiPdf(e: Sessione, c: CalcoloProposta, id: string) {
 /** Inserisce la proposta; se l'id del secondo e' gia' preso si aggiunge un suffisso */
 async function salvaProposta(e: Sessione, c: CalcoloProposta, idBase: string, corpo: Record<string, unknown>) {
   const { contesto, carrozzeria } = e;
-  const scheda = c.ricerca.dati_credito.scheda;
   const mc = c.macchine;
   const numeri = {
     ...esitoPerSchermo(c),
@@ -111,8 +110,8 @@ async function salvaProposta(e: Sessione, c: CalcoloProposta, idBase: string, co
                                  voce_codice, descrizione, prezzo, semaforo, anticipo, markup, dati, numeri)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
        ON CONFLICT (id) DO NOTHING RETURNING id`,
-      [id, carrozzeria.slug, contesto.organizationId, contesto.userId, c.ricerca.id, c.ricerca.piva,
-       scheda.ragioneSociale || 'Cliente', c.voce.codice, c.descrizione, c.prezzo, c.esito.semaforo,
+      [id, carrozzeria.slug, contesto.organizationId, contesto.userId, c.ricerca?.id ?? null, c.cliente.piva ?? '',
+       c.cliente.nome || 'Senza intestatario', c.voce.codice, c.descrizione, c.prezzo, c.esito.semaforo,
        c.esito.anticipoRichiesto, c.esito.markup,
        JSON.stringify(dati), JSON.stringify(numeri)],
     );
@@ -123,18 +122,21 @@ async function salvaProposta(e: Sessione, c: CalcoloProposta, idBase: string, co
 
 async function mailMcf(e: Sessione, c: CalcoloProposta, id: string, allegati: { filename: string; contenuto: string }[]) {
   const { contesto, carrozzeria } = e;
-  const s = c.ricerca.dati_credito.scheda;
+  const cl = c.cliente;
+  const rating = c.ricerca?.dati_credito.scheda.rating;
   const eur = (v: number, dec = 0) => `${euro(v, dec)} euro`;
   const riga = (et: string, val: string) =>
     `<tr><td style="padding:4px 12px 4px 0;width:210px;vertical-align:top"><strong>${et}</strong></td><td>${escapeHtml(val)}</td></tr>`;
   const b = c.bp?.calcolo;
   const mc = c.macchine;
-  const sem = c.esito.locatore
+  const sem = !cl.verificato
+    ? 'nessuno, cliente non verificato'
+    : c.esito.locatore
     ? c.esito.locatore.etichetta
     : `${c.esito.semaforo}${c.esito.anticipoRichiesto ? `, anticipo richiesto ${c.esito.anticipoRichiesto}%` : ''}${c.esito.markup ? `, markup ${c.esito.markup}%` : ''}`;
   return inviaMail({
     to: DESTINATARIO_MCF,
-    subject: `${carrozzeria.nome} — ${contesto.nome || contesto.email} — ${s.ragioneSociale} — ${eur(c.prezzo)}`,
+    subject: `${carrozzeria.nome} — ${contesto.nome || contesto.email} — ${cl.nome || 'senza intestatario'}${cl.verificato ? '' : ' (non verificato)'} — ${eur(c.prezzo)}`,
     allegati: allegati.map((f) => ({ filename: f.filename, content: f.contenuto })),
     html: layoutMail('Nuovo preventivo dal portale', `
       <p style="font-size:14px;color:#787782;margin:0 0 18px">
@@ -142,8 +144,8 @@ async function mailMcf(e: Sessione, c: CalcoloProposta, id: string, allegati: { 
         Generato da ${escapeHtml(contesto.nome || contesto.email)} (${escapeHtml(contesto.email)})
       </p>
       <table style="font-size:14px;border-collapse:collapse;width:100%">
-        ${riga('Cliente', `${s.ragioneSociale}, P.IVA ${s.piva}`)}
-        ${riga('Rating', s.rating ? `${s.rating.classe} (${s.rating.descrizione ?? ''})` : 'non assegnato')}
+        ${riga('Cliente', cl.verificato ? `${cl.nome}, P.IVA ${cl.piva}` : `${cl.nome || 'non indicato'} (cliente non verificato)`)}
+        ${cl.verificato ? riga('Rating', rating ? `${rating.classe} (${rating.descrizione ?? ''})` : 'non assegnato') : ''}
         ${riga('Semaforo', sem)}
         ${riga(mc ? 'Configurazione' : 'Offerta', mc ? c.descrizione : `${c.voce.nome} (${c.voce.codice})`)}
         ${riga('Prezzo trattato', `${eur(c.prezzo)} (listino ${eur(mc?.listino ?? c.voce.prezzo)})`)}

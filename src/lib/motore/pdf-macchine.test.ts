@@ -3,7 +3,8 @@
 
 import { describe, expect, it } from 'vitest';
 import { TABELLA_GRACE_DUPLEX, TABELLA_SPUTNIK_DUPLEX } from '../tabelle-canoni';
-import type { CalcoloProposta } from './calcolo-proposta';
+import type { CalcoloProposta, RicercaSalvata } from './calcolo-proposta';
+import { clienteDellaProposta } from './cliente-proposta';
 import type { Carrozzeria, VoceCatalogo } from './carrozzeria';
 import { vociDuplex } from './catalogo-duplex';
 import { contenutoMacchine, documentiMacchine } from './pdf-macchine';
@@ -20,18 +21,25 @@ const K: Carrozzeria = {
   tabellaAlternativa: 'grace-duplex', regoleSemaforo: 'locatore', leasing: false,
 };
 
-function calcolo(codice: string, prezzo: number, accessori: Record<string, number> = {}): CalcoloProposta {
+function calcolo(
+  codice: string,
+  prezzo: number,
+  accessori: Record<string, number> = {},
+  senzaVerifica?: { intestatario: string },
+): CalcoloProposta {
   const r = validaConfigurazione(VOCI, { codice, accessori });
   if (!r.ok) throw new Error(r.error);
   const macchine = calcolaMacchine(r.conf, prezzo, 60, new Date(2026, 9, 15), TABELLA_SPUTNIK_DUPLEX, TABELLA_GRACE_DUPLEX);
-  return {
-    ricerca: {
-      id: 'r1', piva: '01234567890', ragione_sociale: 'Pulizie Prova S.r.l.', eventi: null,
-      dati_credito: {
-        dati: {},
-        scheda: { piva: '01234567890', ragioneSociale: 'Pulizie Prova S.r.l.', formaGiuridica: "SOCIETA' A RESPONSABILITA' LIMITATA", sede: 'Via Roma 1, Prato (PO)' },
-      },
+  const ricerca = senzaVerifica ? null : ({
+    id: 'r1', piva: '01234567890', ragione_sociale: 'Pulizie Prova S.r.l.', eventi: null,
+    dati_credito: {
+      dati: {},
+      scheda: { piva: '01234567890', ragioneSociale: 'Pulizie Prova S.r.l.', formaGiuridica: "SOCIETA' A RESPONSABILITA' LIMITATA", sede: 'Via Roma 1, Prato (PO)' },
     },
+  } as unknown as RicercaSalvata);
+  return {
+    ricerca,
+    cliente: clienteDellaProposta(ricerca, senzaVerifica?.intestatario),
     voce: r.conf.macchina, prezzo, esito: {}, bp: null, inputBp: {}, descrizione: r.conf.descrizione, macchine,
   } as unknown as CalcoloProposta;
 }
@@ -85,5 +93,27 @@ describe('preventivo macchine', () => {
     const [pdf] = documentiMacchine(calcolo('ULTRAX-45', 3738, { 'UX-MICROFIBRA': 2 }), K, 'DX-1', AGENTE, OGGI);
     const testoPdf = Buffer.from(pdf.contenuto, 'base64').toString('latin1');
     expect(testoPdf.match(/\/Type \/Page\b/g)).toHaveLength(1);
+  });
+});
+
+describe('preventivo prima della verifica', () => {
+  it('col nome scritto a mano: il nome, niente partita IVA', () => {
+    const t = JSON.stringify(contenutoMacchine(calcolo('ULTRAX-45', 3500, {}, { intestatario: 'Bar Centrale' }), K, 'DX-1', AGENTE, OGGI));
+    expect(t).toContain('Bar Centrale');
+    expect(t).not.toContain('Partita IVA');
+    expect(t).not.toContain('Ragione sociale');
+    expect(t).toContain('Mario Rossi');
+    expect(t).toContain('81,00 euro al mese');
+  });
+  it('sopra 10.000 euro, senza forma giuridica: le due strade per la reddituale', () => {
+    const t = JSON.stringify(contenutoMacchine(calcolo('ULTRAX-45', 12000, {}, { intestatario: 'Bar Centrale' }), K, 'DX-3', AGENTE, OGGI));
+    expect(t).toContain('bilanci depositati per le società');
+    expect(t).toContain('dichiarazioni dei redditi per le ditte individuali');
+  });
+  it('senza nome: nessuna riga del cliente, resta chi lo ha preparato', () => {
+    const d = contenutoMacchine(calcolo('ULTRAX-45', 3500, {}, { intestatario: '' }), K, 'DX-2', AGENTE, OGGI);
+    const t = JSON.stringify(d);
+    expect(t).not.toContain('Cliente');
+    expect(t).toContain('Preparato da');
   });
 });

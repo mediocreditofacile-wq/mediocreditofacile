@@ -19,7 +19,9 @@ function rendiAzioni() {
   const fv = stato.settore === 'fotovoltaico';
   box.innerHTML = `
     ${esito.bloccate ? '' : `<button type="button" class="mt-btn" id="genera-btn">${fv ? 'Genera i prospetti PDF' : 'Genera il preventivo PDF'}</button>`}
-    <button type="button" class="mt-btn ${esito.bloccate ? '' : 'mt-btn--secondario'}" id="pratica-btn">Carica la pratica</button>
+    ${stato.settore === 'macchine' && !stato.ricerca
+      ? '<button type="button" class="mt-btn mt-btn--secondario" data-vai="cliente">Verifica il cliente per caricare la pratica</button>'
+      : `<button type="button" class="mt-btn ${esito.bloccate ? '' : 'mt-btn--secondario'}" id="pratica-btn">Carica la pratica</button>`}
     <div id="genera-esito" style="flex-basis:100%"></div>`;
 }
 

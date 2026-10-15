@@ -206,20 +206,26 @@ export function calcolaMacchine(
   };
 }
 
+/** Il semaforo di una proposta fatta prima della verifica della partita IVA */
+export const SEMAFORO_NON_VERIFICATO = 'non-verificato';
+
 /**
  * L'esito nella forma del motore: storico, pratica e mail lo leggono come gli
  * altri settori. Il semaforo informa e non cambia niente; il noleggio elencato e'
- * quello della tabella principale.
+ * quello della tabella principale. Senza bilancio (cliente non ancora verificato)
+ * i canoni sono gli stessi e il semaforo non c'e'.
  */
 export function esitoDaMacchine(
   m: EsitoMacchine,
-  bilancio: DatiBilancio & Partial<DatiCreditoMotore>,
+  bilancio: (DatiBilancio & Partial<DatiCreditoMotore>) | null,
   k: Carrozzeria,
   tab: TabellaCanoni,
   eventi: StatoEventi,
   oggi?: Date,
 ): EsitoProposte {
-  const v = valuta(k, bilancio, m.prezzo, eventi, oggi);
+  const v = bilancio
+    ? valuta(k, bilancio, m.prezzo, eventi, oggi)
+    : { semaforo: SEMAFORO_NON_VERIFICATO, credito: null, locatore: null };
   const avvisi: string[] = [];
   if (v.semaforo === 'rosso') {
     avvisi.push('Valutazione difficile: prima di presentare il canone carica la pratica, la guarda Mediocredito Facile.');

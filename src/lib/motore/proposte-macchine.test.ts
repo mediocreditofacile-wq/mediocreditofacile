@@ -143,6 +143,16 @@ describe('esito per il motore', () => {
     expect(e.leasing).toEqual([]);
     expect(e.markup).toBe(0);
   });
+  it('senza cliente verificato: stessi canoni, nessun semaforo', () => {
+    const conVerifica = esitoDaMacchine(calcola('ULTRAX-45', 3500), BILANCIO, K, TABELLA_SPUTNIK_DUPLEX, 'assenti', OGGI);
+    const e = esitoDaMacchine(calcola('ULTRAX-45', 3500), null, K, TABELLA_SPUTNIK_DUPLEX, 'non-avviata', OGGI);
+    expect(e.semaforo).toBe('non-verificato');
+    expect(e.locatore).toBeNull();
+    expect(e.credito).toBeNull();
+    expect(e.avvisi).toEqual([]);
+    expect(e.bloccate).toBe(false);
+    expect(e.noleggio).toEqual(conVerifica.noleggio);
+  });
   it('il rosso non blocca e avvisa', () => {
     const e = esitoDaMacchine(calcola('ULTRAX-45', 3500), { ...BILANCIO, fatturato: 0 }, K, TABELLA_SPUTNIK_DUPLEX, 'assenti', OGGI);
     expect(e.semaforo).toBe('rosso');

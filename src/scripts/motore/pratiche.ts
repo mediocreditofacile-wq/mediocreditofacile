@@ -58,7 +58,7 @@ function rendiModulo() {
   const r = stato.ricerca;
   const box = $('pratica-nuova');
   if (!r) {
-    box.innerHTML = '<p class="mt-vuoto">Per caricare una pratica verifica prima il cliente nella sezione Cliente.</p>';
+    box.innerHTML = `<p class="mt-vuoto">Per caricare una pratica verifica prima il cliente nella sezione ${stato.settore === 'macchine' ? 'Verifica cliente' : 'Cliente'}.</p>`;
     box.hidden = false;
     return;
   }

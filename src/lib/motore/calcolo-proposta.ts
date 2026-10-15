@@ -8,6 +8,7 @@ import { businessPlan, bpPerSchermo, type InputBp } from './bp-fotovoltaico';
 import { getTabella, tabellaSeEsiste } from '../tabelle-canoni';
 import { catalogo, voceCatalogo, type Carrozzeria, type VoceCatalogo } from './carrozzeria';
 import type { EventiRicerca } from './eventi-stato';
+import { clienteDellaProposta, type ClienteProposta } from './cliente-proposta';
 import { calcolaMacchine, dataConsegna, esitoDaMacchine, validaConfigurazione, type EsitoMacchine } from './proposte-macchine';
 import type { DatiCreditoMotore, SchedaRidotta } from './merito';
 import { calcolaProposte, type EsitoProposte } from './proposte';
@@ -52,7 +53,10 @@ export function formaPerProspetto(forma: string | null): FormaGiuridica {
 }
 
 export interface CalcoloProposta {
-  ricerca: RicercaSalvata;
+  /** Null solo sul settore macchine, quando la proposta precede la verifica */
+  ricerca: RicercaSalvata | null;
+  /** A chi e' intestata: la scheda verificata, oppure il nome scritto dall'agente */
+  cliente: ClienteProposta;
   voce: VoceCatalogo;
   prezzo: number;
   esito: EsitoProposte;
@@ -73,7 +77,11 @@ export async function calcolaProposta(
   corpo: Record<string, unknown>,
 ): Promise<{ ok: true; calcolo: CalcoloProposta } | { ok: false; risposta: Response }> {
   const carrozzeria: Carrozzeria = e.carrozzeria;
-  const ricerca = await ricercaVisibile(e, String(corpo.ricercaId ?? ''));
+  const ricercaId = String(corpo.ricercaId ?? '');
+  // Sul settore macchine si propone anche prima della verifica: senza ricerca,
+  // niente semaforo e il cliente e' il nome scritto dall'agente
+  if (carrozzeria.settore === 'macchine' && !ricercaId) return calcolaPropostaMacchine(carrozzeria, null, corpo);
+  const ricerca = await ricercaVisibile(e, ricercaId);
   if (!ricerca) return { ok: false, risposta: json({ ok: false, error: 'ricerca_non_trovata' }, 404) };
   if (carrozzeria.settore === 'macchine') return calcolaPropostaMacchine(carrozzeria, ricerca, corpo);
 
@@ -110,13 +118,16 @@ export async function calcolaProposta(
       )
     : null;
 
-  return { ok: true, calcolo: { ricerca, voce, prezzo, esito, bp, inputBp, descrizione: voce.nome, macchine: null } };
+  return {
+    ok: true,
+    calcolo: { ricerca, cliente: clienteDellaProposta(ricerca, null), voce, prezzo, esito, bp, inputBp, descrizione: voce.nome, macchine: null },
+  };
 }
 
 /** Settore macchine: configurazione ricontrollata sul catalogo, poi canoni, date e costi */
 async function calcolaPropostaMacchine(
   k: Carrozzeria,
-  ricerca: RicercaSalvata,
+  ricerca: RicercaSalvata | null,
   corpo: Record<string, unknown>,
 ): Promise<{ ok: true; calcolo: CalcoloProposta } | { ok: false; risposta: Response }> {
   const voci = await catalogo(k.slug);
@@ -134,10 +145,13 @@ async function calcolaPropostaMacchine(
   const chiesta = Math.round(numero(corpo.durata));
   const durata = tab.durate.includes(chiesta) ? chiesta : tab.durate[tab.durate.length - 1];
   const macchine = calcolaMacchine(v.conf, prezzo, durata, dataConsegna(corpo.consegna), tab, alt);
-  const esito = esitoDaMacchine(macchine, ricerca.dati_credito.dati, k, tab, ricerca.eventi?.stato ?? 'non-avviata');
+  const esito = esitoDaMacchine(macchine, ricerca?.dati_credito.dati ?? null, k, tab, ricerca?.eventi?.stato ?? 'non-avviata');
   return {
     ok: true,
-    calcolo: { ricerca, voce: v.conf.macchina, prezzo, esito, bp: null, inputBp: {} as InputBp, descrizione: v.conf.descrizione, macchine },
+    calcolo: {
+      ricerca, cliente: clienteDellaProposta(ricerca, corpo.intestatario),
+      voce: v.conf.macchina, prezzo, esito, bp: null, inputBp: {} as InputBp, descrizione: v.conf.descrizione, macchine,
+    },
   };
 }
 

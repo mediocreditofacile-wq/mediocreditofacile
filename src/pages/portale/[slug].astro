@@ -58,8 +58,9 @@ const macchine = c.settore === 'macchine';
         <div id="vista-login">
           <p class="mt-eyebrow">Portale riservato</p>
           <p class="mt-gate__desc">
-            Verifica il cliente con la partita IVA, scegli dal catalogo e porta via le {proposteOfferte(c)}
-            da consegnare.
+            {macchine
+              ? `Scegli dal catalogo e porta via le ${proposteOfferte(c)} da consegnare. Quando la trattativa si fa seria, verifica il cliente con la partita IVA.`
+              : `Verifica il cliente con la partita IVA, scegli dal catalogo e porta via le ${proposteOfferte(c)} da consegnare.`}
           </p>
           <div class="mt-gate__form">
             <input type="email" id="login-email" class="mt-input" placeholder="La tua email" autocomplete="username" />
@@ -147,9 +148,19 @@ const macchine = c.settore === 'macchine';
       )}
 
       <nav class="mt-tabs" role="tablist" aria-label="Sezioni del portale">
-        <button role="tab" class="mt-tab" data-tab="cliente" aria-selected="true">Cliente</button>
-        <button role="tab" class="mt-tab" data-tab="info" aria-selected="false">Info aggiuntive</button>
-        <button role="tab" class="mt-tab" data-tab="proposte" aria-selected="false">Proposte</button>
+        {macchine ? (
+          <>
+            <button role="tab" class="mt-tab" data-tab="proposte" aria-selected="true">Proposte</button>
+            <button role="tab" class="mt-tab" data-tab="cliente" aria-selected="false">Verifica cliente</button>
+            <button role="tab" class="mt-tab" data-tab="info" aria-selected="false">Info aggiuntive</button>
+          </>
+        ) : (
+          <>
+            <button role="tab" class="mt-tab" data-tab="cliente" aria-selected="true">Cliente</button>
+            <button role="tab" class="mt-tab" data-tab="info" aria-selected="false">Info aggiuntive</button>
+            <button role="tab" class="mt-tab" data-tab="proposte" aria-selected="false">Proposte</button>
+          </>
+        )}
         <button role="tab" class="mt-tab" data-tab="pratiche" aria-selected="false">Pratiche</button>
         <button role="tab" class="mt-tab" data-tab="storico" aria-selected="false">Storico</button>
         <button role="tab" class="mt-tab" data-tab="rete" aria-selected="false" hidden>La tua rete</button>
@@ -157,12 +168,20 @@ const macchine = c.settore === 'macchine';
       </nav>
 
       <!-- 1. Cliente -->
-      <section class="mt-pannello" data-pannello="cliente" role="tabpanel">
+      <section class="mt-pannello" data-pannello="cliente" role="tabpanel" hidden={macchine}>
         <h1 class="mt-h1">Verifica il cliente</h1>
-        <p class="mt-lead">
-          Inserisci la partita IVA del cliente: arrivano anagrafica, bilancio e una prima valutazione. Il
-          semaforo definitivo si accende quando scegli {fotovoltaico ? 'il pacchetto' : macchine ? 'la macchina' : 'il bene'} e il prezzo.
-        </p>
+        {macchine ? (
+          <p class="mt-lead">
+            Quando la trattativa si fa seria, prima della visita o della dimostrazione, inserisci la partita IVA del
+            cliente: arrivano anagrafica, bilancio e la valutazione. Da quel momento le proposte mostrano il semaforo,
+            il preventivo porta i dati del registro e si può caricare la pratica.
+          </p>
+        ) : (
+          <p class="mt-lead">
+            Inserisci la partita IVA del cliente: arrivano anagrafica, bilancio e una prima valutazione. Il
+            semaforo definitivo si accende quando scegli {fotovoltaico ? 'il pacchetto' : 'il bene'} e il prezzo.
+          </p>
+        )}
         <div class="mt-cerca">
           <input type="text" id="piva" class="mt-input" inputmode="numeric" maxlength="13" placeholder="Partita IVA, 11 cifre" autocomplete="off" />
           <button id="cerca-btn" class="mt-btn">Verifica</button>
@@ -178,15 +197,15 @@ const macchine = c.settore === 'macchine';
           Soci, amministratori e bilancio riclassificato dell'azienda verificata. Sono i dati del Registro imprese,
           utili a capire con chi si parla prima di presentare l'offerta.
         </p>
-        <div id="info"><p class="mt-vuoto">Verifica prima un cliente nella sezione Cliente.</p></div>
+        <div id="info"><p class="mt-vuoto">Verifica prima un cliente nella sezione {macchine ? 'Verifica cliente' : 'Cliente'}.</p></div>
       </section>
 
       <!-- 3. Proposte -->
-      <section class="mt-pannello" data-pannello="proposte" role="tabpanel" hidden>
+      <section class="mt-pannello" data-pannello="proposte" role="tabpanel" hidden={!macchine}>
         <h2 class="mt-h2">Proposte</h2>
         <p id="proposte-cliente" class="mt-lead">Verifica prima un cliente nella sezione Cliente.</p>
 
-        <div id="proposte-corpo" hidden>
+        <div id="proposte-corpo" hidden={!macchine}>
           <h3 class="mt-h3">{fotovoltaico ? 'Scegli il pacchetto' : macchine ? 'Scegli la macchina' : 'Scegli dal catalogo'}</h3>
           <div id="catalogo" class="mt-catalogo"></div>
           {macchine && <div id="macchine-config"></div>}
@@ -197,6 +216,13 @@ const macchine = c.settore === 'macchine';
               <input type="number" id="prezzo" class="mt-input" min="1" step="any" />
               <small id="prezzo-listino" class="mt-nota"></small>
             </label>
+            {macchine && (
+              <label class="mt-campo" id="campo-intestatario">
+                <span>Intestato a, facoltativo</span>
+                <input type="text" id="intestatario" class="mt-input" maxlength="120" placeholder="Nome del cliente" autocomplete="off" />
+                <small class="mt-nota">Va sul preventivo. Dopo la verifica il cliente lo prende dal registro.</small>
+              </label>
+            )}
             {fotovoltaico && (
               <>
                 <label class="mt-campo">

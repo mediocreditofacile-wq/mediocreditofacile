@@ -66,7 +66,7 @@ export const dataItaliana = (d: Date) =>
   new Intl.DateTimeFormat('it-IT', { timeZone: 'Europe/Rome', day: '2-digit', month: '2-digit', year: 'numeric' }).format(d);
 
 function blocchiCliente(c: CalcoloProposta): Blocco[] {
-  const s = c.ricerca.dati_credito.scheda;
+  const s = c.ricerca!.dati_credito.scheda; // sul settore generico la ricerca c'e' sempre
   const righe: [string, string][] = [
     ['Ragione sociale', s.ragioneSociale || 'Cliente'],
     ['Partita IVA', s.piva],
@@ -110,7 +110,7 @@ export function contenutoNoleggio(c: CalcoloProposta, k: Carrozzeria, id: string
     blocchi.push({ tipo: 'testo', testo: esito.motivoNoNoleggio ?? 'Il noleggio non è disponibile su questo importo.' });
   }
 
-  const forma = c.ricerca.dati_credito.scheda.formaGiuridica ?? '';
+  const forma = c.ricerca!.dati_credito.scheda.formaGiuridica ?? '';
   blocchi.push(
     { tipo: 'sezione', titolo: 'Documenti per aprire la pratica' },
     { tipo: 'elenco', voci: buildChecklist(forma, c.prezzo, k.documentiExtra) },

@@ -25,10 +25,14 @@ let richiesta = 0;
 
 /** L'input che va al server: lo stesso serve al preventivo PDF */
 export function inputMacchine() {
-  if (!stato.ricerca || !macchina) return null;
+  if (!macchina) return null;
+  // Senza ricerca la proposta si fa lo stesso: niente semaforo, e il cliente
+  // del preventivo e' il nome scritto a mano
+  const intestatario = document.getElementById('intestatario') as HTMLInputElement | null;
   return {
     f: stato.slug,
-    ricercaId: stato.ricerca.id,
+    ricercaId: stato.ricerca?.id ?? '',
+    intestatario: stato.ricerca ? '' : intestatario?.value ?? '',
     codice: macchina.codice,
     accessori: { ...quantita },
     prezzo: Number($<HTMLInputElement>('prezzo').value) || null,
@@ -160,8 +164,16 @@ function rendiEsito(r: any) {
     </tbody></table>
     ${alt === 'Grace Period' ? '<p class="mt-nota"><a href="/docs/duplex-grace-period.pdf" target="_blank" rel="noopener">Come funziona la Grace Period</a>: il foglio da girare al cliente.</p>' : ''}`;
 
+  const semaforo = r.semaforo === 'non-verificato'
+    ? `<div class="mt-card">
+        <p class="mt-semaforo__tit">Cliente non ancora verificato</p>
+        <p class="mt-nota" style="margin:0 0 10px">Canoni e date valgono già, e il preventivo si può consegnare.
+          Prima della visita o della dimostrazione verifica la partita IVA: qui compare il semaforo.${differenza ? ` ${esc(differenza)}` : ''}</p>
+        <button type="button" class="mt-btn mt-btn--secondario" data-vai="cliente">Verifica il cliente</button>
+      </div>`
+    : bloccoSemaforo(r, `Valutazione su ${euro(r.importo)}`, differenza);
   $('proposte-esito').innerHTML = `
-    ${bloccoSemaforo(r, `Valutazione su ${euro(r.importo)}`, differenza)}
+    ${semaforo}
     ${avvisi}
     ${r.motivoNoNoleggio && !m.righe.some((x: any) => x.canoneAlternativo != null)
       ? `<p class="mt-msg mt-msg--errore">${esc(r.motivoNoNoleggio)}</p>`
@@ -207,14 +219,22 @@ export function aggiornaCatalogoMacchine(lista: any[]) {
   rendiConfigurazione();
 }
 
+/** Sopra le proposte: per chi sono, o come si fanno prima della verifica */
+function intestazione() {
+  const r = stato.ricerca;
+  $('proposte-corpo').hidden = false;
+  $('proposte-cliente').textContent = r
+    ? `Proposte per ${r.scheda.ragioneSociale}, P.IVA ${r.scheda.piva}.`
+    : 'Scegli la macchina e prepara tutti i preventivi che servono. Quando la trattativa si fa seria, verifica la partita IVA del cliente nella sezione Verifica cliente: le proposte mostreranno il semaforo.';
+  const campo = document.getElementById('campo-intestatario');
+  if (campo) campo.hidden = Boolean(r);
+}
+
 export function montaProposteMacchine() {
   rendiFamiglie();
+  intestazione();
   document.addEventListener('mt:ricerca', () => {
-    const r = stato.ricerca;
-    $('proposte-corpo').hidden = !r;
-    $('proposte-cliente').textContent = r
-      ? `Proposte per ${r.scheda.ragioneSociale}, P.IVA ${r.scheda.piva}.`
-      : 'Verifica prima un cliente nella sezione Cliente.';
+    intestazione();
     $('proposte-esito').innerHTML = '';
     rendiFamiglie();
     if (macchina) pianifica(0);

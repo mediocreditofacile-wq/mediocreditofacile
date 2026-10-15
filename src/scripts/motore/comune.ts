@@ -131,4 +131,6 @@ export const ETICHETTA_SEMAFORO: Record<string, string> = {
   verde: 'Verosimile',
   giallo: 'Da istruire',
   rosso: 'Difficile',
+  // Settore macchine: proposta fatta prima della verifica della partita IVA
+  'non-verificato': 'Cliente non verificato',
 };

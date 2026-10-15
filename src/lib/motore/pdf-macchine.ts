@@ -34,6 +34,18 @@ function colonna(p: Pagamento, grazia: boolean) {
   };
 }
 
+/**
+ * I documenti per aprire la pratica. Senza verifica la forma giuridica non si
+ * conosce: sopra la soglia della reddituale si dicono tutte e due le strade.
+ */
+function documentiPerPartire(forma: string | null, importo: number, extra: string[]): string[] {
+  if (forma !== null) return buildChecklist(forma, importo, extra);
+  const base = buildChecklist('', 0, extra);
+  return buildChecklist('', importo, extra).length > base.length
+    ? [...base, 'Ultimi 2 bilanci depositati per le società, ultime 2 dichiarazioni dei redditi per le ditte individuali']
+    : base;
+}
+
 export function contenutoMacchine(
   c: CalcoloProposta,
   k: Carrozzeria,
@@ -42,12 +54,16 @@ export function contenutoMacchine(
   oggi: Date = new Date(),
 ): Documento {
   const m = c.macchine!;
-  const s = c.ricerca.dati_credito.scheda;
+  const cl = c.cliente;
   const t = m.tradizionale;
   const g = m.alternativa;
 
-  const cliente: [string, string][] = [['Ragione sociale', s.ragioneSociale || 'Cliente'], ['Partita IVA', s.piva]];
-  if (s.sede) cliente.push(['Sede', s.sede]);
+  // Verificato: i dati del registro. Prima della verifica solo il nome scritto
+  // dall'agente, se c'e': mai una partita IVA che nessuno ha controllato
+  const cliente: [string, string][] = cl.verificato
+    ? [['Ragione sociale', cl.nome], ['Partita IVA', cl.piva ?? '']]
+    : cl.nome ? [['Cliente', cl.nome]] : [];
+  if (cl.sede) cliente.push(['Sede', cl.sede]);
   // Chi ha preparato il preventivo: e' il riferimento del cliente, sta in testa
   cliente.push(['Preparato da', agente.nome ? `${agente.nome}, ${agente.email}` : agente.email]);
 
@@ -131,7 +147,7 @@ export function contenutoMacchine(
     // In una riga, come nel preventivo di /tools/duplex: il documento sta in una pagina
     {
       tipo: 'testo',
-      testo: `Per partire servono: ${buildChecklist(s.formaGiuridica ?? '', m.prezzo, k.documentiExtra).join('; ')}.`,
+      testo: `Per partire servono: ${documentiPerPartire(cl.forma, m.prezzo, k.documentiExtra).join('; ')}.`,
     },
   );
 
