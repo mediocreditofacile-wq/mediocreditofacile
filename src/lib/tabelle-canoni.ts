@@ -11,6 +11,9 @@
 // Tenerle separate evita l'errore piu' facile, cioe' allinearle credendole
 // la stessa cosa: sullo stesso impianto danno canoni diversi.
 
+import { RISCATTO_PERC as RISCATTO_DUPLEX } from '../data/duplex-costi';
+import { coefficienteGrace, GRACE_FASCE, type FasciaGrace } from '../data/duplex-grace';
+import { coefficienteSputnik, SPUTNIK_FASCE } from '../data/duplex-sputnik';
 import { ESG_MAX, ESG_MIN, esgPrezzoDaCanone, getEsgCoeff } from '../data/esg';
 import { GRENKE_COEFFS, RISCATTI, getCoeff } from '../data/grenke';
 import { pagarentPrezzoDaRata } from '../data/pagarent';
@@ -22,7 +25,7 @@ import {
   coefficiente as coeffPagarent,
 } from './prospetti-pv-coefficienti';
 
-export type IdTabella = 'pagarent' | 'esg' | 'sputnik';
+export type IdTabella = 'pagarent' | 'esg' | 'sputnik' | 'sputnik-duplex' | 'grace-duplex';
 
 export interface TabellaCanoni {
   id: IdTabella;
@@ -170,10 +173,64 @@ export const TABELLA_SPUTNIK: TabellaCanoni = {
   },
 };
 
+/**
+ * Le due tabelle del fornitore Duplex International lette su ReteRent, fascia per
+ * fascia (fonte e data in testa ai file di src/data): la Sputnik vera, coefficienti
+ * esatti e non arrotondati come quelli di grenke.ts, e la Grace Period. Durate 24-60,
+ * riscatti del tariffario "Altri beni strumentali" (duplex-costi.ts).
+ * Sono le stesse di /tools/duplex: il motore e il portale storico danno lo stesso
+ * canone al centesimo, e un test lo controlla.
+ */
+const DURATE_DUPLEX = [24, 36, 48, 60];
+
+function tabellaAFasce(
+  id: IdTabella,
+  fasce: Record<number, FasciaGrace[]>,
+  coeff: (importo: number, durata: number) => number | null,
+  nota: string,
+): TabellaCanoni {
+  const tutte = Object.values(fasce).flat();
+  return {
+    id,
+    nota,
+    durate: DURATE_DUPLEX,
+    riscatto: RISCATTO_DUPLEX,
+    importoMin: Math.min(...tutte.map((f) => f.da)),
+    importoMax: Math.max(...tutte.map((f) => f.a)),
+    coefficiente: coeff,
+    prezzoDaCanone(canone, durata) {
+      if (canone <= 0) return null;
+      for (const f of fasce[durata] ?? []) {
+        const prezzo = (canone / f.c) * 100;
+        if (prezzo >= f.da && prezzo < f.a + 1) return prezzo;
+      }
+      return null;
+    },
+    durateDisponibili: (importo) => DURATE_DUPLEX.filter((m) => coeff(importo, m) !== null),
+    quotabile: (importo) => DURATE_DUPLEX.some((m) => coeff(importo, m) !== null),
+  };
+}
+
+export const TABELLA_SPUTNIK_DUPLEX = tabellaAFasce(
+  'sputnik-duplex',
+  SPUTNIK_FASCE,
+  coefficienteSputnik,
+  'Fatturazione trimestrale anticipata. Assicurazione obbligatoria, non compresa nel canone.',
+);
+
+export const TABELLA_GRACE_DUPLEX = tabellaAFasce(
+  'grace-duplex',
+  GRACE_FASCE,
+  coefficienteGrace,
+  'Fatturazione trimestrale anticipata; pro rata e primo trimestre in coda al contratto. Assicurazione obbligatoria, non compresa nel canone.',
+);
+
 export const TABELLE: Record<IdTabella, TabellaCanoni> = {
   pagarent: TABELLA_PAGARENT,
   esg: TABELLA_ESG,
   sputnik: TABELLA_SPUTNIK,
+  'sputnik-duplex': TABELLA_SPUTNIK_DUPLEX,
+  'grace-duplex': TABELLA_GRACE_DUPLEX,
 };
 
 /** Tabella di default: PagaRent, cosi' chi non passa niente non cambia comportamento */
@@ -181,4 +238,9 @@ export const TABELLA_DEFAULT = TABELLA_PAGARENT;
 
 export function getTabella(id: string | null | undefined): TabellaCanoni {
   return TABELLE[(id ?? '') as IdTabella] ?? TABELLA_DEFAULT;
+}
+
+/** La tabella con quell'id, senza ripiego sul default: null se non esiste */
+export function tabellaSeEsiste(id: string | null | undefined): TabellaCanoni | null {
+  return TABELLE[(id ?? '') as IdTabella] ?? null;
 }
