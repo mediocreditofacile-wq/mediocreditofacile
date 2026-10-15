@@ -18,7 +18,7 @@ const K: Carrozzeria = {
   tabellaCanoni: 'sputnik-duplex', brand: { logo: null, colore: '#1B3A57', accento: '#E66A2C' },
   settore: 'macchine', etichettaBene: 'Macchina per la pulizia', partnerLeasing: 'alba', sogliaLeasing: 0,
   tettoMeseEuro: 100, demo: false, documentiExtra: [], attivo: true,
-  tabellaAlternativa: 'grace-duplex', regoleSemaforo: 'locatore', leasing: false,
+  tabellaAlternativa: 'grace-duplex', regoleSemaforo: 'locatore', leasing: false, prezzoVerifica: null,
 };
 
 function calcolo(

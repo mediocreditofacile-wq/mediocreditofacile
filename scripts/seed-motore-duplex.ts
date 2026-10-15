@@ -45,6 +45,8 @@ const CARROZZERIA = {
   tabella_alternativa: 'grace-duplex',
   regole_semaforo: 'locatore',
   leasing: false,
+  // Euro per richiesta di verifica (un cliente al mese) addebitati a Duplex: li vede solo MCF
+  prezzo_verifica: 5,
 };
 
 const ADMIN_EMAIL = 'mediocreditofacile@gmail.com';
@@ -88,15 +90,15 @@ async function main() {
   const c = CARROZZERIA;
   await query(
     `INSERT INTO app.carrozzeria (slug, settore, etichetta_bene, partner_leasing, soglia_leasing, tetto_mese_euro,
-                                  demo, documenti_extra, tabella_alternativa, regole_semaforo, leasing)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+                                  demo, documenti_extra, tabella_alternativa, regole_semaforo, leasing, prezzo_verifica)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
      ON CONFLICT (slug) DO UPDATE SET settore = EXCLUDED.settore, etichetta_bene = EXCLUDED.etichetta_bene,
        partner_leasing = EXCLUDED.partner_leasing, soglia_leasing = EXCLUDED.soglia_leasing,
        tetto_mese_euro = EXCLUDED.tetto_mese_euro, demo = EXCLUDED.demo, documenti_extra = EXCLUDED.documenti_extra,
        tabella_alternativa = EXCLUDED.tabella_alternativa, regole_semaforo = EXCLUDED.regole_semaforo,
-       leasing = EXCLUDED.leasing, aggiornato = now()`,
+       leasing = EXCLUDED.leasing, prezzo_verifica = EXCLUDED.prezzo_verifica, aggiornato = now()`,
     [SLUG, c.settore, c.etichetta_bene, c.partner_leasing, c.soglia_leasing, c.tetto_mese_euro, c.demo,
-     JSON.stringify(c.documenti_extra), c.tabella_alternativa, c.regole_semaforo, c.leasing],
+     JSON.stringify(c.documenti_extra), c.tabella_alternativa, c.regole_semaforo, c.leasing, c.prezzo_verifica],
   );
   console.log(`carrozzeria ${SLUG} allineata (noleggio ${TABELLA} + ${c.tabella_alternativa}, semaforo ${c.regole_semaforo}, niente leasing)`);
 

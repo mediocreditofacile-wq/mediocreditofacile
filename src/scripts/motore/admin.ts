@@ -8,6 +8,7 @@
 import { $, api, apiJson, esc, euro, messaggio, num, stato, traduci } from './comune';
 import { aggiornaCatalogo } from './proposte';
 import { leggiIncollato } from '../../lib/motore/catalogo-import';
+import { etichettaMese } from '../../lib/motore/richieste';
 
 let dati: any = null;
 
@@ -17,6 +18,11 @@ const opzioni = (lista: { valore: string; etichetta: string }[] | undefined, sce
 function rendi() {
   const c = dati.config;
   const s = dati.spesa;
+  const r = dati.richieste;
+  const quante = (n: number) => `${num(n)} ${n === 1 ? 'richiesta' : 'richieste'}`;
+  const conto = (x: any) => r.prezzo != null
+    ? `${quante(x.richieste)} a ${euro(r.prezzo, 2)}: <strong>${euro(x.importo, 2)}</strong>`
+    : quante(x.richieste);
   const fv = c.settore === 'fotovoltaico';
   const mc = c.settore === 'macchine';
   $('mcf').innerHTML = `
@@ -25,6 +31,14 @@ function rendi() {
       <p class="mt-lead" style="margin:0">${euro(s.euro, 2)} su un tetto di ${euro(c.tettoMeseEuro)}, ${num(s.chiamate)} chiamate a Openapi (${esc(s.mese)}).
         Le schede già in cache non costano e non contano.</p>
     </article>
+    ${r ? `<article class="mt-card">
+      <p class="mt-semaforo__tit">Richieste da addebitare a ${esc(stato.carrozzeria?.nome ?? 'questo fornitore')}</p>
+      <p class="mt-lead" style="margin:0">
+        ${esc(etichettaMese(r.corrente.mese))}: ${conto(r.corrente)}${r.corrente.margine != null ? `, margine sulla spesa Openapi ${euro(r.corrente.margine, 2)}` : ''}.<br>
+        ${esc(etichettaMese(r.precedente.mese))}: ${conto(r.precedente)}.
+        ${r.prezzo == null ? '<br>Prezzo per richiesta non impostato: si imposta qui sotto, nella configurazione.' : ''}</p>
+      <p class="mt-nota" style="margin:8px 0 0">Un cliente al mese: la stessa partita IVA verificata di nuovo nello stesso mese non conta. Il referente vede lo stesso conteggio nello Storico, senza importi.</p>
+    </article>` : ''}
 
     <h3 class="mt-h3">Configurazione</h3>
     <div class="mt-griglia">
@@ -43,6 +57,7 @@ function rendi() {
         ${opzioni(dati.opzioni?.partner, c.partnerLeasing)}</select></label>
       <label class="mt-campo"><span>Leasing da, euro (0 = sempre)</span><input id="cf-soglia" type="number" min="0" step="1000" class="mt-input" value="${esc(c.sogliaLeasing)}" /></label>
       <label class="mt-campo"><span>Tetto ricerche al mese, euro</span><input id="cf-tetto" type="number" min="0" step="5" class="mt-input" value="${esc(c.tettoMeseEuro)}" /></label>
+      <label class="mt-campo"><span>Prezzo per richiesta al fornitore, euro</span><input id="cf-prezzo-verifica" type="number" min="0" step="any" class="mt-input" value="${esc(c.prezzoVerifica ?? '')}" placeholder="vuoto: non si fattura" /></label>
       <label class="mt-campo"><span>Colore della testata</span><input id="cf-colore" type="color" class="mt-input" value="${esc(c.colore ?? '#664CCD')}" /></label>
       <label class="mt-campo"><span>Colore dei titoli nei PDF</span><input id="cf-accento" type="color" class="mt-input" value="${esc(c.accento ?? c.colore ?? '#664CCD')}" /></label>
     </div>
@@ -116,6 +131,7 @@ export function montaAdmin() {
           documentiExtra: val('cf-extra').split('\n').map((x) => x.trim()).filter(Boolean),
           tabellaAlternativa: val('cf-alternativa'), regoleSemaforo: val('cf-regole'),
           leasing: $<HTMLInputElement>('cf-leasing').checked,
+          prezzoVerifica: val('cf-prezzo-verifica'),
         },
       });
       if (!res.ok || !corpo?.ok) return messaggio($('cf-msg'), traduci(corpo?.error ?? ''), false);

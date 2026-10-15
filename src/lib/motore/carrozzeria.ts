@@ -39,6 +39,8 @@ export interface Carrozzeria {
   regoleSemaforo: RegoleSemaforo;
   /** false = solo noleggio operativo */
   leasing: boolean;
+  /** Euro per richiesta di verifica addebitati al fornitore. Solo admin MCF. Null = non si fattura */
+  prezzoVerifica: number | null;
 }
 
 export interface VoceCatalogo {
@@ -74,13 +76,15 @@ export interface RigaCarrozzeria {
   tabella_alternativa: string | null;
   regole_semaforo: string;
   leasing: boolean;
+  prezzo_verifica: string | null;
 }
 
 const SELECT = `
   SELECT f.slug, f.nome, f.citta, f.prefisso, f.organization_id, f.tabella_canoni,
          f.brand_logo, f.brand_colore, f.brand_accento, f.attivo,
          c.settore, c.etichetta_bene, c.partner_leasing, c.soglia_leasing,
-         c.tetto_mese_euro, c.demo, c.documenti_extra, c.tabella_alternativa, c.regole_semaforo, c.leasing
+         c.tetto_mese_euro, c.demo, c.documenti_extra, c.tabella_alternativa, c.regole_semaforo, c.leasing,
+         c.prezzo_verifica
     FROM app.fornitore f
     JOIN app.carrozzeria c ON c.slug = f.slug`;
 
@@ -105,6 +109,7 @@ export function carrozzeriaDaRiga(r: RigaCarrozzeria): Carrozzeria {
     tabellaAlternativa: r.tabella_alternativa || null,
     regoleSemaforo: r.regole_semaforo === 'locatore' ? 'locatore' : 'credit-policy',
     leasing: r.leasing !== false,
+    prezzoVerifica: r.prezzo_verifica === null || r.prezzo_verifica === undefined ? null : Number(r.prezzo_verifica),
   };
 }
 

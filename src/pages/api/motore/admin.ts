@@ -20,6 +20,7 @@ import { catalogo } from '../../../lib/motore/carrozzeria';
 import { leggiVoce, numero, testo, type Voce } from '../../../lib/motore/catalogo-import';
 import { corpoJson, json, sessioneMotore } from '../../../lib/motore/sessione';
 import { spesaDelMese } from '../../../lib/openapi';
+import { contoRichieste, meseDi, mesePrecedenteDi, riepilogoMesi } from '../../../lib/motore/richieste';
 
 const PARTNER = ['sella', 'alba', 'credem'];
 const SETTORI = ['fotovoltaico', 'generico', 'macchine'];
@@ -46,6 +47,23 @@ export async function GET({ request }: { request: Request }) {
   const c = e.carrozzeria;
   const spesa = await spesaDelMese();
   const mia = spesa.perSorgente[`carrozzeria/${c.slug}`] ?? { chiamate: 0, totale: 0, perServizio: {} };
+
+  // Richieste da addebitare al fornitore: un cliente al mese (richieste.ts).
+  // Il mese corrente col margine sulla spesa Openapi, il precedente da fatturare.
+  const verifiche = await query<{ id: string; piva: string; creato: string }>(
+    `SELECT id, piva, creato FROM app.ricerca_merito WHERE fornitore_slug = $1 AND creato >= now() - interval '70 days'`,
+    [c.slug],
+  );
+  const perMese = riepilogoMesi(verifiche);
+  const corrente = meseDi(new Date());
+  const precedente = mesePrecedenteDi(corrente);
+  const quante = (m: string) => perMese.find((x) => x.mese === m)?.richieste ?? 0;
+  const richieste = {
+    prezzo: c.prezzoVerifica,
+    corrente: { mese: corrente, richieste: quante(corrente), ...contoRichieste(quante(corrente), c.prezzoVerifica, mia.totale) },
+    precedente: { mese: precedente, richieste: quante(precedente), ...contoRichieste(quante(precedente), c.prezzoVerifica, null) },
+  };
+
   return json({
     ok: true,
     config: {
@@ -54,6 +72,7 @@ export async function GET({ request }: { request: Request }) {
       documentiExtra: c.documentiExtra, tabellaCanoni: c.tabellaCanoni,
       colore: c.brand.colore, accento: c.brand.accento, attivo: c.attivo,
       tabellaAlternativa: c.tabellaAlternativa, regoleSemaforo: c.regoleSemaforo, leasing: c.leasing,
+      prezzoVerifica: c.prezzoVerifica,
     },
     // Le scelte possibili arrivano da qui e non dal codice della pagina: i nomi
     // dei partner sono ratio interna e il browser degli agenti non li scarica
@@ -73,6 +92,7 @@ export async function GET({ request }: { request: Request }) {
     },
     catalogo: await catalogo(c.slug, false),
     spesa: { mese: spesa.mese, euro: mia.totale, chiamate: mia.chiamate, perServizio: mia.perServizio },
+    richieste,
   });
 }
 
@@ -90,20 +110,27 @@ export async function POST({ request }: { request: Request }) {
     const partner = PARTNER.includes(String(k.partnerLeasing)) ? String(k.partnerLeasing) : e.carrozzeria.partnerLeasing;
     const soglia = numero(k.sogliaLeasing);
     const tetto = numero(k.tettoMeseEuro);
+    // Vuoto = il fornitore non paga le verifiche. Assente (una pagina vecchia
+    // che non conosce il campo) = resta il prezzo di prima
+    const prezzoLetto = k.prezzoVerifica === undefined
+      ? e.carrozzeria.prezzoVerifica
+      : k.prezzoVerifica === '' || k.prezzoVerifica === null ? null : numero(k.prezzoVerifica);
+    const prezzoVerifica = prezzoLetto !== null && prezzoLetto >= 0 && prezzoLetto <= 1000 ? Math.round(prezzoLetto * 100) / 100 : null;
     const extra = Array.isArray(k.documentiExtra)
       ? k.documentiExtra.map((d) => testo(d, 160)).filter(Boolean).slice(0, 12)
       : e.carrozzeria.documentiExtra;
     await query(
       `UPDATE app.carrozzeria SET settore = $2, etichetta_bene = $3, partner_leasing = $4, soglia_leasing = $5,
               tetto_mese_euro = $6, demo = $7, documenti_extra = $8, tabella_alternativa = $9,
-              regole_semaforo = $10, leasing = $11, aggiornato = now() WHERE slug = $1`,
+              regole_semaforo = $10, leasing = $11, prezzo_verifica = $12, aggiornato = now() WHERE slug = $1`,
       [slug, SETTORI.includes(String(k.settore)) ? String(k.settore) : 'generico',
        testo(k.etichettaBene, 80) || e.carrozzeria.etichettaBene, partner,
        soglia >= 0 ? soglia : e.carrozzeria.sogliaLeasing, tetto >= 0 ? tetto : e.carrozzeria.tettoMeseEuro,
        Boolean(k.demo), JSON.stringify(extra),
        LISTINI.includes(String(k.tabellaAlternativa)) ? String(k.tabellaAlternativa) : null,
        REGOLE.includes(String(k.regoleSemaforo)) ? String(k.regoleSemaforo) : e.carrozzeria.regoleSemaforo,
-       k.leasing === undefined ? e.carrozzeria.leasing : Boolean(k.leasing)],
+       k.leasing === undefined ? e.carrozzeria.leasing : Boolean(k.leasing),
+       prezzoVerifica],
     );
     await query(
       `UPDATE app.fornitore SET tabella_canoni = $2, brand_colore = $3, brand_accento = $4 WHERE slug = $1`,

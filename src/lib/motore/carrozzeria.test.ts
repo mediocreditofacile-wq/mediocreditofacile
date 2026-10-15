@@ -9,6 +9,7 @@ const RIGA: RigaCarrozzeria = {
   brand_logo: null, brand_colore: null, brand_accento: null, attivo: true, settore: 'generico',
   etichetta_bene: 'Bene', partner_leasing: 'alba', soglia_leasing: '0', tetto_mese_euro: '30', demo: false,
   documenti_extra: [], tabella_alternativa: null, regole_semaforo: 'credit-policy', leasing: true,
+  prezzo_verifica: null,
 };
 
 describe('carrozzeria dalla riga', () => {
@@ -35,6 +36,15 @@ describe('carrozzeria dalla riga', () => {
     expect(c.settore).toBe('generico');
     expect(c.regoleSemaforo).toBe('credit-policy');
     expect(c.tabellaAlternativa).toBeNull();
+  });
+});
+
+describe('prezzo per richiesta di verifica', () => {
+  it('senza prezzo non si fattura niente', () => {
+    expect(carrozzeriaDaRiga(RIGA).prezzoVerifica).toBeNull();
+  });
+  it('legge il prezzo impostato', () => {
+    expect(carrozzeriaDaRiga({ ...RIGA, prezzo_verifica: '5.00' }).prezzoVerifica).toBe(5);
   });
 });
 

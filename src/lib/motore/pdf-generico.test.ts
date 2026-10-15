@@ -15,7 +15,7 @@ const K: Carrozzeria = {
   tabellaCanoni: 'sputnik', brand: { logo: null, colore: '#2E3A46', accento: '#8A6A3A' },
   settore: 'generico', etichettaBene: 'Fornitura per hotel', partnerLeasing: 'alba', sogliaLeasing: 0,
   tettoMeseEuro: 30, demo: true, documentiExtra: ['Offerta del fornitore intestata al cliente'], attivo: true,
-  tabellaAlternativa: null, regoleSemaforo: 'credit-policy', leasing: true,
+  tabellaAlternativa: null, regoleSemaforo: 'credit-policy', leasing: true, prezzoVerifica: null,
 };
 const BILANCIO = { fatturato: 2_000_000, patrimonioNetto: 600_000, utile: 80_000, inizioAttivita: '2005-03-01' };
 const OGGI = new Date('2026-10-16T10:00:00+02:00');

@@ -1,12 +1,18 @@
 // Storico: ricerche di merito, preventivi generati, pratiche caricate.
 // L'agente vede il proprio, referente e MCF tutto il fornitore: lo decide l'API.
 
+import { etichettaMese } from '../../lib/motore/richieste';
 import { riapriRicerca } from './cliente';
 import { $, api, apiJson, data, esc, euro, stato } from './comune';
 
 export interface DatiStorico { ricerche: any[]; proposte: any[]; pratiche: any[] }
 
 let ultimo: DatiStorico = { ricerche: [], proposte: [], pratiche: [] };
+/** Mese delle verifiche mostrate (AAAA-MM) e richieste per mese, dal server */
+let mese = '';
+let mesi: { mese: string; richieste: number }[] = [];
+/** Il fornitore paga le verifiche: referente e MCF vedono il conteggio */
+let conteggio = false;
 const ascoltatori: ((d: DatiStorico) => void)[] = [];
 
 /** Chi vuole lo storico aggiornato (la sezione Pratiche) si iscrive qui */
@@ -14,10 +20,13 @@ export function suStorico(fn: (d: DatiStorico) => void) {
   ascoltatori.push(fn);
 }
 
-export async function caricaStorico() {
-  const { res, corpo } = await apiJson(api('storico'));
+export async function caricaStorico(meseScelto = mese) {
+  const { res, corpo } = await apiJson(api('storico', meseScelto ? { mese: meseScelto } : {}));
   if (!res.ok || !corpo?.ok) return;
   ultimo = { ricerche: corpo.ricerche ?? [], proposte: corpo.proposte ?? [], pratiche: corpo.pratiche ?? [] };
+  mese = corpo.mese ?? '';
+  mesi = corpo.mesi ?? [];
+  conteggio = Boolean(corpo.conteggio);
   rendi();
   for (const fn of ascoltatori) fn(ultimo);
 }
@@ -28,21 +37,34 @@ export const bottoneDoc = (d: { nome: string; pathname: string }, etichetta?: st
 
 function rendi() {
   const agente = stato.vedeTutto;
+  const conta = agente && conteggio;
   $('storico-sub').textContent = agente
     ? 'Tutta la rete, con il nome di chi ha lavorato.'
     : 'Le tue verifiche e i tuoi preventivi.';
   const colAgente = agente ? '<th>Agente</th>' : '';
 
+  // Il mese: quelli con verifiche, piu' quello mostrato anche se vuoto
+  const elencoMesi = mesi.some((m) => m.mese === mese) || !mese ? mesi : [{ mese, richieste: 0 }, ...mesi];
+  const richieste = elencoMesi.find((m) => m.mese === mese)?.richieste ?? 0;
+  const sceltaMese = `
+    <div class="mt-storico-mese">
+      <label class="mt-campo" style="max-width:240px"><span>Mese</span>
+        <select id="storico-mese" class="mt-input">${elencoMesi.map((m) =>
+          `<option value="${esc(m.mese)}" ${m.mese === mese ? 'selected' : ''}>${esc(etichettaMese(m.mese))}</option>`).join('')}</select></label>
+      ${conta ? `<p class="mt-lead" style="margin:0"><strong>Richieste di ${esc(etichettaMese(mese))}: ${richieste}</strong><br>
+        <span class="mt-nota">Un cliente al mese: se la stessa partita IVA si verifica di nuovo nello stesso mese, si vede qui ma non conta di nuovo.</span></p>` : ''}
+    </div>`;
   const ricerche = ultimo.ricerche.length
     ? `<div class="mt-scorri"><table class="mt-tabella">
-        <thead><tr><th>Quando</th>${colAgente}<th>Cliente</th><th>Rating</th><th></th></tr></thead>
-        <tbody>${ultimo.ricerche.map((r) => `<tr>
+        <thead><tr><th>Quando</th>${colAgente}<th>Cliente</th><th>Rating</th>${conta ? '<th>Richiesta</th>' : ''}<th></th></tr></thead>
+        <tbody>${ultimo.ricerche.map((r) => `<tr class="${conta && !r.conta ? 'spenta' : ''}">
           <td>${data(r.creato)}</td>${agente ? `<td>${esc(r.agente_nome)}</td>` : ''}
           <td>${esc(r.ragione_sociale ?? '—')}<br><span class="mt-id">P.IVA ${esc(r.piva)}</span></td>
           <td>${esc(r.rating ?? '—')}</td>
+          ${conta ? `<td>${r.conta ? 'Conta' : '<span class="mt-id">ripetuta, non conta</span>'}</td>` : ''}
           <td class="num"><button type="button" class="mt-link" data-riapri="${esc(r.id)}">Riapri</button></td>
         </tr>`).join('')}</tbody></table></div>`
-    : '<p class="mt-vuoto">Nessuna verifica ancora.</p>';
+    : `<p class="mt-vuoto">Nessuna verifica ${mese ? `a ${esc(etichettaMese(mese))}` : 'ancora'}.</p>`;
 
   const preventivi = ultimo.proposte.length
     ? `<div class="mt-scorri"><table class="mt-tabella">
@@ -57,7 +79,7 @@ function rendi() {
     : '<p class="mt-vuoto">Nessun preventivo ancora.</p>';
 
   $('storico').innerHTML = `
-    <h3 class="mt-h3" style="margin-top:0">Verifiche</h3>${ricerche}
+    <h3 class="mt-h3" style="margin-top:0">Verifiche</h3>${sceltaMese}${ricerche}
     <h3 class="mt-h3">Preventivi</h3>${preventivi}`;
 }
 
@@ -93,5 +115,9 @@ export function montaStorico() {
   });
   document.addEventListener('mt:tab', (e) => {
     if ((e as CustomEvent).detail === 'storico') void caricaStorico();
+  });
+  document.addEventListener('change', (e) => {
+    const t = e.target as HTMLSelectElement;
+    if (t.id === 'storico-mese' && t.value) void caricaStorico(t.value);
   });
 }
