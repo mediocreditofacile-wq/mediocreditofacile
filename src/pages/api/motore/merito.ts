@@ -8,15 +8,24 @@ export const prerender = false;
 // La scheda completa costa 0,81 euro (IT-full + punteggio) e si addebita alla
 // carrozzeria, col suo tetto mensile. La cache dura 30 giorni ed e' condivisa
 // con /tools/valutazione: un cliente gia' analizzato non si paga due volte.
-// La verifica eventi negativi qui NON parte: parte all'invio della pratica.
+// Sui fornitori con la credit policy la verifica eventi negativi qui NON parte:
+// parte all'invio della pratica. Sui fornitori col semaforo del locatore (Duplex)
+// parte qui: la risposta esce subito con gli eventi "in verifica", il server segue
+// l'esito in background per circa 90 secondi (waitUntil), lo salva sulla riga
+// della ricerca e manda una mail ad Alberto se scheda o verifica sono nuove.
 //
 // I numeri di bilancio si salvano in app.ricerca_merito e la proposta li rilegge
 // da li': il browser non puo' mandare un fatturato suo per farsi verde.
 
 import { randomUUID } from 'node:crypto';
+import { waitUntil } from '@vercel/functions';
 import { valutaCredito } from '../../../lib/credit-policy';
 import { queryUna, query } from '../../../lib/db';
-import { leggiScheda, type DatiCreditoMotore, type SchedaRidotta } from '../../../lib/motore/merito';
+import { avviaEventi, riprendiEventi, salvaEventi, seguiEventi } from '../../../lib/motore/eventi-merito';
+import { bersaglioEventi, eventiNonAvviati, serveControllo, type EventiRicerca } from '../../../lib/motore/eventi-stato';
+import { datiLocatore, leggiScheda, type DatiCreditoMotore, type SchedaRidotta } from '../../../lib/motore/merito';
+import { valutaLocatore } from '../../../lib/motore/semaforo-locatore';
+import { semaforoPerSchermo, valuta } from '../../../lib/motore/valutazione';
 import { corpoJson, filtroVisibilita, json, sessioneMotore } from '../../../lib/motore/sessione';
 import { entroIlTetto, schedaAzienda, schedaSoloCache, sorgenteCarrozzeria } from '../../../lib/openapi';
 import { pivaValida, pulisciPiva } from '../../../lib/piva';
@@ -63,7 +72,28 @@ export async function POST({ request }: { request: Request }) {
   );
   console.log(JSON.stringify({ evento: 'motore_merito', fornitore: carrozzeria.slug, daCache: Boolean(scheda.daCache) }));
 
-  return json({ ok: true, ricercaId: id, scheda: ridotta, info, credito: creditoBase(dati), daCache: Boolean(scheda.daCache) });
+  let eventi: EventiRicerca | null = null;
+  if (carrozzeria.regoleSemaforo === 'locatore') {
+    // Gia' rosso sui dati di anagrafica e bilancio: la verifica non si paga
+    const giaRosso = valutaLocatore(datiLocatore(dati), null, 'non-avviata').semaforo === 'rosso';
+    eventi = giaRosso
+      ? eventiNonAvviati(piva)
+      : await avviaEventi(carrozzeria, bersaglioEventi(piva, dati.formaCodice ?? null, scheda.advanced?.taxCode));
+    const nuova = { scheda: !scheda.daCache, eventi: Boolean(eventi.id) && !eventi.daRegistro };
+    eventi.mail = nuova.scheda || nuova.eventi ? 'da-mandare' : 'non-serve';
+    await salvaEventi(id, eventi);
+    const mail = eventi.mail === 'da-mandare'
+      ? { fornitore: carrozzeria.nome, agente: { nome: contesto.nome ?? '', email: contesto.email }, scheda: ridotta, dati, nuova }
+      : null;
+    // La risposta parte subito; esito e mail li segue il server per circa 90 secondi
+    waitUntil(seguiEventi(carrozzeria, id, eventi, mail).catch((err) =>
+      console.error(JSON.stringify({ evento: 'motore_eventi_errore', fornitore: carrozzeria.slug, msg: String(err) }))));
+  }
+  const credito = carrozzeria.regoleSemaforo === 'locatore'
+    ? semaforoPerSchermo(valuta(carrozzeria, dati, null, eventi?.stato ?? 'non-avviata'))
+    : creditoBase(dati);
+
+  return json({ ok: true, ricercaId: id, scheda: ridotta, info, credito, eventi: eventi?.stato ?? null, daCache: Boolean(scheda.daCache) });
 }
 
 export async function GET({ request }: { request: Request }) {
@@ -72,11 +102,32 @@ export async function GET({ request }: { request: Request }) {
   if (!e.ok) return e.risposta;
 
   const { where, valori } = filtroVisibilita(e, '', 2);
-  const riga = await queryUna<{ id: string; piva: string; dati_credito: { dati: DatiCreditoMotore; scheda: SchedaRidotta } }>(
-    `SELECT id, piva, dati_credito FROM app.ricerca_merito WHERE id = $1 AND ${where}`,
+  const riga = await queryUna<{
+    id: string; piva: string;
+    dati_credito: { dati: DatiCreditoMotore; scheda: SchedaRidotta };
+    eventi: EventiRicerca | null;
+  }>(
+    `SELECT id, piva, dati_credito, eventi FROM app.ricerca_merito WHERE id = $1 AND ${where}`,
     [url.searchParams.get('id') ?? '', ...valori],
   );
   if (!riga) return json({ ok: false, error: 'ricerca_non_trovata' }, 404);
+
+  const { carrozzeria, contesto } = e;
+  const locatore = carrozzeria.regoleSemaforo === 'locatore';
+  let ev = riga.eventi;
+  if (locatore && ev && serveControllo(ev)) {
+    const mail = {
+      fornitore: carrozzeria.nome, agente: { nome: contesto.nome ?? '', email: contesto.email },
+      scheda: riga.dati_credito.scheda, dati: riga.dati_credito.dati, nuova: { scheda: false, eventi: !ev.daRegistro },
+    };
+    ev = await riprendiEventi(carrozzeria, riga.id, ev, mail).catch(() => ev);
+  }
+  const credito = locatore
+    ? semaforoPerSchermo(valuta(carrozzeria, riga.dati_credito.dati, null, ev?.stato ?? 'non-avviata'))
+    : creditoBase(riga.dati_credito.dati);
+
+  // Attesa degli eventi dalla pagina: solo semaforo e stato, niente scheda
+  if (url.searchParams.get('eventi') === '1') return json({ ok: true, eventi: ev?.stato ?? null, credito });
 
   // Le info aggiuntive vengono dalla cache, senza spendere. Scaduta la cache
   // (30 giorni) restano la scheda ridotta e i numeri salvati con la ricerca.
@@ -86,6 +137,7 @@ export async function GET({ request }: { request: Request }) {
     ricercaId: riga.id,
     scheda: riga.dati_credito.scheda,
     info: cache ? leggiScheda(cache).info : null,
-    credito: creditoBase(riga.dati_credito.dati),
+    credito,
+    eventi: ev?.stato ?? null,
   });
 }
