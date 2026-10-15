@@ -17,6 +17,7 @@
     "visibilita:ai": "node scripts/visibilita-ai/monitor.mjs",
     "controlla:anonimato": "node scripts/controlla-anonimato.mjs",
     "seed:motore-fas-italia": "tsx --env-file=.env.local scripts/seed-motore-fas-italia.ts",
+    "seed:motore-duplex": "tsx --env-file=.env.local scripts/seed-motore-duplex.ts",
     "seed:stilo": "tsx --env-file=.env.local scripts/seed-stilo.ts"
   },
   "dependencies": {
