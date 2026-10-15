@@ -66,7 +66,7 @@ function rendiModulo() {
   file = [];
   const e = stato.proposta?.esito;
   const prodotto = e && !e.noleggio?.length && e.leasing?.length ? 'leasing' : 'noleggio';
-  const scelta = e?.bp?.durata ?? 60;
+  const scelta = e?.bp?.durata ?? e?.macchine?.durata ?? 60;
   box.hidden = false;
   box.innerHTML = `
     <article class="mt-card mt-card--evidenza">

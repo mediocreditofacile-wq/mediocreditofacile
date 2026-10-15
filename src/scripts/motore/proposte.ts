@@ -7,6 +7,7 @@
 
 import { bloccoSemaforo } from './cliente';
 import { $, apiJson, esc, euro, num, stato, traduci } from './comune';
+import { aggiornaCatalogoMacchine, inputMacchine, montaProposteMacchine } from './proposte-macchine';
 
 let voceScelta: any = null;
 let timer: ReturnType<typeof setTimeout> | undefined;
@@ -44,6 +45,7 @@ function scegliVoce(codice: string) {
 
 /** L'input che va al server: lo stesso servira' al preventivo PDF */
 export function inputCorrente() {
+  if (stato.settore === 'macchine') return inputMacchine();
   if (!stato.ricerca || !voceScelta) return null;
   const val = (id: string) => campo(id)?.value ?? '';
   return {
@@ -242,12 +244,14 @@ function suNuovaRicerca() {
 
 /** Il catalogo e' cambiato dal pannello MCF: si ridisegna senza ricaricare */
 export function aggiornaCatalogo(lista: any[]) {
+  if (stato.settore === 'macchine') return aggiornaCatalogoMacchine(lista);
   stato.catalogo = lista;
   if (voceScelta && !lista.some((v) => v.codice === voceScelta.codice)) voceScelta = null;
   rendiCatalogo();
 }
 
 export function montaProposte() {
+  if (stato.settore === 'macchine') return montaProposteMacchine();
   rendiCatalogo();
   document.addEventListener('mt:ricerca', suNuovaRicerca);
   $('catalogo').addEventListener('click', (e) => {

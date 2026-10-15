@@ -187,12 +187,13 @@ const macchine = c.settore === 'macchine';
         <p id="proposte-cliente" class="mt-lead">Verifica prima un cliente nella sezione Cliente.</p>
 
         <div id="proposte-corpo" hidden>
-          <h3 class="mt-h3">{fotovoltaico ? 'Scegli il pacchetto' : 'Scegli dal catalogo'}</h3>
+          <h3 class="mt-h3">{fotovoltaico ? 'Scegli il pacchetto' : macchine ? 'Scegli la macchina' : 'Scegli dal catalogo'}</h3>
           <div id="catalogo" class="mt-catalogo"></div>
+          {macchine && <div id="macchine-config"></div>}
 
           <div class="mt-griglia">
             <label class="mt-campo">
-              <span>Prezzo trattato, IVA esclusa</span>
+              <span>{macchine ? 'Prezzo, IVA esclusa' : 'Prezzo trattato, IVA esclusa'}</span>
               <input type="number" id="prezzo" class="mt-input" min="1" step="100" />
               <small id="prezzo-listino" class="mt-nota"></small>
             </label>
@@ -393,6 +394,11 @@ const macchine = c.settore === 'macchine';
   .mt-semaforo--verde-chiaro .mt-semaforo__luce { background: #6FA86A; }
   .mt-semaforo--provvisorio .mt-semaforo__luce { opacity: .55; }
   .mt-righe { margin: 4px 0 8px; padding-left: 18px; font-size: 14px; color: var(--mt-black); }
+  .mt-accessori { list-style: none; padding: 0; margin: 8px 0 0; }
+  .mt-accessori li { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--mt-platinum); }
+  .mt-contatore { display: inline-flex; align-items: center; gap: 10px; }
+  .mt-contatore .mt-btn { padding: 4px 12px; min-width: 36px; }
+  .mt-durate { display: flex; gap: 8px; flex-wrap: wrap; }
   .mt-semaforo__tit { font-weight: 700; color: var(--mt-black); margin: 0 0 4px; }
   .mt-criteri { list-style: none; padding: 0; margin: 8px 0 0; font-size: 14px; display: grid; gap: 4px; }
   .mt-criteri li::before { content: '–'; color: var(--mt-accent); margin-right: 8px; }
