@@ -16,6 +16,7 @@
 import CODICI from '../../data/codici-bilancio.json';
 import { ETICHETTE, RUOLI, VALORI } from '../../data/openapi-etichette';
 import type { SchedaAzienda } from '../openapi';
+import type { DatiLocatore } from './semaforo-locatore';
 
 const CODICI_BILANCIO = CODICI as Record<string, string>;
 
@@ -30,6 +31,12 @@ export interface DatiCreditoMotore {
   /** AAAA-MM-GG */
   inizioAttivita: string | null;
   rating: string | null;
+  /** Codice della forma giuridica del Registro (SR, RS, DI, SN...). Dal 15/10/2026. */
+  formaCodice?: string | null;
+  /** true attiva, false non attiva o in liquidazione, null non disponibile. Dal 15/10/2026. */
+  attiva?: boolean | null;
+  /** Data di cessazione o codice fiscale cessato. Dal 15/10/2026. */
+  cessata?: boolean;
 }
 
 export interface SchedaRidotta {
@@ -194,6 +201,14 @@ export function leggiScheda(s: SchedaAzienda): LetturaScheda {
   const rating = SCALA_RATING.includes(CS.rating) ? String(CS.rating) : null;
   const utile = numero(ann.IIC179);
 
+  // Per il semaforo del locatore: forma dal codice del Registro, stato e cessazione.
+  // IT-advanced dice "ATTIVA"; se manca, IT-full ha il codice "A".
+  const formaCodice = A.detailedLegalForm?.code ?? F.legalForm?.detailedLegalForm?.code ?? null;
+  const statoA = typeof A.activityStatus === 'string' ? A.activityStatus.trim().toUpperCase() : '';
+  const statoF = String(F.companyStatus?.activityStatus?.code ?? '').trim().toUpperCase();
+  const attiva = statoA ? statoA === 'ATTIVA' : statoF ? statoF === 'A' : null;
+  const cessata = Boolean(A.endDate) || A.taxCodeCeased === true || A.taxCodeCeased === 'true';
+
   const dati: DatiCreditoMotore = {
     fatturato: numero(eco.turnover),
     annoBilancio: numero(eco.turnoverYear),
@@ -203,6 +218,9 @@ export function leggiScheda(s: SchedaAzienda): LetturaScheda {
     utile,
     inizioAttivita: inizio,
     rating,
+    formaCodice,
+    attiva,
+    cessata,
   };
 
   const scheda: SchedaRidotta = {
@@ -275,4 +293,17 @@ export function leggiScheda(s: SchedaAzienda): LetturaScheda {
     }));
 
   return { dati, scheda, info: { soci, amministratori, anagrafica, indici: sezione(SEZ_ECON), bilancio } };
+}
+
+/** I numeri della ricerca nella forma del semaforo del locatore. Le ricerche vecchie non hanno forma e stato: restano dati mancanti. */
+export function datiLocatore(d: Partial<DatiCreditoMotore>): DatiLocatore {
+  return {
+    formaCodice: d.formaCodice ?? null,
+    attiva: d.attiva ?? null,
+    cessata: d.cessata ?? false,
+    inizioAttivita: d.inizioAttivita ?? null,
+    volumeAffari: d.fatturato ?? null,
+    patrimonioNetto: d.patrimonioNetto ?? null,
+    annoBilancio: d.annoBilancio ?? null,
+  };
 }

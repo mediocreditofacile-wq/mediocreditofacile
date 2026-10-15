@@ -6,7 +6,7 @@
 // fiscale, data e luogo di nascita).
 
 import { describe, expect, it } from 'vitest';
-import { leggiScheda } from './merito';
+import { datiLocatore, leggiScheda } from './merito';
 
 const SCHEDA = {
   trovata: true,
@@ -80,5 +80,45 @@ describe('leggiScheda', () => {
     const pn = info.bilancio.find((b) => b.voci.some((v) => v.etichetta === 'A. Crediti verso soci'));
     expect(pn).toBeDefined();
     expect(info.bilancio[0].voci[0].etichetta).toMatch(/^21\. Utile/);
+  });
+});
+
+describe('dati per il semaforo del locatore', () => {
+  const conAnagrafica = (adv: Record<string, unknown>) =>
+    leggiScheda({ ...SCHEDA, advanced: { ...SCHEDA.advanced, ...adv } } as any).dati;
+
+  it('forma, stato e cessazione', () => {
+    const d = conAnagrafica({
+      detailedLegalForm: { code: 'SR', description: "SOCIETA' A RESPONSABILITA' LIMITATA" },
+      activityStatus: 'ATTIVA', endDate: null, taxCodeCeased: false,
+    });
+    expect(d.formaCodice).toBe('SR');
+    expect(d.attiva).toBe(true);
+    expect(d.cessata).toBe(false);
+  });
+
+  it('una data di cessazione o un codice fiscale cessato chiudono l azienda', () => {
+    expect(conAnagrafica({ endDate: '2025-06-30' }).cessata).toBe(true);
+    expect(conAnagrafica({ taxCodeCeased: true }).cessata).toBe(true);
+  });
+
+  it('uno stato diverso da ATTIVA vale non attiva', () => {
+    expect(conAnagrafica({ activityStatus: 'IN LIQUIDAZIONE' }).attiva).toBe(false);
+  });
+
+  it('senza stato in IT-advanced si legge IT-full', () => {
+    expect(conAnagrafica({ activityStatus: undefined }).attiva).toBe(true);
+  });
+
+  it('il volume d affari zero resta zero', () => {
+    const d = leggiScheda({ ...SCHEDA, full: { ...SCHEDA.full, ecofin: { ...SCHEDA.full.ecofin, turnover: 0 } } } as any).dati;
+    expect(datiLocatore(d).volumeAffari).toBe(0);
+  });
+
+  it('una ricerca salvata prima del 15/10 non ha la forma: dato mancante', () => {
+    const d = datiLocatore({ fatturato: 100, patrimonioNetto: 50, annoBilancio: 2025, inizioAttivita: '2010-01-01' });
+    expect(d.formaCodice).toBeNull();
+    expect(d.attiva).toBeNull();
+    expect(d.cessata).toBe(false);
   });
 });
