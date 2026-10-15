@@ -60,6 +60,12 @@ describe('criteri del locatore', () => {
     expect(s.eventi).toBe('in-verifica');
     expect(semaforoPerSchermo(valuta(K, SOLIDA, 50_000, 'non-avviata', OGGI)).etichetta).toBeNull();
   });
+  it('allo schermo arriva l indicazione massima, solo sulla verifica senza importo', () => {
+    expect(semaforoPerSchermo(valuta(LOCATORE, DATI, null, 'assenti', OGGI)).indicazioneMassima).toBe(180_000);
+    expect(semaforoPerSchermo(valuta(LOCATORE, DATI, 3500, 'assenti', OGGI)).indicazioneMassima).toBeNull();
+    // la credit policy di FAS ha il suo massimale e non questa riga
+    expect(semaforoPerSchermo(valuta(K, SOLIDA, null, 'non-avviata', OGGI)).indicazioneMassima).toBeNull();
+  });
 });
 
 describe('leasing spento', () => {

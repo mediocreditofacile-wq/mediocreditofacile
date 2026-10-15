@@ -25,6 +25,7 @@ export function bloccoSemaforo(credito: any, titolo: string, nota = ''): string 
         ${righe ? `<ul class="mt-righe">${righe}</ul>` : ''}
         <ul class="mt-criteri">${criteri}</ul>
         ${credito?.massimale != null ? `<p class="mt-nota" style="margin:8px 0 0">Massimale finanziabile stimato: ${euro(credito.massimale)}.</p>` : ''}
+        ${credito?.indicazioneMassima != null ? `<p class="mt-nota" style="margin:8px 0 0">Indicazione massima importo finanziabile: <strong>${euro(credito.indicazioneMassima)}</strong>.</p>` : ''}
         <p class="mt-nota" style="margin:8px 0 0">Valutazione indicativa, non è una delibera.${nota ? ` ${esc(nota)}` : ''}</p>
       </div>
     </div>`;

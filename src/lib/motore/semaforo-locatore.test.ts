@@ -138,3 +138,21 @@ describe('mai promesse', () => {
     for (const e of esiti) expect(JSON.stringify(e)).not.toMatch(/approvat|grenke/i);
   });
 });
+
+describe('indicazione massima importo finanziabile', () => {
+  it('nella verifica senza importo: il 15% del volume d affari, per difetto alle centinaia', () => {
+    expect(v({ volumeAffari: 1_241_373 }, null).indicazioneMassima).toBe(186_200);
+    expect(v({}, null).indicazioneMassima).toBe(127_500);
+  });
+  it('con un importo in valutazione non si mostra: risponde il semaforo', () => {
+    expect(v({}, 3500).indicazioneMassima).toBeNull();
+  });
+  it('sul rosso non si mostra', () => {
+    expect(v({ cessata: true }, null).indicazioneMassima).toBeNull();
+    expect(v({ inizioAttivita: '2025-06-01' }, null).indicazioneMassima).toBeNull();
+    expect(v({}, null, 'presenti').indicazioneMassima).toBeNull();
+  });
+  it('senza volume d affari non si inventa', () => {
+    expect(v({ volumeAffari: null, annoBilancio: null, patrimonioNetto: null }, null).indicazioneMassima).toBeNull();
+  });
+});

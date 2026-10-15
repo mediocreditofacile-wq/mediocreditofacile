@@ -38,6 +38,25 @@ export interface EsitoLocatore {
   /** Eventi ancora in verifica: il colore puo' cambiare */
   provvisorio: boolean;
   eventi: StatoEventi;
+  /**
+   * Indicazione massima importo finanziabile, solo nella verifica senza importo
+   * e fuori dal rosso. Null quando non si mostra.
+   */
+  indicazioneMassima: number | null;
+}
+
+/**
+ * Quota del volume d'affari per l'indicazione massima importo finanziabile.
+ * Indicazione di Alberto del 15/10/2026 sui parametri del locatore: il tetto
+ * teorico e' il 20%, all'agente si indica il 15%. Non e' un limite: l'importo
+ * lo valuta il semaforo quando c'e' una proposta.
+ */
+export const QUOTA_INDICAZIONE_MASSIMA = 0.15;
+
+/** Il 15% del volume d'affari, per difetto alle centinaia di euro */
+function indicazioneMassima(volumeAffari: number | null): number | null {
+  if (volumeAffari === null || !(volumeAffari > 0)) return null;
+  return Math.floor((volumeAffari * QUOTA_INDICAZIONE_MASSIMA) / 100) * 100;
 }
 
 export const ETICHETTA_LOCATORE: Record<ColoreLocatore, string> = {
@@ -147,6 +166,7 @@ export function valutaLocatore(
   const esito = (semaforo: ColoreLocatore, etichetta = ETICHETTA_LOCATORE[semaforo]): EsitoLocatore => ({
     semaforo, etichetta, righe, criteri, eventi,
     provvisorio: eventi === 'in-verifica' && semaforo !== 'rosso',
+    indicazioneMassima: importo === null && semaforo !== 'rosso' ? indicazioneMassima(d.volumeAffari) : null,
   });
 
   // 1. Rosso Difficile: prevale su tutto
