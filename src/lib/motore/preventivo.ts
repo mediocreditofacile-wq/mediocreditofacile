@@ -25,6 +25,7 @@ import { buildPayloadPdf, euro } from '../prospetti-pv';
 import { getTabella } from '../tabelle-canoni';
 import { esitoPerSchermo, type CalcoloProposta } from './calcolo-proposta';
 import { documentiGenerici } from './pdf-generico';
+import { documentiMacchine } from './pdf-macchine';
 import { tabellaConMarkup } from './proposte';
 import { generaId, type EsitoMotore } from './sessione';
 
@@ -44,6 +45,11 @@ export interface EsitoPreventivo {
 async function documentiPdf(e: Sessione, c: CalcoloProposta, id: string) {
   const { carrozzeria } = e;
   const bp = c.bp;
+  if (carrozzeria.settore === 'macchine') {
+    const pdf = documentiMacchine(c, carrozzeria, id, { nome: e.contesto.nome ?? '', email: e.contesto.email });
+    const documenti = await salvaPdf(carrozzeria.slug, id, pdf);
+    return { documenti, allegati: pdf, attesi: pdf.length, err: documenti.length === pdf.length ? undefined : 'salvataggio_pdf' };
+  }
   if (carrozzeria.settore !== 'fotovoltaico') {
     const pdf = documentiGenerici(c, carrozzeria, id);
     const documenti = await salvaPdf(carrozzeria.slug, id, pdf);
@@ -80,16 +86,23 @@ async function documentiPdf(e: Sessione, c: CalcoloProposta, id: string) {
 async function salvaProposta(e: Sessione, c: CalcoloProposta, idBase: string, corpo: Record<string, unknown>) {
   const { contesto, carrozzeria } = e;
   const scheda = c.ricerca.dati_credito.scheda;
+  const mc = c.macchine;
   const numeri = {
     ...esitoPerSchermo(c),
-    scelta: c.bp
-      ? {
-          durata: c.bp.calcolo.durata,
-          canone: c.bp.calcolo.canone,
-          rataLeasing: c.bp.calcolo.leasingEsterno?.rata ?? null,
-        }
-      : null,
+    scelta: mc
+      ? { durata: mc.durata, canone: mc.tradizionale?.canone ?? null, canoneAlternativo: mc.alternativa?.canone ?? null }
+      : c.bp
+        ? {
+            durata: c.bp.calcolo.durata,
+            canone: c.bp.calcolo.canone,
+            rataLeasing: c.bp.calcolo.leasingEsterno?.rata ?? null,
+          }
+        : null,
   };
+  // L'input dell'agente, per poter rifare lo stesso conto
+  const dati = mc
+    ? { codice: corpo.codice, accessori: corpo.accessori ?? {}, prezzo: c.prezzo, consegna: mc.consegna, durata: mc.durata }
+    : { codice: corpo.codice, prezzo: c.prezzo, bp: c.inputBp };
   for (let tentativo = 0; tentativo < 4; tentativo++) {
     const id = tentativo ? `${idBase}-${tentativo + 1}` : idBase;
     const righe = await query(
@@ -98,9 +111,9 @@ async function salvaProposta(e: Sessione, c: CalcoloProposta, idBase: string, co
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
        ON CONFLICT (id) DO NOTHING RETURNING id`,
       [id, carrozzeria.slug, contesto.organizationId, contesto.userId, c.ricerca.id, c.ricerca.piva,
-       scheda.ragioneSociale || 'Cliente', c.voce.codice, c.voce.nome, c.prezzo, c.esito.semaforo,
+       scheda.ragioneSociale || 'Cliente', c.voce.codice, c.descrizione, c.prezzo, c.esito.semaforo,
        c.esito.anticipoRichiesto, c.esito.markup,
-       JSON.stringify({ codice: corpo.codice, prezzo: c.prezzo, bp: c.inputBp }), JSON.stringify(numeri)],
+       JSON.stringify(dati), JSON.stringify(numeri)],
     );
     if (righe.length) return id;
   }
@@ -114,6 +127,10 @@ async function mailMcf(e: Sessione, c: CalcoloProposta, id: string, allegati: { 
   const riga = (et: string, val: string) =>
     `<tr><td style="padding:4px 12px 4px 0;width:210px;vertical-align:top"><strong>${et}</strong></td><td>${escapeHtml(val)}</td></tr>`;
   const b = c.bp?.calcolo;
+  const mc = c.macchine;
+  const sem = c.esito.locatore
+    ? c.esito.locatore.etichetta
+    : `${c.esito.semaforo}${c.esito.anticipoRichiesto ? `, anticipo richiesto ${c.esito.anticipoRichiesto}%` : ''}${c.esito.markup ? `, markup ${c.esito.markup}%` : ''}`;
   return inviaMail({
     to: DESTINATARIO_MCF,
     subject: `${carrozzeria.nome} — ${contesto.nome || contesto.email} — ${s.ragioneSociale} — ${eur(c.prezzo)}`,
@@ -126,14 +143,16 @@ async function mailMcf(e: Sessione, c: CalcoloProposta, id: string, allegati: { 
       <table style="font-size:14px;border-collapse:collapse;width:100%">
         ${riga('Cliente', `${s.ragioneSociale}, P.IVA ${s.piva}`)}
         ${riga('Rating', s.rating ? `${s.rating.classe} (${s.rating.descrizione ?? ''})` : 'non assegnato')}
-        ${riga('Semaforo', `${c.esito.semaforo}${c.esito.anticipoRichiesto ? `, anticipo richiesto ${c.esito.anticipoRichiesto}%` : ''}${c.esito.markup ? `, markup ${c.esito.markup}%` : ''}`)}
-        ${riga('Offerta', `${c.voce.nome} (${c.voce.codice})`)}
-        ${riga('Prezzo trattato', `${eur(c.prezzo)} (listino ${eur(c.voce.prezzo)})`)}
+        ${riga('Semaforo', sem)}
+        ${riga(mc ? 'Configurazione' : 'Offerta', mc ? c.descrizione : `${c.voce.nome} (${c.voce.codice})`)}
+        ${riga('Prezzo trattato', `${eur(c.prezzo)} (listino ${eur(mc?.listino ?? c.voce.prezzo)})`)}
+        ${mc ? riga('Noleggio scelto', `${mc.durata} mesi: ${mc.tradizionale ? `${eur(mc.tradizionale.canone, 2)} tradizionale` : 'tradizionale fuori listino'}${mc.alternativa ? `, ${eur(mc.alternativa.canone, 2)} ${mc.nomeAlternativa}` : ''}`) : ''}
+        ${mc ? riga('Consegna prevista', mc.consegna) : ''}
         ${b ? riga('Noleggio scelto', `${b.durata} mesi, ${eur(b.canone, 2)} al mese`) : ''}
         ${b?.leasingEsterno ? riga('Leasing', `${b.durata} mesi, anticipo ${b.leasingEsterno.anticipoPerc}%, rata ${eur(b.leasingEsterno.rata, 2)}`) : ''}
         ${b ? riga('Copertura del canone', `${euro(b.coperturaCanone * 100, 0)}%`) : ''}
-        ${!b && c.esito.noleggio.length ? riga('Noleggio', c.esito.noleggio.map((n) => `${n.durata} mesi ${eur(n.canone, 2)}`).join(' · ')) : ''}
-        ${!b && c.esito.leasing.length ? riga('Leasing', c.esito.leasing.map((l) => `${l.durata} mesi ${eur(l.rata, 2)}`).join(' · ')) : ''}
+        ${!b && !mc && c.esito.noleggio.length ? riga('Noleggio', c.esito.noleggio.map((n) => `${n.durata} mesi ${eur(n.canone, 2)}`).join(' · ')) : ''}
+        ${!b && !mc && c.esito.leasing.length ? riga('Leasing', c.esito.leasing.map((l) => `${l.durata} mesi ${eur(l.rata, 2)}`).join(' · ')) : ''}
       </table>
       ${allegati.length ? '' : `<p style="font-size:14px;color:#8A2D0E;margin:16px 0 0">I PDF non sono allegati: il servizio di generazione non ha risposto o il settore non li prevede. I numeri restano validi.</p>`}
     `),

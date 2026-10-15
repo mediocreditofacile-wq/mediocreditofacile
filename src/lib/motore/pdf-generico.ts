@@ -37,9 +37,10 @@ const PIEDE_LEASING =
 export type Blocco =
   | { tipo: 'sezione'; titolo: string }
   | { tipo: 'coppie'; righe: [string, string][] }
-  | { tipo: 'tabella'; intestazioni: string[]; destra: boolean[]; righe: string[][] }
+  | { tipo: 'tabella'; intestazioni: string[]; destra: boolean[]; righe: string[][]; primaColonna?: number }
   | { tipo: 'testo'; testo: string }
-  | { tipo: 'elenco'; voci: string[] };
+  | { tipo: 'elenco'; voci: string[] }
+  | { tipo: 'colonne'; colonne: { etichetta: string; titolo: string; cifra: string; testo: string; evidenza?: boolean }[] };
 
 export interface Documento {
   filename: string;
@@ -61,7 +62,7 @@ export function euro(n: number, decimali = 2): string {
   } as Intl.NumberFormatOptions);
 }
 
-const dataItaliana = (d: Date) =>
+export const dataItaliana = (d: Date) =>
   new Intl.DateTimeFormat('it-IT', { timeZone: 'Europe/Rome', day: '2-digit', month: '2-digit', year: 'numeric' }).format(d);
 
 function blocchiCliente(c: CalcoloProposta): Blocco[] {
@@ -194,7 +195,7 @@ function rgb(hex: string): [number, number, number] {
   return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)];
 }
 
-function disegna(d: Documento, colore: string, accento: string): string {
+export function disegna(d: Documento, colore: string, accento: string): string {
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
   doc.addFileToVFS('Manrope-Regular.ttf', MANROPE_REGULAR);
   doc.addFont('Manrope-Regular.ttf', 'Manrope', 'normal');
@@ -275,7 +276,7 @@ function disegna(d: Documento, colore: string, accento: string): string {
       }
     } else if (b.tipo === 'tabella') {
       const n = b.intestazioni.length;
-      const primaCol = 26;
+      const primaCol = b.primaColonna ?? 26;
       const altre = (largo - primaCol) / (n - 1);
       const xCol = (i: number) => (i === 0 ? M : M + primaCol + altre * (i - 1));
       const xTesto = (i: number) => (b.destra[i] ? xCol(i) + (i === 0 ? primaCol : altre) - 2 : xCol(i) + 2);
@@ -315,6 +316,36 @@ function disegna(d: Documento, colore: string, accento: string): string {
         doc.text(righe, M + 6, y);
         y += 4.6 * righe.length + 0.6;
       }
+    } else if (b.tipo === 'colonne') {
+      // Riquadri affiancati: etichetta, titolo, cifra grande, testo. Quello in
+      // evidenza ha il bordo del colore dei titoli e il fondo chiaro.
+      const n = b.colonne.length;
+      const gap = 6;
+      const w = (largo - gap * (n - 1)) / n;
+      font('normal', 8.5, CHARCOAL);
+      const testi = b.colonne.map((c) => doc.splitTextToSize(c.testo, w - 8) as string[]);
+      const h = 24 + 4.2 * Math.max(...testi.map((t) => t.length));
+      spazio(h + 4);
+      b.colonne.forEach((c, i) => {
+        const x = M + i * (w + gap);
+        doc.setDrawColor(...rgb(c.evidenza ? accento : PLATINUM));
+        doc.setLineWidth(c.evidenza ? 0.5 : 0.3);
+        if (c.evidenza) {
+          doc.setFillColor(...rgb(GHOST));
+          doc.roundedRect(x, y - 4, w, h, 2, 2, 'FD');
+        } else {
+          doc.roundedRect(x, y - 4, w, h, 2, 2, 'S');
+        }
+        font('bold', 7, accento);
+        doc.text(c.etichetta.toUpperCase(), x + 4, y + 1);
+        font('bold', 10.5, NERO);
+        doc.text(c.titolo, x + 4, y + 7);
+        font('bold', 16, colore);
+        doc.text(c.cifra, x + 4, y + 15);
+        font('normal', 8.5, CHARCOAL);
+        doc.text(testi[i], x + 4, y + 21);
+      });
+      y += h + 2;
     }
   }
 
