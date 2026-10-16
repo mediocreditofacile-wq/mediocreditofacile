@@ -15,12 +15,14 @@
 
 import { randomUUID } from 'node:crypto';
 import { BASE_URL } from './auth';
+import { invitiPerGiro } from './copia-mcf';
 import { query, queryUna } from './db';
 import { mailInvito } from './mail-invito';
 
-/** Quanti inviti al giorno. Sotto i 100 di Resend, per lasciare margine ai
- *  reset password e alle notifiche dei preventivi, che usano lo stesso tetto. */
-export const INVITI_PER_GIRO = 80;
+/** Quanti inviti a giro: 80, sotto i 100 di Resend per lasciare margine ai reset
+ *  password e alle notifiche dei preventivi, che usano lo stesso tetto. Fino al
+ *  31/12/2026 sono 40, perche' ogni invito parte con MCF in copia nascosta e per
+ *  Resend vale due mail (src/lib/copia-mcf.ts). */
 /** Dopo questi tentativi l'invito si ferma e lo si guarda a mano */
 const TENTATIVI_MAX = 5;
 /** Giorni di validita', allineati a invitationExpiresIn in auth.ts */
@@ -95,7 +97,7 @@ interface DaInviare {
  * al giro successivo.
  */
 export async function svuotaCoda(
-  limite = INVITI_PER_GIRO,
+  limite = invitiPerGiro(),
   /** Un solo invito, quando il referente chiede di mandare proprio quello */
   solo?: { id: string; organizationId: string },
 ): Promise<{ inviati: number; rimandati: number; falliti: number }> {

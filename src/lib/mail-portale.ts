@@ -9,7 +9,13 @@
 // Il piano Resend gratuito ha un tetto di 100 email al giorno e 3.000 al mese:
 // per questo l'esito distingue "fallito" da "ritentabile", e la coda degli
 // inviti (src/lib/inviti.ts) rimette in fila i secondi invece di bruciarli.
+//
+// Fino al 31/12/2026 ogni mail a un destinatario esterno parte con MCF in copia
+// nascosta (src/lib/copia-mcf.ts, decisione di Alberto del 16/10/2026). Ogni mail
+// verso l'esterno deve passare da qui, non da una chiamata diretta a Resend,
+// altrimenti la copia non parte.
 
+import { copiaNascostaMcf } from './copia-mcf';
 import { env } from './db';
 
 export const MITTENTE = 'Mediocredito Facile <no-reply@mediocreditofacile.it>';
@@ -41,9 +47,12 @@ export async function inviaMail(opts: {
   const key = env('RESEND_API_KEY');
   if (!key) return { ok: false, err: 'resend_key_missing', ritentabile: true };
 
+  const to = Array.isArray(opts.to) ? opts.to : [opts.to];
+  const bcc = copiaNascostaMcf(to);
   const body = {
     from: MITTENTE,
-    to: Array.isArray(opts.to) ? opts.to : [opts.to],
+    to,
+    ...(bcc.length ? { bcc } : {}),
     reply_to: opts.replyTo ?? REPLY_TO,
     subject: opts.subject,
     html: opts.html,
