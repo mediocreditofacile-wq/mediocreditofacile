@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { controllaReferente } from './referente-cliente';
+import { controllaDatiCliente, controllaReferente } from './dati-cliente-pratica';
 
 describe('controllaReferente', () => {
   it('accetta cellulare ed email del referente', () => {
@@ -43,5 +43,44 @@ describe('controllaReferente', () => {
       expect(r.ok).toBe(false);
       if (!r.ok) expect(r.messaggio.length).toBeGreaterThan(20);
     }
+  });
+});
+
+describe('controllaDatiCliente', () => {
+  const buoni = { telefono: '333 123 4567', email: 'mario@esempio.it', iban: 'it60 x054 2811 1010 0000 0123 456' };
+
+  it('restituisce contatti ripuliti e IBAN normalizzato', () => {
+    expect(controllaDatiCliente(buoni)).toEqual({
+      ok: true, telefono: '333 123 4567', email: 'mario@esempio.it', iban: 'IT60X0542811101000000123456',
+    });
+  });
+
+  it("senza IBAN la pratica non passa, anche con i contatti a posto", () => {
+    const r = controllaDatiCliente({ ...buoni, iban: '' });
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.errore).toBe('iban_mancante');
+  });
+
+  it('un IBAN sbagliato di una cifra non passa, e il messaggio dice perché', () => {
+    const r = controllaDatiCliente({ ...buoni, iban: 'IT60X0542811101000000123457' });
+    expect(r.ok).toBe(false);
+    if (!r.ok) {
+      expect(r.errore).toBe('iban_non_valido');
+      expect(r.messaggio).toContain('non torna');
+    }
+  });
+
+  it('senza email o senza cellulare non passa', () => {
+    const a = controllaDatiCliente({ ...buoni, email: '' });
+    const b = controllaDatiCliente({ ...buoni, telefono: '' });
+    expect(a.ok || b.ok).toBe(false);
+    if (!a.ok) expect(a.errore).toBe('email_mancante');
+    if (!b.ok) expect(b.errore).toBe('cellulare_mancante');
+  });
+
+  it('regge valori che non sono stringhe, come arrivano da un JSON manomesso', () => {
+    const r = controllaDatiCliente({ telefono: 3331234567 as unknown as string, email: null as unknown as string, iban: {} as unknown as string });
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.errore).toBe('email_mancante');
   });
 });

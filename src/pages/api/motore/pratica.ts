@@ -3,13 +3,18 @@ export const prerender = false;
 // Caricamento di una pratica dal portale del motore.
 // POST /api/motore/pratica
 //   { f, ricercaId, propostaId?, bozza, prodotto, durata, importo,
-//     formaGiuridica, referente: {nome, telefono, email}, note, documenti: [...] }
+//     formaGiuridica, referente: {nome, telefono, email}, iban, note, documenti: [...] }
+//
+// Cellulare ed email del referente e IBAN dell'azienda sono obbligatori e si
+// ricontrollano qui (src/lib/dati-cliente-pratica.ts): il browser li controlla
+// gia', ma il browser si aggira.
 //
 // Il cliente e' quello della ricerca di merito, non uno scritto a mano. I
 // documenti sono gia' sullo store (caricati dal browser via /api/motore/upload)
 // e si tengono solo quelli nella cartella della bozza. All'invio parte la
 // verifica eventi negativi, il cui esito vede solo MCF.
 
+import { controllaDatiCliente } from '../../../lib/dati-cliente-pratica';
 import { queryUna } from '../../../lib/db';
 import { ricercaVisibile } from '../../../lib/motore/calcolo-proposta';
 import { prodottoAmmesso } from '../../../lib/motore/carrozzeria';
@@ -44,8 +49,9 @@ export async function POST({ request }: { request: Request }) {
   if (!(durata >= 12 && durata <= 120)) return json({ ok: false, error: 'durata_non_valida' }, 400);
   const forma = testo(corpo.formaGiuridica, 40);
   const ref = (corpo.referente ?? {}) as Record<string, unknown>;
-  const referente = { nome: testo(ref.nome, 120), telefono: testo(ref.telefono, 40), email: testo(ref.email, 160) };
-  if (!referente.telefono && !referente.email) return json({ ok: false, error: 'referente_mancante' }, 400);
+  const cliente = controllaDatiCliente({ telefono: ref.telefono, email: ref.email, iban: corpo.iban });
+  if (!cliente.ok) return json({ ok: false, error: cliente.errore, messaggio: cliente.messaggio }, 400);
+  const referente = { nome: testo(ref.nome, 120), telefono: testo(cliente.telefono, 40), email: testo(cliente.email, 160) };
 
   try {
     const id = await creaPratica(e, {
@@ -58,6 +64,7 @@ export async function POST({ request }: { request: Request }) {
       importo,
       formaGiuridica: (FORME as readonly string[]).includes(forma) ? forma : 'Altro',
       referente,
+      iban: cliente.iban,
       note: testo(corpo.note, 2000),
       documenti: documentiDellaBozza(e.carrozzeria.slug, bozza, corpo.documenti),
     });

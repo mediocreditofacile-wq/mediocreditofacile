@@ -4,6 +4,8 @@
 
 import { upload } from '@vercel/blob/client';
 import { buildChecklist } from '../../lib/checklist-pratica';
+import { controllaDatiCliente } from '../../lib/dati-cliente-pratica';
+import { initCampoIban, type CampoIban } from '../campo-iban';
 import { $, apiJson, data, esc, euro, messaggio, stato, traduci } from './comune';
 import { bottoneDoc, caricaStorico, suStorico, type DatiStorico } from './storico';
 
@@ -19,6 +21,7 @@ const FORME = ['Società di capitali', 'Società di persone', 'Ditta individuale
 
 let bozza = '';
 let file: File[] = [];
+let campoIban: CampoIban | null = null;
 let pratiche: any[] = [];
 
 /** La forma giuridica del Registro, ridotta alle voci della checklist */
@@ -84,9 +87,14 @@ function rendiModulo() {
         <label class="mt-campo"><span>Forma giuridica</span>
           <select id="pr-forma" class="mt-input">${FORME.map((f) => `<option ${f === formaDaScheda(r.scheda.formaGiuridica) ? 'selected' : ''}>${f}</option>`).join('')}</select></label>
         <label class="mt-campo"><span>Referente del cliente</span><input type="text" id="pr-ref-nome" class="mt-input" placeholder="Nome e cognome" /></label>
-        <label class="mt-campo"><span>Telefono</span><input type="tel" id="pr-ref-tel" class="mt-input" /></label>
-        <label class="mt-campo"><span>Email</span><input type="email" id="pr-ref-email" class="mt-input" /></label>
+        <label class="mt-campo"><span>Cellulare del referente *</span><input type="tel" id="pr-ref-tel" class="mt-input" required autocomplete="off" /></label>
+        <label class="mt-campo"><span>Email del referente *</span><input type="email" id="pr-ref-email" class="mt-input" required autocomplete="off" /></label>
       </div>
+      <label class="mt-campo" style="margin-top:16px"><span>IBAN del conto aziendale *</span>
+        <input type="text" id="pr-iban" class="mt-input mt-input--iban" required autocomplete="off" spellcheck="false"
+          inputmode="text" maxlength="48" placeholder="27 caratteri, inizia con IT" aria-describedby="pr-iban-esito" />
+        <small>Quello su cui il cliente pagherà i canoni. Senza IBAN la pratica non parte.</small>
+        <span id="pr-iban-esito" class="mt-campo__errore" role="alert" hidden></span></label>
       <label class="mt-campo" style="margin-top:16px"><span>Note per Mediocredito Facile</span>
         <textarea id="pr-note" class="mt-input" rows="3" maxlength="2000"></textarea></label>
       <div class="mt-due" style="margin-top:24px">
@@ -124,14 +132,46 @@ function rendiModulo() {
     el.value = '';
     rendiFile();
   });
+  campoIban = initCampoIban($<HTMLInputElement>('pr-iban'), $('pr-iban-esito'));
   rendiChecklist();
   rendiFile();
+}
+
+/** Il campo del modulo a cui si riferisce un errore sui dati del cliente */
+const CAMPO_DELL_ERRORE: Record<string, string> = {
+  cellulare_mancante: 'pr-ref-tel',
+  cellulare_non_valido: 'pr-ref-tel',
+  email_mancante: 'pr-ref-email',
+  email_non_valida: 'pr-ref-email',
+  iban_mancante: 'pr-iban',
+  iban_non_valido: 'pr-iban',
+};
+
+function segnalaCampo(errore: string, testo: string) {
+  const id = CAMPO_DELL_ERRORE[errore];
+  if (!id) return;
+  const campo = $<HTMLInputElement>(id);
+  campo.setAttribute('aria-invalid', 'true');
+  campo.addEventListener('input', () => campo.removeAttribute('aria-invalid'), { once: true });
+  if (id === 'pr-iban') {
+    const esito = $('pr-iban-esito');
+    esito.textContent = testo;
+    esito.hidden = false;
+  }
+  campo.focus();
 }
 
 async function invia(btn: HTMLButtonElement) {
   const msg = $('pr-msg');
   const val = (id: string) => $<HTMLInputElement>(id).value.trim();
-  if (!val('pr-ref-tel') && !val('pr-ref-email')) return messaggio(msg, traduci('referente_mancante'), false);
+  // Prima i dati del cliente, poi i documenti: inutile caricare file per una pratica che il server rifiuta
+  campoIban?.verifica();
+  const cliente = controllaDatiCliente({ telefono: val('pr-ref-tel'), email: val('pr-ref-email'), iban: val('pr-iban') });
+  if (!cliente.ok) {
+    messaggio(msg, cliente.messaggio, false);
+    return segnalaCampo(cliente.errore, cliente.messaggio);
+  }
+  messaggio(msg, '', false);
   btn.disabled = true;
 
   // 1. i documenti salgono dal browser allo store, nella cartella della bozza
@@ -166,14 +206,18 @@ async function invia(btn: HTMLButtonElement) {
       durata: Number($<HTMLSelectElement>('pr-durata').value),
       importo: Number(val('pr-importo')),
       formaGiuridica: $<HTMLSelectElement>('pr-forma').value,
-      referente: { nome: val('pr-ref-nome'), telefono: val('pr-ref-tel'), email: val('pr-ref-email') },
+      referente: { nome: val('pr-ref-nome'), telefono: cliente.telefono, email: cliente.email },
+      iban: cliente.iban,
       note: $<HTMLTextAreaElement>('pr-note').value.trim(),
       documenti,
     }),
   });
   btn.disabled = false;
   btn.textContent = 'Invia la pratica';
-  if (!res.ok || !corpo?.ok) return messaggio(msg, traduci(corpo?.error ?? ''), false);
+  if (!res.ok || !corpo?.ok) {
+    messaggio(msg, corpo?.messaggio || traduci(corpo?.error ?? ''), false);
+    return segnalaCampo(corpo?.error ?? '', corpo?.messaggio ?? '');
+  }
   $('pratica-nuova').innerHTML = `<p class="mt-msg mt-msg--ok">Pratica ${esc(corpo.id)} inviata${documenti.length ? ` con ${documenti.length === 1 ? 'un documento' : `${documenti.length} documenti`}` : ''}. Lo stato lo segui qui sotto.</p>`;
   void caricaStorico();
 }

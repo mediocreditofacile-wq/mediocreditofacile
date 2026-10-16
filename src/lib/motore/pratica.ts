@@ -18,6 +18,7 @@
 
 import { buildChecklist } from '../checklist-pratica';
 import { query, queryUna } from '../db';
+import { formattaIban } from '../iban';
 import { DESTINATARIO_MCF, escapeHtml, inviaMail, layoutMail } from '../mail-portale';
 import {
   avviaNegativita,
@@ -108,6 +109,8 @@ export interface InputPratica {
   importo: number;
   formaGiuridica: string;
   referente: { nome: string; telefono: string; email: string };
+  /** Normalizzato e controllato (src/lib/iban.ts). Sta in app.pratica.dati e nella mail a MCF, mai nello storico. */
+  iban: string;
   note: string;
   documenti: DocumentoPratica[];
 }
@@ -122,6 +125,7 @@ export async function creaPratica(e: Sessione, p: InputPratica): Promise<string>
     durata: p.durata,
     formaGiuridica: p.formaGiuridica,
     referente: p.referente,
+    iban: p.iban,
     note: p.note,
     checklist,
     bozza: p.bozza,
@@ -175,7 +179,10 @@ async function mailPratica(e: Sessione, id: string, p: InputPratica, checklist: 
       <table style="font-size:14px;border-collapse:collapse;width:100%">
         ${riga('Cliente', `${s.ragioneSociale}, P.IVA ${s.piva}`)}
         ${riga('Forma giuridica', p.formaGiuridica)}
-        ${riga('Referente', [p.referente.nome, p.referente.telefono, p.referente.email].filter(Boolean).join(' · ') || '-')}
+        ${riga('Referente', p.referente.nome || '-')}
+        ${riga('Cellulare', p.referente.telefono)}
+        ${riga('Email', p.referente.email)}
+        ${riga('IBAN', formattaIban(p.iban))}
         ${riga('Prodotto', `${p.prodotto === 'leasing' ? 'Leasing finanziario' : 'Noleggio operativo'}, ${p.durata} mesi`)}
         ${riga('Importo', `${euro(p.importo, 0)} euro`)}
         ${riga('Rating', s.rating ? `${s.rating.classe} (${s.rating.descrizione ?? ''})` : 'non assegnato')}

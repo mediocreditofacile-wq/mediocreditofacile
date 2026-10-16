@@ -464,6 +464,9 @@ const macchine = c.settore === 'macchine';
   .mt-griglia { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px 24px; }
   .mt-campo { display: grid; gap: 6px; font-size: 14px; font-weight: 600; color: var(--mt-black); }
   .mt-campo small { font-weight: 400; }
+  .mt-campo__errore { font-size: 14px; font-weight: 500; color: #8A2D0E; }
+  .mt-input[aria-invalid="true"] { border-color: #B23A12; }
+  .mt-input--iban { font-variant-numeric: tabular-nums; letter-spacing: 0.04em; text-transform: uppercase; }
   .mt-toggle-riga { display: flex; gap: 24px; flex-wrap: wrap; margin-top: 16px; font-size: 15px; }
   .mt-toggle { display: inline-flex; gap: 8px; align-items: center; cursor: pointer; }
   .mt-due { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; }
