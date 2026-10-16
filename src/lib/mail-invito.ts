@@ -100,9 +100,14 @@ export function testoInvito(
       ? `Da lì prepari preventivi e pratiche, vedi quelli di tutta la tua rete e apri gli accessi
          personali dei tuoi agenti: ognuno riceve un invito come questo e sceglie la propria password,
          senza credenziali da girare a voce.`
-      : `Dalla partita IVA verifichi il cliente, scegli ${macchine ? 'la macchina' : 'la fornitura'} e la
-         durata e scarichi il preventivo in PDF da consegnare. Quando il cliente accetta, carichi la
-         pratica con i suoi documenti, senza passare da noi per ogni richiesta.`;
+      : macchine
+        // Duplex si apre sulle proposte: la verifica viene quando la trattativa si fa seria
+        ? `Scegli la macchina e la durata e scarichi il preventivo in PDF da consegnare, anche prima di
+           verificare il cliente. Quando la trattativa si fa seria verifichi la partita IVA del cliente,
+           e quando accetta carichi la pratica con i suoi documenti, senza passare da noi per ogni richiesta.`
+        : `Dalla partita IVA verifichi il cliente, scegli la fornitura e la durata e scarichi il
+           preventivo in PDF da consegnare. Quando il cliente accetta, carichi la pratica con i suoi
+           documenti, senza passare da noi per ogni richiesta.`;
     notaGuide = NOTA_GUIDA_NOLEGGIO;
   }
 

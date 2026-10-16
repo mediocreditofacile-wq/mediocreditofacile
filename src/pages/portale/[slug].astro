@@ -294,6 +294,11 @@ const macchine = c.settore === 'macchine';
         <div class="mt-griglia">
           <label class="mt-campo"><span>Nome e cognome</span><input type="text" id="inv-nome" class="mt-input" /></label>
           <label class="mt-campo"><span>Email</span><input type="email" id="inv-email" class="mt-input" /></label>
+          <!-- Solo l'admin MCF nomina un referente: il campo compare solo a lui, e il server lo ricontrolla -->
+          <label class="mt-campo" id="inv-ruolo-campo" hidden><span>Ruolo</span><select id="inv-ruolo" class="mt-input">
+            <option value="agente">Agente: vede solo il proprio lavoro</option>
+            <option value="referente">Referente: vede tutta la rete e invita gli agenti</option>
+          </select></label>
         </div>
         <div class="mt-azioni">
           <button id="inv-btn" class="mt-btn">Metti in coda l'invito</button>

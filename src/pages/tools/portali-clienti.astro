@@ -10,7 +10,8 @@
  *  - PORTALI_PRATICHE: costruiti sul motore condiviso (src/lib/pratiche-partner.ts),
  *    login email+password, simulatore, caricamento pratica con documenti, stato richieste.
  *  - AREE_PARTNER: aree riservate col simulatore dedicato (fotovoltaico), il tool
- *    della rete commerciale Marotta e il portale distributori Duplex.
+ *    della rete commerciale Marotta e il simulatore Duplex a password unica
+ *    (il portale Duplex ad accessi personali sta fra i PORTALI_PRATICHE).
  *
  * REGOLA: ogni portale o area riservata di un cliente o partner si raggiunge da
  * Strumenti -> Portali Clienti, e da nessun'altra parte. Nell'hub /tools/ non si
@@ -100,11 +101,19 @@ const PORTALI_PRATICHE: PortaleCard[] = [
     descrizione:
       'Il cliente si verifica con la partita IVA, poi si sceglie il pacchetto dal catalogo e arrivano le proposte di noleggio e di leasing, il business plan energetico, i prospetti in PDF e il caricamento della pratica. Fornitore e prezzi sono di prova.',
   },
+  {
+    nome: 'Duplex',
+    href: '/portale/duplex',
+    icona: 'cleaning_services',
+    settore: 'Pulizia professionale, rete distributori',
+    descrizione:
+      'Ogni agente ha il proprio accesso: sceglie macchina e accessori, vede il canone tradizionale e quello con il trimestre di grazia con le date delle fatture, scarica il preventivo per il cliente e, quando la trattativa si fa seria, verifica la partita IVA e carica la pratica. Il referente vede tutta la rete.',
+  },
 ];
 
 const AREE_PARTNER: PortaleCard[] = [
   {
-    nome: 'Duplex',
+    nome: 'Duplex, simulatore con password unica',
     href: '/tools/duplex',
     icona: 'cleaning_services',
     settore: 'Pulizia industriale',

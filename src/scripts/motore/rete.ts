@@ -64,7 +64,7 @@ function rendiInviti(inviti: any[]) {
     : `<div class="mt-scorri"><table class="mt-tabella">
       <thead><tr><th>Persona</th><th>Stato</th><th>Inviato</th><th></th></tr></thead>
       <tbody>${inviti.map((i) => `<tr>
-        <td>${esc(i.nome)}<br><span class="mt-id">${esc(i.email)}</span></td>
+        <td>${esc(i.nome)}<br><span class="mt-id">${esc(i.email)}${i.ruolo === 'referente' ? ' · <strong>Referente</strong>' : ''}</span></td>
         <td>${ETICHETTA_INVITO[i.stato] ?? esc(i.stato)}</td>
         <td>${i.inviato_il ? data(i.inviato_il) : '<span class="mt-id">parte col giro delle 7, o mandalo ora</span>'}</td>
         <td>${i.stato === 'accettato' ? '' : `<button type="button" class="mt-link" data-invito="${esc(i.id)}">${i.stato === 'inviato' ? 'Rimanda ora' : 'Manda ora'}</button>`}</td>
@@ -74,13 +74,19 @@ function rendiInviti(inviti: any[]) {
 export function montaRete(opzioni: { conPreventivi?: boolean } = {}) {
   conPreventivi = opzioni.conPreventivi ?? true;
   const box = $('rete-msg');
+  // La scelta del ruolo la vede solo l'admin MCF: un referente non nomina altri
+  // referenti (il server lo rifiuta comunque). Le pagine senza il campo non cambiano.
+  const campoRuolo = document.getElementById('inv-ruolo-campo');
+  if (campoRuolo) campoRuolo.hidden = stato.ruolo !== 'admin';
   $('inv-btn').addEventListener('click', async () => {
     const nome = $<HTMLInputElement>('inv-nome').value.trim();
     const email = $<HTMLInputElement>('inv-email').value.trim();
     if (!nome || !email) return messaggio(box, 'Servono nome e email.', false);
-    const { res, corpo } = await post({ azione: 'invita', nome, email, ruolo: 'agente' });
+    const scelto = (document.getElementById('inv-ruolo') as HTMLSelectElement | null)?.value;
+    const ruolo = stato.ruolo === 'admin' && scelto === 'referente' ? 'referente' : 'agente';
+    const { res, corpo } = await post({ azione: 'invita', nome, email, ruolo });
     if (!res.ok || !corpo?.ok) return messaggio(box, traduci(corpo?.error ?? ''), false);
-    messaggio(box, `${nome} è in coda. L'invito parte col prossimo scaglione.`, true);
+    messaggio(box, `${nome} è in coda come ${ruolo}. L'invito parte col prossimo scaglione, o subito con "Manda ora" nella lista qui sotto.`, true);
     $<HTMLInputElement>('inv-nome').value = '';
     $<HTMLInputElement>('inv-email').value = '';
     void caricaRete();

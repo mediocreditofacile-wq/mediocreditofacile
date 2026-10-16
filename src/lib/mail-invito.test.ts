@@ -103,7 +103,10 @@ describe('testoInvito, motore sugli altri settori', () => {
     expect(t).toContain(
       'Alberto Amà ti ha aperto un accesso al portale con cui Duplex prepara i preventivi di noleggio operativo sulle sue macchine.',
     );
-    expect(t).toContain('scegli la macchina e la durata e scarichi il preventivo in PDF da consegnare');
+    // Su Duplex il portale si apre sulle proposte: la verifica viene dopo, non prima
+    expect(t).toContain('Scegli la macchina e la durata e scarichi il preventivo in PDF da consegnare, anche prima di verificare il cliente.');
+    expect(t).toContain('Quando la trattativa si fa seria verifichi la partita IVA del cliente, e quando accetta carichi la pratica con i suoi documenti');
+    expect(t).not.toContain('Dalla partita IVA verifichi il cliente');
     expect(t).not.toMatch(/leasing/i);
     expect(t).not.toMatch(/fotovoltaic|impiant|prospett|kWp/i);
     expect(subject).toBe('Il tuo accesso al portale Duplex — Mediocredito Facile');
