@@ -14,8 +14,10 @@ export interface AccessoPortale {
   nome: string;
   percorso: string;
   utente?: string;
-  password: string;
-  tipo: 'partner' | 'interno';
+  /** Assente sui portali ad accesso personale: li' ognuno entra col proprio account */
+  password?: string;
+  /** personale = utenti nominali (Better Auth): MCF entra con mediocreditofacile@gmail.com */
+  tipo: 'partner' | 'interno' | 'personale';
   nota?: string;
 }
 
@@ -23,9 +25,9 @@ export const CREDENZIALI: AccessoPortale[] = [
   // --- Portali pratiche: login con email + password ---
   { nome: 'Expo Energia', percorso: '/tools/expo-energia', utente: 'massimopalermo10@gmail.com', password: 'expoenergia', tipo: 'partner',
     nota: 'Come admin: mediocreditofacile@gmail.com + la chiave EXPO_PORTAL_ADMIN_KEY (sta nelle env di Vercel, non qui)' },
-  { nome: 'STILO', percorso: '/tools/stilo', utente: 'bonardipaolo@gmail.com', password: 'stilosrl', tipo: 'partner' },
   { nome: 'Full Service', percorso: '/tools/full-service', utente: 'commerciale@fullserviceagency.biz', password: 'fullservice', tipo: 'partner' },
   { nome: 'UNIDIMA', percorso: '/tools/unidima', utente: 'info@unidima.it', password: 'unidima', tipo: 'partner' },
+  { nome: 'Extreme Computer', percorso: '/tools/extreme-computer', utente: 'direzione@extremecomputer.it', password: 'extremecomputer', tipo: 'partner' },
   { nome: 'InnovaLux', percorso: '/tools/innovalux', utente: 'contratti@innovalux.net', password: 'innovalux', tipo: 'partner',
     nota: 'Portale preventivi fotovoltaico, non pratiche' },
 
@@ -37,8 +39,23 @@ export const CREDENZIALI: AccessoPortale[] = [
   { nome: 'Edilizia GIERRE', percorso: '/tools/edilizia-gierre', password: 'gierreedilizia', tipo: 'partner' },
   { nome: 'Gruppo Barone', percorso: '/tools/gruppo-barone', password: 'gruppobarone', tipo: 'partner' },
   { nome: 'Datron', percorso: '/tools/datron', password: 'cantinette', tipo: 'partner', nota: 'Stessa password per /tools/datron-ecommerce' },
-  { nome: 'Duplex', percorso: '/tools/duplex', password: 'duplex', tipo: 'partner' },
+  { nome: 'Duplex, simulatore con password unica', percorso: '/tools/duplex', password: 'duplex', tipo: 'partner',
+    nota: 'Resta in parallelo al portale Duplex ad accesso personale, finche\' la rete non passa li\'' },
   { nome: 'Marotta Evolution', percorso: '/tools/marotta/', password: '9999', tipo: 'partner', nota: 'PIN a 4 cifre, lo stesso del tool Joker Store' },
+
+  // --- Portali ad accesso personale: nessuna password comune ---
+  // MCF entra con mediocreditofacile@gmail.com e la propria password; referenti e
+  // agenti hanno ognuno il proprio accesso, aperto con un invito da "La tua rete".
+  { nome: 'Duplex', percorso: '/portale/duplex', tipo: 'personale',
+    nota: 'Sul motore dei portali. Referenti Leo e Rossano, agenti Stefano e Giovanni Stara (da invitare). L\'account demo dello stand e\' agente.' },
+  { nome: 'Fas Italia (prototipo)', percorso: '/portale/fas-italia-orby1x', tipo: 'personale',
+    nota: 'Proposta per Fas Italia, fuori dall\'indice Portali Clienti. Account demo dello stand: mediocreditofacile+demo@gmail.com, agente.' },
+  { nome: 'Portale dimostrativo', percorso: '/portale/demo-fotovoltaico', tipo: 'personale',
+    nota: 'Fornitore inventato, catalogo e prezzi di prova.' },
+  { nome: 'Green-Go', percorso: '/tools/green-go', tipo: 'personale',
+    nota: 'Referente Donato Di Zenzo; ogni agente ha il proprio accesso.' },
+  { nome: 'STILO', percorso: '/tools/stilo', tipo: 'personale',
+    nota: 'Dal 13/10/2026 ad accessi personali: referente Paolo Bonardi (bonardipaolo@gmail.com). La vecchia password comune non apre piu\' niente.' },
 
   // --- Strumenti interni MCF ---
   { nome: 'Simulazione leasing', percorso: '/tools/simulazione-leasing', password: 'mcf-leasing', tipo: 'interno' },

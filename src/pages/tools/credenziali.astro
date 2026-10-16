@@ -2,7 +2,9 @@
 /**
  * Accessi ai portali — /tools/credenziali
  *
- * Pagina interna: elenca username e password di tutti i portali partner.
+ * Pagina interna: elenca username e password dei portali a password unica e, a
+ * parte, i portali ad accesso personale, dove non c'e' una password comune: MCF
+ * entra con mediocreditofacile@gmail.com, referenti e agenti col proprio account.
  *
  * Le credenziali NON sono nel sorgente. La pagina serve solo il guscio; la
  * lista arriva da /api/credenziali, che risponde soltanto a chi presenta la
@@ -26,7 +28,7 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
 
     <div id="app" style="display:none;">
       <h1>Accessi ai portali</h1>
-      <p class="cred-sub">Username e password di tutte le aree riservate. Clicca su una password per copiarla.</p>
+      <p class="cred-sub">Username e password delle aree riservate a password unica: clicca su una password per copiarla. I portali ad accesso personale non hanno una password comune: ci entri col tuo account.</p>
       <div id="lista"></div>
       <button class="cred-btn cred-btn--ghost" id="esci">Esci</button>
     </div>
@@ -42,10 +44,24 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
     const r = await fetch('/api/credenziali', { headers: { Authorization: `Bearer ${chiave}` } });
     if (r.status === 401) { localStorage.removeItem(CH); $('err').textContent = 'Chiave errata.'; return false; }
     const d = await r.json();
-    const gruppi: [string, string][] = [['partner', 'Portali partner'], ['interno', 'Strumenti interni MCF']];
+    const gruppi: [string, string][] = [
+      ['partner', 'Portali partner a password unica'],
+      ['personale', 'Portali ad accesso personale'],
+      ['interno', 'Strumenti interni MCF'],
+    ];
     $('lista').innerHTML = gruppi.map(([tipo, titolo]) => {
       const righe = (d.credenziali ?? []).filter((c: any) => c.tipo === tipo);
       if (!righe.length) return '';
+      // Accesso personale: nessuna password da mostrare, ognuno entra col suo account
+      if (tipo === 'personale') {
+        return `<h2>${titolo}</h2><table><thead><tr><th>Portale</th><th>Come entri</th></tr></thead><tbody>` +
+          righe.map((c: any) => `<tr>
+            <td><a href="${esc(c.percorso)}" target="_blank" rel="noopener">${esc(c.nome)}</a>
+                ${c.nota ? `<br><span class="nota">${esc(c.nota)}</span>` : ''}</td>
+            <td><code class="copia" data-v="mediocreditofacile@gmail.com">mediocreditofacile@gmail.com</code>
+                <br><span class="nota">con la tua password personale</span></td>
+          </tr>`).join('') + '</tbody></table>';
+      }
       return `<h2>${titolo}</h2><table><thead><tr><th>Portale</th><th>Utente</th><th>Password</th></tr></thead><tbody>` +
         righe.map((c: any) => `<tr>
           <td><a href="${esc(c.percorso)}" target="_blank" rel="noopener">${esc(c.nome)}</a>
