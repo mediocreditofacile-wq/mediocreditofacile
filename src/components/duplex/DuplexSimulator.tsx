@@ -1,6 +1,4 @@
 import { useEffect, useMemo, useState } from 'preact/hooks';
-import listino from '../../data/duplex-listino.json';
-import accessoriDB from '../../data/duplex-accessori.json';
 import { coefficienteGrace, graceDisponibile } from '../../data/duplex-grace';
 import { coefficienteSputnik } from '../../data/duplex-sputnik';
 import {
@@ -16,34 +14,16 @@ import {
   trimestreEsteso,
   type TabellaCanoni,
 } from '../../lib/duplex-calendario';
+import {
+  accessoriVisibili,
+  MACCHINE_DUPLEX,
+  type AccessorioDuplex as Accessorio,
+  type Alimentazione,
+  type ModelloListino,
+} from './accessori-duplex';
 import './duplex-simulator.css';
 
-// Tipi del listino e dei coefficienti
-// 'steam' non e' un'alimentazione ma un allestimento (vapore): sta qui perche' nel
-// selettore occupa lo stesso posto di cavo e batteria, come terza variante della famiglia.
-type Alimentazione = 'cavo' | 'batteria' | 'steam' | null;
-interface ModelloListino {
-  id: string;
-  label: string;
-  prezzo: number;
-  alimentazione: Alimentazione;
-  highlight?: boolean;
-}
-// Tipi accessori: una voce e' un add-on (spazzola o accessorio).
-// step = incremento del counter (es. 2 per "in coppia"), max = limite superiore.
-interface Accessorio {
-  id: string;
-  label: string;
-  prezzo: number;
-  step: number;
-  max: number;
-  note?: string;
-}
-interface AccessoriFamiglia {
-  spazzole: Accessorio[];
-  extra: Accessorio[];
-}
-type AccessoriDB = Record<string, AccessoriFamiglia>;
+// Macchine, accessori e loro tipi: ./accessori-duplex.ts, dagli stessi JSON del motore.
 
 const DURATE = [24, 36, 48, 60] as const;
 type Durata = typeof DURATE[number];
@@ -119,8 +99,7 @@ function trackEvent(name: string, payload: Record<string, unknown> = {}) {
 }
 
 export default function DuplexSimulator() {
-  const items = listino as ModelloListino[];
-  const accessori = accessoriDB as AccessoriDB;
+  const items = MACCHINE_DUPLEX;
   const famiglie = useMemo(() => buildFamiglie(items), [items]);
 
   // Stato simulatore. Default: Ultrax 45.
@@ -147,13 +126,22 @@ export default function DuplexSimulator() {
     return famigliaCorrente.varianti[0];
   }, [famigliaCorrente, alimentazione, items]);
 
-  // Accessori disponibili per la famiglia corrente.
-  // L'ordine in pagina e' spazzole + extra concatenati.
-  const accessoriFamiglia: AccessoriFamiglia = accessori[famigliaNome] ?? { spazzole: [], extra: [] };
+  // Accessori della famiglia corrente compatibili con la versione scelta: la batteria
+  // di scorta solo sulla versione a batteria. In pagina spazzole + extra concatenati.
   const tuttiAccessori: Accessorio[] = useMemo(
-    () => [...accessoriFamiglia.spazzole, ...accessoriFamiglia.extra],
-    [accessoriFamiglia],
+    () => accessoriVisibili(famigliaNome, varianteAttiva.alimentazione),
+    [famigliaNome, varianteAttiva],
   );
+
+  // Cambiando versione (da batteria a cavo) la batteria di scorta non si offre piu':
+  // via dalla scelta, cosi' non torna fuori se si rimette la batteria.
+  useEffect(() => {
+    const offerti = new Set(tuttiAccessori.map((a) => a.id));
+    setQuantita((prev) => {
+      const tenute = Object.fromEntries(Object.entries(prev).filter(([id]) => offerti.has(id)));
+      return Object.keys(tenute).length === Object.keys(prev).length ? prev : tenute;
+    });
+  }, [tuttiAccessori]);
 
   // Aggregato accessori: somma di (quantita x prezzo) per ogni voce della famiglia corrente.
   const totaleAccessori = useMemo(

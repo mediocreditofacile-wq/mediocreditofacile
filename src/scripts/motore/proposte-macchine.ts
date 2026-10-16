@@ -6,7 +6,7 @@
 import { dataEstesaDaIso as giorno } from '../../lib/duplex-calendario';
 import { bloccoSemaforo } from './cliente';
 import { $, apiJson, esc, euro, stato, traduci } from './comune';
-import { cambiaQuantita, ETICHETTA_ALLESTIMENTO, famiglie, listinoConfigurazione, type Famiglia, type VoceVista } from './macchine-catalogo';
+import { accessoriPer, cambiaQuantita, ETICHETTA_ALLESTIMENTO, famiglie, listinoConfigurazione, tieniCompatibili, type Famiglia, type VoceVista } from './macchine-catalogo';
 
 const pad = (n: number) => String(n).padStart(2, '0');
 const oggiIso = () => {
@@ -57,7 +57,7 @@ function rendiConfigurazione() {
   const box = $('macchine-config');
   if (!famigliaScelta || !macchina) { box.innerHTML = ''; return; }
   const varianti = famigliaScelta.varianti;
-  const acc = famigliaScelta.accessori;
+  const acc = accessoriPer(famigliaScelta, macchina);
   const durate: number[] = stato.proposta?.esito?.macchine?.righe?.map((r: any) => r.durata) ?? [24, 36, 48, 60];
   box.innerHTML = `
     <div class="mt-griglia">
@@ -91,7 +91,7 @@ function rendiConfigurazione() {
 
 function aggiornaPrezzo() {
   if (!macchina || !famigliaScelta) return;
-  const tot = listinoConfigurazione(macchina, famigliaScelta.accessori, quantita);
+  const tot = listinoConfigurazione(macchina, accessoriPer(famigliaScelta, macchina), quantita);
   const extra = Math.round((tot - macchina.prezzo) * 100) / 100;
   if (!prezzoToccato) $<HTMLInputElement>('prezzo').value = String(tot);
   $('prezzo-listino').innerHTML =
@@ -196,7 +196,8 @@ function scegliFamiglia(nome: string) {
 }
 
 function cambia(codice: string, verso: 1 | -1) {
-  const a = famigliaScelta?.accessori.find((x) => x.codice === codice);
+  if (!famigliaScelta || !macchina) return;
+  const a = accessoriPer(famigliaScelta, macchina).find((x) => x.codice === codice);
   if (!a) return;
   quantita[codice] = cambiaQuantita(quantita[codice] ?? 0, verso, Number(a.attributi?.passo) || 1, Number(a.attributi?.massimo) || 1);
   aggiornaPrezzo();
@@ -213,6 +214,8 @@ export function aggiornaCatalogoMacchine(lista: any[]) {
       famigliaScelta = null;
       macchina = null;
       quantita = {};
+    } else {
+      quantita = tieniCompatibili(quantita, accessoriPer(famigliaScelta, macchina!));
     }
   }
   rendiFamiglie();
@@ -261,6 +264,8 @@ export function montaProposteMacchine() {
     const t = e.target as HTMLInputElement;
     if (t.id === 'mc-allestimento' && famigliaScelta) {
       macchina = famigliaScelta.varianti.find((v) => v.codice === t.value) ?? macchina;
+      // Da batteria a cavo la batteria di scorta non si offre piu': via dalla scelta
+      quantita = tieniCompatibili(quantita, accessoriPer(famigliaScelta, macchina!));
       aggiornaPrezzo();
       rendiConfigurazione();
       pianifica(0);

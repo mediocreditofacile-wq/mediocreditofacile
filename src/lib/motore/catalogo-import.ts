@@ -5,6 +5,7 @@
 // Colonne riconosciute: codice, nome, prezzo, descrizione; sul fotovoltaico kwp,
 // accumulo, installazione; sul settore macchine famiglia, allestimento (cavo,
 // batteria, steam), tipo (accessorio), passo, massimo, nota (o note).
+// L'allestimento vale anche sull'accessorio: lo offre solo con quella versione.
 
 export const numero = (v: unknown) => {
   if (typeof v === 'number') return Number.isFinite(v) ? v : NaN;
@@ -34,19 +35,24 @@ export function leggiVoce(r: Record<string, unknown>): Voce | null {
   // macchine
   const famiglia = testo(r.famiglia, 80);
   if (famiglia) attributi.famiglia = famiglia;
+  const all = testo(r.allestimento, 20).toLowerCase();
+  const allestimento = ['cavo', 'batteria', 'steam'].includes(all) ? all : null;
   const accessorio = testo(r.tipo, 20).toLowerCase().startsWith('acc');
   if (accessorio) {
     // Un accessorio senza famiglia non si puo' offrire con nessuna macchina
     if (!famiglia) return null;
+    // Sull'accessorio l'allestimento restringe (la batteria di scorta solo sulla
+    // versione a batteria): scritto male lo aprirebbe a tutte, meglio scartarlo
+    if (all && !allestimento) return null;
     const passo = Math.max(1, Math.round(numero(r.passo)) || 1);
     attributi.tipo = 'accessorio';
+    if (allestimento) attributi.allestimento = allestimento;
     attributi.passo = passo;
     attributi.massimo = Math.max(passo, Math.round(numero(r.massimo)) || passo);
     const nota = testo(r.nota, 60);
     if (nota) attributi.nota = nota;
-  } else {
-    const all = testo(r.allestimento, 20).toLowerCase();
-    if (['cavo', 'batteria', 'steam'].includes(all)) attributi.allestimento = all;
+  } else if (allestimento) {
+    attributi.allestimento = allestimento;
   }
 
   const descrizione = testo(r.descrizione, 400) || (accessorio ? '' : testo(r.nota, 400)) || null;

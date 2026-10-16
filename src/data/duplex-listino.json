@@ -1,12 +1,15 @@
-[
-  { "id": "ultrax-45", "label": "Ultrax 45", "prezzo": 3500, "alimentazione": null, "highlight": true },
-  { "id": "duplex-340-cavo", "label": "Duplex 340 a cavo", "prezzo": 1931, "alimentazione": "cavo" },
-  { "id": "duplex-340-batteria", "label": "Duplex 340 a batteria", "prezzo": 2690, "alimentazione": "batteria" },
-  { "id": "duplex-340-steam", "label": "Duplex 340 Steam", "prezzo": 2694, "alimentazione": "steam" },
-  { "id": "duplex-420-cavo", "label": "Duplex 420 a cavo", "prezzo": 2259, "alimentazione": "cavo" },
-  { "id": "duplex-420-batteria", "label": "Duplex 420 a batteria", "prezzo": 2990, "alimentazione": "batteria" },
-  { "id": "duplex-420-steam", "label": "Duplex 420 Steam", "prezzo": 2954, "alimentazione": "steam" },
-  { "id": "duplex-620-cavo", "label": "Duplex 620 a cavo", "prezzo": 3800, "alimentazione": "cavo" },
-  { "id": "duplex-620-batteria", "label": "Duplex 620 a batteria", "prezzo": 6200, "alimentazione": "batteria" },
-  { "id": "duplex-escalator", "label": "Duplex Escalator", "prezzo": 10000, "alimentazione": null }
-]
+{
+  "_fonte": "Prezzi di listino Duplex International, IVA esclusa, franco fabbrica. Fonte: Listino ITALIA 2024, copia in src/data/fonti/duplex-listino-italia-2024.pdf, letto il 16/10/2026. Duplex 340 e 420 a cavo e Steam: pagine 8, 10, 13 e 14, qui senza i centesimi (1.931,02, 2.259,71, 2.694,35, 2.954,92). Duplex 340 e 420 a batteria: pagine 9 e 11, versione con batteria LITE (2.690,00 e 2.990,00). Ultrax 45, Duplex 620 a cavo e a batteria e Duplex Escalator sono nel file dal 13/05/2026 senza un documento di riferimento: nel Listino 2024 non ci sono o non tornano con nessuna voce (620 3.434,80, 620 Tekna 3.835,36, Escalator da 5.493,90 a 10.813,70). Da riscontrare con Duplex.",
+  "macchine": [
+    { "id": "ultrax-45", "label": "Ultrax 45", "prezzo": 3500, "alimentazione": null, "highlight": true },
+    { "id": "duplex-340-cavo", "label": "Duplex 340 a cavo", "prezzo": 1931, "alimentazione": "cavo" },
+    { "id": "duplex-340-batteria", "label": "Duplex 340 a batteria", "prezzo": 2690, "alimentazione": "batteria" },
+    { "id": "duplex-340-steam", "label": "Duplex 340 Steam", "prezzo": 2694, "alimentazione": "steam" },
+    { "id": "duplex-420-cavo", "label": "Duplex 420 a cavo", "prezzo": 2259, "alimentazione": "cavo" },
+    { "id": "duplex-420-batteria", "label": "Duplex 420 a batteria", "prezzo": 2990, "alimentazione": "batteria" },
+    { "id": "duplex-420-steam", "label": "Duplex 420 Steam", "prezzo": 2954, "alimentazione": "steam" },
+    { "id": "duplex-620-cavo", "label": "Duplex 620 a cavo", "prezzo": 3800, "alimentazione": "cavo" },
+    { "id": "duplex-620-batteria", "label": "Duplex 620 a batteria", "prezzo": 6200, "alimentazione": "batteria" },
+    { "id": "duplex-escalator", "label": "Duplex Escalator", "prezzo": 10000, "alimentazione": null }
+  ]
+}

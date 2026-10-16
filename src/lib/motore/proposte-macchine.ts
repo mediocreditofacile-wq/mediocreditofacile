@@ -12,6 +12,7 @@
 // configurazione (spec, paragrafo 15).
 
 import { canoneDaCoefficiente, polizzaAnnua, speseIstruttoria, totaleContratto } from '../../data/duplex-costi';
+import { accessorioCompatibile } from '../allestimento-accessorio';
 import { calendarioPagamenti, type CalendarioPagamenti } from '../duplex-calendario';
 import type { TabellaCanoni } from '../tabelle-canoni';
 import type { Carrozzeria, VoceCatalogo } from './carrozzeria';
@@ -87,8 +88,9 @@ const euroTesto = (n: number) => n.toLocaleString('it-IT', { useGrouping: 'alway
 
 /**
  * La macchina e gli accessori scelti, ricontrollati sul catalogo attivo: stessa
- * famiglia, multipli del passo, non oltre il massimo. Il browser propone, il
- * server decide: un accessorio spento dal Pannello non passa.
+ * famiglia, stesso allestimento se l'accessorio ne ha uno (la batteria di scorta
+ * solo sulla macchina a batteria), multipli del passo, non oltre il massimo. Il
+ * browser propone, il server decide: un accessorio spento dal Pannello non passa.
  */
 export function validaConfigurazione(
   voci: VoceCatalogo[],
@@ -106,7 +108,8 @@ export function validaConfigurazione(
     const passo = Number(a?.attributi.passo) || 1;
     const massimo = Number(a?.attributi.massimo) || 1;
     if (
-      !a || a.attributi.famiglia !== famiglia || !Number.isInteger(quantita) ||
+      !a || a.attributi.famiglia !== famiglia ||
+      !accessorioCompatibile(a.attributi.allestimento, macchina.attributi.allestimento) || !Number.isInteger(quantita) ||
       quantita < 0 || quantita % passo !== 0 || quantita > massimo
     ) {
       return { ok: false, error: 'accessorio_non_valido' };

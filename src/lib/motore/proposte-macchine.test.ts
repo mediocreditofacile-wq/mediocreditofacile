@@ -21,9 +21,73 @@ const calcola = (codice: string, prezzo: number, durata = 60) =>
   calcolaMacchine(conf(codice), prezzo, durata, CONSEGNA, TABELLA_SPUTNIK_DUPLEX, TABELLA_GRACE_DUPLEX);
 
 describe('catalogo Duplex', () => {
-  it('dieci macchine e dieci accessori', () => {
+  it('dieci macchine e quattordici accessori', () => {
     expect(vociDuplex().filter((v) => v.attributi.tipo !== 'accessorio')).toHaveLength(10);
-    expect(vociDuplex().filter((v) => v.attributi.tipo === 'accessorio')).toHaveLength(10);
+    expect(vociDuplex().filter((v) => v.attributi.tipo === 'accessorio')).toHaveLength(14);
+  });
+});
+
+// Listino ITALIA 2024, pagina 24 (e pagine 9 e 11): LITE G42048003 a 390,00 e
+// PRO G42048001 a 595,00, per 340 DC e 420 DC. La 36V (280i e 320 DC) resta fuori:
+// quelle macchine non sono in catalogo. Deciso da Alberto il 16/10/2026.
+describe('batterie di scorta', () => {
+  const voce = (codice: string) => vociDuplex().find((v) => v.codice === codice);
+
+  it.each([
+    ['D340-BATTERIA-LITE', 'Duplex 340', 390],
+    ['D340-BATTERIA-PRO', 'Duplex 340', 595],
+    ['D420-BATTERIA-LITE', 'Duplex 420', 390],
+    ['D420-BATTERIA-PRO', 'Duplex 420', 595],
+  ])('%s: %s, %i euro, solo sulla versione a batteria, fino a due', (codice, famiglia, prezzo) => {
+    const v = voce(codice)!;
+    expect(v.prezzo).toBe(prezzo);
+    expect(v.attributi).toEqual({ tipo: 'accessorio', famiglia, allestimento: 'batteria', passo: 1, massimo: 2 });
+  });
+
+  it('nessuna batteria su Ultrax, 620 ed Escalator, e niente 36V', () => {
+    const batterie = vociDuplex().filter((v) => /batteria/i.test(v.nome) && v.attributi.tipo === 'accessorio');
+    expect(batterie.map((v) => v.attributi.famiglia).sort()).toEqual(['Duplex 340', 'Duplex 340', 'Duplex 420', 'Duplex 420']);
+    expect(vociDuplex().some((v) => v.prezzo === 369.36)).toBe(false);
+  });
+
+  it('340 a batteria con due LITE: 3.470 euro di listino', () => {
+    const c = conf('DUPLEX-340-BATTERIA', { 'D340-BATTERIA-LITE': 2 });
+    expect(c.listino).toBe(3470);
+    expect(c.descrizione).toBe('Duplex 340 a batteria + 2x Batteria di scorta LITE Li-ion 48V');
+  });
+
+  it('420 a batteria con una LITE e una PRO, più una spazzola', () => {
+    const c = conf('DUPLEX-420-BATTERIA', { 'D420-BATTERIA-LITE': 1, 'D420-BATTERIA-PRO': 1, 'D420-BLU': 1 });
+    expect(c.listino).toBe(2990 + 390 + 595 + 65);
+  });
+
+  it('rifiuta la batteria sulla macchina a cavo e sulla Steam, e la terza batteria', () => {
+    const no = { ok: false, error: 'accessorio_non_valido' };
+    expect(validaConfigurazione(VOCI, { codice: 'DUPLEX-340-CAVO', accessori: { 'D340-BATTERIA-LITE': 1 } })).toEqual(no);
+    expect(validaConfigurazione(VOCI, { codice: 'DUPLEX-340-STEAM', accessori: { 'D340-BATTERIA-PRO': 1 } })).toEqual(no);
+    expect(validaConfigurazione(VOCI, { codice: 'DUPLEX-420-CAVO', accessori: { 'D420-BATTERIA-PRO': 2 } })).toEqual(no);
+    expect(validaConfigurazione(VOCI, { codice: 'DUPLEX-340-BATTERIA', accessori: { 'D340-BATTERIA-LITE': 3 } })).toEqual(no);
+    // la batteria della 420 non va sulla 340 (altra famiglia)
+    expect(validaConfigurazione(VOCI, { codice: 'DUPLEX-340-BATTERIA', accessori: { 'D420-BATTERIA-LITE': 1 } })).toEqual(no);
+  });
+
+  it('le spazzole restano su tutti gli allestimenti', () => {
+    expect(conf('DUPLEX-340-CAVO', { 'D340-BLU': 1 }).listino).toBe(1987);
+    expect(conf('DUPLEX-340-BATTERIA', { 'D340-BLU': 1 }).listino).toBe(2746);
+    expect(conf('DUPLEX-340-STEAM', { 'D340-BLU': 1 }).listino).toBe(2750);
+  });
+
+  it('il canone sale con le batterie: 340 a batteria a 60 mesi', () => {
+    const senza = calcolaMacchine(conf('DUPLEX-340-BATTERIA'), 2690, 60, CONSEGNA, TABELLA_SPUTNIK_DUPLEX, TABELLA_GRACE_DUPLEX);
+    const c = conf('DUPLEX-340-BATTERIA', { 'D340-BATTERIA-LITE': 2 });
+    const con = calcolaMacchine(c, c.listino, 60, CONSEGNA, TABELLA_SPUTNIK_DUPLEX, TABELLA_GRACE_DUPLEX);
+    expect(senza.tradizionale!.canone).toBe(62.26);
+    expect(senza.alternativa!.canone).toBe(61.52);
+    expect(con.tradizionale!.canone).toBe(80.31);
+    expect(con.alternativa!.canone).toBe(79.36);
+    expect(con.accessori).toEqual([
+      { codice: 'D340-BATTERIA-LITE', nome: 'Batteria di scorta LITE Li-ion 48V', prezzo: 390, quantita: 2 },
+    ]);
   });
 });
 

@@ -34,7 +34,7 @@ describe('listini Duplex sul motore', () => {
   });
 
   it('stesso canone di /tools/duplex su tutto il listino', () => {
-    for (const m of listino as { prezzo: number }[]) {
+    for (const m of listino.macchine as { prezzo: number }[]) {
       for (const d of [24, 36, 48, 60]) {
         expect(canone(TABELLA_SPUTNIK_DUPLEX, m.prezzo, d)).toBe(canoneDaCoefficiente(m.prezzo, coefficienteSputnik(m.prezzo, d)!));
         expect(canone(TABELLA_GRACE_DUPLEX, m.prezzo, d)).toBe(canoneDaCoefficiente(m.prezzo, coefficienteGrace(m.prezzo, d)!));

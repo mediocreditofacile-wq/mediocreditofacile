@@ -2,6 +2,8 @@
 // accessori, con le regole dei contatori. Funzioni pure, provate nei test.
 // Il controllo vero lo rifa' il server (src/lib/motore/proposte-macchine.ts).
 
+import { accessorioCompatibile } from '../../lib/allestimento-accessorio';
+
 export interface VoceVista { codice: string; nome: string; prezzo: number; attributi: Record<string, any> }
 export interface Famiglia { nome: string; da: number; varianti: VoceVista[]; accessori: VoceVista[] }
 
@@ -27,6 +29,21 @@ export function famiglie(catalogo: VoceVista[]): Famiglia[] {
     out.get(String(v.attributi.famiglia))?.accessori.push(v);
   }
   return [...out.values()];
+}
+
+/**
+ * Gli accessori da offrire con la macchina scelta: quelli della famiglia, meno
+ * quelli legati a un altro allestimento (la batteria di scorta solo sulla
+ * versione a batteria).
+ */
+export function accessoriPer(famiglia: Famiglia, macchina: VoceVista): VoceVista[] {
+  return famiglia.accessori.filter((a) => accessorioCompatibile(a.attributi?.allestimento, macchina.attributi?.allestimento));
+}
+
+/** Cambiando allestimento restano solo le quantita' degli accessori ancora offerti */
+export function tieniCompatibili(quantita: Record<string, number>, accessori: VoceVista[]): Record<string, number> {
+  const offerti = new Set(accessori.map((a) => a.codice));
+  return Object.fromEntries(Object.entries(quantita).filter(([codice]) => offerti.has(codice)));
 }
 
 /** Un passo avanti o indietro, mai sotto zero e mai oltre il massimo */

@@ -74,14 +74,14 @@ function rendi() {
       <tbody>${dati.catalogo.map((v: any) => `<tr class="${v.attivo ? '' : 'spenta'}">
         <td>${esc(v.codice)}</td><td>${esc(v.nome)}</td>
         ${fv ? `<td class="num">${v.attributi?.kwp != null ? num(v.attributi.kwp) : '—'}</td><td class="num">${v.attributi?.kwh_accumulo ? `${num(v.attributi.kwh_accumulo)} kWh` : '—'}</td>` : ''}
-        ${mc ? `<td>${esc(v.attributi?.famiglia ?? '—')}</td><td>${v.attributi?.tipo === 'accessorio' ? `accessorio${v.attributi.passo > 1 ? `, a ${v.attributi.passo}` : ''}, max ${v.attributi.massimo}` : esc(v.attributi?.allestimento ?? 'macchina')}</td>` : ''}
+        ${mc ? `<td>${esc(v.attributi?.famiglia ?? '—')}</td><td>${v.attributi?.tipo === 'accessorio' ? `accessorio${v.attributi.passo > 1 ? `, a ${v.attributi.passo}` : ''}, max ${v.attributi.massimo}${v.attributi.allestimento ? `, solo versione ${esc(v.attributi.allestimento)}` : ''}` : esc(v.attributi?.allestimento ?? 'macchina')}</td>` : ''}
         <td class="num">${euro(v.prezzo)}</td>
         <td><button type="button" class="mt-link" data-voce-stato="${esc(v.codice)}" data-attivo="${v.attivo ? '0' : '1'}">${v.attivo ? 'Spegni' : 'Riaccendi'}</button></td>
       </tr>`).join('')}</tbody></table></div>
 
     <h3 class="mt-h3">Importa da Excel</h3>
     <p class="mt-nota" style="margin-top:0">Copia le righe dal foglio, intestazione compresa, e incollale qui. Colonne riconosciute: codice, nome,
-      prezzo${fv ? ', kwp, accumulo, installazione' : ''}${mc ? ', famiglia, allestimento (cavo, batteria, steam), tipo (accessorio), passo, massimo, nota' : ''}, descrizione. Lo stesso codice aggiorna la voce, non la duplica.</p>
+      prezzo${fv ? ', kwp, accumulo, installazione' : ''}${mc ? ', famiglia, allestimento (cavo, batteria, steam; su un accessorio lo offre solo con quella versione), tipo (accessorio), passo, massimo, nota' : ''}, descrizione. Lo stesso codice aggiorna la voce, non la duplica.</p>
     <textarea id="cf-incolla" class="mt-input" rows="6" placeholder="codice&#9;nome&#9;prezzo${fv ? '&#9;kwp&#9;accumulo' : ''}"></textarea>
     <div class="mt-azioni">
       <button type="button" id="cf-importa" class="mt-btn mt-btn--secondario">Importa le righe</button>
