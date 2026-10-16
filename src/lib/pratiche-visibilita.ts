@@ -61,3 +61,16 @@ export function documentoVisibile(
     (p) => praticaVisibile(p, lettore) && (p.documenti ?? []).some((d) => d?.pathname === percorso),
   );
 }
+
+/**
+ * Una pratica come compare nelle liste del portale ("Le tue richieste"): senza
+ * l'IBAN del cliente, a nessun ruolo. L'IBAN serve a MCF per aprire la pratica,
+ * e MCF lo legge nella mail e nel record; nella lista lo vedrebbe anche il
+ * collega o chiunque abbia la password condivisa del portale.
+ */
+export function praticaPerElenco<T extends object>(pratica: T): T {
+  const cliente = (pratica as { cliente?: unknown }).cliente;
+  if (!cliente || typeof cliente !== 'object' || !('iban' in cliente)) return pratica;
+  const { iban: _, ...resto } = cliente as Record<string, unknown>;
+  return { ...pratica, cliente: resto };
+}

@@ -173,13 +173,21 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
             </label>
 
             <label class="ud__field">
-              <span class="ud__field-label">Telefono *</span>
+              <span class="ud__field-label">Cellulare del referente *</span>
               <input type="tel" name="telefono" required placeholder="+39 333 1234567" />
             </label>
 
             <label class="ud__field ud__field--full">
-              <span class="ud__field-label">Email *</span>
+              <span class="ud__field-label">Email del referente *</span>
               <input type="email" name="email" required placeholder="cliente@esempio.it" />
+            </label>
+
+            <label class="ud__field ud__field--full">
+              <span class="ud__field-label">IBAN del conto aziendale *</span>
+              <input type="text" name="iban" class="ud__iban" required autocomplete="off" spellcheck="false" maxlength="48"
+                placeholder="27 caratteri, inizia con IT" aria-describedby="iban-esito" />
+              <span class="ud__field-hint">Quello su cui il cliente pagherà i canoni. Senza IBAN la pratica non parte.</span>
+              <span class="ud__field-error" id="iban-esito" data-iban-esito role="alert" hidden></span>
             </label>
           </div>
         </div>
@@ -354,6 +362,7 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
 <script>
   import { upload } from '@vercel/blob/client';
   import { initBeniRows } from '../../scripts/beni-rows';
+  import { initDatiCliente } from '../../scripts/dati-cliente-form';
 
   // Due account sul gate:
   //  - partner: Fabio Maresca (UNIDIMA) — credenziali fisse
@@ -553,6 +562,8 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
 
   // === Submit form: prima i documenti su Blob, poi la pratica ===
   const form = document.getElementById('pratica-form') as HTMLFormElement;
+  // Cellulare, email e IBAN del cliente: obbligatori e controllati prima dell'invio
+  const datiCliente = initDatiCliente(form);
   const feedback = document.getElementById('form-feedback')!;
   const submitBtn = form.querySelector<HTMLButtonElement>('.ud__submit')!;
 
@@ -566,6 +577,7 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
     feedback.hidden = true;
     feedback.classList.remove('ud__feedback--ok', 'ud__feedback--err');
 
+    datiCliente.verifica();
     if (!form.reportValidity()) return;
     if (!session) { showGate(); return; }
 
@@ -612,6 +624,12 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
         void loadRichieste();
         submitBtn.innerHTML = '<span class="material-icons-outlined">check</span> Inviata';
         setTimeout(resetSubmitBtn, 3000);
+      } else if (json?.messaggio) {
+        // Il server ha rifiutato un dato del cliente: il motivo si mostra com'e'
+        feedback.textContent = json.messaggio;
+        feedback.classList.add('ud__feedback--err');
+        feedback.hidden = false;
+        resetSubmitBtn();
       } else {
         throw new Error('server_error');
       }
@@ -911,6 +929,10 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
     box-shadow: 0 0 0 3px rgba(254, 111, 58, 0.1);
   }
   .ud__field textarea { resize: vertical; min-height: 80px; }
+  .ud__field-hint { font-size: 0.8rem; color: #787782; line-height: 1.4; }
+  .ud__field-error { font-size: 0.85rem; font-weight: 500; color: #8A2D0E; line-height: 1.4; }
+  .ud__field input[aria-invalid="true"] { border-color: #B23A12; }
+  .ud__iban { font-variant-numeric: tabular-nums; letter-spacing: 0.04em; text-transform: uppercase; }
 
   /* Distinta beni */
   .ud__beni-hint { font-size: 0.85rem; color: #787782; line-height: 1.5; margin: 0 0 1rem; }

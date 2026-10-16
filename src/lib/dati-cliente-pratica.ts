@@ -24,18 +24,29 @@ const MESSAGGI: Record<ErroreReferente, string> = {
   email_non_valida: 'L\'email del referente non sembra valida: controlla chiocciola e dominio.',
 };
 
-const no = (e: ErroreReferente): EsitoReferente => ({ ok: false, errore: e, messaggio: MESSAGGI[e] });
+type Motivo = { errore: ErroreReferente; messaggio: string };
+const motivo = (e: ErroreReferente): Motivo => ({ errore: e, messaggio: MESSAGGI[e] });
 
-export function controllaReferente(r: { telefono?: string; email?: string }): EsitoReferente {
-  const telefono = String(r.telefono ?? '').trim();
-  const email = String(r.email ?? '').trim();
-  if (!telefono) return no('cellulare_mancante');
+/** null se il cellulare va bene, altrimenti il motivo. Lo usa il browser campo per campo. */
+export function controllaCellulare(valore: string): Motivo | null {
+  const telefono = String(valore ?? '').trim();
+  if (!telefono) return motivo('cellulare_mancante');
   // Separatori ammessi: spazi, punti, trattini, barre, parentesi; prefisso + o 00
   const cifre = telefono.replace(/[\s.\-/()]/g, '').replace(/^(\+|00)/, '');
-  if (!/^\d{8,15}$/.test(cifre)) return no('cellulare_non_valido');
-  if (!email) return no('email_mancante');
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return no('email_non_valida');
-  return { ok: true, telefono, email };
+  return /^\d{8,15}$/.test(cifre) ? null : motivo('cellulare_non_valido');
+}
+
+/** null se l'email va bene, altrimenti il motivo */
+export function controllaEmail(valore: string): Motivo | null {
+  const email = String(valore ?? '').trim();
+  if (!email) return motivo('email_mancante');
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email) ? null : motivo('email_non_valida');
+}
+
+export function controllaReferente(r: { telefono?: string; email?: string }): EsitoReferente {
+  const no = controllaCellulare(r.telefono ?? '') ?? controllaEmail(r.email ?? '');
+  if (no) return { ok: false, ...no };
+  return { ok: true, telefono: String(r.telefono).trim(), email: String(r.email).trim() };
 }
 
 export type EsitoDatiCliente =

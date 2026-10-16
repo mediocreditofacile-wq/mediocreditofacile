@@ -10,6 +10,7 @@ export const prerender = false;
 
 import { list, get, put } from '@vercel/blob';
 import { getPartner, pathPrefix, ruoloDaChiave, STATI_PRATICA } from '../../data/portali-partner';
+import { praticaPerElenco } from '../../lib/pratiche-visibilita';
 
 function jsonResponse(payload: unknown, status = 200): Response {
   return new Response(JSON.stringify(payload), {
@@ -55,7 +56,8 @@ export async function GET({ request }: { request: Request }) {
     // Piu' recenti in alto (l'id contiene il timestamp)
     records.sort((a, b) => String(b!.id).localeCompare(String(a!.id)));
 
-    return jsonResponse({ ok: true, ruolo, partner: partner.slug, pratiche: records });
+    // L'IBAN del cliente resta nel record e nella mail a MCF, non nella lista
+    return jsonResponse({ ok: true, ruolo, partner: partner.slug, pratiche: records.map((r) => praticaPerElenco(r!)) });
   } catch (e) {
     const msg = e instanceof Error ? e.message : 'unknown';
     console.error(JSON.stringify({ event: 'pratiche_list_error', partner: partner.slug, error: msg }));
@@ -107,7 +109,7 @@ export async function POST({ request }: { request: Request }) {
       token,
     });
     console.log(JSON.stringify({ event: 'pratica_stato', partner: partner.slug, id, stato }));
-    return jsonResponse({ ok: true, pratica: record });
+    return jsonResponse({ ok: true, pratica: praticaPerElenco(record) });
   } catch (e) {
     const msg = e instanceof Error ? e.message : 'unknown';
     console.error(JSON.stringify({ event: 'pratica_stato_error', id, error: msg }));

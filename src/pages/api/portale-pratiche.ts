@@ -14,7 +14,7 @@ export const prerender = false;
 import { getPartner } from '../../data/portali-partner';
 import { richiediSessione, vedeTuttoIlFornitore } from '../../lib/portale-auth';
 import { praticheVisibili, rispostaDocumento, scriviStato } from '../../lib/pratiche-nominali';
-import { documentoVisibile } from '../../lib/pratiche-visibilita';
+import { documentoVisibile, praticaPerElenco } from '../../lib/pratiche-visibilita';
 
 function json(payload: unknown, status = 200): Response {
   return new Response(JSON.stringify(payload), {
@@ -61,7 +61,8 @@ export async function GET({ request }: { request: Request }) {
       ruolo: contesto.ruolo,
       vedeTutto: lettore.vedeTutto,
       utente: { id: contesto.userId, nome: contesto.nome, email: contesto.email },
-      pratiche,
+      // L'IBAN del cliente resta nel record e nella mail a MCF, non nella lista
+      pratiche: pratiche.map((p) => praticaPerElenco(p)),
     });
   } catch (e) {
     console.error(JSON.stringify({ event: 'portale_pratiche_errore', partner: partner.slug, error: String(e) }));
@@ -88,7 +89,7 @@ export async function POST({ request }: { request: Request }) {
     const r = await scriviStato(partner.slug, String(corpo.id ?? '').trim(), String(corpo.stato ?? '').trim(), esito.contesto.email);
     if (!r.ok) return json({ ok: false, error: r.errore }, r.errore === 'pratica_non_trovata' ? 404 : 400);
     console.log(JSON.stringify({ event: 'pratica_stato', partner: partner.slug, id: corpo.id, stato: corpo.stato }));
-    return json({ ok: true, pratica: r.pratica });
+    return json({ ok: true, pratica: praticaPerElenco(r.pratica) });
   } catch (e) {
     console.error(JSON.stringify({ event: 'pratica_stato_error', partner: partner.slug, error: String(e) }));
     return json({ ok: false, error: 'aggiornamento_non_riuscito' }, 500);

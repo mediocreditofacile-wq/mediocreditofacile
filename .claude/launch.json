@@ -57,6 +57,15 @@
         "RESEND_API_KEY= ZAPIER_WEBHOOK_URL= sh scripts/dev-prova.sh"
       ],
       "port": 4321
+    },
+    {
+      "name": "mcf-dev-prova-senza-spese",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": [
+        "-c",
+        "RESEND_API_KEY= ZAPIER_WEBHOOK_URL= OPENAPI_EMAIL= OPENAPI_KEY= sh scripts/dev-prova.sh"
+      ],
+      "port": 4321
     }
   ]
 }

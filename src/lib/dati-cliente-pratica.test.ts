@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { controllaDatiCliente, controllaReferente } from './dati-cliente-pratica';
+import { controllaCellulare, controllaDatiCliente, controllaEmail, controllaReferente } from './dati-cliente-pratica';
 
 describe('controllaReferente', () => {
   it('accetta cellulare ed email del referente', () => {
@@ -82,5 +82,20 @@ describe('controllaDatiCliente', () => {
     const r = controllaDatiCliente({ telefono: 3331234567 as unknown as string, email: null as unknown as string, iban: {} as unknown as string });
     expect(r.ok).toBe(false);
     if (!r.ok) expect(r.errore).toBe('email_mancante');
+  });
+});
+
+describe('controllaCellulare e controllaEmail, campo per campo', () => {
+  it('danno null se il campo va bene', () => {
+    expect(controllaCellulare('+39 333 123 4567')).toBeNull();
+    expect(controllaEmail('mario@esempio.it')).toBeNull();
+  });
+
+  it('danno il motivo se il campo manca o non va', () => {
+    expect(controllaCellulare('')?.errore).toBe('cellulare_mancante');
+    expect(controllaCellulare('12')?.errore).toBe('cellulare_non_valido');
+    expect(controllaEmail(' ')?.errore).toBe('email_mancante');
+    expect(controllaEmail('mario@')?.errore).toBe('email_non_valida');
+    expect(controllaEmail('mario@')?.messaggio).toContain('email');
   });
 });

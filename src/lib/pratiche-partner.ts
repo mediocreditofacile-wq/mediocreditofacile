@@ -12,6 +12,8 @@
 
 import { put } from '@vercel/blob';
 import { pathPrefix, type PortalePartner } from '../data/portali-partner';
+import { controllaDatiCliente } from './dati-cliente-pratica';
+import { formattaIban } from './iban';
 import type { AutorePratica } from './pratiche-visibilita';
 
 export interface DocumentoPratica {
@@ -34,6 +36,8 @@ export interface PraticaLead {
   referente: string;
   telefono: string;
   email: string;
+  /** IBAN dell'azienda, normalizzato e controllato (src/lib/iban.ts). Nel record e nella mail, mai nelle liste. */
+  iban: string;
   // Campi flat = riepilogo del contratto: tipologia sintetica, descrizione
   // unita e importo TOTALE (somma delle righe). Guidano checklist e Pipedrive.
   tipologia: string;
@@ -105,6 +109,7 @@ async function savePraticaRecord(
       referente: lead.referente,
       telefono: lead.telefono,
       email: lead.email,
+      iban: lead.iban,
     },
     // Riepilogo del contratto (importo = totale): la lista richieste dei
     // portali legge da qui e resta compatibile coi record a bene singolo.
@@ -200,8 +205,9 @@ async function sendResendEmail(
           <tr><td style="padding:4px 12px 4px 0"><strong>Forma giuridica</strong></td><td>${escapeHtml(lead.forma_giuridica || '-')}</td></tr>
           <tr><td style="padding:4px 12px 4px 0"><strong>P.IVA / CF</strong></td><td>${escapeHtml(lead.piva || '-')}</td></tr>
           <tr><td style="padding:4px 12px 4px 0"><strong>Referente</strong></td><td>${escapeHtml(lead.referente || '-')}</td></tr>
-          <tr><td style="padding:4px 12px 4px 0"><strong>Telefono</strong></td><td>${escapeHtml(lead.telefono || '-')}</td></tr>
+          <tr><td style="padding:4px 12px 4px 0"><strong>Cellulare</strong></td><td>${escapeHtml(lead.telefono || '-')}</td></tr>
           <tr><td style="padding:4px 12px 4px 0"><strong>Email</strong></td><td>${escapeHtml(lead.email || '-')}</td></tr>
+          <tr><td style="padding:4px 12px 4px 0"><strong>IBAN</strong></td><td style="font-family:ui-monospace,Menlo,monospace">${escapeHtml(lead.iban ? formattaIban(lead.iban) : '-')}</td></tr>
         </table>
 
         <h3 style="color:#0F1020;font-size:15px;margin:20px 0 8px">Beni da noleggiare${lead.beni.length > 1 ? ` (${lead.beni.length})` : ''}</h3>
@@ -314,6 +320,7 @@ export async function gestisciPratica(
     referente: campo('referente'),
     telefono: campo('telefono'),
     email: campo('email'),
+    iban: campo('iban'),
     tipologia: campo('tipologia'),
     bene_descrizione: campo('bene_descrizione'),
     importo: campo('importo'),
@@ -354,21 +361,28 @@ export async function gestisciPratica(
   lead.bene_descrizione = beni.map((b) => b.descrizione).filter(Boolean).join('; ') || lead.bene_descrizione;
   lead.tipologia = beni.length > 1 ? `Piu' beni (${beni.length})` : (beni[0].tipologia || lead.tipologia);
 
-  // Validazione minima: serve almeno ragione sociale + un canale di contatto.
-  if (!lead.ragione_sociale || (!lead.telefono && !lead.email)) {
-    console.warn(JSON.stringify({
-      event: `form_rejected_${evento}`,
-      reason: 'missing_required',
-      timestamp,
-      has_ragione_sociale: Boolean(lead.ragione_sociale),
-      has_telefono: Boolean(lead.telefono),
-      has_email: Boolean(lead.email),
-    }));
+  if (!lead.ragione_sociale) {
+    console.warn(JSON.stringify({ event: `form_rejected_${evento}`, reason: 'missing_required', timestamp, has_ragione_sociale: false }));
     return new Response(JSON.stringify({ ok: false, error: 'invalid' }), {
       status: 400,
       headers: { 'Content-Type': 'application/json' },
     });
   }
+
+  // Cellulare ed email del referente e IBAN dell'azienda: tutti obbligatori
+  // (regola del 16/10/2026). Il browser li controlla gia', qui si ricontrolla
+  // perche' il browser si aggira, e si risponde col motivo da mostrare.
+  const datiCliente = controllaDatiCliente({ telefono: lead.telefono, email: lead.email, iban: lead.iban });
+  if (!datiCliente.ok) {
+    console.warn(JSON.stringify({ event: `form_rejected_${evento}`, reason: datiCliente.errore, timestamp }));
+    return new Response(JSON.stringify({ ok: false, error: datiCliente.errore, messaggio: datiCliente.messaggio }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+  lead.telefono = datiCliente.telefono;
+  lead.email = datiCliente.email;
+  lead.iban = datiCliente.iban;
 
   // Documenti gia' caricati su Blob dal browser: qui arriva solo l'elenco
   let documenti: DocumentoPratica[] = [];
@@ -397,6 +411,8 @@ export async function gestisciPratica(
   data.set('nome', `${lead.ragione_sociale} — ${partner.nome} (partner)`);
   data.set('fonte', partner.slug);
   data.set('pratica_id', id);
+  // L'IBAN resta fra record e mail a MCF: a Zapier (e da li' a Pipedrive) non serve
+  data.delete('iban');
   if (opzioni.autore) data.set('caricata_da', `${opzioni.autore.nome} <${opzioni.autore.email}>`);
 
   const [recordResult, mailResult, zapierResult] = await Promise.all([

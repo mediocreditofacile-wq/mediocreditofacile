@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { cartellaDocumenti, documentoVisibile, praticaVisibile } from './pratiche-visibilita';
+import { cartellaDocumenti, documentoVisibile, praticaPerElenco, praticaVisibile } from './pratiche-visibilita';
 import { PORTALI_PARTNER, ruoloDaChiave } from '../data/portali-partner';
 
 const paolo = { userId: 'referente01', vedeTutto: true };
@@ -75,5 +75,30 @@ describe('password condivisa sui portali ad accesso nominale', () => {
 
   it('gli altri portali a password non cambiano', () => {
     expect(ruoloDaChiave('unidima', PORTALI_PARTNER.unidima, admin)).toBe('partner');
+  });
+});
+
+describe('praticaPerElenco', () => {
+  const record = {
+    id: 'ST-20261016-101500',
+    cliente: { ragione_sociale: 'Rossi SRL', telefono: '3331234567', email: 'a@b.it', iban: 'IT60X0542811101000000123456' },
+    documenti: [],
+  };
+
+  it("toglie l'IBAN del cliente: nelle liste del portale non compare a nessuno", () => {
+    const r = praticaPerElenco(record);
+    expect(r.cliente).not.toHaveProperty('iban');
+    expect(r.cliente.ragione_sociale).toBe('Rossi SRL');
+    expect(r.id).toBe(record.id);
+  });
+
+  it('non tocca il record originale', () => {
+    praticaPerElenco(record);
+    expect(record.cliente.iban).toBe('IT60X0542811101000000123456');
+  });
+
+  it('regge i record vecchi, senza IBAN o senza cliente', () => {
+    expect(praticaPerElenco({ id: 'EE-1' })).toEqual({ id: 'EE-1' });
+    expect(praticaPerElenco({ id: 'EE-2', cliente: { ragione_sociale: 'X' } })).toEqual({ id: 'EE-2', cliente: { ragione_sociale: 'X' } });
   });
 });
