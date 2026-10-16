@@ -47,9 +47,9 @@ export const CREDENZIALI: AccessoPortale[] = [
   // MCF entra con mediocreditofacile@gmail.com e la propria password; referenti e
   // agenti hanno ognuno il proprio accesso, aperto con un invito da "La tua rete".
   { nome: 'Duplex', percorso: '/portale/duplex', tipo: 'personale',
-    nota: 'Sul motore dei portali. Referenti Leo e Rossano, agenti Stefano e Giovanni Stara (da invitare). L\'account demo dello stand e\' agente.' },
+    nota: 'Sul motore dei portali. Referenti Leo e Rossano, agenti Stefano e Giovanni Stara (da invitare).' },
   { nome: 'Fas Italia (prototipo)', percorso: '/portale/fas-italia-orby1x', tipo: 'personale',
-    nota: 'Proposta per Fas Italia, fuori dall\'indice Portali Clienti. Account demo dello stand: mediocreditofacile+demo@gmail.com, agente.' },
+    nota: 'Proposta per Fas Italia, fuori dall\'indice Portali Clienti. L\'account demo dello stand TTG e\' stato cancellato il 16/10/2026.' },
   { nome: 'Portale dimostrativo', percorso: '/portale/demo-fotovoltaico', tipo: 'personale',
     nota: 'Fornitore inventato, catalogo e prezzi di prova.' },
   { nome: 'Green-Go', percorso: '/tools/green-go', tipo: 'personale',
