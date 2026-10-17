@@ -20,43 +20,15 @@
 
 import { betterAuth } from 'better-auth';
 import { admin, organization } from 'better-auth/plugins';
-import { createAccessControl } from 'better-auth/plugins/access';
-import { defaultStatements, ownerAc } from 'better-auth/plugins/organization/access';
 import { env, getPool, queryUna } from './db';
 import { inviaMail, layoutMail, escapeHtml } from './mail-portale';
 import { mailInvito } from './mail-invito';
 import { percorsoPortale } from './percorso-portale';
+import { ac, RUOLI_ORG } from './ruoli-portale';
 
-/**
- * Permessi del portale. Non usiamo i ruoli predefiniti owner/admin/member
- * perche' il loro member e' pensato in sola lettura, mentre il nostro agente
- * deve poter creare preventivi e rileggere i propri.
- */
-const statement = {
-  ...defaultStatements,
-  preventivo: ['crea', 'leggi-propri', 'leggi-org'],
-  utente: ['invita', 'disattiva', 'lista'],
-  documento: ['leggi-propri', 'leggi-org'],
-} as const;
-
-export const ac = createAccessControl(statement);
-
-/** Il referente del fornitore: vede tutta la rete e ne gestisce gli account */
-export const referente = ac.newRole({
-  ...ownerAc.statements,
-  preventivo: ['crea', 'leggi-propri', 'leggi-org'],
-  utente: ['invita', 'disattiva', 'lista'],
-  documento: ['leggi-propri', 'leggi-org'],
-});
-
-/** L'agente: genera preventivi e rilegge solo i propri */
-export const agente = ac.newRole({
-  preventivo: ['crea', 'leggi-propri'],
-  documento: ['leggi-propri'],
-});
-
-export const RUOLI_ORG = { referente, agente };
-export type RuoloOrg = keyof typeof RUOLI_ORG;
+// I ruoli stanno in un modulo senza database, cosi' i test li leggono senza
+// connessione. Qui si riesportano per chi li importava da auth.ts.
+export { ac, referente, agente, RUOLI_ORG, type RuoloOrg } from './ruoli-portale';
 
 /** Dominio pubblico: in locale il default e' la porta di astro dev */
 export const BASE_URL = env('BETTER_AUTH_URL') ?? 'http://localhost:4321';
@@ -139,8 +111,9 @@ export const auth = betterAuth({
       // Un agente plurimandatario non apre la posta in giornata: 48 ore sono
       // poche, e un invito scaduto e' una telefonata ad Alberto.
       invitationExpiresIn: 60 * 60 * 24 * 7,
-      // Le organizzazioni le crea MCF, non gli utenti.
+      // Le organizzazioni le crea MCF, non gli utenti, e nessuno le cancella.
       allowUserToCreateOrganization: false,
+      disableOrganizationDeletion: true,
       // Strada secondaria: gli inviti normali passano dalla coda
       // (src/lib/inviti.ts), che li manda a scaglioni per non sfondare il tetto
       // giornaliero di Resend. Questo scatta solo se un invito viene creato
