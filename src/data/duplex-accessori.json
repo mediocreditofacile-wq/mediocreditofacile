@@ -1,5 +1,5 @@
 {
-  "_fonte": "Prezzi di listino Duplex International, IVA esclusa. Fonte: Listino ITALIA 2024, copia in src/data/fonti/duplex-listino-italia-2024.pdf, letto il 16/10/2026. Spazzole UltraBrush di 340, 420 e 620: pagina 23. Batterie di scorta LITE (G42048003, 390,00) e PRO (G42048001, 595,00) per 340 DC e 420 DC: pagine 9, 11 e 24, aggiunte il 16/10/2026 con allestimento 'batteria', cioe' offerte solo con la versione a batteria. La batteria 36V (800000364, 369,36) va su 280i e 320 DC, che non sono in catalogo. Accessori Ultrax 45 (microfibra 119, Squeegy 150): non sono nel Listino 2024, nel file dal 13/05/2026 senza un documento di riferimento.",
+  "_fonte": "Prezzi di listino Duplex International, IVA esclusa. Fonte: Listino ITALIA 2024, copia in src/data/fonti/duplex-listino-italia-2024.pdf, letto il 16/10/2026. Spazzole UltraBrush di 340, 420 e 620: pagina 23. Batterie di scorta LITE (G42048003, 390,00) e PRO (G42048001, 595,00) per 340 DC e 420 DC: pagine 9, 11 e 24, aggiunte il 16/10/2026 con allestimento 'batteria', cioe' offerte solo con la versione a batteria. La batteria 36V (800000364, 369,36) va su 280i e 320 DC, che non sono in catalogo. Carrelli di trasporto Caddy (pagina 24, ripetuti nelle pagine 8-16 di ogni macchina): a due ruote 420495000 a 186,32 per 340 e 420, a tre ruote 420492000 a 293,61 per la 420 e 620495000 a 336,26 per la 620; aggiunti il 19/10/2026 su tutte le versioni, uno per contratto. Accessori Ultrax 45 (microfibra 119, Squeegy 150): non sono nel Listino 2024, nel file dal 13/05/2026 senza un documento di riferimento.",
   "famiglie": {
     "Ultrax 45": {
       "spazzole": [
@@ -17,7 +17,8 @@
       ],
       "extra": [
         { "id": "d340-batteria-lite", "label": "Batteria di scorta LITE Li-ion 48V", "prezzo": 390, "step": 1, "max": 2, "allestimento": "batteria" },
-        { "id": "d340-batteria-pro", "label": "Batteria di scorta PRO Li-ion 48V", "prezzo": 595, "step": 1, "max": 2, "allestimento": "batteria" }
+        { "id": "d340-batteria-pro", "label": "Batteria di scorta PRO Li-ion 48V", "prezzo": 595, "step": 1, "max": 2, "allestimento": "batteria" },
+        { "id": "d340-caddy", "label": "Carrello Caddy a due ruote", "prezzo": 186.32, "step": 1, "max": 1 }
       ]
     },
     "Duplex 420": {
@@ -28,7 +29,9 @@
       ],
       "extra": [
         { "id": "d420-batteria-lite", "label": "Batteria di scorta LITE Li-ion 48V", "prezzo": 390, "step": 1, "max": 2, "allestimento": "batteria" },
-        { "id": "d420-batteria-pro", "label": "Batteria di scorta PRO Li-ion 48V", "prezzo": 595, "step": 1, "max": 2, "allestimento": "batteria" }
+        { "id": "d420-batteria-pro", "label": "Batteria di scorta PRO Li-ion 48V", "prezzo": 595, "step": 1, "max": 2, "allestimento": "batteria" },
+        { "id": "d420-caddy-2", "label": "Carrello Caddy a due ruote", "prezzo": 186.32, "step": 1, "max": 1 },
+        { "id": "d420-caddy-3", "label": "Carrello Caddy a tre ruote", "prezzo": 293.61, "step": 1, "max": 1 }
       ]
     },
     "Duplex 620": {
@@ -36,7 +39,9 @@
         { "id": "d620-med", "label": "Brush Med (gialla, abrasivo medio)", "prezzo": 120, "step": 1, "max": 4 },
         { "id": "d620-max", "label": "Brush Max (rossa, altamente abrasiva)", "prezzo": 120, "step": 1, "max": 4 }
       ],
-      "extra": []
+      "extra": [
+        { "id": "d620-caddy", "label": "Carrello Caddy a tre ruote", "prezzo": 336.26, "step": 1, "max": 1 }
+      ]
     },
     "Duplex Escalator": {
       "spazzole": [],

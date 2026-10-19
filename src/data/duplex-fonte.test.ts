@@ -20,6 +20,11 @@ describe.each(['duplex-listino.json', 'duplex-accessori.json'])('%s', (nome) => 
   });
 });
 
+it('la fonte degli accessori dice da dove vengono i carrelli', () => {
+  const { _fonte } = JSON.parse(fs.readFileSync(path.join(CARTELLA, 'duplex-accessori.json'), 'utf8'));
+  for (const codice of ['420495000', '420492000', '620495000']) expect(_fonte).toContain(codice);
+});
+
 it('la copia del listino e\' nel repo', () => {
   expect(fs.statSync(path.join(process.cwd(), LISTINO_PDF)).size).toBeGreaterThan(1_000_000);
 });

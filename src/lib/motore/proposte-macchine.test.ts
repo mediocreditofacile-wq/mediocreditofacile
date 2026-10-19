@@ -21,9 +21,69 @@ const calcola = (codice: string, prezzo: number, durata = 60) =>
   calcolaMacchine(conf(codice), prezzo, durata, CONSEGNA, TABELLA_SPUTNIK_DUPLEX, TABELLA_GRACE_DUPLEX);
 
 describe('catalogo Duplex', () => {
-  it('dieci macchine e quattordici accessori', () => {
+  it('dieci macchine e diciotto accessori', () => {
     expect(vociDuplex().filter((v) => v.attributi.tipo !== 'accessorio')).toHaveLength(10);
-    expect(vociDuplex().filter((v) => v.attributi.tipo === 'accessorio')).toHaveLength(14);
+    expect(vociDuplex().filter((v) => v.attributi.tipo === 'accessorio')).toHaveLength(18);
+  });
+});
+
+// Listino ITALIA 2024, pagina 24 (e pagine 8-16): carrello di trasporto "Caddy",
+// a due ruote 420495000 a 186,32 per 340 e 420, a tre ruote 420492000 a 293,61
+// per la 420 e 620495000 a 336,26 per la 620. Serve a spostare la macchina, vale
+// per tutte le versioni, uno per contratto. Deciso da Alberto il 19/10/2026.
+describe('carrelli Caddy', () => {
+  const voce = (codice: string) => vociDuplex().find((v) => v.codice === codice);
+
+  it.each([
+    ['D340-CADDY', 'Duplex 340', 'Carrello Caddy a due ruote', 186.32],
+    ['D420-CADDY-2', 'Duplex 420', 'Carrello Caddy a due ruote', 186.32],
+    ['D420-CADDY-3', 'Duplex 420', 'Carrello Caddy a tre ruote', 293.61],
+    ['D620-CADDY', 'Duplex 620', 'Carrello Caddy a tre ruote', 336.26],
+  ])('%s: %s, %s, %d euro, su tutte le versioni, uno solo', (codice, famiglia, nome, prezzo) => {
+    const v = voce(codice)!;
+    expect(v.nome).toBe(nome);
+    expect(v.prezzo).toBe(prezzo);
+    expect(v.attributi).toEqual({ tipo: 'accessorio', famiglia, passo: 1, massimo: 1 });
+  });
+
+  it('nessun carrello su Ultrax ed Escalator', () => {
+    const famiglie = vociDuplex().filter((v) => /Caddy/.test(v.nome)).map((v) => v.attributi.famiglia);
+    expect(famiglie).toEqual(['Duplex 340', 'Duplex 420', 'Duplex 420', 'Duplex 620']);
+  });
+
+  it('va con la macchina a cavo, a batteria e Steam, e somma i centesimi', () => {
+    expect(conf('DUPLEX-340-CAVO', { 'D340-CADDY': 1 }).listino).toBe(2117.32);
+    expect(conf('DUPLEX-340-BATTERIA', { 'D340-CADDY': 1 }).listino).toBe(2876.32);
+    expect(conf('DUPLEX-340-STEAM', { 'D340-CADDY': 1 }).listino).toBe(2880.32);
+    expect(conf('DUPLEX-620-BATTERIA', { 'D620-CADDY': 1 }).listino).toBe(6536.26);
+    expect(conf('DUPLEX-340-CAVO', { 'D340-CADDY': 1 }).descrizione).toBe('Duplex 340 a cavo + 1x Carrello Caddy a due ruote');
+  });
+
+  it('con le batterie di scorta: 340 a batteria, due LITE e il carrello', () => {
+    expect(conf('DUPLEX-340-BATTERIA', { 'D340-BATTERIA-LITE': 2, 'D340-CADDY': 1 }).listino).toBe(3656.32);
+  });
+
+  it('un carrello solo, e quello della 620 non va sulla 420', () => {
+    const no = { ok: false, error: 'accessorio_non_valido' };
+    expect(validaConfigurazione(VOCI, { codice: 'DUPLEX-340-CAVO', accessori: { 'D340-CADDY': 2 } })).toEqual(no);
+    expect(validaConfigurazione(VOCI, { codice: 'DUPLEX-420-CAVO', accessori: { 'D620-CADDY': 1 } })).toEqual(no);
+    expect(validaConfigurazione(VOCI, { codice: 'ULTRAX-45', accessori: { 'D340-CADDY': 1 } })).toEqual(no);
+  });
+
+  it('il canone sale col carrello: 340 a cavo a 60 mesi', () => {
+    const c = conf('DUPLEX-340-CAVO', { 'D340-CADDY': 1 });
+    const m = calcolaMacchine(c, c.listino, 60, CONSEGNA, TABELLA_SPUTNIK_DUPLEX, TABELLA_GRACE_DUPLEX);
+    expect(m.tradizionale!.canone).toBe(56.58);
+    expect(m.alternativa!.canone).toBe(56.09);
+  });
+
+  it('il canone segue la fascia: la 420 a cavo col tre ruote passa i 2.500 euro e scende', () => {
+    const senza = calcolaMacchine(conf('DUPLEX-420-CAVO'), 2259, 60, CONSEGNA, TABELLA_SPUTNIK_DUPLEX, TABELLA_GRACE_DUPLEX);
+    const c = conf('DUPLEX-420-CAVO', { 'D420-CADDY-3': 1 });
+    const con = calcolaMacchine(c, c.listino, 60, CONSEGNA, TABELLA_SPUTNIK_DUPLEX, TABELLA_GRACE_DUPLEX);
+    expect(c.listino).toBe(2552.61);
+    expect(senza.tradizionale!.canone).toBe(60.37);
+    expect(con.tradizionale!.canone).toBe(59.08);
   });
 });
 

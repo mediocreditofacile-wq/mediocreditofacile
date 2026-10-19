@@ -5,7 +5,7 @@
 
 import { dataEstesaDaIso as giorno } from '../../lib/duplex-calendario';
 import { bloccoSemaforo } from './cliente';
-import { $, apiJson, esc, euro, stato, traduci } from './comune';
+import { $, apiJson, esc, euro, euroEsatto, stato, traduci } from './comune';
 import { accessoriPer, cambiaQuantita, ETICHETTA_ALLESTIMENTO, famiglie, listinoConfigurazione, tieniCompatibili, type Famiglia, type VoceVista } from './macchine-catalogo';
 
 const pad = (n: number) => String(n).padStart(2, '0');
@@ -76,7 +76,7 @@ function rendiConfigurazione() {
         const passo = Number(a.attributi?.passo) || 1;
         const max = Number(a.attributi?.massimo) || 1;
         return `<li>
-          <span>${esc(a.nome)} <span class="mt-id">${euro(a.prezzo)}${passo > 1 ? ` x ${passo}${a.attributi?.nota ? `, ${esc(a.attributi.nota)}` : ''}` : ''}</span></span>
+          <span>${esc(a.nome)} <span class="mt-id">${euroEsatto(a.prezzo)}${passo > 1 ? ` x ${passo}${a.attributi?.nota ? `, ${esc(a.attributi.nota)}` : ''}` : ''}</span></span>
           <span class="mt-contatore">
             <button type="button" class="mt-btn mt-btn--secondario" data-acc="${esc(a.codice)}" data-verso="-1" ${q === 0 ? 'disabled' : ''} aria-label="Togli ${esc(a.nome)}">−</button>
             <span aria-live="polite">${q}</span>
@@ -95,7 +95,7 @@ function aggiornaPrezzo() {
   const extra = Math.round((tot - macchina.prezzo) * 100) / 100;
   if (!prezzoToccato) $<HTMLInputElement>('prezzo').value = String(tot);
   $('prezzo-listino').innerHTML =
-    `Listino ${euro(macchina.prezzo)}${extra ? ` + accessori ${euro(extra)} = ${euro(tot)}` : ''}. Il prezzo si può ritoccare: le proposte seguono.` +
+    `Listino ${euroEsatto(macchina.prezzo)}${extra ? ` + accessori ${euroEsatto(extra)} = ${euroEsatto(tot)}` : ''}. Il prezzo si può ritoccare: le proposte seguono.` +
     (prezzoToccato ? ' <button type="button" class="mt-link" id="mc-usa-listino">Torna al listino</button>' : '');
 }
 

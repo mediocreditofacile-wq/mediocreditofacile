@@ -5,7 +5,7 @@
 // intestazioni, separatore tabulazione, punto e virgola o virgola. Le colonne
 // riconosciute stanno in src/lib/motore/catalogo-import.ts.
 
-import { $, api, apiJson, esc, euro, messaggio, num, stato, traduci } from './comune';
+import { $, api, apiJson, esc, euro, euroEsatto, messaggio, num, stato, traduci } from './comune';
 import { aggiornaCatalogo } from './proposte';
 import { leggiIncollato } from '../../lib/motore/catalogo-import';
 import { etichettaMese } from '../../lib/motore/richieste';
@@ -75,7 +75,7 @@ function rendi() {
         <td>${esc(v.codice)}</td><td>${esc(v.nome)}</td>
         ${fv ? `<td class="num">${v.attributi?.kwp != null ? num(v.attributi.kwp) : '—'}</td><td class="num">${v.attributi?.kwh_accumulo ? `${num(v.attributi.kwh_accumulo)} kWh` : '—'}</td>` : ''}
         ${mc ? `<td>${esc(v.attributi?.famiglia ?? '—')}</td><td>${v.attributi?.tipo === 'accessorio' ? `accessorio${v.attributi.passo > 1 ? `, a ${v.attributi.passo}` : ''}, max ${v.attributi.massimo}${v.attributi.allestimento ? `, solo versione ${esc(v.attributi.allestimento)}` : ''}` : esc(v.attributi?.allestimento ?? 'macchina')}</td>` : ''}
-        <td class="num">${euro(v.prezzo)}</td>
+        <td class="num">${euroEsatto(v.prezzo)}</td>
         <td><button type="button" class="mt-link" data-voce-stato="${esc(v.codice)}" data-attivo="${v.attivo ? '0' : '1'}">${v.attivo ? 'Spegni' : 'Riaccendi'}</button></td>
       </tr>`).join('')}</tbody></table></div>
 

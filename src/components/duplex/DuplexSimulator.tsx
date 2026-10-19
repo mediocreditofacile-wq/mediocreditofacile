@@ -464,7 +464,7 @@ export default function DuplexSimulator() {
                         <div class="dx-sim__acc-info">
                           <span class="dx-sim__acc-label">{acc.label}</span>
                           <span class="dx-sim__acc-meta">
-                            {formatEuro(acc.prezzo)} euro
+                            {euroPdf(acc.prezzo)} euro
                             {acc.step > 1 ? ` x ${acc.step} (${acc.note ?? 'multipli di ' + acc.step})` : ''}
                           </span>
                         </div>

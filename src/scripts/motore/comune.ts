@@ -42,6 +42,9 @@ export const num = (v: unknown, dec = 0) =>
 
 export const euro = (v: unknown, dec = 0) => (v == null || v === '' ? '—' : `${num(v, dec)} €`);
 
+/** Un prezzo di listino com'e': coi centesimi quando ci sono (il carrello Caddy a 186,32), tondo altrimenti */
+export const euroEsatto = (v: unknown) => euro(v, Math.abs((Number(v) || 0) % 1) < 0.005 ? 0 : 2);
+
 export const data = (iso: string) =>
   new Date(iso).toLocaleString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
