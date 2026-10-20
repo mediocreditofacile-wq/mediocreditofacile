@@ -9,9 +9,16 @@ export const prerender = false;
 // pratica che l'utente puo' vedere. L'agente scarica i suoi, il referente e
 // MCF quelli di tutta la rete. Sulle pratiche ci sono carte d'identita' e
 // bilanci del cliente: un collega non li apre indovinando il percorso.
+//
+// La cartella riservata (preventivi/<slug>/<id>/mcf/, la proposta per il locatore di
+// Led Office) e' solo dell'admin MCF: per referente e agente percorsoConsentito() la
+// rifiuta prima ancora del database, e per l'admin il file deve stare nel
+// `riservato.documenti` di una proposta o di una pratica del fornitore, non nei
+// `documenti`.
 
 import { get } from '@vercel/blob';
 import { env, queryUna } from '../../../lib/db';
+import { percorsoConsentito } from '../../../lib/motore/percorso-riservato';
 import { filtroVisibilita, sessioneMotore } from '../../../lib/motore/sessione';
 
 export async function GET({ request }: { request: Request }) {
@@ -23,23 +30,37 @@ export async function GET({ request }: { request: Request }) {
 
   const percorso = url.searchParams.get('path') ?? '';
   const slug = e.carrozzeria.slug;
-  const nellaCartella = !percorso.includes('..') &&
-    (percorso.startsWith(`preventivi/${slug}/`) || percorso.startsWith(`pratiche/${slug}/`));
+  const accesso = percorsoConsentito(percorso, slug, e.contesto.ruolo === 'admin');
 
   const { where, valori } = filtroVisibilita(e, 'x', 2);
   const doc = JSON.stringify([{ pathname: percorso }]);
-  const trovato = nellaCartella && await queryUna(
-    `SELECT 1 FROM (
-       SELECT organization_id, user_id, documenti FROM app.proposta
-       UNION ALL
-       SELECT organization_id, user_id, documenti FROM app.pratica
-     ) x
-     WHERE x.documenti @> $1::jsonb AND ${where}
-     LIMIT 1`,
-    [doc, ...valori],
-  );
+  const trovato = accesso === 'documenti'
+    ? await queryUna(
+      `SELECT 1 FROM (
+         SELECT organization_id, user_id, documenti FROM app.proposta
+         UNION ALL
+         SELECT organization_id, user_id, documenti FROM app.pratica
+       ) x
+       WHERE x.documenti @> $1::jsonb AND ${where}
+       LIMIT 1`,
+      [doc, ...valori],
+    )
+    : accesso === 'riservato'
+      ? await queryUna(
+        `SELECT 1 FROM (
+           SELECT organization_id, user_id, riservato FROM app.proposta
+           UNION ALL
+           SELECT organization_id, user_id, riservato FROM app.pratica
+         ) x
+         WHERE x.riservato->'documenti' @> $1::jsonb AND ${where}
+         LIMIT 1`,
+        [doc, ...valori],
+      )
+      : null;
   if (!trovato) {
-    console.warn(JSON.stringify({ evento: 'motore_doc_rifiutato', userId: e.contesto.userId, fornitore: slug, percorso }));
+    console.warn(JSON.stringify({
+      evento: 'motore_doc_rifiutato', userId: e.contesto.userId, fornitore: slug, percorso, accesso,
+    }));
     return new Response('Documento non disponibile', { status: 403 });
   }
 

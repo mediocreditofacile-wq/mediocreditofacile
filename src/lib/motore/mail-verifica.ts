@@ -26,7 +26,7 @@ export interface DatiMailVerifica {
   prefiltro?: { segnali: SegnaliPrefiltro };
 }
 
-const FONTE_PRATICA: Record<PraticaTrovata['fonte'], string> = {
+export const FONTE_PRATICA: Record<PraticaTrovata['fonte'], string> = {
   motore: 'portale dei fornitori',
   portale: 'portale pratiche',
   esterna: 'storico importato',
