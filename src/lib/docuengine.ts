@@ -15,7 +15,7 @@
 // documenti-ufficiali.ts, che e' puro e testato.
 
 import { put, get, list } from '@vercel/blob';
-import { chiamaOpenapi, getToken, schedaDallaCache, type Servizio } from './openapi';
+import { chiamaOpenapi, getToken, schedaDallaCache, type Servizio, type Sorgente } from './openapi';
 import {
   VISURA, BILANCIO, PROTESTI, TTL_VISURA, TTL_PROTESTI, tipoVisura, anniDaRicerca, avanzamento, decidi,
   resultIdRiusabile, anniValidi, personeDallaScheda,
@@ -25,6 +25,9 @@ import {
 import { leggiVisuraProtesti, type VisuraProtesti } from './eventi-negativi';
 
 const DOCUENGINE = 'https://docuengine.openapi.com';
+// DocuEngine lo usa solo /tools/valutazione: visure, bilanci e protesti si
+// addebitano al tool interno, che non ha tetto, e non al budget di Marotta.
+const SORGENTE: Sorgente = 'valutazione';
 const blobToken = () => import.meta.env.BLOB_READ_WRITE_TOKEN as string | undefined;
 
 const cartella = (piva: string) => `openapi/documenti/${piva}/`;
@@ -204,7 +207,7 @@ export async function ordinaVisura(piva: string): Promise<{ ordine: OrdineVisura
   const r = await chiamaOpenapi(`${DOCUENGINE}/requests`, servizio, {
     method: 'POST',
     body: JSON.stringify({ documentId: v.documentId, search: { field0: az.rea, field1: az.cciaa } }),
-  });
+  }, SORGENTE);
   const id = r?.dati?.id;
   if (!id) throw new Error('DocuEngine non ha restituito un id per la visura');
   const ordine: OrdineVisura = {
@@ -239,7 +242,7 @@ export async function cercaBilanci(piva: string): Promise<AnnoBilancio[]> {
   const r = await chiamaOpenapi(`${DOCUENGINE}/requests`, 'DOC-bilancio-ricerca', {
     method: 'POST',
     body: JSON.stringify({ documentId: BILANCIO.documentId, search: { field0: piva } }),
-  });
+  }, SORGENTE);
   const id = r?.dati?.id;
   const anni = anniDaRicerca(r?.dati?.results);
   if (!id) throw new Error('DocuEngine non ha restituito un id per la ricerca dei bilanci');
@@ -276,7 +279,7 @@ export async function ordinaBilancio(piva: string, balanceSheetId: string): Prom
   const r = await chiamaOpenapi(`${DOCUENGINE}/requests/${encodeURIComponent(ricerca.richiestaId)}`, 'DOC-bilancio', {
     method: 'PATCH',
     body: JSON.stringify({ resultId }),
-  });
+  }, SORGENTE);
   const ordine: OrdineBilancio = {
     richiestaId: ricerca.richiestaId,
     avviato: new Date().toISOString(),
@@ -324,7 +327,7 @@ async function nuovaRichiesta(documentId: string, search: Record<string, string>
   const r = await chiamaOpenapi(`${DOCUENGINE}/requests`, servizio, {
     method: 'POST',
     body: JSON.stringify({ documentId, search }),
-  });
+  }, SORGENTE);
   const id = r?.dati?.id;
   if (!id) throw new Error('DocuEngine non ha restituito un id per la richiesta');
   return {

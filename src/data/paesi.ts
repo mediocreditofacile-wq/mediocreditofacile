@@ -31,6 +31,8 @@ export const FORMATO_ID: Record<string, string> = {
   PT: 'NIPC',
   AT: 'Firmenbuchnummer o partita IVA',
   CH: 'IDE/UID',
+  // Il formato completo e il controllo stanno in src/lib/id-estero.ts
+  NL: 'Solo partita IVA, es. NL852057775B01: il KVK non è accettato',
 };
 
 export function nomePaese(iso: string): string {

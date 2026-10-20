@@ -8,6 +8,8 @@ import { PAESI_SEPA, PAESI_MONDO, FORMATO_ID, nomePaese } from '../data/paesi';
 import { leggiReport, sintesiReport } from '../lib/report-persona';
 import { leggiEventiNegativi, sintesiEventi, conEventi, confrontoVerificaVisura, senzaProtesti } from '../lib/eventi-negativi';
 import { htmlEventi } from './eventi-negativi-html';
+import { riepilogoSpesa, type RiepilogoSpesa } from '../lib/tetto-openapi';
+import { normalizzaIdEstero } from '../lib/id-estero';
 
 type Dizionari = {
   CODICI: Record<string, string>;
@@ -628,6 +630,31 @@ function rendiPaginatore(r: any): string {
     + freccia(r.pagina + 1, '›', 'Pagina successiva', r.pagina >= r.pagine);
 }
 
+// --- spesa Openapi del mese --------------------------------------------------
+// Il tool interno non ha tetto, ma la sua spesa si vede: una riga sopra le
+// ricerche recenti con quanto ha speso lui e quanto vale il conto del mese.
+
+/** Con i centesimi: la spesa Openapi si muove a 0,11 e 0,45 */
+const euroCent = (n: number) => `${nf(n, 2)} €`;
+
+function rigaSpesa(s: RiepilogoSpesa): string {
+  const resto = [
+    `tool Marotta ${euroCent(s.marotta)}`,
+    `portali ${euroCent(s.portali)}`,
+    `fiera ${euroCent(s.fiera)}`,
+    `non attribuiti ${euroCent(s.nonAttribuiti)}`,
+  ].join(' · ');
+  return `<span>Openapi, ${esc(s.meseLeggibile)}: tool interno <strong>${euroCent(s.valutazione.totale)}</strong> · totale del conto <strong>${euroCent(s.conto)}</strong></span>`
+    + `<span class="val-spesa-mese__resto" title="Non attribuiti: voci registrate prima del 20/10/2026, quando tool interno e tool Marotta avevano un registro unico, e differenza fra wallet e registro">Il resto: ${resto}</span>`;
+}
+
+async function caricaSpesa() {
+  const box = $('spesaMese');
+  if (!box) return;
+  const r = await api('/api/spesa-openapi').catch(() => null);
+  box.innerHTML = r && !r.errore ? rigaSpesa(r) : '';
+}
+
 let paginaRecenti = 1;
 let giroRecenti = 0;   // due clic veloci sulle frecce: vince l'ultima risposta chiesta, non l'ultima arrivata
 
@@ -656,6 +683,7 @@ export function montaValutazione() {
     recenti.style.display = 'block';
     tornaRecenti.style.display = 'none';
     caricaRecenti(paginaRecenti);
+    caricaSpesa();
   };
   const nascondiRecenti = () => {
     recenti.style.display = 'none';
@@ -736,7 +764,10 @@ export function montaValutazione() {
     $('msg').textContent = 'Interrogazione in corso…';
     $('scheda').innerHTML = '';
     const id = piva.value.trim();
-    const r = await api(`/api/azienda-estera?paese=${encodeURIComponent(paese.value)}&id=${encodeURIComponent(id)}`)
+    // Sui Paesi Bassi il codice si controlla prima: una ricerca malformata si paga
+    const norma = normalizzaIdEstero(paese.value, id);
+    if (!norma.ok) { $('msg').textContent = norma.errore; return; }
+    const r = await api(`/api/azienda-estera?paese=${encodeURIComponent(paese.value)}&id=${encodeURIComponent(norma.id)}`)
       .catch((e) => ({ error: String(e) }));
     if (r?.found === false || r?.error) {
       $('msg').textContent = r?.error ? `Errore: ${r.error}` : 'Controparte non trovata.';
@@ -784,7 +815,10 @@ export function montaValutazione() {
     document.title = `Scheda ${rs} - ${piva.value}`;
     const btnPdf = $('pdf');
     if (btnPdf) btnPdf.style.display = 'inline-flex';
-    if (r.spesa) $('spesa').innerHTML = `spesa di ${esc(r.spesa.mese)}<strong>${nf(r.spesa.totale, 2)} €</strong>${r.spesa.chiamate} chiamate`;
+    if (r.spesa) {
+      const s = riepilogoSpesa(r.spesa);
+      $('spesa').innerHTML = `tool interno, ${esc(s.meseLeggibile)}<strong>${euroCent(s.valutazione.totale)}</strong>conto del mese ${euroCent(s.conto)}`;
+    }
     const na = $('negAzienda');
     const negAz = r.verifiche?.[r.piva]?.negativita;
     if (negAz?.pronto) schedaCorrente.negativita = negAz.dati;   // gia' in registro, mostrata da rendiScheda

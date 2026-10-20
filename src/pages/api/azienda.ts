@@ -32,7 +32,8 @@ export async function GET({ request }: { request: Request }) {
   if (!/^\d{11}$/.test(piva)) return json({ errore: 'partita IVA non valida' }, 400);
 
   try {
-    const scheda = await schedaAzienda(piva, { conNegativita: true });
+    // Le chiamate si addebitano al tool interno, che non ha tetto (vedi entroIlTetto)
+    const scheda = await schedaAzienda(piva, { conNegativita: true, sorgente: 'valutazione' });
     if (!scheda.trovata) return json({ trovata: false, piva });
     // Esiti delle verifiche gia' pagate su azienda, soci e amministratori: solo blob,
     // nessuna chiamata Openapi. Stanno fuori dalla cache della scheda perche' hanno
