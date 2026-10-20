@@ -1,12 +1,14 @@
 // Sezione Pratiche: caricamento della pratica con i documenti, elenco con lo
 // stato, e per MCF il cambio di stato libero (anche saltando passaggi, anche
 // su piu' pratiche insieme) e l'esito della verifica eventi negativi.
+// Sul settore distinta il modulo di caricamento e' quello di pratiche-distinta.ts.
 
 import { upload } from '@vercel/blob/client';
 import { buildChecklist } from '../../lib/checklist-pratica';
 import { controllaDatiCliente } from '../../lib/dati-cliente-pratica';
 import { initCampoIban, type CampoIban } from '../campo-iban';
 import { $, apiJson, data, esc, euro, messaggio, stato, traduci } from './comune';
+import { montaPraticheDistinta, rendiModuloDistinta } from './pratiche-distinta';
 import { bottoneDoc, caricaStorico, suStorico, type DatiStorico } from './storico';
 
 const STATI: [string, string][] = [
@@ -57,7 +59,10 @@ function rendiFile() {
     : '<li class="mt-id">Nessun documento ancora.</li>';
 }
 
-function rendiModulo() {
+function rendiModulo(evento?: Event) {
+  // Settore distinta: un caricamento per voce, niente forma, prodotto e importo,
+  // e la segnalazione a Mediocredito Facile (pratiche-distinta.ts)
+  if (stato.settore === 'distinta') return rendiModuloDistinta(Boolean((evento as CustomEvent | undefined)?.detail?.segnalazione));
   const r = stato.ricerca;
   const box = $('pratica-nuova');
   if (!r) {
@@ -301,6 +306,7 @@ export function montaPratiche() {
     <div id="pratiche-elenco"><p class="mt-vuoto">Nessuna pratica ancora.</p></div>`;
 
   suStorico((d: DatiStorico) => { pratiche = d.pratiche; rendiElenco(); });
+  if (stato.settore === 'distinta') montaPraticheDistinta();
   document.addEventListener('mt:nuova-pratica', rendiModulo);
   document.addEventListener('mt:tab', (e) => { if ((e as CustomEvent).detail === 'pratiche') void caricaStorico(); });
 

@@ -14,8 +14,24 @@ const SCALA = ['A1', 'A2', 'A3', 'B1', 'B2', 'B3', 'C1', 'C2', 'C3'];
 export function bloccoSemaforo(credito: any, titolo: string, nota = ''): string {
   const s = credito?.semaforo ?? 'giallo';
   const etichetta = credito?.etichetta ?? ETICHETTA_SEMAFORO[s] ?? s;
+  // Sul bloccato (prefiltro) resta solo il testo fisso: niente criteri, niente cifre
+  if (s === 'bloccato') {
+    const testo = (credito?.righe ?? []).map((r: string) => `<li>${esc(r)}</li>`).join('');
+    return `
+    <div class="mt-semaforo mt-semaforo--bloccato">
+      <span class="mt-semaforo__luce" aria-hidden="true"></span>
+      <div>
+        <p class="mt-semaforo__tit">${esc(titolo)}: ${esc(etichetta)}</p>
+        ${testo ? `<ul class="mt-righe">${testo}</ul>` : ''}
+        <p class="mt-nota" style="margin:8px 0 0">Valutazione indicativa, non è una delibera.</p>
+      </div>
+    </div>`;
+  }
+  // Il prefiltro ha anche criteri "da verificare" (ok null): li dice. Gli altri semafori restano come sono
+  const prefiltro = Array.isArray(credito?.motivazioniRichieste);
+  const esito = (c: any) => (c.ok === false ? ' (da guardare)' : prefiltro && c.ok === null ? ' (da verificare)' : '');
   const criteri = (credito?.criteri ?? [])
-    .map((c: any) => `<li class="${c.ok === false ? 'ko' : ''}">${esc(c.nome)}: ${esc(c.valore)}${c.ok === false ? ' (da guardare)' : ''}</li>`)
+    .map((c: any) => `<li class="${c.ok === false ? 'ko' : ''}">${esc(c.nome)}: ${esc(c.valore)}${esito(c)}</li>`)
     .join('');
   const righe = (credito?.righe ?? []).map((r: string) => `<li>${esc(r)}</li>`).join('');
   return `
@@ -42,6 +58,9 @@ function cifra(et: string, val: string, sub = '') {
   return `<div class="mt-cifra"><div class="mt-cifra__et">${esc(et)}</div><div class="mt-cifra__val">${val}</div>${sub ? `<div class="mt-cifra__sub">${sub}</div>` : ''}</div>`;
 }
 
+/** Il titolo del semaforo della scheda: sul settore distinta e' il prefiltro sul cliente */
+const titoloScheda = () => (stato.settore === 'distinta' ? 'Prefiltro sul cliente' : 'Prima valutazione');
+
 function rendiScheda(s: any, credito: any): string {
   const trend = s.trendFatturato != null ? `${s.trendFatturato > 0 ? '+' : ''}${num(s.trendFatturato, 1)}% sull'anno prima` : '';
   const rating = s.rating
@@ -58,7 +77,7 @@ function rendiScheda(s: any, credito: any): string {
             ${s.ateco ? `ATECO ${esc(s.ateco)}` : ''}
           </p>
         </div>
-        <button type="button" class="mt-btn" data-vai="proposte">Vai alle proposte</button>
+        ${credito?.semaforo === 'bloccato' ? '' : '<button type="button" class="mt-btn" data-vai="proposte">Vai alle proposte</button>'}
       </div>
       <div class="mt-cifre">
         ${cifra('Fatturato', euro(s.fatturato), [s.annoBilancio ? `esercizio ${s.annoBilancio}` : '', trend].filter(Boolean).join(' · '))}
@@ -70,7 +89,7 @@ function rendiScheda(s: any, credito: any): string {
           s.rating ? `${esc(s.rating.descrizione ?? '')}${rating}` : 'nessuna classe assegnata')}
       </div>
       ${s.lineaCreditoConsigliata ? `<p class="mt-nota" style="margin:16px 0 0">Linea di credito commerciale consigliata dal Registro: ${euro(s.lineaCreditoConsigliata)}.<span id="frase-noleggio">${fraseNoleggio(credito)}</span> Il rating è informativo e non entra nel semaforo.</p>` : ''}
-      <div id="scheda-semaforo">${bloccoSemaforo(credito, 'Prima valutazione', credito?.etichetta ? '' : 'Senza importo pesano solo utile e anni di attività: il rapporto con il fatturato arriva col prezzo.')}</div>
+      <div id="scheda-semaforo">${bloccoSemaforo(credito, titoloScheda(), credito?.etichetta ? '' : 'Senza importo pesano solo utile e anni di attività: il rapporto con il fatturato arriva col prezzo.')}</div>
       <p class="mt-nota" style="margin:16px 0 0">Soci, amministratori e bilancio completo sono nel tab <button type="button" class="mt-link" data-vai="info">Info aggiuntive</button>.</p>
     </article>`;
 }
@@ -131,7 +150,7 @@ function aspettaEventi(ricercaId: string, giro = 0) {
     stato.ricerca.credito = corpo.credito;
     stato.ricerca.eventi = corpo.eventi;
     const box = document.getElementById('scheda-semaforo');
-    if (box) box.innerHTML = bloccoSemaforo(corpo.credito, 'Prima valutazione');
+    if (box) box.innerHTML = bloccoSemaforo(corpo.credito, titoloScheda());
     // Se gli eventi spengono l'indicazione (rosso), sparisce anche la frase sul noleggio
     const frase = document.getElementById('frase-noleggio');
     if (frase) frase.innerHTML = fraseNoleggio(corpo.credito);

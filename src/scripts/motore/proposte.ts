@@ -1,5 +1,6 @@
 // Sezione Proposte: catalogo, prezzo trattato, proposte di noleggio e leasing,
-// business plan energetico sui fornitori fotovoltaico.
+// business plan energetico sui fornitori fotovoltaico. I settori macchine e
+// distinta hanno una scheda loro (proposte-macchine.ts, proposte-distinta.ts).
 //
 // Il calcolo e' tutto lato server (/api/motore/proposte): qui si raccolgono le
 // scelte dell'agente e si disegna quello che torna. Ogni cambio rifa' il conto
@@ -7,6 +8,7 @@
 
 import { bloccoSemaforo } from './cliente';
 import { $, apiJson, esc, euro, num, stato, traduci } from './comune';
+import { aggiornaProposteDistinta, inputDistinta, montaProposteDistinta } from './proposte-distinta';
 import { aggiornaCatalogoMacchine, inputMacchine, montaProposteMacchine } from './proposte-macchine';
 
 let voceScelta: any = null;
@@ -46,6 +48,7 @@ function scegliVoce(codice: string) {
 /** L'input che va al server: lo stesso servira' al preventivo PDF */
 export function inputCorrente() {
   if (stato.settore === 'macchine') return inputMacchine();
+  if (stato.settore === 'distinta') return inputDistinta();
   if (!stato.ricerca || !voceScelta) return null;
   const val = (id: string) => campo(id)?.value ?? '';
   return {
@@ -245,6 +248,7 @@ function suNuovaRicerca() {
 /** Il catalogo e' cambiato dal pannello MCF: si ridisegna senza ricaricare */
 export function aggiornaCatalogo(lista: any[]) {
   if (stato.settore === 'macchine') return aggiornaCatalogoMacchine(lista);
+  if (stato.settore === 'distinta') return aggiornaProposteDistinta(lista);
   stato.catalogo = lista;
   if (voceScelta && !lista.some((v) => v.codice === voceScelta.codice)) voceScelta = null;
   rendiCatalogo();
@@ -252,6 +256,7 @@ export function aggiornaCatalogo(lista: any[]) {
 
 export function montaProposte() {
   if (stato.settore === 'macchine') return montaProposteMacchine();
+  if (stato.settore === 'distinta') return montaProposteDistinta();
   rendiCatalogo();
   document.addEventListener('mt:ricerca', suNuovaRicerca);
   $('catalogo').addEventListener('click', (e) => {

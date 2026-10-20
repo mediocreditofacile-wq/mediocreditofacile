@@ -2,6 +2,8 @@
 // Nel browser non c'e' niente di riservato: coefficienti, listini e dati dei
 // clienti arrivano dalle API, che ricavano il fornitore dalla sessione.
 
+import { TESTI_PREFILTRO } from '../../lib/motore/prefiltro';
+
 export interface Stato {
   slug: string;
   settore: string;
@@ -96,6 +98,18 @@ const MESSAGGI: Record<string, string> = {
   voce_non_valida: 'Alla voce mancano codice, nome o prezzo.',
   azione_sconosciuta: 'Operazione non riconosciuta.',
   accessorio_non_valido: 'Un accessorio non è più disponibile o non è di questa macchina: rifai la scelta.',
+  // Settore distinta: righe della fornitura e pratica
+  distinta_vuota: 'Aggiungi almeno un bene alla fornitura.',
+  troppe_righe: 'Una fornitura arriva al massimo a 60 righe.',
+  quantita_non_valida: 'La quantità deve essere un numero intero da 1 in su.',
+  categoria_non_valida: 'Scegli la categoria del bene.',
+  descrizione_mancante: 'Scrivi la descrizione del bene.',
+  proposta_mancante: 'Per caricare la pratica serve una proposta salvata: prima scarica il preventivo e la proposta di vendita.',
+  proposta_non_valida: 'La proposta indicata non è di questo cliente o non si può usare: rifai il preventivo dalla scheda Proposte.',
+  consegna_mancante: "Manca l'indirizzo di consegna: indica dove vanno consegnati i beni.",
+  documenti_mancanti: 'Mancano dei documenti obbligatori.',
+  cliente_bloccato: TESTI_PREFILTRO.bloccato,
+  configurazione_mancante: 'Il portale non è configurato per le pratiche. Scrivi a Mediocredito Facile.',
 };
 export const traduci = (codice: string) => MESSAGGI[codice] ?? 'Qualcosa non ha funzionato. Riprova.';
 
@@ -140,4 +154,6 @@ export const ETICHETTA_SEMAFORO: Record<string, string> = {
   rosso: 'Difficile',
   // Settore macchine: proposta fatta prima della verifica della partita IVA
   'non-verificato': 'Cliente non verificato',
+  // Settore distinta (prefiltro): cliente segnato da MCF, niente distinta e niente pratica
+  bloccato: 'Non lavorabile dal portale',
 };

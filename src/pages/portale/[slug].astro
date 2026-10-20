@@ -12,7 +12,8 @@
  *   1. Cliente: partita IVA, scheda di merito ridotta col semaforo
  *   2. Info aggiuntive: soci, amministratori, bilancio riclassificato, indici
  *   3. Proposte: pacchetto del catalogo, prezzo trattato, noleggio e leasing,
- *      business plan energetico sui fornitori fotovoltaico
+ *      business plan energetico sui fornitori fotovoltaico; sul settore distinta
+ *      (Led Office) la fornitura a piu' righe col prefiltro e la proposta di vendita
  *   4. Preventivo PDF e pratica con i documenti
  *
  * La pagina gira sul server (prerender = false) solo per vestire il gate col
@@ -38,6 +39,8 @@ const coloreValido = (v: string | null) => (v && /^#[0-9a-fA-F]{6}$/.test(v) ? v
 const colore = coloreValido(c.brand.colore) ?? '#664CCD';
 const fotovoltaico = c.settore === 'fotovoltaico';
 const macchine = c.settore === 'macchine';
+// Settore distinta (Led Office): la fornitura a piu' righe, il prefiltro e la proposta di vendita
+const distinta = c.settore === 'distinta';
 ---
 <ToolLayout
   title={`Portale ${c.nome} | Mediocredito Facile`}
@@ -60,7 +63,9 @@ const macchine = c.settore === 'macchine';
           <p class="mt-gate__desc">
             {macchine
               ? `Scegli dal catalogo e porta via le ${proposteOfferte(c)} da consegnare. Quando la trattativa si fa seria, verifica il cliente con la partita IVA.`
-              : `Verifica il cliente con la partita IVA, scegli dal catalogo e porta via le ${proposteOfferte(c)} da consegnare.`}
+              : distinta
+                ? 'Verifica il cliente con la partita IVA, componi la fornitura e porta via il preventivo del canone e la proposta di vendita da far firmare.'
+                : `Verifica il cliente con la partita IVA, scegli dal catalogo e porta via le ${proposteOfferte(c)} da consegnare.`}
           </p>
           <div class="mt-gate__form">
             <input type="email" id="login-email" class="mt-input" placeholder="La tua email" autocomplete="username" />
@@ -176,6 +181,12 @@ const macchine = c.settore === 'macchine';
             cliente: arrivano anagrafica, bilancio e la valutazione. Da quel momento le proposte mostrano il semaforo,
             il preventivo porta i dati del registro e si può caricare la pratica.
           </p>
+        ) : distinta ? (
+          <p class="mt-lead">
+            Inserisci la partita IVA del cliente: arrivano anagrafica, bilancio e il prefiltro sul cliente. Se il
+            prefiltro lo consente, nella sezione Proposte componi la fornitura: il prefiltro si completa su beni,
+            quantità e consegna.
+          </p>
         ) : (
           <p class="mt-lead">
             Inserisci la partita IVA del cliente: arrivano anagrafica, bilancio e una prima valutazione. Il
@@ -206,63 +217,76 @@ const macchine = c.settore === 'macchine';
         <p id="proposte-cliente" class="mt-lead">Verifica prima un cliente nella sezione Cliente.</p>
 
         <div id="proposte-corpo" hidden={!macchine}>
-          <h3 class="mt-h3">{fotovoltaico ? 'Scegli il pacchetto' : macchine ? 'Scegli la macchina' : 'Scegli dal catalogo'}</h3>
-          <div id="catalogo" class="mt-catalogo"></div>
-          {macchine && <div id="macchine-config"></div>}
+          <h3 class="mt-h3">{fotovoltaico ? 'Scegli il pacchetto' : macchine ? 'Scegli la macchina' : distinta ? 'Componi la fornitura' : 'Scegli dal catalogo'}</h3>
+          {distinta ? (
+            <>
+              <!-- Settore distinta: il markup lo disegna proposte-distinta.ts -->
+              <div id="distinta-catalogo"></div>
+              <div id="distinta-righe"></div>
+              <div id="distinta-esito"></div>
+              <div id="distinta-vendita"></div>
+              <div id="distinta-azioni"></div>
+            </>
+          ) : (
+            <>
+              <div id="catalogo" class="mt-catalogo"></div>
+              {macchine && <div id="macchine-config"></div>}
 
-          <div class="mt-griglia">
-            <label class="mt-campo">
-              <span>{macchine ? 'Prezzo, IVA esclusa' : 'Prezzo trattato, IVA esclusa'}</span>
-              <input type="number" id="prezzo" class="mt-input" min="1" step="any" />
-              <small id="prezzo-listino" class="mt-nota"></small>
-            </label>
-            {macchine && (
-              <label class="mt-campo" id="campo-intestatario">
-                <span>Intestato a, facoltativo</span>
-                <input type="text" id="intestatario" class="mt-input" maxlength="120" placeholder="Nome del cliente" autocomplete="off" />
-                <small class="mt-nota">Va sul preventivo. Dopo la verifica il cliente lo prende dal registro.</small>
-              </label>
-            )}
-            {fotovoltaico && (
-              <>
+              <div class="mt-griglia">
                 <label class="mt-campo">
-                  <span>Provincia dell'impianto</span>
-                  <input type="text" id="bp-provincia" class="mt-input" maxlength="2" placeholder="VI" />
+                  <span>{macchine ? 'Prezzo, IVA esclusa' : 'Prezzo trattato, IVA esclusa'}</span>
+                  <input type="number" id="prezzo" class="mt-input" min="1" step="any" />
+                  <small id="prezzo-listino" class="mt-nota"></small>
                 </label>
-                <label class="mt-campo">
-                  <span>Comune</span>
-                  <input type="text" id="bp-comune" class="mt-input" maxlength="80" placeholder="facoltativo" />
-                </label>
-                <label class="mt-campo">
-                  <span>Consumo annuo da bolletta, kWh</span>
-                  <input type="number" id="bp-consumo" class="mt-input" min="0" step="100" placeholder="facoltativo" />
-                </label>
-                <label class="mt-campo">
-                  <span>Prezzo energia, euro al kWh</span>
-                  <input type="number" id="bp-prezzo-kwh" class="mt-input" min="0" step="0.01" placeholder="facoltativo" />
-                </label>
-                <label class="mt-campo">
-                  <span>Profilo dei consumi</span>
-                  <select id="bp-profilo" class="mt-input">
-                    <option value="diurno">Diurno, orari d'ufficio</option>
-                    <option value="h24">Continuo, anche di notte</option>
-                  </select>
-                </label>
-                <label class="mt-campo">
-                  <span>Durata del business plan</span>
-                  <select id="bp-durata" class="mt-input"><option value="">Consigliata</option></select>
-                </label>
-              </>
-            )}
-          </div>
-          {fotovoltaico && (
-            <div id="bp-agevolazioni" class="mt-toggle-riga" hidden>
-              <label class="mt-toggle" id="lab-sabatini"><input type="checkbox" id="bp-sabatini" checked /> Nuova Sabatini sul leasing</label>
-              <label class="mt-toggle" id="lab-iper"><input type="checkbox" id="bp-iper" checked /> Iperammortamento sul leasing</label>
-            </div>
+                {macchine && (
+                  <label class="mt-campo" id="campo-intestatario">
+                    <span>Intestato a, facoltativo</span>
+                    <input type="text" id="intestatario" class="mt-input" maxlength="120" placeholder="Nome del cliente" autocomplete="off" />
+                    <small class="mt-nota">Va sul preventivo. Dopo la verifica il cliente lo prende dal registro.</small>
+                  </label>
+                )}
+                {fotovoltaico && (
+                  <>
+                    <label class="mt-campo">
+                      <span>Provincia dell'impianto</span>
+                      <input type="text" id="bp-provincia" class="mt-input" maxlength="2" placeholder="VI" />
+                    </label>
+                    <label class="mt-campo">
+                      <span>Comune</span>
+                      <input type="text" id="bp-comune" class="mt-input" maxlength="80" placeholder="facoltativo" />
+                    </label>
+                    <label class="mt-campo">
+                      <span>Consumo annuo da bolletta, kWh</span>
+                      <input type="number" id="bp-consumo" class="mt-input" min="0" step="100" placeholder="facoltativo" />
+                    </label>
+                    <label class="mt-campo">
+                      <span>Prezzo energia, euro al kWh</span>
+                      <input type="number" id="bp-prezzo-kwh" class="mt-input" min="0" step="0.01" placeholder="facoltativo" />
+                    </label>
+                    <label class="mt-campo">
+                      <span>Profilo dei consumi</span>
+                      <select id="bp-profilo" class="mt-input">
+                        <option value="diurno">Diurno, orari d'ufficio</option>
+                        <option value="h24">Continuo, anche di notte</option>
+                      </select>
+                    </label>
+                    <label class="mt-campo">
+                      <span>Durata del business plan</span>
+                      <select id="bp-durata" class="mt-input"><option value="">Consigliata</option></select>
+                    </label>
+                  </>
+                )}
+              </div>
+              {fotovoltaico && (
+                <div id="bp-agevolazioni" class="mt-toggle-riga" hidden>
+                  <label class="mt-toggle" id="lab-sabatini"><input type="checkbox" id="bp-sabatini" checked /> Nuova Sabatini sul leasing</label>
+                  <label class="mt-toggle" id="lab-iper"><input type="checkbox" id="bp-iper" checked /> Iperammortamento sul leasing</label>
+                </div>
+              )}
+
+              <div id="proposte-esito"></div>
+            </>
           )}
-
-          <div id="proposte-esito"></div>
         </div>
       </section>
 
@@ -477,6 +501,37 @@ const macchine = c.settore === 'macchine';
   .mt-avvisi { margin: 16px 0 0; padding: 0; list-style: none; display: grid; gap: 8px; }
   .mt-avvisi li { font-size: 14px; padding: 10px 14px; border-left: 3px solid var(--mt-primary); background: var(--mt-ghost); border-radius: 6px; }
   .mt-azioni { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; margin-top: 24px; }
+
+  /* distinta (settore Led Office): catalogo, righe, consegna, motivazioni, pratica per voce */
+  .mt-semaforo--bloccato .mt-semaforo__luce { background: var(--mt-black); }
+  .mt-dc-lista { list-style: none; padding: 0; margin: 12px 0 0; max-height: 360px; overflow-y: auto; border: 1px solid var(--mt-platinum); border-radius: 10px; }
+  .mt-dc-lista li { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding: 10px 14px; border-bottom: 1px solid var(--mt-platinum); }
+  .mt-dc-lista li:last-child { border-bottom: 0; }
+  .mt-dc-lista .mt-btn { padding: 6px 14px; }
+  .mt-tabella--righe { min-width: 640px; }
+  .mt-tabella--righe .mt-input { padding: 6px 10px; text-align: right; font-variant-numeric: tabular-nums; }
+  .mt-input--q { width: 88px; }
+  .mt-input--p { width: 128px; }
+  .mt-input--maiuscolo { text-transform: uppercase; }
+  .mt-tabella tfoot td { font-weight: 700; color: var(--mt-black); border-top: 2px solid var(--mt-platinum); border-bottom: 0; }
+  .mt-riconferma { font-size: 13px; font-weight: 600; color: #8A2D0E; }
+  .mt-fuori { margin-top: 16px; }
+  .mt-consegna { display: grid; gap: 8px; }
+  .mt-consegna .mt-toggle { display: flex; align-items: flex-start; }
+  .mt-consegna .mt-toggle input { margin-top: 4px; }
+  .mt-motivazione { margin-top: 12px; }
+  .mt-ledwall { margin-top: 24px; padding: 16px; border-left: 3px solid var(--mt-primary); background: var(--mt-ghost); border-radius: 6px; }
+  .mt-ledwall .mt-toggle { align-items: flex-start; font-weight: 600; color: var(--mt-black); }
+  .mt-ledwall .mt-toggle input { margin-top: 4px; }
+  .mt-totale-beni { font-size: 1.125rem; color: var(--mt-black); margin: 16px 0 0; font-variant-numeric: tabular-nums; }
+  .mt-tabella--rate { max-width: 480px; }
+  .mt-da-confermare { font-weight: 700; color: var(--mt-black); margin: 12px 0 0; }
+  .mt-in-attesa { opacity: 0.6; transition: opacity 0.15s; }
+  #distinta-azioni .mt-btn:disabled { cursor: not-allowed; }
+  .mt-checklist { list-style: none; padding: 0; margin: 8px 0 0; display: grid; gap: 12px; }
+  .mt-checklist > li { border: 1px solid var(--mt-platinum); border-radius: 10px; padding: 12px 14px; display: grid; gap: 8px; }
+  .mt-voce-doc { margin: 0; font-weight: 600; color: var(--mt-black); }
+  .mt-obbligatoria { font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--mt-primary); margin-left: 6px; }
 
   @media (max-width: 640px) {
     .mt { padding: 16px 16px 48px; }
