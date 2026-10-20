@@ -38,6 +38,7 @@ import type { IdCanale } from './config-distinta';
 import type { DatiVendita } from './dati-vendita';
 import type { Distinta, RigaDistinta } from './distinta';
 import { FONTE_PRATICA } from './mail-verifica';
+import { nomeCanale } from './nomi-canale';
 import { euro } from './pdf-generico';
 import { documentiLedOffice } from './pdf-ledoffice';
 import { nomeNonIndovinabile, percorsoRiservato } from './percorso-riservato';
@@ -135,7 +136,6 @@ export function datiProposta(c: CalcoloDistinta): DatiProposta {
 
 // --- mail a MCF --------------------------------------------------------------
 
-const NOMI_CANALE: Record<IdCanale, string> = { econocom: 'Econocom', grenke: 'Grenke', pagarent: 'Pagarent' };
 const TIPO_CONSEGNA: Record<Consegna['tipo'], string> = {
   sede: 'sede legale',
   unita: 'unità locale',
@@ -203,7 +203,7 @@ export function corpoMailDistinta(o: {
     <table style="font-size:14px;border-collapse:collapse;width:100%">
       ${riga('Cliente', `${cliente}, P.IVA ${piva}`)}
       ${riga('Prefiltro', `${p.etichetta}${p.provvisorio ? ', eventi negativi ancora in verifica' : ''}`)}
-      ${i ? riga('Canale', NOMI_CANALE[i.canale] ?? i.canale) : riga('Canale', 'nessuno')}
+      ${i ? riga('Canale', nomeCanale(i.canale) ?? 'nessuno') : riga('Canale', 'nessuno')}
       ${i ? riga('Beni', eur(i.beni)) : ''}
       ${i ? riga('Maggiorazione', i.maggiorazione > 0 ? eur(i.maggiorazione, 0) : 'nessuna') : ''}
       ${i ? riga('Imponibile', eur(i.imponibile)) : ''}
@@ -218,7 +218,7 @@ export function corpoMailDistinta(o: {
       ${segnali?.segnalato ? riga('Cliente segnalato', `${segnali.segnalato.motivo}, effetto ${segnali.segnalato.effetto}`) : ''}
       ${recente ? riga('Pratica recente', [
         dataIt(recente.data),
-        recente.canale ?? 'canale non indicato',
+        nomeCanale(recente.canale) ?? 'canale non indicato',
         recente.fornitore ?? 'fornitore non indicato',
         FONTE_PRATICA[recente.fonte],
       ].join(', ')) : ''}

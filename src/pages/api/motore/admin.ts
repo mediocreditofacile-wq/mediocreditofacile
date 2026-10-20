@@ -35,10 +35,9 @@ export const prerender = false;
 import { query } from '../../../lib/db';
 import { catalogo, type Carrozzeria } from '../../../lib/motore/carrozzeria';
 import { leggiVoceConMotivo, numero, testo, type Voce } from '../../../lib/motore/catalogo-import';
+import { CANALI } from '../../../lib/motore/config-distinta';
+import { CANALI_ESTERNI, NOMI_CANALE } from '../../../lib/motore/nomi-canale';
 import {
-  CANALI_ESTERNI,
-  NOMI_CANALE,
-  NOMI_CANALE_ESTERNO,
   categorieOrfane,
   controllaCanali,
   controllaCategorie,
@@ -224,8 +223,8 @@ export async function GET({ request }: { request: Request }) {
         { valore: 'locatore', etichetta: 'Criteri del locatore' },
         { valore: 'prefiltro', etichetta: 'Prefiltro (settore distinta)' },
       ],
-      canali: Object.entries(NOMI_CANALE).map(([valore, etichetta]) => ({ valore, etichetta })),
-      canaliEsterni: CANALI_ESTERNI.map((valore) => ({ valore, etichetta: NOMI_CANALE_ESTERNO[valore] })),
+      canali: CANALI.map((valore) => ({ valore, etichetta: NOMI_CANALE[valore] })),
+      canaliEsterni: CANALI_ESTERNI.map((valore) => ({ valore, etichetta: NOMI_CANALE[valore] })),
     },
     catalogo: await catalogo(c.slug, false),
     spesa: { mese: spesa.mese, euro: mia.totale, chiamate: mia.chiamate, perServizio: mia.perServizio },

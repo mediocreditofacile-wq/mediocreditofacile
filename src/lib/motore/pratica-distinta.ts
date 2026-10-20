@@ -52,6 +52,7 @@ import { codiceVerifica, eventiNonAvviati, serveControllo, statoDaEsito, type Ev
 import { instrada, type Instradamento } from './instradamento';
 import { FONTE_PRATICA, type DatiMailVerifica } from './mail-verifica';
 import type { DatiCreditoMotore, SchedaRidotta } from './merito';
+import { nomeCanale as nomeDelCanale } from './nomi-canale';
 import { percorsoConsentito } from './percorso-riservato';
 import { bozzaValida, documentiDellaBozza, negativitaAllInvio } from './pratica';
 import {
@@ -110,8 +111,6 @@ const FORMA_PRATICA: Record<ClasseForma, string> = {
   individuale: 'Ditta individuale',
   'non-classificata': 'Altro',
 };
-
-const NOMI_CANALE: Record<IdCanale, string> = { econocom: 'Econocom', grenke: 'Grenke', pagarent: 'Pagarent' };
 
 const TIPO_CONSEGNA: Record<Consegna['tipo'], string> = {
   sede: 'sede legale',
@@ -252,7 +251,7 @@ export function corpoMailPratica(o: InputMailPratica): { subject: string; html: 
     `<ul style="font-size:14px;margin:0;padding-left:18px">${voci.map((v) => `<li>${escapeHtml(v)}</li>`).join('')}</ul>`;
 
   const importi = o.riservato ?? o.canaleIndicativo;
-  const nomeCanale = (c: IdCanale) => NOMI_CANALE[c] ?? c;
+  const nomeCanale = (c: IdCanale) => nomeDelCanale(c) ?? c;
   const canale = o.riservato
     ? o.segnalazione ? `nessuno, segnalazione: la proposta era su ${nomeCanale(o.riservato.canale)}` : nomeCanale(o.riservato.canale)
     : o.canaleIndicativo
@@ -286,7 +285,7 @@ export function corpoMailPratica(o: InputMailPratica): { subject: string; html: 
       ${segnalato ? riga('Cliente segnalato', `${segnalato.motivo}, effetto ${segnalato.effetto}`) : ''}
       ${recente ? riga('Pratica recente', [
         dataIt(recente.data),
-        recente.canale ?? 'canale non indicato',
+        nomeDelCanale(recente.canale) ?? 'canale non indicato',
         recente.fornitore ?? 'fornitore non indicato',
         FONTE_PRATICA[recente.fonte],
       ].join(', ')) : ''}

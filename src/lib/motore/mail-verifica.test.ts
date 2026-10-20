@@ -69,9 +69,19 @@ describe('mail della verifica col prefiltro', () => {
     expect(m.subject).toMatch(/Da completare$/);
     expect(m.html).toContain('Pratica recente');
     expect(m.html).toContain('28/07/2026');
-    expect(m.html).toContain('pagarent');
+    // Il canale col suo nome, non con l'id del database
+    expect(m.html).toContain('Pagarent');
     expect(m.html).toContain('led-office');
     expect(m.html).toContain('storico importato');
+  });
+  it('pratica recente su Rete Rent: "Rete Rent", mai l\'id reterent', () => {
+    const m = corpoMailVerifica({
+      ...LED,
+      prefiltro: { segnali: { segnalato: null, praticaRecente: { data: '2026-07-28', canale: 'reterent', fornitore: null, fonte: 'esterna' } } },
+    }, 'assenti', OGGI);
+    expect(m.html).toContain('Rete Rent');
+    expect(m.html).not.toContain('reterent');
+    expect(m.html).toContain('fornitore non indicato');
   });
   it('cliente segnalato: motivo ed effetto', () => {
     const m = corpoMailVerifica({

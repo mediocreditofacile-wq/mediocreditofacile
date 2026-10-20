@@ -12,7 +12,9 @@
 // con lo stesso lettore, e se il lettore scarterebbe o cambierebbe qualcosa il
 // salvataggio si rifiuta con un messaggio che dice cosa.
 
+import { CANALI_ESTERNI, NOMI_CANALE, type CanaleEsterno } from './nomi-canale';
 import {
+  CANALI,
   leggiCanali,
   leggiCategorie,
   leggiChecklist,
@@ -31,14 +33,6 @@ export type Esito<T> = { ok: true; valore: T } | { ok: false; errore: string };
 
 const no = (errore: string): { ok: false; errore: string } => ({ ok: false, errore });
 
-/** I canali col loro nome, per i messaggi e il pannello. Solo admin */
-export const NOMI_CANALE: Record<IdCanale, string> = { econocom: 'Econocom', grenke: 'Grenke', pagarent: 'Pagarent' };
-
-/** I canali delle pratiche lavorate fuori dal portale: gli stessi del seed */
-export const CANALI_ESTERNI = ['pagarent', 'reterent', 'grenke', 'ifis'] as const;
-export const NOMI_CANALE_ESTERNO: Record<(typeof CANALI_ESTERNI)[number], string> = {
-  pagarent: 'Pagarent', reterent: 'Rete Rent', grenke: 'Grenke', ifis: 'Ifis',
-};
 
 export const MOTIVI_SEGNALAZIONE = ['insoluto', 'sofferenze', 'altro'] as const;
 export const EFFETTI_SEGNALAZIONE = ['blocco', 'rosso'] as const;
@@ -138,9 +132,11 @@ export function controllaCanali(v: unknown, tabellaEsiste: (id: string) => boole
   const letti: CanaleConfig[] = [];
   for (const [i, x] of v.entries()) {
     const o = oggetto(x);
-    const nome = (o && NOMI_CANALE[o.canale as IdCanale]) || `Canale n. ${i + 1}`;
+    const id = o?.canale as IdCanale;
+    const noto = CANALI.includes(id);
+    const nome = noto ? NOMI_CANALE[id] : `Canale n. ${i + 1}`;
     if (!o) return no(`${nome}: non si legge. ${NON_SALVATO}`);
-    if (!NOMI_CANALE[o.canale as IdCanale]) return no(`${nome}: canale sconosciuto «${mostra(o.canale)}». ${NON_SALVATO}`);
+    if (!noto) return no(`${nome}: canale sconosciuto «${mostra(o.canale)}». ${NON_SALVATO}`);
     const letto = leggiUnCanale(o);
     if (!letto) return no(`${nome}, ${perche(o)}. ${NON_SALVATO}`);
     const diversa = differenza(o, letto, ETICHETTE_CANALE);
@@ -307,7 +303,7 @@ export function controllaSegnalazione(v: unknown): Esito<Segnalazione> {
 export interface PraticaEsternaNuova {
   piva: string;
   ragioneSociale: string | null;
-  canale: (typeof CANALI_ESTERNI)[number] | null;
+  canale: CanaleEsterno | null;
   /** AAAA-MM-GG */
   data: string;
   esito: string | null;
@@ -329,7 +325,7 @@ export function controllaPraticaEsterna(v: unknown, oggi: Date = new Date()): Es
   let canale: PraticaEsternaNuova['canale'] = null;
   if (!vuoto(o.canale)) {
     canale = CANALI_ESTERNI.find((c) => c === o.canale) ?? null;
-    if (!canale) return no(`Canale non ammesso: ${Object.values(NOMI_CANALE_ESTERNO).join(', ')}, oppure nessuno.`);
+    if (!canale) return no(`Canale non ammesso: ${CANALI_ESTERNI.map((c) => NOMI_CANALE[c]).join(', ')}, oppure nessuno.`);
   }
   let importo: number | null = null;
   if (!vuoto(o.importo)) {

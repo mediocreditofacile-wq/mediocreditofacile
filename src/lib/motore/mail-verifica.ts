@@ -10,6 +10,7 @@
 
 import { DESTINATARIO_MCF, escapeHtml, inviaMail, layoutMail, type EsitoMail } from '../mail-portale';
 import { datiLocatore, type DatiCreditoMotore, type SchedaRidotta } from './merito';
+import { nomeCanale } from './nomi-canale';
 import { datiPrefiltro, valutaPrefiltro, type PraticaTrovata, type SegnaliPrefiltro } from './prefiltro';
 import { TESTO_EVENTI, valutaLocatore, type StatoEventi } from './semaforo-locatore';
 
@@ -51,7 +52,7 @@ export function corpoMailVerifica(d: DatiMailVerifica, eventi: StatoEventi, oggi
     recente
       ? riga('Pratica recente', [
         recente.data.split('-').reverse().join('/'),
-        recente.canale ?? 'canale non indicato',
+        nomeCanale(recente.canale) ?? 'canale non indicato',
         recente.fornitore ?? 'fornitore non indicato',
         FONTE_PRATICA[recente.fonte],
       ].join(', '))

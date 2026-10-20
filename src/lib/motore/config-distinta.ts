@@ -75,7 +75,8 @@ export interface Categoria {
   ledwall: boolean;
 }
 
-const CANALI: readonly IdCanale[] = ['econocom', 'grenke', 'pagarent'];
+/** I canali che il motore sa instradare, nell'ordine del pannello */
+export const CANALI: readonly IdCanale[] = ['econocom', 'grenke', 'pagarent'];
 const CLASSI: readonly ClasseChecklist[] = ['capitali', 'persone', 'individuale'];
 const FORMATI: readonly string[] = ['pdf', 'jpg'];
 
