@@ -72,9 +72,46 @@ export interface ContenutoPreventivo {
   riferimento: string;
 }
 
-/** Spazi ripuliti e trattini lunghi resi normali: nel modello non ce n'e' nessuno */
-const pulito = (s: string | null | undefined) => (s ?? '').replace(/[–—]/g, '-').replace(/\s+/g, ' ').trim();
-const maiuscolo = (s: string | null | undefined) => pulito(s).toUpperCase();
+// Helvetica di jsPDF stampa solo il Latin-1 (U+0000-U+00FF), dove stanno anche le
+// lettere accentate italiane. Un solo carattere fuori da li' (l'apostrofo curvo che
+// l'iPhone mette da solo, l'euro) e jsPDF scrive tutta la stringa a due byte, che il
+// PDF mostra come caratteri a caso, oppure lo salta senza dirlo: D'ANGELO diventava
+// DANGELO sulla proposta che il cliente firma. Qui ogni carattere diventa stampabile.
+const SOSTITUZIONI: [RegExp, string][] = [
+  [/[\u2018\u2019\u201A\u201B\u2032]/g, "'"], // ‘ ’ ‚ ‛ ′
+  [/[\u201C\u201D\u201E\u201F\u2033]/g, '"'], // “ ” „ ‟ ″
+  [/[\u2010-\u2015\u2212]/g, '-'], // trattini, lineette (anche – e —) e il meno
+  [/\u2265/g, '>='], // ≥
+  [/\u2264/g, '<='], // ≤
+  [/\u2122/g, 'TM'], // ™
+  [/\u2022/g, '-'], // • punto elenco
+];
+
+/** Caratteri di controllo (salvo gli spazi, che si ripuliscono dopo) e trattino morbido */
+const CONTROLLO = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F\u00AD]/g;
+
+/**
+ * Il testo come Helvetica di jsPDF lo sa stampare. L'euro diventa EUR, con lo spazio
+ * che serve ("1.500 €" e "1.500€" danno "1.500 EUR", "€ 1.500" da' "EUR 1.500"). Quello
+ * che resta fuori dal Latin-1 diventa la sua forma ASCII se ne ha una (NFKD senza
+ * segni diacritici: Ź -> Z, ﬁ -> fi), altrimenti si toglie (emoji, Ł). Le accentate
+ * italiane stanno nel Latin-1 e non si toccano.
+ */
+function stampabile(s: string): string {
+  let t = s;
+  for (const [cerca, metti] of SOSTITUZIONI) t = t.replace(cerca, metti);
+  t = t.replace(/\s*\u20AC\s*/g, ' EUR ').replace(/ EUR (?=[.,;:!?)\]]|$)/g, ' EUR');
+  t = t.replace(/[^\u0000-\u00FF]/gu, (ch) => {
+    const base = ch.normalize('NFKD').replace(/\p{M}/gu, '');
+    return /^[\x20-\x7E]+$/.test(base) ? base : '';
+  });
+  return t.replace(CONTROLLO, '');
+}
+
+/** Stampabile, spazi ripuliti: e' la forma di ogni testo che finisce nei PDF */
+const pulito = (s: string | null | undefined) => stampabile(s ?? '').replace(/\s+/g, ' ').trim();
+/** In maiuscolo prima di ripulire: toUpperCase puo' uscire dal Latin-1 (ÿ -> Ÿ) */
+const maiuscolo = (s: string | null | undefined) => pulito((s ?? '').toUpperCase());
 
 /** Le righe della distinta come le stampa il modello: descrizione in maiuscolo, prezzo trattato */
 const righeBeni = (c: CalcoloDistinta): RigaProposta[] =>
@@ -451,7 +488,7 @@ export function disegnaProposta(
   }
   if (disegnaLogo(doc, loghi.marchio, { x: DESTRA, y: 10, w: 55, hMax: 20, allinea: 'right' }) === null && nomeMarchio) {
     font(doc, 'bold', 16);
-    doc.text(nomeMarchio.toUpperCase(), DESTRA, 20, { align: 'right' });
+    doc.text(maiuscolo(nomeMarchio), DESTRA, 20, { align: 'right' });
   }
 
   font(doc, 'bold', 11);
@@ -535,7 +572,7 @@ export function disegnaPreventivo(
 
   if (disegnaLogo(doc, logo, { x: M, y: 12, w: 55, hMax: 18, allinea: 'left' }) === null && nomeMarchio) {
     font(doc, 'bold', 18, colori.colore);
-    doc.text(nomeMarchio.toUpperCase(), M, 24);
+    doc.text(maiuscolo(nomeMarchio), M, 24);
   }
   font(doc, 'bold', 12, colori.colore);
   doc.text('PREVENTIVO DEL CANONE', DESTRA, 18, { align: 'right' });

@@ -171,6 +171,11 @@ const PNG_1X1 =
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
 
 const pdf = (b64: string) => Buffer.from(b64, 'base64');
+/** Il PDF di jsPDF non e' compresso: in latin1 il testo stampato si legge cosi' com'e' */
+const testoPdf = (b64: string) => pdf(b64).toString('latin1');
+const centesimi = (n: number) => Math.round(n * 100);
+/** I nomi dei locatori che il cliente non deve mai leggere */
+const LOCATORI = /pagarent|grenke|econocom|rete ?rent/i;
 
 describe('i numeri del caso di prova', () => {
   it('Pagarent su 137.750 di beni: maggiorazione 6.888, imponibile 144.638', () => {
@@ -239,6 +244,50 @@ describe('proposta di vendita', () => {
     expect(p.righe.at(-1)!.descrizione).toBe('SUPPORTO A PARETE - 86 POLLICI');
   });
 
+  it('apostrofi curvi, euro e simboli diventano stampabili, le accentate restano', () => {
+    const c = calcoloDa({
+      ...CORPO,
+      consegna: { tipo: 'altro', indirizzo: 'Via dell\u2019Industria 5, Bari' },
+      righe: [
+        ...CORPO.righe,
+        { descrizione: 'Staffa \u201Cslim\u201D da 1.500 \u20AC e cavo 20\u20AC', categoria: 'Periferiche e tablet', quantita: 1, prezzo: 300 },
+        { descrizione: 'TV\u2122 \u2265 55\u2033 e \u2264 86\u2033 \u{1F642}', categoria: 'Periferiche e tablet', quantita: 1, prezzo: 300 },
+      ],
+      vendita: {
+        ...VENDITA,
+        amministratore: { ...VENDITA.amministratore, nome: 'Gianni D\u2019Angelo', residenza: 'Via Niccolò Tommaseo 4, Città di Castello' },
+        riferimento: { nome: 'Lucia Dell\u2019Orto', telefono: '081 1234567' },
+      },
+    });
+    const p = contenutoPropostaVendita(c, EMME2, 'x');
+    expect(p.consegna).toBe("VIA DELL'INDUSTRIA 5, BARI");
+    expect(p.vendita.amministratore.nome).toBe("GIANNI D'ANGELO");
+    expect(p.vendita.amministratore.residenza).toBe('VIA NICCOLÒ TOMMASEO 4, CITTÀ DI CASTELLO');
+    expect(p.vendita.riferimento.nome).toBe("LUCIA DELL'ORTO");
+    expect(p.righe.at(-2)!.descrizione).toBe('STAFFA "SLIM" DA 1.500 EUR E CAVO 20 EUR');
+    expect(p.righe.at(-1)!.descrizione).toBe('TVTM >= 55" E <= 86"');
+    // Nessun carattere fuori dal Latin-1 resta nel contenuto
+    expect(JSON.stringify(p)).not.toMatch(/[^\u0000-\u00FF]/u);
+  });
+
+  it("nel PDF l'apostrofo arriva come ', l'euro come EUR, le accentate maiuscole intere", () => {
+    const c = calcoloDa({
+      ...CORPO,
+      consegna: { tipo: 'altro', indirizzo: 'Via dell\u2019Industria 5, Bari' },
+      righe: [
+        ...CORPO.righe,
+        { descrizione: 'Caffè perché più così, città però: 1.500 \u20AC', categoria: 'Periferiche e tablet', quantita: 1, prezzo: 300 },
+      ],
+      vendita: { ...VENDITA, amministratore: { ...VENDITA.amministratore, nome: 'Gianni D\u2019Angelo' } },
+    });
+    const t = testoPdf(documentiLedOffice(c, LO_K, 'x', SENZA_LOGHI).cliente[1].contenuto);
+    expect(t).toContain("(VIA DELL'INDUSTRIA 5, BARI)");
+    expect(t).toContain("(D'ANGELO)");
+    for (const parola of ['CAFFÈ', 'PERCHÉ', 'PIÙ', 'COSÌ', 'CITTÀ', 'PERÒ', '1.500 EUR']) expect(t).toContain(parola);
+    // Una stringa che jsPDF scrive a due byte comincia con un NUL: nessuna
+    expect(t).not.toMatch(/\(\u0000/);
+  });
+
   it('nessuna traccia di canale, maggiorazione o imponibile', () => {
     const s = JSON.stringify(contenutoPropostaVendita(calcolo, EMME2, 'x'));
     expect(s).not.toMatch(/pagarent|grenke|econocom|SERVIZI DI TRASPORTO|6\.?888|144\.?638/i);
@@ -259,7 +308,23 @@ describe('proposta per il locatore', () => {
 
   it('la somma delle righe torna col totale, al centesimo', () => {
     const p = contenutoPropostaLocatore(calcolo, EMME2, 'x');
-    expect(p.righe.reduce((s, r) => s + r.totale, 0)).toBe(p.totale);
+    expect(centesimi(p.righe.reduce((s, r) => s + r.totale, 0))).toBe(centesimi(p.totale));
+  });
+
+  it('anche con i centesimi nei prezzi: 3 x 1.971,33 e 7 x 560,17', () => {
+    const c = calcoloDa({
+      ...CORPO,
+      righe: [
+        { codice: 'AIO-MSI', quantita: 3, prezzo: 1_971.33 },
+        { codice: 'TAB-S10', quantita: 7, prezzo: 560.17 },
+      ],
+    });
+    // 5.913,99 + 3.921,19 = 9.835,18 di beni; 5% = 491,759 -> 492; imponibile 10.327,18
+    expect(c.instradamento).toMatchObject({ beni: 9_835.18, maggiorazione: 492, imponibile: 10_327.18 });
+    const p = contenutoPropostaLocatore(c, EMME2, 'x');
+    expect(p.totale).toBe(10_327.18);
+    expect(centesimi(p.righe.reduce((s, r) => s + r.totale, 0))).toBe(1_032_718);
+    expect(centesimi(contenutoPropostaVendita(c, EMME2, 'x').righe.reduce((s, r) => s + r.totale, 0))).toBe(983_518);
   });
 
   it('per il resto e\' la stessa proposta di vendita', () => {
@@ -327,6 +392,28 @@ describe('documentiLedOffice', () => {
     const d = documentiLedOffice(calcolo, LO_K, 'LO-1', SENZA_LOGHI, OGGI);
     expect(d.cliente.map((f) => f.filename)).toEqual(['preventivo-canone-LO-1.pdf', 'proposta-vendita-LO-1.pdf']);
     for (const f of [...d.cliente, d.locatore!]) expect(pdf(f.contenuto).subarray(0, 5).toString()).toBe('%PDF-');
+  });
+
+  it('nei PDF veri la riga servizi e il totale maggiorato stanno solo nella proposta per il locatore', () => {
+    const d = documentiLedOffice(calcolo, LO_K, 'x', SENZA_LOGHI, OGGI);
+    const vendita = testoPdf(d.cliente[1].contenuto);
+    expect(vendita).toContain('137.750,00');
+    for (const vietato of ['SERVIZI DI TRASPORTO', '144.638', '6.888']) expect(vendita).not.toContain(vietato);
+    const preventivo = testoPdf(d.cliente[0].contenuto);
+    for (const vietato of ['SERVIZI DI TRASPORTO', '144.638', '6.888']) expect(preventivo).not.toContain(vietato);
+    const locatore = testoPdf(d.locatore!.contenuto);
+    expect(locatore).toContain('SERVIZI DI TRASPORTO');
+    expect(locatore).toContain('6.888,00');
+    expect(locatore).toContain('144.638,00');
+  });
+
+  it('nessun nome di locatore nei PDF, su Pagarent e su Econocom', () => {
+    for (const c of [calcolo, calcoloEconocom]) {
+      const d = documentiLedOffice(c, LO_K, 'x', SENZA_LOGHI, OGGI);
+      for (const f of [...d.cliente, d.locatore!]) expect(testoPdf(f.contenuto)).not.toMatch(LOCATORI);
+    }
+    const preventivoEconocom = testoPdf(documentiLedOffice(calcoloEconocom, LO_K, 'x', SENZA_LOGHI, OGGI).cliente[0].contenuto);
+    expect(preventivoEconocom).toContain(NOTA_DA_CONFERMARE);
   });
 
   it('senza dati di vendita esce solo il preventivo del canone', () => {
