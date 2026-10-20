@@ -138,10 +138,31 @@ const TIPO_CONSEGNA: Record<Consegna['tipo'], string> = {
 const dataIt = (iso: string) => iso.split('-').reverse().join('/');
 
 /**
+ * La proposta per il locatore rispetto agli allegati della mail: allegata (il PDF e'
+ * uscito, anche se l'archivio non l'ha preso), non generata (mancano i dati di vendita
+ * o l'indirizzo di consegna, quindi esce solo il preventivo del canone), oppure
+ * nessun PDF perche' la generazione e' fallita.
+ */
+export type LocatoreInMail = 'allegata' | 'non-generate' | 'errore';
+
+/** La riga in coda alla mail: dice cosa e' allegato davvero, e la riga servizi solo se c'e' */
+function rigaLocatore(c: CalcoloDistinta, stato: LocatoreInMail): string {
+  if (stato === 'errore') return 'Nessun PDF in allegato: la generazione non è riuscita, quindi manca anche la proposta per il locatore.';
+  if (stato === 'non-generate') {
+    const perche = c.datiVendita ? "manca l'indirizzo di consegna" : 'mancano i dati per la proposta di vendita';
+    return `Proposta di vendita e proposta per il locatore non generate: ${perche}. In allegato solo il preventivo del canone.`;
+  }
+  return (c.instradamento?.maggiorazione ?? 0) > 0
+    ? 'La proposta per il locatore allegata è solo per MCF: porta la riga servizi e non va al cliente.'
+    : 'La proposta per il locatore allegata è solo per MCF e non va al cliente.';
+}
+
+/**
  * La mail a MCF per una proposta di distinta: canale, beni, maggiorazione e
  * imponibile, la distinta con listino e prezzo trattato, motivazioni, criteri e segnali
  * del prefiltro (segnalazione di MCF, pratica recente con data, canale e fornitore).
- * Pura: si prova senza mandare niente. `avviso` dice cosa non e' andato coi PDF.
+ * Pura: si prova senza mandare niente. `avviso` dice cosa non e' andato coi PDF,
+ * `locatore` se la proposta per il locatore e' fra gli allegati.
  */
 export function corpoMailDistinta(o: {
   k: Pick<Carrozzeria, 'nome' | 'demo'>;
@@ -149,6 +170,7 @@ export function corpoMailDistinta(o: {
   c: CalcoloDistinta;
   id: string;
   avviso: string | null;
+  locatore: LocatoreInMail;
 }): { subject: string; html: string } {
   const { k, agente, c, id } = o;
   const i = c.instradamento;
@@ -182,7 +204,9 @@ export function corpoMailDistinta(o: {
       ${avvisiRata ? riga('Avvisi', avvisiRata) : ''}
       ${riga('Consegna', `${TIPO_CONSEGNA[c.consegna.tipo]}: ${c.consegna.indirizzo || 'non indicato'}`)}
       ${c.distinta.conLedwall ? riga('LEDwall', c.ledwallConfermato ? 'installazione fissa confermata dal commerciale' : 'spunta sull\'installazione mancante') : ''}
-      ${riga('Proposta di vendita', c.datiVendita ? 'dati completi, proposta allegata' : `non compilata${c.venditaMancanti.length ? ` (mancano: ${c.venditaMancanti.join(', ')})` : ''}`)}
+      ${riga('Proposta di vendita', c.datiVendita
+        ? `dati completi${o.locatore === 'allegata' ? ', proposta allegata' : ', proposta non allegata'}`
+        : `non compilata${c.venditaMancanti.length ? ` (mancano: ${c.venditaMancanti.join(', ')})` : ''}`)}
       ${segnali?.segnalato ? riga('Cliente segnalato', `${segnali.segnalato.motivo}, effetto ${segnali.segnalato.effetto}`) : ''}
       ${recente ? riga('Pratica recente', [
         dataIt(recente.data),
@@ -244,7 +268,7 @@ export function corpoMailDistinta(o: {
       ${bloccoMotivazioni}
       ${prefiltro}
       ${o.avviso ? `<p style="font-size:14px;color:#8A2D0E;margin:16px 0 0">${escapeHtml(o.avviso)}</p>` : ''}
-      <p style="font-size:13px;color:#787782;margin:16px 0 0">La proposta per il locatore allegata è solo per MCF: porta la riga servizi e non va al cliente.</p>
+      <p style="font-size:13px;color:#787782;margin:16px 0 0">${escapeHtml(rigaLocatore(c, o.locatore))}</p>
     `);
   return { subject, html };
 }
@@ -350,7 +374,10 @@ export async function generaPreventivoDistinta(
     ? 'I PDF non sono stati generati: la proposta è salvata, i numeri restano validi.'
     : pdfPronti ? null
     : "I PDF non si sono salvati tutti nell'archivio: nello Storico possono mancare. Gli allegati sono completi.";
-  const m = corpoMailDistinta({ k, agente: { nome: e.contesto.nome ?? '', email: e.contesto.email }, c, id, avviso });
+  const statoLocatore: LocatoreInMail = pdf.locatore ? 'allegata' : errore ? 'errore' : 'non-generate';
+  const m = corpoMailDistinta({
+    k, agente: { nome: e.contesto.nome ?? '', email: e.contesto.email }, c, id, avviso, locatore: statoLocatore,
+  });
   const mail = await inviaMail({
     to: DESTINATARIO_MCF,
     subject: m.subject,

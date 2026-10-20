@@ -272,8 +272,8 @@ describe('la mail a MCF', () => {
     segnali,
   );
 
-  const mail = (c: CalcoloDistinta, avviso: string | null = null) =>
-    corpoMailDistinta({ k: LO_K, agente: { nome: 'Gino Agente', email: 'agente@example.it' }, c, id: 'LO-20261020-101500', avviso });
+  const mail = (c: CalcoloDistinta, avviso: string | null = null, locatore: 'allegata' | 'non-generate' | 'errore' = 'allegata') =>
+    corpoMailDistinta({ k: LO_K, agente: { nome: 'Gino Agente', email: 'agente@example.it' }, c, id: 'LO-20261020-101500', avviso, locatore });
 
   it('porta canale, beni, maggiorazione e imponibile', () => {
     const m = mail(calcolo);
@@ -311,6 +311,38 @@ describe('la mail a MCF', () => {
 
   it('l\'avviso sui PDF finisce nella mail', () =>
     expect(mail(calcolo, 'I PDF non si sono salvati tutti').html).toContain('I PDF non si sono salvati tutti'));
+
+  describe('la riga sulla proposta per il locatore dice cosa e\' allegato davvero', () => {
+    it('allegata con la maggiorazione: solo per MCF, porta la riga servizi', () => {
+      const html = mail(calcolo, null, 'allegata').html;
+      expect(html).toContain('La proposta per il locatore allegata è solo per MCF');
+      expect(html).toContain('riga servizi');
+    });
+
+    it('allegata senza maggiorazione (Econocom): solo per MCF, nessuna riga servizi', () => {
+      expect(calcoloEconocom.instradamento!.maggiorazione).toBe(0);
+      const html = mail(calcoloEconocom, null, 'allegata').html;
+      expect(html).toContain('La proposta per il locatore allegata è solo per MCF');
+      expect(html).not.toContain('riga servizi');
+    });
+
+    it('senza dati di vendita: le due proposte non ci sono, in allegato solo il preventivo del canone', () => {
+      const senzaVendita = calcoloDa({ ...CORPO, vendita: undefined });
+      const html = mail(senzaVendita, null, 'non-generate').html;
+      expect(html).not.toContain('allegata è solo per MCF');
+      expect(html).not.toContain('riga servizi');
+      expect(html).toContain('Proposta di vendita e proposta per il locatore non generate');
+      expect(html).toContain('In allegato solo il preventivo del canone');
+      expect(html).not.toContain('proposta allegata');
+    });
+
+    it('PDF non generati: nessun allegato, lo dice', () => {
+      const html = mail(calcolo, 'I PDF non sono stati generati', 'errore').html;
+      expect(html).not.toContain('allegata è solo per MCF');
+      expect(html).toContain('Nessun PDF in allegato');
+      expect(html).not.toContain('proposta allegata');
+    });
+  });
 });
 
 describe('generaPreventivoDistinta', () => {
@@ -441,6 +473,8 @@ describe('generaPreventivoDistinta', () => {
     expect(blob.put).not.toHaveBeenCalled();
     expect(JSON.parse(String(update()[1][3])).documenti).toEqual([]);
     expect(posta.inviaMail.mock.calls[0][0].allegati).toHaveLength(1);
+    expect(posta.inviaMail.mock.calls[0][0].html).not.toContain('allegata è solo per MCF');
+    expect(posta.inviaMail.mock.calls[0][0].html).toContain('In allegato solo il preventivo del canone');
   });
 
   it('la proposta per il locatore non si salva: la riga resta, pdf_pronti falso, la mail parte e lo dice', async () => {
