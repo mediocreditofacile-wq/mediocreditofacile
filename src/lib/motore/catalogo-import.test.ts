@@ -2,7 +2,7 @@
 // e quelle nuove del settore macchine.
 
 import { describe, expect, it } from 'vitest';
-import { leggiIncollato, leggiVoce } from './catalogo-import';
+import { leggiIncollato, leggiVoce, numero } from './catalogo-import';
 
 describe('righe del catalogo', () => {
   it('macchina con famiglia e allestimento', () => {
@@ -55,5 +55,58 @@ describe('righe incollate da Excel, colonna note', () => {
     const v = voce('codice;nome;prezzo;famiglia;descrizione;note\nULTRAX-45;Ultrax 45;4290;Ultrax 45;Lavasciuga compatta;da magazzino');
     expect(v?.descrizione).toBe('Lavasciuga compatta');
     expect(v?.attributi.nota).toBeUndefined();
+  });
+});
+
+describe('righe del catalogo, categoria e validità (settore distinta)', () => {
+  it('categoria e valido_fino in formato italiano: validità scritta AAAA-MM-GG', () => {
+    expect(leggiVoce({ codice: 'LO-SRV-1', nome: 'Server tower', prezzo: '1.900', categoria: 'Server e stampa', valido_fino: '31/12/2026' }))
+      .toEqual({ codice: 'LO-SRV-1', nome: 'Server tower', descrizione: null, prezzo: 1900, attributi: { categoria: 'Server e stampa', valido_fino: '2026-12-31' } });
+  });
+  it('valido_fino già in formato AAAA-MM-GG resta com\'è', () => {
+    expect(leggiVoce({ codice: 'X', nome: 'X', prezzo: '10', valido_fino: '2027-03-01' })?.attributi).toEqual({ valido_fino: '2027-03-01' });
+  });
+  it('giorno e mese a una cifra, come li copia Excel: 1/3/2027', () => {
+    expect(leggiVoce({ codice: 'X', nome: 'X', prezzo: '10', valido_fino: '1/3/2027' })?.attributi.valido_fino).toBe('2027-03-01');
+  });
+  it('data impossibile: il campo non c\'è, la voce resta valida', () => {
+    for (const d of ['31/02/2026', '2026-13-01', '00/01/2026', 'fine anno', '12/2026']) {
+      const v = leggiVoce({ codice: 'X', nome: 'X', prezzo: '10', categoria: 'Server e stampa', valido_fino: d });
+      expect(v, d).not.toBeNull();
+      expect(v?.attributi, d).toEqual({ categoria: 'Server e stampa' });
+    }
+  });
+  it('validità vuota o categoria vuota: nessun attributo', () => {
+    expect(leggiVoce({ codice: 'X', nome: 'X', prezzo: '10', categoria: '  ', valido_fino: '' })?.attributi).toEqual({});
+  });
+  it('dall\'incollato: sinonimi famiglia_prodotto, validità con l\'accento e scadenza', () => {
+    const a = leggiIncollato('codice\tnome\tprezzo\tfamiglia_prodotto\tValidità\nLO-DS-1\tMonitor 55"\t890\tDigital signage e display\t30/06/2027');
+    expect(leggiVoce(a[0])?.attributi).toEqual({ categoria: 'Digital signage e display', valido_fino: '2027-06-30' });
+    const b = leggiIncollato('codice;nome;prezzo;categoria;scadenza\nLO-PER-1;Tablet;450;Periferiche e tablet;2027-01-31');
+    expect(leggiVoce(b[0])?.attributi).toEqual({ categoria: 'Periferiche e tablet', valido_fino: '2027-01-31' });
+    const c = leggiIncollato('codice;nome;prezzo;categoria;validita\nLO-PER-2;Mouse;20;Periferiche e tablet;31/12/2026');
+    expect(leggiVoce(c[0])?.attributi.valido_fino).toBe('2026-12-31');
+    const d = leggiIncollato('codice;nome;prezzo;categoria;valido_fino\nLO-PER-3;Tastiera;30;Periferiche e tablet;31/12/2026');
+    expect(leggiVoce(d[0])?.attributi.valido_fino).toBe('2026-12-31');
+  });
+  it('le righe del fotovoltaico e delle macchine non prendono attributi nuovi', () => {
+    expect(leggiVoce({ codice: 'PV-20', nome: 'Impianto 20 kWp', prezzo: '24000', kwp: '20' })?.attributi).toEqual({ kwp: 20 });
+  });
+});
+
+describe('numeri all\'italiana', () => {
+  it('il punto delle migliaia senza decimali, come lo copia Excel: 1.900 e\' 1900, non 1,90', () => {
+    expect(numero('1.900')).toBe(1900);
+    expect(numero('12.500')).toBe(12500);
+    expect(numero('1.234.567')).toBe(1234567);
+    expect(numero('€ 1.900')).toBe(1900);
+  });
+  it('con la virgola o con decimali che non sono migliaia: come prima', () => {
+    expect(numero('1.931,00')).toBe(1931);
+    expect(numero('390,00')).toBe(390);
+    expect(numero('1.5')).toBe(1.5);
+    expect(numero('19.80')).toBe(19.8);
+    expect(numero('1931')).toBe(1931);
+    expect(numero(12.5)).toBe(12.5);
   });
 });

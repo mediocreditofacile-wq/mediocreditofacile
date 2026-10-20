@@ -6,13 +6,35 @@
 // accumulo, installazione; sul settore macchine famiglia, allestimento (cavo,
 // batteria, steam), tipo (accessorio), passo, massimo, nota (o note).
 // L'allestimento vale anche sull'accessorio: lo offre solo con quella versione.
+// Su ogni settore, e di fatto sul settore distinta: categoria (testo) e valido_fino
+// (GG/MM/AAAA o AAAA-MM-GG, salvato come AAAA-MM-GG; una data impossibile non si
+// salva e la voce resta valida, senza scadenza).
 
 export const numero = (v: unknown) => {
   if (typeof v === 'number') return Number.isFinite(v) ? v : NaN;
   const s = String(v ?? '').trim().replace(/[€\s]/g, '');
+  // Il punto delle migliaia senza decimali (1.900, come lo copia Excel) e' 1900:
+  // letto come decimale il prezzo diventerebbe 1,90 senza che nessuno se ne accorga
+  if (/^\d{1,3}(\.\d{3})+$/.test(s)) return parseFloat(s.replace(/\./g, ''));
   return parseFloat(s.includes(',') ? s.replace(/\./g, '').replace(',', '.') : s);
 };
 export const testo = (v: unknown, max = 200) => String(v ?? '').trim().slice(0, max);
+
+/**
+ * Una data di validita' -> AAAA-MM-GG, o null se non e' una data vera. Accetta
+ * GG/MM/AAAA (anche a una cifra, come la copia Excel) e AAAA-MM-GG.
+ */
+export function dataValidita(v: unknown): string | null {
+  const s = String(v ?? '').trim();
+  const it = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(s);
+  const iso = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s);
+  const [a, m, g] = it ? [+it[3], +it[2], +it[1]] : iso ? [+iso[1], +iso[2], +iso[3]] : [NaN, NaN, NaN];
+  if (!Number.isInteger(a) || a < 2000 || a > 2100) return null;
+  // Il 31 febbraio diventerebbe il 3 marzo: si ricontrolla che il giorno sia quello scritto
+  const d = new Date(Date.UTC(a, m - 1, g));
+  if (d.getUTCFullYear() !== a || d.getUTCMonth() !== m - 1 || d.getUTCDate() !== g) return null;
+  return `${a}-${String(m).padStart(2, '0')}-${String(g).padStart(2, '0')}`;
+}
 
 export interface Voce { codice: string; nome: string; descrizione: string | null; prezzo: number; attributi: Record<string, unknown> }
 
@@ -55,6 +77,12 @@ export function leggiVoce(r: Record<string, unknown>): Voce | null {
     attributi.allestimento = allestimento;
   }
 
+  // distinta: la categoria del Pannello e la validita' del prezzo
+  const categoria = testo(r.categoria, 80);
+  if (categoria) attributi.categoria = categoria;
+  const validoFino = dataValidita(r.valido_fino);
+  if (validoFino) attributi.valido_fino = validoFino;
+
   const descrizione = testo(r.descrizione, 400) || (accessorio ? '' : testo(r.nota, 400)) || null;
   return { codice, nome, descrizione, prezzo: Math.round(prezzo * 100) / 100, attributi };
 }
@@ -71,14 +99,21 @@ const SINONIMI: Record<string, string> = {
   famiglia: 'famiglia', modello: 'famiglia',
   allestimento: 'allestimento', alimentazione: 'allestimento',
   tipo: 'tipo', passo: 'passo', step: 'passo', massimo: 'massimo', max: 'massimo', nota: 'nota',
+  // distinta ("Validità" arriva qui senza accento, "Valido fino" senza spazio)
+  categoria: 'categoria', famiglia_prodotto: 'categoria', famigliaprodotto: 'categoria',
+  validita: 'valido_fino', valido_fino: 'valido_fino', validofino: 'valido_fino', scadenza: 'valido_fino',
 };
+
+/** L'intestazione di una colonna come chiave: minuscole, senza accenti, solo lettere e trattino basso */
+const chiaveColonna = (h: string) =>
+  h.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z_]/g, '');
 
 /** Righe incollate da Excel -> oggetti. Le colonne si riconoscono dall'intestazione. */
 export function leggiIncollato(testo: string): Record<string, string>[] {
   const righe = testo.split(/\r?\n/).map((r) => r.trimEnd()).filter((r) => r.trim());
   if (righe.length < 2) return [];
   const sep = righe[0].includes('\t') ? '\t' : righe[0].includes(';') ? ';' : ',';
-  const testata = righe[0].split(sep).map((h) => SINONIMI[h.trim().toLowerCase().replace(/[^a-z_]/g, '')] ?? '');
+  const testata = righe[0].split(sep).map((h) => SINONIMI[chiaveColonna(h)] ?? '');
   return righe.slice(1).map((r) => {
     const celle = r.split(sep);
     const o: Record<string, string> = {};
