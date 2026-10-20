@@ -15,7 +15,7 @@
 import { giornoItaliano, totaleRighe } from '../../lib/motore/distinta';
 import { MOTIVAZIONE_MINIMA, motivazioneValida, TESTI_PREFILTRO } from '../../lib/motore/prefiltro';
 import { bloccoSemaforo } from './cliente';
-import { $, apiJson, apriTab, esc, euro, euroEsatto, messaggio, stato, traduci } from './comune';
+import { $, apiJsonSicura, apriTab, esc, euro, euroEsatto, messaggio, stato, traduci } from './comune';
 import {
   filtraCatalogo,
   leggiNumero,
@@ -24,6 +24,7 @@ import {
   opzioniConsegna,
   prezzoDaRiconfermare,
   righePerServer,
+  turni,
   type OpzioneConsegna,
   type RigaBrowser,
 } from './distinta-browser';
@@ -53,9 +54,13 @@ let generando = false;
 /** Le motivazioni chieste dall'ultimo conto: se non cambiano, le caselle restano dove sono */
 let firmaMotivazioni = '';
 let timer: ReturnType<typeof setTimeout> | undefined;
-let richiesta = 0;
-/** Durate quotate e totale dei beni dei preventivi fatti in questa sessione: li usa il modulo della pratica */
-const preventivi = new Map<string, { durate: number[]; evidenza: number | null; beni: number }>();
+/** Ogni cambio della distinta apre un turno: le risposte dei turni vecchi si scartano */
+const turno = turni();
+/**
+ * I preventivi fatti in questa sessione, finche' lo Storico non li porta: durate quotate,
+ * totale dei beni e se e' uscita anche la proposta di vendita. Li usa il modulo della pratica.
+ */
+const preventivi = new Map<string, { durate: number[]; evidenza: number | null; beni: number; conVendita: boolean }>();
 
 const MOTIVI: Record<string, string> = {
   rosso: 'Con il prefiltro rosso la rata e i documenti per il cliente non escono. Puoi segnalare il cliente a Mediocredito Facile con la distinta: lo guarda e ti dice come procedere.',
@@ -96,17 +101,33 @@ export function inputDistinta() {
 }
 
 /**
- * La segnalazione a Mediocredito Facile porta la distinta a schermo: le righe se
- * reggono, la consegna, le motivazioni, la spunta e i dati di vendita scritti.
+ * La segnalazione a Mediocredito Facile della distinta a schermo: righe, consegna,
+ * motivazioni, spunta e i dati di vendita scritti. Senza righe, con una riga che non
+ * regge o senza indirizzo di consegna non parte, e il messaggio dice perche'.
  */
-export function corpoSegnalazione() {
+export function corpoSegnalazione():
+  | { ok: true; corpo: Record<string, unknown> }
+  | { ok: false; messaggio: string } {
   const r = righePerServer(righe);
+  if (!r.ok) {
+    return {
+      ok: false,
+      messaggio: r.riga == null
+        ? 'Per segnalare il cliente serve la distinta: componila nella sezione Proposte.'
+        : `Riga ${r.riga + 1} della distinta: ${traduci(r.errore)} Correggila nella sezione Proposte.`,
+    };
+  }
+  const indirizzo = indirizzoConsegna();
+  if (!indirizzo) return { ok: false, messaggio: "Manca l'indirizzo di consegna: sceglilo nella sezione Proposte." };
   return {
-    ...(r.ok ? { righe: r.righe } : {}),
-    consegna: { indirizzo: indirizzoConsegna() },
-    motivazioni: { ...motivazioni },
-    ledwallConfermato,
-    vendita: datiVenditaCorrenti(),
+    ok: true,
+    corpo: {
+      righe: r.righe,
+      consegna: { indirizzo },
+      motivazioni: { ...motivazioni },
+      ledwallConfermato,
+      vendita: datiVenditaCorrenti(),
+    },
   };
 }
 
@@ -173,8 +194,9 @@ function aggiungiVoce(codice: string) {
 
 // --- righe ---------------------------------------------------------------------------
 
+/** Quantita' intera da 1 in su e prezzo sopra zero: le altre righe non entrano nei totali a schermo */
 function rigaLeggibile(r: Riga) {
-  return Number.isFinite(r.quantita) && Number.isFinite(r.prezzo) && r.quantita > 0 && r.prezzo > 0;
+  return Number.isInteger(r.quantita) && r.quantita >= 1 && Number.isFinite(r.prezzo) && r.prezzo > 0;
 }
 const totaleCella = (r: Riga) => (rigaLeggibile(r) ? euroEsatto(totaleRighe([r])) : '—');
 
@@ -215,6 +237,10 @@ function rendiRighe() {
 
 function togliRiga(i: number) {
   righe.splice(i, 1);
+  // Il conto di prima parlava di righe che non ci sono piu': non vale piu' niente,
+  // ne' i suoi pulsanti ne' le sue motivazioni (il turno nuovo lo apre pianifica)
+  ultimoEsito = null;
+  stato.proposta = null;
   // La motivazione della riga tolta sparisce e quelle dopo scalano: un testo non
   // deve mai finire sotto un altro bene. Le caselle tornano col prossimo conto.
   motivazioni = motivazioniDopoTolta(motivazioni, i);
@@ -333,18 +359,25 @@ function dopoCambio() {
 
 function pianifica(ms = 450) {
   clearTimeout(timer);
+  // Turno nuovo: una risposta gia' in viaggio, partita con la distinta di prima, si scarta
+  turno.nuovo();
   inAttesa = true;
+  document.getElementById('distinta-esito')?.classList.add('mt-in-attesa');
   rendiAzioni();
   timer = setTimeout(() => void calcola(), ms);
 }
 
 async function calcola() {
-  if (!stato.ricerca) return;
+  if (!stato.ricerca) {
+    inAttesa = false;
+    return;
+  }
   const esitoBox = $('distinta-esito');
   const prova = righePerServer(righe);
   if (!prova.ok) {
-    richiesta++;
+    turno.nuovo();
     inAttesa = false;
+    esitoBox.classList.remove('mt-in-attesa');
     ultimoEsito = null;
     stato.proposta = null;
     if (prova.errore === 'distinta_vuota') {
@@ -361,18 +394,20 @@ async function calcola() {
   }
   messaggio($('dr-msg'), '', false);
   const input = inputDistinta()!;
-  const mia = ++richiesta;
+  const mio = turno.nuovo();
   esitoBox.classList.add('mt-in-attesa');
-  const { res, corpo } = await apiJson('/api/motore/proposte', { method: 'POST', body: JSON.stringify(input) });
-  // Una risposta vecchia non deve coprire quella della riga appena cambiata
-  if (mia !== richiesta) return;
+  const risposta = await apiJsonSicura('/api/motore/proposte', { method: 'POST', body: JSON.stringify(input) });
+  // Una risposta vecchia non deve coprire quella della distinta appena cambiata
+  if (!turno.vale(mio)) return;
   inAttesa = false;
   esitoBox.classList.remove('mt-in-attesa');
-  if (!res.ok || !corpo?.ok) {
+  const corpo = risposta?.corpo;
+  if (!risposta || !risposta.res.ok || !corpo?.ok) {
     ultimoEsito = null;
     stato.proposta = null;
     esitoBox.innerHTML = '';
-    mostraErroreRiga(corpo?.riga ?? null, corpo?.error ?? '', corpo?.messaggio);
+    if (!risposta) messaggio($('dr-msg'), traduci('connessione_assente'), false);
+    else mostraErroreRiga(corpo?.riga ?? null, corpo?.error ?? '', corpo?.messaggio);
     rendiAzioni();
     return;
   }
@@ -459,26 +494,38 @@ async function genera(btn: HTMLButtonElement, conProposta: boolean) {
   // Senza indirizzo di consegna o con i dati incompleti la proposta di vendita non si chiede
   const corpo = conProposta ? { ...input, vendita: datiVenditaCorrenti() } : input;
   const esitoBox = $('dz-esito');
+  // L'esito di un tentativo di prima non resta sotto quello nuovo
+  esitoBox.innerHTML = '';
   generando = true;
   for (const b of document.querySelectorAll<HTMLButtonElement>('#dz-bottoni .mt-btn')) b.disabled = true;
   btn.textContent = 'Preparo i documenti...';
-  const { res, corpo: r } = await apiJson('/api/motore/preventivo', { method: 'POST', body: JSON.stringify(corpo) });
-  generando = false;
-  // I pulsanti li ha toccati questa funzione: si ridisegnano da capo
-  ultimiBottoni = '';
-  rendiAzioni();
+  let risposta: Awaited<ReturnType<typeof apiJsonSicura>> = null;
+  try {
+    risposta = await apiJsonSicura('/api/motore/preventivo', { method: 'POST', body: JSON.stringify(corpo) });
+  } finally {
+    generando = false;
+    // I pulsanti li ha toccati questa funzione: si ridisegnano da capo
+    ultimiBottoni = '';
+    rendiAzioni();
+  }
+  if (!risposta) {
+    esitoBox.innerHTML = `<p class="mt-msg mt-msg--errore">${esc(traduci('connessione_assente'))}</p>`;
+    return;
+  }
+  const { res, corpo: r } = risposta;
   if (!res.ok || !r?.ok) {
     const testo = r?.messaggio || traduci(r?.error ?? '');
     esitoBox.innerHTML = `<p class="mt-msg mt-msg--errore">${esc(r?.riga != null ? `Riga ${r.riga + 1}: ${testo}` : testo)}</p>`;
     return;
   }
   stato.ultimoPreventivo = r.id;
+  const docs = (r.documenti ?? []) as { nome: string; pathname: string }[];
   preventivi.set(r.id, {
     durate: (ultimoEsito?.rate ?? []).map((x: any) => x.durata),
     evidenza: ultimoEsito?.durataEvidenza ?? null,
     beni: Number(ultimoEsito?.totaleBeni) || totaleBeniCorrente(),
+    conVendita: docs.some((d) => /proposta-vendita/i.test(d.nome)),
   });
-  const docs = (r.documenti ?? []) as { nome: string; pathname: string }[];
   const senzaProposta = conProposta && docs.length > 0 && !docs.some((d) => /proposta-vendita/i.test(d.nome));
   esitoBox.innerHTML = `
     <div class="mt-card" style="margin-top:16px">
@@ -502,7 +549,7 @@ async function genera(btn: HTMLButtonElement, conProposta: boolean) {
 function suNuovaRicerca() {
   const r = stato.ricerca;
   clearTimeout(timer);
-  richiesta++;
+  turno.nuovo();
   righe = [];
   motivazioni = {};
   ledwallConfermato = false;
@@ -521,6 +568,7 @@ function suNuovaRicerca() {
       : `Fornitura per ${r.scheda.ragioneSociale}, P.IVA ${r.scheda.piva}.`;
   for (const id of ['distinta-catalogo', 'distinta-righe', 'distinta-vendita', 'distinta-azioni']) $(id).hidden = false;
   $('distinta-esito').innerHTML = r && !bloccato ? SUGGERIMENTO : '';
+  $('distinta-esito').classList.remove('mt-in-attesa');
   $('dr-motivazioni').innerHTML = '';
   $('dz-esito').innerHTML = '';
   messaggio($('dr-msg'), '', false);

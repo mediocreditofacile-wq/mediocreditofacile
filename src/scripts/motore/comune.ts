@@ -110,8 +110,14 @@ const MESSAGGI: Record<string, string> = {
   documenti_mancanti: 'Mancano dei documenti obbligatori.',
   cliente_bloccato: TESTI_PREFILTRO.bloccato,
   configurazione_mancante: 'Il portale non è configurato per le pratiche. Scrivi a Mediocredito Facile.',
+  connessione_assente: 'Connessione assente, riprova.',
 };
-export const traduci = (codice: string) => MESSAGGI[codice] ?? 'Qualcosa non ha funzionato. Riprova.';
+// Sul settore distinta alcune azioni si chiamano diversamente: lo stesso codice, un altro consiglio
+const MESSAGGI_DISTINTA: Record<string, string> = {
+  proposta_bloccata: 'Su questa fornitura non si genera un preventivo: segnala il cliente a Mediocredito Facile.',
+};
+export const traduci = (codice: string) =>
+  (stato.settore === 'distinta' ? MESSAGGI_DISTINTA[codice] : undefined) ?? MESSAGGI[codice] ?? 'Qualcosa non ha funzionato. Riprova.';
 
 export async function apiJson(url: string, opts: RequestInit = {}) {
   const res = await fetch(url, {
@@ -122,6 +128,15 @@ export async function apiJson(url: string, opts: RequestInit = {}) {
   let corpo: any = null;
   try { corpo = await res.json(); } catch { /* risposta senza corpo */ }
   return { res, corpo };
+}
+
+/** Come apiJson, ma se la rete cade non lancia: risponde null e la pagina dice "Connessione assente, riprova" */
+export async function apiJsonSicura(url: string, opts: RequestInit = {}) {
+  try {
+    return await apiJson(url, opts);
+  } catch {
+    return null;
+  }
 }
 
 /** URL di un'API del motore col fornitore della pagina */

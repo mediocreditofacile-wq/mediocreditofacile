@@ -8,6 +8,9 @@
 // anticipa soltanto quello che dira'. Non importa config-distinta.ts: quel modulo
 // porta anche i canali, che nel browser non devono entrare.
 
+import { controllaCellulare, controllaDatiCliente, controllaEmail, type EsitoDatiCliente } from '../../lib/dati-cliente-pratica';
+import { controllaIban } from '../../lib/iban';
+
 // --- catalogo ------------------------------------------------------------------
 
 /** Minuscole, senza accenti, spazi ripuliti: "Unità" e "UNITA" si trovano a vicenda */
@@ -225,4 +228,44 @@ export const ETICHETTE_VENDITA: Record<string, string> = {
 export function mancantiProposte(venditaMancanti: string[], indirizzoConsegna: string): string[] {
   const nomi = venditaMancanti.map((k) => ETICHETTE_VENDITA[k] ?? k);
   return String(indirizzoConsegna ?? '').trim() ? nomi : ['indirizzo di consegna', ...nomi];
+}
+
+// --- il conto in corso -------------------------------------------------------------
+
+/**
+ * I turni delle richieste del conto. Ogni cambio della distinta apre un turno nuovo,
+ * e una risposta vale solo se il suo turno e' ancora l'ultimo: una risposta partita
+ * prima di togliere una riga porterebbe motivazioni con gli indici di prima, e un
+ * testo finirebbe sotto un altro bene.
+ */
+export function turni() {
+  let ultimo = 0;
+  return {
+    nuovo: () => ++ultimo,
+    vale: (turno: number) => turno === ultimo,
+  };
+}
+
+// --- contatti della pratica ----------------------------------------------------------
+
+/**
+ * Cellulare, email del referente e IBAN prima dell'invio della pratica. Senza una
+ * proposta di vendita servono tutti e tre (controllaDatiCliente, regola del
+ * 16/10/2026). Con una proposta di vendita un campo vuoto resta vuoto: il server lo
+ * prende dai dati di vendita della proposta. Quello che e' scritto deve reggere.
+ */
+export function controllaContatti(
+  d: { telefono: string; email: string; iban: string },
+  dallaProposta: boolean,
+): EsitoDatiCliente {
+  const telefono = String(d.telefono ?? '').trim();
+  const email = String(d.email ?? '').trim();
+  const iban = String(d.iban ?? '').trim();
+  if (!dallaProposta) return controllaDatiCliente({ telefono, email, iban });
+  const motivo = (telefono ? controllaCellulare(telefono) : null) ?? (email ? controllaEmail(email) : null);
+  if (motivo) return { ok: false, ...motivo };
+  if (!iban) return { ok: true, telefono, email, iban: '' };
+  const letto = controllaIban(iban);
+  if (!letto.ok) return { ok: false, errore: 'iban_non_valido', messaggio: letto.messaggio };
+  return { ok: true, telefono, email, iban: letto.iban };
 }

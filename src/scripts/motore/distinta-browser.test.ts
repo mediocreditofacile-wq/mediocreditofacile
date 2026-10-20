@@ -5,8 +5,10 @@
 import { describe, expect, it } from 'vitest';
 import { CATEGORIE_LO, CHECKLIST_LO, vociLedOffice } from '../../lib/motore/catalogo-ledoffice';
 import { vociChecklist } from '../../lib/motore/config-distinta';
+import { stato, traduci } from './comune';
 import {
   classeDaForma,
+  controllaContatti,
   filtraCatalogo,
   leggiNumero,
   mancantiProposte,
@@ -14,6 +16,7 @@ import {
   opzioniConsegna,
   prezzoDaRiconfermare,
   righePerServer,
+  turni,
   vociDaChiedere,
 } from './distinta-browser';
 
@@ -250,5 +253,73 @@ describe('categorie della carrozzeria', () => {
     // Guardia: i test sopra usano i nomi veri delle categorie
     expect(CATEGORIE_LO.map((c) => c.nome)).toContain('LEDwall');
     expect(CATEGORIE_LO.map((c) => c.nome)).toContain('Periferiche e tablet');
+  });
+});
+
+describe('turni', () => {
+  it('la risposta del turno in corso vale', () => {
+    const t = turni();
+    const mio = t.nuovo();
+    expect(t.vale(mio)).toBe(true);
+  });
+
+  it('una risposta partita prima di un cambio della distinta non vale piu', () => {
+    // Righe A, B, C: parte il conto; il commerciale toglie A; la risposta vecchia arriva dopo
+    const t = turni();
+    const contoVecchio = t.nuovo();
+    t.nuovo(); // togliRiga -> pianifica
+    expect(t.vale(contoVecchio)).toBe(false);
+    const contoNuovo = t.nuovo();
+    expect(t.vale(contoNuovo)).toBe(true);
+  });
+
+  it('due contatori non si disturbano', () => {
+    const a = turni();
+    const b = turni();
+    const x = a.nuovo();
+    b.nuovo();
+    b.nuovo();
+    expect(a.vale(x)).toBe(true);
+  });
+});
+
+describe('controllaContatti', () => {
+  const IBAN = 'IT60X0542811101000000123456';
+
+  it('senza proposta di vendita servono cellulare, email e IBAN, come controllaDatiCliente', () => {
+    expect(controllaContatti({ telefono: '', email: 'a@b.it', iban: IBAN }, false)).toMatchObject({ ok: false, errore: 'cellulare_mancante' });
+    expect(controllaContatti({ telefono: '3331234567', email: '', iban: IBAN }, false)).toMatchObject({ ok: false, errore: 'email_mancante' });
+    expect(controllaContatti({ telefono: '3331234567', email: 'a@b.it', iban: '' }, false)).toMatchObject({ ok: false, errore: 'iban_mancante' });
+    expect(controllaContatti({ telefono: '333 1234567', email: 'a@b.it', iban: 'it60 x054 2811 1010 0000 0123 456' }, false))
+      .toEqual({ ok: true, telefono: '333 1234567', email: 'a@b.it', iban: IBAN });
+  });
+
+  it('con la proposta di vendita i campi vuoti restano vuoti: li prende il server dalla proposta', () => {
+    expect(controllaContatti({ telefono: '', email: '', iban: '' }, true)).toEqual({ ok: true, telefono: '', email: '', iban: '' });
+    expect(controllaContatti({ telefono: ' 3331234567 ', email: '', iban: '' }, true)).toEqual({ ok: true, telefono: '3331234567', email: '', iban: '' });
+  });
+
+  it('con la proposta di vendita quello che e scritto deve reggere', () => {
+    expect(controllaContatti({ telefono: '12', email: '', iban: '' }, true)).toMatchObject({ ok: false, errore: 'cellulare_non_valido' });
+    expect(controllaContatti({ telefono: '', email: 'senza-chiocciola', iban: '' }, true)).toMatchObject({ ok: false, errore: 'email_non_valida' });
+    expect(controllaContatti({ telefono: '', email: '', iban: 'IT00X0542811101000000123456' }, true)).toMatchObject({ ok: false, errore: 'iban_non_valido' });
+    expect(controllaContatti({ telefono: '', email: '', iban: 'it60 x054 2811 1010 0000 0123 456' }, true)).toEqual({ ok: true, telefono: '', email: '', iban: IBAN });
+  });
+});
+
+describe('proposta_bloccata secondo il settore', () => {
+  it('sul settore distinta dice di segnalare il cliente, sugli altri resta com era', () => {
+    const prima = stato.settore;
+    try {
+      stato.settore = 'distinta';
+      expect(traduci('proposta_bloccata')).toBe('Su questa fornitura non si genera un preventivo: segnala il cliente a Mediocredito Facile.');
+      expect(traduci('ricerca_non_trovata')).toBe('Ricerca non trovata. Rifai la verifica del cliente.');
+      for (const settore of ['macchine', 'generico', 'fotovoltaico']) {
+        stato.settore = settore;
+        expect(traduci('proposta_bloccata')).toBe('Su questo importo non si genera un preventivo: carica la pratica e la guarda Mediocredito Facile.');
+      }
+    } finally {
+      stato.settore = prima;
+    }
   });
 });
