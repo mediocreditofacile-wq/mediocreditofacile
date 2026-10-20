@@ -100,7 +100,9 @@ const SRV = 'Server e stampa';
 const DS = 'Digital signage e display';
 
 const RIGHE: Riga[] = [
-  // Il brief dice 1.800-1.900: 1.800 nella proposta delle 15:36 del 15/10, 1.900 in quella delle 15:49
+  // Il brief dice 1.800-1.900, "8/16 GB": il 15/10 la proposta delle 15:36 lo da' a 1.800 con 8 GB,
+  // quella delle 15:49 a 1.900 senza dire la RAM. Senza una configurazione da 16 GB scritta in una
+  // proposta di ottobre resta una voce sola, al prezzo piu' recente (Ruling 13 del 20/10/2026)
   ['LO-POST-AM242', 'PC ALL IN ONE MSI PRO AM242 TP 1M 23,8" I5 SSD 512GB W11', 1_900, POST], // 15/10/2026
   ['LO-POST-AIO-I5-256', 'PC ALL IN ONE MSI I5 8GB SSD 256GB W11', 951.23, POST], // 28/07/2026
   ['LO-POST-MINI-DESK-I5', 'PC MSI MINI DESK I5 16GB SSD 256GB W11 PRO', 1_538, POST], // 10/07/2026
