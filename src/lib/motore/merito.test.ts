@@ -154,16 +154,25 @@ describe('dati per il prefiltro', () => {
     expect(leggiScheda(schedaDiProva).dati.capitaleSociale).toBe(2_083_126);
   });
 
-  it('unita\' locali: solo quelle attive, UL e SSL, con indirizzo leggibile', () => {
+  it('unita\' locali: solo le UL attive, con indirizzo leggibile', () => {
     const u = unitaLocaliDa(full);
-    // 24 UL attive + 1 SSL attiva; le 11 UL cessate (stato CF) restano fuori
-    expect(u).toHaveLength(25);
+    // 24 UL attive; le 11 UL cessate (stato CF) restano fuori, e la sede
+    // legale (SSL) non e' un'unita' locale: sta gia' in scheda.sede
+    expect(u).toHaveLength(24);
     expect(u.every((x) => /\(\w\w\)$/.test(x))).toBe(true);
     expect(u).toContain('VIA GIROLAMO BORTOTTI, 25, 32100 BELLUNO (BL)');
-    // la sede secondaria attiva c'e', l'unita' cessata no
-    expect(u).toContain('VIA I SETTEMBRE, 32, 31010 FARRA DI SOLIGO (TV)');
     expect(u).not.toContain('VIA MATTEOTTI, 3, 36056 TEZZE SUL BRENTA (VI)');
+    // l'indirizzo della SSL (Administrative headquarter and registered office) non c'e'
+    expect(u).not.toContain('VIA I SETTEMBRE, 32, 31010 FARRA DI SOLIGO (TV)');
     expect(leggiScheda(schedaDiProva).scheda.unitaLocali).toEqual(u);
+  });
+
+  it('unita\' locali: una SSL attiva da sola non produce niente', () => {
+    const u = unitaLocaliDa({ allOffices: [
+      { companyDetails: { officeType: { code: 'SSL' } }, companyStatus: { activityStatus: { code: 'A' } },
+        address: { streetName: 'VIA ROMA, 1', zipCode: '36100', town: 'VICENZA', province: { code: 'VI' } } },
+    ] });
+    expect(u).toEqual([]);
   });
 
   it('unita\' locali: senza allOffices la lista e\' vuota', () => {

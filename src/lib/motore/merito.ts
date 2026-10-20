@@ -66,7 +66,7 @@ export interface SchedaRidotta {
   dipendenti: number | null;
   rating: { classe: string; posizione: number; descrizione: string | null } | null;
   lineaCreditoConsigliata: number | null;
-  /** Indirizzi delle unita' locali attive, da IT-full allOffices. `branches` porta solo il numero. */
+  /** Indirizzi delle unita' locali attive (UL, senza la sede legale), da IT-full allOffices. `branches` porta solo il numero. */
   unitaLocali: string[];
 }
 
@@ -183,10 +183,11 @@ const RUOLI_INGLESE: Record<string, string> = {
 // --- unita' locali, bilanci, ateco ----------------------------------------------
 
 /**
- * Indirizzi delle unita' locali (UL) e delle sedi secondarie (SSL) attive, da
- * IT-full `allOffices`, nel formato "VIA, CAP COMUNE (PR)". Le cessate (stato CF)
- * restano fuori. Senza allOffices la lista e' vuota; non si deduce niente dal
- * solo numero di `branches`.
+ * Indirizzi delle unita' locali (UL) attive, da IT-full `allOffices`, nel formato
+ * "VIA, CAP COMUNE (PR)". Le cessate (stato CF) restano fuori. Resta fuori anche
+ * la SSL ("Administrative headquarter and registered office"): e' la sede legale,
+ * gia' in `sede`, non un'unita' locale. Senza allOffices la lista e' vuota; non
+ * si deduce niente dal solo numero di `branches`.
  */
 export function unitaLocaliDa(F: any): string[] {
   const sedi: any[] = Array.isArray(F?.allOffices) ? F.allOffices : [];
@@ -194,7 +195,7 @@ export function unitaLocaliDa(F: any): string[] {
   for (const o of sedi) {
     const tipo = String(o?.companyDetails?.officeType?.code ?? '').trim().toUpperCase();
     const stato = String(o?.companyStatus?.activityStatus?.code ?? '').trim().toUpperCase();
-    if ((tipo !== 'UL' && tipo !== 'SSL') || stato !== 'A') continue;
+    if (tipo !== 'UL' || stato !== 'A') continue;
     const a = o?.address ?? {};
     // La provincia e' un oggetto {code, description} in IT-full, una sigla altrove
     const prov = typeof a.province === 'string' ? a.province : a.province?.code;
