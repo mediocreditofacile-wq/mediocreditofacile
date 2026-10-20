@@ -32,7 +32,7 @@ import { bersaglioEventi, eventiNonAvviati, serveControllo, type EventiRicerca }
 import type { Carrozzeria } from '../../../lib/motore/carrozzeria';
 import { datiLocatore, leggiScheda, type DatiCreditoMotore, type SchedaRidotta } from '../../../lib/motore/merito';
 import { datiPrefiltro, valutaPrefiltro, type SegnaliPrefiltro } from '../../../lib/motore/prefiltro';
-import { regoleConEventi, salvaSegnali, segnaliPrefiltro } from '../../../lib/motore/segnali-prefiltro';
+import { regoleConEventi, salvaSegnali, segnaliPrefiltro, unisciSegnali } from '../../../lib/motore/segnali-prefiltro';
 import { valutaLocatore, type StatoEventi } from '../../../lib/motore/semaforo-locatore';
 import { prefiltroPerSchermo, semaforoPerSchermo, valuta } from '../../../lib/motore/valutazione';
 import { corpoJson, filtroVisibilita, json, sessioneMotore } from '../../../lib/motore/sessione';
@@ -95,8 +95,9 @@ export async function POST({ request }: { request: Request }) {
   );
   console.log(JSON.stringify({ evento: 'motore_merito', fornitore: carrozzeria.slug, daCache: Boolean(scheda.daCache) }));
 
-  // Prefiltro: cliente segnalato e pratica recente, letti adesso e salvati sulla ricerca
-  const segnali = carrozzeria.regoleSemaforo === 'prefiltro' ? await segnaliPrefiltro(piva) : null;
+  // Prefiltro: cliente segnalato e pratica recente, letti adesso e salvati sulla
+  // ricerca. Contano le pratiche nate prima di questo momento (Ruling 11).
+  const segnali = carrozzeria.regoleSemaforo === 'prefiltro' ? (await segnaliPrefiltro(piva, new Date())).segnali : null;
   if (segnali) await salvaSegnali(id, segnali);
 
   let eventi: EventiRicerca | null = null;
@@ -141,19 +142,26 @@ export async function GET({ request }: { request: Request }) {
     dati_credito: { dati: DatiCreditoMotore; scheda: SchedaRidotta };
     eventi: EventiRicerca | null;
     segnali?: SegnaliPrefiltro | null;
+    creato?: Date | string;
   }>(
-    `SELECT id, piva, dati_credito, eventi${prefiltro ? ', segnali' : ''} FROM app.ricerca_merito WHERE id = $1 AND ${where}`,
+    `SELECT id, piva, dati_credito, eventi${prefiltro ? ', segnali, creato' : ''} FROM app.ricerca_merito WHERE id = $1 AND ${where}`,
     [url.searchParams.get('id') ?? '', ...valori],
   );
   if (!riga) return json({ ok: false, error: 'ricerca_non_trovata' }, 404);
 
   // Riaprendo la ricerca i segnali si rileggono, perche' MCF puo' aver segnato il
-  // cliente nel frattempo, e si salvano di nuovo; l'attesa degli eventi usa quelli salvati
+  // cliente nel frattempo, e si salvano di nuovo; l'attesa degli eventi usa quelli
+  // salvati. Le pratiche contano fino al momento della ricerca, non a oggi: quella
+  // mandata dopo aver verificato il cliente non accende la regola 9 (Ruling 11).
+  // Una fonte che non risponde lascia il valore salvato invece di azzerarlo.
   let segnali: SegnaliPrefiltro | null = null;
   if (prefiltro) {
     const salvati = riga.segnali ?? null;
-    segnali = attesaEventi && salvati ? salvati : await segnaliPrefiltro(riga.piva);
-    if (segnali !== salvati) await salvaSegnali(riga.id, segnali);
+    if (attesaEventi && salvati) segnali = salvati;
+    else {
+      segnali = unisciSegnali(await segnaliPrefiltro(riga.piva, new Date(riga.creato ?? Date.now())), salvati);
+      await salvaSegnali(riga.id, segnali);
+    }
   }
 
   let ev = riga.eventi;

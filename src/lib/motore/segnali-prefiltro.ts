@@ -8,13 +8,21 @@
 // Quello che esce da qui (motivo della segnalazione, data, canale e fornitore della
 // pratica) lo vede solo MCF, nella mail della verifica: al commerciale il prefiltro
 // passa solo i testi generici. Una fonte che non risponde non ferma la verifica:
-// vale come vuota e lascia una riga nei log.
+// vale come vuota, lascia una riga nei log e chi rilegge tiene il valore salvato.
+//
+// La pratica recente conta solo se e' nata PRIMA della verifica (decisione del
+// controller, Ruling 11): la pratica che il commerciale manda dopo aver verificato
+// il cliente non deve accendere la regola 9 sulla sua stessa ricerca. La finestra
+// dei sei mesi si conta dalla verifica, non da oggi: riaprendo la ricerca dopo due
+// mesi si legge il cliente com'era quel giorno. Il cliente segnalato invece si
+// rilegge sempre: MCF puo' segnarlo anche dopo.
 
 import { PORTALI_PARTNER } from '../../data/portali-partner';
 import { query } from '../db';
 import { pulisciPiva } from '../piva';
 import { leggiPratiche } from '../pratiche-nominali';
 import type { Carrozzeria } from './carrozzeria';
+import { giornoItaliano } from './distinta';
 import type { PraticaTrovata, SegnaliPrefiltro } from './prefiltro';
 
 /** La finestra della regola 9 */
@@ -27,20 +35,35 @@ export function regoleConEventi(k: Pick<Carrozzeria, 'regoleSemaforo'>): boolean
   return k.regoleSemaforo === 'locatore' || k.regoleSemaforo === 'prefiltro';
 }
 
+/** I segnali letti, e quali fonti non hanno risposto (valgono vuote) */
+export interface LetturaSegnali {
+  segnali: SegnaliPrefiltro;
+  fallite: { segnalato: boolean; pratiche: boolean };
+}
+
+/** Una pratica con l'istante in cui e' nata (ISO), quando lo si conosce */
+export interface PraticaDatata {
+  pratica: PraticaTrovata;
+  creato: string | null;
+}
+
 const DATA = /^\d{4}-\d{2}-\d{2}$/;
 const due = (n: number) => String(n).padStart(2, '0');
 
 /**
- * Il primo giorno ancora dentro la finestra, sulle date di calendario: oggi meno
- * `mesi` mesi, estremo compreso. Se quel giorno non esiste (31 agosto meno sei
- * mesi) vale l'ultimo del mese, invece di sforare nel mese dopo.
+ * Il primo giorno ancora dentro la finestra, sul calendario italiano (le date delle
+ * pratiche sono italiane, il server su Vercel gira in UTC): oggi meno `mesi` mesi,
+ * estremo compreso. Se quel giorno non esiste (31 agosto meno sei mesi) vale
+ * l'ultimo del mese, invece di sforare nel mese dopo.
  */
 function limiteFinestra(oggi: Date, mesi: number): string {
-  const totale = oggi.getFullYear() * 12 + oggi.getMonth() - mesi;
+  const [a, m, g] = giornoItaliano(oggi).split('-').map(Number);
+  const totale = a * 12 + (m - 1) - mesi;
   const anno = Math.floor(totale / 12);
   const mese = totale - anno * 12;
-  const ultimo = new Date(anno, mese + 1, 0).getDate();
-  return `${anno}-${due(mese + 1)}-${due(Math.min(oggi.getDate(), ultimo))}`;
+  // Giorni del mese col calendario di Date in UTC: nessun fuso di mezzo
+  const ultimo = new Date(Date.UTC(anno, mese + 1, 0)).getUTCDate();
+  return `${anno}-${due(mese + 1)}-${due(Math.min(g, ultimo))}`;
 }
 
 /** La pratica piu' recente dentro la finestra, oppure null. Le date illeggibili non contano. */
@@ -58,19 +81,45 @@ export function praticaPiuRecente(
   return migliore;
 }
 
+/**
+ * Le pratiche nate prima della verifica. Con l'istante si confrontano istanti
+ * (strettamente prima); senza, solo il giorno, e il giorno stesso della verifica
+ * non conta: non si sa se la pratica e' venuta prima o dopo.
+ */
+export function natePrima(trovate: PraticaDatata[], prima: Date): PraticaTrovata[] {
+  const giorno = giornoItaliano(prima);
+  return trovate
+    .filter(({ pratica, creato }) => {
+      const t = creato ? new Date(creato).getTime() : NaN;
+      return Number.isFinite(t) ? t < prima.getTime() : pratica.data < giorno;
+    })
+    .map(({ pratica }) => pratica);
+}
+
+/**
+ * Rileggendo una ricerca: per una fonte che non ha risposto vale il valore salvato,
+ * cosi' un intoppo di un attimo non cancella un blocco o una pratica recente. Sulle
+ * pratiche (tre fonti) si tiene la piu' recente fra quella salvata e quella letta.
+ */
+export function unisciSegnali(letti: LetturaSegnali, salvati: SegnaliPrefiltro | null): SegnaliPrefiltro {
+  if (!salvati) return letti.segnali;
+  const segnalato = letti.fallite.segnalato ? salvati.segnalato : letti.segnali.segnalato;
+  let praticaRecente = letti.segnali.praticaRecente;
+  if (letti.fallite.pratiche) {
+    const vecchia = salvati.praticaRecente;
+    if (vecchia && (!praticaRecente || vecchia.data > praticaRecente.data)) praticaRecente = vecchia;
+  }
+  return { segnalato, praticaRecente };
+}
+
 // --- portali pratiche su Blob ---------------------------------------------------
 
-/** La data italiana di un istante: il record su Blob ha creato in UTC */
-const dataItaliana = new Intl.DateTimeFormat('en-CA', {
-  timeZone: 'Europe/Rome', year: 'numeric', month: '2-digit', day: '2-digit',
-});
-
-function dataRecord(r: Record<string, unknown>): string | null {
+function dataRecord(r: Record<string, unknown>): { data: string; creato: string | null } | null {
   const creato = typeof r.creato === 'string' ? new Date(r.creato) : null;
-  if (creato && !Number.isNaN(creato.getTime())) return dataItaliana.format(creato);
-  // I record vecchi senza creato: l'id contiene la data (EE-AAAAMMGG-HHMMSS)
+  if (creato && !Number.isNaN(creato.getTime())) return { data: giornoItaliano(creato), creato: creato.toISOString() };
+  // I record vecchi senza creato: l'id contiene la data italiana (EE-AAAAMMGG-HHMMSS), l'istante no
   const m = String(r.id ?? '').match(/^[A-Z]{2}-(\d{4})(\d{2})(\d{2})-/);
-  return m ? `${m[1]}-${m[2]}-${m[3]}` : null;
+  return m ? { data: `${m[1]}-${m[2]}-${m[3]}`, creato: null } : null;
 }
 
 /**
@@ -78,24 +127,22 @@ function dataRecord(r: Record<string, unknown>): string | null {
  * cliente.piva e' "P.IVA / CF" scritto dal partner: un codice fiscale non da' una
  * partita IVA e si scarta. Il canale su quei portali lo sceglie Alberto dopo: ignoto.
  */
-export function praticheDaRecord(
-  slug: string,
-  record: Record<string, unknown>[],
-): { piva: string; pratica: PraticaTrovata }[] {
-  const fuori: { piva: string; pratica: PraticaTrovata }[] = [];
+export function praticheDaRecord(slug: string, record: Record<string, unknown>[]): ({ piva: string } & PraticaDatata)[] {
+  const fuori: ({ piva: string } & PraticaDatata)[] = [];
   for (const r of record) {
     const cliente = (r.cliente ?? null) as { piva?: unknown } | null;
     const piva = pulisciPiva(String(cliente?.piva ?? ''));
-    const data = dataRecord(r);
-    if (!/^\d{11}$/.test(piva) || !data) continue;
-    fuori.push({ piva, pratica: { data, canale: null, fornitore: slug, fonte: 'portale' } });
+    const quando = dataRecord(r);
+    if (!/^\d{11}$/.test(piva) || !quando) continue;
+    fuori.push({ piva, pratica: { data: quando.data, canale: null, fornitore: slug, fonte: 'portale' }, creato: quando.creato });
   }
   return fuori;
 }
 
-type IndicePortali = Map<string, PraticaTrovata[]>;
+type IndicePortali = Map<string, PraticaDatata[]>;
+type LetturaIndice = { mappa: IndicePortali; completa: boolean };
 let indice: { creato: number; mappa: IndicePortali } | null = null;
-let inVolo: Promise<IndicePortali> | null = null;
+let inVolo: Promise<LetturaIndice> | null = null;
 
 /** Per i test: svuota l'indice in memoria */
 export function azzeraIndicePortali(): void {
@@ -103,7 +150,7 @@ export function azzeraIndicePortali(): void {
   inVolo = null;
 }
 
-async function costruisciIndice(): Promise<IndicePortali> {
+async function costruisciIndice(): Promise<LetturaIndice> {
   const slug = Object.keys(PORTALI_PARTNER);
   const letti = await Promise.allSettled(slug.map((s) => leggiPratiche(s)));
   const mappa: IndicePortali = new Map();
@@ -113,8 +160,8 @@ async function costruisciIndice(): Promise<IndicePortali> {
       falliti.push(slug[i]);
       return;
     }
-    for (const { piva, pratica } of praticheDaRecord(slug[i], esito.value)) {
-      mappa.set(piva, [...(mappa.get(piva) ?? []), pratica]);
+    for (const { piva, ...p } of praticheDaRecord(slug[i], esito.value)) {
+      mappa.set(piva, [...(mappa.get(piva) ?? []), p]);
     }
   });
   if (falliti.length) {
@@ -124,22 +171,28 @@ async function costruisciIndice(): Promise<IndicePortali> {
     // Un indice letto a meta' non si tiene: la prossima verifica riprova
     indice = { creato: Date.now(), mappa };
   }
-  return mappa;
+  return { mappa, completa: falliti.length === 0 };
 }
 
 /** Le pratiche dei portali per partita IVA, dall'indice in memoria se ha meno di 60 secondi */
-async function praticheDeiPortali(piva: string): Promise<PraticaTrovata[]> {
-  if (!indice || Date.now() - indice.creato >= VITA_INDICE_PORTALI_MS) {
+async function praticheDeiPortali(piva: string): Promise<{ trovate: PraticaDatata[]; fallita: boolean }> {
+  if (indice && Date.now() - indice.creato < VITA_INDICE_PORTALI_MS) {
+    return { trovate: indice.mappa.get(piva) ?? [], fallita: false };
+  }
+  try {
     // Due verifiche insieme aspettano la stessa lettura dello store
     inVolo ??= costruisciIndice().finally(() => { inVolo = null; });
-    return (await inVolo).get(piva) ?? [];
+    const { mappa, completa } = await inVolo;
+    return { trovate: mappa.get(piva) ?? [], fallita: !completa };
+  } catch (err) {
+    console.warn(JSON.stringify({ evento: 'motore_segnali_errore', fonte: 'portali', msg: String(err) }));
+    return { trovate: [], fallita: true };
   }
-  return indice.mappa.get(piva) ?? [];
 }
 
 // --- database ----------------------------------------------------------------------
 
-async function clienteSegnalato(piva: string): Promise<SegnaliPrefiltro['segnalato']> {
+async function clienteSegnalato(piva: string): Promise<{ segnalato: SegnaliPrefiltro['segnalato']; fallita: boolean }> {
   try {
     // La partita IVA si confronta a sole cifre: chi l'ha scritta col prefisso IT resta trovato
     const righe = await query<{ motivo: string; effetto: 'blocco' | 'rosso' }>(
@@ -147,55 +200,81 @@ async function clienteSegnalato(piva: string): Promise<SegnaliPrefiltro['segnala
       [piva],
     );
     const r = righe[0];
-    return r ? { motivo: r.motivo, effetto: r.effetto } : null;
+    return { segnalato: r ? { motivo: r.motivo, effetto: r.effetto } : null, fallita: false };
   } catch (err) {
     // Non ferma la verifica, ma un blocco che non si legge non deve passare in silenzio
     console.error(JSON.stringify({ evento: 'motore_segnalato_errore', piva, msg: String(err) }));
-    return null;
+    return { segnalato: null, fallita: true };
   }
 }
 
 type RigaPratica = { data: string; canale: string | null; fornitore_slug: string | null };
 
-/** La pratica piu' recente di una tabella, gia' con la data in AAAA-MM-GG. Errore = nessuna */
-async function ultimaPratica(fonte: 'motore' | 'esterna', sql: string, piva: string): Promise<PraticaTrovata[]> {
+/** La pratica piu' recente di una tabella, gia' con la data in AAAA-MM-GG. Errore = nessuna, fallita */
+async function ultimaPratica(
+  fonte: 'motore' | 'esterna',
+  sql: string,
+  valori: unknown[],
+): Promise<{ trovate: PraticaTrovata[]; fallita: boolean }> {
   try {
-    const righe = await query<RigaPratica>(sql, [piva]);
-    return righe.map((r) => ({ data: r.data, canale: r.canale ?? null, fornitore: r.fornitore_slug ?? null, fonte }));
+    const righe = await query<RigaPratica>(sql, valori);
+    return {
+      trovate: righe.map((r) => ({ data: r.data, canale: r.canale ?? null, fornitore: r.fornitore_slug ?? null, fonte })),
+      fallita: false,
+    };
   } catch (err) {
     console.warn(JSON.stringify({ evento: 'motore_segnali_errore', fonte, msg: String(err) }));
-    return [];
+    return { trovate: [], fallita: true };
   }
 }
 
 // Le date escono gia' come testo: pg trasformerebbe un date in mezzanotte locale,
-// e da li' a toISOString si perde un giorno
+// e da li' a toISOString si perde un giorno.
+// app.pratica ha l'istante: si confronta con l'istante della verifica, strettamente prima.
 const SQL_PRATICA_MOTORE = `
   SELECT to_char(creato AT TIME ZONE 'Europe/Rome', 'YYYY-MM-DD') AS data, canale, fornitore_slug
-  FROM app.pratica WHERE piva = $1 ORDER BY creato DESC LIMIT 1`;
+  FROM app.pratica WHERE piva = $1 AND creato < $2::timestamptz ORDER BY creato DESC LIMIT 1`;
+// app.pratica_esterna ha solo il giorno: contano i giorni prima di quello italiano della
+// verifica. Una pratica esterna datata lo stesso giorno non si sa se e' venuta prima o
+// dopo, e la piu' probabile e' quella che MCF sta lavorando proprio da questa
+// verifica: si lascia fuori, come la pratica del motore mandata dopo.
 const SQL_PRATICA_ESTERNA = `
   SELECT to_char(data, 'YYYY-MM-DD') AS data, canale, fornitore_slug
-  FROM app.pratica_esterna WHERE regexp_replace(piva, '\\D', '', 'g') = $1 ORDER BY data DESC LIMIT 1`;
+  FROM app.pratica_esterna WHERE regexp_replace(piva, '\\D', '', 'g') = $1 AND data < $2::date
+  ORDER BY data DESC LIMIT 1`;
 
 /**
- * Cliente segnalato e pratica recente per una partita IVA. Le pratiche del motore
- * contano su ogni carrozzeria, non solo su quella che verifica.
+ * Cliente segnalato e pratica recente per una partita IVA, con le pratiche nate prima
+ * dell'istante `prima`: la verifica appena fatta (POST) o quella riaperta (GET, il suo
+ * `creato`). Le pratiche del motore contano su ogni carrozzeria, non solo su quella
+ * che verifica. Dice anche quali fonti non hanno risposto.
  */
-export async function segnaliPrefiltro(pivaGrezza: string): Promise<SegnaliPrefiltro> {
+export async function segnaliPrefiltro(pivaGrezza: string, prima: Date): Promise<LetturaSegnali> {
   const piva = pulisciPiva(pivaGrezza);
   const [segnalato, motore, esterna, portali] = await Promise.all([
     clienteSegnalato(piva),
-    ultimaPratica('motore', SQL_PRATICA_MOTORE, piva),
-    ultimaPratica('esterna', SQL_PRATICA_ESTERNA, piva),
-    praticheDeiPortali(piva).catch((err) => {
-      console.warn(JSON.stringify({ evento: 'motore_segnali_errore', fonte: 'portali', msg: String(err) }));
-      return [] as PraticaTrovata[];
-    }),
+    ultimaPratica('motore', SQL_PRATICA_MOTORE, [piva, prima.toISOString()]),
+    ultimaPratica('esterna', SQL_PRATICA_ESTERNA, [piva, giornoItaliano(prima)]),
+    praticheDeiPortali(piva),
   ]);
-  return { segnalato, praticaRecente: praticaPiuRecente([...motore, ...portali, ...esterna]) };
+  return {
+    segnali: {
+      segnalato: segnalato.segnalato,
+      praticaRecente: praticaPiuRecente([...motore.trovate, ...natePrima(portali.trovate, prima), ...esterna.trovate], prima),
+    },
+    fallite: { segnalato: segnalato.fallita, pratiche: motore.fallita || esterna.fallita || portali.fallita },
+  };
 }
 
-/** I segnali letti si salvano sulla ricerca: il polling degli eventi li rilegge da li' */
+/**
+ * I segnali letti si salvano sulla ricerca: il polling degli eventi li rilegge da li'.
+ * Non fallisce mai: la scheda e' gia' pagata, un salvataggio mancato lascia una riga
+ * nei log e la prossima riapertura li rilegge.
+ */
 export async function salvaSegnali(ricercaId: string, segnali: SegnaliPrefiltro): Promise<void> {
-  await query(`UPDATE app.ricerca_merito SET segnali = $2 WHERE id = $1`, [ricercaId, JSON.stringify(segnali)]);
+  try {
+    await query(`UPDATE app.ricerca_merito SET segnali = $2 WHERE id = $1`, [ricercaId, JSON.stringify(segnali)]);
+  } catch (err) {
+    console.error(JSON.stringify({ evento: 'motore_segnali_errore', fonte: 'salvataggio', ricercaId, msg: String(err) }));
+  }
 }
