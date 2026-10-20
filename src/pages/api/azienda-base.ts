@@ -20,7 +20,9 @@ export const prerender = false;
  *
  * Autenticazione: nessuna, per ora. La chiamata costa pochi centesimi e c'e' un
  * tetto mensile server-side (OPENAPI_TETTO_RICERCHE), quindi un abuso si ferma da
- * solo. L'endpoint a pagamento, quello si', nascera' autenticato.
+ * solo. L'endpoint a pagamento, quello si', nascera' autenticato. Il tetto conta
+ * solo le ricerche del tool Marotta, che dal 20/10/2026 hanno una cartella loro
+ * nel registro spesa.
  */
 
 import { ricercaBase, entroIlTetto, fatturatoDaRicerca } from '../../lib/openapi';
@@ -39,14 +41,14 @@ export async function GET({ request }: { request: Request }) {
   const piva = (new URL(request.url).searchParams.get('piva') ?? '').replace(/\D/g, '');
   if (!pivaValida(piva)) return json({ found: false, error: 'Partita IVA non valida' }, 400);
 
-  const tetto = await entroIlTetto('IT-advanced');
+  const tetto = await entroIlTetto('IT-advanced', 'marotta');
   if (!tetto.ok) {
     console.warn(JSON.stringify({ evento: 'ricerca_azienda_tetto', piva, motivo: tetto.motivo }));
-    return json({ found: false, error: 'Ricerche esaurite per questo mese' }, 429);
+    return json({ found: false, error: tetto.messaggio }, 429);
   }
 
   try {
-    const r = await ricercaBase(piva);
+    const r = await ricercaBase(piva, { sorgente: 'marotta' });
     if (!r.trovata) {
       console.log(JSON.stringify({ evento: 'ricerca_azienda', piva, esito: 'non trovata' }));
       return json({ found: false });

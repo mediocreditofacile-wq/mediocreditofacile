@@ -58,6 +58,8 @@ const datiClient = { CODICI, ETICHETTE, RUOLI, VALORI };
 
       <!-- L'elenco e' la cache: le schede scadute non ci sono, e riaprirne una non costa -->
       <section class="val-rec" id="recenti" style="display:none;">
+        <!-- Spesa Openapi del mese: il tool interno non ha tetto, ma quanto spende si vede -->
+        <p class="val-spesa-mese" id="spesaMese"></p>
         <div class="val-rec__head">
           <h2 class="val-rec__tit">Ricerche ultimi 30 giorni</h2>
           <div class="val-rec__pag" id="recentiPag"></div>
@@ -109,6 +111,12 @@ const datiClient = { CODICI, ETICHETTE, RUOLI, VALORI };
   .val-btn--2 { background: transparent; color: #FE6F3A; border: 1.5px solid #FE6F3A; }
   .val-btn--2:disabled { background: transparent; border-color: #E1DEE3; color: #787782; }
   .val-msg { font-size: .9375rem; color: #787782; margin-top: 16px; min-height: 22px; }
+
+  /* --- Spesa Openapi del mese, sopra le ricerche recenti --- */
+  .val-spesa-mese { font-size: .875rem; color: #444451; margin: 0 0 16px; font-variant-numeric: tabular-nums; }
+  .val-spesa-mese:empty { display: none; }
+  .val-spesa-mese strong { color: #0F1020; font-weight: 700; }
+  .val-spesa-mese__resto { display: block; font-size: .75rem; color: #787782; margin-top: 4px; }
 
   /* --- Ricerche ultimi 30 giorni --- */
   .val-rec { border: 1px solid #E1DEE3; border-radius: 16px; padding: 24px; margin-top: 8px; }

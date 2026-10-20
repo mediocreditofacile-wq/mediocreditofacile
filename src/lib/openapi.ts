@@ -15,6 +15,7 @@
 
 import { put, list, get } from '@vercel/blob';
 import { conEsito, type EsitoVerifica, type RegistroVerifiche, type TipoVerifica } from './verifiche-cache';
+import { messaggioTetto } from './tetto-openapi';
 
 // L'SDK Blob legge process.env, che in dev Astro non popola sempre: passiamo
 // il token esplicitamente cosi' cache e registro costi funzionano anche in locale.
@@ -71,13 +72,18 @@ export const LISTINO_OLTRE_FRANCHIGIA: Partial<Record<Servizio, number>> = {
 };
 
 /**
- * Chi ha originato la chiamata. 'sito' sono gli strumenti interni e il tool
- * Marotta (il default, e il percorso storico del registro); 'fiera' e' la
- * pagina /fiera; 'carrozzeria/<slug>' e' un fornitore sul motore dei portali,
- * uno per uno. Tetti separati: un picco in padiglione o un fornitore che
- * esagera non devono mangiare il budget che serve a una pratica vera.
+ * Chi ha originato la chiamata, cioe' chi la paga:
+ *   'valutazione'        /tools/valutazione (schede, verifiche, documenti, estero): nessun tetto
+ *   'marotta'            il tool Marotta (/api/azienda-base, /api/azienda-estera): tetto suo
+ *   'fiera'              la pagina /fiera, col tetto di fiera-guardia.ts
+ *   'carrozzeria/<slug>' un fornitore sul motore dei portali, col tetto nel database
+ *   'sito'               il default e la cartella storica: fino al 20/10/2026 ci
+ *                        finivano insieme valutazione e Marotta. Oggi raccoglie
+ *                        cio' che non e' di nessuno strumento (vedi spesaDelMese)
+ * Tetti separati: un picco in padiglione, un fornitore che esagera o le visure
+ * del tool interno non devono mangiare il budget di qualcun altro.
  */
-export type Sorgente = 'sito' | 'fiera' | `carrozzeria/${string}`;
+export type Sorgente = 'sito' | 'fiera' | 'marotta' | 'valutazione' | `carrozzeria/${string}`;
 
 /** Sorgente di un fornitore sul motore. Lo slug finisce in un percorso: si valida. */
 export function sorgenteCarrozzeria(slug: string): Sorgente {
@@ -258,8 +264,13 @@ async function chiama(
  * La stessa chiamata, per i moduli che parlano con altri prodotti Openapi
  * (DocuEngine): registro spesa, rifiuti del token e ritentativi restano quelli.
  */
-export function chiamaOpenapi(url: string, servizio: Servizio, init?: RequestInit): Promise<any> {
-  return chiama(url, servizio, init);
+export function chiamaOpenapi(
+  url: string,
+  servizio: Servizio,
+  init?: RequestInit,
+  sorgente: Sorgente = 'sito',
+): Promise<any> {
+  return chiama(url, servizio, init, sorgente);
 }
 
 // --- registro spesa ----------------------------------------------------------
@@ -286,13 +297,18 @@ async function registraCosto(servizio: Servizio, sorgente: Sorgente = 'sito', er
 export interface ConsumoParziale {
   /** Chiamate nel registro (successi ed errori) */
   chiamate: number;
-  /** Spesa: sul totale e sul sito riconciliata col wallet, sulla fiera dal registro */
+  /** Spesa: sul totale e su 'sito' riconciliata col wallet, sugli strumenti dal registro */
   totale: number;
   perServizio: Record<string, number>;
 }
 
-/** Sito e fiera ci sono sempre; le carrozzerie compaiono quando hanno speso */
-export type ConsumoPerSorgente = { sito: ConsumoParziale; fiera: ConsumoParziale } & Record<string, ConsumoParziale>;
+/** Le sorgenti fisse ci sono sempre; le carrozzerie compaiono quando hanno speso */
+export type ConsumoPerSorgente = {
+  sito: ConsumoParziale;
+  fiera: ConsumoParziale;
+  marotta: ConsumoParziale;
+  valutazione: ConsumoParziale;
+} & Record<string, ConsumoParziale>;
 
 export interface Consumo extends ConsumoParziale {
   mese: string;
@@ -309,15 +325,18 @@ export interface Consumo extends ConsumoParziale {
 }
 
 const vuoto = (): ConsumoParziale => ({ chiamate: 0, totale: 0, perServizio: {} });
+const sorgentiVuote = (): ConsumoPerSorgente => ({ sito: vuoto(), fiera: vuoto(), marotta: vuoto(), valutazione: vuoto() });
 
 /**
  * Sorgente dal percorso del blob, gia' privato del nome del file:
  *   openapi/costi/<mese>/                     -> 'sito' (il percorso storico)
  *   openapi/costi/<mese>/fiera/               -> 'fiera'
+ *   openapi/costi/<mese>/marotta/             -> 'marotta'
+ *   openapi/costi/<mese>/valutazione/         -> 'valutazione'
  *   openapi/costi/<mese>/carrozzeria/<slug>/  -> 'carrozzeria/<slug>'
  */
 export function sorgenteDaPercorso(parti: string[]): Sorgente {
-  if (parti[3] === 'fiera') return 'fiera';
+  if (parti[3] === 'fiera' || parti[3] === 'marotta' || parti[3] === 'valutazione') return parti[3];
   if (parti[3] === 'carrozzeria' && parti[4]) return `carrozzeria/${parti[4]}`;
   return 'sito';
 }
@@ -335,11 +354,32 @@ export function sorgenteDaPercorso(parti: string[]): Sorgente {
 // sia lungo il ritardo. Una chiamata fatta poco prima di un lotto che la fattura
 // in quello dopo puo' sfuggire finche' quel lotto non arriva: per un tetto va bene.
 // Il mese dell'addebito e' quello della fattura, come in console.
-async function transazioniWallet(): Promise<{ amount: number; createdAt: string }[] | null> {
+//
+// L'elenco e' a pagine da 100 al massimo (skip e limit, OAuth v2), dalla piu'
+// recente (verificato il 20/10/2026). Fino a quel giorno si leggeva solo la
+// prima pagina, e a ottobre le prime 100 transazioni arrivavano al 10/10: il
+// conto del mese usciva 85,63 invece di 96,79. Si sfoglia finche' una pagina non
+// arriva al mese prima o non e' corta. Una pagina che non risponde vale come
+// wallet muto: meglio il solo registro di un totale a meta' che sembra intero.
+const PAGINA_WALLET = 100;
+const PAGINE_WALLET_MAX = 20;
+
+async function transazioniWallet(mese: string): Promise<{ amount: number; createdAt: string }[] | null> {
   try {
-    const res = await fetch(`${OAUTH}/wallet/transactions`, { headers: { Authorization: credenziali() } });
-    const body = await res.json();
-    return Array.isArray(body?.data) ? body.data : null;
+    const tutte: { amount: number; createdAt: string }[] = [];
+    for (let pagina = 0; pagina < PAGINE_WALLET_MAX; pagina++) {
+      const res = await fetch(
+        `${OAUTH}/wallet/transactions?skip=${pagina * PAGINA_WALLET}&limit=${PAGINA_WALLET}`,
+        { headers: { Authorization: credenziali() } },
+      );
+      const body = await res.json();
+      if (!Array.isArray(body?.data)) return null;
+      const righe: { amount: number; createdAt: string }[] = body.data;
+      tutte.push(...righe);
+      if (righe.length < PAGINA_WALLET) break;
+      if (righe.some((t) => meseDi(new Date(t.createdAt)) < mese)) break;
+    }
+    return tutte;
   } catch {
     return null;
   }
@@ -369,7 +409,7 @@ export async function spesaDelMese(mese?: string): Promise<Consumo> {
         cursor = r.cursor;
       } while (cursor);
     })();
-    const [, transazioni] = await Promise.all([lettura, transazioniWallet()]);
+    const [, transazioni] = await Promise.all([lettura, transazioniWallet(m)]);
 
     // Addebiti del mese e momento dell'ultimo lotto fatturato (anche di mesi prima)
     const uscite = (transazioni ?? []).filter((t) => Number(t.amount) < 0);
@@ -379,7 +419,7 @@ export async function spesaDelMese(mese?: string): Promise<Consumo> {
     const ultimoAddebito = uscite.reduce((max, t) => Math.max(max, new Date(t.createdAt).getTime()), 0);
 
     const tutto = vuoto();
-    const perSorgente: ConsumoPerSorgente = { sito: vuoto(), fiera: vuoto() };
+    const perSorgente = sorgentiVuote();
     let inAttesa = 0;
     for (const b of blobs) {
       const parti = b.pathname.split('/');
@@ -399,8 +439,10 @@ export async function spesaDelMese(mese?: string): Promise<Consumo> {
     const registrato = tutto.totale;
 
     // Il wallet non sa chi ha fatto la chiamata: la riconciliazione vale per il
-    // totale. Fiera e carrozzerie restano sul loro registro, e il sito prende
-    // il resto del reale, mai meno di quanto il suo registro ha gia' visto.
+    // totale. Ogni strumento (valutazione, Marotta, fiera, carrozzerie) resta sul
+    // suo registro, e 'sito' prende il resto del reale, mai meno di quanto il suo
+    // registro ha gia' visto. Cosi' le prove e gli scarti di listino non finiscono
+    // mai sul budget di uno strumento, e in particolare non su quello di Marotta.
     if (addebitato != null) {
       tutto.totale = addebitato + inAttesa;
       const altri = Object.entries(perSorgente)
@@ -421,7 +463,7 @@ export async function spesaDelMese(mese?: string): Promise<Consumo> {
     return dato;
   } catch {
     return {
-      mese: m, ...vuoto(), perSorgente: { sito: vuoto(), fiera: vuoto() },
+      mese: m, ...vuoto(), perSorgente: sorgentiVuote(),
       registrato: 0, addebitato: null, inAttesa: 0,
     };
   }
@@ -430,13 +472,19 @@ export async function spesaDelMese(mese?: string): Promise<Consumo> {
 // --- tetto di spesa ----------------------------------------------------------
 // Gli endpoint aperti al tool Marotta spendono soldi veri: senza un tetto, un
 // abuso si accorge solo il wallet. Il tetto e' server-side e si configura da env,
-// cosi' si stringe o si allarga senza toccare il codice.
+// cosi' si stringe o si allarga senza toccare il codice (su Vercel, poi un nuovo
+// deploy perche' la variabile arrivi alle funzioni).
 //
-//   OPENAPI_TETTO_MESE      euro di spesa a pagamento nel mese (default 30)
-//   OPENAPI_TETTO_RICERCHE  chiamate IT-advanced nel mese (default 400)
+//   OPENAPI_TETTO_MAROTTA   euro a pagamento nel mese del tool Marotta (default 30)
+//   OPENAPI_TETTO_RICERCHE  chiamate IT-advanced nel mese, per sorgente (default 400)
+//   OPENAPI_TETTO_MESE      euro per una sorgente che non ha un tetto suo (default 30)
 //
 // IT-advanced ha 30 chiamate al mese incluse e poi costa pochi centesimi: il suo
 // tetto e' sul numero di chiamate, non sugli euro, altrimenti non si fermerebbe mai.
+//
+// Il tool di valutazione non ha tetto (decisione di Alberto del 20/10/2026): e'
+// lo strumento di lavoro, ogni chiamata la decide lui guardando il prezzo. La sua
+// spesa si registra comunque, nella sua cartella, e la pagina la mostra.
 const numeroEnv = (chiave: string, difetto: number): number => {
   const v = Number(import.meta.env[chiave as keyof ImportMetaEnv]);
   return Number.isFinite(v) && v > 0 ? v : difetto;
@@ -444,36 +492,52 @@ const numeroEnv = (chiave: string, difetto: number): number => {
 
 export interface EsitoTetto {
   ok: boolean;
+  /** Per i log: tecnico e breve */
   motivo?: string;
+  /** Per chi si vede fermare: quale budget, quanto speso, quando si riapre */
+  messaggio?: string;
   /** Consumo del mese al momento del controllo, per i log e per la UI */
   consumo: Consumo;
 }
 
 /**
  * Controlla se c'e' ancora budget per una chiamata a un dato servizio.
- * Conta solo le chiamate della sorgente indicata: la fiera ha il suo tetto
- * (vedi src/lib/fiera-guardia.ts) e non consuma quello degli strumenti.
- * Una carrozzeria passa il suo tetto in euro, che sta nel database
+ * Conta solo le chiamate della sorgente indicata: ogni strumento spende il suo e
+ * solo quello. La fiera ha il suo tetto in src/lib/fiera-guardia.ts. Una
+ * carrozzeria passa il suo tetto in euro, che sta nel database
  * (app.carrozzeria.tetto_mese_euro) e non nelle variabili d'ambiente.
  */
 export async function entroIlTetto(
   servizio: Servizio,
-  sorgente: Sorgente = 'sito',
+  sorgente: Sorgente,
   tettoEuro?: number,
 ): Promise<EsitoTetto> {
   const consumo = await spesaDelMese();
+  if (sorgente === 'valutazione') return { ok: true, consumo };
   const mio = consumo.perSorgente[sorgente] ?? vuoto();
   if (COSTI[servizio] === 0) {
     const tetto = numeroEnv('OPENAPI_TETTO_RICERCHE', 400);
     const fatte = mio.perServizio[servizio] ?? 0;
     if (fatte >= tetto) {
-      return { ok: false, motivo: `tetto ricerche del mese raggiunto (${fatte}/${tetto})`, consumo };
+      return {
+        ok: false,
+        motivo: `tetto ricerche del mese raggiunto (${fatte}/${tetto})`,
+        messaggio: messaggioTetto({ sorgente, mese: consumo.mese, tipo: 'ricerche', speso: fatte, tetto }),
+        consumo,
+      };
     }
     return { ok: true, consumo };
   }
-  const tetto = tettoEuro != null && tettoEuro >= 0 ? tettoEuro : numeroEnv('OPENAPI_TETTO_MESE', 30);
+  const tetto = tettoEuro != null && tettoEuro >= 0
+    ? tettoEuro
+    : numeroEnv(sorgente === 'marotta' ? 'OPENAPI_TETTO_MAROTTA' : 'OPENAPI_TETTO_MESE', 30);
   if (mio.totale >= tetto) {
-    return { ok: false, motivo: `tetto di spesa del mese raggiunto (${mio.totale} / ${tetto} euro)`, consumo };
+    return {
+      ok: false,
+      motivo: `tetto di spesa del mese raggiunto (${mio.totale} / ${tetto} euro)`,
+      messaggio: messaggioTetto({ sorgente, mese: consumo.mese, tipo: 'euro', speso: mio.totale, tetto }),
+      consumo,
+    };
   }
   return { ok: true, consumo };
 }
@@ -584,7 +648,7 @@ export interface SchedaAzienda {
  */
 export interface OpzioniScheda {
   conNegativita?: boolean;
-  /** A chi si addebitano le chiamate. Default 'sito' (gli strumenti interni). */
+  /** A chi si addebitano le chiamate. Default 'sito'; il tool interno passa 'valutazione'. */
   sorgente?: Sorgente;
 }
 
@@ -669,11 +733,16 @@ export async function esitoNegativita(id: string, sorgente: Sorgente = 'sito'): 
 }
 
 /** Report completo su una persona: cariche, partecipazioni, eventi negativi, immobili. */
-export async function avviaReportPersona(nome: string, cognome: string, cf: string): Promise<string | null> {
+export async function avviaReportPersona(
+  nome: string,
+  cognome: string,
+  cf: string,
+  sorgente: Sorgente = 'sito',
+): Promise<string | null> {
   const r = await chiama(`${RISK}/IT-report-persona/`, 'IT-report-persona', {
     method: 'POST',
     body: JSON.stringify({ name: nome, surname: cognome, taxCode: cf }),
-  });
+  }, sorgente);
   return (r as any).dati?.id ?? null;
 }
 
@@ -985,7 +1054,7 @@ export const chiaveEstera = (paese: string, id: string) =>
  * 0,11 EUR di listino: all'estero non c'e' la franchigia mensile che c'e' sull'Italia,
  * quindi si paga dal primo pezzo. Cache 30 giorni come sull'italiano.
  */
-export async function ricercaEstera(paese: string, id: string): Promise<RicercaEstera> {
+export async function ricercaEstera(paese: string, id: string, sorgente: Sorgente = 'sito'): Promise<RicercaEstera> {
   const P = paese.toUpperCase();
   const chiave = chiaveEstera(P, id);
 
@@ -999,7 +1068,7 @@ export async function ricercaEstera(paese: string, id: string): Promise<RicercaE
     /* cache assente o illeggibile: si prosegue con la chiamata */
   }
 
-  const res = await chiama(`${COMPANY}/WW-advanced/${P}/${encodeURIComponent(id)}`, 'WW-advanced');
+  const res = await chiama(`${COMPANY}/WW-advanced/${P}/${encodeURIComponent(id)}`, 'WW-advanced', undefined, sorgente);
   if (!res.trovato || !res.dati) {
     return {
       trovata: false, paese: P, identificativo: id, fonte: 'openapi', ragioneSociale: null,

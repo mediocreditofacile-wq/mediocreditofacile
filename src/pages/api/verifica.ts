@@ -45,7 +45,7 @@ const cfValido = (cf: string) => /^[A-Z0-9]{11,16}$/.test(cf);
 /** Chiede l'esito a Openapi e lo riduce alla forma che si conserva. */
 async function esitoDaOpenapi(tipo: TipoVerifica, id: string): Promise<{ pronto: boolean; dati?: any }> {
   if (tipo === 'report') return esitoReportPersona(id);
-  const r = await esitoNegativita(id);
+  const r = await esitoNegativita(id, 'valutazione');
   return r.pronto ? { pronto: true, dati: riduciNegativita(r.dati) } : r;
 }
 
@@ -66,8 +66,8 @@ async function avvia(tipo: TipoVerifica, cf: string, body: any) {
   }
 
   const id = tipo === 'report'
-    ? await avviaReportPersona(String(body.nome), String(body.cognome), cf)
-    : await avviaNegativita(cf);
+    ? await avviaReportPersona(String(body.nome), String(body.cognome), cf, 'valutazione')
+    : await avviaNegativita(cf, 'valutazione');
   if (!id) return json({ errore: 'Openapi non ha restituito un id' }, 502);
   await salvaAvvio(cf, tipo, id);
   console.log(JSON.stringify({ evento: tipo === 'report' ? 'verifica_report_persona' : 'verifica_negativita', cf, id, motivo: decisione.motivo }));
