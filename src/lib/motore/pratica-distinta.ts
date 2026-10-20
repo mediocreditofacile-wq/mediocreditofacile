@@ -100,6 +100,8 @@ const MESSAGGI: Record<string, string> = {
     'La proposta indicata non è di questo cliente o non si può usare: rifai il preventivo dalla scheda Proposte.',
   consegna_proposta: "Nella proposta manca l'indirizzo di consegna: rifai la proposta indicando dove vanno i beni.",
   consegna_corpo: "Manca l'indirizzo di consegna: indica dove vanno consegnati i beni.",
+  proposta_senza_vendita:
+    'Genera prima la proposta di vendita: completa i dati del cliente nella scheda Proposte e rifai il preventivo.',
 };
 
 const FORMA_PRATICA: Record<ClasseForma, string> = {
@@ -147,6 +149,25 @@ export function propostaUsabile(p: PropostaSalvata | null): p is PropostaSalvata
   if (!p || !p.canale || !p.riservato) return false;
   const righe = oggetto(p.dati).righe;
   return Array.isArray(righe) && righe.length > 0;
+}
+
+/**
+ * La proposta da cui parte una pratica normale (non una segnalazione): usabile, coi
+ * dati di vendita e con la proposta per il locatore salvata nel riservato. Una proposta
+ * col solo canone (dati di vendita mai completati, o PDF del locatore non salvato) a
+ * MCF non darebbe ne' la proposta da far firmare ne' quella da mandare al locatore.
+ * Il percorso lo controlla poi allegatoLocatore(), che lo legge solo dalla cartella
+ * riservata del fornitore.
+ */
+export function propostaCompleta(p: PropostaSalvata | null): boolean {
+  if (!propostaUsabile(p)) return false;
+  const vendita = oggetto(p.dati).vendita;
+  if (vendita === null || typeof vendita !== 'object' || Array.isArray(vendita)) return false;
+  const documenti = oggetto(p.riservato).documenti;
+  return Array.isArray(documenti) && documenti.some((d) => {
+    const percorso = oggetto(d).pathname;
+    return typeof percorso === 'string' && percorso !== '';
+  });
 }
 
 /** La durata della pratica: quella chiesta se la proposta la quota, altrimenti quella in evidenza */
@@ -510,6 +531,9 @@ export async function creaPraticaDistinta(
   }
   const segnalazione = decisione.tipo === 'segnalazione';
   const motivo: MotivoSegnalazione | null = !segnalazione ? null : prefiltro.semaforo === 'rosso' ? 'rosso' : 'nessun_canale';
+  // Una pratica normale parte solo dalla proposta di vendita: il solo canone non basta.
+  // Sulla segnalazione la proposta resta facoltativa e puo' essere quella col solo canone.
+  if (!segnalazione && !propostaCompleta(proposta)) return no(400, 'proposta_senza_vendita');
 
   // 5. importo, righe, canale e dati di vendita dalla proposta; senza proposta dal corpo
   let c: Contenuto;

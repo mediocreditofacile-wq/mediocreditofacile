@@ -585,11 +585,42 @@ describe('/api/motore/pratica sul settore distinta', () => {
     });
 
     db.query.mockClear();
-    database({ proposta: proposta({ dati: { vendita: null } }) });
+    // Una proposta di vendita salvata senza IBAN (dati di prima, o scritti male): il corpo non lo porta
+    database({ proposta: proposta({ dati: { vendita: { ...VENDITA, iban: '' } } }) });
     const senza = await post(corpo({ referente: { telefono: '333 1234567', email: 'anna@example.it' } }));
     expect(senza.status).toBe(400);
     expect(await senza.json()).toMatchObject({ error: 'iban_mancante', messaggio: expect.any(String) });
     expect(inserita()).toBeNull();
+  });
+
+  describe('una pratica normale parte solo dalla proposta di vendita, non dal solo canone', () => {
+    it('proposta senza dati di vendita: proposta_senza_vendita, nessuna pratica e nessuna mail', async () => {
+      database({ proposta: proposta({ dati: { vendita: null } }) });
+      const r = await post(corpo());
+      expect(r.status).toBe(400);
+      expect(await r.json()).toMatchObject({
+        ok: false, error: 'proposta_senza_vendita', messaggio: expect.stringContaining('Genera prima la proposta di vendita'),
+      });
+      expect(inserita()).toBeNull();
+      expect(mail()).toBeUndefined();
+    });
+
+    it('proposta senza la proposta per il locatore salvata: proposta_senza_vendita', async () => {
+      database({ proposta: proposta({ riservato: { ...proposta().riservato, documenti: [] } }) });
+      const r = await post(corpo());
+      expect(r.status).toBe(400);
+      expect((await r.json()).error).toBe('proposta_senza_vendita');
+      expect(inserita()).toBeNull();
+    });
+
+    it('sulla segnalazione (rosso) la proposta col solo canone resta buona', async () => {
+      const segnalato = { segnalato: { motivo: 'sofferenze', effetto: 'rosso' as const }, praticaRecente: null };
+      segn.segnaliPrefiltro.mockResolvedValue({ segnali: segnalato, fallite: { segnalato: false, pratiche: false } });
+      database({ proposta: proposta({ dati: { vendita: null }, riservato: { ...proposta().riservato, documenti: [] } }) });
+      const r = await post(corpo({ iban: IBAN, referente: { telefono: '333 1234567', email: 'anna@example.it' } }));
+      expect(await r.json()).toMatchObject({ ok: true, segnalazione: true });
+      expect(inserita()!.propostaId).toBe(ID_PROPOSTA);
+    });
   });
 
   it('bozza non valida: rifiutata', async () => {

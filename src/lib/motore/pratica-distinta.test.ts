@@ -20,6 +20,7 @@ import {
   decidiInvio,
   documentiMancanti,
   formatoAmmesso,
+  propostaCompleta,
   propostaUsabile,
   statoEventiInvio,
   testoFormati,
@@ -190,6 +191,30 @@ describe('propostaUsabile', () => {
     expect(propostaUsabile({ ...buona, riservato: null } as any)).toBe(false);
     expect(propostaUsabile({ ...buona, dati: { ...buona.dati, righe: [] } } as any)).toBe(false);
     expect(propostaUsabile({ ...buona, dati: null } as any)).toBe(false);
+  });
+});
+
+describe('propostaCompleta: quella da cui parte una pratica normale', () => {
+  const righe = [{ codice: 'X', descrizione: 'A', categoria: 'C', quantita: 1, prezzo: 10, listino: 10, fuoriListino: false, scaduta: false, totale: 10 }];
+  const locatore = { nome: 'proposta-locatore-LO-1.pdf', pathname: 'preventivi/led-office/LO-1/mcf/proposta-locatore-LO-1-0123456789abcdef.pdf' };
+  const completa = {
+    id: 'LO-1', piva: '1',
+    dati: { righe, consegna: { tipo: 'sede', indirizzo: 'VIA ROMA 1' }, vendita: { iban: 'IT60X0542811101000000123456' } },
+    canale: 'pagarent', riservato: { canale: 'pagarent', beni: 10, maggiorazione: 1, imponibile: 11, documenti: [locatore] },
+  };
+  it('coi dati di vendita e la proposta per il locatore salvata: si', () => expect(propostaCompleta(completa as any)).toBe(true));
+  it('senza dati di vendita: no (solo canone)', () => {
+    expect(propostaCompleta({ ...completa, dati: { ...completa.dati, vendita: null } } as any)).toBe(false);
+    expect(propostaCompleta({ ...completa, dati: { righe, consegna: completa.dati.consegna } } as any)).toBe(false);
+  });
+  it('senza la proposta per il locatore nel riservato: no', () => {
+    expect(propostaCompleta({ ...completa, riservato: { ...completa.riservato, documenti: [] } } as any)).toBe(false);
+    expect(propostaCompleta({ ...completa, riservato: { ...completa.riservato, documenti: [{ nome: 'x.pdf', pathname: '' }] } } as any)).toBe(false);
+    expect(propostaCompleta({ ...completa, riservato: { canale: 'pagarent', beni: 10, maggiorazione: 1, imponibile: 11 } } as any)).toBe(false);
+  });
+  it('una proposta che non regge non e\' completa', () => {
+    expect(propostaCompleta(null)).toBe(false);
+    expect(propostaCompleta({ ...completa, canale: null } as any)).toBe(false);
   });
 });
 
