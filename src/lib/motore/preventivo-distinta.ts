@@ -25,7 +25,14 @@ import { logoDaBlob } from '../brand-fornitore';
 import { env, query } from '../db';
 import { DESTINATARIO_MCF, escapeHtml, inviaMail, layoutMail } from '../mail-portale';
 import { salvaPdf } from '../preventivi-pv';
-import { distintaPerSchermo, type CalcoloDistinta, type Consegna, type DistintaSchermo } from './calcolo-distinta';
+import { pulisciPiva } from '../piva';
+import {
+  distintaPerSchermo,
+  prefiltroConSegnali,
+  type CalcoloDistinta,
+  type Consegna,
+  type DistintaSchermo,
+} from './calcolo-distinta';
 import type { Carrozzeria } from './carrozzeria';
 import type { IdCanale } from './config-distinta';
 import type { DatiVendita } from './dati-vendita';
@@ -35,6 +42,7 @@ import { euro } from './pdf-generico';
 import { documentiLedOffice } from './pdf-ledoffice';
 import { nomeNonIndovinabile, percorsoRiservato } from './percorso-riservato';
 import type { EsitoPreventivo } from './preventivo';
+import { clienteSegnalato } from './segnali-prefiltro';
 import { generaId, type EsitoMotore } from './sessione';
 
 export { percorsoRiservato } from './percorso-riservato';
@@ -302,6 +310,21 @@ async function salvaRiservato(slug: string, id: string, pdf: Pdf): Promise<Docum
   }
 }
 
+/**
+ * La proposta e' ancora libera di uscire? Il calcolo usa i segnali salvati sulla
+ * ricerca, che si aggiornano solo riaprendola: MCF puo' aver segnato il cliente dopo la
+ * verifica. Qui si rilegge la sua riga in app.cliente_segnalato e si rifa' il prefiltro;
+ * bloccato o rosso fermano il preventivo. Se la lettura fallisce resta il valore salvato
+ * (clienteSegnalato lascia la riga nei log): un intoppo non ferma il commerciale.
+ */
+async function bloccataDaMcf(c: CalcoloDistinta, k: Carrozzeria): Promise<boolean> {
+  const salvati = c.ricerca.segnali ?? { segnalato: null, praticaRecente: null };
+  const letto = await clienteSegnalato(pulisciPiva(c.ricerca.piva || c.ricerca.dati_credito.scheda.piva || ''));
+  const segnalato = letto.fallita ? salvati.segnalato : letto.segnalato;
+  const ora = prefiltroConSegnali(c, k.categorie ?? [], { ...salvati, segnalato });
+  return ora.semaforo === 'bloccato' || ora.semaforo === 'rosso';
+}
+
 /** Inserisce la proposta; se l'id del secondo e' gia' preso si aggiunge un suffisso */
 async function salvaProposta(e: Sessione, c: CalcoloDistinta, idBase: string): Promise<string> {
   const { contesto, carrozzeria: k } = e;
@@ -331,8 +354,9 @@ async function salvaProposta(e: Sessione, c: CalcoloDistinta, idBase: string): P
 
 /**
  * Salva la proposta di distinta, genera i PDF e avvisa MCF. Rifiuta con
- * proposta_bloccata quando il prefiltro blocca o nessun canale regge: in quel caso non
- * si scrive niente. Al commerciale tornano id, pdfPronti e i soli suoi PDF.
+ * proposta_bloccata quando il prefiltro blocca, nessun canale regge o MCF ha segnato il
+ * cliente dopo la verifica (bloccataDaMcf): in quel caso non si scrive niente. Al
+ * commerciale tornano id, pdfPronti e i soli suoi PDF.
  * Il corpo grezzo della richiesta non si salva: tutto esce dal calcolo validato.
  */
 export async function generaPreventivoDistinta(
@@ -342,6 +366,10 @@ export async function generaPreventivoDistinta(
 ): Promise<EsitoPreventivo> {
   if (c.prefiltro.bloccaProposta || !c.instradamento) return { ok: false, error: 'proposta_bloccata' };
   const k = e.carrozzeria;
+  if (await bloccataDaMcf(c, k)) {
+    console.warn(JSON.stringify({ evento: 'motore_preventivo_segnalato', fornitore: k.slug, ricercaId: c.ricerca.id, userId: e.contesto.userId }));
+    return { ok: false, error: 'proposta_bloccata' };
+  }
 
   // Prima si riserva l'id con la riga, poi si generano i PDF nella sua cartella
   const id = await salvaProposta(e, c, generaId(k.prefisso));

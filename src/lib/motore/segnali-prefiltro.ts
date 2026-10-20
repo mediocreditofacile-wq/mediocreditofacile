@@ -192,7 +192,12 @@ async function praticheDeiPortali(piva: string): Promise<{ trovate: PraticaDatat
 
 // --- database ----------------------------------------------------------------------
 
-async function clienteSegnalato(piva: string): Promise<{ segnalato: SegnaliPrefiltro['segnalato']; fallita: boolean }> {
+/**
+ * Il cliente segnalato da MCF per una partita IVA gia' ripulita (pulisciPiva). Lo usa
+ * la verifica e, prima di generare i PDF, il preventivo della distinta: MCF puo' segnare
+ * il cliente dopo la verifica. Errore = nessuno, fallita, con una riga nei log.
+ */
+export async function clienteSegnalato(piva: string): Promise<{ segnalato: SegnaliPrefiltro['segnalato']; fallita: boolean }> {
   try {
     // La partita IVA si confronta a sole cifre: chi l'ha scritta col prefisso IT resta trovato
     const righe = await query<{ motivo: string; effetto: 'blocco' | 'rosso' }>(

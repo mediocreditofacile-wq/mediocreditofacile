@@ -18,6 +18,7 @@
 // aggira.
 
 import { catalogo, type Carrozzeria, type VoceCatalogo } from './carrozzeria';
+import type { Categoria } from './config-distinta';
 import { ricercaVisibile, type RicercaSalvata } from './calcolo-proposta';
 import { leggiDatiVendita, type DatiVendita } from './dati-vendita';
 import { validaDistinta, type Distinta, type ErroreDistinta, type RigaDistinta } from './distinta';
@@ -183,6 +184,33 @@ export function componiCalcolo(
       venditaMancanti: vendita.ok ? [] : vendita.mancanti,
     },
   };
+}
+
+/**
+ * Il prefiltro della stessa distinta con altri segnali: stessi dati del cliente, stessi
+ * eventi, stesse righe, consegna, spunta e motivazioni del calcolo; cambia solo cio' che
+ * MCF ha scritto nel frattempo. Lo usa il preventivo, che rilegge il cliente segnalato
+ * prima di generare i PDF.
+ */
+export function prefiltroConSegnali(
+  c: CalcoloDistinta,
+  categorie: Categoria[],
+  segnali: SegnaliPrefiltro,
+  oggi: Date = new Date(),
+): EsitoPrefiltro {
+  return valutaPrefiltro(
+    datiPrefiltro(c.ricerca.dati_credito.dati),
+    segnali,
+    c.ricerca.eventi?.stato ?? 'non-avviata',
+    categorie,
+    {
+      righe: c.distinta.righe.map((r) => ({ categoria: r.categoria, quantita: r.quantita })),
+      consegna: c.consegna.tipo,
+      ledwallConfermato: c.ledwallConfermato,
+      motivazioni: c.motivazioni,
+    },
+    oggi,
+  );
 }
 
 /**

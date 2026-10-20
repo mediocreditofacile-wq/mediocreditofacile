@@ -499,6 +499,48 @@ describe('generaPreventivoDistinta', () => {
     expect(posta.inviaMail.mock.calls[0][0].html).toMatch(/non si sono salvati/);
   });
 
+  describe('il cliente segnalato da MCF si rilegge prima di generare', () => {
+    const conSegnalato = (riga: { motivo: string; effetto: 'blocco' | 'rosso' } | Error) =>
+      db.query.mockImplementation(async (sql: string, valori: unknown[]) => {
+        if (String(sql).includes('app.cliente_segnalato')) {
+          if (riga instanceof Error) throw riga;
+          return [riga];
+        }
+        return String(sql).trim().startsWith('INSERT') ? [{ id: valori[0] }] : [];
+      });
+    const letture = () => db.query.mock.calls.filter(([sql]) => String(sql).includes('app.cliente_segnalato'));
+
+    for (const effetto of ['blocco', 'rosso'] as const) {
+      it(`segnato dopo la verifica con effetto ${effetto}: proposta_bloccata, niente salvato, niente PDF, niente mail`, async () => {
+        conSegnalato({ motivo: 'insoluto', effetto });
+        // La ricerca salvata non lo sa: il calcolo passa
+        expect(calcolo.prefiltro.bloccaProposta).toBe(false);
+        expect(await generaPreventivoDistinta(SESSIONE, calcolo, {})).toEqual({ ok: false, error: 'proposta_bloccata' });
+        expect(letture()).toHaveLength(1);
+        expect(letture()[0][1]).toEqual(['01234567890']);
+        expect(insert()).toBeUndefined();
+        expect(pv.salvaPdf).not.toHaveBeenCalled();
+        expect(blob.put).not.toHaveBeenCalled();
+        expect(posta.inviaMail).not.toHaveBeenCalled();
+      });
+    }
+
+    it('la lettura fallisce: si scrive nei log e vale il valore salvato sulla ricerca', async () => {
+      conSegnalato(new Error('neon giu'));
+      const errore = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const r = await generaPreventivoDistinta(SESSIONE, calcolo, {});
+      expect(r.ok).toBe(true);
+      expect(errore.mock.calls.some(([m]) => String(m).includes('motore_segnalato_errore'))).toBe(true);
+      errore.mockRestore();
+    });
+
+    it('nessuna segnalazione: la proposta esce come prima, con una lettura sola', async () => {
+      const r = await generaPreventivoDistinta(SESSIONE, calcolo, {});
+      expect(r.ok).toBe(true);
+      expect(letture()).toHaveLength(1);
+    });
+  });
+
   it('id gia\' preso: si aggiunge un suffisso, come sugli altri settori', async () => {
     let primo = true;
     db.query.mockImplementation(async (sql: string, valori: unknown[]) => {
