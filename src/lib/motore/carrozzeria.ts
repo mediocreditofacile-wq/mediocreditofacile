@@ -102,7 +102,10 @@ export interface RigaCarrozzeria {
   regole_semaforo: string;
   leasing: boolean;
   prezzo_verifica: string | null;
-  // jsonb: arrivano dal database come oggetti gia' decodificati, o assenti prima dello SQL 011
+  // jsonb: arrivano dal database come oggetti gia' decodificati, null se la carrozzeria non li
+  // usa. La SELECT li nomina, quindi lo SQL 011 va applicato PRIMA di pubblicare questo
+  // codice: senza quelle colonne la query fallisce per tutti i fornitori del motore, non
+  // le salta (in produzione dal 20/10/2026). Facoltativi qui solo per le righe finte dei test.
   canali?: unknown;
   societa_fornitrice?: unknown;
   checklist?: unknown;
