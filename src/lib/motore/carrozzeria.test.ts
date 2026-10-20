@@ -2,7 +2,7 @@
 // nuove lasciano gli altri fornitori esattamente com'erano.
 
 import { describe, expect, it } from 'vitest';
-import { carrozzeriaDaRiga, prodottoAmmesso, proposteOfferte, type RigaCarrozzeria } from './carrozzeria';
+import { carrozzeriaDaRiga, carrozzeriaPerBrowser, prodottoAmmesso, proposteOfferte, type RigaCarrozzeria } from './carrozzeria';
 
 const RIGA: RigaCarrozzeria = {
   slug: 'x', nome: 'X', citta: null, prefisso: 'XX', organization_id: 'org', tabella_canoni: 'sputnik',
@@ -110,5 +110,67 @@ describe('testo della pagina di accesso', () => {
   });
   it('col leasing acceso nomina tutti e due', () => {
     expect(proposteOfferte(carrozzeriaDaRiga(RIGA))).toBe('proposte di noleggio operativo e di leasing');
+  });
+});
+
+describe('la carrozzeria per il browser', () => {
+  // La riga di Led Office come la scrive il seed: canali con la maggiorazione,
+  // societa' fornitrice, checklist e categorie coi settori tipici
+  const LED_OFFICE = carrozzeriaDaRiga({
+    ...RIGA,
+    settore: 'distinta',
+    regole_semaforo: 'prefiltro',
+    canali: [
+      { canale: 'econocom', attivo: true, tabella: 'econocom-pa', maggiorazionePerc: 0, fatturatoMin: 5_000_000, importoMin: 150_000 },
+      { canale: 'pagarent', attivo: true, tabella: 'pagarent', maggiorazionePerc: 5 },
+    ],
+    societa_fornitrice: {
+      ragioneSociale: 'EMME 2 SERVIZI S.R.L.', piva: '01234567890', rea: 'RM-1', indirizzo: 'Via Roma 1',
+      telefono: '06 1', email: 'a@b.it', pec: 'a@pec.it', logo: 'brand/emme2.png',
+    },
+    checklist: {
+      formati: ['pdf', 'jpg'],
+      voci: [
+        { nome: 'Visura camerale', obbligatoria: false },
+        { nome: 'Situazione contabile dell\'anno', obbligatoria: false, sopraImporto: 50_000 },
+        { nome: 'Ultimi due bilanci', obbligatoria: false, forme: ['capitali'] },
+      ],
+    },
+    categorie: [
+      { nome: 'Postazioni', settoriTipici: ['62.0'], postazione: true, ledwall: false },
+      { nome: 'LEDwall', settoriTipici: [], postazione: false, ledwall: true },
+    ],
+  });
+
+  it('non porta canali, maggiorazioni, listini ne\' la societa\' fornitrice', () => {
+    const testo = JSON.stringify(carrozzeriaPerBrowser(LED_OFFICE));
+    for (const vietato of ['canali', 'maggiorazione', 'pagarent', 'econocom', 'societa', 'EMME 2', 'brand/emme2', 'settoriTipici', 'tabella']) {
+      expect(testo).not.toContain(vietato);
+    }
+  });
+
+  it('porta categorie (nome e flag) e checklist', () => {
+    const b = carrozzeriaPerBrowser(LED_OFFICE);
+    expect(b.categorie).toEqual([
+      { nome: 'Postazioni', postazione: true, ledwall: false },
+      { nome: 'LEDwall', postazione: false, ledwall: true },
+    ]);
+    expect(b.checklist).toEqual({
+      formati: ['pdf', 'jpg'],
+      voci: [
+        { nome: 'Visura camerale', obbligatoria: false },
+        { nome: 'Situazione contabile dell\'anno', obbligatoria: false, sopraImporto: 50_000 },
+        { nome: 'Ultimi due bilanci', obbligatoria: false, forme: ['capitali'] },
+      ],
+    });
+    expect(b.settore).toBe('distinta');
+  });
+
+  it('gli altri fornitori ricevono quello di sempre, con categorie e checklist a null', () => {
+    const c = carrozzeriaDaRiga({ ...RIGA, brand_colore: '#123456', brand_accento: '#abcdef', documenti_extra: ['Offerta'] });
+    expect(carrozzeriaPerBrowser(c)).toEqual({
+      slug: 'x', nome: 'X', citta: null, settore: 'generico', etichettaBene: 'Bene', sogliaLeasing: 0, leasing: true,
+      demo: false, colore: '#123456', accento: '#abcdef', documentiExtra: ['Offerta'], categorie: null, checklist: null,
+    });
   });
 });

@@ -159,6 +159,43 @@ export async function elencoCarrozzerie(): Promise<Carrozzeria[]> {
   return righe.map(carrozzeriaDaRiga);
 }
 
+/**
+ * La parte della carrozzeria che il browser puo' vedere: nome, marchio, settore e,
+ * sul settore distinta, le categorie del catalogo coi loro due flag e la checklist
+ * della pratica. Restano qui il listino del noleggio, il partner del leasing, i
+ * canali con le maggiorazioni, la societa' fornitrice e i settori tipici delle
+ * categorie (la regola 6 la applica il server): sono la ratio interna di MCF.
+ * Ogni campo e' copiato a mano, cosi' un campo nuovo della carrozzeria non esce
+ * da solo verso il browser.
+ */
+export function carrozzeriaPerBrowser(c: Carrozzeria) {
+  return {
+    slug: c.slug,
+    nome: c.nome,
+    citta: c.citta,
+    settore: c.settore,
+    etichettaBene: c.etichettaBene,
+    sogliaLeasing: c.sogliaLeasing,
+    leasing: c.leasing,
+    demo: c.demo,
+    colore: c.brand.colore,
+    accento: c.brand.accento,
+    documentiExtra: c.documentiExtra,
+    categorie: c.categorie?.map(({ nome, postazione, ledwall }) => ({ nome, postazione, ledwall })) ?? null,
+    checklist: c.checklist
+      ? {
+          voci: c.checklist.voci.map((v) => ({
+            nome: v.nome,
+            obbligatoria: v.obbligatoria,
+            ...(v.sopraImporto !== undefined ? { sopraImporto: v.sopraImporto } : {}),
+            ...(v.forme ? { forme: [...v.forme] } : {}),
+          })),
+          formati: [...c.checklist.formati],
+        }
+      : null,
+  };
+}
+
 /** Il partner leasing della carrozzeria, come oggetto di src/data/leasing.ts */
 export function partnerLeasingDi(c: Carrozzeria): PartnerLeasing {
   return PARTNERS_LEASING.find((p) => p.key === c.partnerLeasing) ?? PARTNERS_LEASING[1];

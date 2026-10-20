@@ -11,6 +11,7 @@ import type { EventiRicerca } from './eventi-stato';
 import { clienteDellaProposta, type ClienteProposta } from './cliente-proposta';
 import { calcolaMacchine, dataConsegna, esitoDaMacchine, validaConfigurazione, type EsitoMacchine } from './proposte-macchine';
 import type { DatiCreditoMotore, SchedaRidotta } from './merito';
+import type { SegnaliPrefiltro } from './prefiltro';
 import { calcolaProposte, type EsitoProposte } from './proposte';
 import { filtroVisibilita, json, type EsitoMotore } from './sessione';
 import type { FormaGiuridica } from '../prospetti-pv';
@@ -33,6 +34,11 @@ export interface RicercaSalvata {
   dati_credito: { dati: DatiCreditoMotore; scheda: SchedaRidotta };
   /** Eventi negativi della ricerca, sui fornitori col semaforo del locatore */
   eventi: EventiRicerca | null;
+  /**
+   * Cliente segnalato e pratica recente, letti dal server alla verifica (solo sulle
+   * regole prefiltro; null sugli altri fornitori). Il dettaglio resta a MCF.
+   */
+  segnali: SegnaliPrefiltro | null;
 }
 
 /** La ricerca, se l'utente la puo' vedere */
@@ -42,7 +48,7 @@ export async function ricercaVisibile(
 ): Promise<RicercaSalvata | null> {
   const { where, valori } = filtroVisibilita(e, '', 2);
   return queryUna<RicercaSalvata>(
-    `SELECT id, piva, ragione_sociale, dati_credito, eventi FROM app.ricerca_merito WHERE id = $1 AND ${where}`,
+    `SELECT id, piva, ragione_sociale, dati_credito, eventi, segnali FROM app.ricerca_merito WHERE id = $1 AND ${where}`,
     [id, ...valori],
   );
 }
