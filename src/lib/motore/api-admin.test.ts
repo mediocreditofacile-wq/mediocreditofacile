@@ -120,6 +120,20 @@ describe('configurazione: settore e regole', () => {
     await POST(post(config({ settore: 'macchine', regoleSemaforo: 'locatore', tabellaAlternativa: 'grace-2027' })));
     expect(parametriCarrozzeria()[8]).toBe('grace-duplex');
   });
+  it('prezzo per richiesta oltre 1.000 euro, negativo o illeggibile: 400 col messaggio, niente salvato', async () => {
+    for (const prezzoVerifica of ['2000', '-1', 'cinque']) {
+      motore.sessioneMotore.mockResolvedValueOnce(sessione('admin', 'macchine'));
+      const r = await POST(post(config({ settore: 'macchine', regoleSemaforo: 'locatore', prezzoVerifica })));
+      expect(r.status, prezzoVerifica).toBe(400);
+      expect((await corpo(r)).messaggio).toMatch(/Prezzo per richiesta/);
+    }
+    expect(db.query).not.toHaveBeenCalled();
+  });
+  it('prezzo per richiesta vuoto: non si fattura (null), come prima', async () => {
+    motore.sessioneMotore.mockResolvedValueOnce(sessione('admin', 'macchine'));
+    expect((await POST(post(config({ settore: 'macchine', regoleSemaforo: 'locatore', prezzoVerifica: '' })))).status).toBe(200);
+    expect(parametriCarrozzeria()[11]).toBeNull();
+  });
   it('Duplex salva come prima: macchine, criteri del locatore, Grace affiancata', async () => {
     motore.sessioneMotore.mockResolvedValueOnce(sessione('admin', 'macchine'));
     await POST(post(config({ settore: 'macchine', regoleSemaforo: 'locatore', tabellaAlternativa: 'grace-duplex', tabellaCanoni: 'sputnik-duplex' })));
@@ -262,6 +276,46 @@ describe('catalogo e storico prezzi', () => {
     expect(c).toMatchObject({ ok: true, salvate: 2, scartate: [], senzaCategoria: [3, 4] });
     const storico = db.query.mock.calls.filter((x) => String(x[0]).includes('INSERT INTO app.catalogo_storico'));
     expect(storico.map((x) => x[1])).toEqual([['led-office', 'LO-SRV-9', 1900, '2026-12-31', 'admin@example.it']]);
+  });
+  it('import con kWp ambiguo: riga scartata col motivo, le altre salvate', async () => {
+    motore.sessioneMotore.mockResolvedValueOnce(sessione('admin', 'fotovoltaico'));
+    const righe = [
+      { codice: 'PV-6', nome: 'Impianto 6 kWp', prezzo: '9.800', kwp: '6.375' },
+      { codice: 'PV-7', nome: 'Impianto 7 kWp', prezzo: '10.900', kwp: '7,2' },
+    ];
+    const c = await corpo(await POST(post({ azione: 'importa', righe })));
+    expect(c).toMatchObject({ ok: true, salvate: 1, scartate: [], ambigue: [{ riga: 1, motivo: 'kWp/kWh ambiguo: scrivi 6,375 o 6375' }] });
+  });
+  it('voce singola con kWp ambiguo: 400 col messaggio', async () => {
+    motore.sessioneMotore.mockResolvedValueOnce(sessione('admin', 'fotovoltaico'));
+    const r = await POST(post({ azione: 'voce', voce: { codice: 'PV-6', nome: 'Impianto', prezzo: '9800', kwp: '6.375' } }));
+    expect(r.status).toBe(400);
+    expect((await corpo(r)).messaggio).toBe('kWp/kWh ambiguo: scrivi 6,375 o 6375');
+  });
+  it('reimport senza la colonna validita\': la validita\' salvata resta, e lo storico solo se qualcosa cambia', async () => {
+    motore.sessioneMotore.mockResolvedValueOnce(sessione('admin'));
+    // Ultimo storico: stesso prezzo e stessa validita' di quella che il database tiene
+    db.queryUna.mockResolvedValueOnce({ prezzo: '1900.00', valido_fino: '2026-12-31' });
+    db.query.mockImplementation(async (sql: string) =>
+      sql.includes('INSERT INTO app.catalogo_voce') ? [{ valido_fino: '2026-12-31' }] : []);
+    const c = await corpo(await POST(post({ azione: 'importa', righe: [{ codice: 'LO-SRV-9', nome: 'Server', prezzo: '1900', categoria: 'Server e stampa' }] })));
+    expect(c.salvate).toBe(1);
+    const [sql, p] = db.query.mock.calls.find((x) => String(x[0]).includes('INSERT INTO app.catalogo_voce'))!;
+    expect(String(sql)).toMatch(/CASE WHEN \$7::boolean THEN EXCLUDED\.attributi/);
+    expect(String(sql)).toContain("app.catalogo_voce.attributi->'valido_fino'");
+    expect(p[6]).toBe(false);
+    expect(sqlChiamate().some((x) => x.includes('INSERT INTO app.catalogo_storico'))).toBe(false);
+  });
+  it('reimport con la colonna validita\' vuota: la validita\' si toglie e lo storico lo registra', async () => {
+    motore.sessioneMotore.mockResolvedValueOnce(sessione('admin'));
+    db.queryUna.mockResolvedValueOnce({ prezzo: '1900.00', valido_fino: '2026-12-31' });
+    db.query.mockImplementation(async (sql: string) =>
+      sql.includes('INSERT INTO app.catalogo_voce') ? [{ valido_fino: null }] : []);
+    await POST(post({ azione: 'importa', righe: [{ codice: 'LO-SRV-9', nome: 'Server', prezzo: '1900', categoria: 'Server e stampa', valido_fino: '' }] }));
+    const [, p] = db.query.mock.calls.find((x) => String(x[0]).includes('INSERT INTO app.catalogo_voce'))!;
+    expect(p[6]).toBe(true);
+    const storico = db.query.mock.calls.filter((x) => String(x[0]).includes('INSERT INTO app.catalogo_storico'));
+    expect(storico.map((x) => x[1])).toEqual([['led-office', 'LO-SRV-9', 1900, null, 'admin@example.it']]);
   });
   it('import su Duplex: nessuno storico, nessun controllo di categoria', async () => {
     motore.sessioneMotore.mockResolvedValueOnce(sessione('admin', 'macchine'));

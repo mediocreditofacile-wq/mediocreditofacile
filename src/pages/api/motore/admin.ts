@@ -34,7 +34,7 @@ export const prerender = false;
 
 import { query } from '../../../lib/db';
 import { catalogo, type Carrozzeria } from '../../../lib/motore/carrozzeria';
-import { leggiVoce, numero, testo, type Voce } from '../../../lib/motore/catalogo-import';
+import { leggiVoceConMotivo, numero, testo, type Voce } from '../../../lib/motore/catalogo-import';
 import {
   CANALI_ESTERNI,
   NOMI_CANALE,
@@ -72,22 +72,39 @@ const ULTIME = 50;
  * Una voce del catalogo. Sul settore distinta lascia anche la riga di storico quando
  * prezzo o validita' cambiano rispetto all'ultima riga (storico-prezzi.ts); sugli
  * altri settori il catalogo si salva come sempre, senza storico.
+ *
+ * `conValidita` dice se la riga aveva la colonna della validita'. Senza la colonna
+ * (un reimport dei soli prezzi) la validita' salvata resta: gli attributi si
+ * sostituiscono per intero, e senza questa eccezione la scadenza sparirebbe. Con la
+ * colonna vuota invece la validita' si toglie, perche' e' quello che c'e' scritto.
  */
-async function salvaVoce(slug: string, v: Voce, storico: { utente: string } | null) {
+async function salvaVoce(slug: string, v: Voce, storico: { utente: string } | null, conValidita: boolean) {
   const prima = storico ? await ultimoStorico(slug, v.codice) : null;
-  await query(
+  const righe = await query<{ valido_fino: string | null }>(
     // Una voce nuova va in coda al catalogo; una che esiste tiene il suo posto
     `INSERT INTO app.catalogo_voce (fornitore_slug, codice, nome, descrizione, prezzo, attributi, ordine)
      VALUES ($1,$2,$3,$4,$5,$6,
              (SELECT COALESCE(max(ordine), -1) + 1 FROM app.catalogo_voce WHERE fornitore_slug = $1))
      ON CONFLICT (fornitore_slug, codice) DO UPDATE SET nome = EXCLUDED.nome, descrizione = EXCLUDED.descrizione,
-       prezzo = EXCLUDED.prezzo, attributi = EXCLUDED.attributi, attivo = true, aggiornato = now()`,
-    [slug, v.codice, v.nome, v.descrizione, v.prezzo, JSON.stringify(v.attributi)],
+       prezzo = EXCLUDED.prezzo,
+       attributi = CASE WHEN $7::boolean THEN EXCLUDED.attributi
+                   ELSE EXCLUDED.attributi || jsonb_strip_nulls(jsonb_build_object('valido_fino', app.catalogo_voce.attributi->'valido_fino')) END,
+       attivo = true, aggiornato = now()
+     RETURNING attributi->>'valido_fino' AS valido_fino`,
+    [slug, v.codice, v.nome, v.descrizione, v.prezzo, JSON.stringify(v.attributi), conValidita],
   );
   if (!storico) return;
-  const dopo = { prezzo: v.prezzo, validoFino: typeof v.attributi.valido_fino === 'string' ? v.attributi.valido_fino : null };
+  // La validita' che la voce ha davvero dopo il salvataggio, anche quella tenuta
+  const salvata = righe[0] ? righe[0].valido_fino ?? null : null;
+  const scritta = typeof v.attributi.valido_fino === 'string' ? v.attributi.valido_fino : null;
+  const dopo = { prezzo: v.prezzo, validoFino: righe[0] ? salvata : scritta };
   if (cambiaStorico(prima, dopo)) await registraStorico(slug, v.codice, dopo, storico.utente);
 }
+
+/** La riga aveva la colonna della validita' (anche vuota)? */
+const haValidita = (r: unknown) =>
+  r !== null && typeof r === 'object' && Object.prototype.hasOwnProperty.call(r, 'valido_fino')
+  && (r as Record<string, unknown>).valido_fino !== undefined;
 
 /** Sul settore distinta una voce senza una categoria del pannello fermerebbe la distinta */
 const categoriaNota = (k: Carrozzeria, v: Voce) =>
@@ -243,11 +260,17 @@ export async function POST({ request }: { request: Request }) {
     const soglia = numero(c.sogliaLeasing);
     const tetto = numero(c.tettoMeseEuro);
     // Vuoto = il fornitore non paga le verifiche. Assente (una pagina vecchia
-    // che non conosce il campo) = resta il prezzo di prima
-    const prezzoLetto = c.prezzoVerifica === undefined
-      ? k.prezzoVerifica
-      : c.prezzoVerifica === '' || c.prezzoVerifica === null ? null : numero(c.prezzoVerifica);
-    const prezzoVerifica = prezzoLetto !== null && prezzoLetto >= 0 && prezzoLetto <= 1000 ? Math.round(prezzoLetto * 100) / 100 : null;
+    // che non conosce il campo) = resta il prezzo di prima. Fuori misura o
+    // illeggibile = rifiuto: prima diventava "non si fattura" senza dirlo
+    let prezzoVerifica: number | null = k.prezzoVerifica;
+    if (c.prezzoVerifica === '' || c.prezzoVerifica === null) prezzoVerifica = null;
+    else if (c.prezzoVerifica !== undefined) {
+      const letto = numero(c.prezzoVerifica);
+      if (!(letto >= 0 && letto <= 1000)) {
+        return rifiuto('Prezzo per richiesta non valido: un numero fra 0 e 1.000 euro, oppure vuoto se non si fattura. Nessuna modifica salvata.');
+      }
+      prezzoVerifica = Math.round(letto * 100) / 100;
+    }
     const extra = Array.isArray(c.documentiExtra)
       ? c.documentiExtra.map((d) => testo(d, 160)).filter(Boolean).slice(0, 12)
       : k.documentiExtra;
@@ -279,10 +302,10 @@ export async function POST({ request }: { request: Request }) {
   }
 
   if (azione === 'voce') {
-    const v = leggiVoce((corpo.voce ?? {}) as Record<string, unknown>);
-    if (!v) return json({ ok: false, error: 'voce_non_valida' }, 400);
-    if (!categoriaNota(k, v)) return json({ ok: false, error: 'categoria_non_valida' }, 400);
-    await salvaVoce(slug, v, storico);
+    const letta = leggiVoceConMotivo((corpo.voce ?? {}) as Record<string, unknown>);
+    if (!letta.ok) return json({ ok: false, error: 'voce_non_valida', ...(letta.motivo ? { messaggio: letta.motivo } : {}) }, 400);
+    if (!categoriaNota(k, letta.voce)) return json({ ok: false, error: 'categoria_non_valida' }, 400);
+    await salvaVoce(slug, letta.voce, storico, haValidita(corpo.voce));
     return json({ ok: true });
   }
 
@@ -290,18 +313,25 @@ export async function POST({ request }: { request: Request }) {
     const righe = Array.isArray(corpo.righe) ? corpo.righe.slice(0, 500) : [];
     const scartate: number[] = [];
     const senzaCategoria: number[] = [];
+    // Righe scartate con un motivo da dire (kWp, kWh, passo o massimo ambigui)
+    const ambigue: { riga: number; motivo: string }[] = [];
     let salvate = 0;
     for (const [i, r] of righe.entries()) {
-      const v = leggiVoce(r as Record<string, unknown>);
-      if (!v) { scartate.push(i + 1); continue; }
-      if (!categoriaNota(k, v)) { senzaCategoria.push(i + 1); continue; }
-      await salvaVoce(slug, v, storico);
+      const letta = leggiVoceConMotivo(r as Record<string, unknown>);
+      if (!letta.ok) {
+        if (letta.motivo) ambigue.push({ riga: i + 1, motivo: letta.motivo });
+        else scartate.push(i + 1);
+        continue;
+      }
+      if (!categoriaNota(k, letta.voce)) { senzaCategoria.push(i + 1); continue; }
+      await salvaVoce(slug, letta.voce, storico, haValidita(r));
       salvate++;
     }
     console.log(JSON.stringify({
-      evento: 'motore_admin_import', fornitore: slug, salvate, scartate: scartate.length + senzaCategoria.length,
+      evento: 'motore_admin_import', fornitore: slug, salvate,
+      scartate: scartate.length + senzaCategoria.length + ambigue.length,
     }));
-    return json({ ok: true, salvate, scartate, senzaCategoria });
+    return json({ ok: true, salvate, scartate, senzaCategoria, ambigue });
   }
 
   if (azione === 'attiva') {

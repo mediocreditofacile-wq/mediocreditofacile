@@ -98,10 +98,14 @@ const oggetto = (v: unknown): Record<string, unknown> =>
 const assente = (v: unknown) => v === undefined || v === null || (typeof v === 'string' && v.trim() === '');
 
 /**
- * Una stringa col punto come separatore delle migliaia e nessuna virgola ("1.500",
- * "1.000"). numero() la legge all'inglese (1,5 e 1) e il valore resterebbe mille volte
- * sotto quello che chi scrive intendeva: nel dubbio la riga non passa. I numeri veri
- * (typeof number) e le stringhe con la virgola ("1.799,50") non sono ambigui.
+ * Una stringa col punto seguito da tre cifre e nessuna virgola ("1.500", "1.000").
+ * Il commerciale la scrive a mano su quantita' e prezzo trattato, e puo' voler dire
+ * 1500 o 1,5: la distinta non sceglie una lettura e la riga non passa, cosi' chi
+ * scrive la corregge. E' una scelta voluta, non un ripiego: numero() di per se' la
+ * legge come migliaia (vale per i listini incollati da Excel nel Pannello MCF), ma
+ * davanti al commerciale una quantita' mille volte sbagliata e' un preventivo
+ * sbagliato. I numeri veri (typeof number) e le stringhe con la virgola ("1.799,50")
+ * non sono ambigui.
  */
 const migliaiaAmbigue = (v: unknown) =>
   typeof v === 'string' && /^\d{1,3}(\.\d{3})+$/.test(v.replace(/[€\s]/g, ''));

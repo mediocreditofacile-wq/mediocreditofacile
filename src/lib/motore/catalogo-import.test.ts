@@ -2,7 +2,7 @@
 // e quelle nuove del settore macchine.
 
 import { describe, expect, it } from 'vitest';
-import { leggiIncollato, leggiVoce, numero } from './catalogo-import';
+import { AMBIGUO_KWP, leggiIncollato, leggiVoce, leggiVoceConMotivo, numero, numeroDecimale } from './catalogo-import';
 
 describe('righe del catalogo', () => {
   it('macchina con famiglia e allestimento', () => {
@@ -108,5 +108,46 @@ describe('numeri all\'italiana', () => {
     expect(numero('19.80')).toBe(19.8);
     expect(numero('1931')).toBe(1931);
     expect(numero(12.5)).toBe(12.5);
+  });
+});
+
+describe('kWp e kWh: il punto seguito da tre cifre non si indovina (Ruling 18)', () => {
+  const base = { codice: 'PV-6', nome: 'Impianto 6 kWp', prezzo: '9.800' };
+  it('kWp "6.375": riga scartata col motivo, mai letta come 6375 o 6,375', () => {
+    expect(leggiVoceConMotivo({ ...base, kwp: '6.375' })).toEqual({ ok: false, motivo: AMBIGUO_KWP });
+    expect(AMBIGUO_KWP).toBe('kWp/kWh ambiguo: scrivi 6,375 o 6375');
+    expect(leggiVoce({ ...base, kwp: '6.375' })).toBeNull();
+  });
+  it('kWh "10.240" e la colonna accumulo dall\'incollato: scartata allo stesso modo', () => {
+    expect(leggiVoceConMotivo({ ...base, kwh_accumulo: '10.240' })).toEqual({ ok: false, motivo: AMBIGUO_KWP });
+    const r = leggiIncollato('codice;nome;prezzo;kwp;accumulo\nPV-6;Impianto;9800;6,4;10.240');
+    expect(leggiVoceConMotivo(r[0])).toEqual({ ok: false, motivo: AMBIGUO_KWP });
+  });
+  it('"6,375" e\' 6,375; "6.4" e\' 6,4; "6375" e\' 6375; i numeri veri restano', () => {
+    expect(leggiVoce({ ...base, kwp: '6,375' })?.attributi.kwp).toBe(6.375);
+    expect(leggiVoce({ ...base, kwp: '6.4' })?.attributi.kwp).toBe(6.4);
+    expect(leggiVoce({ ...base, kwp: '6375' })?.attributi.kwp).toBe(6375);
+    expect(leggiVoce({ ...base, kwp: 6.375, kwh_accumulo: 10.24 })?.attributi).toEqual({ kwp: 6.375, kwh_accumulo: 10.24 });
+  });
+  it('il prezzo resta all\'italiana: "1.931" e\' 1931, anche con kWp scritto bene', () => {
+    expect(leggiVoce({ ...base, prezzo: '1.931', kwp: '6,375' })?.prezzo).toBe(1931);
+  });
+  it('passo e massimo degli accessori: "1.000" scartato, mai 1 o 1000 a caso', () => {
+    const acc = { codice: 'X', nome: 'Spazzola', prezzo: '50', famiglia: 'F', tipo: 'accessorio' };
+    const e = leggiVoceConMotivo({ ...acc, massimo: '1.000' });
+    expect(e.ok).toBe(false);
+    expect(e.ok ? '' : e.motivo).toMatch(/massimo ambiguo/);
+    expect(leggiVoce({ ...acc, passo: '2', massimo: '4' })?.attributi).toMatchObject({ passo: 2, massimo: 4 });
+  });
+  it('numeroDecimale: ambiguo = NaN, il resto come prima', () => {
+    expect(numeroDecimale('6.375')).toBeNaN();
+    expect(numeroDecimale('1.234,5')).toBe(1234.5);
+    expect(numeroDecimale('6,375')).toBe(6.375);
+    expect(numeroDecimale('19.80')).toBe(19.8);
+    expect(numeroDecimale(6.375)).toBe(6.375);
+    expect(numeroDecimale('')).toBeNaN();
+  });
+  it('le righe valide escono con ok e la voce', () => {
+    expect(leggiVoceConMotivo({ ...base, kwp: '6,4' })).toMatchObject({ ok: true, voce: { codice: 'PV-6', prezzo: 9800, attributi: { kwp: 6.4 } } });
   });
 });

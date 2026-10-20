@@ -10,14 +10,42 @@
 // (GG/MM/AAAA o AAAA-MM-GG, salvato come AAAA-MM-GG; una data impossibile non si
 // salva e la voce resta valida, senza scadenza).
 
+/** Il punto seguito da gruppi di tre cifre, senza virgola: "1.900", "6.375", "1.000.000" */
+const PUNTO_MIGLIAIA = /^\d{1,3}(\.\d{3})+$/;
+const pulito = (v: unknown) => String(v ?? '').trim().replace(/[€\s]/g, '');
+
+/**
+ * Un importo (prezzo, soglie, tetti): all'italiana. Il punto delle migliaia senza
+ * decimali (1.900, come lo copia Excel) e' 1900: letto come decimale il prezzo
+ * diventerebbe 1,90 senza che nessuno se ne accorga. Solo per importi in euro, dove
+ * nessuno scrive tre decimali; per kWp e kWh c'e' numeroDecimale.
+ */
 export const numero = (v: unknown) => {
   if (typeof v === 'number') return Number.isFinite(v) ? v : NaN;
-  const s = String(v ?? '').trim().replace(/[€\s]/g, '');
-  // Il punto delle migliaia senza decimali (1.900, come lo copia Excel) e' 1900:
-  // letto come decimale il prezzo diventerebbe 1,90 senza che nessuno se ne accorga
-  if (/^\d{1,3}(\.\d{3})+$/.test(s)) return parseFloat(s.replace(/\./g, ''));
+  const s = pulito(v);
+  if (PUNTO_MIGLIAIA.test(s)) return parseFloat(s.replace(/\./g, ''));
   return parseFloat(s.includes(',') ? s.replace(/\./g, '').replace(',', '.') : s);
 };
+
+/** Un testo con il punto seguito da tre cifre e nessuna virgola: su un valore che non e' un importo non si sa se e' migliaia o decimali */
+export const puntoAmbiguo = (v: unknown) => typeof v === 'string' && PUNTO_MIGLIAIA.test(pulito(v));
+
+/**
+ * Un valore che non e' un importo (kWp, kWh, passo, massimo). "6.375" puo' essere
+ * 6,375 kWp o 6375: non si sceglie una lettura, esce NaN e chi legge scarta la riga.
+ * Con la virgola ("6,375", "1.234,5") o con un decimale che non sono tre cifre
+ * ("6.4") la lettura e' una sola.
+ */
+export const numeroDecimale = (v: unknown) => {
+  if (typeof v === 'number') return Number.isFinite(v) ? v : NaN;
+  if (puntoAmbiguo(v)) return NaN;
+  const s = pulito(v);
+  return parseFloat(s.includes(',') ? s.replace(/\./g, '').replace(',', '.') : s);
+};
+
+/** Il motivo dello scarto di una riga con kWp o kWh scritti col punto e tre cifre */
+export const AMBIGUO_KWP = 'kWp/kWh ambiguo: scrivi 6,375 o 6375';
+const AMBIGUO_ACCESSORIO = 'passo/massimo ambiguo: scrivi il numero senza punto';
 export const testo = (v: unknown, max = 200) => String(v ?? '').trim().slice(0, max);
 
 /**
@@ -40,15 +68,29 @@ export interface Voce { codice: string; nome: string; descrizione: string | null
 
 /** Una riga del catalogo, validata. Null se non regge. */
 export function leggiVoce(r: Record<string, unknown>): Voce | null {
+  const e = leggiVoceConMotivo(r);
+  return e.ok ? e.voce : null;
+}
+
+/**
+ * Come leggiVoce, ma una riga scartata dice perche' quando il perche' non e' il solito
+ * (codice, nome o prezzo mancanti): kWp, kWh, passo o massimo ambigui.
+ */
+export function leggiVoceConMotivo(
+  r: Record<string, unknown>,
+): { ok: true; voce: Voce } | { ok: false; motivo: string | null } {
+  const scarta = (motivo: string | null = null) => ({ ok: false as const, motivo });
   const codice = testo(r.codice, 40).toUpperCase().replace(/\s+/g, '-');
   const nome = testo(r.nome, 160);
   const prezzo = numero(r.prezzo);
-  if (!codice || !nome || !(prezzo > 0) || prezzo > 10_000_000) return null;
+  if (!codice || !nome || !(prezzo > 0) || prezzo > 10_000_000) return scarta();
   const attributi: Record<string, unknown> = {};
 
-  // fotovoltaico
-  const kwp = numero(r.kwp);
-  const kwh = numero(r.kwh_accumulo ?? r.accumulo);
+  // fotovoltaico: kWp e kWh non sono importi, il punto con tre cifre non si indovina
+  const kwhGrezzo = r.kwh_accumulo ?? r.accumulo;
+  if (puntoAmbiguo(r.kwp) || puntoAmbiguo(kwhGrezzo)) return scarta(AMBIGUO_KWP);
+  const kwp = numeroDecimale(r.kwp);
+  const kwh = numeroDecimale(kwhGrezzo);
   if (kwp > 0) attributi.kwp = kwp;
   if (kwh >= 0 && Number.isFinite(kwh)) attributi.kwh_accumulo = kwh;
   const inst = testo(r.installazione, 20).toLowerCase();
@@ -62,15 +104,16 @@ export function leggiVoce(r: Record<string, unknown>): Voce | null {
   const accessorio = testo(r.tipo, 20).toLowerCase().startsWith('acc');
   if (accessorio) {
     // Un accessorio senza famiglia non si puo' offrire con nessuna macchina
-    if (!famiglia) return null;
+    if (!famiglia) return scarta();
     // Sull'accessorio l'allestimento restringe (la batteria di scorta solo sulla
     // versione a batteria): scritto male lo aprirebbe a tutte, meglio scartarlo
-    if (all && !allestimento) return null;
-    const passo = Math.max(1, Math.round(numero(r.passo)) || 1);
+    if (all && !allestimento) return scarta();
+    if (puntoAmbiguo(r.passo) || puntoAmbiguo(r.massimo)) return scarta(AMBIGUO_ACCESSORIO);
+    const passo = Math.max(1, Math.round(numeroDecimale(r.passo)) || 1);
     attributi.tipo = 'accessorio';
     if (allestimento) attributi.allestimento = allestimento;
     attributi.passo = passo;
-    attributi.massimo = Math.max(passo, Math.round(numero(r.massimo)) || passo);
+    attributi.massimo = Math.max(passo, Math.round(numeroDecimale(r.massimo)) || passo);
     const nota = testo(r.nota, 60);
     if (nota) attributi.nota = nota;
   } else if (allestimento) {
@@ -84,7 +127,7 @@ export function leggiVoce(r: Record<string, unknown>): Voce | null {
   if (validoFino) attributi.valido_fino = validoFino;
 
   const descrizione = testo(r.descrizione, 400) || (accessorio ? '' : testo(r.nota, 400)) || null;
-  return { codice, nome, descrizione, prezzo: Math.round(prezzo * 100) / 100, attributi };
+  return { ok: true, voce: { codice, nome, descrizione, prezzo: Math.round(prezzo * 100) / 100, attributi } };
 }
 
 const SINONIMI: Record<string, string> = {

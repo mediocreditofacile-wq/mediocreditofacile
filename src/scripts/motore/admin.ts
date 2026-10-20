@@ -453,7 +453,7 @@ export function montaAdmin() {
           prezzoVerifica: val('cf-prezzo-verifica'),
         },
       });
-      if (!res.ok || !corpo?.ok) return messaggio($('cf-msg'), traduci(corpo?.error ?? ''), false);
+      if (!res.ok || !corpo?.ok) return messaggio($('cf-msg'), errore(corpo), false);
       await carica();
       messaggio($('cf-msg'), 'Configurazione salvata. Colori e settore si vedono ricaricando la pagina.', true);
     }
@@ -467,6 +467,7 @@ export function montaAdmin() {
       const note = [
         corpo.scartate?.length ? ` Righe scartate (manca codice, nome o prezzo): ${corpo.scartate.join(', ')}.` : '',
         corpo.senzaCategoria?.length ? ` Righe scartate perché la categoria manca o non è fra quelle del pannello: ${corpo.senzaCategoria.join(', ')}.` : '',
+        ...(corpo.ambigue ?? []).map((a: any) => ` Riga ${a.riga} scartata, ${a.motivo}.`),
       ].join('');
       messaggio($('cf-import-msg'), `Voci salvate: ${corpo.salvate}.${note}`, !note);
     }
