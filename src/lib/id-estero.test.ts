@@ -1,14 +1,21 @@
 // Identificativo estero: cosa si manda a Openapi prima di pagare 0,11 euro.
 // Il caso da cui nasce e' Knibbelberg B.V., 20/10/2026: KVK 56286333, partita
-// IVA scritta come NL852057775801, con un 8 al posto della B.
+// IVA scritta come NL852057775801, con un 8 al posto della B. La ricerca vera
+// col KVK ha risposto che per NL vale solo ^NL\d{9}B\d{2}$.
 
 import { describe, expect, it } from 'vitest';
 import { normalizzaIdEstero } from './id-estero';
 
 describe('Paesi Bassi', () => {
-  it('accetta il numero KVK di 8 cifre', () => {
-    expect(normalizzaIdEstero('NL', '56286333')).toEqual({ ok: true, id: '56286333', tipo: 'kvk' });
-    expect(normalizzaIdEstero('nl', ' 5628 6333 ')).toEqual({ ok: true, id: '56286333', tipo: 'kvk' });
+  it('ferma il numero KVK prima di spendere, perché Openapi lo rifiuta', () => {
+    for (const kvk of ['56286333', ' 5628 6333 ']) {
+      const esito = normalizzaIdEstero('nl', kvk);
+      expect(esito.ok).toBe(false);
+      if (!esito.ok) {
+        expect(esito.errore).toContain('KVK');
+        expect(esito.errore).toContain('NL + 9 cifre + B + 2 cifre');
+      }
+    }
   });
 
   it('accetta la partita IVA col prefisso NL, ripulita da spazi e punti', () => {
@@ -26,10 +33,10 @@ describe('Paesi Bassi', () => {
     if (!esito.ok) expect(esito.errore).toContain('NL852057775B01');
   });
 
-  it('un codice che non e\' nessuno dei due si ferma col formato atteso', () => {
+  it('un codice che non e\' una partita IVA si ferma col formato atteso', () => {
     const esito = normalizzaIdEstero('NL', '1234567');
     expect(esito.ok).toBe(false);
-    if (!esito.ok) expect(esito.errore).toContain('KVK');
+    if (!esito.ok) expect(esito.errore).toContain('NL + 9 cifre + B + 2 cifre');
   });
 });
 
