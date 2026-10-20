@@ -14,8 +14,14 @@
 import { RISCATTO_PERC as RISCATTO_DUPLEX } from '../data/duplex-costi';
 import { coefficienteGrace, GRACE_FASCE, type FasciaGrace } from '../data/duplex-grace';
 import { coefficienteSputnik, SPUTNIK_FASCE } from '../data/duplex-sputnik';
+import {
+  ECONOCOM_PA_COEFFICIENTI_60M,
+  ECONOCOM_PA_DURATA_MESI,
+  ECONOCOM_PA_IMPORTO_MIN,
+  calcolaRataEconocomPA,
+} from '../data/econocom-pa';
 import { ESG_MAX, ESG_MIN, esgPrezzoDaCanone, getEsgCoeff } from '../data/esg';
-import { GRENKE_COEFFS, RISCATTI, getCoeff } from '../data/grenke';
+import { GRENKE_COEFFS, PIONEER_COEFFS, RISCATTI, getCoeff, getPioneerCoeff } from '../data/grenke';
 import { pagarentPrezzoDaRata } from '../data/pagarent';
 import {
   DURATE as DURATE_PAGARENT,
@@ -25,7 +31,14 @@ import {
   coefficiente as coeffPagarent,
 } from './prospetti-pv-coefficienti';
 
-export type IdTabella = 'pagarent' | 'esg' | 'sputnik' | 'sputnik-duplex' | 'grace-duplex';
+export type IdTabella =
+  | 'pagarent'
+  | 'esg'
+  | 'sputnik'
+  | 'sputnik-duplex'
+  | 'grace-duplex'
+  | 'pioneer'
+  | 'econocom-pa';
 
 export interface TabellaCanoni {
   id: IdTabella;
@@ -183,18 +196,25 @@ export const TABELLA_SPUTNIK: TabellaCanoni = {
  */
 const DURATE_DUPLEX = [24, 36, 48, 60];
 
+/** Durate e riscatti di una tabella a fasce: di default quelli Duplex */
+interface OpzioniFasce {
+  durate: number[];
+  riscatto: Record<number, number>;
+}
+
 function tabellaAFasce(
   id: IdTabella,
   fasce: Record<number, FasciaGrace[]>,
   coeff: (importo: number, durata: number) => number | null,
   nota: string,
+  { durate, riscatto }: OpzioniFasce = { durate: DURATE_DUPLEX, riscatto: RISCATTO_DUPLEX },
 ): TabellaCanoni {
   const tutte = Object.values(fasce).flat();
   return {
     id,
     nota,
-    durate: DURATE_DUPLEX,
-    riscatto: RISCATTO_DUPLEX,
+    durate,
+    riscatto,
     importoMin: Math.min(...tutte.map((f) => f.da)),
     importoMax: Math.max(...tutte.map((f) => f.a)),
     coefficiente: coeff,
@@ -206,8 +226,8 @@ function tabellaAFasce(
       }
       return null;
     },
-    durateDisponibili: (importo) => DURATE_DUPLEX.filter((m) => coeff(importo, m) !== null),
-    quotabile: (importo) => DURATE_DUPLEX.some((m) => coeff(importo, m) !== null),
+    durateDisponibili: (importo) => durate.filter((m) => coeff(importo, m) !== null),
+    quotabile: (importo) => durate.some((m) => coeff(importo, m) !== null),
   };
 }
 
@@ -225,12 +245,75 @@ export const TABELLA_GRACE_DUPLEX = tabellaAFasce(
   'Fatturazione trimestrale anticipata; pro rata e primo trimestre in coda al contratto. Assicurazione obbligatoria, non compresa nel canone.',
 );
 
+/**
+ * Grenke Pioneer++++ (src/data/grenke.ts: PDF "Tabella PIONEER ++++" del kit
+ * collaboratore Grenke/ReteRent; la data di lettura del PDF non e' nota, vedi
+ * PIONEER_LETTO). Beni strumentali da 500 a 100.000 euro. Il listino prevede anche
+ * i 30 mesi, che il portale non offre: restano fuori dalle durate e il coefficiente
+ * a 30 mesi non si legge da qui. Il preventivo non mostra il riscatto, quindi
+ * `riscatto` e' vuoto. Il calcolo inverso dal canone usa le fasce come le tabelle Duplex.
+ */
+const DURATE_PIONEER = [24, 36, 48, 60];
+const FASCE_PIONEER: Record<number, FasciaGrace[]> = Object.fromEntries(
+  DURATE_PIONEER.map((m) => [m, PIONEER_COEFFS[m]]),
+);
+
+export const TABELLA_PIONEER = tabellaAFasce(
+  'pioneer',
+  FASCE_PIONEER,
+  (importo, durata) => (DURATE_PIONEER.includes(durata) ? getPioneerCoeff(importo, durata) : null),
+  'Canone mensile. Assicurazione obbligatoria, non compresa nel canone.',
+  { durate: DURATE_PIONEER, riscatto: {} },
+);
+
+/**
+ * Econocom, tabella per la Pubblica Amministrazione (src/data/econocom-pa.ts: tabella
+ * di Luca Silvestrin del 26/05/2026). DEROGA DICHIARATA: nasce per la PA e il portale
+ * Led Office la usa su clienti privati con oltre 5 milioni di ricavi (decisione di
+ * Alberto del 19/10/2026). Solo 60 mesi, solo da 150.000 euro: sotto non c'e' tabella.
+ * Il coefficiente del file dati e' una frazione (0,0202), qui in percento come le
+ * altre tabelle (2,02). La rata e' indicativa e si dice "da confermare" a video e
+ * nei preventivi: Econocom decide caso per caso.
+ */
+const DURATE_ECONOCOM_PA = [ECONOCOM_PA_DURATA_MESI];
+const ECONOCOM_PA_MAX = 10_000_000;
+
+function coeffEconocomPA(importo: number, durata: number): number | null {
+  if (durata !== ECONOCOM_PA_DURATA_MESI || importo > ECONOCOM_PA_MAX) return null;
+  const calcolo = calcolaRataEconocomPA(importo);
+  return calcolo ? calcolo.fascia.coefficiente * 100 : null;
+}
+
+export const TABELLA_ECONOCOM_PA: TabellaCanoni = {
+  id: 'econocom-pa',
+  nota: 'Canone mensile indicativo, da confermare. Condizioni definite caso per caso.',
+  durate: DURATE_ECONOCOM_PA,
+  riscatto: {},
+  importoMin: ECONOCOM_PA_IMPORTO_MIN,
+  importoMax: ECONOCOM_PA_MAX,
+  coefficiente: coeffEconocomPA,
+  prezzoDaCanone(canone, durata) {
+    if (durata !== ECONOCOM_PA_DURATA_MESI || canone <= 0) return null;
+    // Il coefficiente cala con l'importo, quindi ogni fascia da' un prezzo diverso:
+    // si tiene la prima in cui il prezzo ricavato ricade davvero (a = escluso)
+    for (const f of ECONOCOM_PA_COEFFICIENTI_60M) {
+      const prezzo = canone / f.coefficiente;
+      if (prezzo >= f.da && (f.a === null || prezzo < f.a) && prezzo <= ECONOCOM_PA_MAX) return prezzo;
+    }
+    return null;
+  },
+  durateDisponibili: (importo) => DURATE_ECONOCOM_PA.filter((m) => coeffEconocomPA(importo, m) !== null),
+  quotabile: (importo) => DURATE_ECONOCOM_PA.some((m) => coeffEconocomPA(importo, m) !== null),
+};
+
 export const TABELLE: Record<IdTabella, TabellaCanoni> = {
   pagarent: TABELLA_PAGARENT,
   esg: TABELLA_ESG,
   sputnik: TABELLA_SPUTNIK,
   'sputnik-duplex': TABELLA_SPUTNIK_DUPLEX,
   'grace-duplex': TABELLA_GRACE_DUPLEX,
+  pioneer: TABELLA_PIONEER,
+  'econocom-pa': TABELLA_ECONOCOM_PA,
 };
 
 /** Tabella di default: PagaRent, cosi' chi non passa niente non cambia comportamento */

@@ -81,6 +81,15 @@ export const DURATE_FOTOVOLTAICO = [24, 30, 36, 48, 60, 72, 84];
 // --- Coefficienti Grenke Pioneer++++ (Software Gestionali / CAD — riscatto 0%) ---
 // Fonte: Tabella PIONEER ++++.pdf — Kit collaboratore Grenke / ReteRent
 // Fascia max 100.000 (non 500.000 come Sputnik)
+//
+// Data di lettura del PDF Pioneer: NON la conosciamo. Il PDF e' nel kit, ma nessuno
+// ha annotato quando e' stato letto, e una data indovinata varrebbe quanto un
+// coefficiente inventato (regola vincolante di CLAUDE.md). Finche' resta `null` la
+// tabella Pioneer e' registrata ma l'instradamento del portale Led Office non
+// usa Grenke (Task 6 del piano). Si valorizza, in formato AAAA-MM-GG, solo dopo
+// aver riletto il PDF o riscontrato i coefficienti sul simulatore ReteRent.
+export const PIONEER_LETTO: string | null = null;
+
 export const PIONEER_COEFFS: Record<number, { da: number; a: number; c: number }[]> = {
   24: [
     { da: 500, a: 2500, c: 4.936 },

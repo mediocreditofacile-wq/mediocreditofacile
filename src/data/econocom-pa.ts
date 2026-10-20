@@ -14,6 +14,12 @@
  *  - il preventivo e' indicativo: Econocom analizza ogni operazione caso per caso.
  */
 
+/**
+ * Deroga dichiarata (decisione di Alberto del 19/10/2026): la tabella nasce per la PA
+ * e il portale Led Office la usa su clienti privati con oltre 5 milioni di ricavi,
+ * solo da 150.000 euro e solo a 60 mesi; a video e nei preventivi la rata è 'da confermare'.
+ */
+
 export interface FasciaEconocom {
   da: number;
   /** Limite superiore escluso. `null` = nessun limite. */
