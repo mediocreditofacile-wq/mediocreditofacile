@@ -8,10 +8,14 @@
 //   quindi il semaforo informa e non cambia niente.
 // locatore: i criteri del locatore (semaforo-locatore.ts), quattro colori, mai un
 //   effetto sui numeri.
+// prefiltro: le regole di Led Office (prefiltro.ts), verde, giallo, rosso e bloccato,
+//   mai un effetto sui numeri. Alla ricerca lo calcola l'API del merito coi segnali
+//   letti dal server; qui c'e' solo la forma per lo schermo.
 
 import { valutaCredito, type EsitoCredito } from '../credit-policy';
 import type { Carrozzeria } from './carrozzeria';
 import { datiLocatore, type DatiCreditoMotore } from './merito';
+import type { EsitoPrefiltro, MotivazioneRichiesta } from './prefiltro';
 import type { DatiBilancio } from './proposte';
 import { valutaLocatore, type EsitoLocatore, type StatoEventi } from './semaforo-locatore';
 
@@ -74,5 +78,26 @@ export function semaforoPerSchermo(v: Valutazione) {
     eventi: null as StatoEventi | null,
     indicazioneMassima: null as number | null,
     indicazioneBase: null as string | null,
+  };
+}
+
+/**
+ * Il prefiltro nello stesso formato di semaforoPerSchermo, piu' le motivazioni da
+ * scrivere e la spunta del LEDwall. Niente massimali: il prefiltro non dice cifre.
+ * Sul bloccato la scheda mostra solo il testo fisso: niente eventi, come niente criteri.
+ */
+export function prefiltroPerSchermo(e: EsitoPrefiltro) {
+  return {
+    semaforo: e.semaforo as string,
+    etichetta: e.etichetta as string | null,
+    righe: e.righe,
+    criteri: e.criteri as unknown[],
+    massimale: null as number | null,
+    provvisorio: e.provvisorio,
+    eventi: (e.semaforo === 'bloccato' ? null : e.eventi) as StatoEventi | null,
+    indicazioneMassima: null as number | null,
+    indicazioneBase: null as string | null,
+    motivazioniRichieste: e.motivazioniRichieste as MotivazioneRichiesta[],
+    ledwallMancante: e.ledwallMancante,
   };
 }

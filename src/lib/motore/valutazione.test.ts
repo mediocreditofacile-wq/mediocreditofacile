@@ -6,7 +6,8 @@ import { describe, expect, it } from 'vitest';
 import { valutaCredito } from '../credit-policy';
 import type { Carrozzeria } from './carrozzeria';
 import { calcolaProposte } from './proposte';
-import { semaforoPerSchermo, valuta } from './valutazione';
+import { TESTI_PREFILTRO, valutaPrefiltro, type DatiPrefiltro, type SegnaliPrefiltro } from './prefiltro';
+import { prefiltroPerSchermo, semaforoPerSchermo, valuta } from './valutazione';
 
 const OGGI = new Date('2026-10-15T10:00:00+02:00');
 const K: Carrozzeria = {
@@ -78,5 +79,44 @@ describe('leasing spento', () => {
   });
   it('con i default il leasing c e come prima', () => {
     expect(calcolaProposte(50_000, SOLIDA, K, OGGI).leasing.length).toBeGreaterThan(0);
+  });
+});
+
+describe('prefiltro allo schermo', () => {
+  const SANO: DatiPrefiltro = {
+    formaCodice: 'SR', attiva: true, cessata: false, inizioAttivita: '2015-03-01',
+    bilanciConRicavi: [2025, 2024], patrimonioNetto: 200_000, utile: 30_000,
+    capitaleSociale: 50_000, dipendenti: 20, atecoCodice: '62.01.00',
+  };
+  const NESSUNO: SegnaliPrefiltro = { segnalato: null, praticaRecente: null };
+
+  it('stesso formato del semaforo, coi campi del prefiltro e senza massimali', () => {
+    const s = prefiltroPerSchermo(valutaPrefiltro({ ...SANO, utile: -5_000 }, NESSUNO, 'in-verifica', [], null, OGGI));
+    expect(s.semaforo).toBe('giallo');
+    expect(s.etichetta).toBe('Da completare');
+    expect(s.provvisorio).toBe(true);
+    expect(s.eventi).toBe('in-verifica');
+    expect(s.massimale).toBeNull();
+    expect(s.indicazioneMassima).toBeNull();
+    expect(s.indicazioneBase).toBeNull();
+    expect(s.motivazioniRichieste.map((m) => m.chiave)).toEqual(['perdita']);
+    expect(s.ledwallMancante).toBe(false);
+    expect(Object.keys(semaforoPerSchermo(valuta(LOCATORE, SOLIDA, null, 'assenti', OGGI))).every((c) => c in s)).toBe(true);
+  });
+  it('bloccato: solo il testo fisso, niente criteri e niente eventi', () => {
+    const s = prefiltroPerSchermo(valutaPrefiltro(
+      SANO, { segnalato: { motivo: 'insoluto', effetto: 'blocco' }, praticaRecente: null }, 'presenti', [], null, OGGI));
+    expect(s.semaforo).toBe('bloccato');
+    expect(s.righe).toEqual([TESTI_PREFILTRO.bloccato]);
+    expect(s.criteri).toEqual([]);
+    expect(s.eventi).toBeNull();
+    expect(JSON.stringify(s)).not.toContain('insoluto');
+  });
+  it('la pratica recente arriva allo schermo solo come testo generico', () => {
+    const s = prefiltroPerSchermo(valutaPrefiltro(SANO, {
+      segnalato: null, praticaRecente: { data: '2026-07-28', canale: 'pagarent', fornitore: 'led-office', fonte: 'esterna' },
+    }, 'assenti', [], null, OGGI));
+    expect(s.righe).toContain(TESTI_PREFILTRO.praticaRecente);
+    expect(JSON.stringify(s)).not.toMatch(/pagarent|led-office|2026-07-28/);
   });
 });

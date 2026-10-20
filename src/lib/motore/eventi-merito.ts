@@ -1,4 +1,7 @@
-// Eventi negativi alla ricerca del cliente, per i fornitori col semaforo del locatore.
+// Eventi negativi alla ricerca del cliente, per i fornitori col semaforo del locatore
+// (Duplex) e col prefiltro (Led Office): stesso giro per tutti e due (regoleConEventi
+// di segnali-prefiltro.ts). La mail la decide il DatiMailVerifica che arriva dall'API:
+// sul prefiltro porta anche i segnali, qui passa cosi' com'e'.
 //
 // ATTENZIONE — FILE SERVER-ONLY.
 //

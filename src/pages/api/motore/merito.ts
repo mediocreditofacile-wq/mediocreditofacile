@@ -10,9 +10,15 @@ export const prerender = false;
 // con /tools/valutazione: un cliente gia' analizzato non si paga due volte.
 // Sui fornitori con la credit policy la verifica eventi negativi qui NON parte:
 // parte all'invio della pratica. Sui fornitori col semaforo del locatore (Duplex)
-// parte qui: la risposta esce subito con gli eventi "in verifica", il server segue
-// l'esito in background per circa 90 secondi (waitUntil), lo salva sulla riga
-// della ricerca e manda una mail ad Alberto se scheda o verifica sono nuove.
+// e col prefiltro (Led Office) parte qui: la risposta esce subito con gli eventi
+// "in verifica", il server segue l'esito in background per circa 90 secondi
+// (waitUntil), lo salva sulla riga della ricerca e manda una mail ad Alberto se
+// scheda o verifica sono nuove.
+//
+// Sul prefiltro il server legge anche i segnali (cliente segnalato da MCF, pratica
+// recente su qualunque portale o nello storico importato) e li salva sulla ricerca.
+// Al commerciale arrivano solo i testi generici; motivo, data, canale e fornitore
+// stanno nella mail ad Alberto. Un cliente gia' rosso o bloccato non paga la verifica.
 //
 // I numeri di bilancio si salvano in app.ricerca_merito e la proposta li rilegge
 // da li': il browser non puo' mandare un fatturato suo per farsi verde.
@@ -23,15 +29,32 @@ import { valutaCredito } from '../../../lib/credit-policy';
 import { queryUna, query } from '../../../lib/db';
 import { avviaEventi, riprendiEventi, salvaEventi, seguiEventi } from '../../../lib/motore/eventi-merito';
 import { bersaglioEventi, eventiNonAvviati, serveControllo, type EventiRicerca } from '../../../lib/motore/eventi-stato';
+import type { Carrozzeria } from '../../../lib/motore/carrozzeria';
 import { datiLocatore, leggiScheda, type DatiCreditoMotore, type SchedaRidotta } from '../../../lib/motore/merito';
-import { valutaLocatore } from '../../../lib/motore/semaforo-locatore';
-import { semaforoPerSchermo, valuta } from '../../../lib/motore/valutazione';
+import { datiPrefiltro, valutaPrefiltro, type SegnaliPrefiltro } from '../../../lib/motore/prefiltro';
+import { regoleConEventi, salvaSegnali, segnaliPrefiltro } from '../../../lib/motore/segnali-prefiltro';
+import { valutaLocatore, type StatoEventi } from '../../../lib/motore/semaforo-locatore';
+import { prefiltroPerSchermo, semaforoPerSchermo, valuta } from '../../../lib/motore/valutazione';
 import { corpoJson, filtroVisibilita, json, sessioneMotore } from '../../../lib/motore/sessione';
 import { entroIlTetto, schedaAzienda, schedaSoloCache, sorgenteCarrozzeria } from '../../../lib/openapi';
 import { pivaValida, pulisciPiva } from '../../../lib/piva';
 
 /** Semaforo senza importo: utile e anni di attivita'. Quello vero arriva col prezzo. */
 const creditoBase = (d: DatiCreditoMotore) => valutaCredito({ ...d, importo: null });
+
+const SENZA_SEGNALI: SegnaliPrefiltro = { segnalato: null, praticaRecente: null };
+
+/** Il prefiltro alla verifica: solo le regole sul cliente, la distinta arriva con la proposta */
+const prefiltroCliente = (k: Carrozzeria, d: DatiCreditoMotore, segnali: SegnaliPrefiltro, eventi: StatoEventi) =>
+  valutaPrefiltro(datiPrefiltro(d), segnali, eventi, k.categorie ?? [], null);
+
+/** Il semaforo della ricerca, senza importo, secondo le regole della carrozzeria */
+function creditoPerSchermo(k: Carrozzeria, d: DatiCreditoMotore, segnali: SegnaliPrefiltro | null, eventi: StatoEventi) {
+  // Sul prefiltro i segnali ci sono sempre: POST e GET li leggono prima di arrivare qui
+  if (k.regoleSemaforo === 'prefiltro') return prefiltroPerSchermo(prefiltroCliente(k, d, segnali ?? SENZA_SEGNALI, eventi));
+  if (k.regoleSemaforo === 'locatore') return semaforoPerSchermo(valuta(k, d, null, eventi));
+  return creditoBase(d);
+}
 
 export async function POST({ request }: { request: Request }) {
   const corpo = await corpoJson(request);
@@ -72,10 +95,16 @@ export async function POST({ request }: { request: Request }) {
   );
   console.log(JSON.stringify({ evento: 'motore_merito', fornitore: carrozzeria.slug, daCache: Boolean(scheda.daCache) }));
 
+  // Prefiltro: cliente segnalato e pratica recente, letti adesso e salvati sulla ricerca
+  const segnali = carrozzeria.regoleSemaforo === 'prefiltro' ? await segnaliPrefiltro(piva) : null;
+  if (segnali) await salvaSegnali(id, segnali);
+
   let eventi: EventiRicerca | null = null;
-  if (carrozzeria.regoleSemaforo === 'locatore') {
-    // Gia' rosso sui dati di anagrafica e bilancio: la verifica non si paga
-    const giaRosso = valutaLocatore(datiLocatore(dati), null, 'non-avviata').semaforo === 'rosso';
+  if (regoleConEventi(carrozzeria)) {
+    // Gia' rosso (o bloccato) sui dati di anagrafica, bilancio e segnali: la verifica non si paga
+    const giaRosso = segnali
+      ? ['rosso', 'bloccato'].includes(prefiltroCliente(carrozzeria, dati, segnali, 'non-avviata').semaforo)
+      : valutaLocatore(datiLocatore(dati), null, 'non-avviata').semaforo === 'rosso';
     eventi = giaRosso
       ? eventiNonAvviati(piva)
       : await avviaEventi(carrozzeria, bersaglioEventi(piva, dati.formaCodice ?? null, scheda.advanced?.taxCode));
@@ -83,15 +112,16 @@ export async function POST({ request }: { request: Request }) {
     eventi.mail = nuova.scheda || nuova.eventi ? 'da-mandare' : 'non-serve';
     await salvaEventi(id, eventi);
     const mail = eventi.mail === 'da-mandare'
-      ? { fornitore: carrozzeria.nome, agente: { nome: contesto.nome ?? '', email: contesto.email }, scheda: ridotta, dati, nuova }
+      ? {
+        fornitore: carrozzeria.nome, agente: { nome: contesto.nome ?? '', email: contesto.email }, scheda: ridotta, dati, nuova,
+        ...(segnali ? { prefiltro: { segnali } } : {}),
+      }
       : null;
     // La risposta parte subito; esito e mail li segue il server per circa 90 secondi
     waitUntil(seguiEventi(carrozzeria, id, eventi, mail).catch((err) =>
       console.error(JSON.stringify({ evento: 'motore_eventi_errore', fornitore: carrozzeria.slug, msg: String(err) }))));
   }
-  const credito = carrozzeria.regoleSemaforo === 'locatore'
-    ? semaforoPerSchermo(valuta(carrozzeria, dati, null, eventi?.stato ?? 'non-avviata'))
-    : creditoBase(dati);
+  const credito = creditoPerSchermo(carrozzeria, dati, segnali, eventi?.stato ?? 'non-avviata');
 
   return json({ ok: true, ricercaId: id, scheda: ridotta, info, credito, eventi: eventi?.stato ?? null, daCache: Boolean(scheda.daCache) });
 }
@@ -101,33 +131,44 @@ export async function GET({ request }: { request: Request }) {
   const e = await sessioneMotore(request, url.searchParams.get('f'));
   if (!e.ok) return e.risposta;
 
+  const { carrozzeria, contesto } = e;
+  const prefiltro = carrozzeria.regoleSemaforo === 'prefiltro';
+  const attesaEventi = url.searchParams.get('eventi') === '1';
   const { where, valori } = filtroVisibilita(e, '', 2);
+  // La colonna segnali la legge solo il prefiltro
   const riga = await queryUna<{
     id: string; piva: string;
     dati_credito: { dati: DatiCreditoMotore; scheda: SchedaRidotta };
     eventi: EventiRicerca | null;
+    segnali?: SegnaliPrefiltro | null;
   }>(
-    `SELECT id, piva, dati_credito, eventi FROM app.ricerca_merito WHERE id = $1 AND ${where}`,
+    `SELECT id, piva, dati_credito, eventi${prefiltro ? ', segnali' : ''} FROM app.ricerca_merito WHERE id = $1 AND ${where}`,
     [url.searchParams.get('id') ?? '', ...valori],
   );
   if (!riga) return json({ ok: false, error: 'ricerca_non_trovata' }, 404);
 
-  const { carrozzeria, contesto } = e;
-  const locatore = carrozzeria.regoleSemaforo === 'locatore';
+  // Riaprendo la ricerca i segnali si rileggono, perche' MCF puo' aver segnato il
+  // cliente nel frattempo, e si salvano di nuovo; l'attesa degli eventi usa quelli salvati
+  let segnali: SegnaliPrefiltro | null = null;
+  if (prefiltro) {
+    const salvati = riga.segnali ?? null;
+    segnali = attesaEventi && salvati ? salvati : await segnaliPrefiltro(riga.piva);
+    if (segnali !== salvati) await salvaSegnali(riga.id, segnali);
+  }
+
   let ev = riga.eventi;
-  if (locatore && ev && serveControllo(ev)) {
+  if (regoleConEventi(carrozzeria) && ev && serveControllo(ev)) {
     const mail = {
       fornitore: carrozzeria.nome, agente: { nome: contesto.nome ?? '', email: contesto.email },
       scheda: riga.dati_credito.scheda, dati: riga.dati_credito.dati, nuova: { scheda: false, eventi: !ev.daRegistro },
+      ...(segnali ? { prefiltro: { segnali } } : {}),
     };
     ev = await riprendiEventi(carrozzeria, riga.id, ev, mail).catch(() => ev);
   }
-  const credito = locatore
-    ? semaforoPerSchermo(valuta(carrozzeria, riga.dati_credito.dati, null, ev?.stato ?? 'non-avviata'))
-    : creditoBase(riga.dati_credito.dati);
+  const credito = creditoPerSchermo(carrozzeria, riga.dati_credito.dati, segnali, ev?.stato ?? 'non-avviata');
 
   // Attesa degli eventi dalla pagina: solo semaforo e stato, niente scheda
-  if (url.searchParams.get('eventi') === '1') return json({ ok: true, eventi: ev?.stato ?? null, credito });
+  if (attesaEventi) return json({ ok: true, eventi: ev?.stato ?? null, credito });
 
   // Le info aggiuntive vengono dalla cache, senza spendere. Scaduta la cache
   // (30 giorni) restano la scheda ridotta e i numeri salvati con la ricerca.
