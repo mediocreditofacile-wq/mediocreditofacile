@@ -4,6 +4,7 @@ export const prerender = false;
 // l'admin MCF tutto: la differenza sta nella clausola WHERE, non nell'interfaccia.
 
 import { query } from '../../lib/db';
+import { rifiutoSeSulMotore } from '../../lib/guardia-motore';
 import { richiediSessione, vedeTuttoIlFornitore } from '../../lib/portale-auth';
 
 export async function GET({ request }: { request: Request }) {
@@ -14,6 +15,9 @@ export async function GET({ request }: { request: Request }) {
   });
   if (!esito.ok) return esito.risposta;
   const { contesto } = esito;
+  // Un fornitore sul motore ha il suo storico in /api/motore/storico
+  const sulMotore = await rifiutoSeSulMotore(contesto, '/api/portale-preventivi');
+  if (sulMotore) return sulMotore;
 
   const tutto = vedeTuttoIlFornitore(contesto);
   const condizioni: string[] = [];

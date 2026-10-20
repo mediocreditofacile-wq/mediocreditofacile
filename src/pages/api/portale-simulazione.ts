@@ -22,6 +22,7 @@ export const prerender = false;
 // la fascia di importo.
 
 import { agevolazioneAttiva } from '../../data/leasing';
+import { rifiutoSeSulMotore } from '../../lib/guardia-motore';
 import { richiediSessione } from '../../lib/portale-auth';
 import { leggiInput } from '../../lib/preventivi-pv';
 import { SOGLIA_LEASING, leasingPercorribile } from '../../lib/prospetti-pv-coefficienti';
@@ -40,6 +41,9 @@ const r2 = (v: number) => Math.round(v * 100) / 100;
 export async function POST({ request }: { request: Request }) {
   const esito = await richiediSessione(request, { permesso: { preventivo: ['crea'] } });
   if (!esito.ok) return esito.risposta;
+  // Un fornitore sul motore quota da /api/motore/proposte, col prefiltro e coi suoi canali
+  const sulMotore = await rifiutoSeSulMotore(esito.contesto, '/api/portale-simulazione');
+  if (sulMotore) return sulMotore;
 
   let corpo: Record<string, unknown>;
   try {

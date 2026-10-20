@@ -4,12 +4,23 @@
 // referente e agente.
 
 import { describe, expect, it } from 'vitest';
-import { percorsoConsentito, percorsoRiservato } from './percorso-riservato';
+import { nomeNonIndovinabile, percorsoConsentito, percorsoRiservato } from './percorso-riservato';
 
 describe('percorso riservato', () => {
   it('il percorso riservato sta sotto /mcf/', () =>
     expect(percorsoRiservato('led-office', 'LO-1', 'proposta-locatore-LO-1.pdf'))
       .toBe('preventivi/led-office/LO-1/mcf/proposta-locatore-LO-1.pdf'));
+
+  it('il nome del file prende un pezzo casuale prima dell\'estensione', () => {
+    expect(nomeNonIndovinabile('proposta-locatore-LO-1.pdf', '0123456789abcdef')).toBe('proposta-locatore-LO-1-0123456789abcdef.pdf');
+    expect(nomeNonIndovinabile('senza-estensione', '0123456789abcdef')).toBe('senza-estensione-0123456789abcdef');
+  });
+
+  it('un pezzo casuale che non e\' di 16 cifre esadecimali non si accetta', () => {
+    for (const c of ['', '123', 'zzzzzzzzzzzzzzzz', '0123456789abcdef0', '../../../../../x']) {
+      expect(() => nomeNonIndovinabile('a.pdf', c)).toThrow();
+    }
+  });
 });
 
 describe('chi scarica cosa', () => {

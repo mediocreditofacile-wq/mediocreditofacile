@@ -370,7 +370,8 @@ describe('generaPreventivoDistinta', () => {
 
     expect(blob.put).toHaveBeenCalledTimes(1);
     const [pathname, corpo, opzioni] = blob.put.mock.calls[0];
-    expect(pathname).toBe(`preventivi/led-office/${r.id}/mcf/proposta-locatore-${r.id}.pdf`);
+    // Il nome sullo store ha un pezzo casuale: dall'id della proposta non si ricava
+    expect(pathname).toMatch(new RegExp(`^preventivi/led-office/${r.id}/mcf/proposta-locatore-${r.id}-[0-9a-f]{16}\\.pdf$`));
     expect(Buffer.from(corpo).subarray(0, 5).toString('latin1')).toBe('%PDF-');
     expect(opzioni).toMatchObject({ access: 'private', contentType: 'application/pdf', allowOverwrite: true, addRandomSuffix: false, token: 'tok-finto' });
 
@@ -385,9 +386,21 @@ describe('generaPreventivoDistinta', () => {
       { nome: `proposta-vendita-${r.id}.pdf`, pathname: `preventivi/led-office/${r.id}/proposta-vendita-${r.id}.pdf` },
     ]);
     expect(pronti).toBe(true);
-    expect(JSON.parse(String(riservato)).documenti).toEqual([
-      { nome: `proposta-locatore-${r.id}.pdf`, pathname: `preventivi/led-office/${r.id}/mcf/proposta-locatore-${r.id}.pdf` },
-    ]);
+    // Nel riservato il percorso vero, quello col pezzo casuale; il nome resta quello leggibile
+    expect(JSON.parse(String(riservato)).documenti).toEqual([{ nome: `proposta-locatore-${r.id}.pdf`, pathname }]);
+  });
+
+  it('il percorso della proposta per il locatore non si ricava dall\'id: cambia a ogni proposta', async () => {
+    const percorsi: string[] = [];
+    for (let i = 0; i < 2; i++) {
+      blob.put.mockClear();
+      const r = await generaPreventivoDistinta(SESSIONE, calcolo, {});
+      const [pathname] = blob.put.mock.calls[0];
+      expect(pathname).not.toBe(percorsoRiservato('led-office', r.id!, `proposta-locatore-${r.id}.pdf`));
+      percorsi.push(String(pathname).replace(r.id!, 'ID').replace(r.id!, 'ID'));
+    }
+    // Stesso id a parte, i due percorsi differiscono nel pezzo casuale
+    expect(percorsi[0]).not.toBe(percorsi[1]);
   });
 
   it('la mail a MCF porta tutti e tre i PDF e passa da inviaMail', async () => {

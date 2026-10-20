@@ -19,6 +19,7 @@
 // Se il salvataggio dei PDF fallisce in parte la proposta resta (come sugli altri
 // settori): pdf_pronti falso e la mail parte lo stesso, con gli allegati e l'avviso.
 
+import { randomBytes } from 'node:crypto';
 import { put } from '@vercel/blob';
 import { logoDaBlob } from '../brand-fornitore';
 import { env, query } from '../db';
@@ -32,7 +33,7 @@ import type { Distinta, RigaDistinta } from './distinta';
 import { FONTE_PRATICA } from './mail-verifica';
 import { euro } from './pdf-generico';
 import { documentiLedOffice } from './pdf-ledoffice';
-import { percorsoRiservato } from './percorso-riservato';
+import { nomeNonIndovinabile, percorsoRiservato } from './percorso-riservato';
 import type { EsitoPreventivo } from './preventivo';
 import { generaId, type EsitoMotore } from './sessione';
 
@@ -252,13 +253,15 @@ export function corpoMailDistinta(o: {
 
 /**
  * La proposta per il locatore nella cartella riservata, sullo store privato. Non passa
- * da salvaPdf(), che scrive nella cartella dei documenti della proposta. Null se lo
- * store non e' configurato o la scrittura fallisce.
+ * da salvaPdf(), che scrive nella cartella dei documenti della proposta. Il nome sullo
+ * store ha un pezzo casuale (nomeNonIndovinabile): il percorso vero resta solo nel
+ * `riservato`, il nome leggibile va in `nome` e negli allegati. Null se lo store non
+ * e' configurato o la scrittura fallisce.
  */
 async function salvaRiservato(slug: string, id: string, pdf: Pdf): Promise<Documento | null> {
   const token = env('BLOB_READ_WRITE_TOKEN');
   if (!token) return null;
-  const pathname = percorsoRiservato(slug, id, pdf.filename);
+  const pathname = percorsoRiservato(slug, id, nomeNonIndovinabile(pdf.filename, randomBytes(8).toString('hex')));
   try {
     await put(pathname, Buffer.from(pdf.contenuto, 'base64'), {
       access: 'private',

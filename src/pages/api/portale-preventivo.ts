@@ -5,6 +5,7 @@ export const prerender = false;
 // puo' mandare quello che vuole, qui non viene letto.
 
 import { generaPreventivo } from '../../lib/preventivi-nominali';
+import { rifiutoSeSulMotore } from '../../lib/guardia-motore';
 import { richiediSessione } from '../../lib/portale-auth';
 
 export async function POST({ request }: { request: Request }) {
@@ -16,6 +17,9 @@ export async function POST({ request }: { request: Request }) {
 
   const esito = await richiediSessione(request, { permesso: { preventivo: ['crea'] } });
   if (!esito.ok) return esito.risposta;
+  // Un fornitore sul motore genera i preventivi da /api/motore/preventivo
+  const sulMotore = await rifiutoSeSulMotore(esito.contesto, '/api/portale-preventivo');
+  if (sulMotore) return sulMotore;
   if (!esito.contesto.fornitoreSlug || !esito.contesto.prefisso) {
     return rispondi({ ok: false, error: 'fornitore_non_indicato' }, 400);
   }

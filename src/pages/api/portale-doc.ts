@@ -15,6 +15,7 @@ export const prerender = false;
 
 import { get, BlobNotFoundError } from '@vercel/blob';
 import { env } from '../../lib/db';
+import { rifiutoSeSulMotore } from '../../lib/guardia-motore';
 import { percorsoDelFornitore, richiediSessione } from '../../lib/portale-auth';
 
 export async function GET({ request }: { request: Request }) {
@@ -32,6 +33,11 @@ export async function GET({ request }: { request: Request }) {
     permesso: { documento: ['leggi-propri'] },
   });
   if (!esito.ok) return esito.risposta;
+
+  // Un fornitore sul motore scarica solo da /api/motore/doc, che tiene fuori la
+  // cartella riservata a MCF: qui il perimetro e' solo preventivi/<slug>/.
+  const sulMotore = await rifiutoSeSulMotore(esito.contesto, '/api/portale-doc');
+  if (sulMotore) return sulMotore;
 
   if (!percorsoDelFornitore(esito.contesto, percorso)) {
     console.warn(JSON.stringify({
