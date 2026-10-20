@@ -69,8 +69,10 @@ const codiceForma = (s: string | null): string => (s ?? '').trim().toUpperCase()
  * che un dato mancante o illeggibile (null, NaN) faccia fallire la condizione.
  */
 function reggeIlCliente(c: CanaleConfig, cliente: ClienteInstradamento, beni: number, oggi: Date): boolean {
-  // Il listino Pioneer non ha una data di lettura: finche' manca, Grenke non si sceglie
-  if (c.canale === 'grenke' && PIONEER_LETTO === null) return false;
+  // Il listino Pioneer non ha una data di lettura: finche' manca, nessun canale lo usa.
+  // Il blocco sta sulla tabella e non sul canale: dal Pannello MCF anche un altro canale
+  // si puo' puntare su pioneer, e Grenke su un listino che la data ce l'ha
+  if (c.tabella === 'pioneer' && PIONEER_LETTO === null) return false;
 
   // "Oltre" una soglia: la soglia stessa non basta
   if (c.fatturatoMin !== undefined && !(cliente.fatturato !== null && cliente.fatturato > c.fatturatoMin)) return false;

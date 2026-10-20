@@ -193,6 +193,23 @@ describe('Grenke spento o senza data di lettura del listino', () => {
     expect(stato.letto).toBeNull();
     expect(instrada(LO_GRENKE, srlTreAnni, 60_000, OGGI)!.canale).toBe('pagarent');
   });
+
+  it('il blocco e\' del listino Pioneer, non del canale: un altro canale sulla tabella pioneer non quota', () => {
+    expect(stato.letto).toBeNull();
+    // L'admin punta Pagarent sulla tabella pioneer: senza data di lettura il canale salta
+    const pagarentSuPioneer: CanaleConfig = { ...PAGARENT, tabella: 'pioneer', maggiorazionePerc: 0 };
+    expect(instrada([pagarentSuPioneer], srlTreAnni, 60_000, OGGI)).toBeNull();
+    expect(instrada([pagarentSuPioneer, PAGARENT], srlTreAnni, 60_000, OGGI)).toMatchObject({ canale: 'pagarent', maggiorazione: 3_000 });
+    // Con la data di lettura lo stesso canale quota
+    stato.letto = '2026-01-01';
+    expect(instrada([pagarentSuPioneer], srlTreAnni, 60_000, OGGI)).toMatchObject({ canale: 'pagarent', maggiorazione: 0 });
+  });
+
+  it('Grenke su un listino che ha la sua data di lettura (Sputnik) quota anche senza PIONEER_LETTO', () => {
+    expect(stato.letto).toBeNull();
+    const grenkeSputnik: CanaleConfig = { ...GRENKE, attivo: true, tabella: 'sputnik' };
+    expect(instrada([grenkeSputnik], srlTreAnni, 60_000, OGGI)).toMatchObject({ canale: 'grenke', imponibile: 60_000 });
+  });
 });
 
 describe('Grenke acceso con la data di lettura del listino', () => {
