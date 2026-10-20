@@ -11,7 +11,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { getTabella } from '../tabelle-canoni';
 import type { CanaleConfig } from './config-distinta';
-import { DURATA_EVIDENZA, instrada, type ClienteInstradamento } from './instradamento';
+import { DURATA_EVIDENZA, instrada, vistaCommerciale, type ClienteInstradamento } from './instradamento';
 
 // Grenke non si sceglie mai finche' PIONEER_LETTO e' null. Per provare il canale
 // acceso con una data di lettura si sostituisce solo quella costante, leggendola
@@ -92,6 +92,32 @@ describe('Pagarent, il canale di chiusura', () => {
     // (con il coefficiente 2,27025 della fascia dei soli beni sarebbe 1.022,63)
     expect(r.rate.find((x) => x.durata === 60)!.canone).toBe(1_019.41);
     expect(r.rate.find((x) => x.durata === 24)!.canone).toBe(2_336.49);
+  });
+
+  it('mezzo centesimo: il canone arrotonda per eccesso, come il contratto', () => {
+    // 70.476 + 3.524 (il 5% e' 3.523,8) = 74.000. A 48 mesi 74.000 x 2,73675% fa
+    // 2.025,195: il contratto dice 2.025,20, e un arrotondamento che perde il
+    // mezzo centesimo per la virgola mobile darebbe 2.025,19
+    const r = instrada(LO, piccolo, 70_476, OGGI)!;
+    expect(r).toMatchObject({ canale: 'pagarent', maggiorazione: 3_524, imponibile: 74_000 });
+    expect(r.rate.find((x) => x.durata === 48)!.canone).toBe(2_025.2);
+  });
+
+  it('mezzo centesimo, imponibile 46.000 a 48 mesi: 1.258,91', () => {
+    // 46.000 non si raggiunge con il 5% da beni interi (43.809 fa 45.999, 43.810 fa 46.001):
+    // si prova su un canale senza maggiorazione. 46.000 x 2,73675% = 1.258,905 -> 1.258,91
+    const senzaMaggiorazione: CanaleConfig[] = [{ ...PAGARENT, maggiorazionePerc: 0 }];
+    const r = instrada(senzaMaggiorazione, piccolo, 46_000, OGGI)!;
+    expect(r).toMatchObject({ maggiorazione: 0, imponibile: 46_000 });
+    expect(r.rate.find((x) => x.durata === 48)!.canone).toBe(1_258.91);
+  });
+
+  it('beni ai centesimi: l\'imponibile resta ai centesimi, senza rumore di virgola mobile', () => {
+    // 1000,07 + 50 in virgola mobile fa 1050.0700000000002
+    const r = instrada(LO, piccolo, 1_000.07, OGGI)!;
+    expect(r).toMatchObject({ canale: 'pagarent', beni: 1_000.07, maggiorazione: 50, imponibile: 1_050.07 });
+    const t = getTabella('pagarent');
+    expect(r.rate.find((x) => x.durata === 60)!.canone).toBe(Math.round(Number((1_050.07 * t.coefficiente(1_050.07, 60)!).toFixed(6))) / 100);
   });
 
   it('bordo alto: l\'imponibile puo\' arrivare a 200.000, non oltre', () => {
@@ -300,5 +326,45 @@ describe('la nota', () => {
     const r = instrada(LO, piccolo, 50_000, OGGI)!;
     expect(r.nota).toMatch(/istruttoria/i);
     expect(r.nota ?? '').not.toMatch(/pagarent|grenke|econocom/i);
+  });
+});
+
+describe('vistaCommerciale', () => {
+  const ESCLUSI = ['canale', 'beni', 'maggiorazione', 'imponibile'];
+
+  it('lascia solo rate, nota e i due avvisi', () => {
+    const r = instrada(LO, piccolo, 137_750, OGGI)!;
+    const v = vistaCommerciale(r);
+    expect(Object.keys(v).sort()).toEqual(['daConfermare', 'nota', 'rate', 'richiedeProvvisorio']);
+    expect(v.rate).toEqual(r.rate);
+    expect(v.nota).toBe(r.nota);
+    expect(v.daConfermare).toBe(false);
+    expect(v.richiedeProvvisorio).toBe(false);
+  });
+
+  it('il JSON non porta ne\' le chiavi riservate ne\' i nomi dei locatori, su ogni canale', () => {
+    stato.letto = '2026-01-01';
+    const viste = [
+      instrada(LO_GRENKE, piccolo, 137_750, OGGI)!,
+      instrada(LO_GRENKE, grande, 150_000, OGGI)!,
+      instrada(LO_GRENKE, srlTreAnni, 60_000, OGGI)!,
+    ].map(vistaCommerciale);
+    for (const v of viste) {
+      const json = JSON.stringify(v);
+      for (const chiave of ESCLUSI) expect(json).not.toContain(`"${chiave}"`);
+      expect(json).not.toMatch(/pagarent|grenke|econocom/i);
+    }
+    // gli avvisi passano com'erano
+    expect(viste[1].daConfermare).toBe(true);
+    expect(viste[2].richiedeProvvisorio).toBe(true);
+  });
+
+  it('dalla vista non si ricava la maggiorazione', () => {
+    // la differenza fra imponibile e beni e' la maggiorazione: nessuno dei due deve uscire
+    const v = vistaCommerciale(instrada(LO, piccolo, 137_750, OGGI)!);
+    const json = JSON.stringify(v);
+    expect(json).not.toContain('137750');
+    expect(json).not.toContain('144638');
+    expect(json).not.toContain('6888');
   });
 });
