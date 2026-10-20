@@ -62,23 +62,40 @@ export function bozzaValida(bozza: string): boolean {
 
 export interface DocumentoPratica { nome: string; pathname: string; size: number }
 
-/** I documenti dichiarati dal browser, tenuti solo se stanno nella cartella della bozza */
-export function documentiDellaBozza(slug: string, bozza: string, grezzi: unknown): DocumentoPratica[] {
+/**
+ * I documenti dichiarati dal browser, tenuti solo se stanno nella cartella della bozza.
+ * `voce` (la voce della checklist sotto cui e' stato caricato) passa solo se il browser
+ * la manda: oggi lo fa il settore distinta, dove il server tiene poi soltanto i
+ * documenti delle voci di quel cliente (pratica-distinta.ts). Gli altri fornitori non
+ * la mandano e il loro elenco resta com'era.
+ */
+export function documentiDellaBozza(
+  slug: string,
+  bozza: string,
+  grezzi: unknown,
+): (DocumentoPratica & { voce?: string })[] {
   if (!bozzaValida(bozza) || !Array.isArray(grezzi)) return [];
   const cartella = cartellaBozza(slug, bozza);
   return grezzi
     .map((d) => d as Record<string, unknown>)
     .filter((d) => typeof d?.pathname === 'string' && d.pathname.startsWith(cartella) && !d.pathname.includes('..'))
     .slice(0, 40)
-    .map((d) => ({
-      nome: String(d.nome ?? '').slice(0, 160) || String(d.pathname).split('/').pop()!,
-      pathname: String(d.pathname),
-      size: Number(d.size) || 0,
-    }));
+    .map((d) => {
+      const voce = typeof d.voce === 'string' ? d.voce.trim().slice(0, 300) : '';
+      return {
+        nome: String(d.nome ?? '').slice(0, 160) || String(d.pathname).split('/').pop()!,
+        pathname: String(d.pathname),
+        size: Number(d.size) || 0,
+        ...(voce ? { voce } : {}),
+      };
+    });
 }
 
-/** Verifica eventi negativi sull'azienda: dal registro se c'e', altrimenti a pagamento */
-async function negativitaAllInvio(e: Sessione, piva: string) {
+/**
+ * Verifica eventi negativi sull'azienda: dal registro se c'e', altrimenti a pagamento.
+ * La usa anche la pratica di distinta (pratica-distinta.ts): stessa regola, non si ripaga.
+ */
+export async function negativitaAllInvio(e: Sessione, piva: string) {
   try {
     const registro = await leggiVerifica(piva);
     const decisione = decidiVerifica(registro, 'negativita');

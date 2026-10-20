@@ -39,6 +39,11 @@ export interface RicercaSalvata {
    * regole prefiltro; null sugli altri fornitori). Il dettaglio resta a MCF.
    */
   segnali: SegnaliPrefiltro | null;
+  /**
+   * Quando e' stata fatta la verifica. La regola 9 del prefiltro conta solo le pratiche
+   * nate prima (Ruling 11): la pratica di distinta la rilegge da qui all'invio.
+   */
+  creato?: Date | string;
 }
 
 /** La ricerca, se l'utente la puo' vedere */
@@ -48,7 +53,7 @@ export async function ricercaVisibile(
 ): Promise<RicercaSalvata | null> {
   const { where, valori } = filtroVisibilita(e, '', 2);
   return queryUna<RicercaSalvata>(
-    `SELECT id, piva, ragione_sociale, dati_credito, eventi, segnali FROM app.ricerca_merito WHERE id = $1 AND ${where}`,
+    `SELECT id, piva, ragione_sociale, dati_credito, eventi, segnali, creato FROM app.ricerca_merito WHERE id = $1 AND ${where}`,
     [id, ...valori],
   );
 }

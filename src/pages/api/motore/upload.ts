@@ -6,13 +6,27 @@ export const prerender = false;
 // Come /api/blob-upload, ma il permesso viene dalla sessione dell'agente e non
 // da una password nel payload, e la cartella e' quella della bozza:
 // pratiche/<slug>/bozze/<uuid>/. Il fornitore esce dalla sessione.
+//
+// Una carrozzeria con i formati nella checklist (Led Office: PDF e JPG) restringe i
+// tipi che lo store accetta a quelli (tipiAmmessi): application/pdf e image/jpeg. Le
+// foto HEIC dell'iPhone arrivano gia' convertite in JPEG da Safari, grazie all'accept
+// dell'input; il browser controlla prima con formatoAmmesso e dice "Solo PDF o JPG".
 
 import { handleUpload, type HandleUploadBody } from '@vercel/blob/client';
 import { env } from '../../../lib/db';
 import { bozzaValida, cartellaBozza } from '../../../lib/motore/pratica';
+import { tipiAmmessi } from '../../../lib/motore/pratica-distinta-regole';
 import { json, sessioneMotore } from '../../../lib/motore/sessione';
 
 const MAX_FILE_BYTES = 25 * 1024 * 1024;
+
+/** I tipi di sempre, per le carrozzerie senza formati in checklist */
+const TIPI_DI_SEMPRE = [
+  'application/pdf', 'image/jpeg', 'image/png', 'image/heic',
+  'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'application/pkcs7-mime', 'application/octet-stream',
+];
 
 export async function POST({ request }: { request: Request }) {
   const token = env('BLOB_READ_WRITE_TOKEN');
@@ -45,13 +59,9 @@ export async function POST({ request }: { request: Request }) {
         if (!pathname.startsWith(cartellaBozza(e.carrozzeria.slug, bozza)) || pathname.includes('..')) {
           throw new Error('percorso_non_valido');
         }
+        const formati = e.carrozzeria.checklist?.formati;
         return {
-          allowedContentTypes: [
-            'application/pdf', 'image/jpeg', 'image/png', 'image/heic',
-            'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-            'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'application/pkcs7-mime', 'application/octet-stream',
-          ],
+          allowedContentTypes: formati ? tipiAmmessi(formati) : TIPI_DI_SEMPRE,
           maximumSizeInBytes: MAX_FILE_BYTES,
           addRandomSuffix: true,
         };
