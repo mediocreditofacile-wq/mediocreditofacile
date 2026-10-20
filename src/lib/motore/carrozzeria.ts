@@ -10,11 +10,25 @@
 
 import { query, queryUna } from '../db';
 import { PARTNERS_LEASING, type PartnerLeasing } from '../../data/leasing';
+import {
+  leggiCanali,
+  leggiCategorie,
+  leggiChecklist,
+  leggiSocieta,
+  type CanaleConfig,
+  type Categoria,
+  type ChecklistConfig,
+  type SocietaFornitrice,
+} from './config-distinta';
 
-export type Settore = 'fotovoltaico' | 'generico' | 'macchine';
-/** Regole del semaforo: credit policy del tool Marotta, oppure criteri del locatore (Duplex) */
-export type RegoleSemaforo = 'credit-policy' | 'locatore';
-const SETTORI: Settore[] = ['fotovoltaico', 'generico', 'macchine'];
+/** 'distinta': il commerciale compone una distinta di beni dal catalogo (Led Office) */
+export type Settore = 'fotovoltaico' | 'generico' | 'macchine' | 'distinta';
+/**
+ * Regole del semaforo: credit policy del tool Marotta, criteri del locatore (Duplex)
+ * oppure prefiltro (Led Office: quattro esiti, mai un numero cambiato)
+ */
+export type RegoleSemaforo = 'credit-policy' | 'locatore' | 'prefiltro';
+const SETTORI: Settore[] = ['fotovoltaico', 'generico', 'macchine', 'distinta'];
 
 export interface Carrozzeria {
   slug: string;
@@ -41,6 +55,17 @@ export interface Carrozzeria {
   leasing: boolean;
   /** Euro per richiesta di verifica addebitati al fornitore. Solo admin MCF. Null = non si fattura */
   prezzoVerifica: number | null;
+  /**
+   * Canali di quotazione in ordine di priorita'. Null = listino unico di tabellaCanoni.
+   * Contiene maggiorazioni e nomi di tabella: mai verso referente e agente.
+   */
+  canali: CanaleConfig[] | null;
+  /** La societa' che firma i documenti verso il cliente. Null = il fornitore stesso */
+  societaFornitrice: SocietaFornitrice | null;
+  /** Checklist della pratica propria del fornitore. Null = quella di sempre */
+  checklist: ChecklistConfig | null;
+  /** Categorie del catalogo con settori tipici e flag. Null = nessuna */
+  categorie: Categoria[] | null;
 }
 
 export interface VoceCatalogo {
@@ -77,6 +102,11 @@ export interface RigaCarrozzeria {
   regole_semaforo: string;
   leasing: boolean;
   prezzo_verifica: string | null;
+  // jsonb: arrivano dal database come oggetti gia' decodificati, o assenti prima dello SQL 011
+  canali?: unknown;
+  societa_fornitrice?: unknown;
+  checklist?: unknown;
+  categorie?: unknown;
 }
 
 const SELECT = `
@@ -84,7 +114,7 @@ const SELECT = `
          f.brand_logo, f.brand_colore, f.brand_accento, f.attivo,
          c.settore, c.etichetta_bene, c.partner_leasing, c.soglia_leasing,
          c.tetto_mese_euro, c.demo, c.documenti_extra, c.tabella_alternativa, c.regole_semaforo, c.leasing,
-         c.prezzo_verifica
+         c.prezzo_verifica, c.canali, c.societa_fornitrice, c.checklist, c.categorie
     FROM app.fornitore f
     JOIN app.carrozzeria c ON c.slug = f.slug`;
 
@@ -107,9 +137,14 @@ export function carrozzeriaDaRiga(r: RigaCarrozzeria): Carrozzeria {
     documentiExtra: Array.isArray(r.documenti_extra) ? (r.documenti_extra as unknown[]).map(String) : [],
     attivo: r.attivo,
     tabellaAlternativa: r.tabella_alternativa || null,
-    regoleSemaforo: r.regole_semaforo === 'locatore' ? 'locatore' : 'credit-policy',
+    regoleSemaforo:
+      r.regole_semaforo === 'locatore' ? 'locatore' : r.regole_semaforo === 'prefiltro' ? 'prefiltro' : 'credit-policy',
     leasing: r.leasing !== false,
     prezzoVerifica: r.prezzo_verifica === null || r.prezzo_verifica === undefined ? null : Number(r.prezzo_verifica),
+    canali: leggiCanali(r.canali),
+    societaFornitrice: leggiSocieta(r.societa_fornitrice),
+    checklist: leggiChecklist(r.checklist),
+    categorie: leggiCategorie(r.categorie),
   };
 }
 

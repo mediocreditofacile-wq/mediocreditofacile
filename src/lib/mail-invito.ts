@@ -18,13 +18,13 @@
 import { getPartner } from '../data/portali-partner';
 import { allegatiGuide, type Guida } from './guide';
 import { escapeHtml, inviaMail, layoutMail, type EsitoMail } from './mail-portale';
-import { carrozzeriaDaSlug } from './motore/carrozzeria';
+import { carrozzeriaDaSlug, type Settore } from './motore/carrozzeria';
 import { percorsoPortale } from './percorso-portale';
 
 export type FamigliaInvito =
   | { tipo: 'pratiche' }
   | { tipo: 'preventivi-fotovoltaico' }
-  | { tipo: 'motore'; settore: 'generico' | 'macchine'; leasing: boolean };
+  | { tipo: 'motore'; settore: Exclude<Settore, 'fotovoltaico'>; leasing: boolean };
 
 export interface DatiInvito {
   invitationId: string;

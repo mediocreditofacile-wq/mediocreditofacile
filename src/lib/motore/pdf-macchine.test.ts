@@ -19,6 +19,7 @@ const K: Carrozzeria = {
   settore: 'macchine', etichettaBene: 'Macchina per la pulizia', partnerLeasing: 'alba', sogliaLeasing: 0,
   tettoMeseEuro: 100, demo: false, documentiExtra: [], attivo: true,
   tabellaAlternativa: 'grace-duplex', regoleSemaforo: 'locatore', leasing: false, prezzoVerifica: null,
+  canali: null, societaFornitrice: null, checklist: null, categorie: null,
 };
 
 function calcolo(

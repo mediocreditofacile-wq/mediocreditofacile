@@ -20,6 +20,7 @@ const DEMO: Carrozzeria = {
   settore: 'fotovoltaico', etichettaBene: 'Impianto fotovoltaico', partnerLeasing: 'alba',
   sogliaLeasing: 80000, tettoMeseEuro: 30, demo: true, documentiExtra: [], attivo: true,
   tabellaAlternativa: null, regoleSemaforo: 'credit-policy', leasing: true, prezzoVerifica: null,
+  canali: null, societaFornitrice: null, checklist: null, categorie: null,
 };
 
 // Azienda solida: 98.000 euro sono meno del 10% del fatturato

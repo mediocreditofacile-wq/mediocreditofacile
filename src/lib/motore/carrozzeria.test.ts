@@ -39,6 +39,52 @@ describe('carrozzeria dalla riga', () => {
   });
 });
 
+describe('settore distinta e regole prefiltro', () => {
+  it('una riga senza i quattro campi nuovi li da a null e lascia le regole com erano', () => {
+    const c = carrozzeriaDaRiga(RIGA);
+    expect(c.canali).toBeNull();
+    expect(c.societaFornitrice).toBeNull();
+    expect(c.checklist).toBeNull();
+    expect(c.categorie).toBeNull();
+    expect(c.regoleSemaforo).toBe('credit-policy');
+  });
+
+  it('riporta settore distinta e regole prefiltro', () => {
+    const c = carrozzeriaDaRiga({ ...RIGA, settore: 'distinta', regole_semaforo: 'prefiltro' });
+    expect(c.settore).toBe('distinta');
+    expect(c.regoleSemaforo).toBe('prefiltro');
+  });
+
+  it('le regole del locatore restano quelle di Duplex', () => {
+    expect(carrozzeriaDaRiga({ ...RIGA, regole_semaforo: 'locatore' }).regoleSemaforo).toBe('locatore');
+  });
+
+  it('legge canali, societa, checklist e categorie dal JSON della riga', () => {
+    const c = carrozzeriaDaRiga({
+      ...RIGA,
+      canali: [{ canale: 'pagarent', attivo: true, tabella: 'pagarent', maggiorazionePerc: 5 }],
+      societa_fornitrice: {
+        ragioneSociale: 'EMME 2 SERVIZI S.R.L.', piva: '01234567890', rea: 'RM-1', indirizzo: 'Via Roma 1',
+        telefono: '06 1', email: 'a@b.it', pec: 'a@pec.it', logo: null,
+      },
+      checklist: { formati: ['pdf'], voci: [{ nome: 'Visura', obbligatoria: true }] },
+      categorie: [{ nome: 'Postazioni', settoriTipici: ['62.0'], postazione: true, ledwall: false }],
+    });
+    expect(c.canali).toEqual([{ canale: 'pagarent', attivo: true, tabella: 'pagarent', maggiorazionePerc: 5 }]);
+    expect(c.societaFornitrice?.ragioneSociale).toBe('EMME 2 SERVIZI S.R.L.');
+    expect(c.checklist?.voci[0].nome).toBe('Visura');
+    expect(c.categorie?.[0].settoriTipici).toEqual(['620']);
+  });
+
+  it('un JSON che non si legge torna a null: si ricade sul comportamento di sempre', () => {
+    const c = carrozzeriaDaRiga({ ...RIGA, canali: 'boh', societa_fornitrice: [], checklist: { voci: [] }, categorie: {} });
+    expect(c.canali).toBeNull();
+    expect(c.societaFornitrice).toBeNull();
+    expect(c.checklist).toBeNull();
+    expect(c.categorie).toBeNull();
+  });
+});
+
 describe('prezzo per richiesta di verifica', () => {
   it('senza prezzo non si fattura niente', () => {
     expect(carrozzeriaDaRiga(RIGA).prezzoVerifica).toBeNull();
