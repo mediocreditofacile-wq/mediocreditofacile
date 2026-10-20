@@ -12,7 +12,7 @@ const D: DatiMailVerifica = {
     piva: '01234567890', ragioneSociale: 'PULIZIE PROVA SRL', formaGiuridica: "SOCIETA' A RESPONSABILITA' LIMITATA",
     sede: 'Via Roma 1, Prato (PO)', ateco: null, attivaDal: '01/03/2010', statoAttivita: 'Attiva', fatturato: 850000,
     annoBilancio: 2025, trendFatturato: null, utile: 41000, patrimonioNetto: 310000, ebitda: null, dipendenti: null,
-    rating: null, lineaCreditoConsigliata: null,
+    rating: null, lineaCreditoConsigliata: null, unitaLocali: [],
   },
   dati: {
     fatturato: 850000, annoBilancio: 2025, patrimonioNetto: 310000, utile: 41000, inizioAttivita: '2010-03-01',

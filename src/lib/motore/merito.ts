@@ -15,7 +15,7 @@
 
 import CODICI from '../../data/codici-bilancio.json';
 import { ETICHETTE, RUOLI, VALORI } from '../../data/openapi-etichette';
-import type { SchedaAzienda } from '../openapi';
+import { atecoPuntato, type SchedaAzienda } from '../openapi';
 import type { DatiLocatore } from './semaforo-locatore';
 
 const CODICI_BILANCIO = CODICI as Record<string, string>;
@@ -37,6 +37,16 @@ export interface DatiCreditoMotore {
   attiva?: boolean | null;
   /** Data di cessazione o codice fiscale cessato. Dal 15/10/2026. */
   cessata?: boolean;
+  // Dal 20/10/2026, per il prefiltro. Le ricerche salvate prima non li hanno: il
+  // prefiltro li legge come "non disponibili". Un dato assente e' null, mai zero.
+  /** Da IT-full (ecofin): quello di IT-advanced puo' valere zero anche quando non lo e'. */
+  capitaleSociale?: number | null;
+  /** Da IT-full (employees). */
+  dipendenti?: number | null;
+  /** Anni dello storico IT-advanced con ricavi oltre zero, dal piu' recente. Null se lo storico non c'e'. */
+  bilanciConRicavi?: number[] | null;
+  /** Codice ATECO puntato (10.51.2), senza descrizione. */
+  atecoCodice?: string | null;
 }
 
 export interface SchedaRidotta {
@@ -56,6 +66,8 @@ export interface SchedaRidotta {
   dipendenti: number | null;
   rating: { classe: string; posizione: number; descrizione: string | null } | null;
   lineaCreditoConsigliata: number | null;
+  /** Indirizzi delle unita' locali attive, da IT-full allOffices. `branches` porta solo il numero. */
+  unitaLocali: string[];
 }
 
 /** Una riga etichetta/valore; `sotto` apre un sottogruppo dentro la sezione */
@@ -168,6 +180,63 @@ const RUOLI_INGLESE: Record<string, string> = {
   'Auditor': 'Revisore',
 };
 
+// --- unita' locali, bilanci, ateco ----------------------------------------------
+
+/**
+ * Indirizzi delle unita' locali (UL) e delle sedi secondarie (SSL) attive, da
+ * IT-full `allOffices`, nel formato "VIA, CAP COMUNE (PR)". Le cessate (stato CF)
+ * restano fuori. Senza allOffices la lista e' vuota; non si deduce niente dal
+ * solo numero di `branches`.
+ */
+export function unitaLocaliDa(F: any): string[] {
+  const sedi: any[] = Array.isArray(F?.allOffices) ? F.allOffices : [];
+  const out: string[] = [];
+  for (const o of sedi) {
+    const tipo = String(o?.companyDetails?.officeType?.code ?? '').trim().toUpperCase();
+    const stato = String(o?.companyStatus?.activityStatus?.code ?? '').trim().toUpperCase();
+    if ((tipo !== 'UL' && tipo !== 'SSL') || stato !== 'A') continue;
+    const a = o?.address ?? {};
+    // La provincia e' un oggetto {code, description} in IT-full, una sigla altrove
+    const prov = typeof a.province === 'string' ? a.province : a.province?.code;
+    const via = String(a.streetName ?? '').trim();
+    const luogo = [a.zipCode, a.town, prov ? `(${prov})` : ''].map((x) => String(x ?? '').trim()).filter(Boolean).join(' ');
+    const indirizzo = [via, luogo].filter(Boolean).join(', ');
+    if (indirizzo) out.push(indirizzo);
+  }
+  return out;
+}
+
+/**
+ * Anni di bilancio con ricavi oltre zero, dal piu' recente, dallo storico di
+ * IT-advanced (`balanceSheets.all`). Lo storico assente e' null e non una lista
+ * vuota: "non lo so" e "nessun bilancio" sono due cose diverse per il prefiltro.
+ * L'anno in corso arriva con turnover null e non conta.
+ */
+export function bilanciConRicaviDa(A: any): number[] | null {
+  const tutti = A?.balanceSheets?.all;
+  if (!Array.isArray(tutti)) return null;
+  const anni: number[] = [];
+  for (const b of tutti) {
+    const anno = numero(b?.year);
+    const ricavi = numero(b?.turnover);
+    if (anno != null && ricavi != null && ricavi > 0) anni.push(anno);
+  }
+  return anni.sort((x, y) => y - x);
+}
+
+/**
+ * Codice ATECO puntato. IT-advanced lo da' senza punti ("10512" diventa
+ * "10.51.2"); un codice che arriva gia' puntato non si tocca.
+ */
+function atecoCodiceDa(...blocchi: any[]): string | null {
+  for (const blocco of blocchi) {
+    const scelta = blocco?.ateco ?? blocco?.ateco2007 ?? blocco?.ateco2022;
+    const code = String(scelta?.code ?? '').trim();
+    if (code) return code.includes('.') ? code : atecoPuntato(code);
+  }
+  return null;
+}
+
 // --- lettura -------------------------------------------------------------------
 
 export function leggiScheda(s: SchedaAzienda): LetturaScheda {
@@ -200,6 +269,7 @@ export function leggiScheda(s: SchedaAzienda): LetturaScheda {
 
   const rating = SCALA_RATING.includes(CS.rating) ? String(CS.rating) : null;
   const utile = numero(ann.IIC179);
+  const dipendenti = numero(F.employees?.employee);
 
   // Per il semaforo del locatore: forma dal codice del Registro, stato e cessazione.
   // IT-advanced dice "ATTIVA"; se manca, IT-full ha il codice "A".
@@ -221,6 +291,12 @@ export function leggiScheda(s: SchedaAzienda): LetturaScheda {
     formaCodice,
     attiva,
     cessata,
+    // Il capitale sociale di IT-advanced puo' valere zero quando non lo e' (sul
+    // payload di prova 0 contro 2.083.126): si legge solo da IT-full.
+    capitaleSociale: numero(eco.shareCapital),
+    dipendenti,
+    bilanciConRicavi: bilanciConRicaviDa(A),
+    atecoCodice: atecoCodiceDa(A.atecoClassification, F.atecoClassification),
   };
 
   const scheda: SchedaRidotta = {
@@ -241,11 +317,12 @@ export function leggiScheda(s: SchedaAzienda): LetturaScheda {
     utile,
     patrimonioNetto: dati.patrimonioNetto,
     ebitda: numero(op.ebitda),
-    dipendenti: numero(F.employees?.employee),
+    dipendenti,
     rating: rating
       ? { classe: rating, posizione: SCALA_RATING.indexOf(rating) + 1, descrizione: CS.risk_score_description ?? null }
       : null,
     lineaCreditoConsigliata: numero(CS.operational_credit_limit),
+    unitaLocali: unitaLocaliDa(F),
   };
 
   // --- info aggiuntive ---

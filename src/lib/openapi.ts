@@ -736,7 +736,7 @@ export interface RicercaBase {
 }
 
 /** "10512" -> "10.51.2", "822" -> "82.2". Il tool Marotta confronta prefissi puntati. */
-function atecoPuntato(code: string): string {
+export function atecoPuntato(code: string): string {
   if (code.length < 3) return code;
   const testa = code.slice(0, 2) + '.' + code.slice(2, 4);
   return code.length > 4 ? `${testa}.${code.slice(4)}` : testa;

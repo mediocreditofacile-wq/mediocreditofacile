@@ -6,7 +6,9 @@
 // fiscale, data e luogo di nascita).
 
 import { describe, expect, it } from 'vitest';
-import { datiLocatore, leggiScheda } from './merito';
+import PAYLOAD_FULL from '../../../scripts/openapi/payload-IT-full.json';
+import PAYLOAD_ADVANCED from '../../../scripts/openapi/payload-IT-advanced.json';
+import { bilanciConRicaviDa, datiLocatore, leggiScheda, unitaLocaliDa } from './merito';
 
 const SCHEDA = {
   trovata: true,
@@ -135,5 +137,99 @@ describe('bilancio tutto a zero', () => {
     const d = datiLocatore({ ...base, fatturato: 0, patrimonioNetto: 9092, utile: -907, annoBilancio: 2024 });
     expect(d.volumeAffari).toBe(0);
     expect(d.annoBilancio).toBe(2024);
+  });
+});
+
+// I payload veri di una scheda (Latteria di Soligo) salvati in scripts/openapi/.
+// Come in caricaScheda(): IT-full e' l'oggetto in `data`, IT-advanced il primo
+// elemento della lista in `data`.
+describe('dati per il prefiltro', () => {
+  const full: any = PAYLOAD_FULL.data;
+  const advanced: any = (PAYLOAD_ADVANCED.data as any[])[0];
+  const schedaDiProva: any = { trovata: true, piva: '00178340261', full, advanced, score: null, soci: [] };
+
+  it('capitale sociale da IT-full ecofin, non da IT-advanced', () => {
+    // IT-advanced dice 0 per lo stesso capitale
+    expect(advanced.balanceSheets.last.shareCapital).toBe(0);
+    expect(leggiScheda(schedaDiProva).dati.capitaleSociale).toBe(2_083_126);
+  });
+
+  it('unita\' locali: solo quelle attive, UL e SSL, con indirizzo leggibile', () => {
+    const u = unitaLocaliDa(full);
+    // 24 UL attive + 1 SSL attiva; le 11 UL cessate (stato CF) restano fuori
+    expect(u).toHaveLength(25);
+    expect(u.every((x) => /\(\w\w\)$/.test(x))).toBe(true);
+    expect(u).toContain('VIA GIROLAMO BORTOTTI, 25, 32100 BELLUNO (BL)');
+    // la sede secondaria attiva c'e', l'unita' cessata no
+    expect(u).toContain('VIA I SETTEMBRE, 32, 31010 FARRA DI SOLIGO (TV)');
+    expect(u).not.toContain('VIA MATTEOTTI, 3, 36056 TEZZE SUL BRENTA (VI)');
+    expect(leggiScheda(schedaDiProva).scheda.unitaLocali).toEqual(u);
+  });
+
+  it('unita\' locali: senza allOffices la lista e\' vuota', () => {
+    expect(unitaLocaliDa({})).toEqual([]);
+    expect(unitaLocaliDa(undefined)).toEqual([]);
+  });
+
+  it('unita\' locali: una sede senza indirizzo non diventa una riga vuota', () => {
+    const u = unitaLocaliDa({ allOffices: [
+      { companyDetails: { officeType: { code: 'UL' } }, companyStatus: { activityStatus: { code: 'A' } }, address: {} },
+      { companyDetails: { officeType: { code: 'UL' } }, companyStatus: { activityStatus: { code: 'A' } },
+        address: { streetName: 'VIA ROMA, 1', zipCode: '36100', town: 'VICENZA' } },
+    ] });
+    // senza provincia il formato regge: nessuna parentesi vuota
+    expect(u).toEqual(['VIA ROMA, 1, 36100 VICENZA']);
+  });
+
+  it('bilanci con ricavi: anni con fatturato maggiore di zero, dal piu\' recente', () => {
+    const b = bilanciConRicaviDa(advanced)!;
+    expect(b[0]).toBe(2025);
+    // il 2026 e' l'esercizio in corso: turnover null, non e' un bilancio
+    expect(b).not.toContain(2026);
+    expect(b).toEqual([...b].sort((x, y) => y - x));
+    expect(leggiScheda(schedaDiProva).dati.bilanciConRicavi).toEqual(b);
+  });
+
+  it('bilanci con ricavi: l\'ordine non dipende da come arriva la lista', () => {
+    const b = bilanciConRicaviDa({ balanceSheets: { all: [
+      { year: 2023, turnover: 5 }, { year: 2025, turnover: 7 }, { year: 2024, turnover: 0 }, { year: 2022, turnover: null },
+    ] } });
+    expect(b).toEqual([2025, 2023]);
+  });
+
+  it('senza storico bilanci il dato e\' null, non una lista vuota', () => {
+    expect(bilanciConRicaviDa({})).toBeNull();
+    expect(bilanciConRicaviDa(undefined)).toBeNull();
+    expect(bilanciConRicaviDa({ balanceSheets: {} })).toBeNull();
+  });
+
+  it('uno storico presente ma senza nessun anno con ricavi e\' una lista vuota', () => {
+    // societa' appena nata: lo storico c'e', ricavi no. Diverso da "storico non disponibile".
+    expect(bilanciConRicaviDa({ balanceSheets: { all: [{ year: 2026, turnover: null }] } })).toEqual([]);
+  });
+
+  it('ateco come codice puntato e dipendenti da IT-full', () => {
+    const d = leggiScheda(schedaDiProva).dati;
+    expect(d.atecoCodice).toBe('10.51.2');
+    expect(d.dipendenti).toBe(172);
+  });
+
+  it('un codice ateco gia\' puntato resta com\'e\'', () => {
+    // la scheda di prova in cima al file ha '43.21.01'
+    expect(leggiScheda(SCHEDA as any).dati.atecoCodice).toBe('43.21.01');
+  });
+
+  it('dati assenti sono null, mai zero', () => {
+    const d = leggiScheda({ trovata: true, piva: '01234567890', full: {}, advanced: {}, score: null, soci: [] } as any).dati;
+    expect(d.capitaleSociale).toBeNull();
+    expect(d.dipendenti).toBeNull();
+    expect(d.bilanciConRicavi).toBeNull();
+    expect(d.atecoCodice).toBeNull();
+  });
+
+  it('un capitale sociale a zero dichiarato in IT-full resta zero', () => {
+    // lo zero vero si distingue dall'assenza: e' il caso delle societa' con capitale simbolico
+    const d = leggiScheda({ ...SCHEDA, full: { ...SCHEDA.full, ecofin: { ...SCHEDA.full.ecofin, shareCapital: 0 } } } as any).dati;
+    expect(d.capitaleSociale).toBe(0);
   });
 });
