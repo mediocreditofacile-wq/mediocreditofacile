@@ -188,6 +188,35 @@ describe('quantita e prezzo', () => {
     }
   });
 
+  it('punto come separatore delle migliaia e niente virgola: ambiguo, non passa', () => {
+    // "1.500" per numero() e' 1,5 e "1.000" e' 1: mille volte meno di quello che si intendeva
+    expect(validaDistinta(VOCI, CAT, [{ codice: 'LO-TAB-S10FE', quantita: 1, prezzo: '1.500' }])).toMatchObject({ ok: false, error: 'prezzo_non_valido', riga: 0 });
+    expect(validaDistinta(VOCI, CAT, [{ codice: 'LO-TAB-S10FE', quantita: '1.000' }])).toMatchObject({ ok: false, error: 'quantita_non_valida', riga: 0 });
+    // Vale anche con piu' gruppi, col simbolo dell'euro e sulle righe fuori listino
+    for (const p of ['12.345', '1.234.567', ' 1.500 ', '1.500 €', '€ 1.500']) {
+      expect(validaDistinta(VOCI, CAT, [{ codice: 'LO-TAB-S10FE', quantita: 1, prezzo: p }])).toMatchObject({ ok: false, error: 'prezzo_non_valido' });
+    }
+    expect(validaDistinta(VOCI, CAT, [{ descrizione: 'X', categoria: 'LEDwall', quantita: 1, prezzo: '1.500' }])).toMatchObject({ ok: false, error: 'prezzo_non_valido' });
+    expect(validaDistinta(VOCI, CAT, [{ codice: 'LO-TAB-S10FE', quantita: '2.500' }])).toMatchObject({ ok: false, error: 'quantita_non_valida' });
+  });
+
+  it('le scritture non ambigue restano: virgola, numero vero, nessun punto', () => {
+    const prezzo = (p: unknown) => {
+      const r = validaDistinta(VOCI, CAT, [{ codice: 'LO-TAB-S10FE', quantita: 1, prezzo: p }]);
+      return r.ok ? r.distinta.righe[0].prezzo : r;
+    };
+    expect(prezzo('1.500,00')).toBe(1500);
+    expect(prezzo('1.500,5')).toBe(1500.5);
+    expect(prezzo(1500)).toBe(1500);
+    expect(prezzo('1500')).toBe(1500);
+    expect(prezzo('1.5')).toBe(1.5); // un decimale solo con il punto: non e' un gruppo di migliaia
+    expect(prezzo('1.234.567,89')).toBe(1234567.89);
+    const q = validaDistinta(VOCI, CAT, [{ codice: 'LO-TAB-S10FE', quantita: '1000', prezzo: 1 }]);
+    expect(q.ok && q.distinta.righe[0].quantita).toBe(1000);
+    const n = validaDistinta(VOCI, CAT, [{ codice: 'LO-TAB-S10FE', quantita: 1000, prezzo: 1 }]);
+    expect(n.ok && n.distinta.righe[0].quantita).toBe(1000);
+  });
+
   it('prezzo: zero, negativo, illeggibile o infinito non passano', () => {
     for (const p of [0, -0.5, 'gratis', 'Infinity', NaN, Infinity, {}]) {
       expect(validaDistinta(VOCI, CAT, [{ codice: 'LO-TAB-S10FE', quantita: 1, prezzo: p }])).toMatchObject({ ok: false, error: 'prezzo_non_valido', riga: 0 });

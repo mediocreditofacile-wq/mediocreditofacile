@@ -97,13 +97,24 @@ const oggetto = (v: unknown): Record<string, unknown> =>
 /** Assente: non mandato, null o testo vuoto */
 const assente = (v: unknown) => v === undefined || v === null || (typeof v === 'string' && v.trim() === '');
 
+/**
+ * Una stringa col punto come separatore delle migliaia e nessuna virgola ("1.500",
+ * "1.000"). numero() la legge all'inglese (1,5 e 1) e il valore resterebbe mille volte
+ * sotto quello che chi scrive intendeva: nel dubbio la riga non passa. I numeri veri
+ * (typeof number) e le stringhe con la virgola ("1.799,50") non sono ambigui.
+ */
+const migliaiaAmbigue = (v: unknown) =>
+  typeof v === 'string' && /^\d{1,3}(\.\d{3})+$/.test(v.replace(/[€\s]/g, ''));
+
 function leggiQuantita(v: unknown): number | null {
+  if (migliaiaAmbigue(v)) return null;
   const n = numero(v);
   return Number.isInteger(n) && n >= 1 && n <= MAX_QUANTITA ? n : null;
 }
 
 /** Il prezzo unitario al centesimo, oppure null se non si legge o non e' maggiore di zero */
 function leggiPrezzo(v: unknown): number | null {
+  if (migliaiaAmbigue(v)) return null;
   const n = numero(v);
   if (!Number.isFinite(n)) return null;
   const p = centesimi(n) / 100;

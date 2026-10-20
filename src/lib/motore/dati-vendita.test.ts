@@ -164,10 +164,27 @@ describe('leggiDatiVendita', () => {
       expect(mancanti(con({ 'riferimento.nome': '  ' }))).toEqual(['riferimento.nome']);
     });
 
-    it('il telefono del riferimento e\' facoltativo, ma se c\'e\' deve essere un numero', () => {
-      const senza = leggiDatiVendita(con({ 'riferimento.telefono': '' }), OGGI);
-      expect(senza.ok && senza.dati.riferimento.telefono).toBe('');
+    it('senza telefono: riferimento.telefono', () => {
+      expect(mancanti(con({ 'riferimento.telefono': '' }))).toEqual(['riferimento.telefono']);
+      expect(mancanti(con({ 'riferimento.telefono': '   ' }))).toEqual(['riferimento.telefono']);
+    });
+
+    it('telefono che non e\' un numero: riferimento.telefono', () => {
       expect(mancanti(con({ 'riferimento.telefono': 'dopo le 17' }))).toEqual(['riferimento.telefono']);
+      expect(mancanti(con({ 'riferimento.telefono': '12' }))).toEqual(['riferimento.telefono']);
+    });
+
+    it('telefono buono: ok, ripulito agli estremi e con lo stesso controllo del firmatario', () => {
+      const r = leggiDatiVendita(con({ 'riferimento.telefono': ' 081 1234567 ' }), OGGI);
+      expect(r.ok && r.dati.riferimento.telefono).toBe('081 1234567');
+      // Un numero che il firmatario puo' scrivere, il riferimento lo puo' scrivere uguale
+      expect(leggiDatiVendita(con({ 'riferimento.telefono': '+39 333 1234567' }), OGGI).ok).toBe(true);
+    });
+
+    it('senza l\'intero blocco riferimento mancano nome e telefono', () => {
+      const senzaBlocco = con({});
+      delete senzaBlocco.riferimento;
+      expect(mancanti(senzaBlocco)).toEqual(['riferimento.nome', 'riferimento.telefono']);
     });
   });
 
@@ -183,6 +200,7 @@ describe('leggiDatiVendita', () => {
             telefono: '',
             email: '',
             'riferimento.nome': '',
+            'riferimento.telefono': '',
             iban: '',
             sdi: '',
             pec: '',
@@ -196,6 +214,7 @@ describe('leggiDatiVendita', () => {
         'telefono',
         'email',
         'riferimento.nome',
+        'riferimento.telefono',
         'iban',
         'sdi_o_pec',
       ]);
@@ -210,6 +229,7 @@ describe('leggiDatiVendita', () => {
         'telefono',
         'email',
         'riferimento.nome',
+        'riferimento.telefono',
         'iban',
         'sdi_o_pec',
       ];

@@ -64,9 +64,17 @@ function leggiNascita(v: unknown, oggi: string): string | null {
 
 /**
  * `oggi` decide se la data di nascita e' nel passato (in ora italiana) e serve ai test.
- * Il telefono della persona di riferimento e' facoltativo, ma se c'e' deve essere un numero.
+ *
+ * Le chiavi di `mancanti`, stabili e nell'ordine del modulo (ogni campo che manca o non
+ * regge ne mette una, tutte insieme):
+ *   amministratore.nome, amministratore.nascita, amministratore.codiceFiscale,
+ *   amministratore.residenza, telefono, email, riferimento.nome, riferimento.telefono,
+ *   iban, sdi_o_pec
+ * Il telefono della persona di riferimento e' obbligatorio come quello del firmatario
+ * (stesso controllo): mancante o illeggibile, esce `riferimento.telefono`.
  * Fra SDI e PEC ne serve almeno uno, e quello scritto deve reggere: un valore storto non
  * passa neanche quando l'altro e' buono, perche' finirebbe sulla proposta cosi' com'e'.
+ * La chiave `sdi_o_pec` copre entrambi i campi.
  */
 export function leggiDatiVendita(v: unknown, oggi: Date = new Date()): EsitoDatiVendita {
   const radice = oggetto(v);
@@ -96,7 +104,7 @@ export function leggiDatiVendita(v: unknown, oggi: Date = new Date()): EsitoDati
   if (!nomeRiferimento) mancanti.push('riferimento.nome');
 
   const telefonoRiferimento = testo(rif.telefono, 40);
-  if (telefonoRiferimento && controllaCellulare(telefonoRiferimento)) mancanti.push('riferimento.telefono');
+  if (controllaCellulare(telefonoRiferimento)) mancanti.push('riferimento.telefono');
 
   const iban = controllaIban(testo(radice.iban, 60));
   if (!iban.ok) mancanti.push('iban');
