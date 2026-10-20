@@ -264,11 +264,32 @@ describe('corpoMailPratica', () => {
     const { html } = corpoMailPratica(base());
     expect(html).toContain('Il cliente gestisce una sala eventi nella sede.');
     expect(html).toContain('Riga 2, LEDwall: bene non tipico');
-    expect(html).toContain("LEDwall: non tipico per l&#39;ATECO 62.01.00");
+    expect(html).toContain("LEDwall: non tipico per l&#39;ATECO 62.01.00 (non ok)");
+    expect(html).toContain('Eventi negativi: assenti (ok)');
     expect(html).toContain('28/07/2026');
     expect(html).toContain('storico importato');
     expect(html).toContain('installazione fissa confermata');
     expect(html).toContain('Valutazione indicativa, non è una delibera.');
+  });
+
+  it('ogni criterio col suo esito: ok, non ok, da verificare', () => {
+    const p = prefiltro('verde');
+    p.criteri.push({ chiave: 'capitale', nome: 'Capitale sociale', valore: 'non disponibile', ok: null });
+    const { html } = corpoMailPratica(base({ prefiltro: p }));
+    expect(html).toContain('Capitale sociale: non disponibile (da verificare)');
+  });
+
+  it('il rating, come nella mail di sempre', () => {
+    expect(corpoMailPratica(base()).html).toContain('non assegnato');
+    const { html } = corpoMailPratica(base({
+      cliente: { ragioneSociale: 'Cliente di Prova S.r.l.', piva: '01234567890', rating: { classe: 'B2', posizione: 5, descrizione: 'Rischio medio' } },
+    }));
+    expect(html).toContain('B2 (Rischio medio)');
+  });
+
+  it('segnalazione con una proposta: nessun canale, la proposta era sul suo', () => {
+    const { html } = corpoMailPratica(base({ segnalazione: 'rosso', prefiltro: prefiltro('rosso') }));
+    expect(html).toContain('nessuno, segnalazione: la proposta era su Pagarent');
   });
 
   it('documenti caricati per voce e documenti che mancano', () => {

@@ -181,6 +181,8 @@ const VENDITA = {
 
 const proposta = (o: Record<string, any> = {}) => ({
   id: ID_PROPOSTA,
+  // Non la seleziona la pratica: serve al database finto per filtrare come farebbe Postgres
+  ricerca_id: 'r-1',
   dati: {
     righe: RIGHE,
     consegna: { tipo: 'sede', indirizzo: SCHEDA.sede },
@@ -216,9 +218,13 @@ const righeCatalogo = () => vociLedOffice().map((v, i) => ({
 }));
 
 function database(o: { ricerca?: unknown; proposta?: unknown } = {}) {
-  db.queryUna.mockImplementation(async (sql: string) => {
+  db.queryUna.mockImplementation(async (sql: string, valori: unknown[]) => {
     if (sql.includes('FROM app.ricerca_merito')) return o.ricerca === undefined ? ricerca() : o.ricerca;
-    if (sql.includes('FROM app.proposta')) return o.proposta === undefined ? proposta() : o.proposta;
+    if (sql.includes('FROM app.proposta')) {
+      const p = (o.proposta === undefined ? proposta() : o.proposta) as { ricerca_id?: string } | null;
+      // La proposta deve essere della ricerca indicata ($4)
+      return p && p.ricerca_id === valori[3] ? p : null;
+    }
     return null;
   });
   db.query.mockImplementation(async (sql: string, valori: unknown[]) => {
@@ -249,7 +255,9 @@ function inserita() {
   };
 }
 
-const mail = () => posta.inviaMail.mock.calls[0]?.[0] as { to: string; subject: string; html: string; allegati?: { filename: string; content: string }[] };
+type Mail = { to: string; subject: string; html: string; allegati?: { filename: string; content: string }[] };
+const mail = () => posta.inviaMail.mock.calls.map(([m]) => m as Mail).find((m) => /^(Pratica|Segnalazione) /.test(m.subject))!;
+const mailVerifica = () => posta.inviaMail.mock.calls.map(([m]) => m as Mail).find((m) => /Verifica|verifica/.test(m.subject));
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -265,6 +273,7 @@ beforeEach(() => {
   oa.avviaNegativita.mockRejectedValue(new Error('la verifica non si ripaga'));
   oa.entroIlTetto.mockResolvedValue({ ok: true });
   oa.scriviVerifica.mockResolvedValue(undefined);
+  oa.esitoNegativita.mockResolvedValue({ pronto: false });
   posta.inviaMail.mockResolvedValue({ ok: true, id: 'm-1' });
   motore.sessioneMotore.mockResolvedValue(sessione());
 });
@@ -330,8 +339,16 @@ describe('/api/motore/pratica sul settore distinta', () => {
     expect((await r.json()).error).toBe('proposta_non_valida');
     // La proposta si cerca per id, fornitore e partita IVA della ricerca, dentro la visibilita' dell'agente
     const [sql, valori] = db.queryUna.mock.calls.find(([s]) => String(s).includes('FROM app.proposta'))!;
-    expect(sql).toMatch(/fornitore_slug = \$2 AND piva = \$3/);
-    expect(valori).toEqual([ID_PROPOSTA, 'led-office', PIVA, 'org-lo', 'u-agente']);
+    expect(sql).toMatch(/fornitore_slug = \$2 AND piva = \$3 AND ricerca_id = \$4/);
+    expect(valori).toEqual([ID_PROPOSTA, 'led-office', PIVA, 'r-1', 'org-lo', 'u-agente']);
+  });
+
+  it('proposta di un\'altra verifica dello stesso cliente: proposta_non_valida', async () => {
+    database({ ricerca: ricerca({ id: 'r-2' }) });
+    const r = await post(corpo({ ricercaId: 'r-2' }));
+    expect(r.status).toBe(400);
+    expect((await r.json()).error).toBe('proposta_non_valida');
+    expect(inserita()).toBeNull();
   });
 
   it('rosso arrivato dopo il preventivo (eventi chiusi presenti): l\'invio diventa una segnalazione', async () => {
@@ -344,10 +361,15 @@ describe('/api/motore/pratica sul settore distinta', () => {
     expect(p.dati).toMatchObject({ segnalazione: true, motivoSegnalazione: 'rosso', semaforo: 'rosso', eventi: 'presenti' });
     expect(p.propostaId).toBe(ID_PROPOSTA);
     expect(p.importo).toBe(BENI);
-    expect(p.canale).toBe('pagarent');
+    // Una segnalazione non e' andata su nessun canale: la proposta resta nel riservato, per MCF
+    expect(p.canale).toBeNull();
+    expect(p.riservato).toEqual({ ...proposta().riservato, canaleProposta: 'pagarent' });
     const m = mail();
     expect(m.subject).toMatch(/^Segnalazione Led Office/);
     expect(m.html).toContain('SEGNALAZIONE, prefiltro rosso');
+    expect(m.html).toContain('la proposta era su Pagarent');
+    // La proposta per il locatore resta allegata
+    expect(m.allegati).toHaveLength(1);
   });
 
   it('eventi chiusi nel registro dopo la ricerca: rosso anche se la ricerca dice ancora in verifica', async () => {
@@ -358,6 +380,57 @@ describe('/api/motore/pratica sul settore distinta', () => {
     const r = await post(corpo());
     expect(await r.json()).toMatchObject({ ok: true, segnalazione: true });
     expect(inserita()!.dati.motivoSegnalazione).toBe('rosso');
+  });
+
+  describe('esito arrivato dopo il giro in background e mai letto', () => {
+    // Avviata cinque minuti fa: oltre la soglia di rilettura, dentro le 24 ore del registro
+    const avviata = () => new Date(Date.now() - 5 * 60_000).toISOString();
+    const tardivi = () => {
+      const quando = avviata();
+      database({ ricerca: ricerca({ eventi: { ...eventi('non-pervenuti'), avviata: quando } }) });
+      oa.leggiVerifica.mockImplementation(async () => ({ cf: PIVA, negativita: { id: 'ev-1', avviata: quando, pronto: false } }));
+    };
+
+    it('presenti: si legge una volta all\'invio, l\'invio diventa una segnalazione e parte l\'aggiornamento a MCF', async () => {
+      tardivi();
+      oa.esitoNegativita.mockResolvedValue({ pronto: true, dati: { presenzaProtesti: true } });
+      const r = await post(corpo());
+      expect(await r.json()).toMatchObject({ ok: true, segnalazione: true });
+      expect(oa.esitoNegativita).toHaveBeenCalledTimes(1);
+      expect(oa.esitoNegativita).toHaveBeenCalledWith('ev-1', 'carrozzeria/led-office');
+      expect(oa.avviaNegativita).not.toHaveBeenCalled();
+      const p = inserita()!;
+      expect(p.dati).toMatchObject({ motivoSegnalazione: 'rosso', eventi: 'presenti' });
+      // L'esito si salva sulla ricerca, e MCF riceve l'aggiornamento della verifica coi segnali
+      const salvata = db.query.mock.calls.find(([sql]) => String(sql).includes('UPDATE app.ricerca_merito SET eventi'));
+      expect(JSON.parse(String(salvata![1][1]))).toMatchObject({ stato: 'presenti' });
+      expect(mailVerifica()!.subject).toMatch(/^Aggiornamento verifica Led Office/);
+    });
+
+    it('assenti: pratica normale, nessuna verifica nuova a pagamento', async () => {
+      tardivi();
+      oa.esitoNegativita.mockResolvedValue({ pronto: true, dati: { presenzaProtesti: false } });
+      const r = await post(corpo());
+      expect(await r.json()).toMatchObject({ ok: true, segnalazione: false });
+      expect(inserita()!.dati.eventi).toBe('assenti');
+      expect(oa.esitoNegativita).toHaveBeenCalledTimes(1);
+      expect(oa.avviaNegativita).not.toHaveBeenCalled();
+      expect(mailVerifica()).toBeUndefined();
+    });
+
+    it('la lettura che fallisce non ferma la pratica: si va avanti con quello che c\'e\'', async () => {
+      tardivi();
+      oa.esitoNegativita.mockRejectedValue(new Error('openapi giu\''));
+      const r = await post(corpo());
+      expect(await r.json()).toMatchObject({ ok: true, segnalazione: false });
+      expect(inserita()!.dati.eventi).toBe('non-pervenuti');
+    });
+
+    it('esito appena avviato: non si rilegge, ci pensa il giro in background', async () => {
+      database({ ricerca: ricerca({ eventi: { ...eventi('in-verifica'), avviata: new Date().toISOString() } }) });
+      await post(corpo());
+      expect(oa.esitoNegativita).not.toHaveBeenCalled();
+    });
   });
 
   it('MCF segna il cliente dopo la verifica: segnalazione, coi segnali riletti dalla verifica e salvati', async () => {

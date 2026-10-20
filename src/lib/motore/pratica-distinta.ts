@@ -10,8 +10,11 @@
 // l'importo dal browser, tratta la proposta come facoltativa e non guarda il semaforo.
 // Qui invece:
 //  - il prefiltro si ricalcola sul server con i segnali riletti (MCF puo' aver segnato il
-//    cliente dopo la verifica) e con gli eventi aggiornati dal registro: un rosso
-//    arrivato dopo il preventivo trasforma l'invio in una segnalazione;
+//    cliente dopo la verifica) e con gli eventi aggiornati: un esito chiuso dopo il giro
+//    in background e mai letto si legge qui (una lettura, come riaprendo la ricerca), poi
+//    conta il registro. Un rosso arrivato dopo il preventivo trasforma l'invio in una
+//    segnalazione;
+//  - la proposta deve essere della ricerca indicata, non solo dello stesso cliente;
 //  - importo, righe, consegna, canale e dati di vendita si rileggono dalla proposta
 //    salvata. Solo nella segnalazione senza proposta la distinta viene dal corpo, e la
 //    si ricontrolla sul catalogo come per il preventivo;
@@ -22,7 +25,9 @@
 //
 // Cosa va dove: `app.pratica.dati` porta anche IBAN e dati di vendita (codice fiscale
 // dell'amministratore), `canale` e `riservato` sono copiati dalla proposta e sono solo di
-// MCF. Nessuna lista li legge: lo storico seleziona colonne esplicite. Al commerciale la
+// MCF. Sulla segnalazione `canale` resta vuoto: non e' andata su nessun canale, e la
+// regola 9 delle verifiche successive non deve mostrare a MCF un canale mai usato; se
+// c'era una proposta, i suoi dati restano nel `riservato` con `canaleProposta`. Nessuna lista li legge: lo storico seleziona colonne esplicite. Al commerciale la
 // risposta dice soltanto id e se e' una segnalazione; tutto il resto va nella mail a MCF,
 // con la proposta per il locatore in allegato.
 
@@ -42,10 +47,11 @@ import { catalogo } from './carrozzeria';
 import { vociChecklist, type Categoria, type IdCanale } from './config-distinta';
 import type { DatiVendita } from './dati-vendita';
 import { totaleRighe, type RigaDistinta } from './distinta';
-import { codiceVerifica, eventiNonAvviati, statoDaEsito } from './eventi-stato';
+import { riprendiEventi } from './eventi-merito';
+import { codiceVerifica, eventiNonAvviati, serveControllo, statoDaEsito, type EventiRicerca } from './eventi-stato';
 import { instrada, type Instradamento } from './instradamento';
-import { FONTE_PRATICA } from './mail-verifica';
-import type { DatiCreditoMotore } from './merito';
+import { FONTE_PRATICA, type DatiMailVerifica } from './mail-verifica';
+import type { DatiCreditoMotore, SchedaRidotta } from './merito';
 import { percorsoConsentito } from './percorso-riservato';
 import { bozzaValida, documentiDellaBozza, negativitaAllInvio } from './pratica';
 import {
@@ -169,7 +175,7 @@ export interface InputMailPratica {
   agente: { nome: string; email: string };
   id: string;
   segnalazione: MotivoSegnalazione | null;
-  cliente: { ragioneSociale: string; piva: string };
+  cliente: { ragioneSociale: string; piva: string; rating?: SchedaRidotta['rating'] };
   forma: ClasseForma;
   referente: { nome: string; telefono: string; email: string };
   iban: string;
@@ -205,6 +211,9 @@ const TESTA_SEGNALAZIONE: Record<MotivoSegnalazione, string> = {
 
 const dataIt = (iso: string) => iso.split('-').reverse().join('/');
 
+/** L'esito di un criterio del prefiltro, come sul blocco a video */
+const ESITO_CRITERIO: Record<string, string> = { true: 'ok', false: 'non ok', null: 'da verificare' };
+
 /**
  * La mail a MCF per una pratica (o segnalazione) di distinta. Pura: si prova senza
  * mandare niente. Porta tutto quello che il commerciale non vede: canale, maggiorazione
@@ -222,10 +231,11 @@ export function corpoMailPratica(o: InputMailPratica): { subject: string; html: 
     `<ul style="font-size:14px;margin:0;padding-left:18px">${voci.map((v) => `<li>${escapeHtml(v)}</li>`).join('')}</ul>`;
 
   const importi = o.riservato ?? o.canaleIndicativo;
+  const nomeCanale = (c: IdCanale) => NOMI_CANALE[c] ?? c;
   const canale = o.riservato
-    ? NOMI_CANALE[o.riservato.canale] ?? o.riservato.canale
+    ? o.segnalazione ? `nessuno, segnalazione: la proposta era su ${nomeCanale(o.riservato.canale)}` : nomeCanale(o.riservato.canale)
     : o.canaleIndicativo
-      ? `nessuna proposta; indicativo: ${NOMI_CANALE[o.canaleIndicativo.canale] ?? o.canaleIndicativo.canale}`
+      ? `nessuna proposta; indicativo: ${nomeCanale(o.canaleIndicativo.canale)}`
       : 'nessuno';
   const neg = o.negativita?.pronto
     ? "già in registro, esito nel pannello"
@@ -237,6 +247,7 @@ export function corpoMailPratica(o: InputMailPratica): { subject: string; html: 
     <table style="font-size:14px;border-collapse:collapse;width:100%">
       ${riga('Cliente', `${cliente.ragioneSociale}, P.IVA ${cliente.piva}`)}
       ${riga('Forma giuridica (Registro)', FORMA_PRATICA[o.forma])}
+      ${riga('Rating', cliente.rating ? `${cliente.rating.classe} (${cliente.rating.descrizione ?? ''})` : 'non assegnato')}
       ${riga('Proposta', o.propostaId ?? 'nessuna proposta: segnalazione')}
       ${riga('Prefiltro', `${p.etichetta}${p.provvisorio ? ', eventi negativi ancora in verifica' : ''}`)}
       ${riga('Canale', canale)}
@@ -296,7 +307,7 @@ export function corpoMailPratica(o: InputMailPratica): { subject: string; html: 
 
   const prefiltro = `
     ${p.righe.length ? `<div style="margin:16px 0 0">${elenco(p.righe)}</div>` : ''}
-    ${p.criteri.length ? `${h3('Criteri del prefiltro')}${elenco(p.criteri.map((cr) => `${cr.nome}: ${cr.valore}`))}` : ''}
+    ${p.criteri.length ? `${h3('Criteri del prefiltro')}${elenco(p.criteri.map((cr) => `${cr.nome}: ${cr.valore} (${ESITO_CRITERIO[String(cr.ok)]})`))}` : ''}
     ${senzaRisposta.length ? `${h3('Motivazioni non scritte')}${elenco(senzaRisposta)}` : ''}
     <p style="font-size:13px;color:#787782;margin:12px 0 0">Valutazione indicativa, non è una delibera.</p>`;
 
@@ -339,20 +350,48 @@ export function corpoMailPratica(o: InputMailPratica): { subject: string; html: 
 
 // --- I/O ---------------------------------------------------------------------------
 
-/** La proposta, se l'utente la puo' vedere ed e' dello stesso cliente e dello stesso fornitore */
-async function propostaVisibile(e: Sessione, id: string, piva: string): Promise<PropostaSalvata | null> {
-  const { where, valori } = filtroVisibilita(e, '', 4);
+/**
+ * La proposta, se l'utente la puo' vedere ed e' del fornitore, dello stesso cliente e
+ * della stessa verifica: una proposta fatta su un'altra verifica dello stesso cliente
+ * non vale, perche' prefiltro e segnali sono quelli di questa.
+ */
+async function propostaVisibile(e: Sessione, id: string, ricerca: RicercaSalvata): Promise<PropostaSalvata | null> {
+  const { where, valori } = filtroVisibilita(e, '', 5);
   return queryUna<PropostaSalvata>(
     `SELECT id, dati, numeri, canale, riservato FROM app.proposta
-      WHERE id = $1 AND fornitore_slug = $2 AND piva = $3 AND ${where}`,
-    [id, e.carrozzeria.slug, piva, ...valori],
+      WHERE id = $1 AND fornitore_slug = $2 AND piva = $3 AND ricerca_id = $4 AND ${where}`,
+    [id, e.carrozzeria.slug, ricerca.piva, ricerca.id, ...valori],
   );
 }
 
-/** Gli eventi all'invio: quelli della ricerca, aggiornati dal registro se chiusi dopo. Solo letture, niente spesa */
-async function eventiAllInvio(ricerca: RicercaSalvata): Promise<StatoEventi> {
+/**
+ * Gli eventi all'invio. Se la verifica e' ancora aperta e il giro in background e'
+ * finito (serveControllo), l'esito si legge una volta su Openapi come quando si riapre
+ * la ricerca: riprendiEventi lo salva sulla ricerca e, se arriva il rosso dopo la mail
+ * della verifica, manda a MCF l'aggiornamento. Nessuna verifica nuova a pagamento. Poi
+ * conta il registro, che puo' essere stato chiuso da un altro strumento. Una lettura
+ * che fallisce non ferma la pratica: si va avanti con quello che c'e'.
+ */
+async function eventiAllInvio(e: Sessione, ricerca: RicercaSalvata, segnali: SegnaliPrefiltro): Promise<StatoEventi> {
+  let ev: EventiRicerca | null = ricerca.eventi;
+  if (ev && serveControllo(ev)) {
+    const { scheda, dati } = ricerca.dati_credito;
+    const mail: DatiMailVerifica = {
+      fornitore: e.carrozzeria.nome,
+      agente: { nome: e.contesto.nome ?? '', email: e.contesto.email },
+      scheda,
+      dati,
+      nuova: { scheda: false, eventi: !ev.daRegistro },
+      prefiltro: { segnali },
+    };
+    const aperta = ev;
+    ev = await riprendiEventi(e.carrozzeria, ricerca.id, aperta, mail).catch((err) => {
+      console.error(JSON.stringify({ evento: 'motore_pratica_eventi_errore', fornitore: e.carrozzeria.slug, ricercaId: ricerca.id, msg: String(err) }));
+      return aperta;
+    });
+  }
   const registro = await leggiVerifica(codiceVerifica(ricerca)).catch(() => null);
-  return statoEventiInvio(ricerca.eventi?.stato ?? null, decidiVerifica(registro, 'negativita'));
+  return statoEventiInvio(ev?.stato ?? null, decidiVerifica(registro, 'negativita'));
 }
 
 /**
@@ -425,7 +464,7 @@ export async function creaPraticaDistinta(
 
   // 2. la proposta, se indicata: visibile, dello stesso cliente e del fornitore
   const propostaId = testo(corpo.propostaId, 60);
-  const proposta = propostaId ? await propostaVisibile(e, propostaId, ricerca.piva) : null;
+  const proposta = propostaId ? await propostaVisibile(e, propostaId, ricerca) : null;
   const propostaValida = propostaUsabile(proposta);
 
   // 3. segnali riletti (MCF puo' aver segnato il cliente dopo la verifica) e salvati;
@@ -434,7 +473,7 @@ export async function creaPraticaDistinta(
   const prima = Number.isNaN(verifica.getTime()) ? new Date() : verifica;
   const segnali = unisciSegnali(await segnaliPrefiltro(ricerca.piva, prima), ricerca.segnali ?? null);
   await salvaSegnali(ricerca.id, segnali);
-  const eventi = await eventiAllInvio(ricerca);
+  const eventi = await eventiAllInvio(e, ricerca, segnali);
   const aggiornata: RicercaSalvata = {
     ...ricerca,
     segnali,
@@ -580,6 +619,10 @@ export async function creaPraticaDistinta(
   const storia = [{ a: 'ricevuta', chi: contesto.nome || contesto.email, quando: adesso }];
   const clienteNome = scheda.ragioneSociale || ricerca.ragione_sociale || 'Cliente';
 
+  // Sulla segnalazione nessun canale (vedi l'intestazione); i dati della proposta restano a MCF
+  const canalePratica = segnalazione ? null : c.canale;
+  const riservatoPratica = c.riservato && segnalazione ? { ...c.riservato, canaleProposta: c.canale } : c.riservato;
+
   const idBase = generaId(k.prefisso, 'P');
   let id = '';
   for (let t = 0; t < 4 && !id; t++) {
@@ -591,7 +634,7 @@ export async function creaPraticaDistinta(
        ON CONFLICT (id) DO NOTHING RETURNING id`,
       [prova, k.slug, contesto.organizationId, contesto.userId, propostaValida ? proposta.id : null, ricerca.piva,
        clienteNome, c.totale, JSON.stringify(datiPratica), JSON.stringify(documenti), JSON.stringify(negativita),
-       JSON.stringify(storia), c.canale, c.riservato ? JSON.stringify(c.riservato) : null],
+       JSON.stringify(storia), canalePratica, riservatoPratica ? JSON.stringify(riservatoPratica) : null],
     );
     if (righe.length) id = prova;
   }
@@ -607,7 +650,7 @@ export async function creaPraticaDistinta(
       agente: { nome: contesto.nome ?? '', email: contesto.email },
       id,
       segnalazione: motivo,
-      cliente: { ragioneSociale: clienteNome, piva: scheda.piva || ricerca.piva },
+      cliente: { ragioneSociale: clienteNome, piva: scheda.piva || ricerca.piva, rating: scheda.rating },
       forma: classe,
       referente,
       iban: cliente.iban,
