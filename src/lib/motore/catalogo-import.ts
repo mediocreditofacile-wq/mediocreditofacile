@@ -10,8 +10,12 @@
 // (GG/MM/AAAA o AAAA-MM-GG, salvato come AAAA-MM-GG; una data impossibile non si
 // salva e la voce resta valida, senza scadenza).
 
-/** Il punto seguito da gruppi di tre cifre, senza virgola: "1.900", "6.375", "1.000.000" */
-const PUNTO_MIGLIAIA = /^\d{1,3}(\.\d{3})+$/;
+/**
+ * Il punto seguito da gruppi di tre cifre, senza virgola: "1.900", "6.375", "1.000.000".
+ * Il primo gruppo non comincia con lo zero: "0.500" non e' un numero con le migliaia,
+ * e' 0,5 (letto come migliaia faceva 500).
+ */
+const PUNTO_MIGLIAIA = /^[1-9]\d{0,2}(\.\d{3})+$/;
 const pulito = (v: unknown) => String(v ?? '').trim().replace(/[€\s]/g, '');
 
 /**

@@ -109,6 +109,18 @@ describe('numeri all\'italiana', () => {
     expect(numero('1931')).toBe(1931);
     expect(numero(12.5)).toBe(12.5);
   });
+  it('uno zero davanti non apre un gruppo di migliaia: "0.500" e\' 0,5, non 500', () => {
+    expect(numero('0.500')).toBe(0.5);
+    expect(numero('0.050')).toBe(0.05);
+    expect(numero('1.500')).toBe(1500);
+    expect(numero('12.345.678')).toBe(12345678);
+  });
+  it('kWp "0.375": con lo zero davanti la lettura e\' una sola, 0,375', () => {
+    expect(numeroDecimale('0.375')).toBe(0.375);
+    expect(leggiVoce({ codice: 'PV-0', nome: 'Impianto', prezzo: '900', kwp: '0.375' })?.attributi.kwp).toBe(0.375);
+    // "6.375" resta ambiguo
+    expect(numeroDecimale('6.375')).toBeNaN();
+  });
 });
 
 describe('kWp e kWh: il punto seguito da tre cifre non si indovina (Ruling 18)', () => {

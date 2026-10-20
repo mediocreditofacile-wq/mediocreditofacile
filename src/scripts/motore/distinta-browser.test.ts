@@ -86,6 +86,12 @@ describe('leggiNumero', () => {
     expect(leggiNumero('0.99')).toBe(0.99);
   });
 
+  it('uno zero davanti non apre un gruppo di migliaia: "0.500" e\' 0,5, non 500', () => {
+    expect(leggiNumero('0.500')).toBe(0.5);
+    expect(leggiNumero('1.500')).toBe(1500);
+    expect(leggiNumero('12.345.678')).toBe(12345678);
+  });
+
   it('quello che non si legge e NaN, mai zero', () => {
     for (const v of ['', '   ', 'abc', '1,2,3', '1.50.0', '12,', null, undefined]) expect(leggiNumero(v)).toBeNaN();
   });

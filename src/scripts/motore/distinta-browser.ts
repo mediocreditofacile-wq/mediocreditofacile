@@ -115,7 +115,8 @@ export function leggiNumero(v: unknown): number {
   const s = String(v ?? '').replace(/[€\s]/g, '');
   let pulito: string;
   if (/^-?\d{1,3}(\.\d{3})*,\d+$/.test(s) || /^-?\d+,\d+$/.test(s)) pulito = s.replace(/\./g, '').replace(',', '.');
-  else if (/^-?\d{1,3}(\.\d{3})+$/.test(s)) pulito = s.replace(/\./g, '');
+  // Il primo gruppo non comincia con lo zero: "0.500" e' 0,5, non 500
+  else if (/^-?[1-9]\d{0,2}(\.\d{3})+$/.test(s)) pulito = s.replace(/\./g, '');
   else if (/^-?\d+(\.\d+)?$/.test(s)) pulito = s;
   else return NaN;
   const n = Number(pulito);
