@@ -5,8 +5,8 @@
 //    al mese, verifiche fatturate a Emme 2 a 5 euro;
 //  - canali Econocom, Grenke (spento) e Pagarent col 5%, checklist e categorie Led
 //    Office, documenti firmati da EMME 2 SERVIZI S.R.L.: tutto da catalogo-ledoffice.ts;
-//  - nessun invito: referente e agente si invitano quando lo dice Alberto, e fino ad
-//    allora il portale resta fuori dall'indice /tools/portali-clienti.
+//  - nessun invito: referente e agente si invitano quando lo dice Alberto (la voce
+//    nell'indice /tools/portali-clienti c'e' dal 21/10/2026, in src/data/portali-clienti.ts).
 //
 // I dati dei clienti finali (clienti segnalati e pratiche lavorate fuori dal portale)
 // non stanno nel repo: il seed li legge da una cartella fuori, con quattro file:

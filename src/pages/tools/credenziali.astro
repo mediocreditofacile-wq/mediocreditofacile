@@ -2,9 +2,11 @@
 /**
  * Accessi ai portali — /tools/credenziali
  *
- * Pagina interna: elenca username e password dei portali a password unica e, a
- * parte, i portali ad accesso personale, dove non c'e' una password comune: MCF
- * entra con mediocreditofacile@gmail.com, referenti e agenti col proprio account.
+ * Pagina interna, la plancia di MCF. Scheda "Portali clienti": tutti i portali
+ * dell'indice /tools/portali-clienti, nello stesso ordine, con le credenziali
+ * accanto, piu' quelli rimasti fuori dall'indice; scheda "Strumenti interni".
+ * Sui portali ad accesso personale non c'e' una password comune: MCF entra con
+ * mediocreditofacile@gmail.com, referenti e agenti col proprio account.
  *
  * Le credenziali NON sono nel sorgente. La pagina serve solo il guscio; la
  * lista arriva da /api/credenziali, che risponde soltanto a chi presenta la
@@ -28,7 +30,11 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
 
     <div id="app" style="display:none;">
       <h1>Accessi ai portali</h1>
-      <p class="cred-sub">Username e password delle aree riservate a password unica: clicca su una password per copiarla. I portali ad accesso personale non hanno una password comune: ci entri col tuo account.</p>
+      <p class="cred-sub">Ogni portale si apre in una nuova scheda. Clicca su un utente o una password per copiarli; sui portali ad accesso personale entri col tuo account.</p>
+      <div class="cred-tabs" role="tablist">
+        <button class="cred-tab" role="tab" data-scheda="clienti">Portali clienti</button>
+        <button class="cred-tab" role="tab" data-scheda="interni">Strumenti interni</button>
+      </div>
       <div id="lista"></div>
       <button class="cred-btn cred-btn--ghost" id="esci">Esci</button>
     </div>
@@ -40,36 +46,45 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
   const $ = (id: string) => document.getElementById(id) as HTMLElement;
   const esc = (s: unknown) => String(s ?? '').replace(/[<>&"]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' }[c] as string));
 
+  const copia = (v: string) => `<code class="copia" data-v="${esc(v)}">${esc(v)}</code>`;
+
+  function riga(c: any) {
+    const portale = `<td><a href="${esc(c.percorso)}" target="_blank" rel="noopener">${esc(c.nome)}</a>
+      ${c.settore ? `<br><span class="settore">${esc(c.settore)}</span>` : ''}
+      ${c.nota ? `<br><span class="nota">${esc(c.nota)}</span>` : ''}</td>`;
+    // Accesso personale: nessuna password comune, ognuno entra col suo account
+    if (c.tipo === 'personale') {
+      return `<tr>${portale}<td>${copia('mediocreditofacile@gmail.com')}</td><td><span class="nota">la tua password personale</span></td></tr>`;
+    }
+    if (c.tipo === 'mancante') {
+      return `<tr>${portale}<td colspan="2"><span class="nota">credenziali non registrate in credenziali-portali.ts</span></td></tr>`;
+    }
+    return `<tr>${portale}<td>${c.utente ? copia(c.utente) : '<span class="nota">solo password</span>'}</td><td>${copia(c.password)}</td></tr>`;
+  }
+
+  function mostra(scheda: string) {
+    document.querySelectorAll<HTMLElement>('.cred-sez').forEach((el) => { el.hidden = el.dataset.scheda !== scheda; });
+    document.querySelectorAll<HTMLElement>('.cred-tab').forEach((el) => el.setAttribute('aria-selected', String(el.dataset.scheda === scheda)));
+  }
+
+  document.querySelectorAll<HTMLElement>('.cred-tab').forEach((el) =>
+    el.addEventListener('click', () => {
+      const scheda = el.dataset.scheda ?? 'clienti';
+      history.replaceState(null, '', scheda === 'interni' ? '#interni' : location.pathname);
+      mostra(scheda);
+    }));
+
   async function carica(chiave: string) {
     const r = await fetch('/api/credenziali', { headers: { Authorization: `Bearer ${chiave}` } });
     if (r.status === 401) { localStorage.removeItem(CH); $('err').textContent = 'Chiave errata.'; return false; }
     const d = await r.json();
-    const gruppi: [string, string][] = [
-      ['partner', 'Portali partner a password unica'],
-      ['personale', 'Portali ad accesso personale'],
-      ['interno', 'Strumenti interni MCF'],
-    ];
-    $('lista').innerHTML = gruppi.map(([tipo, titolo]) => {
-      const righe = (d.credenziali ?? []).filter((c: any) => c.tipo === tipo);
-      if (!righe.length) return '';
-      // Accesso personale: nessuna password da mostrare, ognuno entra col suo account
-      if (tipo === 'personale') {
-        return `<h2>${titolo}</h2><table><thead><tr><th>Portale</th><th>Come entri</th></tr></thead><tbody>` +
-          righe.map((c: any) => `<tr>
-            <td><a href="${esc(c.percorso)}" target="_blank" rel="noopener">${esc(c.nome)}</a>
-                ${c.nota ? `<br><span class="nota">${esc(c.nota)}</span>` : ''}</td>
-            <td><code class="copia" data-v="mediocreditofacile@gmail.com">mediocreditofacile@gmail.com</code>
-                <br><span class="nota">con la tua password personale</span></td>
-          </tr>`).join('') + '</tbody></table>';
-      }
-      return `<h2>${titolo}</h2><table><thead><tr><th>Portale</th><th>Utente</th><th>Password</th></tr></thead><tbody>` +
-        righe.map((c: any) => `<tr>
-          <td><a href="${esc(c.percorso)}" target="_blank" rel="noopener">${esc(c.nome)}</a>
-              ${c.nota ? `<br><span class="nota">${esc(c.nota)}</span>` : ''}</td>
-          <td>${c.utente ? `<code class="copia" data-v="${esc(c.utente)}">${esc(c.utente)}</code>` : '<span class="nota">solo password</span>'}</td>
-          <td><code class="copia" data-v="${esc(c.password)}">${esc(c.password)}</code></td>
-        </tr>`).join('') + '</tbody></table>';
+    $('lista').innerHTML = (d.sezioni ?? []).map((sez: any) => {
+      if (!sez.voci.length) return '';
+      return `<section class="cred-sez" data-scheda="${esc(sez.scheda)}"><h2>${esc(sez.titolo)}</h2>` +
+        '<table><thead><tr><th>Portale</th><th>Utente</th><th>Password</th></tr></thead><tbody>' +
+        sez.voci.map(riga).join('') + '</tbody></table></section>';
     }).join('');
+    mostra(location.hash === '#interni' ? 'interni' : 'clienti');
     document.querySelectorAll<HTMLElement>('.copia').forEach((el) =>
       el.addEventListener('click', () => {
         navigator.clipboard.writeText(el.dataset.v ?? '');
@@ -103,6 +118,19 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
   .cred tbody tr:nth-child(even) td { background: #F5F3F6; }
   .cred a { color: #664CCD; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
   .cred .nota { font-size: .8125rem; color: #787782; }
+  .cred .settore { font-size: .8125rem; color: #444451; }
+  .cred-tabs { display: flex; gap: 8px; margin: 24px 0 0; border-bottom: 1px solid #E1DEE3; }
+  .cred-tab { font-family: inherit; font-size: .9375rem; font-weight: 600; color: #787782; background: none; border: none; border-bottom: 3px solid transparent; padding: 10px 4px; margin-right: 16px; cursor: pointer; }
+  .cred-tab[aria-selected="true"] { color: #664CCD; border-bottom-color: #FE6F3A; }
+  .cred-sez[hidden] { display: none; }
+  @media (max-width: 640px) {
+    .cred { padding: 24px 16px 48px; }
+    .cred table, .cred tbody, .cred tr, .cred td { display: block; width: 100%; }
+    .cred thead { display: none; }
+    .cred tbody tr { border-bottom: 1px solid #E1DEE3; padding: 8px 0; }
+    .cred tbody td { border: none; padding: 4px 0; }
+    .cred tbody tr:nth-child(even) td { background: none; }
+  }
   .cred code.copia { font-family: ui-monospace, "SF Mono", monospace; font-size: .875rem; background: #fff; border: 1px solid #E1DEE3; border-radius: 6px; padding: 4px 10px; cursor: pointer; display: inline-block; }
   .cred code.copia:hover { border-color: #FE6F3A; }
   .cred-btn { font-family: inherit; font-size: .9375rem; font-weight: 600; color: #fff; background: #FE6F3A; border: none; border-radius: 10px; padding: 12px 24px; cursor: pointer; margin-top: 32px; }
