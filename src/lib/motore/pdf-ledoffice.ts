@@ -25,7 +25,7 @@ import type { CalcoloDistinta } from './calcolo-distinta';
 import type { Carrozzeria } from './carrozzeria';
 import type { SocietaFornitrice } from './config-distinta';
 import type { DatiVendita } from './dati-vendita';
-import { DURATA_EVIDENZA, vistaCommerciale, type RataDurata } from './instradamento';
+import { DURATA_EVIDENZA, vistaCommerciale, type Instradamento, type RataDurata } from './instradamento';
 import { dataItaliana, euro } from './pdf-generico';
 
 // --- testi fissi (spec, paragrafo 8) ----------------------------------------
@@ -63,7 +63,10 @@ export interface ContenutoProposta {
 
 export interface ContenutoPreventivo {
   data: string;
+  /** Sulla simulazione la partita IVA e' vuota, e anche il nome se il commerciale non lo scrive: la riga vuota non si stampa */
   cliente: { ragioneSociale: string; piva: string };
+  /** Simulazione senza verifica del cliente: lo dice sotto il titolo */
+  simulazione?: boolean;
   righe: RigaProposta[];
   totale: number;
   rate: RataDurata[];
@@ -231,6 +234,67 @@ export function contenutoPreventivoCanone(c: CalcoloDistinta, id: string, oggi: 
     durataEvidenza,
     note,
     riferimento: `Rif. ${pulito(id)}`,
+  };
+}
+
+export const NOTA_SIMULAZIONE =
+  'Simulazione sull\'importo indicato, fatta prima della valutazione del cliente: il canone definitivo dipende dal suo esito.';
+
+/** Quello che il commerciale scrive nella scheda Simulazione */
+export interface DatiSimulazione {
+  importo: number;
+  /** Facoltativo: a chi va il preventivo */
+  intestatario: string;
+  /** Facoltativa: cosa si noleggia, senza marca ne' modello */
+  descrizione: string;
+}
+
+/** La riga dei beni quando il commerciale non scrive cosa si noleggia */
+export const DESCRIZIONE_SIMULAZIONE = 'Fornitura di beni strumentali';
+
+/**
+ * Il preventivo del canone della simulazione: una riga sola con l'importo, le rate della
+ * vista del commerciale, le condizioni del listino e la nota che dice che il cliente
+ * non e' ancora stato valutato. Nessuna partita IVA.
+ */
+export function contenutoPreventivoSimulazione(
+  s: DatiSimulazione,
+  i: Instradamento,
+  id: string,
+  oggi: Date = new Date(),
+): ContenutoPreventivo {
+  const vista = vistaCommerciale(i);
+  const durataEvidenza = vista.rate.some((r) => r.durata === DURATA_EVIDENZA)
+    ? DURATA_EVIDENZA
+    : vista.rate.at(-1)?.durata ?? DURATA_EVIDENZA;
+  const note = [vista.nota ? pulito(vista.nota) : '', NOTA_RATA, vista.daConfermare ? NOTA_DA_CONFERMARE : '', NOTA_SIMULAZIONE].filter(Boolean);
+  const descrizione = maiuscolo(s.descrizione) || maiuscolo(DESCRIZIONE_SIMULAZIONE);
+  return {
+    data: dataItaliana(oggi),
+    cliente: { ragioneSociale: maiuscolo(s.intestatario), piva: '' },
+    simulazione: true,
+    righe: [{ descrizione, quantita: 1, prezzo: s.importo, totale: s.importo }],
+    totale: s.importo,
+    rate: vista.rate,
+    durataEvidenza,
+    note,
+    riferimento: `Rif. ${pulito(id)}`,
+  };
+}
+
+/** Il PDF della simulazione, col marchio e i colori della carrozzeria */
+export function documentoSimulazione(
+  s: DatiSimulazione,
+  i: Instradamento,
+  k: Carrozzeria,
+  id: string,
+  marchio: string | null,
+  oggi: Date = new Date(),
+): { filename: string; contenuto: string } {
+  const colori = { colore: k.brand.colore || COLORE_PREDEFINITO, accento: k.brand.accento || ACCENTO_PREDEFINITO };
+  return {
+    filename: `preventivo-canone-${id}.pdf`,
+    contenuto: disegnaPreventivo(contenutoPreventivoSimulazione(s, i, id, oggi), marchio, colori, k.nome),
   };
 }
 
@@ -577,7 +641,7 @@ export function disegnaPreventivo(
   font(doc, 'bold', 12, colori.colore);
   doc.text('PREVENTIVO DEL CANONE', DESTRA, 18, { align: 'right' });
   font(doc, 'normal', 9);
-  doc.text('Noleggio operativo', DESTRA, 23.5, { align: 'right' });
+  doc.text(p.simulazione ? 'Noleggio operativo, simulazione' : 'Noleggio operativo', DESTRA, 23.5, { align: 'right' });
   doc.text(`Data ${p.data}`, DESTRA, 28.5, { align: 'right' });
   doc.setDrawColor(...rgb(colori.accento));
   doc.setLineWidth(0.8);
@@ -588,12 +652,17 @@ export function disegnaPreventivo(
     return IN_ALTO;
   };
 
-  titoletto(doc, 'CLIENTE', 45);
-  let y = 49;
-  y += riga(doc, M, y, [{ testo: 'RAGIONE SOCIALE', w: 44 }, { testo: p.cliente.ragioneSociale, w: LARGO - 44 }], 7.5);
-  y += riga(doc, M, y, [{ testo: 'P.IVA', w: 44 }, { testo: p.cliente.piva, w: LARGO - 44 }], 7.5);
+  // Sulla simulazione partita IVA (e nome, se non c'e') mancano: niente righe vuote
+  const righeCliente = [['RAGIONE SOCIALE', p.cliente.ragioneSociale], ['P.IVA', p.cliente.piva]].filter(([, v]) => v);
+  let y = 45;
+  if (righeCliente.length) {
+    titoletto(doc, 'CLIENTE', 45);
+    y = 49;
+    for (const [etichetta, valore] of righeCliente) y += riga(doc, M, y, [{ testo: etichetta, w: 44 }, { testo: valore, w: LARGO - 44 }], 7.5);
+    y += 10;
+  }
 
-  y = tabellaProdotti(doc, y + 10, 'BENI', p.righe, nuovaPagina);
+  y = tabellaProdotti(doc, y, 'BENI', p.righe, nuovaPagina);
   const totale: Cella[] = [
     { testo: 'TOTALE BENI', w: COL_PRODOTTI[0] + COL_PRODOTTI[1] + COL_PRODOTTI[2], allinea: 'right', stile: 'bold' },
     { testo: euro(p.totale), w: COL_PRODOTTI[3], allinea: 'right', stile: 'bold' },

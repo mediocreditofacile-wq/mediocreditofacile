@@ -9,6 +9,7 @@
  * codice nuovo, chiede righe nuove.
  *
  * Il percorso dell'agente:
+ *   0. Simulazione (solo settore distinta): dall'importo ai canoni, senza cliente
  *   1. Cliente: partita IVA, scheda di merito ridotta col semaforo
  *   2. Info aggiuntive: soci, amministratori, bilancio riclassificato, indici
  *   3. Proposte: pacchetto del catalogo, prezzo trattato, noleggio e leasing,
@@ -161,7 +162,8 @@ const distinta = c.settore === 'distinta';
           </>
         ) : (
           <>
-            <button role="tab" class="mt-tab" data-tab="cliente" aria-selected="true">Cliente</button>
+            {distinta && <button role="tab" class="mt-tab" data-tab="simulazione" aria-selected="true">Simulazione</button>}
+            <button role="tab" class="mt-tab" data-tab="cliente" aria-selected={distinta ? 'false' : 'true'}>Cliente</button>
             <button role="tab" class="mt-tab" data-tab="info" aria-selected="false">Info aggiuntive</button>
             <button role="tab" class="mt-tab" data-tab="proposte" aria-selected="false">Proposte</button>
           </>
@@ -172,8 +174,21 @@ const distinta = c.settore === 'distinta';
         <button role="tab" class="mt-tab" data-tab="mcf" aria-selected="false" hidden>Pannello MCF</button>
       </nav>
 
+      <!-- 0. Simulazione, prima della verifica: solo settore distinta -->
+      {distinta && (
+        <section class="mt-pannello" data-pannello="simulazione" role="tabpanel">
+          <h1 class="mt-h1">Simulazione del canone</h1>
+          <p class="mt-lead">
+            Scrivi l'importo della fornitura, IVA esclusa: escono i canoni a 24, 36, 48 e 60 mesi, senza partita IVA.
+            Il preventivo in PDF si può dare subito al cliente. La rata è indicativa: quella definitiva arriva dopo la
+            verifica del cliente nella sezione Cliente.
+          </p>
+          <div id="simulazione"></div>
+        </section>
+      )}
+
       <!-- 1. Cliente -->
-      <section class="mt-pannello" data-pannello="cliente" role="tabpanel" hidden={macchine}>
+      <section class="mt-pannello" data-pannello="cliente" role="tabpanel" hidden={macchine || distinta}>
         <h1 class="mt-h1">Verifica il cliente</h1>
         {macchine ? (
           <p class="mt-lead">
@@ -396,6 +411,7 @@ const distinta = c.settore === 'distinta';
   .mt-msg { font-size: 15px; padding: 12px 16px; border-radius: 6px; margin: 16px 0 0; border-left: 3px solid var(--mt-accent); background: var(--mt-ghost); }
   .mt-msg--errore { border-left-color: #B23A12; color: #8A2D0E; }
   .mt-msg--ok { border-left-color: var(--mt-accent); }
+  .mt-scaduta { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; margin: 0 0 16px; position: sticky; top: 8px; z-index: 5; background: #fff; }
 
   /* gate */
   .mt-gate { display: flex; justify-content: center; padding: 48px 0; }

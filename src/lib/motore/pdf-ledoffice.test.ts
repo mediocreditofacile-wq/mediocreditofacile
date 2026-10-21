@@ -16,6 +16,7 @@ import type { CanaleConfig, Categoria, SocietaFornitrice } from './config-distin
 import type { EventiRicerca } from './eventi-stato';
 import { vistaCommerciale } from './instradamento';
 import type { DatiCreditoMotore, SchedaRidotta } from './merito';
+import type { Firmatario } from './registro-vendita';
 import {
   contenutoPreventivoCanone,
   contenutoPropostaLocatore,
@@ -71,11 +72,14 @@ const EVENTI_ASSENTI: EventiRicerca = {
   stato: 'assenti', id: 'ev-1', avviata: null, chiusa: null, codice: '01234567890', daRegistro: true, mail: 'non-serve',
 };
 
-const ricerca = (dati: Partial<DatiCreditoMotore> = {}): RicercaSalvata => ({
+/** Il legale rappresentante come lo salva la verifica (registro-vendita.ts) */
+const FIRMATARIO: Firmatario = { nome: 'MARIO ROSSI', nascita: '15/03/1979', codiceFiscale: 'RSSMRA79C15H501Z' };
+
+const ricerca = (dati: Partial<DatiCreditoMotore> = {}, firmatario: Firmatario = FIRMATARIO): RicercaSalvata => ({
   id: 'r-1',
   piva: SCHEDA.piva,
   ragione_sociale: SCHEDA.ragioneSociale,
-  dati_credito: { dati: { ...DATI, ...dati }, scheda: SCHEDA },
+  dati_credito: { dati: { ...DATI, ...dati }, scheda: SCHEDA, firmatario },
   eventi: EVENTI_ASSENTI,
   segnali: null,
 });
@@ -131,8 +135,8 @@ const CORPO = {
   vendita: VENDITA,
 };
 
-function calcoloDa(corpo: Record<string, unknown>, dati: Partial<DatiCreditoMotore> = {}): CalcoloDistinta {
-  const esito = componiCalcolo(ricerca(dati), { categorie: CATEGORIE, canali: LO }, VOCI, corpo, OGGI);
+function calcoloDa(corpo: Record<string, unknown>, dati: Partial<DatiCreditoMotore> = {}, firmatario = FIRMATARIO): CalcoloDistinta {
+  const esito = componiCalcolo(ricerca(dati, firmatario), { categorie: CATEGORIE, canali: LO }, VOCI, corpo, OGGI);
   if (!esito.ok) throw new Error(`distinta rifiutata: ${esito.error}`);
   return esito.calcolo;
 }
@@ -205,10 +209,12 @@ describe('proposta di vendita', () => {
     const p = contenutoPropostaVendita(calcolo, EMME2, 'LO-20261020-101500', OGGI);
     expect(p.data).toBe('20/10/2026');
     expect(p.cliente).toEqual({ ragioneSociale: 'ALFA SOCCORSI SOC. COOP.', indirizzo: 'VIA ROMA 1 - 00100 ROMA (RM)', piva: '01234567890' });
+    // Firmatario dal Registro; la residenza il Registro non la da' e resta vuota
     expect(p.vendita.amministratore).toEqual({
-      nome: 'MARIO ROSSI', nascita: '15/03/1979', codiceFiscale: 'RSSMRA79C15H501Z', residenza: 'VIA VERDI 3, ROMA',
+      nome: 'MARIO ROSSI', nascita: '15/03/1979', codiceFiscale: 'RSSMRA79C15H501Z', residenza: '',
     });
-    expect(p.vendita.riferimento).toEqual({ nome: 'ANNA BIANCHI', telefono: '081 1234567' });
+    // La persona di riferimento e' il firmatario, col cellulare scritto dal commerciale
+    expect(p.vendita.riferimento).toEqual({ nome: 'MARIO ROSSI', telefono: '+39 333 1234567' });
     // Email e PEC restano come sono scritte: un indirizzo in maiuscolo non si legge bene
     expect(p.vendita.email).toBe('mario.rossi@example.it');
     expect(p.vendita.pec).toBe('alfa@pec.example.it');
@@ -253,17 +259,11 @@ describe('proposta di vendita', () => {
         { descrizione: 'Staffa \u201Cslim\u201D da 1.500 \u20AC e cavo 20\u20AC', categoria: 'Periferiche e tablet', quantita: 1, prezzo: 300 },
         { descrizione: 'TV\u2122 \u2265 55\u2033 e \u2264 86\u2033 \u{1F642}', categoria: 'Periferiche e tablet', quantita: 1, prezzo: 300 },
       ],
-      vendita: {
-        ...VENDITA,
-        amministratore: { ...VENDITA.amministratore, nome: 'Gianni D\u2019Angelo', residenza: 'Via Niccolò Tommaseo 4, Città di Castello' },
-        riferimento: { nome: 'Lucia Dell\u2019Orto', telefono: '081 1234567' },
-      },
-    });
+    }, {}, { ...FIRMATARIO, nome: 'Gianni D\u2019Angelo' });
     const p = contenutoPropostaVendita(c, EMME2, 'x');
     expect(p.consegna).toBe("VIA DELL'INDUSTRIA 5, BARI");
     expect(p.vendita.amministratore.nome).toBe("GIANNI D'ANGELO");
-    expect(p.vendita.amministratore.residenza).toBe('VIA NICCOLÒ TOMMASEO 4, CITTÀ DI CASTELLO');
-    expect(p.vendita.riferimento.nome).toBe("LUCIA DELL'ORTO");
+    expect(p.vendita.riferimento.nome).toBe("GIANNI D'ANGELO");
     expect(p.righe.at(-2)!.descrizione).toBe('STAFFA "SLIM" DA 1.500 EUR E CAVO 20 EUR');
     expect(p.righe.at(-1)!.descrizione).toBe('TVTM >= 55" E <= 86"');
     // Nessun carattere fuori dal Latin-1 resta nel contenuto
@@ -278,8 +278,7 @@ describe('proposta di vendita', () => {
         ...CORPO.righe,
         { descrizione: 'Caffè perché più così, città però: 1.500 \u20AC', categoria: 'Periferiche e tablet', quantita: 1, prezzo: 300 },
       ],
-      vendita: { ...VENDITA, amministratore: { ...VENDITA.amministratore, nome: 'Gianni D\u2019Angelo' } },
-    });
+    }, {}, { ...FIRMATARIO, nome: 'Gianni D\u2019Angelo' });
     const t = testoPdf(documentiLedOffice(c, LO_K, 'x', SENZA_LOGHI).cliente[1].contenuto);
     expect(t).toContain("(VIA DELL'INDUSTRIA 5, BARI)");
     expect(t).toContain("(D'ANGELO)");

@@ -16,6 +16,7 @@
 import CODICI from '../../data/codici-bilancio.json';
 import { ETICHETTE, RUOLI, VALORI } from '../../data/openapi-etichette';
 import { atecoPuntato, type SchedaAzienda } from '../openapi';
+import { fatturazioneDaScheda } from './registro-vendita';
 import type { DatiLocatore } from './semaforo-locatore';
 
 const CODICI_BILANCIO = CODICI as Record<string, string>;
@@ -68,6 +69,12 @@ export interface SchedaRidotta {
   lineaCreditoConsigliata: number | null;
   /** Indirizzi delle unita' locali attive (UL, senza la sede legale), da IT-full allOffices. `branches` porta solo il numero. */
   unitaLocali: string[];
+  /**
+   * PEC e codice SDI del Registro, per la proposta di vendita (registro-vendita.ts). Dal
+   * 21/10/2026: le ricerche salvate prima non li hanno e li prende completaRicerca().
+   */
+  pec?: string | null;
+  sdi?: string | null;
 }
 
 /** Una riga etichetta/valore; `sotto` apre un sottogruppo dentro la sezione */
@@ -324,6 +331,7 @@ export function leggiScheda(s: SchedaAzienda): LetturaScheda {
       : null,
     lineaCreditoConsigliata: numero(CS.operational_credit_limit),
     unitaLocali: unitaLocaliDa(F),
+    ...fatturazioneDaScheda(s),
   };
 
   // --- info aggiuntive ---

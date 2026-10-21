@@ -38,6 +38,7 @@ import { prefiltroPerSchermo, semaforoPerSchermo, valuta } from '../../../lib/mo
 import { corpoJson, filtroVisibilita, json, sessioneMotore } from '../../../lib/motore/sessione';
 import { entroIlTetto, schedaAzienda, schedaSoloCache, sorgenteCarrozzeria } from '../../../lib/openapi';
 import { pivaValida, pulisciPiva } from '../../../lib/piva';
+import { fatturazioneDaScheda, firmatarioDaScheda } from '../../../lib/motore/registro-vendita';
 
 /** Semaforo senza importo: utile e anni di attivita'. Quello vero arriva col prezzo. */
 const creditoBase = (d: DatiCreditoMotore) => valutaCredito({ ...d, importo: null });
@@ -91,7 +92,7 @@ export async function POST({ request }: { request: Request }) {
     `INSERT INTO app.ricerca_merito (id, fornitore_slug, organization_id, user_id, piva, ragione_sociale, dati_credito, da_cache)
      VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
     [id, carrozzeria.slug, contesto.organizationId, contesto.userId, piva, ridotta.ragioneSociale,
-     JSON.stringify({ dati, scheda: ridotta }), Boolean(scheda.daCache)],
+     JSON.stringify({ dati, scheda: ridotta, firmatario: firmatarioDaScheda(scheda) }), Boolean(scheda.daCache)],
   );
   console.log(JSON.stringify({ evento: 'motore_merito', fornitore: carrozzeria.slug, daCache: Boolean(scheda.daCache) }));
 
@@ -181,10 +182,14 @@ export async function GET({ request }: { request: Request }) {
   // Le info aggiuntive vengono dalla cache, senza spendere. Scaduta la cache
   // (30 giorni) restano la scheda ridotta e i numeri salvati con la ricerca.
   const cache = await schedaSoloCache(riga.piva);
+  // Le ricerche salvate prima del 21/10/2026 non hanno PEC e codice SDI: dalla stessa cache
+  const scheda = riga.dati_credito.scheda.pec === undefined && cache
+    ? { ...riga.dati_credito.scheda, ...fatturazioneDaScheda(cache) }
+    : riga.dati_credito.scheda;
   return json({
     ok: true,
     ricercaId: riga.id,
-    scheda: riga.dati_credito.scheda,
+    scheda,
     info: cache ? leggiScheda(cache).info : null,
     credito,
     eventi: ev?.stato ?? null,

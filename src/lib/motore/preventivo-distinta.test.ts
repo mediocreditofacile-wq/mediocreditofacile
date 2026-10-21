@@ -38,6 +38,7 @@ import { DESCRIZIONE_SERVIZI } from './pdf-ledoffice';
 import type { SegnaliPrefiltro } from './prefiltro';
 import {
   corpoMailDistinta,
+  daCompletare,
   datiProposta,
   descrizioneDistinta,
   generaPreventivoDistinta,
@@ -550,5 +551,23 @@ describe('generaPreventivoDistinta', () => {
     });
     const r = await generaPreventivoDistinta(SESSIONE, calcolo, {});
     expect(r.id).toMatch(/^LO-\d{8}-\d{6}-2$/);
+  });
+});
+
+describe('daCompletare', () => {
+  const v = (amministratore: Record<string, string>) => ({
+    amministratore: { nome: '', nascita: '', codiceFiscale: '', residenza: '', ...amministratore },
+    telefono: '', email: '', riferimento: { nome: '', telefono: '' }, iban: '', sdi: '', pec: '',
+  });
+
+  it('col firmatario del Registro resta solo la residenza', () => {
+    expect(daCompletare(v({ nome: 'MARIO ROSSI', nascita: '15/03/1979', codiceFiscale: 'RSSMRA79C15H501Z' })))
+      .toEqual(['residenza del firmatario']);
+  });
+
+  it('quello che il Registro non ha dato si elenca', () => {
+    expect(daCompletare(v({ nome: 'MARIO ROSSI' })))
+      .toEqual(['data di nascita del firmatario', 'codice fiscale del firmatario', 'residenza del firmatario']);
+    expect(daCompletare(v({}))[0]).toMatch(/^firmatario/);
   });
 });

@@ -86,6 +86,9 @@ const MESSAGGI: Record<string, string> = {
   preventivo_non_riuscito: 'Il preventivo non è stato salvato. Riprova tra poco.',
   bozza_non_valida: 'Il modulo è scaduto. Ricarica la pagina e riprova.',
   importo_non_valido: "L'importo non è valido.",
+  simulazione_fuori_tabella:
+    'Su questo importo la simulazione non dà un canone: verifica il cliente e componi la fornitura, oppure scrivi a Mediocredito Facile.',
+  non_disponibile: 'Questa funzione non è attiva su questo portale.',
   durata_non_valida: 'La durata non è valida.',
   cellulare_mancante: "Scrivi il cellulare del referente del cliente: serve insieme all'email.",
   cellulare_non_valido: 'Il cellulare del referente non sembra un numero: controlla le cifre.',
@@ -127,6 +130,8 @@ export async function apiJson(url: string, opts: RequestInit = {}) {
   });
   let corpo: any = null;
   try { corpo = await res.json(); } catch { /* risposta senza corpo */ }
+  // La sessione e' caduta a portale aperto: lo dice la pagina in alto, non un messaggio in fondo
+  if (res.status === 401 && corpo?.error === 'sessione_assente') document.dispatchEvent(new CustomEvent('mt:sessione-scaduta'));
   return { res, corpo };
 }
 

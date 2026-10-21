@@ -210,14 +210,8 @@ export function vociDaChiedere<T extends VoceChecklistBrowser>(voci: T[], classe
 
 /** I nomi dei campi, con le chiavi di leggiDatiVendita (dati-vendita.ts) */
 export const ETICHETTE_VENDITA: Record<string, string> = {
-  'amministratore.nome': "nome dell'amministratore",
-  'amministratore.nascita': "data di nascita dell'amministratore",
-  'amministratore.codiceFiscale': "codice fiscale dell'amministratore",
-  'amministratore.residenza': "residenza dell'amministratore",
-  telefono: 'telefono del firmatario',
+  telefono: 'cellulare del firmatario',
   email: 'email del firmatario',
-  'riferimento.nome': 'persona di riferimento',
-  'riferimento.telefono': 'telefono della persona di riferimento',
   iban: 'IBAN',
   sdi_o_pec: 'codice SDI o PEC',
 };

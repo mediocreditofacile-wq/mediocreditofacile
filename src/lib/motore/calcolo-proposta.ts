@@ -15,6 +15,7 @@ import type { SegnaliPrefiltro } from './prefiltro';
 import { calcolaProposte, type EsitoProposte } from './proposte';
 import { filtroVisibilita, json, type EsitoMotore } from './sessione';
 import type { FormaGiuridica } from '../prospetti-pv';
+import type { Firmatario } from './registro-vendita';
 
 /** Tetto di buon senso sul prezzo trattato: oltre e' un errore di battitura */
 const PREZZO_MAX = 10_000_000;
@@ -31,7 +32,16 @@ export interface RicercaSalvata {
   id: string;
   piva: string;
   ragione_sociale: string | null;
-  dati_credito: { dati: DatiCreditoMotore; scheda: SchedaRidotta };
+  dati_credito: {
+    dati: DatiCreditoMotore;
+    scheda: SchedaRidotta;
+    /**
+     * Il legale rappresentante del Registro, per la proposta di vendita: solo server,
+     * mai verso il browser. Dal 21/10/2026: undefined sulle ricerche salvate prima
+     * (le completa completaRicerca), null se il Registro non ha un firmatario persona.
+     */
+    firmatario?: Firmatario | null;
+  };
   /** Eventi negativi della ricerca, sui fornitori col semaforo del locatore */
   eventi: EventiRicerca | null;
   /**

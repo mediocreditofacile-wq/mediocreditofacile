@@ -230,9 +230,9 @@ describe('vociDaChiedere', () => {
 
 describe('mancantiProposte', () => {
   it('indirizzo di consegna e dati di vendita, con le parole del modulo', () => {
-    expect(mancantiProposte(['amministratore.nascita', 'iban', 'sdi_o_pec'], '')).toEqual([
+    expect(mancantiProposte(['telefono', 'iban', 'sdi_o_pec'], '')).toEqual([
       'indirizzo di consegna',
-      "data di nascita dell'amministratore",
+      'cellulare del firmatario',
       'IBAN',
       'codice SDI o PEC',
     ]);
@@ -243,13 +243,10 @@ describe('mancantiProposte', () => {
     expect(mancantiProposte([], '   ')).toEqual(['indirizzo di consegna']);
   });
 
-  it('tutte le dieci chiavi di leggiDatiVendita hanno un nome', () => {
-    const chiavi = [
-      'amministratore.nome', 'amministratore.nascita', 'amministratore.codiceFiscale', 'amministratore.residenza',
-      'telefono', 'email', 'riferimento.nome', 'riferimento.telefono', 'iban', 'sdi_o_pec',
-    ];
+  it('tutte le quattro chiavi di leggiDatiVendita hanno un nome', () => {
+    const chiavi = ['telefono', 'email', 'iban', 'sdi_o_pec'];
     const nomi = mancantiProposte(chiavi, 'VIA ROMA 1');
-    expect(nomi).toHaveLength(10);
+    expect(nomi).toHaveLength(4);
     expect(nomi.every((n) => !n.includes('.') && !n.includes('_'))).toBe(true);
   });
 });

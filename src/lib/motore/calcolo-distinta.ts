@@ -21,6 +21,7 @@ import { catalogo, type Carrozzeria, type VoceCatalogo } from './carrozzeria';
 import type { Categoria } from './config-distinta';
 import { ricercaVisibile, type RicercaSalvata } from './calcolo-proposta';
 import { leggiDatiVendita, type DatiVendita } from './dati-vendita';
+import { completaRicerca } from './registro-ricerca';
 import { validaDistinta, type Distinta, type ErroreDistinta, type RigaDistinta } from './distinta';
 import { DURATA_EVIDENZA, instrada, vistaCommerciale, type Instradamento, type RataDurata } from './instradamento';
 import type { SchedaRidotta } from './merito';
@@ -168,7 +169,11 @@ export function componiCalcolo(
   const motivazioni: Record<string, string> = {};
   for (const m of prefiltro.motivazioniRichieste) if (scritte[m.chiave]) motivazioni[m.chiave] = scritte[m.chiave];
 
-  const vendita = leggiDatiVendita(corpo.vendita, oggi);
+  // Firmatario, PEC e codice SDI li sa il Registro: il commerciale scrive solo il resto
+  const vendita = leggiDatiVendita(corpo.vendita, {
+    firmatario: ricerca.dati_credito.firmatario ?? null,
+    fatturazione: { pec: scheda.pec ?? null, sdi: scheda.sdi ?? null },
+  });
 
   return {
     ok: true,
@@ -223,8 +228,9 @@ export async function calcolaDistinta(
   corpo: Record<string, unknown>,
   oggi: Date = new Date(),
 ): Promise<{ ok: true; calcolo: CalcoloDistinta } | { ok: false; risposta: Response }> {
-  const ricerca = await ricercaVisibile(e, String(corpo.ricercaId ?? ''));
-  if (!ricerca) return { ok: false, risposta: json({ ok: false, error: 'ricerca_non_trovata' }, 404) };
+  const letta = await ricercaVisibile(e, String(corpo.ricercaId ?? ''));
+  if (!letta) return { ok: false, risposta: json({ ok: false, error: 'ricerca_non_trovata' }, 404) };
+  const ricerca = await completaRicerca(letta);
 
   const voci = await catalogo(e.carrozzeria.slug);
   const esito = componiCalcolo(ricerca, e.carrozzeria, voci, corpo, oggi);

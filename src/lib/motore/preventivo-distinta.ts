@@ -172,6 +172,17 @@ function rigaLocatore(c: CalcoloDistinta, stato: LocatoreInMail): string {
  * Pura: si prova senza mandare niente. `avviso` dice cosa non e' andato coi PDF,
  * `locatore` se la proposta per il locatore e' fra gli allegati.
  */
+/** Quello che il Registro non ha dato e che sulla proposta resta vuoto: lo completa MCF */
+export function daCompletare(v: DatiVendita): string[] {
+  const a = v.amministratore;
+  if (!a.nome) return ['firmatario (il Registro non ha un legale rappresentante persona)', 'residenza del firmatario'];
+  return [
+    a.nascita ? '' : 'data di nascita del firmatario',
+    a.codiceFiscale ? '' : 'codice fiscale del firmatario',
+    'residenza del firmatario',
+  ].filter(Boolean);
+}
+
 export function corpoMailDistinta(o: {
   k: Pick<Carrozzeria, 'nome' | 'demo'>;
   agente: { nome: string; email: string };
@@ -213,7 +224,7 @@ export function corpoMailDistinta(o: {
       ${riga('Consegna', `${TIPO_CONSEGNA[c.consegna.tipo]}: ${c.consegna.indirizzo || 'non indicato'}`)}
       ${c.distinta.conLedwall ? riga('LEDwall', c.ledwallConfermato ? 'installazione fissa confermata dal commerciale' : 'spunta sull\'installazione mancante') : ''}
       ${riga('Proposta di vendita', c.datiVendita
-        ? `dati completi${o.locatore === 'allegata' ? ', proposta allegata' : ', proposta non allegata'}`
+        ? `dati completi${o.locatore === 'allegata' ? ', proposta allegata' : ', proposta non allegata'}; da completare a mano: ${daCompletare(c.datiVendita).join(', ')}`
         : `non compilata${c.venditaMancanti.length ? ` (mancano: ${c.venditaMancanti.join(', ')})` : ''}`)}
       ${segnali?.segnalato ? riga('Cliente segnalato', `${segnali.segnalato.motivo}, effetto ${segnali.segnalato.effetto}`) : ''}
       ${recente ? riga('Pratica recente', [

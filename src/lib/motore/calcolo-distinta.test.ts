@@ -281,9 +281,10 @@ describe('distintaPerSchermo', () => {
     for (const vietato of VIETATE) expect(testo).not.toContain(vietato);
   });
 
-  it('i dati per la proposta di vendita: senza, i dieci campi mancanti; completi, nessuno', () => {
+  it('i dati per la proposta di vendita: senza, i quattro campi mancanti; completi, nessuno', () => {
     expect(calcoloDiProva.datiVendita).toBeNull();
-    expect(distintaPerSchermo(calcoloDiProva).venditaMancanti).toHaveLength(10);
+    // Il Registro della ricerca di prova non ha ne' PEC ne' codice SDI: si chiedono anche quelli
+    expect(distintaPerSchermo(calcoloDiProva).venditaMancanti).toEqual(['telefono', 'email', 'iban', 'sdi_o_pec']);
 
     const c = calcolo({ ...CORPO, vendita: VENDITA });
     expect(c.venditaMancanti).toEqual([]);
@@ -292,6 +293,20 @@ describe('distintaPerSchermo', () => {
     expect(s.venditaMancanti).toEqual([]);
     // I dati del cliente restano sul server: lo schermo non li rimanda indietro
     expect(JSON.stringify(s)).not.toContain('IT60X0542811101000000123456');
+  });
+
+  it('firmatario e PEC dal Registro della ricerca: il commerciale scrive solo cellulare, email e IBAN', () => {
+    const firmatario = { nome: 'MARIO ROSSI', nascita: '15/03/1979', codiceFiscale: 'RSSMRA79C15H501Z' };
+    const r = ricerca({ dati_credito: { dati: DATI, scheda: { ...SCHEDA, pec: 'rossi@pec.example.it', sdi: null }, firmatario } });
+    const solo = { telefono: VENDITA.telefono, email: VENDITA.email, iban: VENDITA.iban };
+    const c = calcolo({ ...CORPO, vendita: solo }, r);
+    expect(c.venditaMancanti).toEqual([]);
+    expect(c.datiVendita?.amministratore).toEqual({ ...firmatario, residenza: '' });
+    expect(c.datiVendita?.pec).toBe('rossi@pec.example.it');
+    // Codice fiscale e data di nascita non escono verso lo schermo
+    const s = JSON.stringify(distintaPerSchermo(c));
+    expect(s).not.toContain('RSSMRA79C15H501Z');
+    expect(s).not.toContain('15/03/1979');
   });
 });
 
