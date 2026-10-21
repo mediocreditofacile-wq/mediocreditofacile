@@ -14,13 +14,13 @@ export const prerender = false;
 import { randomUUID } from 'node:crypto';
 import { auth } from '../../lib/auth';
 import { query, queryUna } from '../../lib/db';
+import { copiaSetCookie } from '../../lib/inoltra-cookie';
 import { segnaAccettato } from '../../lib/inviti';
 
-function json(payload: unknown, status = 200, headers: HeadersInit = {}): Response {
-  return new Response(JSON.stringify(payload), {
-    status,
-    headers: { 'Content-Type': 'application/json', 'Cache-Control': 'private, no-store', ...headers },
-  });
+function json(payload: unknown, status = 200, headers: Headers = new Headers()): Response {
+  headers.set('Content-Type', 'application/json');
+  headers.set('Cache-Control', 'private, no-store');
+  return new Response(JSON.stringify(payload), { status, headers });
 }
 
 interface RigaInvito {
@@ -150,7 +150,7 @@ export async function POST({ request }: { request: Request }) {
   if (!utente) return json({ ok: false, error: 'creazione_account_fallita' }, 500);
 
   await attivaRapporto(inv, utente.id);
-  // L'account e' appena nato ed e' gia' autenticato: si passa avanti il cookie.
-  const cookie = risposta.headers.get('set-cookie');
-  return json({ ok: true, slug: inv.org_slug }, 200, cookie ? { 'set-cookie': cookie } : {});
+  // L'account e' appena nato ed e' gia' autenticato: si passano avanti i cookie,
+  // uno per riga (vedi inoltra-cookie.ts: incollati, la sessione durava 5 minuti).
+  return json({ ok: true, slug: inv.org_slug }, 200, copiaSetCookie(risposta.headers, new Headers()));
 }
