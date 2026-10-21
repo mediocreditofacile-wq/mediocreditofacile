@@ -136,7 +136,7 @@ async function mailMcf(e: Sessione, c: CalcoloProposta, id: string, allegati: { 
     : `${c.esito.semaforo}${c.esito.anticipoRichiesto ? `, anticipo richiesto ${c.esito.anticipoRichiesto}%` : ''}${c.esito.markup ? `, markup ${c.esito.markup}%` : ''}`;
   return inviaMail({
     to: DESTINATARIO_MCF,
-    subject: `${carrozzeria.nome} — ${contesto.nome || contesto.email} — ${cl.nome || 'senza intestatario'}${cl.verificato ? '' : ' (non verificato)'} — ${eur(c.prezzo)}`,
+    subject: `Preventivo ${carrozzeria.nome} — ${contesto.nome || contesto.email} — ${cl.nome || 'senza intestatario'}${cl.verificato ? '' : ' (non verificato)'} — ${eur(c.prezzo)}`,
     allegati: allegati.map((f) => ({ filename: f.filename, content: f.contenuto })),
     html: layoutMail('Nuovo preventivo dal portale', `
       <p style="font-size:14px;color:#787782;margin:0 0 18px">

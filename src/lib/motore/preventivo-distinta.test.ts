@@ -282,7 +282,7 @@ describe('la mail a MCF', () => {
     expect(m.html).toContain('137.750,00 euro');
     expect(m.html).toContain('6.888 euro');
     expect(m.html).toContain('144.638,00 euro');
-    expect(m.subject).toContain('Led Office');
+    expect(m.subject).toMatch(/^Preventivo Led Office — /);
     expect(m.subject).toContain('Alfa Soccorsi');
   });
 

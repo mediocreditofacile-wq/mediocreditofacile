@@ -276,7 +276,8 @@ export function corpoMailDistinta(o: {
     <ul style="font-size:14px;margin:0;padding-left:18px">${p.criteri.map((cr) => `<li>${escapeHtml(cr.nome)}: ${escapeHtml(cr.valore)}</li>`).join('')}</ul>` : ''}
     <p style="font-size:13px;color:#787782;margin:12px 0 0">Valutazione indicativa, non è una delibera.</p>`;
 
-  const subject = `${k.nome} — ${agente.nome || agente.email} — ${cliente} — ${eur(c.distinta.totale, 0)}`;
+  // "Preventivo" in testa, come "Pratica" e "Verifica": nella posta i tre tipi si distinguono dall'oggetto
+  const subject = `Preventivo ${k.nome} — ${agente.nome || agente.email} — ${cliente} — ${eur(c.distinta.totale, 0)}`;
   const html = layoutMail('Nuova proposta dal portale', `
       <p style="font-size:14px;color:#787782;margin:0 0 18px">
         Portale ${escapeHtml(k.nome)}${k.demo ? ' (dimostrativo)' : ''} — proposta ${escapeHtml(id)}<br>
