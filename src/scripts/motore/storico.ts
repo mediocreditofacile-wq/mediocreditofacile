@@ -5,9 +5,10 @@ import { etichettaMese } from '../../lib/motore/richieste';
 import { riapriRicerca } from './cliente';
 import { $, api, apiJson, data, esc, euro, stato } from './comune';
 
-export interface DatiStorico { ricerche: any[]; proposte: any[]; pratiche: any[] }
+/** esterne = pratiche lavorate prima del portale: arrivano solo a referente e MCF */
+export interface DatiStorico { ricerche: any[]; proposte: any[]; pratiche: any[]; esterne: any[] }
 
-let ultimo: DatiStorico = { ricerche: [], proposte: [], pratiche: [] };
+let ultimo: DatiStorico = { ricerche: [], proposte: [], pratiche: [], esterne: [] };
 /** Mese delle verifiche mostrate (AAAA-MM) e richieste per mese, dal server */
 let mese = '';
 let mesi: { mese: string; richieste: number }[] = [];
@@ -23,7 +24,7 @@ export function suStorico(fn: (d: DatiStorico) => void) {
 export async function caricaStorico(meseScelto = mese) {
   const { res, corpo } = await apiJson(api('storico', meseScelto ? { mese: meseScelto } : {}));
   if (!res.ok || !corpo?.ok) return;
-  ultimo = { ricerche: corpo.ricerche ?? [], proposte: corpo.proposte ?? [], pratiche: corpo.pratiche ?? [] };
+  ultimo = { ricerche: corpo.ricerche ?? [], proposte: corpo.proposte ?? [], pratiche: corpo.pratiche ?? [], esterne: corpo.esterne ?? [] };
   mese = corpo.mese ?? '';
   mesi = corpo.mesi ?? [];
   conteggio = Boolean(corpo.conteggio);

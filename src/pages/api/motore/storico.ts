@@ -11,8 +11,11 @@ export const prerender = false;
 // L'agente vede il proprio, referente e admin MCF tutto il fornitore: la
 // differenza sta nella clausola WHERE (filtroVisibilita), non nell'interfaccia.
 // L'esito della verifica eventi negativi esce solo per l'admin MCF.
+// Le pratiche lavorate prima del portale (app.pratica_esterna) escono per
+// referente e MCF, il canale solo per MCF (src/lib/motore/pratiche-esterne.ts).
 
 import { query } from '../../../lib/db';
+import { praticheEsternePerRuolo, type RigaEsterna } from '../../../lib/motore/pratiche-esterne';
 import { meseDi, meseRichiesto, riepilogoMesi, verificheContate } from '../../../lib/motore/richieste';
 import { filtroVisibilita, json, sessioneMotore } from '../../../lib/motore/sessione';
 
@@ -23,7 +26,7 @@ export async function GET({ request }: { request: Request }) {
   const admin = e.contesto.ruolo === 'admin';
   const mese = meseRichiesto(new URL(request.url).searchParams.get('mese'));
 
-  const [ricerche, proposte, pratiche] = await Promise.all([
+  const [ricerche, proposte, pratiche, esterne] = await Promise.all([
     query(
       `SELECT x.id, x.piva, x.ragione_sociale, x.creato, x.dati_credito->'dati'->>'rating' AS rating,
               u.name AS agente_nome
@@ -46,6 +49,14 @@ export async function GET({ request }: { request: Request }) {
         WHERE ${where} ORDER BY x.creato DESC LIMIT 500`,
       valori,
     ),
+    // Il commerciale non le vede: la query non parte nemmeno
+    e.vedeTutto
+      ? query<RigaEsterna>(
+          `SELECT id::text AS id, piva, ragione_sociale, canale, to_char(data, 'YYYY-MM-DD') AS data, esito, importo
+             FROM app.pratica_esterna WHERE fornitore_slug = $1 ORDER BY data DESC, id DESC LIMIT 500`,
+          [e.carrozzeria.slug],
+        )
+      : Promise.resolve([] as RigaEsterna[]),
   ]);
 
   const tutte = ricerche as { id: string; piva: string; creato: string }[];
@@ -58,5 +69,6 @@ export async function GET({ request }: { request: Request }) {
     conteggio: e.carrozzeria.prezzoVerifica !== null,
     ricerche: delMese.map((r) => ({ ...r, conta: contate.has(r.id) })),
     proposte, pratiche,
+    esterne: praticheEsternePerRuolo(esterne, e.contesto.ruolo, e.vedeTutto),
   });
 }

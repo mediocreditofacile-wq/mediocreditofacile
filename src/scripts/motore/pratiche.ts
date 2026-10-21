@@ -25,6 +25,8 @@ let bozza = '';
 let file: File[] = [];
 let campoIban: CampoIban | null = null;
 let pratiche: any[] = [];
+/** Pratiche lavorate prima del portale: l'API le manda solo a referente e MCF */
+let esterne: any[] = [];
 
 /** La forma giuridica del Registro, ridotta alle voci della checklist */
 function formaDaScheda(forma: string | null): string {
@@ -242,7 +244,7 @@ function rendiElenco() {
   const admin = stato.ruolo === 'admin';
   const el = $('pratiche-elenco');
   if (!pratiche.length) {
-    el.innerHTML = '<p class="mt-vuoto">Nessuna pratica ancora.</p>';
+    el.innerHTML = '<p class="mt-vuoto">Nessuna pratica caricata dal portale.</p>';
     return;
   }
   const opzioniStato = (corrente: string) =>
@@ -287,6 +289,32 @@ function rendiElenco() {
   }
 }
 
+// La tabella ha solo il giorno: niente ora, che sarebbe inventata
+const giorno = (iso: string) => (iso ?? '').split('-').reverse().join('/');
+const maiuscola = (t: string | null) => (t ? t.charAt(0).toUpperCase() + t.slice(1) : '—');
+
+function rendiEsterne() {
+  const el = $('pratiche-esterne');
+  if (!esterne.length) {
+    el.innerHTML = '';
+    return;
+  }
+  const admin = stato.ruolo === 'admin';
+  el.innerHTML = `
+    <h3 class="mt-h3">Pratiche lavorate prima del portale</h3>
+    <p class="mt-nota">Inviate a MCF prima che il portale esistesse, con l'esito registrato. Sono storico: niente documenti e niente stato da spostare.</p>
+    <div class="mt-scorri"><table class="mt-tabella">
+      <thead><tr><th>Data</th><th>Cliente</th><th class="num">Importo</th><th>Esito</th>${admin ? '<th>Canale</th>' : ''}</tr></thead>
+      <tbody>${esterne.map((p) => `<tr>
+        <td>${esc(giorno(p.data))}</td>
+        <td>${esc(p.ragione_sociale ?? '—')}<br><span class="mt-id">P.IVA ${esc(p.piva)}</span></td>
+        <td class="num">${euro(p.importo)}</td>
+        <td>${esc(maiuscola(p.esito))}</td>
+        ${admin ? `<td>${esc(p.canale ?? 'non indicato')}</td>` : ''}
+      </tr>`).join('')}</tbody>
+    </table></div>`;
+}
+
 async function sposta(ids: string[], nuovo: string) {
   const { res, corpo } = await apiJson('/api/motore/stato', {
     method: 'POST',
@@ -303,9 +331,10 @@ export function montaPratiche() {
     </div>
     <div id="pratica-nuova" hidden></div>
     <h3 class="mt-h3">Le pratiche</h3>
-    <div id="pratiche-elenco"><p class="mt-vuoto">Nessuna pratica ancora.</p></div>`;
+    <div id="pratiche-elenco"><p class="mt-vuoto">Nessuna pratica caricata dal portale.</p></div>
+    <div id="pratiche-esterne"></div>`;
 
-  suStorico((d: DatiStorico) => { pratiche = d.pratiche; rendiElenco(); });
+  suStorico((d: DatiStorico) => { pratiche = d.pratiche; esterne = d.esterne; rendiElenco(); rendiEsterne(); });
   if (stato.settore === 'distinta') montaPraticheDistinta();
   document.addEventListener('mt:nuova-pratica', rendiModulo);
   document.addEventListener('mt:tab', (e) => { if ((e as CustomEvent).detail === 'pratiche') void caricaStorico(); });
