@@ -11,8 +11,9 @@
 // nessun coefficiente, nessuna fascia, nessuna sigla di tabella.
 //
 // Il portale scorre i canali attivi nell'ordine della configurazione (l'ordine e'
-// la priorita') e prende il primo che il cliente e l'importo soddisfano. Un dato
-// del cliente che manca non soddisfa mai una condizione: senza prova non si passa.
+// la priorita') e prende il primo che il cliente, l'importo e (sul settore mezzi)
+// il bene soddisfano. Un dato che manca non soddisfa mai una condizione: senza
+// prova non si passa.
 // Senza un canale che regga il risultato e' null e la proposta non esce; non si
 // ripiega mai su un altro listino.
 
@@ -35,6 +36,18 @@ export interface ClienteInstradamento {
   fatturato: number | null;
   /** Codice ATECO, con o senza punti */
   atecoCodice: string | null;
+}
+
+/**
+ * Quello che del bene serve per scegliere il canale (settore mezzi): `categorie`
+ * sono quelle delle righe della distinta, `targato` vale se anche una sola riga lo e'.
+ * Lo costruisce il chiamante, che conosce il catalogo.
+ */
+export interface BeneInstradamento {
+  /** Codice del venditore che firma l'offerta */
+  venditore: string;
+  categorie: string[];
+  targato: boolean;
 }
 
 export interface RataDurata {
@@ -101,19 +114,39 @@ function reggeIlCliente(c: CanaleConfig, cliente: ClienteInstradamento, beni: nu
 }
 
 /**
+ * Il bene soddisfa le condizioni del canale? Un canale senza condizioni sul bene
+ * lo ignora (Led Office, Duplex...). Con almeno una condizione e senza bene non si
+ * prova niente, e il canale non regge. Una lista di venditori vuota non ne ammette
+ * nessuno; una lista di categorie escluse vuota non esclude niente.
+ */
+function reggeIlBene(c: CanaleConfig, bene: BeneInstradamento | null): boolean {
+  const escluse = c.categorieEscluse ?? [];
+  const condizioni = c.venditori !== undefined || escluse.length > 0 || c.escludiTargati === true;
+  if (!condizioni) return true;
+  if (bene === null) return false;
+
+  if (c.venditori !== undefined && !c.venditori.includes(bene.venditore)) return false;
+  if (bene.categorie.some((categoria) => escluse.includes(categoria))) return false;
+  if (c.escludiTargati === true && bene.targato) return false;
+  return true;
+}
+
+/**
  * Sceglie il canale e calcola le rate. `oggi` serve agli anni di attivita' e si
- * passa dai test; la data e' quella locale.
+ * passa dai test; la data e' quella locale. `bene` serve solo ai canali con
+ * condizioni sul bene (settore mezzi).
  */
 export function instrada(
   canali: CanaleConfig[],
   cliente: ClienteInstradamento,
   beni: number,
   oggi: Date = new Date(),
+  bene: BeneInstradamento | null = null,
 ): Instradamento | null {
   if (!Number.isFinite(beni) || beni <= 0) return null;
 
   for (const c of canali) {
-    if (!c.attivo || !reggeIlCliente(c, cliente, beni, oggi)) continue;
+    if (!c.attivo || !reggeIlCliente(c, cliente, beni, oggi) || !reggeIlBene(c, bene)) continue;
 
     // Una tabella che non esiste fa saltare il canale: niente ripiego su un altro listino
     const tabella = tabellaSeEsiste(c.tabella);

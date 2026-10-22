@@ -11,7 +11,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { getTabella } from '../tabelle-canoni';
 import type { CanaleConfig } from './config-distinta';
-import { DURATA_EVIDENZA, instrada, vistaCommerciale, type ClienteInstradamento } from './instradamento';
+import {
+  DURATA_EVIDENZA, instrada, vistaCommerciale,
+  type BeneInstradamento, type ClienteInstradamento,
+} from './instradamento';
 
 // Grenke non si sceglie mai finche' PIONEER_LETTO e' null. Per provare il canale
 // acceso con una data di lettura si sostituisce solo quella costante, leggendola
@@ -386,5 +389,132 @@ describe('vistaCommerciale', () => {
     expect(json).not.toContain('137750');
     expect(json).not.toContain('144638');
     expect(json).not.toContain('6888');
+  });
+});
+
+// --- il bene: venditore, categoria, targa (settore mezzi) ----------------------
+
+// I canali di Bergamelli (spec, sezione 4): Nol System va su Econocom solo per i
+// clienti grandi e i beni grandi, Manc su Grenke Sputnik escluso il targato e i ponteggi.
+const ECONOCOM_NOLSYSTEM: CanaleConfig = { ...ECONOCOM, venditori: ['nolsystem'] };
+const GRENKE_MANC: CanaleConfig = {
+  canale: 'grenke', attivo: true, tabella: 'sputnik', maggiorazionePerc: 0,
+  venditori: ['manc'], categorieEscluse: ['Ponteggi'], escludiTargati: true,
+};
+const BERGAMELLI: CanaleConfig[] = [ECONOCOM_NOLSYSTEM, GRENKE_MANC];
+
+const gru: BeneInstradamento = { venditore: 'manc', categorie: ['Gru a torre'], targato: false };
+const nolsystem: BeneInstradamento = { venditore: 'nolsystem', categorie: ['Gru a torre'], targato: false };
+
+describe('il bene: Manc su Grenke Sputnik', () => {
+  it('gru non targata a 50.000: Grenke, rate su tutte le durate del listino, nessuna maggiorazione', () => {
+    const r = instrada(BERGAMELLI, piccolo, 50_000, OGGI, gru)!;
+    expect(r).toMatchObject({ canale: 'grenke', beni: 50_000, maggiorazione: 0, imponibile: 50_000, daConfermare: false });
+    // Le durate sono quelle che il listino quota a quell'importo: non un elenco scritto a mano
+    expect(r.rate.map((x) => x.durata)).toEqual(getTabella('sputnik').durateDisponibili(50_000));
+    expect(r.rate[0].durata).toBe(24);
+    expect(r.rate.at(-1)!.durata).toBe(60);
+  });
+
+  it('il canone e\' quello della tabella Sputnik sull\'importo', () => {
+    const r = instrada(BERGAMELLI, piccolo, 50_000, OGGI, gru)!;
+    const t = getTabella('sputnik');
+    for (const { durata, canone } of r.rate) {
+      expect(canone).toBe(Math.round(50_000 * t.coefficiente(50_000, durata)!) / 100);
+    }
+  });
+
+  it('lo stesso bene targato: nessun canale', () => {
+    expect(instrada(BERGAMELLI, piccolo, 50_000, OGGI, { ...gru, targato: true })).toBeNull();
+  });
+
+  it('una riga Ponteggi fra le categorie: nessun canale, anche se le altre sono ammesse', () => {
+    expect(instrada(BERGAMELLI, piccolo, 50_000, OGGI, { ...gru, categorie: ['Ponteggi'] })).toBeNull();
+    expect(instrada(BERGAMELLI, piccolo, 50_000, OGGI, { ...gru, categorie: ['Gru a torre', 'Ponteggi'] })).toBeNull();
+  });
+
+  it('il cliente grande non porta Manc su Econocom: il venditore decide', () => {
+    // Fatturato e importo sarebbero da Econocom, ma i beni di Manc non sono suoi
+    const r = instrada(BERGAMELLI, grande, 200_000, OGGI, gru)!;
+    expect(r).toMatchObject({ canale: 'grenke', daConfermare: false });
+  });
+
+  it('un venditore che nessun canale quota: nessun canale', () => {
+    expect(instrada(BERGAMELLI, piccolo, 50_000, OGGI, { ...gru, venditore: 'altro' })).toBeNull();
+  });
+});
+
+describe('il bene: Nol System su Econocom', () => {
+  it('cliente oltre 5 milioni e 200.000 di beni: Econocom, 36/48/60 mesi, da confermare', () => {
+    const r = instrada(BERGAMELLI, { ...grande, fatturato: 6_000_000 }, 200_000, OGGI, nolsystem)!;
+    expect(r).toMatchObject({ canale: 'econocom', maggiorazione: 0, imponibile: 200_000, daConfermare: true });
+    expect(r.rate).toEqual([
+      { durata: 36, canone: 6_304 },
+      { durata: 48, canone: 4_946 },
+      { durata: 60, canone: 4_152 },
+    ]);
+  });
+
+  it('fatturato esattamente 5.000.000: la soglia e\' "oltre", nessun canale', () => {
+    expect(instrada(BERGAMELLI, { ...grande, fatturato: 5_000_000 }, 200_000, OGGI, nolsystem)).toBeNull();
+    expect(instrada(BERGAMELLI, { ...grande, fatturato: 5_000_001 }, 200_000, OGGI, nolsystem)!.canale).toBe('econocom');
+  });
+
+  it('beni sotto 150.000: nessun canale (Nol System non ha altri noleggi)', () => {
+    expect(instrada(BERGAMELLI, grande, 149_999, OGGI, nolsystem)).toBeNull();
+  });
+
+  it('fatturato sconosciuto: nessun canale', () => {
+    expect(instrada(BERGAMELLI, { ...grande, fatturato: null }, 200_000, OGGI, nolsystem)).toBeNull();
+  });
+});
+
+describe('il bene: i dati che mancano e le liste vuote', () => {
+  it('un canale con condizioni sul bene, e nessun bene: non regge', () => {
+    expect(instrada(BERGAMELLI, piccolo, 50_000, OGGI)).toBeNull();
+    expect(instrada(BERGAMELLI, piccolo, 50_000, OGGI, null)).toBeNull();
+    // Basta una sola delle tre condizioni
+    for (const condizione of [{ venditori: ['manc'] }, { categorieEscluse: ['Ponteggi'] }, { escludiTargati: true }]) {
+      const canale: CanaleConfig = { ...PAGARENT, ...condizione };
+      expect(instrada([canale], piccolo, 50_000, OGGI)).toBeNull();
+      expect(instrada([canale], piccolo, 50_000, OGGI, gru)).toMatchObject({ canale: 'pagarent' });
+    }
+  });
+
+  it('venditori vuoto: il canale non vale per nessun venditore', () => {
+    const canale: CanaleConfig = { ...PAGARENT, venditori: [] };
+    expect(instrada([canale], piccolo, 50_000, OGGI, gru)).toBeNull();
+    expect(instrada([canale], piccolo, 50_000, OGGI)).toBeNull();
+  });
+
+  it('categorieEscluse vuoto: nessuna esclusione', () => {
+    const canale: CanaleConfig = { ...PAGARENT, categorieEscluse: [] };
+    expect(instrada([canale], piccolo, 50_000, OGGI, { ...gru, categorie: ['Ponteggi'] })).toMatchObject({ canale: 'pagarent' });
+    // e non e' una condizione sul bene: senza bene il canale regge come prima
+    expect(instrada([canale], piccolo, 50_000, OGGI)).toMatchObject({ canale: 'pagarent' });
+  });
+
+  it('escludiTargati falso: il targato passa', () => {
+    const canale: CanaleConfig = { ...PAGARENT, escludiTargati: false };
+    expect(instrada([canale], piccolo, 50_000, OGGI, { ...gru, targato: true })).toMatchObject({ canale: 'pagarent' });
+  });
+
+  it('un canale che non regge sul bene lascia la parola al successivo', () => {
+    const conChiusura: CanaleConfig[] = [GRENKE_MANC, PAGARENT];
+    expect(instrada(conChiusura, piccolo, 50_000, OGGI, gru)!.canale).toBe('grenke');
+    expect(instrada(conChiusura, piccolo, 50_000, OGGI, { ...gru, targato: true })).toMatchObject({
+      canale: 'pagarent', maggiorazione: 2_500,
+    });
+  });
+});
+
+describe('il bene: i canali senza condizioni non cambiano', () => {
+  it('Led Office con o senza bene da gli stessi risultati di sempre', () => {
+    for (const [cliente, beni] of [[piccolo, 50_000], [piccolo, 137_750], [grande, 150_000], [grande, 149_999]] as const) {
+      const senza = instrada(LO, cliente, beni, OGGI);
+      expect(instrada(LO, cliente, beni, OGGI, null)).toEqual(senza);
+      expect(instrada(LO, cliente, beni, OGGI, gru)).toEqual(senza);
+      expect(instrada(LO, cliente, beni, OGGI, { ...gru, targato: true })).toEqual(senza);
+    }
   });
 });
