@@ -20,15 +20,19 @@ import {
   type ChecklistConfig,
   type SocietaFornitrice,
 } from './config-distinta';
+import { leggiConfigMezzi, type ConfigMezzi, type MezziBrowser } from './config-mezzi';
 
-/** 'distinta': il commerciale compone una distinta di beni dal catalogo (Led Office) */
-export type Settore = 'fotovoltaico' | 'generico' | 'macchine' | 'distinta';
+/**
+ * 'distinta': il commerciale compone una distinta di beni dal catalogo (Led Office).
+ * 'mezzi': macchine e mezzi d'opera con piu' venditori, noleggio e confronto leasing (Bergamelli)
+ */
+export type Settore = 'fotovoltaico' | 'generico' | 'macchine' | 'distinta' | 'mezzi';
 /**
  * Regole del semaforo: credit policy del tool Marotta, criteri del locatore (Duplex)
  * oppure prefiltro (Led Office: quattro esiti, mai un numero cambiato)
  */
 export type RegoleSemaforo = 'credit-policy' | 'locatore' | 'prefiltro';
-const SETTORI: Settore[] = ['fotovoltaico', 'generico', 'macchine', 'distinta'];
+const SETTORI: Settore[] = ['fotovoltaico', 'generico', 'macchine', 'distinta', 'mezzi'];
 
 export interface Carrozzeria {
   slug: string;
@@ -66,6 +70,12 @@ export interface Carrozzeria {
   checklist: ChecklistConfig | null;
   /** Categorie del catalogo con settori tipici e flag. Null = nessuna */
   categorie: Categoria[] | null;
+  /**
+   * Settore mezzi: venditori, categorie col targato, condizioni del leasing. Null = la
+   * carrozzeria non vende mezzi. Contiene P.IVA, recapiti e spread: mai verso il browser
+   * cosi' com'e' (vedi carrozzeriaPerBrowser).
+   */
+  mezzi: ConfigMezzi | null;
 }
 
 export interface VoceCatalogo {
@@ -110,6 +120,9 @@ export interface RigaCarrozzeria {
   societa_fornitrice?: unknown;
   checklist?: unknown;
   categorie?: unknown;
+  // Come le quattro sopra, dallo SQL 012: la SELECT nomina c.mezzi, quindi lo SQL va
+  // applicato PRIMA di pubblicare questo codice
+  mezzi?: unknown;
 }
 
 const SELECT = `
@@ -117,7 +130,7 @@ const SELECT = `
          f.brand_logo, f.brand_colore, f.brand_accento, f.attivo,
          c.settore, c.etichetta_bene, c.partner_leasing, c.soglia_leasing,
          c.tetto_mese_euro, c.demo, c.documenti_extra, c.tabella_alternativa, c.regole_semaforo, c.leasing,
-         c.prezzo_verifica, c.canali, c.societa_fornitrice, c.checklist, c.categorie
+         c.prezzo_verifica, c.canali, c.societa_fornitrice, c.checklist, c.categorie, c.mezzi
     FROM app.fornitore f
     JOIN app.carrozzeria c ON c.slug = f.slug`;
 
@@ -148,6 +161,7 @@ export function carrozzeriaDaRiga(r: RigaCarrozzeria): Carrozzeria {
     societaFornitrice: leggiSocieta(r.societa_fornitrice),
     checklist: leggiChecklist(r.checklist),
     categorie: leggiCategorie(r.categorie),
+    mezzi: leggiConfigMezzi(r.mezzi),
   };
 }
 
@@ -165,9 +179,11 @@ export async function elencoCarrozzerie(): Promise<Carrozzeria[]> {
 /**
  * La parte della carrozzeria che il browser puo' vedere: nome, marchio, settore e,
  * sul settore distinta, le categorie del catalogo coi loro due flag e la checklist
- * della pratica. Restano qui il listino del noleggio, il partner del leasing, i
- * canali con le maggiorazioni, la societa' fornitrice e i settori tipici delle
- * categorie (la regola 6 la applica il server): sono la ratio interna di MCF.
+ * della pratica; sul settore mezzi i venditori (codice, ragione sociale, categorie), le
+ * categorie col targato, l'anticipo e se mostrare i nomi dei partner. Restano qui il
+ * listino del noleggio, il partner del leasing, i canali con le maggiorazioni, la
+ * societa' fornitrice, i settori tipici delle categorie (la regola 6 la applica il
+ * server) e, dei mezzi, partite IVA, recapiti e spread: sono la ratio interna di MCF.
  * Ogni campo e' copiato a mano, cosi' un campo nuovo della carrozzeria non esce
  * da solo verso il browser.
  */
@@ -196,6 +212,21 @@ export function carrozzeriaPerBrowser(c: Carrozzeria) {
           formati: [...c.checklist.formati],
         }
       : null,
+    mezzi: c.mezzi ? mezziPerBrowser(c.mezzi) : null,
+  };
+}
+
+/** Il blocco mezzi per il browser, copiato campo per campo: niente P.IVA, recapiti, partner e spread */
+function mezziPerBrowser(m: ConfigMezzi): MezziBrowser {
+  return {
+    venditori: m.venditori.map(({ codice, ragioneSociale, categorie }) => ({
+      codice,
+      ragioneSociale,
+      categorie: [...categorie],
+    })),
+    categorie: m.categorie.map(({ nome, targato }) => ({ nome, targato })),
+    anticipoPerc: m.leasing.anticipoPerc,
+    mostraNomiPartner: m.mostraNomiPartner,
   };
 }
 

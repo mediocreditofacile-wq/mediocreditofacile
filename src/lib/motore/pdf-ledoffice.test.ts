@@ -165,7 +165,7 @@ const LO_K: Carrozzeria = {
   settore: 'distinta', etichettaBene: 'Bene', partnerLeasing: 'alba', sogliaLeasing: 0,
   tettoMeseEuro: 100, demo: false, documentiExtra: [], attivo: true,
   tabellaAlternativa: null, regoleSemaforo: 'prefiltro', leasing: false, prezzoVerifica: 5,
-  canali: LO, societaFornitrice: EMME2, checklist: null, categorie: CATEGORIE,
+  canali: LO, societaFornitrice: EMME2, checklist: null, categorie: CATEGORIE, mezzi: null,
 };
 
 const SENZA_LOGHI = { fornitrice: null, marchio: null };

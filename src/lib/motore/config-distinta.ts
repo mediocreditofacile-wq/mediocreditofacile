@@ -33,6 +33,13 @@ export interface CanaleConfig {
   settoriEsclusi?: string[];
   /** Sopra questo importo la proposta del canale esce come provvisoria */
   sogliaProvvisorio?: number;
+  // Condizioni sul bene (settore mezzi): il canale vale solo per certi beni
+  /** Codici dei venditori i cui beni il canale quota. Assente = tutti */
+  venditori?: string[];
+  /** Categorie del catalogo che il canale non quota */
+  categorieEscluse?: string[];
+  /** Il canale non quota i mezzi targati */
+  escludiTargati?: boolean;
 }
 
 /** La societa' che firma i documenti verso il cliente */
@@ -86,17 +93,17 @@ const MAGGIORAZIONE_MAX = 50;
 // --- lettori elementari -----------------------------------------------------
 // Ognuno ritorna il valore letto oppure null.
 
-const oggetto = (v: unknown): Record<string, unknown> | null =>
+export const oggetto = (v: unknown): Record<string, unknown> | null =>
   v !== null && typeof v === 'object' && !Array.isArray(v) ? (v as Record<string, unknown>) : null;
 
-const testo = (v: unknown): string | null => (typeof v === 'string' && v.trim() !== '' ? v.trim() : null);
+export const testo = (v: unknown): string | null => (typeof v === 'string' && v.trim() !== '' ? v.trim() : null);
 
-const booleano = (v: unknown): boolean | null => (typeof v === 'boolean' ? v : null);
+export const booleano = (v: unknown): boolean | null => (typeof v === 'boolean' ? v : null);
 
 const numeroNonNegativo = (v: unknown): number | null =>
   typeof v === 'number' && Number.isFinite(v) && v >= 0 ? v : null;
 
-function elencoTesti(v: unknown): string[] | null {
+export function elencoTesti(v: unknown): string[] | null {
   if (!Array.isArray(v)) return null;
   const letti = v.map(testo);
   return letti.every((t): t is string => t !== null) ? letti : null;
@@ -116,7 +123,7 @@ function facoltativo<T>(v: unknown, leggi: (x: unknown) => T | null): { ok: bool
   return letto === null ? { ok: false } : { ok: true, valore: letto };
 }
 
-const nonNull = <T>(x: T | null): x is T => x !== null;
+export const nonNull = <T>(x: T | null): x is T => x !== null;
 
 // --- canali -----------------------------------------------------------------
 
@@ -128,6 +135,9 @@ const CONDIZIONI_CANALE: readonly [keyof CanaleConfig, (x: unknown) => unknown][
   ['anniMin', numeroNonNegativo],
   ['settoriEsclusi', prefissiAteco],
   ['sogliaProvvisorio', numeroNonNegativo],
+  ['venditori', elencoTesti],
+  ['categorieEscluse', elencoTesti],
+  ['escludiTargati', booleano],
 ];
 
 function leggiCanale(x: unknown): CanaleConfig | null {

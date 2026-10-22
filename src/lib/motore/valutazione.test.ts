@@ -15,7 +15,7 @@ const K: Carrozzeria = {
   brand: { logo: null, colore: null, accento: null }, settore: 'generico', etichettaBene: 'Bene',
   partnerLeasing: 'alba', sogliaLeasing: 0, tettoMeseEuro: 30, demo: false, documentiExtra: [], attivo: true,
   tabellaAlternativa: null, regoleSemaforo: 'credit-policy', leasing: true, prezzoVerifica: null,
-  canali: null, societaFornitrice: null, checklist: null, categorie: null,
+  canali: null, societaFornitrice: null, checklist: null, categorie: null, mezzi: null,
 };
 const MACCHINE: Carrozzeria = { ...K, settore: 'macchine' };
 const LOCATORE: Carrozzeria = { ...K, settore: 'macchine', regoleSemaforo: 'locatore', leasing: false };

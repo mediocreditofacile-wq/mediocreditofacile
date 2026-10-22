@@ -41,6 +41,24 @@ describe('leggiCanali', () => {
     });
   });
 
+  it('legge le condizioni sul bene: venditori, categorie escluse, mezzi targati', () => {
+    const canale = {
+      canale: 'grenke', attivo: true, tabella: 'sputnik', maggiorazionePerc: 0,
+      venditori: ['manc'], categorieEscluse: ['Ponteggi'], escludiTargati: true,
+    };
+    expect(leggiCanali([canale])).toEqual([canale]);
+    // escludiTargati: false e' una condizione letta, non un'assenza
+    expect(leggiCanali([{ ...canale, escludiTargati: false }])![0].escludiTargati).toBe(false);
+  });
+
+  it('le condizioni sul bene scritte male fanno scartare il canale', () => {
+    const base = { canale: 'grenke', attivo: true, tabella: 'sputnik', maggiorazionePerc: 0 };
+    expect(leggiCanali([{ ...base, venditori: 'manc' }])).toEqual([]);
+    expect(leggiCanali([{ ...base, venditori: ['manc', 7] }])).toEqual([]);
+    expect(leggiCanali([{ ...base, categorieEscluse: 'Ponteggi' }])).toEqual([]);
+    expect(leggiCanali([{ ...base, escludiTargati: 'si' }])).toEqual([]);
+  });
+
   it('una condizione scritta male fa scartare il canale: non lo si allarga di nascosto', () => {
     const base = { canale: 'econocom', attivo: true, tabella: 'econocom-pa', maggiorazionePerc: 0 };
     expect(leggiCanali([{ ...base, fatturatoMin: 'tanto' }])).toEqual([]);

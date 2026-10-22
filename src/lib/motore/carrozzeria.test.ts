@@ -171,6 +171,80 @@ describe('la carrozzeria per il browser', () => {
     expect(carrozzeriaPerBrowser(c)).toEqual({
       slug: 'x', nome: 'X', citta: null, settore: 'generico', etichettaBene: 'Bene', sogliaLeasing: 0, leasing: true,
       demo: false, colore: '#123456', accento: '#abcdef', documentiExtra: ['Offerta'], categorie: null, checklist: null,
+      mezzi: null,
     });
+  });
+});
+
+// La configurazione mezzi come la scrive il seed: P.IVA dei venditori, recapiti e
+// spread dei partner stanno in app.carrozzeria.mezzi e non devono mai uscire
+const MEZZI_JSON = {
+  venditori: [
+    {
+      codice: 'manc', ragioneSociale: 'Manc S.r.l.', piva: '05400750260', indirizzo: 'Via Roma 1, Treviso',
+      telefono: '0422 000000', email: 'info@manc.example', pec: 'manc@pec.example', categorie: ['Autogru'],
+    },
+    {
+      codice: 'nolsystem', ragioneSociale: 'Nol System S.r.l.', piva: '01234567897', indirizzo: '', telefono: '',
+      email: '', pec: '', categorie: [],
+    },
+  ],
+  categorie: [
+    { nome: 'Autogru', targato: true },
+    { nome: 'Carrelli elevatori', targato: null },
+  ],
+  leasing: {
+    anticipoPerc: 10,
+    partner: [
+      { partner: 'sella', spreadFinoA48: 2.25, spreadDa60: 2.25 },
+      { partner: 'alba', spreadFinoA48: 3.1, spreadDa60: 2.5 },
+    ],
+  },
+  mostraNomiPartner: true,
+};
+
+describe('settore mezzi', () => {
+  it('una riga senza la colonna mezzi la da a null: le carrozzerie esistenti non cambiano', () => {
+    expect(carrozzeriaDaRiga(RIGA).mezzi).toBeNull();
+    expect(carrozzeriaDaRiga({ ...RIGA, mezzi: null }).mezzi).toBeNull();
+  });
+
+  it('riporta settore mezzi e legge la configurazione dal JSON della riga', () => {
+    const c = carrozzeriaDaRiga({ ...RIGA, settore: 'mezzi', mezzi: MEZZI_JSON });
+    expect(c.settore).toBe('mezzi');
+    expect(c.mezzi).toEqual(MEZZI_JSON);
+  });
+
+  it('un JSON mezzi che non si legge torna a null', () => {
+    expect(carrozzeriaDaRiga({ ...RIGA, settore: 'mezzi', mezzi: 'boh' }).mezzi).toBeNull();
+    expect(carrozzeriaDaRiga({ ...RIGA, settore: 'mezzi', mezzi: { ...MEZZI_JSON, venditori: [] } }).mezzi).toBeNull();
+  });
+
+  it('la forma per il browser porta venditori (codice, ragione sociale, categorie), categorie, anticipo e nomi', () => {
+    const b = carrozzeriaPerBrowser(carrozzeriaDaRiga({ ...RIGA, settore: 'mezzi', mezzi: MEZZI_JSON }));
+    expect(b.settore).toBe('mezzi');
+    expect(b.mezzi).toEqual({
+      venditori: [
+        { codice: 'manc', ragioneSociale: 'Manc S.r.l.', categorie: ['Autogru'] },
+        { codice: 'nolsystem', ragioneSociale: 'Nol System S.r.l.', categorie: [] },
+      ],
+      categorie: [
+        { nome: 'Autogru', targato: true },
+        { nome: 'Carrelli elevatori', targato: null },
+      ],
+      anticipoPerc: 10,
+      mostraNomiPartner: true,
+    });
+  });
+
+  it('la forma per il browser non porta partite IVA, recapiti, spread ne\' partner', () => {
+    const testo = JSON.stringify(carrozzeriaPerBrowser(carrozzeriaDaRiga({ ...RIGA, settore: 'mezzi', mezzi: MEZZI_JSON })));
+    // 'leasing' non si cerca: il flag booleano della carrozzeria esce da sempre
+    for (const vietato of [
+      'piva', 'spread', '05400750260', '01234567897', 'info@manc', 'pec', 'telefono', 'indirizzo', 'Via Roma',
+      'sella', 'alba',
+    ]) {
+      expect(testo).not.toContain(vietato);
+    }
   });
 });
