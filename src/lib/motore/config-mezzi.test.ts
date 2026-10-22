@@ -6,6 +6,7 @@
 
 import { describe, expect, it } from 'vitest';
 import { ALBA, CREDEM, SELLA } from '../../data/leasing';
+import { pivaValida } from '../piva';
 import {
   ANTICIPO_MAX_MEZZI,
   condizioneDaSpread,
@@ -98,49 +99,59 @@ describe('leggiConfigMezzi: contenitore', () => {
   });
 });
 
-describe('leggiConfigMezzi: un venditore illeggibile si scarta', () => {
-  // Un terzo venditore, non di default, che porta una categoria: se si scarta lui
-  // la configurazione resta in piedi coi due di prima
+describe('leggiConfigMezzi: un venditore illeggibile fa cadere la configurazione', () => {
+  // Il venditore decide la societa' che firma le offerte: uno illeggibile non si scarta,
+  // altrimenti le sue categorie passerebbero in silenzio al venditore di default e
+  // l'offerta uscirebbe con la ragione sociale e la P.IVA di un altro
   const EXTRA = { ...NOLSYSTEM, codice: 'extra', piva: '09876543217', categorie: ['Carrelli elevatori'] };
-  const codici = (v: unknown) => leggiConfigMezzi(v)?.venditori.map((x) => x.codice);
   const con3 = (ritocco: Record<string, unknown>) => con((c) => c.venditori.push({ ...EXTRA, ...ritocco }));
 
-  it('il terzo venditore intatto resta (prova del banco)', () => {
-    expect(codici(con3({}))).toEqual(['manc', 'nolsystem', 'extra']);
+  it('il terzo venditore intatto si legge (prova del banco)', () => {
+    expect(leggiConfigMezzi(con3({}))?.venditori.map((x) => x.codice)).toEqual(['manc', 'nolsystem', 'extra']);
   });
 
-  it.each(['Manc', 'm', 'a'.repeat(31), 'no_sys', 'con spazio', ''])('codice "%s" fuori da [a-z0-9-]{2,30}', (codice) => {
-    expect(codici(con3({ codice }))).toEqual(['manc', 'nolsystem']);
+  it('partita IVA di Manc scritta male: niente configurazione, le sue gru non passano a Nol System', () => {
+    // Un'ultima cifra sbagliata: sarebbe bastato scartare Manc per far firmare le autogru a Nol System
+    expect(pivaValida('05400750261')).toBe(false);
+    expect(leggiConfigMezzi(con((c) => (c.venditori[0].piva = '05400750261')))).toBeNull();
   });
 
-  it('codice doppio: resta il primo, il secondo si scarta', () => {
-    const c = leggiConfigMezzi(con3({ codice: 'manc' }))!;
-    expect(c.venditori.map((v) => v.codice)).toEqual(['manc', 'nolsystem']);
-    expect(c.venditori[0].categorie).toEqual(['Gru a torre', 'Autogru']);
+  it.each(['Manc', 'm', 'a'.repeat(31), 'no_sys', 'con spazio', ' extra', ''])('codice "%s" fuori da [a-z0-9-]{2,30}', (codice) => {
+    expect(leggiConfigMezzi(con3({ codice }))).toBeNull();
+  });
+
+  it('codice doppio da null: due venditori non possono avere lo stesso codice', () => {
+    expect(leggiConfigMezzi(con3({ codice: 'manc' }))).toBeNull();
+    expect(leggiConfigMezzi(con3({ codice: 'nolsystem', categorie: [] }))).toBeNull();
   });
 
   it.each(['12345678901', '5400750260', 'abcdefghilm', '', 5400750260])('partita IVA %j che non passa pivaValida()', (piva) => {
-    expect(codici(con3({ piva }))).toEqual(['manc', 'nolsystem']);
+    expect(leggiConfigMezzi(con3({ piva }))).toBeNull();
   });
 
   it('ragione sociale vuota o mancante', () => {
-    expect(codici(con3({ ragioneSociale: '  ' }))).toEqual(['manc', 'nolsystem']);
-    expect(codici(con3({ ragioneSociale: undefined }))).toEqual(['manc', 'nolsystem']);
+    expect(leggiConfigMezzi(con3({ ragioneSociale: '  ' }))).toBeNull();
+    expect(leggiConfigMezzi(con3({ ragioneSociale: undefined }))).toBeNull();
   });
 
   it('recapito che non e\' una stringa (puo\' essere vuota, non di un altro tipo)', () => {
     for (const campo of ['indirizzo', 'telefono', 'email', 'pec']) {
-      expect(codici(con3({ [campo]: 12 })), campo).toEqual(['manc', 'nolsystem']);
-      expect(codici(con3({ [campo]: undefined })), campo).toEqual(['manc', 'nolsystem']);
+      expect(leggiConfigMezzi(con3({ [campo]: 12 })), campo).toBeNull();
+      expect(leggiConfigMezzi(con3({ [campo]: undefined })), campo).toBeNull();
     }
   });
 
   it('categorie del venditore che non e\' un elenco di testi', () => {
-    expect(codici(con3({ categorie: 'Carrelli elevatori' }))).toEqual(['manc', 'nolsystem']);
-    expect(codici(con3({ categorie: ['Carrelli elevatori', 3] }))).toEqual(['manc', 'nolsystem']);
+    expect(leggiConfigMezzi(con3({ categorie: 'Carrelli elevatori' }))).toBeNull();
+    expect(leggiConfigMezzi(con3({ categorie: ['Carrelli elevatori', 3] }))).toBeNull();
   });
 
-  it('se si scarta il venditore di default non ne resta nessuno: tutta la configurazione da null', () => {
+  it('un elemento che non e\' nemmeno un oggetto fa cadere la configurazione', () => {
+    expect(leggiConfigMezzi(con((c) => c.venditori.push('manc' as never)))).toBeNull();
+    expect(leggiConfigMezzi(con((c) => c.venditori.push(null as never)))).toBeNull();
+  });
+
+  it('vale anche per il venditore di default', () => {
     expect(leggiConfigMezzi(con((c) => (c.venditori[1].piva = '12345678901')))).toBeNull();
   });
 });

@@ -8,10 +8,14 @@
 // spread finiscono nel bundle. I valori stanno in app.carrozzeria.mezzi come jsonb
 // scritto dal Pannello MCF o dal seed, con le chiavi in camelCase come nei tipi.
 //
-// Regola di lettura, quella di config-distinta.ts: un valore che non si legge si
-// scarta, non si indovina. Un venditore o un partner scritto male esce dall'elenco;
-// un contenitore che non regge (nessun venditore di default, una categoria assegnata
-// due volte, un anticipo fuori scala) da' null e la carrozzeria non parte.
+// Regola di lettura, quella di config-distinta.ts: un valore che non si legge non si
+// indovina. Un partner del leasing o una categoria scritti male escono dall'elenco.
+// Un venditore illeggibile (codice sbagliato o doppio, P.IVA che non torna, campo
+// mancante) NON si scarta: fa cadere l'intera configurazione, perche' il venditore
+// decide la societa' che firma le offerte al cliente e, scartandolo, le sue categorie
+// passerebbero in silenzio al venditore di default. Lo stesso per un contenitore che
+// non regge (nessun venditore di default, una categoria assegnata due volte, un
+// anticipo fuori scala): null e la carrozzeria non parte.
 
 import {
   getCondizioniPerDurata,
@@ -158,7 +162,10 @@ export function leggiConfigMezzi(v: unknown): ConfigMezzi | null {
   const leasing = leggiLeasing(o.leasing);
   if (!leasing) return null;
 
-  const venditori = senzaDoppi(o.venditori.map(leggiVenditore).filter(nonNull), (x) => x.codice);
+  // Nessun venditore si scarta: uno illeggibile o con il codice di un altro da' null
+  const venditori = o.venditori.map(leggiVenditore);
+  if (!venditori.every(nonNull)) return null;
+  if (new Set(venditori.map((x) => x.codice)).size !== venditori.length) return null;
   const categorie = senzaDoppi(o.categorie.map(leggiCategoria).filter(nonNull), (c) => c.nome);
 
   // Il venditore di tutto il resto deve esistere ed essere uno: ogni bene ha un solo firmatario
