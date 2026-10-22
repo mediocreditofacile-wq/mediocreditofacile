@@ -18,7 +18,7 @@
 // server-side e' l'unico modo perche' la scheda a schermo e il PDF dicano la
 // stessa cosa anche fra sei mesi.
 
-import { calcolaRataEconocomPA, type RisultatoEconocomPA } from './econocom-pa';
+import { calcolaRataEconocom, type RisultatoEconocom } from './econocom';
 
 /** Sopra questo importo di operazione si va su Econocom, sempre. E' il tetto Grenke. */
 export const SOGLIA_ECONOCOM = 200_000;
@@ -75,7 +75,7 @@ export interface EsitoCanale {
     superata: boolean | null;
   };
   /** Solo sul canale Econocom */
-  rataIndicativa: RisultatoEconocomPA | null;
+  rataIndicativa: RisultatoEconocom | null;
   avvisi: string[];
   /** Cosa serve per portare avanti la pratica sul canale scelto */
   prossimiPassi: string[];
@@ -145,9 +145,9 @@ export function valutaCanaleEstero(
     if (area === 'extra') {
       avvisi.push('Controparte fuori area Schengen: il canale resta Econocom, ma va verificato che operi in quel paese.');
     }
-    const rata = calcolaRataEconocomPA(importo);
+    const rata = calcolaRataEconocom(importo, 60);
     if (rata) {
-      avvisi.push('La rata usa i coefficienti Econocom a 60 mesi nati per la Pubblica Amministrazione: e\' l\'unica tabella che abbiamo, quindi vale come ordine di grandezza e non come quotazione.');
+      avvisi.push('La rata usa il coefficiente Econocom a 60 mesi: vale come ordine di grandezza e non come quotazione, perche\' Econocom quota caso per caso.');
     }
     return {
       canale: 'econocom',

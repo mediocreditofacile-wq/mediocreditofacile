@@ -141,15 +141,18 @@ describe('Pagarent, il canale di chiusura', () => {
 });
 
 describe('Econocom, il canale dei clienti grandi', () => {
-  it('cliente oltre 5 milioni e beni da 150.000: 60 mesi, nessuna maggiorazione', () => {
+  it('cliente oltre 5 milioni e beni da 150.000: 36, 48 e 60 mesi, nessuna maggiorazione', () => {
     const r = instrada(LO, grande, 150_000, OGGI)!;
     expect(r).toMatchObject({
       canale: 'econocom', beni: 150_000, maggiorazione: 0, imponibile: 150_000,
       daConfermare: true, richiedeProvvisorio: false,
     });
-    expect(r.rate.map((x) => x.durata)).toEqual([60]);
-    // 150.000 x 2,02% = 3.030
-    expect(r.rate[0].canone).toBe(3_030);
+    // Coefficienti del 22/10/2026: 150.000 x 3,152% / 2,473% / 2,076%
+    expect(r.rate).toEqual([
+      { durata: 36, canone: 4_728 },
+      { durata: 48, canone: 3_709.5 },
+      { durata: 60, canone: 3_114 },
+    ]);
   });
 
   it('cliente grande sotto 150.000: Pagarent col 5%', () => {

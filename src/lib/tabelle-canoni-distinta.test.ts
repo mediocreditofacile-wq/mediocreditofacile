@@ -1,12 +1,12 @@
 // I due listini che il portale Led Office aggiunge al registro: Pioneer (beni
-// strumentali, fino a 100.000 euro) ed Econocom PA (beni da 150.000, solo 60 mesi).
+// strumentali, fino a 100.000 euro) ed Econocom (beni da 150.000, 36-48-60 mesi).
 // Nessun coefficiente nuovo: i numeri vengono da src/data/grenke.ts e da
-// src/data/econocom-pa.ts, e questi test lo verificano.
+// src/data/econocom.ts, e questi test lo verificano.
 
 import { describe, expect, it } from 'vitest';
-import { ECONOCOM_PA_COEFFICIENTI_60M } from '../data/econocom-pa';
+import { ECONOCOM_COEFFICIENTI } from '../data/econocom';
 import { PIONEER_COEFFS, PIONEER_LETTO, getPioneerCoeff } from '../data/grenke';
-import { TABELLA_ECONOCOM_PA, TABELLA_PIONEER, getTabella, tabellaSeEsiste } from './tabelle-canoni';
+import { TABELLA_ECONOCOM, TABELLA_PIONEER, getTabella, tabellaSeEsiste } from './tabelle-canoni';
 
 describe('listino Pioneer sul motore', () => {
   it('pioneer: coefficienti di PIONEER_COEFFS, durate 24-60 senza 30, fino a 100.000', () => {
@@ -57,65 +57,65 @@ describe('listino Pioneer sul motore', () => {
   });
 });
 
-describe('listino Econocom PA sul motore', () => {
-  it('econocom-pa: solo 60 mesi, solo da 150.000, coefficiente in percento', () => {
-    expect(TABELLA_ECONOCOM_PA.durate).toEqual([60]);
-    expect(TABELLA_ECONOCOM_PA.quotabile(149_999)).toBe(false);
-    expect(TABELLA_ECONOCOM_PA.coefficiente(150_000, 60)).toBeCloseTo(2.02, 10);
-    expect(TABELLA_ECONOCOM_PA.coefficiente(200_000, 48)).toBeNull();
+describe('listino Econocom sul motore', () => {
+  it('36, 48 e 60 mesi, solo da 150.000, coefficiente in percento', () => {
+    expect(TABELLA_ECONOCOM.durate).toEqual([36, 48, 60]);
+    expect(TABELLA_ECONOCOM.quotabile(149_999)).toBe(false);
+    expect(TABELLA_ECONOCOM.coefficiente(150_000, 36)).toBeCloseTo(3.152, 10);
+    expect(TABELLA_ECONOCOM.coefficiente(150_000, 48)).toBeCloseTo(2.473, 10);
+    expect(TABELLA_ECONOCOM.coefficiente(150_000, 60)).toBeCloseTo(2.076, 10);
+    expect(TABELLA_ECONOCOM.coefficiente(200_000, 24)).toBeNull();
   });
 
-  it('i coefficienti sono quelli di ECONOCOM_PA_COEFFICIENTI_60M, per fascia', () => {
-    for (const f of ECONOCOM_PA_COEFFICIENTI_60M) {
-      expect(TABELLA_ECONOCOM_PA.coefficiente(f.da, 60)).toBeCloseTo(f.coefficiente * 100, 10);
+  it('i coefficienti sono quelli di ECONOCOM_COEFFICIENTI, uguali su tutti gli importi', () => {
+    for (const [durata, c] of Object.entries(ECONOCOM_COEFFICIENTI)) {
+      for (const importo of [150_000, 299_999, 300_000, 900_000, 10_000_000]) {
+        expect(TABELLA_ECONOCOM.coefficiente(importo, Number(durata))).toBeCloseTo(c * 100, 10);
+      }
     }
-    // 299.999 sta ancora nella prima fascia, 300.000 apre la seconda
-    expect(TABELLA_ECONOCOM_PA.coefficiente(299_999, 60)).toBeCloseTo(2.02, 10);
-    expect(TABELLA_ECONOCOM_PA.coefficiente(300_000, 60)).toBeCloseTo(2.0, 10);
-    expect(TABELLA_ECONOCOM_PA.coefficiente(900_000, 60)).toBeCloseTo(1.97, 10);
   });
 
   it('da 150.000 fino a 10 milioni, riscatto non mostrato', () => {
-    expect(TABELLA_ECONOCOM_PA.importoMin).toBe(150_000);
-    expect(TABELLA_ECONOCOM_PA.importoMax).toBe(10_000_000);
-    expect(TABELLA_ECONOCOM_PA.quotabile(150_000)).toBe(true);
-    expect(TABELLA_ECONOCOM_PA.quotabile(10_000_000)).toBe(true);
-    expect(TABELLA_ECONOCOM_PA.quotabile(10_000_001)).toBe(false);
-    expect(TABELLA_ECONOCOM_PA.coefficiente(10_000_001, 60)).toBeNull();
-    expect(TABELLA_ECONOCOM_PA.riscatto).toEqual({});
+    expect(TABELLA_ECONOCOM.importoMin).toBe(150_000);
+    expect(TABELLA_ECONOCOM.importoMax).toBe(10_000_000);
+    expect(TABELLA_ECONOCOM.quotabile(150_000)).toBe(true);
+    expect(TABELLA_ECONOCOM.quotabile(10_000_000)).toBe(true);
+    expect(TABELLA_ECONOCOM.quotabile(10_000_001)).toBe(false);
+    expect(TABELLA_ECONOCOM.coefficiente(10_000_001, 60)).toBeNull();
+    expect(TABELLA_ECONOCOM.riscatto).toEqual({});
   });
 
-  it('le durate disponibili sono i 60 mesi, e solo sopra i 150.000', () => {
-    expect(TABELLA_ECONOCOM_PA.durateDisponibili(400_000)).toEqual([60]);
-    expect(TABELLA_ECONOCOM_PA.durateDisponibili(149_999)).toEqual([]);
+  it('le durate disponibili sono 36, 48 e 60 mesi, e solo sopra i 150.000', () => {
+    expect(TABELLA_ECONOCOM.durateDisponibili(400_000)).toEqual([36, 48, 60]);
+    expect(TABELLA_ECONOCOM.durateDisponibili(149_999)).toEqual([]);
   });
 
   it('dal canone al prezzo: ritrova l\'importo e rifiuta durate e canoni fuori tabella', () => {
-    const canone = 400_000 * 0.02;
-    expect(TABELLA_ECONOCOM_PA.prezzoDaCanone(canone, 60)).toBeCloseTo(400_000, 6);
-    expect(TABELLA_ECONOCOM_PA.prezzoDaCanone(canone, 48)).toBeNull();
-    expect(TABELLA_ECONOCOM_PA.prezzoDaCanone(0, 60)).toBeNull();
-    // il canone di un bene da 100.000 euro, sotto la soglia: nessuna fascia lo regge
-    expect(TABELLA_ECONOCOM_PA.prezzoDaCanone(2_000, 60)).toBeNull();
+    expect(TABELLA_ECONOCOM.prezzoDaCanone(400_000 * 0.02076, 60)).toBeCloseTo(400_000, 6);
+    expect(TABELLA_ECONOCOM.prezzoDaCanone(400_000 * 0.03152, 36)).toBeCloseTo(400_000, 6);
+    expect(TABELLA_ECONOCOM.prezzoDaCanone(8_000, 24)).toBeNull();
+    expect(TABELLA_ECONOCOM.prezzoDaCanone(0, 60)).toBeNull();
+    // il canone di un bene da 100.000 euro, sotto la soglia: la tabella non lo regge
+    expect(TABELLA_ECONOCOM.prezzoDaCanone(2_000, 60)).toBeNull();
   });
 });
 
 describe('le due tabelle nel registro', () => {
   it('le note non nominano nessun operatore', () => {
-    for (const t of [TABELLA_PIONEER, TABELLA_ECONOCOM_PA]) {
+    for (const t of [TABELLA_PIONEER, TABELLA_ECONOCOM]) {
       expect(t.nota ?? '').not.toMatch(/grenke|econocom|pagarent|rete ?rent/i);
     }
   });
 
   it('le note dicono le condizioni da dare al cliente', () => {
     expect(TABELLA_PIONEER.nota).toBe('Canone mensile. Assicurazione obbligatoria, non compresa nel canone.');
-    expect(TABELLA_ECONOCOM_PA.nota).toBe('Canone mensile indicativo, da confermare. Condizioni definite caso per caso.');
+    expect(TABELLA_ECONOCOM.nota).toBe('Canone mensile indicativo, da confermare. Condizioni definite caso per caso.');
   });
 
   it('getTabella risolve i due id nuovi', () => {
     expect(getTabella('pioneer').id).toBe('pioneer');
     expect(getTabella('econocom-pa').id).toBe('econocom-pa');
     expect(tabellaSeEsiste('pioneer')).toBe(TABELLA_PIONEER);
-    expect(tabellaSeEsiste('econocom-pa')).toBe(TABELLA_ECONOCOM_PA);
+    expect(tabellaSeEsiste('econocom-pa')).toBe(TABELLA_ECONOCOM);
   });
 });

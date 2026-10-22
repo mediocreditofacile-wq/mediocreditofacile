@@ -270,12 +270,12 @@ describe('distintaPerSchermo', () => {
     expect(s).toMatchObject({ semaforo: 'verde', bloccata: true, motivoBlocco: 'nessun_canale', totaleBeni: 253_460, rate: [] });
   });
 
-  it('cliente oltre 5 milioni con beni da 150.000: Econocom, 60 mesi da confermare, senza nomi', () => {
+  it('cliente oltre 5 milioni con beni da 150.000: Econocom da 36 a 60 mesi da confermare, senza nomi', () => {
     // 28 monitor: 154.280 di beni. Il fatturato e' quello della ricerca salvata
     const c = calcolo({ ...CORPO, righe: [{ codice: 'MON-86', quantita: 28 }] }, ricerca({}, { fatturato: 6_000_000 }));
     expect(c.instradamento).toMatchObject({ canale: 'econocom', maggiorazione: 0, imponibile: 154_280 });
     const s = distintaPerSchermo(c);
-    expect(s.rate!.map((r) => r.durata)).toEqual([60]);
+    expect(s.rate!.map((r) => r.durata)).toEqual([36, 48, 60]);
     expect(s).toMatchObject({ daConfermare: true, durataEvidenza: 60, bloccata: false });
     const testo = JSON.stringify(s).toLowerCase();
     for (const vietato of VIETATE) expect(testo).not.toContain(vietato);

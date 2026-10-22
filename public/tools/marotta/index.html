@@ -1006,7 +1006,7 @@
             </thead>
             <tbody id="esteroSchengenBody"></tbody>
           </table>
-          <div class="note-small">Grenke opera dove è presente con propria sede, quindi in area Schengen e senza rischio cambio, con limite di €200.000 per operazione. Sopra quella soglia si passa a Econocom oppure al finanziamento in cui la proprietà del bene resta al cliente, il fornitore viene pagato subito e il cliente rimborsa in 60 mesi. Coefficienti Econocom 60 mesi da tabella Luca Silvestrin del 26/05/2026: rata indicativa, l'operazione viene valutata caso per caso.</div>
+          <div class="note-small">Grenke opera dove è presente con propria sede, quindi in area Schengen e senza rischio cambio, con limite di €200.000 per operazione. Sopra quella soglia si passa a Econocom oppure al finanziamento in cui la proprietà del bene resta al cliente, il fornitore viene pagato subito e il cliente rimborsa in 60 mesi. Coefficienti Econocom di Luca Silvestrin aggiornati al 22/10/2026: rata indicativa, l'operazione viene valutata caso per caso.</div>
         </div>
 
         <div id="esteroExtraBox" style="display:none;">
@@ -1594,29 +1594,19 @@ function operatoreNoleggio(importo){
 }
 
 // --- Econocom: noleggio operativo sopra i 240.000 € ---
-// 60 mesi: tabella inviata da Luca Silvestrin (Econocom) il 26/05/2026, la stessa di
-// src/data/econocom-pa.ts MCF. E' l'unica durata che Econocom ha messo per iscritto.
-// 24, 36 e 48 mesi NON vengono da una tabella Econocom: sono ricavati dal 60 alle stesse
-// condizioni finanziarie, col metodo della proposta Buffalo Food del 17/07/2026 (tasso
-// mensile implicito nel coefficiente a 60 mesi, rendita a rate posticipate), fascia per
-// fascia. Scelta di Alberto del 30/09/2026, consapevole che deroga alla regola "un
-// coefficiente viene sempre da una tabella": per questo a video e nel PDF quei canoni
-// dicono "da confermare con Econocom". Il metodo riproduce al centesimo i canoni Buffalo
-// su 400.000 € (36 mesi: 12.427,81; 48 mesi: 9.656,65).
-// Fasce: da incluso, a escluso. Canone mensile anticipato, nessun riscatto in tabella.
-const ECONOCOM_FASCE=[
-  {da:150000,a:300000,label:"fascia 150–300k",c:{24:0.04515444,36:0.03126270,48:0.02433798,60:0.0202}},
-  {da:300000,a:500000,label:"fascia 300–500k",c:{24:0.04496327,36:0.03106953,48:0.02414163,60:0.0200}},
-  {da:500000,a:700000,label:"fascia 500–700k",c:{24:0.04486743,36:0.03097279,48:0.02404338,60:0.0199}},
-  {da:700000,a:null,  label:"oltre 700k",     c:{24:0.04467525,36:0.03077897,48:0.02384670,60:0.0197}},
-];
-const ECONOCOM_DURATA_TABELLA=60; // l'unica letta davvero da una tabella
+// Coefficienti aggiornati di Luca Silvestrin (Econocom), riportati da Alberto il
+// 22/10/2026: gli stessi di src/data/econocom.ts MCF. Un coefficiente per durata, senza
+// fasce, da 150.000 €. Sostituiscono la tabella del 26/05/2026 (solo 60 mesi, a fasce)
+// e i 24, 36 e 48 mesi che qui si ricavavano da quel 60 col metodo Buffalo Food: da oggi
+// 36 e 48 mesi vengono da una tabella. I 24 mesi non ci sono, perché nessuna tabella
+// Econocom li riporta. Canone mensile anticipato, nessun riscatto in tabella.
+const ECONOCOM_COEFF={36:0.03152,48:0.02473,60:0.02076};
+const ECONOCOM_MIN=150000;
 
 function canoneEconocom(importo,mesi){
   if(!(importo>=ECONOCOM_MIN))return null;
-  const f=ECONOCOM_FASCE.find(f=>importo>=f.da&&(f.a===null||importo<f.a));
-  const c=f?f.c[mesi]:null;
-  return c?{coeff:c,fascia:f,daConfermare:mesi!==ECONOCOM_DURATA_TABELLA}:null;
+  const c=ECONOCOM_COEFF[mesi];
+  return c?{coeff:c}:null;
 }
 
 // --- Preventivatore inverso: dal canone al prezzo ---
@@ -2636,11 +2626,10 @@ function calcScenario(s){
       return {...base,operatore:'econocom',pagamento:'Mensile anticipato'};
     }
     const canone=Math.round(prezzo*e.coeff*k);
-    if(e.daConfermare) avvisi.push(`Canone Econocom a ${s.durata} mesi ricavato dalla tabella a 60 mesi: da confermare con Econocom prima di firmare.`);
     const pl=plafondResiduo('Econocom');
     if(pl!=null&&prezzo>pl) avvisi.push(`Supera il plafond Econocom residuo (€${fmt(pl)}): serve un ampliamento prima della delibera.`);
     return {...base,operatore:'econocom',pagamento:'Mensile anticipato',canone,
-      totale:canone*s.durata,daConfermare:e.daConfermare};
+      totale:canone*s.durata};
   }
   return base; // prezzo a zero: niente operatore, niente canone
 }
@@ -2810,15 +2799,11 @@ function renderScenari(){
 // Le newco restano fuori perimetro ovunque.
 const GRENKE_LIMITE_ESTERO=200000;
 
-// Econocom, tabella 60 mesi (Luca Silvestrin, 26/05/2026 — stessa di src/data/econocom-pa.ts MCF).
-// rata = importo × coefficiente di fascia. Sotto i 150.000 € l'operazione è fuori target.
-// La colonna 60 mesi viene da ECONOCOM_FASCE (sezione Econocom in alto): una tabella sola.
-const ECONOCOM_MIN=150000;
-const ECONOCOM_60M=ECONOCOM_FASCE.map(f=>({da:f.da,a:f.a,c:f.c[60],label:f.label}));
+// Econocom a 60 mesi: lo stesso coefficiente del noleggio (sezione Econocom in alto),
+// rata = importo × coefficiente. Sotto i 150.000 € l'operazione è fuori target.
 function rataEconocom(importo){
-  if(!(importo>=ECONOCOM_MIN))return null;
-  const f=ECONOCOM_60M.find(f=>importo>=f.da&&(f.a===null||importo<f.a));
-  return f?{rata:Math.round(importo*f.c),fascia:f}:null;
+  const e=canoneEconocom(importo,60);
+  return e?{rata:Math.round(importo*e.coeff),coeff:e.coeff}:null;
 }
 
 // Struttura extra-Schengen con assicurazione crediti SACE.
@@ -2890,12 +2875,12 @@ function renderSchengen(){
   </tr>`);
 
   const e=rataEconocom(p);
-  const rataE=e?Math.round(p*e.fascia.c*(1+markup/100)):null;
+  const rataE=e?Math.round(p*e.coeff*(1+markup/100)):null;
   righe.push(`<tr>
     <td>Econocom — noleggio operativo</td>
     <td>60 mesi</td>
     <td>${e?'€'+fmt(rataE)+'/mese'+mk:'—'}</td>
-    <td>${vuoto?'Inserisci il prezzo dell\'offerta':e?e.fascia.label:'Sotto €'+fmt(ECONOCOM_MIN)+': fuori target Econocom'}</td>
+    <td>${vuoto?'Inserisci il prezzo dell\'offerta':e?'Da €'+fmt(ECONOCOM_MIN)+', rata indicativa':'Sotto €'+fmt(ECONOCOM_MIN)+': fuori target Econocom'}</td>
   </tr>`);
 
   document.getElementById('esteroSchengenBody').innerHTML=righe.join('');
@@ -3329,7 +3314,6 @@ function generaPDF(){
 
   // Note sotto la tabella: cosa c'è dentro il totale e cosa va ancora confermato
   const noteTab=['Importi IVA esclusa.'];
-  if(soluzioni.some(x=>x.c.daConfermare)) noteTab.push('* Canone Econocom calcolato alle condizioni della tabella a 60 mesi: soggetto a conferma di Econocom in sede di quotazione.');
   if(soluzioni.some(x=>x.c.operatore==='grenke')) noteTab.push('Noleggio: canone mensile fatturato a trimestre anticipato; il totale comprende il riscatto finale.');
   if(soluzioni.some(x=>x.c.operatore==='econocom')) noteTab.push('Noleggio: canone mensile anticipato, senza anticipo e senza deposito; condizioni di fine contratto da concordare.');
   if(haLea) noteTab.push('Leasing: rata indicativa indicizzata all\'Euribor 3 mesi; il totale comprende anticipo, riscatto e spese di istruttoria e incasso.');

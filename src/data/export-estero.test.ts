@@ -19,8 +19,8 @@ describe('valutaCanaleEstero', () => {
     const e = valutaCanaleEstero(piccola, 'DE', 250_000);
     expect(e.canale).toBe('econocom');
     expect(e.soglia.superata).toBe(true);
-    // 250.000 nella fascia 150-300k: coefficiente 0,0202
-    expect(e.rataIndicativa?.rataMensile).toBeCloseTo(5050, 2);
+    // 250.000 a 60 mesi: coefficiente 0,02076
+    expect(e.rataIndicativa?.rataMensile).toBeCloseTo(5190, 2);
     expect(e.rataIndicativa?.durataMesi).toBe(60);
   });
 
@@ -81,10 +81,10 @@ describe('valutaCanaleEstero', () => {
     expect(e.avvisi.join(' ')).toContain('Nessun dato di bilancio');
   });
 
-  it('la rata segue le fasce Econocom', () => {
-    expect(valutaCanaleEstero(piccola, 'DE', 400_000).rataIndicativa?.rataMensile).toBeCloseTo(8000, 2);
-    expect(valutaCanaleEstero(piccola, 'DE', 600_000).rataIndicativa?.rataMensile).toBeCloseTo(11940, 2);
-    expect(valutaCanaleEstero(piccola, 'DE', 800_000).rataIndicativa?.rataMensile).toBeCloseTo(15760, 2);
+  it('la rata usa un coefficiente solo, senza fasce di importo', () => {
+    expect(valutaCanaleEstero(piccola, 'DE', 400_000).rataIndicativa?.rataMensile).toBeCloseTo(8304, 2);
+    expect(valutaCanaleEstero(piccola, 'DE', 600_000).rataIndicativa?.rataMensile).toBeCloseTo(12456, 2);
+    expect(valutaCanaleEstero(piccola, 'DE', 800_000).rataIndicativa?.rataMensile).toBeCloseTo(16608, 2);
   });
 
   it('soglie e liste dei paesi', () => {

@@ -1,9 +1,9 @@
 import { useState, useMemo } from 'preact/hooks';
 import {
-  ECONOCOM_PA_DURATA_MESI,
-  ECONOCOM_PA_IMPORTO_MIN,
-  calcolaRataEconocomPA,
-} from '../../data/econocom-pa';
+  ECONOCOM_DURATE,
+  ECONOCOM_IMPORTO_MIN,
+  calcolaRataEconocom,
+} from '../../data/econocom';
 import { calcolaBilancioEnergetico } from '../../data/bp-fotovoltaico';
 import './simulatore-econocom-pa.css';
 
@@ -16,7 +16,7 @@ import './simulatore-econocom-pa.css';
  *   2) "E con la bolletta che state pagando + la vendita in rete, la rata
  *       si paga praticamente da sola."
  *
- * Per (1) usa i 4 coefficienti Econocom per fascia (60 mesi, min 150.000 €).
+ * Per (1) usa i coefficienti Econocom per durata (36, 48 o 60 mesi, min 150.000 €).
  * Per (2) attiva il business plan: stessa matematica del simulatore Arca
  * (modello autoconsumo dinamico, PVGIS, ritiro dedicato GSE 0,13 €/kWh)
  * estratta in `src/data/bp-fotovoltaico.ts` per condivisione.
@@ -26,16 +26,18 @@ import './simulatore-econocom-pa.css';
  * irraggiamento forzata a Sud (i clienti di Gianfranco sono giu').
  */
 
+// useGrouping 'always': l'italiano di default non separa le migliaia sotto le
+// cinque cifre e scriverebbe 4152,00 invece di 4.152,00
 const fmtEUR0 = (v: number) =>
   new Intl.NumberFormat('it-IT', {
-    style: 'currency', currency: 'EUR', maximumFractionDigits: 0,
-  }).format(v);
+    style: 'currency', currency: 'EUR', maximumFractionDigits: 0, useGrouping: 'always',
+  } as Intl.NumberFormatOptions).format(v);
 
 const fmtEUR2 = (v: number) =>
   new Intl.NumberFormat('it-IT', {
     style: 'currency', currency: 'EUR',
-    minimumFractionDigits: 2, maximumFractionDigits: 2,
-  }).format(v);
+    minimumFractionDigits: 2, maximumFractionDigits: 2, useGrouping: 'always',
+  } as Intl.NumberFormatOptions).format(v);
 
 const fmtKwh = (v: number) =>
   `${new Intl.NumberFormat('it-IT', { maximumFractionDigits: 0 }).format(v)} kWh`;
@@ -58,6 +60,8 @@ const PROFILO_OTTIMIZZANTE = 'industriale';
 export default function SimulatoreEconocomPA() {
   // === Input rata ===
   const [importoInput, setImportoInput] = useState('');
+  // 60 mesi di partenza: fino al 22/10/2026 era l'unica durata in tabella
+  const [durata, setDurata] = useState(60);
 
   // === Modalita' business plan ===
   const [modalitaBP, setModalitaBP] = useState(false);
@@ -90,8 +94,8 @@ export default function SimulatoreEconocomPA() {
   }, [bollettaInput]);
 
   // === Calcolo rata Econocom ===
-  const risultato = useMemo(() => calcolaRataEconocomPA(importo), [importo]);
-  const sottoSoglia = importo > 0 && importo < ECONOCOM_PA_IMPORTO_MIN;
+  const risultato = useMemo(() => calcolaRataEconocom(importo, durata), [importo, durata]);
+  const sottoSoglia = importo > 0 && importo < ECONOCOM_IMPORTO_MIN;
 
   // === Calcolo bilancio energetico (solo se BP attivo) ===
   // Profilo fissato sul caso piu' favorevole (vedi PROFILO_OTTIMIZZANTE).
@@ -110,7 +114,7 @@ export default function SimulatoreEconocomPA() {
     const ricaviMensili = bilancio.risparmioAutoconsumoMensile + bilancio.valoreImmissioneMensile;
     const cassaNettaMensile = ricaviMensili - risultato.rataMensile;
     const cassaNettaAnnua = cassaNettaMensile * 12;
-    const cassaCumulata60m = cassaNettaMensile * ECONOCOM_PA_DURATA_MESI;
+    const cassaCumulata = cassaNettaMensile * durata;
     const ricaviAnnui = ricaviMensili * 12;
     // Payback dell'impianto: anni per cui i SOLI ricavi (senza considerare la rata)
     // ripagano il valore dell'investimento. KPI classico degli investimenti FV.
@@ -119,11 +123,11 @@ export default function SimulatoreEconocomPA() {
       ricaviMensili,
       cassaNettaMensile,
       cassaNettaAnnua,
-      cassaCumulata60m,
+      cassaCumulata,
       ricaviAnnui,
       paybackAnni,
     };
-  }, [risultato, bilancio, importo]);
+  }, [risultato, bilancio, importo, durata]);
 
   // === Handlers ===
   const handleImporto = (e: Event) => {
@@ -183,9 +187,26 @@ export default function SimulatoreEconocomPA() {
             </div>
             <p class="sepa__hint">
               Costo del bene o dell'opera (parcheggio fotovoltaico,
-              riqualificazione, illuminazione). Importo minimo {fmtEUR0(ECONOCOM_PA_IMPORTO_MIN)}.
-              Zona di irraggiamento: Sud Italia. Durata fissa {ECONOCOM_PA_DURATA_MESI} mesi.
+              riqualificazione, illuminazione). Importo minimo {fmtEUR0(ECONOCOM_IMPORTO_MIN)}.
+              Zona di irraggiamento: Sud Italia.
             </p>
+          </div>
+
+          <div class="sepa__field">
+            <span class="sepa__label" id="sepa-durata-label">Durata</span>
+            <div class="sepa__durate" role="group" aria-labelledby="sepa-durata-label">
+              {ECONOCOM_DURATE.map((m) => (
+                <button
+                  type="button"
+                  key={m}
+                  class={`sepa__durata${m === durata ? ' sepa__durata--active' : ''}`}
+                  aria-pressed={m === durata}
+                  onClick={() => setDurata(m)}
+                >
+                  {m} mesi
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Toggle business plan */}
@@ -284,7 +305,7 @@ export default function SimulatoreEconocomPA() {
             <span class="sepa__result-label">Sotto soglia</span>
             <p class="sepa__result-fascia">
               Importo {fmtEUR0(importo)}: Econocom lavora con operazioni di Pubblica
-              Amministrazione a partire da {fmtEUR0(ECONOCOM_PA_IMPORTO_MIN)}.
+              Amministrazione a partire da {fmtEUR0(ECONOCOM_IMPORTO_MIN)}.
             </p>
             <p class="sepa__result-disclaimer">
               Per investimenti inferiori valuta noleggio operativo standard (Grenke)
@@ -296,12 +317,8 @@ export default function SimulatoreEconocomPA() {
         {risultato && (
           <div class="sepa__result">
             <span class="sepa__result-label">
-              Rata Econocom — {ECONOCOM_PA_DURATA_MESI} mesi
+              Rata Econocom — {durata} mesi
             </span>
-
-            <div>
-              <p class="sepa__result-fascia">{risultato.fascia.label}</p>
-            </div>
 
             <div class="sepa__result-rata">
               <p class="sepa__result-rata-label">Rata mensile indicativa</p>
@@ -356,7 +373,7 @@ export default function SimulatoreEconocomPA() {
             </div>
 
             <div class="sepa__bp-row sepa__bp-row--red">
-              <span>− Rata Econocom (60 mesi)</span>
+              <span>− Rata Econocom ({durata} mesi)</span>
               <span class="sepa__bp-val">−{fmtEUR2(risultato.rataMensile)}<span class="sepa__bp-unit">/mese</span></span>
             </div>
 
@@ -373,13 +390,13 @@ export default function SimulatoreEconocomPA() {
 
             {investimento.cassaNettaMensile >= 0 ? (
               <p class="sepa__bp-extra">
-                Sui {ECONOCOM_PA_DURATA_MESI} mesi del contratto: cassa cumulata{' '}
-                <strong>{fmtEUR0(investimento.cassaCumulata60m)}</strong>.
+                Sui {durata} mesi del contratto: cassa cumulata{' '}
+                <strong>{fmtEUR0(investimento.cassaCumulata)}</strong>.
                 Da fine contratto in poi, i ricavi continuano senza piu' la rata.
               </p>
             ) : (
               <p class="sepa__bp-extra sepa__bp-extra--warn">
-                L'ente paga una quota residua durante i 60 mesi, comunque molto
+                L'ente paga una quota residua durante i {durata} mesi, comunque molto
                 inferiore alla bolletta attuale ({fmtEUR0(bolletta)}/mese). A fine
                 contratto i ricavi continuano senza piu' la rata.
               </p>
@@ -399,9 +416,9 @@ export default function SimulatoreEconocomPA() {
                 </span>
               </div>
 
-              <div class={`sepa__kpi-cell ${investimento.cassaCumulata60m >= 0 ? 'is-positive' : 'is-negative'}`}>
-                <span class="sepa__kpi-label">Cassa cumulata 60 mesi</span>
-                <span class="sepa__kpi-value">{investimento.cassaCumulata60m >= 0 ? '+' : ''}{fmtEUR0(investimento.cassaCumulata60m)}</span>
+              <div class={`sepa__kpi-cell ${investimento.cassaCumulata >= 0 ? 'is-positive' : 'is-negative'}`}>
+                <span class="sepa__kpi-label">Cassa cumulata {durata} mesi</span>
+                <span class="sepa__kpi-value">{investimento.cassaCumulata >= 0 ? '+' : ''}{fmtEUR0(investimento.cassaCumulata)}</span>
                 <span class="sepa__kpi-hint">durata del contratto Econocom</span>
               </div>
 

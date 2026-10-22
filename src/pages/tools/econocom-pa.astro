@@ -8,7 +8,7 @@ import Icon from '../../components/Icon.astro';
  * municipalizzate (parcheggi fotovoltaici, riqualificazione energetica, ecc.).
  *
  * Contiene:
- *  - simulatore rata indicativa Econocom (solo 60 mesi, importo min 150.000 €).
+ *  - simulatore rata indicativa Econocom (36, 48 o 60 mesi, importo min 150.000 €).
  *  - box vincoli operativi della Pubblica Amministrazione (cessione del contratto,
  *    fuori codice degli appalti, accettazione condizioni generali) — paletti di Luca
  *    Silvestrin (Econocom) da presentare al cliente prima di formulare un'offerta.
@@ -90,7 +90,7 @@ import SimulatoreEconocomPA from '../../components/tools/SimulatoreEconocomPA.ts
         </div>
         <div class="epa__badge">
           <Icon name="schedule" />
-          <span>Durata 60 mesi</span>
+          <span>Durata 36-60 mesi</span>
         </div>
       </div>
     </div>
@@ -173,8 +173,8 @@ import SimulatoreEconocomPA from '../../components/tools/SimulatoreEconocomPA.ts
         <div>
           <h2 class="epa__section-title">Simula la rata mensile</h2>
           <p class="epa__section-sub">
-            Inserisci l'importo previsto dell'investimento. La rata si aggiorna in
-            tempo reale in base alla fascia di coefficiente Econocom 60 mesi.
+            Inserisci l'importo previsto dell'investimento e scegli la durata.
+            La rata si aggiorna in tempo reale con il coefficiente Econocom di quella durata.
           </p>
         </div>
       </header>

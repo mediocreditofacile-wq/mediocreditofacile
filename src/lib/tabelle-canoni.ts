@@ -14,12 +14,7 @@
 import { RISCATTO_PERC as RISCATTO_DUPLEX } from '../data/duplex-costi';
 import { coefficienteGrace, GRACE_FASCE, type FasciaGrace } from '../data/duplex-grace';
 import { coefficienteSputnik, SPUTNIK_FASCE } from '../data/duplex-sputnik';
-import {
-  ECONOCOM_PA_COEFFICIENTI_60M,
-  ECONOCOM_PA_DURATA_MESI,
-  ECONOCOM_PA_IMPORTO_MIN,
-  calcolaRataEconocomPA,
-} from '../data/econocom-pa';
+import { ECONOCOM_COEFFICIENTI, ECONOCOM_DURATE, ECONOCOM_IMPORTO_MIN } from '../data/econocom';
 import { ESG_MAX, ESG_MIN, esgPrezzoDaCanone, getEsgCoeff } from '../data/esg';
 import { GRENKE_COEFFS, PIONEER_COEFFS, RISCATTI, getCoeff, getPioneerCoeff } from '../data/grenke';
 import { pagarentPrezzoDaRata } from '../data/pagarent';
@@ -267,43 +262,44 @@ export const TABELLA_PIONEER = tabellaAFasce(
 );
 
 /**
- * Econocom, tabella per la Pubblica Amministrazione (src/data/econocom-pa.ts: tabella
- * di Luca Silvestrin del 26/05/2026). DEROGA DICHIARATA: nasce per la PA e il portale
- * Led Office la usa su clienti privati con oltre 5 milioni di ricavi (decisione di
- * Alberto del 19/10/2026). Solo 60 mesi, solo da 150.000 euro: sotto non c'e' tabella.
- * Il coefficiente del file dati e' una frazione (0,0202), qui in percento come le
- * altre tabelle (2,02). La rata e' indicativa e si dice "da confermare" a video e
+ * Econocom (src/data/econocom.ts: coefficienti di Luca Silvestrin riportati il
+ * 22/10/2026). 36, 48 e 60 mesi, un coefficiente per durata, da 150.000 euro: sotto
+ * non c'e' tabella. Il portale Led Office la usa su clienti privati con oltre 5
+ * milioni di ricavi (decisione di Alberto del 19/10/2026).
+ *
+ * L'id resta 'econocom-pa' anche se la tabella non e' piu' solo per la PA: e' il
+ * valore salvato nella configurazione dei canali in produzione (app.carrozzeria),
+ * e cambiarlo farebbe sparire il canale finche' qualcuno non lo ripunta.
+ *
+ * Il coefficiente del file dati e' una frazione (0,02076), qui in percento come le
+ * altre tabelle (2,076). La rata e' indicativa e si dice "da confermare" a video e
  * nei preventivi: Econocom decide caso per caso.
  */
-const DURATE_ECONOCOM_PA = [ECONOCOM_PA_DURATA_MESI];
-const ECONOCOM_PA_MAX = 10_000_000;
+const ECONOCOM_MAX = 10_000_000;
 
-function coeffEconocomPA(importo: number, durata: number): number | null {
-  if (durata !== ECONOCOM_PA_DURATA_MESI || importo > ECONOCOM_PA_MAX) return null;
-  const calcolo = calcolaRataEconocomPA(importo);
-  return calcolo ? calcolo.fascia.coefficiente * 100 : null;
+function coeffEconocom(importo: number, durata: number): number | null {
+  if (!(importo >= ECONOCOM_IMPORTO_MIN) || importo > ECONOCOM_MAX) return null;
+  const c = ECONOCOM_COEFFICIENTI[durata];
+  return c === undefined ? null : c * 100;
 }
 
-export const TABELLA_ECONOCOM_PA: TabellaCanoni = {
+export const TABELLA_ECONOCOM: TabellaCanoni = {
   id: 'econocom-pa',
   nota: 'Canone mensile indicativo, da confermare. Condizioni definite caso per caso.',
-  durate: DURATE_ECONOCOM_PA,
+  durate: ECONOCOM_DURATE,
   riscatto: {},
-  importoMin: ECONOCOM_PA_IMPORTO_MIN,
-  importoMax: ECONOCOM_PA_MAX,
-  coefficiente: coeffEconocomPA,
+  importoMin: ECONOCOM_IMPORTO_MIN,
+  importoMax: ECONOCOM_MAX,
+  coefficiente: coeffEconocom,
   prezzoDaCanone(canone, durata) {
-    if (durata !== ECONOCOM_PA_DURATA_MESI || canone <= 0) return null;
-    // Il coefficiente cala con l'importo, quindi ogni fascia da' un prezzo diverso:
-    // si tiene la prima in cui il prezzo ricavato ricade davvero (a = escluso)
-    for (const f of ECONOCOM_PA_COEFFICIENTI_60M) {
-      const prezzo = canone / f.coefficiente;
-      if (prezzo >= f.da && (f.a === null || prezzo < f.a) && prezzo <= ECONOCOM_PA_MAX) return prezzo;
-    }
-    return null;
+    const c = ECONOCOM_COEFFICIENTI[durata];
+    if (c === undefined || canone <= 0) return null;
+    // Senza fasce il prezzo e' uno solo: vale se cade dentro i limiti della tabella
+    const prezzo = canone / c;
+    return prezzo >= ECONOCOM_IMPORTO_MIN && prezzo <= ECONOCOM_MAX ? prezzo : null;
   },
-  durateDisponibili: (importo) => DURATE_ECONOCOM_PA.filter((m) => coeffEconocomPA(importo, m) !== null),
-  quotabile: (importo) => DURATE_ECONOCOM_PA.some((m) => coeffEconocomPA(importo, m) !== null),
+  durateDisponibili: (importo) => ECONOCOM_DURATE.filter((m) => coeffEconocom(importo, m) !== null),
+  quotabile: (importo) => ECONOCOM_DURATE.some((m) => coeffEconocom(importo, m) !== null),
 };
 
 export const TABELLE: Record<IdTabella, TabellaCanoni> = {
@@ -313,7 +309,7 @@ export const TABELLE: Record<IdTabella, TabellaCanoni> = {
   'sputnik-duplex': TABELLA_SPUTNIK_DUPLEX,
   'grace-duplex': TABELLA_GRACE_DUPLEX,
   pioneer: TABELLA_PIONEER,
-  'econocom-pa': TABELLA_ECONOCOM_PA,
+  'econocom-pa': TABELLA_ECONOCOM,
 };
 
 /** Tabella di default: PagaRent, cosi' chi non passa niente non cambia comportamento */
