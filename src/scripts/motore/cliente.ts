@@ -170,11 +170,16 @@ export function usaRicerca(r: { ricercaId: string; scheda: any; info: any; credi
   if (r.eventi === 'in-verifica') aspettaEventi(r.ricercaId);
 }
 
-export async function riapriRicerca(id: string) {
+/** Riapre una ricerca dallo Storico e porta sulla scheda indicata. False se non si e' riaperta */
+export async function riapriRicerca(id: string, tab = 'cliente'): Promise<boolean> {
   const { res, corpo } = await apiJson(api('merito', { id }));
-  if (!res.ok || !corpo?.ok) return alert(traduci(corpo?.error ?? ''));
+  if (!res.ok || !corpo?.ok) {
+    alert(traduci(corpo?.error ?? ''));
+    return false;
+  }
   usaRicerca(corpo);
-  apriTab('cliente');
+  apriTab(tab);
+  return true;
 }
 
 export function montaCliente() {

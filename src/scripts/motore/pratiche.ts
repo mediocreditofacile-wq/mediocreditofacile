@@ -11,14 +11,21 @@ import { $, apiJson, data, esc, euro, messaggio, stato, traduci } from './comune
 import { montaPraticheDistinta, rendiModuloDistinta } from './pratiche-distinta';
 import { bottoneDoc, caricaStorico, suStorico, type DatiStorico } from './storico';
 
-const STATI: [string, string][] = [
-  ['ricevuta', 'Ricevuta'],
-  ['in-lavorazione', 'In lavorazione'],
-  ['in-delibera', 'In delibera'],
-  ['approvata', 'Approvata'],
-  ['declinata', 'Declinata'],
-];
-const ETICHETTA = Object.fromEntries(STATI) as Record<string, string>;
+/**
+ * Le etichette che leggono referente e agente. I tre stati "inserita su ..." arrivano
+ * dal server gia' ridotti a "inserita": i nomi dei canali e il menu completo li manda
+ * il server solo a MCF (storico, campo `stati`), cosi' questo codice non li contiene.
+ */
+const ETICHETTA: Record<string, string> = {
+  'ricevuta': 'Ricevuta',
+  'in-lavorazione': 'In lavorazione',
+  'inserita': 'Inserita presso la società di noleggio',
+  'in-delibera': 'In delibera',
+  'approvata': 'Approvata',
+  'declinata': 'Declinata',
+};
+/** Il menu degli stati per MCF, [codice, etichetta], dallo storico */
+let statiAdmin: [string, string][] = [];
 const FORME = ['Società di capitali', 'Società di persone', 'Ditta individuale', 'Lavoratore autonomo', 'Altro'];
 
 let bozza = '';
@@ -61,10 +68,25 @@ function rendiFile() {
     : '<li class="mt-id">Nessun documento ancora.</li>';
 }
 
+/**
+ * Sul settore distinta il modulo della pratica si apre anche sotto la proposta appena
+ * scaricata (scheda Proposte, decisione del 22/10/2026). Si sposta l'elemento, non se ne
+ * crea un altro: gli ascoltatori restano i suoi e gli id restano unici.
+ */
+function collocaModulo(dove: 'proposte' | 'pratiche') {
+  const box = $('pratica-nuova');
+  const posto = dove === 'proposte' ? document.getElementById('dz-pratica-modulo') : document.getElementById('pratica-slot');
+  if (posto && box.parentElement !== posto) posto.append(box);
+}
+
 function rendiModulo(evento?: Event) {
-  // Settore distinta: un caricamento per voce, niente forma, prodotto e importo,
-  // e la segnalazione a Mediocredito Facile (pratiche-distinta.ts)
-  if (stato.settore === 'distinta') return rendiModuloDistinta(Boolean((evento as CustomEvent | undefined)?.detail?.segnalazione));
+  // Settore distinta: un caricamento per voce (o un unico ZIP), niente forma, prodotto e
+  // importo, e la segnalazione a Mediocredito Facile (pratiche-distinta.ts)
+  if (stato.settore === 'distinta') {
+    const dettaglio = (evento as CustomEvent | undefined)?.detail;
+    collocaModulo(dettaglio?.dove === 'proposte' ? 'proposte' : 'pratiche');
+    return rendiModuloDistinta(Boolean(dettaglio?.segnalazione));
+  }
   const r = stato.ricerca;
   const box = $('pratica-nuova');
   if (!r) {
@@ -248,7 +270,7 @@ function rendiElenco() {
     return;
   }
   const opzioniStato = (corrente: string) =>
-    STATI.map(([v, l]) => `<option value="${v}" ${v === corrente ? 'selected' : ''}>${l}</option>`).join('');
+    statiAdmin.map(([v, l]) => `<option value="${esc(v)}" ${v === corrente ? 'selected' : ''}>${esc(l)}</option>`).join('');
   el.innerHTML = `
     ${admin ? `
       <div class="mt-azioni" style="margin:0 0 12px">
@@ -327,16 +349,23 @@ async function sposta(ids: string[], nuovo: string) {
 export function montaPratiche() {
   $('pratiche').innerHTML = `
     <div class="mt-azioni" style="margin-top:0">
-      <button type="button" id="pratica-apri" class="mt-btn mt-btn--secondario">Nuova pratica</button>
+      <button type="button" id="pratica-apri" class="mt-btn mt-btn--secondario">${stato.settore === 'distinta' ? 'Crea pratica' : 'Nuova pratica'}</button>
     </div>
-    <div id="pratica-nuova" hidden></div>
+    <div id="pratica-slot"><div id="pratica-nuova" hidden></div></div>
     <h3 class="mt-h3">Le pratiche</h3>
     <div id="pratiche-elenco"><p class="mt-vuoto">Nessuna pratica caricata dal portale.</p></div>
     <div id="pratiche-esterne"></div>`;
 
-  suStorico((d: DatiStorico) => { pratiche = d.pratiche; esterne = d.esterne; rendiElenco(); rendiEsterne(); });
+  suStorico((d: DatiStorico) => { pratiche = d.pratiche; esterne = d.esterne; statiAdmin = d.stati ?? []; rendiElenco(); rendiEsterne(); });
   if (stato.settore === 'distinta') montaPraticheDistinta();
   document.addEventListener('mt:nuova-pratica', rendiModulo);
+  // Cliente nuovo: il modulo aperto sotto la proposta torna al suo posto, chiuso
+  if (stato.settore === 'distinta') {
+    document.addEventListener('mt:ricerca', () => {
+      collocaModulo('pratiche');
+      $('pratica-nuova').hidden = true;
+    });
+  }
   document.addEventListener('mt:tab', (e) => { if ((e as CustomEvent).detail === 'pratiche') void caricaStorico(); });
 
   document.addEventListener('click', (e) => {

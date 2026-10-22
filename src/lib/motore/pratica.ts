@@ -35,19 +35,12 @@ import { decidiVerifica } from '../verifiche-cache';
 import { euro } from '../prospetti-pv';
 import type { RicercaSalvata } from './calcolo-proposta';
 import { generaId, filtroVisibilita, type EsitoMotore } from './sessione';
+import type { StatoPratica } from './stati-pratica';
 
 type Sessione = Extract<EsitoMotore, { ok: true }>;
 
-export const STATI = ['ricevuta', 'in-lavorazione', 'in-delibera', 'approvata', 'declinata'] as const;
-export type StatoPratica = (typeof STATI)[number];
-
-export const ETICHETTA_STATO: Record<StatoPratica, string> = {
-  'ricevuta': 'Ricevuta',
-  'in-lavorazione': 'In lavorazione',
-  'in-delibera': 'In delibera',
-  'approvata': 'Approvata',
-  'declinata': 'Declinata',
-};
+// Gli stati, coi tre "inserita-..." del 22/10/2026, stanno in stati-pratica.ts
+export { ETICHETTA_STATO, STATI, type StatoPratica } from './stati-pratica';
 
 export const FORME = ['Società di capitali', 'Società di persone', 'Ditta individuale', 'Lavoratore autonomo', 'Altro'] as const;
 

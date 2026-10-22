@@ -55,6 +55,7 @@ import { POST as chiediUpload } from '../../pages/api/motore/upload';
 import { CANALI_LO, CATEGORIE_LO, CHECKLIST_LO, vociLedOffice } from './catalogo-ledoffice';
 import type { DatiCreditoMotore, SchedaRidotta } from './merito';
 import { creaPraticaDistinta } from './pratica-distinta';
+import { TIPI_ZIP, VOCE_ZIP } from './pratica-distinta-regole';
 import { TESTI_PREFILTRO } from './prefiltro';
 
 const OGGI = new Date(2026, 9, 20, 12);
@@ -309,7 +310,7 @@ describe('/api/motore/pratica sul settore distinta', () => {
     }
   });
 
-  it('la mail a MCF porta canale, importi per il locatore e la proposta per il locatore in allegato', async () => {
+  it('la mail a MCF porta canale, importi per il locatore, i documenti e la proposta per il locatore in allegato', async () => {
     await post(corpo());
     const m = mail();
     expect(m.to).toBe(DESTINATARIO_MCF);
@@ -318,10 +319,27 @@ describe('/api/motore/pratica sul settore distinta', () => {
     expect(m.html).toContain('6.640 euro');
     expect(m.html).toContain('139.440,00 euro');
     expect(blob.get).toHaveBeenCalledWith(RISERVATO_PATH, { access: 'private', token: 'tok-finto' });
-    expect(m.allegati).toEqual([{
-      filename: `proposta-locatore-${ID_PROPOSTA}.pdf`,
-      content: Buffer.from(PDF_LOCATORE).toString('base64'),
-    }]);
+    // Dal 22/10/2026 i documenti del cliente vanno in allegato, prima della proposta per il locatore
+    for (const d of DOCUMENTI) expect(blob.get).toHaveBeenCalledWith(d.pathname, { access: 'private', token: 'tok-finto' });
+    expect(m.allegati!.map((a) => a.filename)).toEqual(['proposta-firmata.pdf', 'ci.jpg', `proposta-locatore-${ID_PROPOSTA}.pdf`]);
+    expect(m.allegati!.at(-1)!.content).toBe(Buffer.from(PDF_LOCATORE).toString('base64'));
+    expect(m.html).toContain('Tutti in allegato a questa mail');
+  });
+
+  it('lo ZIP unico basta: le voci obbligatorie non fermano la pratica e la mail lo dice', async () => {
+    const r = await post(corpo({ documenti: [doc(VOCE_ZIP, 'documenti.zip')] }));
+    expect(r.status).toBe(200);
+    const p = inserita()!;
+    expect(p.documenti.map((d: { voce: string }) => d.voce)).toEqual([VOCE_ZIP]);
+    const m = mail();
+    expect(m.allegati!.map((a) => a.filename)).toEqual(['documenti.zip', `proposta-locatore-${ID_PROPOSTA}.pdf`]);
+    expect(m.html).toContain('unico ZIP');
+  });
+
+  it('uno ZIP sotto una voce normale, o un PDF sotto la voce ZIP, non si tengono', async () => {
+    const r = await post(corpo({ documenti: [...DOCUMENTI, doc(IDENTITA, 'altro.zip'), doc(VOCE_ZIP, 'visura.pdf')] }));
+    expect(r.status).toBe(200);
+    expect(inserita()!.documenti.map((d: { nome: string }) => d.nome)).toEqual(['proposta-firmata.pdf', 'ci.jpg']);
   });
 
   it('senza proposta su un cliente verde: proposta_mancante, nessuna pratica', async () => {
@@ -368,8 +386,8 @@ describe('/api/motore/pratica sul settore distinta', () => {
     expect(m.subject).toMatch(/^Segnalazione Led Office/);
     expect(m.html).toContain('SEGNALAZIONE, prefiltro rosso');
     expect(m.html).toContain('la proposta era su Pagarent');
-    // La proposta per il locatore resta allegata
-    expect(m.allegati).toHaveLength(1);
+    // La proposta per il locatore resta allegata, dopo il documento del cliente
+    expect(m.allegati!.map((a) => a.filename)).toEqual(['ci.jpg', `proposta-locatore-${ID_PROPOSTA}.pdf`]);
   });
 
   it('eventi chiusi nel registro dopo la ricerca: rosso anche se la ricerca dice ancora in verifica', async () => {
@@ -507,8 +525,9 @@ describe('/api/motore/pratica sul settore distinta', () => {
     const m = mail();
     expect(m.html).toContain('SEGNALAZIONE, nessun canale regge l&#39;importo');
     expect(m.html).toContain('Nessuna proposta per il locatore');
-    expect(m.allegati).toEqual([]);
-    expect(blob.get).not.toHaveBeenCalled();
+    // Solo il documento del cliente: la proposta per il locatore non c'e'
+    expect(m.allegati!.map((a) => a.filename)).toEqual(['ci.jpg']);
+    expect(blob.get).not.toHaveBeenCalledWith(expect.stringContaining('/mcf/'), expect.anything());
   });
 
   it('rosso senza proposta: segnalazione con la distinta del corpo; senza righe l\'errore della distinta', async () => {
@@ -629,13 +648,14 @@ describe('/api/motore/pratica sul settore distinta', () => {
     expect((await r.json()).error).toBe('bozza_non_valida');
   });
 
-  it('la proposta per il locatore che non si legge: la mail parte lo stesso e lo dice', async () => {
+  it('lo store che non risponde: la mail parte lo stesso, senza allegati, e lo dice', async () => {
     blob.get.mockRejectedValue(new Error('store giu\''));
     const r = await post(corpo());
     expect(r.status).toBe(200);
     const m = mail();
     expect(m.allegati).toEqual([]);
     expect(m.html).toContain('non si è potuta leggere');
+    expect(m.html).toContain('Restano nel portale');
   });
 
   it('una mail persa non annulla la pratica gia\' salvata', async () => {
@@ -648,7 +668,7 @@ describe('/api/motore/pratica sul settore distinta', () => {
   it('un percorso del riservato fuori dalla cartella riservata del fornitore non si legge', async () => {
     database({ proposta: proposta({ riservato: { ...proposta().riservato, documenti: [{ nome: 'x.pdf', pathname: 'preventivi/duplex/X/mcf/x.pdf' }] } }) });
     await post(corpo());
-    expect(blob.get).not.toHaveBeenCalled();
+    expect(blob.get).not.toHaveBeenCalledWith('preventivi/duplex/X/mcf/x.pdf', expect.anything());
     expect(mail().html).toContain('non si è potuta leggere');
   });
 
@@ -698,10 +718,10 @@ describe('/api/motore/upload', () => {
     return { status: r.status, corpo: await r.json() };
   };
 
-  it('settore distinta: lo store accetta solo PDF e JPEG', async () => {
+  it('settore distinta: lo store accetta PDF, JPEG e lo ZIP unico', async () => {
     const { status, corpo: c } = await chiedi('distinta');
     expect(status).toBe(200);
-    expect(c.opzioni.allowedContentTypes).toEqual(['application/pdf', 'image/jpeg']);
+    expect(c.opzioni.allowedContentTypes).toEqual(['application/pdf', 'image/jpeg', ...TIPI_ZIP]);
   });
 
   it('gli altri fornitori: i formati di sempre', async () => {

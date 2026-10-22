@@ -16,6 +16,7 @@ export const prerender = false;
 
 import { query } from '../../../lib/db';
 import { praticheEsternePerRuolo, type RigaEsterna } from '../../../lib/motore/pratiche-esterne';
+import { statiPerAdmin, statoPerRuolo, storiaPerRuolo } from '../../../lib/motore/stati-pratica';
 import { meseDi, meseRichiesto, riepilogoMesi, verificheContate } from '../../../lib/motore/richieste';
 import { filtroVisibilita, json, sessioneMotore } from '../../../lib/motore/sessione';
 
@@ -68,7 +69,10 @@ export async function GET({ request }: { request: Request }) {
     // Solo se il fornitore paga le verifiche: un si' o un no, mai il prezzo
     conteggio: e.carrozzeria.prezzoVerifica !== null,
     ricerche: delMese.map((r) => ({ ...r, conta: contate.has(r.id) })),
-    proposte, pratiche,
+    proposte,
+    // Il canale su cui MCF ha caricato la pratica lo legge solo MCF: agli altri arriva "inserita"
+    pratiche: (pratiche as any[]).map((p) => ({ ...p, stato: statoPerRuolo(p.stato, admin), storia: storiaPerRuolo(p.storia, admin) })),
+    ...(admin ? { stati: statiPerAdmin() } : {}),
     esterne: praticheEsternePerRuolo(esterne, e.contesto.ruolo, e.vedeTutto),
   });
 }
