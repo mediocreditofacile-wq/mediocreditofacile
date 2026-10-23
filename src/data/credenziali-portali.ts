@@ -34,6 +34,7 @@ export const CREDENZIALI: AccessoPortale[] = [
   // --- Aree riservate: solo password ---
   { nome: 'Arca Energia', percorso: '/tools/arca-energia', password: 'arcaenergia', tipo: 'partner' },
   { nome: 'AGE SRL', percorso: '/tools/age-srl', password: 'age-srl', tipo: 'partner' },
+  { nome: 'Evolution Service Holding', percorso: '/tools/evolution-holding', password: 'evolution', tipo: 'partner' },
   { nome: 'EnergyTeam', percorso: '/tools/energyteam', password: 'energyteam', tipo: 'partner' },
   { nome: 'Econocom PA', percorso: '/tools/econocom-pa', password: 'gianfranco', tipo: 'partner' },
   { nome: 'Edilizia GIERRE', percorso: '/tools/edilizia-gierre', password: 'gierreedilizia', tipo: 'partner' },

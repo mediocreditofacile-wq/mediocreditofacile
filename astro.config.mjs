@@ -40,6 +40,7 @@ export default defineConfig({
           '/tools/econocom-pa',
           '/tools/edilizia-gierre',
           '/tools/energyteam',
+          '/tools/evolution-holding',
           '/tools/expo-energia',
           '/tools/extreme-computer',
           '/tools/full-service',

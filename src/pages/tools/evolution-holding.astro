@@ -1,0 +1,460 @@
+---
+import Icon from '../../components/Icon.astro';
+/**
+ * Area Partner Evolution Service Holding — /tools/evolution-holding
+ * Clone di /tools/arca-energia con un'unica differenza nel simulatore: la zona
+ * di irraggiamento non e' bloccata (Evolution installa dal Lazio, il commerciale
+ * la sceglie cliente per cliente) e parte da Centro.
+ * Pagina protetta da password. Simulatore fotovoltaico con:
+ * - switch noleggio operativo / leasing finanziario
+ * - assicurazione all-risk opzionale (solo noleggio)
+ * - agevolazioni 4.0: iperammortamento + Sabatini (solo leasing + BP)
+ * - form di invio richiesta pratica a MCF con checklist documenti
+ */
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import SimulatoreFotovoltaico from '../../components/tools/SimulatoreFotovoltaico.tsx';
+---
+<ToolLayout
+  title="Area Evolution Service Holding — Simulatore Fotovoltaico | Mediocredito Facile"
+  description="Area riservata Evolution Service Holding — simulatore noleggio operativo e leasing fotovoltaico con iperammortamento e Sabatini 4.0."
+  noindex={true}
+  breadcrumbs={[{ name: 'Area Evolution Service Holding', href: '/tools/evolution-holding' }]}
+>
+  <!-- Gate password -->
+  <div id="gate" class="gate">
+    <div class="gate__card">
+      <div class="gate__logos">
+        <img src="/images/logo-mediocreditofacile.webp" alt="Mediocredito Facile" class="gate__logo" />
+        <span class="gate__x">×</span>
+        <span class="gate__partner-name">Evolution Service Holding</span>
+      </div>
+      <div class="gate__divider"></div>
+      <p class="gate__label">Area Riservata Partner</p>
+      <p class="gate__desc">Accedi al simulatore fotovoltaico con confronto noleggio e leasing, agevolazioni 4.0 e invio pratica diretto.</p>
+      <div class="gate__form">
+        <input type="password" id="gate-pwd" class="gate__input" placeholder="Password" autocomplete="off" />
+        <button id="gate-btn" class="gate__btn">
+          <Icon name="lock_open" />
+          Accedi
+        </button>
+      </div>
+      <p id="gate-error" class="gate__error" hidden>Password non corretta</p>
+    </div>
+  </div>
+
+  <!-- Tool content (nascosto fino ad autenticazione) -->
+  <div id="tool" class="evo" style="display:none !important;">
+    <!-- Header co-branded -->
+    <div class="evo__header">
+      <div class="evo__header-brand">
+        <img src="/images/logo-mediocreditofacile.webp" alt="Mediocredito Facile" class="evo__logo" />
+        <div class="evo__header-sep"></div>
+        <div class="evo__partner-badge">
+          <Icon name="wb_sunny" class="evo__partner-icon" />
+          <span class="evo__partner-label">Evolution Service Holding</span>
+        </div>
+      </div>
+      <button id="logout-btn" class="evo__logout">
+        <Icon name="logout" />
+        Esci
+      </button>
+    </div>
+
+    <!-- Hero area -->
+    <div class="evo__hero">
+      <div class="evo__hero-content">
+        <h1 class="evo__title">Simulatore Fotovoltaico</h1>
+        <p class="evo__sub">
+          Confronta noleggio operativo e leasing finanziario sugli impianti proposti ai tuoi clienti.
+          Attiva il business plan per il confronto con la bolletta e le agevolazioni 4.0.
+        </p>
+      </div>
+      <div class="evo__hero-badges">
+        <div class="evo__badge">
+          <Icon name="compare_arrows" />
+          <span>Noleggio vs Leasing</span>
+        </div>
+        <div class="evo__badge">
+          <Icon name="trending_up" />
+          <span>Iper 4.0 + Sabatini</span>
+        </div>
+        <div class="evo__badge">
+          <Icon name="bolt" />
+          <span>Business Plan</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Simulatore interattivo (Preact island) -->
+    <section class="evo__simulator">
+      <SimulatoreFotovoltaico
+        client:load
+        assicurazioneOpzionale
+        varianteForm="evolution-holding"
+        zonaIniziale="centro"
+        abilitaLeasing
+        abilitaAgevolazioni
+      />
+    </section>
+  </div>
+</ToolLayout>
+
+<script>
+  const PASSWORD = 'evolution';
+  const KEY = 'mcf_evolutionholding_auth';
+
+  const gate = document.getElementById('gate')!;
+  const tool = document.getElementById('tool')!;
+  const gatePwd = document.getElementById('gate-pwd') as HTMLInputElement;
+  const gateBtn = document.getElementById('gate-btn')!;
+  const gateError = document.getElementById('gate-error')!;
+  const logoutBtn = document.getElementById('logout-btn')!;
+
+  function showTool() {
+    gate.style.display = 'none';
+    tool.style.cssText = '';
+  }
+
+  function showGate() {
+    gate.style.display = '';
+    tool.style.cssText = 'display:none !important;';
+  }
+
+  if (localStorage.getItem(KEY) === 'ok') {
+    showTool();
+  }
+
+  gateBtn.addEventListener('click', () => {
+    if (gatePwd.value === PASSWORD) {
+      localStorage.setItem(KEY, 'ok');
+      showTool();
+      gateError.hidden = true;
+      gatePwd.classList.remove('gate__input--error');
+    } else {
+      gateError.hidden = false;
+      gatePwd.classList.add('gate__input--error');
+    }
+  });
+
+  gatePwd.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') gateBtn.click();
+  });
+
+  logoutBtn.addEventListener('click', () => {
+    localStorage.removeItem(KEY);
+    showGate();
+    gatePwd.value = '';
+    gateError.hidden = true;
+  });
+</script>
+
+<style>
+  /* === Gate password — personalizzato Evolution Service Holding === */
+  .gate {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 70vh;
+    padding: 2rem 1.5rem;
+    background: linear-gradient(160deg, #f0fdf4 0%, #ecfdf5 40%, #f5f3ff 100%);
+  }
+
+  .gate__card {
+    text-align: center;
+    background: #ffffff;
+    border: 1px solid #d1fae5;
+    border-radius: 16px;
+    padding: 2.5rem 2.5rem 2rem;
+    max-width: 440px;
+    width: 100%;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06), 0 1px 4px rgba(16, 185, 129, 0.08);
+  }
+
+  .gate__logos {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .gate__logo {
+    height: 40px;
+    display: block;
+  }
+
+  .gate__x {
+    font-size: 1.2rem;
+    font-weight: 300;
+    color: #94a3b8;
+  }
+
+  .gate__partner-name {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #059669;
+    letter-spacing: -0.01em;
+  }
+
+  .gate__divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #d1fae5, transparent);
+    margin-bottom: 1.25rem;
+  }
+
+  .gate__label {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.5rem;
+  }
+
+  .gate__desc {
+    font-size: 0.85rem;
+    color: #64748b;
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+    max-width: 340px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .gate__form {
+    display: flex;
+    gap: 0.6rem;
+  }
+
+  .gate__input {
+    flex: 1;
+    padding: 0.8rem 1rem;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 10px;
+    font-family: var(--font-family);
+    font-size: 1rem;
+    color: var(--color-text);
+    background: #f8fafc;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .gate__input:focus {
+    outline: none;
+    border-color: #059669;
+    box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.12);
+    background: #fff;
+  }
+
+  .gate__input--error {
+    border-color: #ef4444;
+  }
+
+  .gate__btn {
+    padding: 0.8rem 1.5rem;
+    background: linear-gradient(135deg, #059669, #10b981);
+    color: #ffffff;
+    font-family: var(--font-family);
+    font-weight: 700;
+    font-size: 0.92rem;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.2s;
+    white-space: nowrap;
+  }
+
+  .gate__btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);
+  }
+
+  .gate__error {
+    color: #ef4444;
+    font-size: 0.82rem;
+    margin-top: 0.75rem;
+  }
+
+  /* === Tool — layout Evolution Service Holding === */
+  .evo {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 0 1.5rem 4rem;
+  }
+
+  /* Header co-branded */
+  .evo__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 0;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .evo__header-brand {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .evo__logo {
+    height: 36px;
+    flex-shrink: 0;
+  }
+
+  .evo__header-sep {
+    width: 1px;
+    height: 28px;
+    background: #e2e8f0;
+  }
+
+  .evo__partner-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+    border: 1px solid #a7f3d0;
+    border-radius: 8px;
+    padding: 0.35rem 0.75rem;
+  }
+
+  .evo__partner-icon {
+    font-size: 1.1rem;
+    color: #059669;
+  }
+
+  .evo__partner-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #059669;
+  }
+
+  .evo__logout {
+    background: none;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.4rem 0.85rem;
+    font-family: var(--font-family);
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #64748b;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  .evo__logout:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+
+  /* Hero area */
+  .evo__hero {
+    background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 50%, #f5f3ff 100%);
+    border: 1px solid #d1fae5;
+    border-radius: 16px;
+    padding: 2rem 2.5rem;
+    margin: 1.5rem 0 2rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 2rem;
+  }
+
+  .evo__hero-content {
+    flex: 1;
+  }
+
+  .evo__title {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
+  }
+
+  .evo__sub {
+    font-size: 0.92rem;
+    color: #475569;
+    line-height: 1.6;
+    max-width: 520px;
+  }
+
+  .evo__hero-badges {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex-shrink: 0;
+  }
+
+  .evo__badge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.5rem 0.85rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #334155;
+    white-space: nowrap;
+  }
+
+  .evo__badge .mcf-icon {
+    font-size: 1rem;
+    color: #059669;
+  }
+
+  .evo__simulator {
+    margin-top: 0;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .gate__card {
+      padding: 2rem 1.5rem 1.5rem;
+    }
+
+    .gate__form {
+      flex-direction: column;
+    }
+
+    .gate__logos {
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .gate__logo {
+      height: 32px;
+    }
+
+    .evo__header-brand {
+      gap: 0.65rem;
+    }
+
+    .evo__logo {
+      height: 28px;
+    }
+
+    .evo__hero {
+      flex-direction: column;
+      padding: 1.5rem;
+      gap: 1.25rem;
+    }
+
+    .evo__title {
+      font-size: 1.25rem;
+    }
+
+    .evo__hero-badges {
+      flex-direction: row;
+      flex-wrap: wrap;
+    }
+
+    .evo__badge {
+      font-size: 0.75rem;
+      padding: 0.4rem 0.65rem;
+    }
+  }
+</style>
