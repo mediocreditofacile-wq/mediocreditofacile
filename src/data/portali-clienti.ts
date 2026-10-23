@@ -109,7 +109,7 @@ export const PORTALI_PRATICHE: PortaleCard[] = [
     icona: 'precision_manufacturing',
     settore: 'Gru, macchine e mezzi da cantiere',
     descrizione:
-      'Ogni agente ha il proprio accesso: verifica la partita IVA del cliente, descrive i mezzi con categoria, prezzo e targa, e vede il noleggio, quando c\'è, accanto al leasing di più società a confronto. Scarica il preventivo di noleggio e il prospetto di leasing da consegnare, poi carica la pratica con i documenti. Il referente vede tutta la rete.',
+      'Ogni agente ha il proprio accesso: verifica la partita IVA del cliente, descrive i mezzi con categoria, prezzo e se sono targati, e vede il noleggio, quando c\'è, accanto al leasing di più società a confronto. Scarica il preventivo di noleggio e il prospetto di leasing da consegnare, poi carica la pratica con i documenti. Il referente vede tutta la rete.',
   },
 ];
 
