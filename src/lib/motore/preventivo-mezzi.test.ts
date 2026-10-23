@@ -61,6 +61,7 @@ import {
   descrizioneMezzi,
   generaPreventivoMezzi,
   numeriPropostaMezzi,
+  sceltaMezzi,
 } from './preventivo-mezzi';
 
 // "Oggi" in ora locale, come nei test dell'instradamento
@@ -322,21 +323,87 @@ describe('datiPropostaMezzi e numeriPropostaMezzi', () => {
     expect(dati.partner).toEqual({ A: 'sella', B: 'credem', C: 'alba' });
   });
 
-  it('numeri: lo schermo, con i nomi che la configurazione consente', () => {
-    expect(numeriPropostaMezzi(c, K)).toEqual(mezziPerSchermo(c, true));
+  it('numeri: lo schermo con i nomi che la configurazione consente, piu\' la scelta', () => {
+    expect(numeriPropostaMezzi(c, K, 'C')).toEqual({ ...mezziPerSchermo(c, true), scelta: sceltaMezzi(c, 'C') });
     const senza = calcolo(GRU, ricerca(), KSENZANOMI);
-    expect(numeriPropostaMezzi(senza, KSENZANOMI)).toEqual(mezziPerSchermo(senza, false));
+    expect(numeriPropostaMezzi(senza, KSENZANOMI, 'C')).toEqual({ ...mezziPerSchermo(senza, false), scelta: sceltaMezzi(senza, 'C') });
   });
 
   it('numeri: con i nomi spenti nessun nome di partner, nemmeno nella chiave', () => {
     const senza = calcolo(GRU, ricerca(), KSENZANOMI);
-    const testo = JSON.stringify(numeriPropostaMezzi(senza, KSENZANOMI)).toLowerCase();
+    const testo = JSON.stringify(numeriPropostaMezzi(senza, KSENZANOMI, 'C')).toLowerCase();
     for (const v of ['sella', 'credem', 'alba']) expect(testo).not.toContain(v);
   });
 
   it('numeri: con una carrozzeria senza configurazione mezzi i nomi sono spenti', () => {
     const senzaConfig = bergamelli({ mezzi: null });
-    expect(numeriPropostaMezzi(c, senzaConfig)).toEqual(mezziPerSchermo(c, false));
+    expect(numeriPropostaMezzi(c, senzaConfig, 'C')).toEqual({ ...mezziPerSchermo(c, false), scelta: sceltaMezzi(c, 'C') });
+  });
+});
+
+// --- la scelta che lo Storico e la pratica leggono ---------------------------
+
+describe('sceltaMezzi: durata, canone e rata del leasing in evidenza', () => {
+  /** La rata del noleggio a una durata, letta dal calcolo */
+  const canoneA = (c: CalcoloMezzi, durata: number) => c.noleggio!.rate.find((r) => r.durata === durata)!.canone;
+
+  it('gru Grenke da 50.000: 60 mesi, il canone Grenke a 60 e la rata della colonna nel PDF a 60', () => {
+    const c = calcolo(GRU);
+    const chiave = chiavePerPdf(c, undefined)!;
+    expect(sceltaMezzi(c, chiave)).toEqual({ durata: 60, canone: canoneA(c, 60), rataLeasing: rataA(c, chiave, 60) });
+  });
+
+  // Il valore assoluto vale con l'Euribor di quel giorno, come in leasing-confronto.test.ts
+  it.runIf(EURIBOR_3M === 2.66)('gru da 50.000: la rata del leasing e\' quella di Alba, 857,72', () => {
+    const c = calcolo(GRU);
+    expect(sceltaMezzi(c, chiavePerPdf(c, undefined)).rataLeasing).toBe(857.72);
+  });
+
+  it('segue la colonna scelta: A, B o C danno la loro rata a 60 mesi', () => {
+    const c = calcolo(GRU);
+    for (const chiave of ['A', 'B', 'C']) expect(sceltaMezzi(c, chiave).rataLeasing, chiave).toBe(rataA(c, chiave, 60));
+  });
+
+  it('Econocom (36, 48 e 60 mesi): 60 mesi e il canone Econocom a 60', () => {
+    const c = calcolo(CARRELLO, ricerca(6_000_000));
+    const s = sceltaMezzi(c, 'A');
+    expect(s.durata).toBe(60);
+    expect(s.canone).toBe(canoneA(c, 60));
+    expect(s.rataLeasing).toBe(rataA(c, 'A', 60));
+  });
+
+  it('un noleggio senza il 60 mette in evidenza la durata piu\' lunga che ha, come lo schermo', () => {
+    const c = structuredClone(calcolo(GRU));
+    c.noleggio!.rate = c.noleggio!.rate.filter((r) => r.durata <= 48);
+    const evidenza = mezziPerSchermo(c, false).noleggio!.durataEvidenza!;
+    expect(evidenza).toBe(48);
+    expect(sceltaMezzi(c, 'A')).toEqual({ durata: 48, canone: canoneA(c, 48), rataLeasing: rataA(c, 'A', 48) });
+  });
+
+  it('autogru targata, senza noleggio: durata 60, canone null, la rata del leasing c\'e\'', () => {
+    const c = calcolo(AUTOGRU);
+    expect(c.noleggio).toBeNull();
+    expect(sceltaMezzi(c, 'A')).toEqual({ durata: 60, canone: null, rataLeasing: rataA(c, 'A', 60) });
+  });
+
+  it('nessun leasing con righe: la rata e\' null, anche con una chiave', () => {
+    const niente = calcolo({ beni: [bene('Attrezzature', 1_000)] });
+    expect(sceltaMezzi(niente, null)).toEqual({ durata: 60, canone: null, rataLeasing: null });
+    expect(sceltaMezzi(niente, 'A').rataLeasing).toBeNull();
+  });
+
+  it('la colonna scelta senza riga a quella durata, o una chiave che non c\'e\': rata null', () => {
+    const c = structuredClone(calcolo(GRU));
+    c.leasing[0].righe = c.leasing[0].righe.filter((r) => r.durata !== 60);
+    expect(sceltaMezzi(c, 'A').rataLeasing).toBeNull();
+    expect(sceltaMezzi(c, 'B').rataLeasing).toBe(rataA(c, 'B', 60));
+    for (const chiave of ['Z', '', 'sella', null]) expect(sceltaMezzi(c, chiave).rataLeasing, String(chiave)).toBeNull();
+  });
+
+  it('senza durata in evidenza il canone e\' null, non un numero inventato', () => {
+    const c = structuredClone(calcolo(GRU));
+    c.noleggio!.rate = [];
+    expect(sceltaMezzi(c, 'A')).toMatchObject({ durata: 60, canone: null });
   });
 });
 
@@ -507,7 +574,14 @@ describe('generaPreventivoMezzi', () => {
     expect(descrizione).toBe('Gru a torre di prova');
     expect([prezzo, semaforo, anticipo, markup]).toEqual([50_000, c.valutazione!.semaforo, 10, 0]);
     expect(JSON.parse(String(dati))).toEqual(JSON.parse(JSON.stringify(datiPropostaMezzi(c, chiavePerPdf(c, undefined)))));
-    expect(JSON.parse(String(numeri))).toEqual(JSON.parse(JSON.stringify(mezziPerSchermo(c, true))));
+    const chiave = chiavePerPdf(c, undefined);
+    expect(JSON.parse(String(numeri))).toEqual(JSON.parse(JSON.stringify({ ...mezziPerSchermo(c, true), scelta: sceltaMezzi(c, chiave) })));
+    // Lo Storico legge numeri->'scelta': durata, canone Grenke e rata del leasing nel PDF
+    expect(JSON.parse(String(numeri)).scelta).toEqual({
+      durata: 60,
+      canone: c.noleggio!.rate.find((x) => x.durata === 60)!.canone,
+      rataLeasing: rataA(c, chiave!, 60),
+    });
     expect(canale).toBe('grenke');
   });
 

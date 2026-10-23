@@ -6,8 +6,9 @@
 // Numeri e PDF escono dal calcolo dello schermo (CalcoloMezzi): non c'e' un secondo
 // conto. Cosa va dove:
 //  - `numeri` di app.proposta e' lo schermo (mezziPerSchermo) con i nomi che la
-//    configurazione consente: lo rileggono lo storico e la pratica anche per referente
-//    e agente, quindi niente che lo schermo nasconde;
+//    configurazione consente, piu' la `scelta` (durata, canone, rata del leasing nel
+//    PDF) che lo Storico e la pratica leggono: lo rileggono anche referente e agente,
+//    quindi niente che lo schermo nasconde;
 //  - `dati` rifa' lo stesso conto e serve alla pratica. La mappa colonna -> partner
 //    (A, B, C -> sella, credem, alba) sta SOLO li': e' server-side, non esce mai;
 //  - `canale` e' la colonna riservata all'admin MCF (Grenke, Econocom o null);
@@ -111,9 +112,39 @@ export function datiPropostaMezzi(c: CalcoloMezzi, chiaveLeasing: string | null)
   };
 }
 
-/** `numeri` di app.proposta: quello che vede lo schermo, con i nomi dei partner solo se la configurazione li mostra */
-export function numeriPropostaMezzi(c: CalcoloMezzi, k: Pick<Carrozzeria, 'mezzi'>): MezziSchermo {
-  return mezziPerSchermo(c, k.mezzi?.mostraNomiPartner === true);
+/**
+ * La scelta in evidenza di un preventivo: quello che lo Storico mostra (`numeri->'scelta'`)
+ * e da cui la pratica propone la durata. La durata e' quella in evidenza dello schermo
+ * (60 mesi se il noleggio la quota, altrimenti la piu' lunga), o 60 senza noleggio. Il
+ * canone e' la rata del noleggio a quella durata; la rata del leasing e' quella della
+ * colonna messa nel PDF (`chiaveLeasing`). Null dove manca la riga, mai un numero
+ * inventato. Sono cifre che l'agente ha gia' a schermo: nessun nome, nessuno spread.
+ */
+export interface SceltaMezzi {
+  durata: number;
+  canone: number | null;
+  rataLeasing: number | null;
+}
+
+export function sceltaMezzi(c: CalcoloMezzi, chiaveLeasing: string | null): SceltaMezzi {
+  const noleggio = mezziPerSchermo(c, false).noleggio;
+  const durata = noleggio?.durataEvidenza ?? DURATA_EVIDENZA;
+  const canone = noleggio?.rate.find((r) => r.durata === durata)?.canone ?? null;
+  const indice = chiaveLeasing === null ? -1 : c.leasing.findIndex((_, i) => chiaveColonna(i) === chiaveLeasing);
+  const rataLeasing = indice < 0 ? null : (c.leasing[indice].righe.find((r) => r.durata === durata)?.rata ?? null);
+  return { durata, canone, rataLeasing };
+}
+
+/**
+ * `numeri` di app.proposta: quello che vede lo schermo, con i nomi dei partner solo se la
+ * configurazione li mostra, e la `scelta` che lo Storico legge.
+ */
+export function numeriPropostaMezzi(
+  c: CalcoloMezzi,
+  k: Pick<Carrozzeria, 'mezzi'>,
+  chiaveLeasing: string | null,
+): MezziSchermo & { scelta: SceltaMezzi } {
+  return { ...mezziPerSchermo(c, k.mezzi?.mostraNomiPartner === true), scelta: sceltaMezzi(c, chiaveLeasing) };
 }
 
 // --- spread e provvigione (solo per la mail a MCF) ----------------------------
@@ -283,7 +314,7 @@ async function salvaProposta(
     k.slug, contesto.organizationId, contesto.userId, ricerca.id, ricerca.piva || scheda.piva,
     scheda.ragioneSociale || ricerca.ragione_sociale || 'Senza intestatario',
     null, descrizioneMezzi(c.beni), c.totale, valutazione.semaforo, c.anticipoPerc, 0,
-    JSON.stringify(datiPropostaMezzi(c, chiave)), JSON.stringify(numeriPropostaMezzi(c, k)),
+    JSON.stringify(datiPropostaMezzi(c, chiave)), JSON.stringify(numeriPropostaMezzi(c, k, chiave)),
     c.noleggio?.canale ?? null,
   ];
   for (let tentativo = 0; tentativo < 4; tentativo++) {
