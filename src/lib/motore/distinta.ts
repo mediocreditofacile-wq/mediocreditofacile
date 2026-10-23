@@ -110,14 +110,14 @@ const assente = (v: unknown) => v === undefined || v === null || (typeof v === '
 const migliaiaAmbigue = (v: unknown) =>
   typeof v === 'string' && /^\d{1,3}(\.\d{3})+$/.test(v.replace(/[€\s]/g, ''));
 
-function leggiQuantita(v: unknown): number | null {
+export function leggiQuantita(v: unknown): number | null {
   if (migliaiaAmbigue(v)) return null;
   const n = numero(v);
   return Number.isInteger(n) && n >= 1 && n <= MAX_QUANTITA ? n : null;
 }
 
 /** Il prezzo unitario al centesimo, oppure null se non si legge o non e' maggiore di zero */
-function leggiPrezzo(v: unknown): number | null {
+export function leggiPrezzo(v: unknown): number | null {
   if (migliaiaAmbigue(v)) return null;
   const n = numero(v);
   if (!Number.isFinite(n)) return null;
