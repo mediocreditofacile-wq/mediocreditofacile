@@ -15,7 +15,9 @@
 //    colonna (A, B, C) e il server la risolve nel partner con la mappa salvata: un
 //    partner o una durata che il preventivo non aveva sono un 400;
 //  - il venditore e' quello che firma l'offerta (ragione sociale dal preventivo);
-//  - il rosso del semaforo non blocca: la pratica parte marcata "da rivalutare".
+//  - il rosso del semaforo non blocca: la pratica parte marcata "da rivalutare". Vale il
+//    rosso salvato col preventivo oppure gli eventi negativi presenti sulla ricerca
+//    riletta all'invio (arrivati dopo il preventivo: la verifica gira in background).
 //
 // Cosa va dove: il nome del partner e il venditore stanno in `app.pratica.dati.extra` e
 // nella mail a MCF, che sono solo di MCF (nessuna lista legge `dati`). Al commerciale la
@@ -201,7 +203,10 @@ export async function creaPraticaMezzi(e: Sessione, corpo: Record<string, unknow
   const extra: ExtraPratica = {
     venditore,
     partner: scelta.partner ? nomePartner(scelta.partner) : null,
-    rivalutare: scelta.rivalutare,
+    // Rosso nel preventivo, o eventi negativi arrivati dopo: con i criteri del locatore la
+    // verifica gira in background e un preventivo salvato mentre e' in corso non e' rosso.
+    // sceltaPratica resta pura; qui conta anche la ricerca riletta all'invio.
+    rivalutare: scelta.rivalutare || ricerca.eventi?.stato === 'presenti',
     checklistExtra: scelta.prodotto === 'leasing' ? [VOCE_BILANCIO_ANALITICO] : [],
   };
 

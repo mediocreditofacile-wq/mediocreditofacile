@@ -692,6 +692,56 @@ describe('creaPraticaMezzi: il rosso non blocca', () => {
     expect(inserita()!.dati.extra.rivalutare).toBe(false);
     expect(mailPratica().subject).not.toContain('rivalutare');
   });
+
+  // Con i criteri del locatore la verifica eventi gira in background: un preventivo salvato
+  // mentre e' in corso non e' rosso, e se poi gli eventi risultano presenti la pratica
+  // dev'essere marcata lo stesso. Conta la ricerca riletta all'invio, non solo la colonna salvata.
+  it('preventivo non rosso ma eventi negativi presenti sulla ricerca all\'invio: la pratica e\' da rivalutare', async () => {
+    const preventivo = salvata(GRU, { ricerca: ricerca('in-verifica') });
+    expect(preventivo.semaforo).not.toBe('rosso');
+    database({ proposta: preventivo, ricerca: ricerca('presenti') });
+    const r = await creaPraticaMezzi(sessione() as any, corpo());
+    expect(r).toMatchObject({ ok: true });
+    expect(inserita()!.dati.extra.rivalutare).toBe(true);
+    const m = mailPratica();
+    expect(m.subject).toBe('Pratica Bergamelli — EDILE ALFA S.R.L. — 50.000 euro — rosso, da rivalutare');
+    expect(m.html).toContain('rosso, da rivalutare');
+  });
+
+  it('lo stesso vale sul leasing', async () => {
+    database({ proposta: salvata(GRU, { ricerca: ricerca('in-verifica') }), ricerca: ricerca('presenti') });
+    await creaPraticaMezzi(sessione() as any, corpo({ prodotto: 'leasing', leasingChiave: 'B', durata: 60 }));
+    expect(inserita()!.dati.extra).toMatchObject({ partner: 'Credem Leasing', rivalutare: true });
+    expect(mailPratica().subject).toMatch(/ — rosso, da rivalutare$/);
+  });
+
+  it('preventivo non rosso e ricerca con eventi assenti: la pratica non e\' marcata', async () => {
+    database({ proposta: salvata(GRU), ricerca: ricerca('assenti') });
+    await creaPraticaMezzi(sessione() as any, corpo());
+    expect(inserita()!.dati.extra.rivalutare).toBe(false);
+    const m = mailPratica();
+    expect(m.subject).toBe('Pratica Bergamelli — EDILE ALFA S.R.L. — 50.000 euro');
+    expect(m.html).not.toContain('da rivalutare');
+  });
+
+  it('eventi ancora in verifica, non pervenuti, non avviati o senza stato non marcano la pratica', async () => {
+    for (const stato of ['in-verifica', 'non-pervenuti', 'non-avviata'] as const) {
+      db.query.mockClear();
+      database({ ricerca: ricerca(stato) });
+      await creaPraticaMezzi(sessione() as any, corpo());
+      expect(inserita()!.dati.extra.rivalutare).toBe(false);
+    }
+    db.query.mockClear();
+    database({ ricerca: { ...ricerca(), eventi: null } });
+    await creaPraticaMezzi(sessione() as any, corpo());
+    expect(inserita()!.dati.extra.rivalutare).toBe(false);
+  });
+
+  it('il preventivo rosso resta rosso anche se gli eventi della ricerca sono assenti', async () => {
+    database({ proposta: salvata(GRU, { ricerca: ricerca('presenti') }), ricerca: ricerca('assenti') });
+    await creaPraticaMezzi(sessione() as any, corpo());
+    expect(inserita()!.dati.extra.rivalutare).toBe(true);
+  });
 });
 
 describe('creaPraticaMezzi: senza preventivo o con un preventivo che non regge e\' un errore', () => {
