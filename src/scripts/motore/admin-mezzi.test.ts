@@ -4,7 +4,7 @@
 // La pagina vera (DOM) non ha test: qui sta quello che si puo' sbagliare in silenzio.
 
 import { describe, expect, it } from 'vitest';
-import { canaleConservato, condizioniSulBene, configDaTesto, configInTesto } from './admin-mezzi';
+import { canaleConservato, condizioniSulBene, configDaTesto, configInTesto, notaConfigurazione } from './admin-mezzi';
 
 const MEZZI = {
   venditori: [{ codice: 'manc', ragioneSociale: 'Manc S.r.l.', piva: '03863700989', categorie: ['Autogru'] }],
@@ -103,5 +103,24 @@ describe('canaleConservato', () => {
     const copia = structuredClone(SALVATO);
     canaleConservato(SALVATO, PANNELLO, { canale: 'grenke', tabella: 'sputnik', attivo: true, maggiorazionePerc: 0 });
     expect(SALVATO).toEqual(copia);
+  });
+});
+
+describe('notaConfigurazione', () => {
+  it('sui mezzi dice quali campi della configurazione il calcolo non usa, e che cosa fa il leasing acceso', () => {
+    const nota = notaConfigurazione('mezzi')!;
+    for (const campo of ['listino del noleggio', 'listino affiancato', 'partner del leasing', 'leasing da']) {
+      expect(nota.toLowerCase(), campo).toContain(campo);
+    }
+    // Il leasing acceso non spegne i partner dei mezzi: cambia solo il testo dell'invito
+    expect(nota).toContain('Proponi anche il leasing');
+    expect(nota).toContain('mail di invito');
+    expect(nota).toContain('Venditori, categorie e leasing');
+  });
+
+  it('sugli altri settori nessuna nota: i campi contano come sempre', () => {
+    for (const settore of ['distinta', 'macchine', 'generico', 'fotovoltaico', '']) {
+      expect(notaConfigurazione(settore), settore).toBeNull();
+    }
   });
 });

@@ -21,7 +21,7 @@ import { $, api, apiJson, esc, euro, euroEsatto, messaggio, num, stato, traduci 
 import { aggiornaCatalogo } from './proposte';
 import { leggiIncollato, numero } from '../../lib/motore/catalogo-import';
 import { etichettaMese } from '../../lib/motore/richieste';
-import { canaleConservato, condizioniSulBene, configDaTesto, configInTesto } from './admin-mezzi';
+import { canaleConservato, condizioniSulBene, configDaTesto, configInTesto, notaConfigurazione } from './admin-mezzi';
 
 let dati: any = null;
 
@@ -404,6 +404,7 @@ function rendi() {
       <textarea id="cf-extra" class="mt-input" rows="3">${esc((c.documentiExtra ?? []).join('\n'))}</textarea></label>
     <label class="mt-toggle" style="margin-top:12px"><input type="checkbox" id="cf-demo" ${c.demo ? 'checked' : ''} /> Portale dimostrativo (scritto a video e nei PDF)</label>
     <label class="mt-toggle" style="margin-top:12px"><input type="checkbox" id="cf-leasing" ${c.leasing !== false ? 'checked' : ''} /> Proponi anche il leasing</label>
+    ${notaConfigurazione(c.settore) ? `<p class="mt-nota" style="margin:12px 0 0">${esc(notaConfigurazione(c.settore))}</p>` : ''}
     <div class="mt-azioni"><button type="button" id="cf-salva" class="mt-btn">Salva la configurazione</button></div>
     <p id="cf-msg" class="mt-msg" hidden></p>
 

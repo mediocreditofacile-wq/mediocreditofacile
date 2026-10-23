@@ -32,6 +32,19 @@ export function configDaTesto(testo: string): LetturaConfig {
 }
 
 /**
+ * La nota sotto la configurazione del settore mezzi. Cinque campi li' non contano per il
+ * calcolo: il noleggio lo decidono i canali, il leasing i partner della configurazione dei
+ * mezzi. I campi restano nel modulo e si salvano come sempre, cosi' il salvataggio e'
+ * lo stesso per ogni settore; la nota dice che cosa non fanno. Null sugli altri settori.
+ */
+export function notaConfigurazione(settore: string): string | null {
+  if (settore !== 'mezzi') return null;
+  return 'Sui mezzi listino del noleggio, listino affiancato, partner del leasing e "Leasing da" non contano: '
+    + 'il noleggio lo decidono i canali di quotazione qui sotto, il leasing i partner della sezione "Venditori, categorie e leasing". '
+    + '"Proponi anche il leasing" non spegne il leasing dei mezzi: cambia solo il testo della mail di invito.';
+}
+
+/**
  * Le condizioni sul bene di un canale come righe di testo, con i nomi del pannello.
  * Si mostrano e non si cambiano da qui. Una condizione che non cambia niente
  * (categorie escluse vuote, esclusione dei targati spenta) non compare; "venditori"
