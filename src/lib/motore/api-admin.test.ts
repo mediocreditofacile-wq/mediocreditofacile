@@ -25,15 +25,49 @@ import { GET, POST } from '../../pages/api/motore/admin';
 type Ruolo = 'admin' | 'referente' | 'agente';
 const LOGO = 'brand/emme2-servizi.jpg';
 
+// Bergamelli come la scrive il seed: Manc firma le gru e le autogru, Nol System tutto il resto
+const CANALI_MEZZI = [
+  { canale: 'econocom', attivo: true, tabella: 'econocom-pa', maggiorazionePerc: 0, fatturatoMin: 5_000_000, importoMin: 150_000, venditori: ['nolsystem'] },
+  { canale: 'grenke', attivo: true, tabella: 'sputnik', maggiorazionePerc: 0, venditori: ['manc'], categorieEscluse: ['Ponteggi'], escludiTargati: true },
+];
+const MEZZI = {
+  venditori: [
+    {
+      codice: 'manc', ragioneSociale: 'Manc S.r.l.', piva: '03863700989', indirizzo: 'Via Roma 1, 25100 Brescia (BS)',
+      telefono: '+39 030 000000', email: 'info@manc.example', pec: 'manc@pec.example', categorie: ['Gru a torre', 'Autogru'],
+    },
+    {
+      codice: 'nolsystem', ragioneSociale: 'NOL SYSTEM ITALIA SRL', piva: '05400750260', indirizzo: '', telefono: '',
+      email: '', pec: '', categorie: [] as string[],
+    },
+  ],
+  categorie: [
+    { nome: 'Gru a torre', targato: false },
+    { nome: 'Autogru', targato: true },
+    { nome: 'Movimento terra', targato: null },
+    { nome: 'Ponteggi', targato: false },
+  ],
+  leasing: {
+    anticipoPerc: 10,
+    partner: [
+      { partner: 'sella', spreadFinoA48: 2.25, spreadDa60: 2.25 },
+      { partner: 'credem', spreadFinoA48: 2.9, spreadDa60: 2.9 },
+      { partner: 'alba', spreadFinoA48: 3.1, spreadDa60: 2.5 },
+    ],
+  },
+  mostraNomiPartner: true,
+};
+
 const carrozzeria = (settore: string) => ({
-  slug: settore === 'distinta' ? 'led-office' : 'duplex',
-  nome: settore === 'distinta' ? 'Led Office' : 'Duplex',
+  slug: settore === 'distinta' ? 'led-office' : settore === 'mezzi' ? 'bergamelli' : 'duplex',
+  nome: settore === 'distinta' ? 'Led Office' : settore === 'mezzi' ? 'Bergamelli' : 'Duplex',
   citta: null, prefisso: 'LO', organizationId: 'org-1', tabellaCanoni: 'pagarent',
   brand: { logo: null, colore: '#1A1A1A', accento: '#D03948' },
   settore, etichettaBene: 'Fornitura', partnerLeasing: 'alba', sogliaLeasing: 0, tettoMeseEuro: 100,
   demo: false, documentiExtra: [], attivo: true, tabellaAlternativa: null,
   regoleSemaforo: settore === 'distinta' ? 'prefiltro' : 'locatore', leasing: false, prezzoVerifica: 5,
-  canali: settore === 'distinta' ? CANALI_LO : null,
+  canali: settore === 'distinta' ? CANALI_LO : settore === 'mezzi' ? CANALI_MEZZI : null,
+  mezzi: settore === 'mezzi' ? MEZZI : null,
   societaFornitrice: settore === 'distinta' ? { ...SOCIETA_EMME2, logo: LOGO } : null,
   checklist: settore === 'distinta' ? CHECKLIST_LO : null,
   categorie: settore === 'distinta' ? CATEGORIE_LO : null,
@@ -71,7 +105,7 @@ describe('solo l\'admin MCF', () => {
     for (const ruolo of ['referente', 'agente'] as const) {
       motore.sessioneMotore.mockResolvedValueOnce(sessione(ruolo));
       expect((await GET(get())).status).toBe(403);
-      for (const azione of ['canali', 'societa', 'categorie', 'checklist', 'segnala', 'togli-segnalazione', 'pratica-esterna']) {
+      for (const azione of ['canali', 'societa', 'categorie', 'checklist', 'segnala', 'togli-segnalazione', 'pratica-esterna', 'mezzi']) {
         motore.sessioneMotore.mockResolvedValueOnce(sessione(ruolo));
         expect((await POST(post({ azione, piva: PIVA }))).status, `${ruolo} ${azione}`).toBe(403);
       }
@@ -366,5 +400,153 @@ describe('lettura del pannello', () => {
     expect(c.segnalati).toEqual([]);
     expect(c.proposte).toEqual([]);
     expect(sqlChiamate().some((s) => /cliente_segnalato|pratica_esterna|catalogo_storico|app\.proposta/.test(s))).toBe(false);
+  });
+});
+
+describe('settore mezzi', () => {
+  const copiaMezzi = () => copia(MEZZI);
+
+  describe('azione mezzi', () => {
+    it('la configurazione valida si salva nella colonna mezzi, com\'e\'', async () => {
+      motore.sessioneMotore.mockResolvedValueOnce(sessione('admin', 'mezzi'));
+      const inviata = copiaMezzi();
+      inviata.leasing.anticipoPerc = 15;
+      const r = await POST(post({ azione: 'mezzi', mezzi: inviata }));
+      expect(r.status).toBe(200);
+      const [sql, p] = db.query.mock.calls[0];
+      expect(sql).toMatch(/UPDATE app\.carrozzeria SET mezzi = \$2, aggiornato = now\(\) WHERE slug = \$1/);
+      expect(p[0]).toBe('bergamelli');
+      expect(JSON.parse(p[1])).toEqual({ ...MEZZI, leasing: { ...MEZZI.leasing, anticipoPerc: 15 } });
+      expect(db.query).toHaveBeenCalledTimes(1);
+    });
+    it('una configurazione che non regge: 400 col messaggio che nomina il campo, niente salvato', async () => {
+      const prove: [(c: any) => void, RegExp][] = [
+        [(c) => (c.venditori[0].piva = '03863700988'), /Venditore manc, partita IVA «03863700988»/],
+        [(c) => (c.leasing.partner[2].spreadFinoA48 = 4.9), /Leasing, Alba, spread fino a 48 mesi «4,90»/],
+        [(c) => (c.note = 'x'), /campo «note» non previsto/],
+        [(c) => (c.venditori[1].categorie = ['Ponteggi']), /Manca il venditore di tutto il resto/],
+        [(c) => (c.leasing.anticipoPerc = 45), /Leasing, anticipo «45»/],
+      ];
+      for (const [modifica, atteso] of prove) {
+        motore.sessioneMotore.mockResolvedValueOnce(sessione('admin', 'mezzi'));
+        const inviata = copiaMezzi();
+        modifica(inviata);
+        const r = await POST(post({ azione: 'mezzi', mezzi: inviata }));
+        expect(r.status, String(atteso)).toBe(400);
+        const c = await corpo(r);
+        expect(c.error).toBe('config_non_valida');
+        expect(c.messaggio).toMatch(atteso);
+        expect(c.messaggio).toMatch(/Nessuna modifica salvata\.$/);
+      }
+      expect(db.query).not.toHaveBeenCalled();
+    });
+    it('senza la configurazione nel corpo: 400, niente salvato', async () => {
+      motore.sessioneMotore.mockResolvedValueOnce(sessione('admin', 'mezzi'));
+      expect((await POST(post({ azione: 'mezzi' }))).status).toBe(400);
+      expect(db.query).not.toHaveBeenCalled();
+    });
+    it('su un settore che non e\' mezzi: 400 solo_mezzi, niente salvato', async () => {
+      for (const settore of ['distinta', 'macchine', 'fotovoltaico', 'generico']) {
+        motore.sessioneMotore.mockResolvedValueOnce(sessione('admin', settore));
+        const r = await POST(post({ azione: 'mezzi', mezzi: copiaMezzi() }));
+        expect(r.status, settore).toBe(400);
+        expect((await corpo(r)).error, settore).toBe('solo_mezzi');
+      }
+      expect(db.query).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('canali', () => {
+    it('sui mezzi i canali si salvano, con le condizioni sul bene', async () => {
+      motore.sessioneMotore.mockResolvedValueOnce(sessione('admin', 'mezzi'));
+      const inviati = copia(CANALI_MEZZI);
+      inviati[0].attivo = false;
+      const r = await POST(post({ azione: 'canali', canali: inviati }));
+      expect(r.status).toBe(200);
+      const [sql, p] = db.query.mock.calls[0];
+      expect(sql).toMatch(/UPDATE app\.carrozzeria SET canali = \$2/);
+      expect(JSON.parse(p[1])).toEqual([{ ...CANALI_MEZZI[0], attivo: false }, CANALI_MEZZI[1]]);
+    });
+    it('una condizione sul bene illeggibile: 400 col nome della condizione', async () => {
+      motore.sessioneMotore.mockResolvedValueOnce(sessione('admin', 'mezzi'));
+      const inviati = copia(CANALI_MEZZI);
+      inviati[1].escludiTargati = 'si';
+      const r = await POST(post({ azione: 'canali', canali: inviati }));
+      expect(r.status).toBe(400);
+      expect((await corpo(r)).messaggio).toMatch(/Grenke, esclude i mezzi targati/);
+      expect(db.query).not.toHaveBeenCalled();
+    });
+    it('le altre azioni di Led Office restano chiuse ai mezzi', async () => {
+      for (const corpoAzione of [
+        { azione: 'societa', societa: { ...SOCIETA_EMME2 } },
+        { azione: 'categorie', categorie: copia(CATEGORIE_LO) },
+        { azione: 'checklist', checklist: copia(CHECKLIST_LO) },
+        { azione: 'segnala', piva: PIVA, motivo: 'insoluto', effetto: 'blocco' },
+        { azione: 'togli-segnalazione', piva: PIVA },
+        { azione: 'pratica-esterna', piva: PIVA, data: '2026-09-15' },
+      ]) {
+        motore.sessioneMotore.mockResolvedValueOnce(sessione('admin', 'mezzi'));
+        const r = await POST(post(corpoAzione));
+        expect(r.status, corpoAzione.azione).toBe(400);
+        expect((await corpo(r)).error, corpoAzione.azione).toBe('solo_distinta');
+      }
+      expect(db.query).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('configurazione del settore', () => {
+    it('il settore mezzi si salva (e non ricade su generico)', async () => {
+      motore.sessioneMotore.mockResolvedValueOnce(sessione('admin', 'macchine'));
+      await POST(post({
+        azione: 'config',
+        config: {
+          settore: 'mezzi', etichettaBene: 'Mezzo', tabellaCanoni: 'sputnik', partnerLeasing: 'alba', sogliaLeasing: 0,
+          tettoMeseEuro: 30, colore: '#1A1A1A', accento: '#D03948', demo: false, documentiExtra: [], tabellaAlternativa: '',
+          leasing: true, prezzoVerifica: '', regoleSemaforo: 'locatore',
+        },
+      }));
+      const [sql, p] = db.query.mock.calls.find((c) => String(c[0]).includes('UPDATE app.carrozzeria SET settore'))!;
+      expect(String(sql)).toContain('settore = COALESCE($2, settore)');
+      expect(p[1]).toBe('mezzi');
+    });
+  });
+
+  describe('lettura del pannello', () => {
+    it('porta la configurazione dei mezzi salvata, con partite IVA e spread: la vede solo l\'admin', async () => {
+      motore.sessioneMotore.mockResolvedValueOnce(sessione('admin', 'mezzi'));
+      const c = await corpo(await GET(get()));
+      expect(c.ok).toBe(true);
+      expect(c.mezzi).toEqual(MEZZI);
+      expect(c.config.settore).toBe('mezzi');
+      expect(c.canali).toEqual(CANALI_MEZZI);
+    });
+    it('fuori dai mezzi la chiave c\'e\' ma e\' vuota', async () => {
+      for (const settore of ['distinta', 'macchine']) {
+        motore.sessioneMotore.mockResolvedValueOnce(sessione('admin', settore));
+        expect((await corpo(await GET(get()))).mezzi, settore).toBeNull();
+      }
+    });
+    it('referente e agente non ricevono niente: 403, senza la chiave', async () => {
+      for (const ruolo of ['referente', 'agente'] as const) {
+        motore.sessioneMotore.mockResolvedValueOnce(sessione(ruolo, 'mezzi'));
+        const r = await GET(get());
+        expect(r.status).toBe(403);
+        expect(JSON.stringify(await corpo(r))).not.toMatch(/mezzi|03863700989|spread/);
+      }
+    });
+    it('l\'avviso sulla data di Pioneer sta sul canale che usa Pioneer, non su Grenke in quanto tale', async () => {
+      // Sui mezzi Grenke quota con Sputnik: dire "resta spento" sarebbe falso
+      motore.sessioneMotore.mockResolvedValueOnce(sessione('admin', 'mezzi'));
+      expect((await corpo(await GET(get()))).avvisiCanale).toEqual({});
+      // Led Office: Grenke su Pioneer, l'avviso c'e' come prima
+      motore.sessioneMotore.mockResolvedValueOnce(sessione('admin', 'distinta'));
+      expect((await corpo(await GET(get()))).avvisiCanale.grenke).toMatch(/Pioneer/);
+    });
+    it('non legge le tabelle della distinta: niente segnalati, storico, proposte', async () => {
+      motore.sessioneMotore.mockResolvedValueOnce(sessione('admin', 'mezzi'));
+      const c = await corpo(await GET(get()));
+      expect(c.segnalati).toEqual([]);
+      expect(sqlChiamate().some((s) => /cliente_segnalato|pratica_esterna|catalogo_storico|app\.proposta/.test(s))).toBe(false);
+    });
   });
 });

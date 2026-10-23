@@ -11,11 +11,17 @@
 // canale, maggiorazione e proposta per il locatore. I nomi dei canali arrivano
 // dall'API admin e non stanno in questo codice; questo pezzo lo scarica solo
 // l'admin (portale.ts).
+//
+// Sul settore mezzi (Bergamelli) la sezione "Venditori, categorie e leasing" con la
+// configurazione in un campo di testo JSON, e i canali con le condizioni sul bene
+// (venditori, categorie escluse, mezzi targati): si vedono, non si cambiano da qui, e il
+// salvataggio dei canali le conserva. I pezzi puri stanno in admin-mezzi.ts.
 
 import { $, api, apiJson, esc, euro, euroEsatto, messaggio, num, stato, traduci } from './comune';
 import { aggiornaCatalogo } from './proposte';
 import { leggiIncollato, numero } from '../../lib/motore/catalogo-import';
 import { etichettaMese } from '../../lib/motore/richieste';
+import { canaleConservato, condizioniSulBene, configDaTesto, configInTesto } from './admin-mezzi';
 
 let dati: any = null;
 
@@ -57,7 +63,8 @@ const giorno = (aaaammgg: string | null | undefined) => (aaaammgg ? aaaammgg.spl
 
 /** Il messaggio di un rifiuto: quello del server se c'e', altrimenti la traduzione */
 const ERRORI_PANNELLO: Record<string, string> = {
-  solo_distinta: 'Questa parte del pannello vale solo sul settore distinta.',
+  solo_distinta: 'Questa parte del pannello vale solo sul settore distinta (i canali anche sui mezzi).',
+  solo_mezzi: 'Questa parte del pannello vale solo sul settore mezzi.',
   segnalazione_non_trovata: 'Questa partita IVA non è più fra i clienti segnalati.',
   categoria_non_valida: 'La categoria della voce non è fra quelle del pannello.',
 };
@@ -71,6 +78,14 @@ const CONDIZIONI = [
   { k: 'formeEscluse', et: 'Forme giuridiche escluse (codici, es. RS)', tipo: 'elenco' },
   { k: 'settoriEsclusi', et: 'Settori esclusi (prefissi ATECO)', tipo: 'ateco' },
 ] as const;
+
+/** Le condizioni sul bene di un canale (mezzi), in sola lettura. Senza condizioni non scrive niente */
+function righeSulBene(c: any): string {
+  const righe = condizioniSulBene(c);
+  return righe.length
+    ? `<p class="mt-nota" style="margin:12px 0 0">Condizioni sul bene, non si cambiano da qui:<br>${righe.map(esc).join('<br>')}</p>`
+    : '';
+}
 
 function sezioneCanali(): string {
   const canali: any[] = dati.canali ?? [];
@@ -87,13 +102,21 @@ function sezioneCanali(): string {
           value="${esc(x.tipo === 'numero' ? comeTesto(c[x.k]) : (c[x.k] ?? []).join(', '))}" placeholder="vuoto: nessuna condizione" /></label>`).join('')}
       </div>
       <label class="mt-toggle" style="margin-top:12px"><input type="checkbox" data-k="soloCapitali" ${c.soloCapitali ? 'checked' : ''} /> Solo società di capitali</label>
+      ${righeSulBene(c)}
     </article>`).join('')}
-    <p class="mt-nota">L'ordine è la priorità: il motore prende il primo canale acceso che regge cliente e importo. Una condizione vuota non si applica.</p>
+    <p class="mt-nota">L'ordine è la priorità: il motore prende il primo canale acceso che regge cliente e importo. Una condizione vuota non si applica.${canali.some((c) => condizioniSulBene(c).length) ? ' Le condizioni sul bene non si cambiano da qui: il salvataggio dei canali le lascia come sono.' : ''}</p>
     <div class="mt-azioni"><button type="button" id="cn-salva" class="mt-btn">Salva i canali</button></div>
     <p id="cn-msg" class="mt-msg" hidden></p>`;
 }
 
-/** I canali letti dal pannello: canale e listino restano quelli salvati */
+/** I campi di un canale che il pannello sa modificare: tutto il resto del canale salvato si conserva */
+const CHIAVI_CANALE_DEL_PANNELLO = ['attivo', 'maggiorazionePerc', 'soloCapitali', ...CONDIZIONI.map((x) => x.k)];
+
+/**
+ * I canali letti dal pannello: canale e listino restano quelli salvati, e con loro le
+ * condizioni sul bene dei mezzi (venditori, categorie escluse, mezzi targati) che il
+ * pannello mostra ma non modifica: senza questa cura ogni salvataggio le cancellerebbe.
+ */
 function canaliDalPannello(): any[] {
   return (dati.canali ?? []).map((orig: any, i: number) => {
     const box = document.querySelector<HTMLElement>(`[data-canale="${i}"]`)!;
@@ -108,8 +131,25 @@ function canaliDalPannello(): any[] {
       if (v !== undefined && !(Array.isArray(v) && v.length === 0)) c[x.k] = v;
     }
     if (campo('soloCapitali')!.checked) c.soloCapitali = true;
-    return c;
+    return canaleConservato(orig, CHIAVI_CANALE_DEL_PANNELLO, c);
   });
+}
+
+// --- settore mezzi ----------------------------------------------------------------
+
+function sezioneMezzi(): string {
+  return `
+    <p class="mt-nota" style="margin-top:0">I venditori che firmano le offerte, le categorie con la domanda sul targato, l'anticipo e gli spread del leasing, e se mostrare i nomi dei partner a schermo. Ci sono partite IVA e spread: la vede solo MCF. È un testo JSON che si salva com'è o non si salva: un campo non previsto o un valore che non si legge fa rifiutare il salvataggio, e il messaggio dice quale.</p>
+    <textarea id="mz-config" class="mt-input" rows="28" spellcheck="false" style="font-family:ui-monospace,Menlo,monospace;font-size:13px;white-space:pre;overflow:auto">${esc(configInTesto(dati.mezzi))}</textarea>
+    ${dati.mezzi ? '' : '<p class="mt-nota">Nessuna configurazione salvata, oppure quella salvata non si legge: il portale dei mezzi non parte finché non ne salvi una valida.</p>'}
+    <div class="mt-azioni"><button type="button" id="mz-salva" class="mt-btn">Salva</button></div>
+    <p id="mz-msg" class="mt-msg" hidden></p>`;
+}
+
+function sezioniMezzi(): string {
+  return `
+    <h3 class="mt-h3">Venditori, categorie e leasing</h3>${sezioneMezzi()}
+    <h3 class="mt-h3">Canali di quotazione</h3>${sezioneCanali()}`;
 }
 
 const CAMPI_SOCIETA = [
@@ -321,6 +361,7 @@ function rendi() {
   const fv = c.settore === 'fotovoltaico';
   const mc = c.settore === 'macchine';
   const ds = c.settore === 'distinta';
+  const mz = c.settore === 'mezzi';
   $('mcf').innerHTML = `
     <article class="mt-card">
       <p class="mt-semaforo__tit">Ricerche del mese</p>
@@ -342,7 +383,8 @@ function rendi() {
         <option value="fotovoltaico" ${fv ? 'selected' : ''}>Fotovoltaico, con business plan</option>
         <option value="macchine" ${mc ? 'selected' : ''}>Macchine, con accessori e consegna</option>
         <option value="distinta" ${ds ? 'selected' : ''}>Distinta di beni, con prefiltro e canali</option>
-        <option value="generico" ${!fv && !mc && !ds ? 'selected' : ''}>Generico</option></select></label>
+        <option value="mezzi" ${mz ? 'selected' : ''}>Mezzi da cantiere, più venditori</option>
+        <option value="generico" ${!fv && !mc && !ds && !mz ? 'selected' : ''}>Generico</option></select></label>
       <label class="mt-campo"><span>Etichetta del bene</span><input id="cf-etichetta" class="mt-input" value="${esc(c.etichettaBene)}" /></label>
       <label class="mt-campo"><span>Listino del noleggio</span><select id="cf-listino" class="mt-input">
         ${opzioni(dati.opzioni?.listini, c.tabellaCanoni)}</select></label>
@@ -366,6 +408,7 @@ function rendi() {
     <p id="cf-msg" class="mt-msg" hidden></p>
 
     ${ds ? sezioniDistinta() : ''}
+    ${mz ? sezioniMezzi() : ''}
 
     <h3 class="mt-h3">Catalogo</h3>
     <div class="mt-scorri"><table class="mt-tabella">
@@ -480,6 +523,12 @@ export function montaAdmin() {
 
     // --- settore distinta ---
     if (t.id === 'cn-salva') await salvaSezione({ azione: 'canali', canali: canaliDalPannello() }, 'cn-msg', 'Canali salvati.');
+    // --- settore mezzi: un JSON che non si legge si ferma qui, senza chiamare il server ---
+    if (t.id === 'mz-salva') {
+      const letto = configDaTesto($<HTMLTextAreaElement>('mz-config').value);
+      if (!letto.ok) return messaggio($('mz-msg'), letto.errore, false);
+      await salvaSezione({ azione: 'mezzi', mezzi: letto.valore }, 'mz-msg', 'Configurazione dei mezzi salvata.');
+    }
     if (t.id === 'so-salva') {
       const societa = Object.fromEntries(CAMPI_SOCIETA.map(([k]) => [k, $<HTMLInputElement>(`so-${k}`).value.trim()]));
       await salvaSezione({ azione: 'societa', societa }, 'so-msg', 'Società fornitrice salvata.');

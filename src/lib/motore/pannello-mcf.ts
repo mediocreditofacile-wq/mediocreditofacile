@@ -2,7 +2,8 @@
 // configurazione del settore distinta, clienti segnalati, pratiche esterne.
 //
 // Modulo puro, senza database: lo usa /api/motore/admin e si prova da solo. Contiene
-// nomi di canali e locatori: solo server, mai dal browser degli agenti.
+// nomi di canali e locatori, e per i mezzi partite IVA e spread: solo server, mai dal
+// browser degli agenti.
 //
 // La regola e' una: quello che l'admin manda si salva com'e' o non si salva. I lettori
 // di config-distinta scartano in silenzio un elemento scritto male, ed e' giusto alla
@@ -27,6 +28,8 @@ import {
   type VoceChecklist,
 } from './config-distinta';
 import { dataValidita, numero } from './catalogo-import';
+import { ANTICIPO_MAX_MEZZI, condizioneDaSpread, leggiConfigMezzi, type ConfigMezzi, type PartnerConfronto } from './config-mezzi';
+import { PARTNERS_LEASING, getCondizioniPerDurata } from '../../data/leasing';
 import { pivaValida, pulisciPiva } from '../piva';
 
 export type Esito<T> = { ok: true; valore: T } | { ok: false; errore: string };
@@ -112,6 +115,8 @@ const ETICHETTE_CANALE: Record<string, string> = {
   fatturatoMin: 'fatturato minimo', importoMin: 'importo minimo dei beni', soloCapitali: 'solo società di capitali',
   formeEscluse: 'forme giuridiche escluse', anniMin: 'anni di attività minimi', settoriEsclusi: 'settori esclusi',
   sogliaProvvisorio: 'soglia del bilancio provvisorio',
+  // Condizioni sul bene (settore mezzi)
+  venditori: 'venditori', categorieEscluse: 'categorie escluse', escludiTargati: 'esclude i mezzi targati',
 };
 
 const leggiUnCanale = (x: unknown) => leggiCanali([x])?.[0] ?? null;
@@ -264,6 +269,207 @@ export function controllaChecklist(v: unknown): Esito<ChecklistConfig> {
   // Ultima prova: il lettore intero deve dare esattamente lo stesso risultato
   const letta = leggiChecklist({ voci, formati });
   if (!letta || !uguali(letta, { voci, formati })) return no(`Checklist non leggibile. ${NON_SALVATO}`);
+  return { ok: true, valore: letta };
+}
+
+// --- configurazione dei mezzi -----------------------------------------------------
+//
+// Il lettore (config-mezzi.ts) da' null a tutta la configurazione appena un venditore
+// non si legge, e non dice quale: su un JSON di cento righe un "non si legge" non serve
+// a niente. Qui ogni campo si controlla a mano e il messaggio dice dove sta lo sbaglio
+// (quale venditore, quale partner, quale spread). Solo dopo la configurazione si
+// rilegge con il lettore vero e si confronta, come per i canali: un campo che il lettore
+// non conosce o cambierebbe non sparisce in silenzio.
+
+const ETICHETTE_MEZZI: Record<string, string> = {
+  venditori: 'venditori', categorie: 'categorie', leasing: 'leasing', mostraNomiPartner: 'nomi dei partner a schermo',
+};
+const ETICHETTE_VENDITORE: Record<string, string> = {
+  codice: 'codice', ragioneSociale: 'ragione sociale', piva: 'partita IVA', indirizzo: 'indirizzo',
+  telefono: 'telefono', email: 'email', pec: 'PEC', categorie: 'categorie',
+};
+const ETICHETTE_CATEGORIA_MEZZO: Record<string, string> = { nome: 'nome', targato: 'domanda sul targato' };
+const ETICHETTE_LEASING: Record<string, string> = { anticipoPerc: 'anticipo', partner: 'partner' };
+const ETICHETTE_PARTNER: Record<string, string> = {
+  partner: 'partner', spreadFinoA48: 'spread fino a 48 mesi', spreadDa60: 'spread da 60 mesi',
+};
+
+// Stessa regola del lettore: se cambia la' deve cambiare qui, e un test lo fa notare
+const CODICE_VENDITORE = /^[a-z0-9-]{2,30}$/;
+const PARTNER_CONFRONTO: readonly PartnerConfronto[] = ['sella', 'credem', 'alba'];
+const nomePartner = (p: string) => p.charAt(0).toUpperCase() + p.slice(1);
+
+/** 3.1 -> "3,10": lo spread come si scrive nei listini */
+function spreadATesto(n: number): string {
+  const [intero, decimali = ''] = String(Math.round(n * 1000) / 1000).split('.');
+  return `${intero},${decimali.padEnd(2, '0')}`;
+}
+
+/** Il primo campo con un valore che l'oggetto non prevede: stesse parole di differenza() */
+function campoNonPrevisto(o: Record<string, unknown>, etichette: Record<string, string>): string | null {
+  const k = Object.keys(o).find((c) => !(c in etichette) && o[c] !== undefined && o[c] !== null);
+  return k === undefined ? null : `campo «${k}» non previsto: non si salverebbe`;
+}
+
+/** Il codice di un venditore com'e' scritto, ripulito dagli spazi; null se manca */
+const codiceDi = (x: unknown): string | null => {
+  const c = oggetto(x)?.codice;
+  return typeof c === 'string' && c.trim() ? c.trim() : null;
+};
+
+/** Il primo sbaglio nei venditori, a parole. Null = nessuno. I messaggi non portano il suffisso */
+function sbagliVenditori(v: unknown): string | null {
+  if (!Array.isArray(v)) return 'I venditori devono essere un elenco';
+  if (v.length === 0) return 'Serve almeno un venditore';
+  const codici = new Set<string>();
+  for (const [i, x] of v.entries()) {
+    const o = oggetto(x);
+    const nome = codiceDi(x) ? `Venditore ${codiceDi(x)}` : `Venditore n. ${i + 1}`;
+    if (!o) return `${nome}: non si legge`;
+    if (o.codice === undefined || o.codice === null) return `${nome}, codice: manca`;
+    if (typeof o.codice !== 'string' || !CODICE_VENDITORE.test(o.codice)) {
+      return `${nome}, codice «${mostra(o.codice)}»: servono da 2 a 30 caratteri fra minuscole, cifre e trattino`;
+    }
+    if (codici.has(o.codice)) return `Il venditore ${o.codice} compare due volte`;
+    codici.add(o.codice);
+    if (typeof o.ragioneSociale !== 'string' || !o.ragioneSociale.trim()) return `${nome}, ragione sociale: manca`;
+    if (typeof o.piva !== 'string' || !pivaValida(o.piva.trim())) {
+      return `${nome}, partita IVA «${mostra(o.piva)}»: non valida, servono 11 cifre con la cifra di controllo giusta`;
+    }
+    for (const k of ['indirizzo', 'telefono', 'email', 'pec']) {
+      if (o[k] === undefined) return `${nome}, ${ETICHETTE_VENDITORE[k]}: manca (se non c'è, scrivi "")`;
+      if (typeof o[k] !== 'string') return `${nome}, ${ETICHETTE_VENDITORE[k]} «${mostra(o[k])}»: non è un testo`;
+    }
+    if (!Array.isArray(o.categorie) || o.categorie.some((c) => typeof c !== 'string' || !c.trim())) {
+      return `${nome}, categorie «${mostra(o.categorie)}»: serve un elenco di nomi, vuoto per il venditore di tutto il resto`;
+    }
+  }
+  return null;
+}
+
+/** Il primo sbaglio nelle categorie con la domanda sul targato */
+function sbagliCategorieMezzi(v: unknown): string | null {
+  if (!Array.isArray(v)) return 'Le categorie devono essere un elenco';
+  if (v.length === 0) return 'Serve almeno una categoria';
+  const nomi = new Set<string>();
+  for (const [i, x] of v.entries()) {
+    const o = oggetto(x);
+    const nome = typeof o?.nome === 'string' && o.nome.trim() ? o.nome.trim() : null;
+    const dove = nome ? `Categoria ${nome}` : `Categoria n. ${i + 1}`;
+    if (!o) return `${dove}: non si legge`;
+    if (!nome) return `${dove}, nome: manca`;
+    const t = o.targato;
+    if (t !== undefined && t !== null && typeof t !== 'boolean') {
+      return `${dove}, targato «${mostra(t)}»: serve true, false oppure null (null: la domanda si fa sempre)`;
+    }
+    if (nomi.has(nome)) return `La categoria ${nome} compare due volte`;
+    nomi.add(nome);
+  }
+  return null;
+}
+
+/** Venditori e categorie gia' letti bene: ora devono stare insieme */
+function sbagliCoerenza(venditori: Record<string, unknown>[], categorie: Record<string, unknown>[]): string | null {
+  const note = new Set(categorie.map((c) => String(c.nome).trim()));
+  const codice = (x: Record<string, unknown>) => String(x.codice).trim();
+  const elenco = (x: Record<string, unknown>) => (x.categorie as string[]).map((c) => c.trim());
+  const predefiniti = venditori.filter((x) => elenco(x).length === 0);
+  if (predefiniti.length === 0) {
+    return 'Manca il venditore di tutto il resto: uno dei venditori deve avere l\'elenco delle categorie vuoto ("categorie": [])';
+  }
+  if (predefiniti.length > 1) {
+    return `I venditori senza categorie sono più di uno (${predefiniti.map(codice).join(', ')}): il venditore di tutto il resto deve essere uno solo`;
+  }
+  const assegnate = new Map<string, string>();
+  for (const x of venditori) {
+    for (const c of elenco(x)) {
+      if (!note.has(c)) return `Venditore ${codice(x)}, categoria «${c}»: non è fra le categorie`;
+      const gia = assegnate.get(c);
+      if (gia) return `La categoria «${c}» è assegnata a due venditori (${gia} e ${codice(x)})`;
+      assegnate.set(c, codice(x));
+    }
+  }
+  return null;
+}
+
+/** Il primo sbaglio nel leasing: anticipo, partner e spread (che devono esistere nei listini) */
+function sbagliLeasingMezzi(v: unknown): string | null {
+  const o = oggetto(v);
+  if (!o) return 'Leasing: dati non leggibili';
+  const a = o.anticipoPerc;
+  if (typeof a !== 'number' || !Number.isFinite(a) || a < 0 || a > ANTICIPO_MAX_MEZZI) {
+    return `Leasing, anticipo «${mostra(a)}»: serve un numero fra 0 e ${ANTICIPO_MAX_MEZZI} (percentuale dei beni)`;
+  }
+  if (!Array.isArray(o.partner)) return 'Leasing, partner: serve un elenco (vuoto: nessun confronto con il leasing)';
+  const visti = new Set<string>();
+  for (const [i, x] of o.partner.entries()) {
+    const p = oggetto(x);
+    if (!p) return `Leasing, partner n. ${i + 1}: non si legge`;
+    const id = PARTNER_CONFRONTO.find((c) => c === p.partner);
+    if (!id) return `Leasing, partner n. ${i + 1} «${mostra(p.partner)}»: sono ammessi ${PARTNER_CONFRONTO.map(nomePartner).join(', ')}`;
+    const nome = nomePartner(id);
+    if (visti.has(id)) return `Leasing, ${nome} compare due volte`;
+    visti.add(id);
+    const listino = PARTNERS_LEASING.find((l) => l.key === id)!;
+    // Una durata per lato del cambio di listino di Alba (48 mesi e 60 mesi)
+    for (const [campo, durata, quando] of [['spreadFinoA48', 36, 'fino a 48 mesi'], ['spreadDa60', 60, 'da 60 mesi']] as const) {
+      const s = p[campo];
+      if (s === undefined || s === null) return `Leasing, ${nome}, spread ${quando}: manca`;
+      if (typeof s !== 'number' || !Number.isFinite(s)) return `Leasing, ${nome}, spread ${quando} «${mostra(s)}»: serve un numero`;
+      if (!condizioneDaSpread(listino, durata, s)) {
+        const presenti = [...new Set(getCondizioniPerDurata(listino, durata).map((c) => c.spread))].map(spreadATesto).join('; ');
+        return `Leasing, ${nome}, spread ${quando} «${spreadATesto(s)}»: il listino non lo prevede (ci sono ${presenti})`;
+      }
+    }
+  }
+  return null;
+}
+
+/**
+ * La configurazione del settore mezzi come l'ha mandata il pannello: venditori, categorie
+ * col targato, leasing e nomi dei partner. Si salva com'e' o non si salva.
+ */
+export function controllaMezzi(v: unknown): Esito<ConfigMezzi> {
+  const o = oggetto(v);
+  if (!o) {
+    return no(`Configurazione dei mezzi: dati non leggibili, serve un oggetto con venditori, categorie, leasing e nomi dei partner. ${NON_SALVATO}`);
+  }
+  const sbaglio = sbagliVenditori(o.venditori) ?? sbagliCategorieMezzi(o.categorie)
+    ?? sbagliCoerenza(o.venditori as Record<string, unknown>[], o.categorie as Record<string, unknown>[])
+    ?? sbagliLeasingMezzi(o.leasing)
+    ?? (o.mostraNomiPartner === undefined || o.mostraNomiPartner === null
+      ? 'Nomi dei partner a schermo: manca (true o false)'
+      : typeof o.mostraNomiPartner !== 'boolean'
+        ? `Nomi dei partner a schermo «${mostra(o.mostraNomiPartner)}»: serve true o false`
+        : null);
+  if (sbaglio) return no(`${sbaglio}. ${NON_SALVATO}`);
+
+  // Ultima prova: il lettore vero, poi il confronto livello per livello
+  const letta = leggiConfigMezzi(o);
+  const venditori = o.venditori as Record<string, unknown>[];
+  const categorie = o.categorie as Record<string, unknown>[];
+  const leasing = o.leasing as Record<string, unknown>;
+  const partner = leasing.partner as Record<string, unknown>[];
+  if (!letta || letta.venditori.length !== venditori.length || letta.categorie.length !== categorie.length
+    || letta.leasing.partner.length !== partner.length) {
+    return no(`Configurazione dei mezzi: non si legge. ${NON_SALVATO}`);
+  }
+  for (const [i, x] of venditori.entries()) {
+    const diversa = differenza(x, letta.venditori[i], ETICHETTE_VENDITORE);
+    if (diversa) return no(`Venditore ${codiceDi(x)}, ${diversa}. ${NON_SALVATO}`);
+  }
+  for (const [i, x] of categorie.entries()) {
+    const diversa = differenza(x, letta.categorie[i], ETICHETTE_CATEGORIA_MEZZO);
+    if (diversa) return no(`Categoria ${String(x.nome).trim()}, ${diversa}. ${NON_SALVATO}`);
+  }
+  const nonPrevistoLeasing = campoNonPrevisto(leasing, ETICHETTE_LEASING);
+  if (nonPrevistoLeasing) return no(`Leasing, ${nonPrevistoLeasing}. ${NON_SALVATO}`);
+  for (const [i, x] of partner.entries()) {
+    const diversa = differenza(x, letta.leasing.partner[i], ETICHETTE_PARTNER);
+    if (diversa) return no(`Leasing, ${nomePartner(String(x.partner))}, ${diversa}. ${NON_SALVATO}`);
+  }
+  const nonPrevisto = campoNonPrevisto(o, ETICHETTE_MEZZI);
+  if (nonPrevisto) return no(`Configurazione dei mezzi, ${nonPrevisto}. ${NON_SALVATO}`);
   return { ok: true, valore: letta };
 }
 

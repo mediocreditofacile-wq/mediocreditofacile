@@ -10,25 +10,29 @@ export const prerender = false;
 //   azione 'voce'     -> crea o aggiorna una voce del catalogo (per codice)
 //   azione 'importa'  -> molte voci insieme, dalle righe incollate da Excel
 //   azione 'attiva'   -> accende o spegne una voce
-// Solo sul settore distinta (Led Office, spec mcf_spec-ledoffice-motore_v1 par. 10):
+// Sul settore distinta (Led Office, spec mcf_spec-ledoffice-motore_v1 par. 10) e, per
+// i canali, anche sui mezzi (Bergamelli):
 //   azione 'canali'             { canali }      -> canali di quotazione, in ordine
+// Solo sul settore distinta:
 //   azione 'societa'            { societa }     -> la societa' che firma i documenti
 //   azione 'categorie'          { categorie }   -> categorie con settori tipici e flag
 //   azione 'checklist'          { checklist }   -> documenti della pratica
 //   azione 'segnala'            { piva, ragioneSociale, motivo, effetto, nota }
 //   azione 'togli-segnalazione' { piva }
 //   azione 'pratica-esterna'    { piva, ragioneSociale, canale, data, esito, importo }
+// Solo sul settore mezzi:
+//   azione 'mezzi'              { mezzi }       -> venditori, categorie col targato, leasing
 //
 // Il catalogo si aggiorna per codice: reimportare lo stesso Excel aggiorna
 // prezzi e nomi senza duplicare. Le voci non si cancellano, si spengono: un
 // preventivo vecchio deve poter dire su quale voce era stato fatto.
 //
-// Sul settore distinta canali, societa', categorie e checklist si salvano come li
-// manda il pannello o non si salvano: se il lettore del motore scarterebbe o
-// cambierebbe qualcosa la risposta e' 400 con un messaggio che dice cosa
-// (pannello-mcf.ts). I clienti segnalati sono un elenco di MCF, comune a tutti i
-// fornitori e letto solo dal prefiltro: togliere una segnalazione cancella la
-// riga e lo lascia nel log. Le pratiche esterne dal pannello si aggiungono e basta.
+// Sul settore distinta canali, societa', categorie e checklist, e sui mezzi i canali e la
+// loro configurazione, si salvano come li manda il pannello o non si salvano: se il
+// lettore del motore scarterebbe o cambierebbe qualcosa la risposta e' 400 con un
+// messaggio che dice cosa (pannello-mcf.ts). I clienti segnalati sono un elenco di MCF,
+// comune a tutti i fornitori e letto solo dal prefiltro: togliere una segnalazione
+// cancella la riga e lo lascia nel log. Le pratiche esterne dal pannello si aggiungono e basta.
 // Canale, maggiorazione e proposta per il locatore di proposte e pratiche escono
 // solo da qui: le API di referente e agente non li leggono.
 
@@ -42,6 +46,7 @@ import {
   controllaCanali,
   controllaCategorie,
   controllaChecklist,
+  controllaMezzi,
   controllaPraticaEsterna,
   controllaSegnalazione,
   controllaSocieta,
@@ -56,13 +61,17 @@ import { tabellaSeEsiste } from '../../../lib/tabelle-canoni';
 import { PIONEER_LETTO } from '../../../data/grenke';
 
 const PARTNER = ['sella', 'alba', 'credem'];
-const SETTORI = ['fotovoltaico', 'generico', 'macchine', 'distinta'];
+const SETTORI = ['fotovoltaico', 'generico', 'macchine', 'distinta', 'mezzi'];
 const LISTINI = ['esg', 'pagarent', 'sputnik', 'sputnik-duplex', 'grace-duplex'];
 const REGOLE = ['credit-policy', 'locatore', 'prefiltro'];
 const COLORE = /^#[0-9a-fA-F]{6}$/;
 
-/** Le azioni che esistono solo sul settore distinta */
+/** Le azioni che esistono solo sul settore distinta (i canali anche sui mezzi, vedi sotto) */
 const AZIONI_DISTINTA = ['canali', 'societa', 'categorie', 'checklist', 'segnala', 'togli-segnalazione', 'pratica-esterna'];
+/** Le azioni che esistono solo sul settore mezzi */
+const AZIONI_MEZZI = ['mezzi'];
+/** I settori che hanno i canali di quotazione */
+const SETTORI_CON_CANALI = ['distinta', 'mezzi'];
 
 /** Le ultime proposte e pratiche mostrate nel pannello */
 const ULTIME = 50;
@@ -233,9 +242,17 @@ export async function GET({ request }: { request: Request }) {
     societaFornitrice: c.societaFornitrice,
     categorie: c.categorie,
     checklist: c.checklist,
+    // La configurazione intera dei mezzi, con partite IVA e spread: la legge solo l'admin MCF
+    // (sopra), nessun altro percorso la manda al browser (carrozzeriaPerBrowser ne copia una parte)
+    mezzi: c.mezzi,
     pioneerLetto: PIONEER_LETTO,
-    // Accanto al canale: l'instradamento ignora Grenke finche' la tabella non ha una data di lettura
-    avvisiCanale: PIONEER_LETTO === null ? { grenke: 'Data di lettura della tabella Pioneer mancante: Grenke resta spento' } : {},
+    // Accanto al canale: l'instradamento ignora un canale che usa Pioneer finche' la tabella
+    // non ha una data di lettura (instradamento.ts guarda la tabella, non il nome del canale)
+    avvisiCanale: PIONEER_LETTO === null
+      ? Object.fromEntries((c.canali ?? []).filter((x) => x.tabella === 'pioneer').map((x) => [
+          x.canale, `Data di lettura della tabella Pioneer mancante: ${NOMI_CANALE[x.canale]} resta spento`,
+        ]))
+      : {},
     ...distinta,
   });
 }
@@ -339,11 +356,14 @@ export async function POST({ request }: { request: Request }) {
     return json({ ok: true });
   }
 
-  if (!AZIONI_DISTINTA.includes(azione)) return json({ ok: false, error: 'azione_sconosciuta' }, 400);
-  if (k.settore !== 'distinta') return json({ ok: false, error: 'solo_distinta' }, 400);
+  if (!AZIONI_DISTINTA.includes(azione) && !AZIONI_MEZZI.includes(azione)) return json({ ok: false, error: 'azione_sconosciuta' }, 400);
+  if (AZIONI_MEZZI.includes(azione) && k.settore !== 'mezzi') return json({ ok: false, error: 'solo_mezzi' }, 400);
+  // Led Office ha tutte le azioni sue; i mezzi hanno in comune con lui i soli canali
+  const settoriAmmessi = azione === 'canali' ? SETTORI_CON_CANALI : ['distinta'];
+  if (AZIONI_DISTINTA.includes(azione) && !settoriAmmessi.includes(k.settore)) return json({ ok: false, error: 'solo_distinta' }, 400);
 
   /** Una colonna jsonb di configurazione, dopo il controllo */
-  const salvaColonna = async (colonna: 'canali' | 'societa_fornitrice' | 'categorie' | 'checklist', valore: unknown) => {
+  const salvaColonna = async (colonna: 'canali' | 'societa_fornitrice' | 'categorie' | 'checklist' | 'mezzi', valore: unknown) => {
     await query(`UPDATE app.carrozzeria SET ${colonna} = $2, aggiornato = now() WHERE slug = $1`, [slug, JSON.stringify(valore)]);
     console.log(JSON.stringify({ evento: 'motore_admin_config', fornitore: slug, colonna, userId: e.contesto.userId }));
     return json({ ok: true });
@@ -352,6 +372,11 @@ export async function POST({ request }: { request: Request }) {
   if (azione === 'canali') {
     const c = controllaCanali(corpo.canali, (id) => tabellaSeEsiste(id) !== null);
     return c.ok ? salvaColonna('canali', c.valore) : rifiuto(c.errore);
+  }
+
+  if (azione === 'mezzi') {
+    const c = controllaMezzi(corpo.mezzi);
+    return c.ok ? salvaColonna('mezzi', c.valore) : rifiuto(c.errore);
   }
 
   if (azione === 'societa') {
