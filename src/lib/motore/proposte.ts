@@ -91,19 +91,24 @@ export function tabellaConMarkup(t: TabellaCanoni, markup: number): TabellaCanon
   };
 }
 
-/** Il leasing del partner su una durata, gia' arrotondato e maggiorato */
+/**
+ * Il leasing del partner su una durata, gia' arrotondato e maggiorato.
+ * `condizioneId` sceglie una condizione precisa del listino per quella durata;
+ * senza, vale lo spread medio commerciale del partner.
+ */
 export function leasingPartner(
   partner: PartnerLeasing,
   importo: number,
   durata: number,
   anticipoPerc: number,
   markup: number,
+  condizioneId?: number,
 ): LeasingEsterno | null {
   if (!partner.durateAmmesse.includes(durata)) return null;
   if (importo < partner.importoMin || importo > partner.importoMax) return null;
-  const condizione = getCondizioneFornitori(partner, durata);
+  const idCondizione = condizioneId ?? getCondizioneFornitori(partner, durata).id;
   const riscattoPerc = Math.min(LEASING_RISCATTO, partner.riscattoMaxPerDurata[durata] ?? LEASING_RISCATTO);
-  const r = calcolaRataLeasingPartner(partner, importo, durata, anticipoPerc, riscattoPerc, condizione.id);
+  const r = calcolaRataLeasingPartner(partner, importo, durata, anticipoPerc, riscattoPerc, idCondizione);
   const rata = r2(r.rataMensile * (1 + markup / 100));
   const anticipo = r2(r.anticipo);
   const riscatto = r2(r.riscatto);
