@@ -39,7 +39,11 @@ export function valuta(
 ): Valutazione {
   if (k.regoleSemaforo === 'locatore') {
     const l = valutaLocatore(datiLocatore(d), importo, eventi, oggi);
-    return { semaforo: l.semaforo, credito: null, locatore: l, markup: 0, anticipo: 0, blocca: false };
+    // L'indicazione massima (15% del volume d'affari, patrimonio, 199.000) e' quella di
+    // Duplex. Sui mezzi direbbe un tetto che il portale stesso supera: Econocom parte da
+    // 150.000 senza tetto e Grenke Sputnik arriva a 500.000. Niente cifra e niente frase
+    const locatore = k.settore === 'mezzi' ? { ...l, indicazioneMassima: null, indicazioneBase: null } : l;
+    return { semaforo: l.semaforo, credito: null, locatore, markup: 0, anticipo: 0, blocca: false };
   }
   const c = valutaCredito({ ...d, importo, oggi });
   const neutro = k.settore === 'macchine';

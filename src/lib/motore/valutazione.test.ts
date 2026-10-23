@@ -19,6 +19,8 @@ const K: Carrozzeria = {
 };
 const MACCHINE: Carrozzeria = { ...K, settore: 'macchine' };
 const LOCATORE: Carrozzeria = { ...K, settore: 'macchine', regoleSemaforo: 'locatore', leasing: false };
+// Bergamelli: criteri del locatore, ma i canali dei mezzi non hanno il tetto di Duplex
+const MEZZI: Carrozzeria = { ...K, settore: 'mezzi', regoleSemaforo: 'locatore' };
 
 const SOLIDA = { fatturato: 1_200_000, patrimonioNetto: 400_000, utile: 60_000, inizioAttivita: '2010-03-01' };
 const PAREGGIO = { ...SOLIDA, utile: 0 }; // giallo con anticipo 10% nella credit policy
@@ -67,6 +69,17 @@ describe('criteri del locatore', () => {
     expect(semaforoPerSchermo(valuta(LOCATORE, DATI, 3500, 'assenti', OGGI)).indicazioneMassima).toBeNull();
     // la credit policy di FAS ha il suo massimale e non questa riga
     expect(semaforoPerSchermo(valuta(K, SOLIDA, null, 'non-avviata', OGGI)).indicazioneMassima).toBeNull();
+  });
+  it('sui mezzi niente indicazione massima e niente base: Econocom parte da 150.000 e Sputnik arriva a 500.000', () => {
+    const s = semaforoPerSchermo(valuta(MEZZI, DATI, null, 'assenti', OGGI));
+    expect(s.indicazioneMassima).toBeNull();
+    expect(s.indicazioneBase).toBeNull();
+    // il semaforo resta quello del locatore, come su Duplex
+    const duplex = semaforoPerSchermo(valuta(LOCATORE, DATI, null, 'assenti', OGGI));
+    expect(s.semaforo).toBe(duplex.semaforo);
+    expect(s.criteri).toEqual(duplex.criteri);
+    expect(duplex.indicazioneMassima).toBe(180_000);
+    expect(duplex.indicazioneBase).toBe('volume');
   });
 });
 
