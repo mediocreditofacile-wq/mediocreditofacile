@@ -97,21 +97,42 @@ describe('validaBeni: la domanda sul targato', () => {
     expect(e.beni[0].targato).toBe(true);
   });
 
-  // Un "si" o un 1 non sono una risposta: su una categoria senza default si richiede,
-  // mai si legge come falso (ne' come vero, che sarebbe comunque una scelta al posto suo)
-  it.each([['si'], ['sì'], ['true'], ['false'], [1], [0], [null], ['']])(
-    'targato %j non e\' una risposta: su una categoria senza default e\' targato_mancante',
+  // Un valore PRESENTE ma non booleano ("si", 1, "true") e' una risposta illeggibile: ferma
+  // l'elenco su qualunque categoria, anche quando ha un default. Mai letto come "non
+  // targato", ne' come vero (sarebbe una scelta al posto dell'agente).
+  const SENZA_DEFAULT = 'Piattaforme aeree';
+  it.each([['si'], ['sì'], ['true'], ['false'], [1], [0], [''], [{}], [[]]])(
+    'targato %j (presente, non booleano): targato_mancante su ogni categoria, con la riga giusta',
     (valore) => {
-      const e = validaBeni(CAT, [{ descrizione: 'Piattaforma', categoria: 'Piattaforme aeree', quantita: 1, prezzo: 60000, targato: valore }]);
-      expect(e).toEqual({ ok: false, error: 'targato_mancante', riga: 0 });
+      for (const categoria of [SENZA_DEFAULT, 'Gru a torre', 'Autocarri']) {
+        const e = validaBeni(CAT, [gru, { descrizione: 'Bene', categoria, quantita: 1, prezzo: 60000, targato: valore }]);
+        expect(e).toEqual({ ok: false, error: 'targato_mancante', riga: 1 });
+      }
     },
   );
 
-  it('targato non booleano su una categoria con default: vale il default', () => {
-    const e = validaBeni(CAT, [{ ...gru, targato: 'si' }]);
+  it('Gru a torre con targato "si": targato_mancante, non "non targato"', () => {
+    expect(validaBeni(CAT, [{ ...gru, targato: 'si' }])).toEqual({ ok: false, error: 'targato_mancante', riga: 0 });
+  });
+
+  // Assente (non mandato o null) = si usa il default della categoria
+  it('Gru a torre con targato null: vale il default, non targato', () => {
+    const e = validaBeni(CAT, [{ ...gru, targato: null }]);
     expect(e.ok).toBe(true);
     if (!e.ok) return;
     expect(e.beni[0].targato).toBe(false);
+  });
+
+  it('Autocarri con targato undefined: vale il default, targato', () => {
+    const e = validaBeni(CAT, [{ descrizione: 'Autocarro', categoria: 'Autocarri', quantita: 1, prezzo: 50000, targato: undefined }]);
+    expect(e.ok).toBe(true);
+    if (!e.ok) return;
+    expect(e.beni[0].targato).toBe(true);
+  });
+
+  it.each([[undefined], [null]])('targato %s su una categoria senza default: targato_mancante', (valore) => {
+    const e = validaBeni(CAT, [{ descrizione: 'Piattaforma', categoria: SENZA_DEFAULT, quantita: 1, prezzo: 60000, targato: valore }]);
+    expect(e).toEqual({ ok: false, error: 'targato_mancante', riga: 0 });
   });
 
   it('targato dell\'elenco e\' vero se lo e\' almeno un bene', () => {

@@ -8,11 +8,12 @@
 // da config-mezzi si importano solo i tipi: li' dentro ci sono i listini del leasing.
 //
 // Il targato decide il canale: Grenke non quota un mezzo targato. Quindi una risposta
-// che non c'e' non vale mai "non targato". La categoria puo' portare un default
-// (Gru a torre: no); dove non lo porta (Movimento terra, Piattaforme aeree) la riga
-// deve rispondere, e senza risposta l'elenco si ferma. Se la riga risponde, vale la
-// riga anche contro il default: e' l'agente che conferma o corregge. Un valore che
-// non e' un booleano ("si", 1) non e' una risposta.
+// che non c'e' o non si legge non vale mai "non targato". La categoria puo' portare un
+// default (Gru a torre: no), che vale solo quando il campo e' assente (non mandato o
+// null); dove non lo porta (Movimento terra, Piattaforme aeree) la riga deve
+// rispondere, e senza risposta l'elenco si ferma. Se la riga risponde con un booleano,
+// vale la riga anche contro il default: e' l'agente che conferma o corregge. Un valore
+// presente ma non booleano ("si", 1) ferma l'elenco su qualunque categoria.
 
 import { testo } from './catalogo-import';
 import { leggiPrezzo, leggiQuantita, MAX_RIGHE, MAX_TOTALE, totaleRighe } from './distinta';
@@ -75,8 +76,12 @@ function leggiBene(grezza: unknown, categorie: CategoriaMezzo[]): Letto {
   const prezzo = leggiPrezzo(r.prezzo);
   if (prezzo === null) return no('prezzo_non_valido');
 
-  // La risposta della riga batte il default della categoria; senza nessuno dei due non si indovina
-  const targato = typeof r.targato === 'boolean' ? r.targato : categoria.targato;
+  // Assente (non mandato o null) = vale il default della categoria. Un booleano batte il
+  // default. Presente ma non booleano ("si", 1, "true") e' una risposta illeggibile: mai
+  // "non targato", si richiede, su qualunque categoria.
+  const risposta = r.targato;
+  const targato =
+    risposta === undefined || risposta === null ? categoria.targato : typeof risposta === 'boolean' ? risposta : null;
   if (targato === null) return no('targato_mancante');
 
   return {
