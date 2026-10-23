@@ -26,6 +26,7 @@ import type { RicercaSalvata } from './calcolo-proposta';
 import type { Carrozzeria } from './carrozzeria';
 import type { Venditore } from './config-mezzi';
 import { vistaCommerciale } from './instradamento';
+import { serveFraseDaConfermare } from './nota-canone';
 import { dataItaliana, disegna, euro, NOTA_DEMO_PDF, PIEDE_LEASING, PIEDE_NOLEGGIO, type Blocco, type Documento } from './pdf-generico';
 
 const NERO = '#0F1020';
@@ -122,11 +123,11 @@ export function contenutoNoleggioMezzi(
   const vista = vistaCommerciale(c.noleggio);
 
   // La nota del listino dice gia' "da confermare" sul canale che lo richiede: la frase
-  // fissa si aggiunge solo se non c'e', cosi' non compare due volte nello stesso paragrafo
+  // fissa si aggiunge solo se non c'e' (la stessa regola dello schermo, nota-canone.ts)
   const nota = vista.nota ?? '';
   const condizioni = [
     nota,
-    vista.daConfermare && !/da confermare/i.test(nota) ? NOTA_CANONE_DA_CONFERMARE : '',
+    serveFraseDaConfermare(vista.daConfermare, nota) ? NOTA_CANONE_DA_CONFERMARE : '',
     NOTA_IVA,
   ]
     .filter((x) => x !== '')

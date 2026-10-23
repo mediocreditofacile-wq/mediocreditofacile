@@ -17,6 +17,7 @@ import { validaBeni } from '../../lib/motore/beni-mezzi';
 import type { MezziSchermo } from '../../lib/motore/calcolo-mezzi';
 import type { CategoriaMezzo, MezziBrowser } from '../../lib/motore/config-mezzi';
 import { leggiPrezzo, leggiQuantita, totaleRighe } from '../../lib/motore/distinta';
+import { serveFraseDaConfermare } from '../../lib/motore/nota-canone';
 import { bloccoSemaforo } from './cliente';
 import { $, apiJsonSicura, apriTab, esc, euro, euroEsatto, messaggio, num, stato, traduci } from './comune';
 import { turni } from './distinta-browser';
@@ -86,7 +87,11 @@ export function inputMezzi(): Record<string, unknown> | null {
   return validaBeni(cfg.categorie, corpo.beni).ok ? corpo : null;
 }
 
-/** Noleggio a schermo: rate per durata, oppure il perche' non c'e'. La riusa la simulazione */
+/**
+ * Noleggio a schermo: rate per durata, oppure il perche' non c'e'. La riusa la simulazione.
+ * "Da confermare" una volta sola: la frase fissa solo se la nota del listino non lo dice
+ * gia' (Econocom), la stessa regola del PDF.
+ */
 export function riquadroNoleggio(r: Pick<MezziSchermo, 'noleggio' | 'motivoNoNoleggio'>): string {
   const n = r.noleggio;
   if (!n) return `<p class="mt-msg">${esc(r.motivoNoNoleggio ?? '')}</p>`;
@@ -96,7 +101,7 @@ export function riquadroNoleggio(r: Pick<MezziSchermo, 'noleggio' | 'motivoNoNol
       <tbody>${n.rate.map((x) => `
         <tr class="${x.durata === n.durataEvidenza ? 'scelta' : ''}"><td>${esc(x.durata)} mesi</td><td class="num">${euro(x.canone, 2)}</td></tr>`).join('')}</tbody>
     </table></div>
-    ${n.daConfermare ? '<p class="mt-da-confermare">Rata indicativa, da confermare.</p>' : ''}
+    ${serveFraseDaConfermare(n.daConfermare, n.nota) ? '<p class="mt-da-confermare">Rata indicativa, da confermare.</p>' : ''}
     ${n.nota ? `<p class="mt-nota">${esc(n.nota)}</p>` : ''}`;
 }
 
