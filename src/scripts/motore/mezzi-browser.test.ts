@@ -21,6 +21,8 @@ import {
   leggiAnticipo,
   messaggioRiga,
   messaggioSimulazione,
+  preventiviPerPratica,
+  preventivoDaStorico,
   provaSimulazione,
   rigaASchermo,
   rigaIntatta,
@@ -32,6 +34,7 @@ import {
   venditoreSuggerito,
   VOCE_BILANCIO_ANALITICO,
   type PreventivoPerPratica,
+  type PreventivoStorico,
   type RigaInPagina,
   type SimulazioneInPagina,
 } from './mezzi-browser';
@@ -507,6 +510,125 @@ describe('sceltePratica', () => {
     p.schermo.noleggio = null;
     p.schermo.leasing = [];
     expect(sceltePratica(p, 'r-1')).toBeNull();
+  });
+});
+
+// --- i preventivi dello Storico ------------------------------------------------------
+
+/** Una riga dei preventivi come la manda /api/motore/storico sui mezzi */
+const salvato = (p: Partial<PreventivoStorico> = {}): PreventivoStorico => ({
+  id: 'EB-20261022-0900',
+  ricerca_id: 'r-0',
+  piva: '01234567890',
+  prezzo: '48500.00',
+  creato: '2026-10-22T09:00:00.000Z',
+  scelta: { durata: 60, canone: 1_017.89, rataLeasing: 877.65 },
+  noleggio: { durate: [24, 36, 48, 60] },
+  leasing: [
+    { chiave: 'A', nome: 'Sella Leasing', motivo: null, durate: [36, 48, 60, 72, 84] },
+    { chiave: 'B', nome: 'Credem Leasing', motivo: null, durate: [36, 48, 60] },
+    { chiave: 'C', nome: 'Alba Leasing', motivo: 'Sotto il minimo.', durate: [] },
+  ],
+  venditore: 'MANC SRL',
+  ...p,
+});
+
+describe('preventivoDaStorico', () => {
+  it('la riga dello Storico diventa il preventivo da cui parte la pratica', () => {
+    expect(preventivoDaStorico(salvato())).toEqual({
+      id: 'EB-20261022-0900',
+      ricercaId: 'r-0',
+      chiaveLeasing: null,
+      schermo: {
+        totale: 48_500,
+        venditore: { ragioneSociale: 'MANC SRL' },
+        // La durata in evidenza e' quella della scelta salvata
+        noleggio: { rate: [24, 36, 48, 60].map((durata) => ({ durata })), durataEvidenza: 60 },
+        leasing: [
+          { chiave: 'A', nome: 'Sella Leasing', righe: [36, 48, 60, 72, 84].map((durata) => ({ durata })) },
+          { chiave: 'B', nome: 'Credem Leasing', righe: [36, 48, 60].map((durata) => ({ durata })) },
+          { chiave: 'C', nome: 'Alba Leasing', righe: [] },
+        ],
+      },
+    });
+  });
+
+  it('dalla riga dello Storico le scelte di sempre: noleggio a 60, la prima colonna che quota', () => {
+    const s = sceltePratica(preventivoDaStorico(salvato()), 'r-0')!;
+    expect(s.importo).toBe(48_500);
+    expect(s.prodotto).toBe('noleggio');
+    expect(s.noleggio).toEqual({ durate: [24, 36, 48, 60], durata: 60 });
+    expect(s.leasing.map((c) => [c.chiave, c.etichetta, c.durata])).toEqual([['A', 'Sella Leasing', 60], ['B', 'Credem Leasing', 60]]);
+    expect(s.colonna).toBe('A');
+  });
+
+  it('senza noleggio salvato e coi nomi spenti: leasing, "Soluzione A"', () => {
+    const p = preventivoDaStorico(salvato({
+      noleggio: null,
+      leasing: [{ chiave: 'A', nome: null, motivo: null, durate: [36, 48] }],
+    }))!;
+    const s = sceltePratica(p, 'r-0')!;
+    expect(s.noleggio).toBeNull();
+    expect(s.prodotto).toBe('leasing');
+    expect(s.leasing).toEqual([{ chiave: 'A', etichetta: 'Soluzione A', durate: [36, 48], durata: 48 }]);
+  });
+
+  it('una riga di un altro settore (senza le colonne dei mezzi) o con un prezzo che non si legge non e\' un preventivo', () => {
+    const { noleggio: _n, leasing: _l, ...altroSettore } = salvato();
+    expect(preventivoDaStorico(altroSettore as PreventivoStorico)).toBeNull();
+    expect(preventivoDaStorico(salvato({ prezzo: 'x' }))).toBeNull();
+    expect(preventivoDaStorico(salvato({ ricerca_id: null }))).toBeNull();
+  });
+});
+
+describe('preventiviPerPratica: il menu della pratica', () => {
+  const cliente = { ricercaId: 'r-1', piva: '01234567890' };
+
+  it('il preventivo appena scaricato su questo cliente viene per primo, poi lo Storico dal piu\' recente', () => {
+    const storico = [
+      salvato({ id: 'EB-3', ricerca_id: 'r-1', creato: '2026-10-23T10:00:00.000Z' }),
+      salvato({ id: 'EB-2', ricerca_id: 'r-0', creato: '2026-10-22T09:00:00.000Z' }),
+    ];
+    const menu = preventiviPerPratica(cliente, preventivo({ id: 'EB-4', ricercaId: 'r-1' }), storico);
+    expect(menu.map((m) => [m.scelte.propostaId, m.creato])).toEqual([
+      ['EB-4', null],
+      ['EB-3', '2026-10-23T10:00:00.000Z'],
+      ['EB-2', '2026-10-22T09:00:00.000Z'],
+    ]);
+    // Quello appena scaricato tiene la colonna messa nel PDF
+    expect(menu[0].scelte.colonna).toBe('B');
+    expect(menu[1].venditore).toBe('MANC SRL');
+  });
+
+  it('il preventivo appena scaricato, quando lo Storico lo riporta, compare una volta sola', () => {
+    const menu = preventiviPerPratica(cliente, preventivo({ id: 'EB-4', ricercaId: 'r-1' }), [salvato({ id: 'EB-4', ricerca_id: 'r-1' })]);
+    expect(menu.map((m) => m.scelte.propostaId)).toEqual(['EB-4']);
+    expect(menu[0].creato).toBeNull();
+  });
+
+  it('dopo un ricaricamento, o il giorno dopo, restano i preventivi salvati del cliente', () => {
+    const menu = preventiviPerPratica(cliente, null, [salvato({ id: 'EB-2', ricerca_id: 'r-0' })]);
+    expect(menu).toHaveLength(1);
+    expect(menu[0].scelte.propostaId).toBe('EB-2');
+    // La pratica va sulla verifica aperta: il server accetta un preventivo della stessa partita IVA
+    expect(menu[0].scelte.ricercaId).toBe('r-1');
+  });
+
+  it('solo i preventivi di questo cliente: un\'altra partita IVA o il preventivo in pagina di un\'altra verifica no', () => {
+    const menu = preventiviPerPratica(cliente, preventivo({ id: 'EB-9', ricercaId: 'r-9' }), [
+      salvato({ id: 'EB-8', piva: '09876543210' }),
+      salvato({ id: 'EB-2', piva: ' 01234567890 ' }),
+    ]);
+    expect(menu.map((m) => m.scelte.propostaId)).toEqual(['EB-2']);
+  });
+
+  it('un preventivo che non quota niente non entra nel menu', () => {
+    const menu = preventiviPerPratica(cliente, null, [salvato({ noleggio: null, leasing: [{ chiave: 'A', nome: null, motivo: 'Sotto il minimo.', durate: [] }] })]);
+    expect(menu).toEqual([]);
+  });
+
+  it('senza cliente aperto il menu e\' vuoto', () => {
+    expect(preventiviPerPratica(null, preventivo(), [salvato()])).toEqual([]);
   });
 });
 

@@ -393,7 +393,7 @@ function markupAzioni(): string {
     <div class="mt-azioni">
       <button type="button" class="mt-btn" id="mz-preventivo" ${inAttesa || !quota ? 'disabled' : ''}>Scarica il preventivo</button>
       <p class="mt-nota" style="flex-basis:100%;margin:0">${quota
-        ? 'Il preventivo resta nello Storico: la pratica parte da lì.'
+        ? 'Il preventivo resta nello Storico: la pratica può partire da lì anche un altro giorno, dalla scheda Pratiche.'
         : "Né il noleggio né il leasing quotano questi beni: non c'è un preventivo da scaricare. Scrivi a Mediocredito Facile."}</p>
     </div>`;
 }

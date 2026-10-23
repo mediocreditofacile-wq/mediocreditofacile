@@ -22,7 +22,8 @@ export interface Stato {
   /**
    * Settore mezzi: i numeri a schermo con cui e' uscito l'ultimo preventivo, la ricerca
    * (il cliente) su cui e' stato fatto e la colonna del leasing messa nel PDF (null se il
-   * leasing non quotava). La pratica parte da qui, e solo se la ricerca e' quella aperta.
+   * leasing non quotava). Nel menu della pratica e' la prima scelta, se la ricerca e'
+   * quella aperta; gli altri preventivi del cliente arrivano dallo Storico.
    */
   mezziPreventivo: { id: string; ricercaId: string; schermo: MezziSchermo; chiaveLeasing: string | null } | null;
 }

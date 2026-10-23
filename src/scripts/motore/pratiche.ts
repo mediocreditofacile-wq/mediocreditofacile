@@ -2,15 +2,24 @@
 // stato, e per MCF il cambio di stato libero (anche saltando passaggi, anche
 // su piu' pratiche insieme) e l'esito della verifica eventi negativi.
 // Sul settore distinta il modulo di caricamento e' quello di pratiche-distinta.ts.
-// Sul settore mezzi il modulo e' questo, ma parte solo dal preventivo salvato: importo,
-// prodotti, partner del leasing e durate sono quelli del preventivo (rendiModuloMezzi).
+// Sul settore mezzi il modulo e' questo, ma parte solo da un preventivo salvato del
+// cliente, scelto da un menu: quello appena scaricato o uno dello Storico, anche di un
+// altro giorno. Importo, prodotti, partner del leasing e durate sono quelli del
+// preventivo scelto (rendiModuloMezzi).
 
 import { upload } from '@vercel/blob/client';
 import { buildChecklist } from '../../lib/checklist-pratica';
 import { controllaDatiCliente } from '../../lib/dati-cliente-pratica';
 import { initCampoIban, type CampoIban } from '../campo-iban';
 import { $, apiJson, data, esc, euro, euroEsatto, messaggio, stato, traduci } from './comune';
-import { checklistPraticaMezzi, corpoPraticaMezzi, sceltePratica, type SceltePratica } from './mezzi-browser';
+import {
+  checklistPraticaMezzi,
+  corpoPraticaMezzi,
+  preventiviPerPratica,
+  type PreventivoInMenu,
+  type PreventivoStorico,
+  type SceltePratica,
+} from './mezzi-browser';
 import { montaPraticheDistinta, rendiModuloDistinta } from './pratiche-distinta';
 import { bottoneDoc, caricaStorico, suStorico, type DatiStorico } from './storico';
 
@@ -32,6 +41,14 @@ let pratiche: any[] = [];
 let esterne: any[] = [];
 /** Settore mezzi: il preventivo da cui parte il modulo aperto, con quello che offre */
 let mezzi: SceltePratica | null = null;
+/** Settore mezzi: i preventivi che il menu del modulo aperto offre */
+let menuMezzi: PreventivoInMenu[] = [];
+/** Settore mezzi: i preventivi dello Storico, per il menu */
+let preventiviStorico: PreventivoStorico[] = [];
+/** Settore mezzi: il modulo aperto non ha ancora un preventivo e aspetta lo Storico */
+let mezziInAttesa = false;
+/** Settore mezzi: la verifica per cui e' aperto il modulo; un'altra verifica non tocca il suo menu */
+let ricercaModulo: string | null = null;
 
 /** La forma giuridica del Registro, ridotta alle voci della checklist */
 function formaDaScheda(forma: string | null): string {
@@ -122,27 +139,19 @@ function collegaModulo() {
   rendiFile();
 }
 
-/**
- * Settore mezzi: la pratica parte solo dall'ultimo preventivo salvato su questo cliente.
- * L'importo si mostra e non si scrive; il prodotto offre solo quello che il preventivo
- * aveva; col leasing compare il partner (il nome, o "Soluzione A") e le durate sono
- * quelle della sua colonna. Il server ricontrolla tutto sul preventivo salvato.
- */
-function rendiModuloMezzi(r: NonNullable<typeof stato.ricerca>, box: HTMLElement) {
-  box.hidden = false;
-  mezzi = sceltePratica(stato.mezziPreventivo, r.id);
-  if (!mezzi) {
-    box.innerHTML = '<p class="mt-vuoto">Scarica prima il preventivo nella scheda Proposte: la pratica parte da lì.</p>';
-    return;
-  }
-  const m = mezzi;
-  bozza = crypto.randomUUID();
-  file = [];
-  box.innerHTML = `
-    <article class="mt-card mt-card--evidenza">
-      <p class="mt-semaforo__tit">Nuova pratica per ${esc(r.scheda.ragioneSociale)}</p>
-      <p class="mt-meta" style="margin-top:0">P.IVA ${esc(r.scheda.piva)} · preventivo ${esc(m.propostaId)}</p>
-      <div class="mt-griglia" style="margin-top:16px">
+/** Settore mezzi: l'etichetta di un preventivo nel menu */
+function etichettaPreventivo(p: PreventivoInMenu): string {
+  return [
+    p.scelte.propostaId,
+    p.venditore,
+    `${euroEsatto(p.scelte.importo)} di beni`,
+    p.creato ? data(p.creato) : 'appena scaricato',
+  ].filter(Boolean).join(' · ');
+}
+
+/** Settore mezzi: prodotto, partner, durata e importo del preventivo scelto */
+function campiOfferta(m: SceltePratica): string {
+  return `
         <label class="mt-campo"><span>Prodotto</span>
           <select id="pr-prodotto" class="mt-input">
             ${m.noleggio ? `<option value="noleggio" ${m.prodotto === 'noleggio' ? 'selected' : ''}>Noleggio operativo</option>` : ''}
@@ -155,13 +164,11 @@ function rendiModuloMezzi(r: NonNullable<typeof stato.ricerca>, box: HTMLElement
         <label class="mt-campo"><span>Durata</span><select id="pr-durata" class="mt-input"></select></label>
         <div class="mt-campo"><span>Importo, IVA esclusa</span>
           <output class="mt-pr-importo">${esc(euroEsatto(m.importo))}</output>
-          <small>Il totale dei beni del preventivo: per cambiarlo rifai il preventivo.</small></div>
-        ${campoForma(r)}
-        ${CAMPI_REFERENTE}
-      </div>
-      ${CODA_MODULO}
-    </article>`;
+          <small>Il totale dei beni del preventivo: per cambiarlo rifai il preventivo.</small></div>`;
+}
 
+/** Settore mezzi: le durate seguono prodotto e partner; si ricollega a ogni cambio di preventivo */
+function collegaOfferta(m: SceltePratica) {
   const prodotto = $<HTMLSelectElement>('pr-prodotto');
   const durata = $<HTMLSelectElement>('pr-durata');
   const aggiorna = () => {
@@ -178,8 +185,79 @@ function rendiModuloMezzi(r: NonNullable<typeof stato.ricerca>, box: HTMLElement
   aggiorna();
   prodotto.addEventListener('change', aggiorna);
   document.getElementById('pr-partner')?.addEventListener('change', aggiorna);
+}
+
+/** Settore mezzi: le voci del menu dei preventivi, con quella scelta */
+const opzioniPreventivi = (scelto: string | null) => menuMezzi
+  .map((p) => `<option value="${esc(p.scelte.propostaId)}" ${p.scelte.propostaId === scelto ? 'selected' : ''}>${esc(etichettaPreventivo(p))}</option>`)
+  .join('');
+
+/**
+ * Settore mezzi: la pratica parte solo da un preventivo salvato di questo cliente, scelto
+ * da un menu: per primo quello appena scaricato, poi quelli dello Storico (anche di un
+ * altro giorno, o di prima di un ricaricamento). L'importo si mostra e non si scrive; il
+ * prodotto offre solo quello che il preventivo aveva; col leasing compare il partner (il
+ * nome, o "Soluzione A") e le durate sono quelle della sua colonna. Il server ricontrolla
+ * tutto sul preventivo salvato.
+ */
+function rendiModuloMezzi(r: NonNullable<typeof stato.ricerca>, box: HTMLElement) {
+  box.hidden = false;
+  ricercaModulo = r.id;
+  menuMezzi = preventiviPerPratica({ ricercaId: r.id, piva: r.scheda.piva }, stato.mezziPreventivo, preventiviStorico);
+  mezziInAttesa = menuMezzi.length === 0;
+  if (mezziInAttesa) {
+    mezzi = null;
+    box.innerHTML = '<p class="mt-vuoto">Scarica prima il preventivo nella scheda Proposte: la pratica parte da lì.</p>';
+    return;
+  }
+  mezzi = menuMezzi[0].scelte;
+  bozza = crypto.randomUUID();
+  file = [];
+  box.innerHTML = `
+    <article class="mt-card mt-card--evidenza">
+      <p class="mt-semaforo__tit">Nuova pratica per ${esc(r.scheda.ragioneSociale)}</p>
+      <p class="mt-meta" style="margin-top:0">P.IVA ${esc(r.scheda.piva)}</p>
+      <div class="mt-griglia" style="margin-top:16px">
+        <label class="mt-campo"><span>Preventivo</span>
+          <select id="pr-preventivo" class="mt-input">${opzioniPreventivi(mezzi.propostaId)}</select>
+          <small>Prodotto, partner, durate e importo vengono da questo preventivo.</small></label>
+        <div id="pr-offerta" style="display:contents">${campiOfferta(mezzi)}</div>
+        ${campoForma(r)}
+        ${CAMPI_REFERENTE}
+      </div>
+      ${CODA_MODULO}
+    </article>`;
+
+  collegaOfferta(mezzi);
+  $<HTMLSelectElement>('pr-preventivo').addEventListener('change', (ev) => {
+    const scelto = menuMezzi.find((p) => p.scelte.propostaId === (ev.target as HTMLSelectElement).value);
+    if (!scelto) return;
+    mezzi = scelto.scelte;
+    $('pr-offerta').innerHTML = campiOfferta(mezzi);
+    collegaOfferta(mezzi);
+  });
   $('pr-forma').addEventListener('change', rendiChecklist);
   collegaModulo();
+}
+
+/**
+ * Settore mezzi: lo Storico e' tornato. Il modulo che aspettava un preventivo si apre; il
+ * menu di quello gia' aperto prende i preventivi nuovi e tiene la scelta, cosi' i campi
+ * gia' scritti restano.
+ */
+function aggiornaMenuMezzi() {
+  const r = stato.ricerca;
+  const box = document.getElementById('pratica-nuova');
+  if (!r || !box || box.hidden || r.id !== ricercaModulo) return;
+  if (mezziInAttesa) return rendiModuloMezzi(r, box);
+  const sel = document.getElementById('pr-preventivo') as HTMLSelectElement | null;
+  if (!sel || !mezzi) return;
+  const aperto = mezzi.propostaId;
+  const nuovo = preventiviPerPratica({ ricercaId: r.id, piva: r.scheda.piva }, stato.mezziPreventivo, preventiviStorico);
+  // Il preventivo scelto resta nel menu anche se lo Storico non lo riporta piu' (lista piena)
+  const scelto = menuMezzi.find((p) => p.scelte.propostaId === aperto);
+  menuMezzi = nuovo.some((p) => p.scelte.propostaId === aperto) || !scelto ? nuovo : [scelto, ...nuovo];
+  sel.innerHTML = opzioniPreventivi(aperto);
 }
 
 function rendiModulo(evento?: Event) {
@@ -189,6 +267,7 @@ function rendiModulo(evento?: Event) {
   const r = stato.ricerca;
   const box = $('pratica-nuova');
   if (!r) {
+    mezziInAttesa = false;
     box.innerHTML = `<p class="mt-vuoto">Per caricare una pratica verifica prima il cliente nella sezione ${stato.settore === 'macchine' ? 'Verifica cliente' : 'Cliente'}.</p>`;
     box.hidden = false;
     return;
@@ -440,7 +519,16 @@ export function montaPratiche() {
     <div id="pratiche-elenco"><p class="mt-vuoto">Nessuna pratica caricata dal portale.</p></div>
     <div id="pratiche-esterne"></div>`;
 
-  suStorico((d: DatiStorico) => { pratiche = d.pratiche; esterne = d.esterne; rendiElenco(); rendiEsterne(); });
+  suStorico((d: DatiStorico) => {
+    pratiche = d.pratiche;
+    esterne = d.esterne;
+    rendiElenco();
+    rendiEsterne();
+    if (stato.settore === 'mezzi') {
+      preventiviStorico = d.proposte;
+      aggiornaMenuMezzi();
+    }
+  });
   if (stato.settore === 'distinta') montaPraticheDistinta();
   document.addEventListener('mt:nuova-pratica', rendiModulo);
   document.addEventListener('mt:tab', (e) => { if ((e as CustomEvent).detail === 'pratiche') void caricaStorico(); });

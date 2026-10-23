@@ -13,11 +13,22 @@ export const prerender = false;
 // L'esito della verifica eventi negativi esce solo per l'admin MCF.
 // Le pratiche lavorate prima del portale (app.pratica_esterna) escono per
 // referente e MCF, il canale solo per MCF (src/lib/motore/pratiche-esterne.ts).
+//
+// Sul settore mezzi ogni preventivo porta anche quello che la pratica puo' chiedere:
+// durate del noleggio, colonne del leasing (chiave, nome come salvato, motivo, durate)
+// e venditore, letti dallo schermo salvato (src/lib/motore/storico-mezzi.ts). Mai
+// `dati`, che ha la mappa colonna -> partner. Gli altri settori restano come prima.
 
 import { query } from '../../../lib/db';
 import { praticheEsternePerRuolo, type RigaEsterna } from '../../../lib/motore/pratiche-esterne';
 import { meseDi, meseRichiesto, riepilogoMesi, verificheContate } from '../../../lib/motore/richieste';
 import { filtroVisibilita, json, sessioneMotore } from '../../../lib/motore/sessione';
+import { colonneMezziStorico } from '../../../lib/motore/storico-mezzi';
+
+/** Le tre parti dello schermo salvato che servono alla pratica dei mezzi */
+const COLONNE_MEZZI = `
+              x.numeri->'noleggio' AS noleggio, x.numeri->'leasing' AS leasing,
+              x.numeri->'venditore'->>'ragioneSociale' AS venditore,`;
 
 export async function GET({ request }: { request: Request }) {
   const e = await sessioneMotore(request, new URL(request.url).searchParams.get('f'));
@@ -25,6 +36,7 @@ export async function GET({ request }: { request: Request }) {
   const { where, valori } = filtroVisibilita(e, 'x');
   const admin = e.contesto.ruolo === 'admin';
   const mese = meseRichiesto(new URL(request.url).searchParams.get('mese'));
+  const mezzi = e.carrozzeria.settore === 'mezzi';
 
   const [ricerche, proposte, pratiche, esterne] = await Promise.all([
     query(
@@ -36,7 +48,7 @@ export async function GET({ request }: { request: Request }) {
     ),
     query(
       `SELECT x.id, x.ricerca_id, x.piva, x.cliente_nome, x.descrizione, x.prezzo, x.semaforo,
-              x.numeri->'scelta' AS scelta, x.documenti, x.pdf_pronti, x.creato, u.name AS agente_nome
+              x.numeri->'scelta' AS scelta,${mezzi ? COLONNE_MEZZI : ''} x.documenti, x.pdf_pronti, x.creato, u.name AS agente_nome
          FROM app.proposta x JOIN "user" u ON u.id = x.user_id
         WHERE ${where} ORDER BY x.creato DESC LIMIT 200`,
       valori,
@@ -68,7 +80,9 @@ export async function GET({ request }: { request: Request }) {
     // Solo se il fornitore paga le verifiche: un si' o un no, mai il prezzo
     conteggio: e.carrozzeria.prezzoVerifica !== null,
     ricerche: delMese.map((r) => ({ ...r, conta: contate.has(r.id) })),
-    proposte, pratiche,
+    // Le colonne lette per i mezzi escono ridotte: niente rate, spese o totali
+    proposte: mezzi ? (proposte as Record<string, unknown>[]).map((p) => ({ ...p, ...colonneMezziStorico(p) })) : proposte,
+    pratiche,
     esterne: praticheEsternePerRuolo(esterne, e.contesto.ruolo, e.vedeTutto),
   });
 }

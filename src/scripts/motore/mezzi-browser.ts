@@ -13,6 +13,7 @@ import { buildChecklist } from '../../lib/checklist-pratica';
 import { validaBeni } from '../../lib/motore/beni-mezzi';
 import type { MezziSchermo } from '../../lib/motore/calcolo-mezzi';
 import type { CategoriaMezzo, MezziBrowser } from '../../lib/motore/config-mezzi';
+import type { ColonneMezziStorico } from '../../lib/motore/storico-mezzi';
 
 /** Una riga dei beni come sta nelle caselle: quantita' e prezzo come li ha scritti l'agente */
 export interface RigaInPagina {
@@ -259,17 +260,19 @@ export const VOCE_BILANCIO_ANALITICO =
 /** La durata di partenza del leasing, come quella in evidenza a schermo */
 const DURATA_LEASING_PRATICA = 60;
 
-/** L'ultimo preventivo salvato, come lo tiene la pagina: di quale cliente e con quali numeri */
+/** Un preventivo salvato, come lo tiene la pagina o come torna dallo Storico: di quale cliente e con quali numeri */
 export interface PreventivoPerPratica {
   id: string;
   /** La ricerca (il cliente) su cui e' stato fatto */
   ricercaId: string;
   schermo: {
     totale: number;
+    /** Chi firma l'offerta: serve all'etichetta del menu */
+    venditore?: { ragioneSociale: string };
     noleggio: { rate: { durata: number }[]; durataEvidenza: number | null } | null;
     leasing: { chiave: string; nome: string | null; righe: { durata: number }[] }[];
   };
-  /** La colonna del leasing messa nel PDF; null se il leasing non quotava */
+  /** La colonna del leasing messa nel PDF; null se il leasing non quotava o non si sa (Storico) */
   chiaveLeasing: string | null;
 }
 
@@ -296,7 +299,11 @@ export interface SceltePratica {
  */
 export function sceltePratica(p: PreventivoPerPratica | null, ricercaId: string | null | undefined): SceltePratica | null {
   if (!p || !ricercaId || p.ricercaId !== ricercaId) return null;
+  return offertaDelPreventivo(p, ricercaId);
+}
 
+/** Che cosa offre un preventivo gia' riconosciuto del cliente; la pratica va sulla ricerca `ricercaId` */
+function offertaDelPreventivo(p: PreventivoPerPratica, ricercaId: string): SceltePratica | null {
   const rate = p.schermo.noleggio?.rate.map((r) => r.durata) ?? [];
   const evidenza = p.schermo.noleggio?.durataEvidenza ?? null;
   const noleggio = rate.length
@@ -319,13 +326,91 @@ export function sceltePratica(p: PreventivoPerPratica | null, ricercaId: string 
   const colonna = leasing.some((c) => c.chiave === p.chiaveLeasing) ? p.chiaveLeasing : leasing[0]?.chiave ?? null;
   return {
     propostaId: p.id,
-    ricercaId: p.ricercaId,
+    ricercaId,
     importo: p.schermo.totale,
     noleggio,
     leasing,
     colonna,
     prodotto: noleggio ? 'noleggio' : 'leasing',
   };
+}
+
+/**
+ * Una riga dei preventivi come la manda /api/motore/storico sul settore mezzi: le colonne
+ * di sempre piu' quelle che servono alla pratica (storico-mezzi.ts). Niente rate ne' spese.
+ */
+export interface PreventivoStorico extends Partial<ColonneMezziStorico> {
+  id: string;
+  ricerca_id: string | null;
+  piva: string;
+  /** numeric(12,2): arriva come stringa */
+  prezzo: number | string;
+  creato: string;
+  /** La scelta in evidenza salvata col preventivo: la sua durata e' quella di partenza del noleggio */
+  scelta?: { durata?: unknown } | null;
+}
+
+/**
+ * Il preventivo dello Storico nella forma da cui parte la pratica. Null se la riga non e'
+ * di un preventivo di mezzi (mancano le colonne) o il prezzo non si legge. La colonna
+ * messa nel PDF non si sa: sta solo in `dati`, che lo Storico non legge, quindi il
+ * leasing parte dalla prima colonna che quota.
+ */
+export function preventivoDaStorico(r: PreventivoStorico): PreventivoPerPratica | null {
+  const totale = Number(r.prezzo);
+  if (!r.ricerca_id || !Number.isFinite(totale) || totale <= 0 || r.noleggio === undefined || !Array.isArray(r.leasing)) return null;
+  const evidenza = r.scelta?.durata;
+  return {
+    id: r.id,
+    ricercaId: r.ricerca_id,
+    chiaveLeasing: null,
+    schermo: {
+      totale,
+      ...(r.venditore ? { venditore: { ragioneSociale: r.venditore } } : {}),
+      noleggio: r.noleggio
+        ? { rate: r.noleggio.durate.map((durata) => ({ durata })), durataEvidenza: typeof evidenza === 'number' ? evidenza : null }
+        : null,
+      leasing: r.leasing.map((c) => ({ chiave: c.chiave, nome: c.nome, righe: c.durate.map((durata) => ({ durata })) })),
+    },
+  };
+}
+
+/** Un preventivo nel menu della pratica */
+export interface PreventivoInMenu {
+  scelte: SceltePratica;
+  /** La ragione sociale del venditore; null se non si sa */
+  venditore: string | null;
+  /** Quando e' stato salvato; null per quello appena scaricato in questa pagina */
+  creato: string | null;
+}
+
+const soloPiva = (v: unknown) => String(v ?? '').trim();
+
+/**
+ * I preventivi da cui puo' partire la pratica del cliente aperto, nell'ordine del menu:
+ * prima quello appena scaricato in questa pagina, se e' di questa verifica (tiene la
+ * colonna messa nel PDF), poi quelli dello Storico con la stessa partita IVA, dal piu'
+ * recente, senza ripetere quello appena scaricato. Fuori quelli che non quotano niente.
+ * La pratica va sempre sulla verifica aperta: il server accetta un preventivo dello
+ * stesso cliente (partita IVA) e rilegge gli eventi negativi da quella verifica.
+ */
+export function preventiviPerPratica(
+  cliente: { ricercaId: string; piva: string } | null,
+  inPagina: PreventivoPerPratica | null,
+  storico: PreventivoStorico[],
+): PreventivoInMenu[] {
+  if (!cliente) return [];
+  const menu: PreventivoInMenu[] = [];
+  const appena = sceltePratica(inPagina, cliente.ricercaId);
+  if (appena && inPagina) menu.push({ scelte: appena, venditore: inPagina.schermo.venditore?.ragioneSociale ?? null, creato: null });
+
+  for (const r of storico) {
+    if (soloPiva(r.piva) !== soloPiva(cliente.piva) || menu.some((m) => m.scelte.propostaId === r.id)) continue;
+    const p = preventivoDaStorico(r);
+    const scelte = p ? offertaDelPreventivo(p, cliente.ricercaId) : null;
+    if (scelte) menu.push({ scelte, venditore: r.venditore ?? null, creato: r.creato });
+  }
+  return menu;
 }
 
 /** La checklist a schermo: quella di forma e importo e, sul leasing, il bilancio analitico in coda, come sul server */
