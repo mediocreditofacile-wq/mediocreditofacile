@@ -40,14 +40,15 @@ export interface ClienteInstradamento {
 
 /**
  * Quello che del bene serve per scegliere il canale (settore mezzi): `categorie`
- * sono quelle delle righe della distinta, `targato` vale se anche una sola riga lo e'.
- * Lo costruisce il chiamante, che conosce il catalogo.
+ * sono quelle delle righe della distinta, `targato` e `usato` valgono se anche una sola
+ * riga lo e'. Lo costruisce il chiamante, che conosce il catalogo.
  */
 export interface BeneInstradamento {
   /** Codice del venditore che firma l'offerta */
   venditore: string;
   categorie: string[];
   targato: boolean;
+  usato: boolean;
 }
 
 export interface RataDurata {
@@ -121,13 +122,15 @@ function reggeIlCliente(c: CanaleConfig, cliente: ClienteInstradamento, beni: nu
  */
 function reggeIlBene(c: CanaleConfig, bene: BeneInstradamento | null): boolean {
   const escluse = c.categorieEscluse ?? [];
-  const condizioni = c.venditori !== undefined || escluse.length > 0 || c.escludiTargati === true;
+  const condizioni = c.venditori !== undefined || escluse.length > 0 || c.escludiTargati === true || c.escludiUsati === true;
   if (!condizioni) return true;
   if (bene === null) return false;
 
   if (c.venditori !== undefined && !c.venditori.includes(bene.venditore)) return false;
   if (bene.categorie.some((categoria) => escluse.includes(categoria))) return false;
   if (c.escludiTargati === true && bene.targato) return false;
+  // Un dato che manca non prova niente: senza la risposta sull'usato il canale non regge
+  if (c.escludiUsati === true && bene.usato !== false) return false;
   return true;
 }
 

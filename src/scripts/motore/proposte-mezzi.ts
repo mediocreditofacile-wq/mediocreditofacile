@@ -1,5 +1,5 @@
 // Scheda Proposte del settore "mezzi" (Bergamelli): l'agente descrive i beni a mano
-// (descrizione, categoria, quantita', prezzo e se il mezzo e' targato), sceglie chi
+// (descrizione, categoria, quantita', prezzo, se il mezzo e' targato e se e' usato), sceglie chi
 // vende e l'anticipo del leasing, e vede il noleggio e il leasing dei partner a
 // confronto. Spec mcf_spec-bergamelli-motore_v2, sezioni 4 e 5.
 //
@@ -35,6 +35,7 @@ import {
   rigaVuota,
   targatoDaMenu,
   targatoIniziale,
+  usatoDaMenu,
   venditoreSuggerito,
   type ColonnaLeasing,
   type RigaInPagina,
@@ -73,7 +74,7 @@ const NOTA_ROSSO =
   'Con il semaforo rosso le proposte e il preventivo escono lo stesso: la pratica arriva a Mediocredito Facile da rivalutare.';
 
 const config = (): MezziBrowser | null => stato.carrozzeria?.mezzi ?? null;
-const rigaNuova = (): RigaInPagina => ({ descrizione: '', categoria: '', quantita: '1', prezzo: '', targato: null });
+const rigaNuova = (): RigaInPagina => ({ descrizione: '', categoria: '', quantita: '1', prezzo: '', targato: null, usato: false });
 
 // --- quello che serve agli altri pezzi del portale ------------------------------------
 
@@ -184,6 +185,10 @@ export function opzioniTargato(categorie: CategoriaMezzo[], r: Pick<RigaInPagina
   return `${senzaDefault ? opzione('', 'Da indicare', r.targato === null) : ''}${opzione('si', 'Sì', r.targato === true)}${opzione('no', 'No', r.targato === false)}`;
 }
 
+/** Le risposte del menu "Nuovo o usato?": due sole, si parte da Nuovo. La riusa la simulazione */
+export const opzioniUsato = (usato: boolean) =>
+  `<option value="nuovo" ${usato ? '' : 'selected'}>Nuovo</option><option value="usato" ${usato ? 'selected' : ''}>Usato</option>`;
+
 /** Il menu delle categorie, con "Scegli" finche' non ce n'e' una. La riusa la simulazione */
 export const opzioniCategoria = (cfg: MezziBrowser, scelta: string) =>
   `<option value="" ${scelta ? '' : 'selected'}>Scegli</option>${cfg.categorie
@@ -199,7 +204,7 @@ function rendiRighe() {
   const categorie = (scelta: string) => opzioniCategoria(cfg, scelta);
   $('mr-tabella').innerHTML = `
     <div class="mt-scorri"><table class="mt-tabella mt-tabella--righe">
-      <thead><tr><th>#</th><th>Bene</th><th>Categoria</th><th>È targato?</th><th class="num">Quantità</th><th class="num">Prezzo unitario</th><th class="num">Totale</th><th></th></tr></thead>
+      <thead><tr><th>#</th><th>Bene</th><th>Categoria</th><th>È targato?</th><th>Nuovo o usato?</th><th class="num">Quantità</th><th class="num">Prezzo unitario</th><th class="num">Totale</th><th></th></tr></thead>
       <tbody>${righe.map((r, i) => `
         <tr>
           <td class="mt-id">${i + 1}</td>
@@ -207,6 +212,7 @@ function rendiRighe() {
             value="${esc(r.descrizione)}" placeholder="Marca e modello" aria-label="Descrizione, riga ${i + 1}" autocomplete="off" /></td>
           <td><select class="mt-input mt-input--testo mt-input--cat" data-campo="categoria" data-i="${i}" aria-label="Categoria, riga ${i + 1}">${categorie(r.categoria)}</select></td>
           <td><select class="mt-input mt-input--testo mt-input--targa" data-campo="targato" data-i="${i}" aria-label="Il mezzo è targato? Riga ${i + 1}">${opzioniTargato(cfg.categorie, r)}</select></td>
+          <td><select class="mt-input mt-input--testo mt-input--targa" data-campo="usato" data-i="${i}" aria-label="Il mezzo è nuovo o usato? Riga ${i + 1}">${opzioniUsato(r.usato)}</select></td>
           <td class="num"><input type="text" class="mt-input mt-input--q" data-campo="quantita" data-i="${i}" inputmode="numeric"
             value="${esc(r.quantita)}" aria-label="Quantità, riga ${i + 1}" autocomplete="off" /></td>
           <td class="num"><input type="text" class="mt-input mt-input--p" data-campo="prezzo" data-i="${i}" inputmode="decimal"
@@ -214,7 +220,7 @@ function rendiRighe() {
           <td class="num" data-totale="${i}">—</td>
           <td><button type="button" class="mt-link" data-togli-bene="${i}" aria-label="Togli la riga ${i + 1}">togli</button></td>
         </tr>`).join('')}</tbody>
-      <tfoot><tr><td colspan="6">Totale beni, IVA esclusa</td><td class="num" id="mr-totale"></td><td></td></tr></tfoot>
+      <tfoot><tr><td colspan="7">Totale beni, IVA esclusa</td><td class="num" id="mr-totale"></td><td></td></tr></tfoot>
     </table></div>`;
   aggiornaTotali();
 }
@@ -575,6 +581,8 @@ export function montaProposteMezzi() {
       if (i === 0) suggerisciVenditore();
     } else if (t.dataset.campo === 'targato') {
       r.targato = targatoDaMenu(t.value);
+    } else if (t.dataset.campo === 'usato') {
+      r.usato = usatoDaMenu(t.value);
     } else return;
     t.removeAttribute('aria-invalid');
     dopoCambio(0);

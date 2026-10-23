@@ -11,7 +11,7 @@ export const prerender = false;
 // nella cartella riservata a MCF.
 //
 // Sul settore mezzi (Bergamelli) il corpo e' quello di /api/motore/proposte piu'
-// `leasingPdf` ('A' | 'B' | 'C'), la colonna del leasing da mettere nel PDF. Il calcolo
+// `leasingPdf` ('A' | 'B' | 'C' | 'D'), la colonna del leasing da mettere nel PDF. Il calcolo
 // e' calcolaMezzi, lo stesso dello schermo. Alla mail di MCF vanno canale, nomi dei
 // partner, spread e provvigione; la risposta resta { ok, id, pdfPronti, documenti }.
 

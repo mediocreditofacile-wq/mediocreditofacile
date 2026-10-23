@@ -12,8 +12,8 @@
 // partner: verso il browser esce soltanto mezziPerSchermo(), che li toglie.
 //
 // Dal browser arrivano la ricerca, i beni, il venditore e l'anticipo. Il server
-// ricontrolla tutto: i beni sulle categorie del fornitore (e il targato, mai
-// indovinato), il venditore fra quelli della configurazione, l'anticipo come intero
+// ricontrolla tutto: i beni sulle categorie del fornitore (targato e usato, mai
+// indovinati), il venditore fra quelli della configurazione, l'anticipo come intero
 // fra 0 e ANTICIPO_MAX_MEZZI. Un valore che non regge e' un errore, mai un ripiego:
 // un venditore sbagliato intesterebbe l'offerta alla societa' sbagliata, un anticipo
 // letto male ("1.000") sposterebbe le rate di migliaia di euro.
@@ -32,6 +32,8 @@ type Sessione = Extract<EsitoMotore, { ok: true }>;
 
 /** Il testo fisso sul mezzo targato: Grenke non lo quota, il noleggio lo valuta MCF */
 export const TESTO_TARGATO = 'Mezzo targato: noleggio su richiesta a Mediocredito Facile.';
+/** Il testo fisso sul mezzo usato: nessun canale lo quota, il noleggio lo valuta MCF (23/10/2026) */
+export const TESTO_USATO = 'Mezzo usato: noleggio su richiesta a Mediocredito Facile.';
 /** Il testo fisso quando nessun canale regge il cliente e il bene */
 export const TESTO_NOLEGGIO_NON_DISPONIBILE =
   'Noleggio non disponibile per questo cliente e questo bene: resta il leasing.';
@@ -51,9 +53,12 @@ export interface CalcoloMezzi {
   valutazione: Valutazione | null;
   /** Canale e importi dell'instradamento: solo MCF. Null se nessun canale regge */
   noleggio: Instradamento | null;
-  /** Null se il noleggio c'e'; TESTO_TARGATO se un bene e' targato; altrimenti TESTO_NOLEGGIO_NON_DISPONIBILE */
+  /**
+   * Null se il noleggio c'e'; TESTO_USATO se un bene e' usato; TESTO_TARGATO se un bene
+   * e' targato; altrimenti TESTO_NOLEGGIO_NON_DISPONIBILE
+   */
   motivoNoNoleggio: string | null;
-  /** Una colonna per partner, nell'ordine della configurazione */
+  /** Una colonna per partner, nell'ordine della configurazione; quelli soloUsato solo se un bene e' usato */
   leasing: LeasingDelPartner[];
 }
 
@@ -127,7 +132,7 @@ export function componiMezzi(
     },
     v.totale,
     oggi,
-    { venditore: venditore.codice, categorie: v.categorie, targato: v.targato },
+    { venditore: venditore.codice, categorie: v.categorie, targato: v.targato, usato: v.usato },
   );
 
   // I criteri del locatore informano e non toccano i numeri: col rosso noleggio e leasing escono lo stesso
@@ -145,8 +150,8 @@ export function componiMezzi(
       anticipoPerc,
       valutazione,
       noleggio,
-      motivoNoNoleggio: noleggio ? null : v.targato ? TESTO_TARGATO : TESTO_NOLEGGIO_NON_DISPONIBILE,
-      leasing: leasingConfronto(mezzi.leasing, v.totale, anticipoPerc),
+      motivoNoNoleggio: noleggio ? null : v.usato ? TESTO_USATO : v.targato ? TESTO_TARGATO : TESTO_NOLEGGIO_NON_DISPONIBILE,
+      leasing: leasingConfronto(mezzi.leasing, v.totale, anticipoPerc, v.usato),
     },
   };
 }
@@ -176,7 +181,7 @@ export async function calcolaMezzi(
  * c'e', quindi non regge mai; quota Grenke dove il venditore e la categoria lo
  * ammettono. Nessun semaforo, nessuna ricerca, niente da salvare.
  *
- * Il corpo e' { importo, categoria, targato, venditore? }. Gli errori sono quelli dei
+ * Il corpo e' { importo, categoria, targato, usato?, venditore? }. Gli errori sono quelli dei
  * beni, ma senza indice di riga: il bene e' uno solo e "riga 0" non direbbe niente. Un
  * importo che non si legge e' importo_non_valido, il nome del campo che l'agente ha scritto.
  */
@@ -191,6 +196,7 @@ export function simulaMezzi(k: Carrozzeria, corpo: Record<string, unknown>, oggi
         quantita: 1,
         prezzo: corpo.importo,
         targato: corpo.targato,
+        usato: corpo.usato,
       }],
       venditore: corpo.venditore,
     },
@@ -200,7 +206,7 @@ export function simulaMezzi(k: Carrozzeria, corpo: Record<string, unknown>, oggi
   return fallito(esito.error === 'prezzo_non_valido' ? 'importo_non_valido' : esito.error);
 }
 
-/** Le colonne del leasing hanno una lettera: A, B, C nell'ordine della configurazione */
+/** Le colonne del leasing hanno una lettera: A, B, C nell'ordine di leasingConfronto, D per A-Leasing sull'usato */
 export function chiaveColonna(i: number): string {
   return String.fromCharCode(65 + i);
 }

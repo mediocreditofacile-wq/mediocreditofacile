@@ -238,6 +238,31 @@ describe('leggiConfigMezzi: leasing', () => {
   });
 });
 
+describe('leggiConfigMezzi: A-Leasing sull\'usato', () => {
+  const conA = (extra: Record<string, unknown> = {}) =>
+    con((c) => (c.leasing.partner as unknown[]).push({ partner: 'aleasing', spreadFinoA48: 4, spreadDa60: 4, ...extra }));
+
+  it('si legge con lo spread del suo listino, e soloUsato resta com\'e\' scritto', () => {
+    expect(leggiConfigMezzi(conA({ soloUsato: true }))!.leasing.partner[3]).toEqual({ partner: 'aleasing', spreadFinoA48: 4, spreadDa60: 4, soloUsato: true });
+    expect(leggiConfigMezzi(conA({ soloUsato: false }))!.leasing.partner[3]).toEqual({ partner: 'aleasing', spreadFinoA48: 4, spreadDa60: 4, soloUsato: false });
+  });
+
+  it('soloUsato assente o null non si scrive: il partner vale sempre', () => {
+    for (const extra of [{}, { soloUsato: null }]) {
+      expect(leggiConfigMezzi(conA(extra))!.leasing.partner[3]).toEqual({ partner: 'aleasing', spreadFinoA48: 4, spreadDa60: 4 });
+    }
+  });
+
+  it.each(['si', 1, 'true'])('soloUsato %j non si legge: il partner si scarta, gli altri restano', (soloUsato) => {
+    expect(leggiConfigMezzi(conA({ soloUsato }))!.leasing.partner.map((p) => p.partner)).toEqual(['sella', 'credem', 'alba']);
+  });
+
+  it('uno spread che A-Leasing non ha scarta il partner: lo spread non si inventa', () => {
+    expect(leggiConfigMezzi(con((c) => (c.leasing.partner as unknown[]).push({ partner: 'aleasing', spreadFinoA48: 3.5, spreadDa60: 4 })))!
+      .leasing.partner.map((p) => p.partner)).toEqual(['sella', 'credem', 'alba']);
+  });
+});
+
 describe('leggiConfigMezzi: nomi dei partner', () => {
   it.each(['si', 1, null, undefined])('mostraNomiPartner %j da null', (mostra) => {
     expect(leggiConfigMezzi(con((c) => (c.mostraNomiPartner = mostra as unknown as boolean)))).toBeNull();

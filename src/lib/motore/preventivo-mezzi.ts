@@ -10,11 +10,11 @@
 //    PDF) che lo Storico e la pratica leggono: lo rileggono anche referente e agente,
 //    quindi niente che lo schermo nasconde;
 //  - `dati` rifa' lo stesso conto e serve alla pratica. La mappa colonna -> partner
-//    (A, B, C -> sella, credem, alba) sta SOLO li': e' server-side, non esce mai;
+//    (A, B, C, D -> sella, credem, alba, aleasing) sta SOLO li': e' server-side, non esce mai;
 //  - `canale` e' la colonna riservata all'admin MCF (Grenke, Econocom o null);
 //  - i PDF sono due: il preventivo di noleggio intestato al venditore (se un canale
 //    quota) e il prospetto di leasing a marchio MCF di UN partner, quello che l'agente
-//    sceglie con `leasingPdf` (A, B o C) o, senza scelta, la rata piu' bassa;
+//    sceglie con `leasingPdf` (A, B, C o D) o, senza scelta, la rata piu' bassa;
 //  - la mail porta tutto: canale, nomi dei partner, spread e provvigione. E' per MCF
 //    (DESTINATARIO_MCF) e per nessun altro. La risposta all'agente invece e' sempre
 //    { ok, id, pdfPronti, documenti }.
@@ -22,7 +22,7 @@
 // Il rosso del semaforo non blocca: la riga si salva col suo colore, i PDF escono. Una
 // simulazione (calcolo senza ricerca) non si salva mai.
 
-import { calcolaProvvigione, PARTNERS_LEASING } from '../../data/leasing';
+import { calcolaProvvigione, PARTNERS_LEASING_MOTORE } from '../../data/leasing';
 import { query } from '../db';
 import { DESTINATARIO_MCF, escapeHtml, inviaMail, layoutMail } from '../mail-portale';
 import { salvaPdf } from '../preventivi-pv';
@@ -49,7 +49,7 @@ const MAX_DESCRIZIONE = 300;
 // --- la colonna del leasing nel PDF -------------------------------------------
 
 /**
- * Il partner di leasing che finisce nel PDF, come lettera della colonna (A, B, C).
+ * Il partner di leasing che finisce nel PDF, come lettera della colonna (A, B, C, D).
  * Vale la chiave chiesta dall'agente se quella colonna ha righe; una chiave che non
  * c'e', non e' testo o e' di una colonna senza righe si ignora. Senza scelta vince la
  * rata piu' bassa a 60 mesi (DURATA_EVIDENZA) se tutte le colonne con righe la
@@ -94,7 +94,7 @@ export interface DatiPropostaMezzi {
   anticipoPerc: number;
   /** La colonna del leasing messa nel PDF; null se nessun partner quota */
   chiaveLeasing: string | null;
-  /** Colonna -> partner. Solo server: lo schermo mostra A, B, C e basta */
+  /** Colonna -> partner. Solo server: lo schermo mostra le lettere e basta */
   partner: Record<string, PartnerConfronto>;
 }
 
@@ -167,7 +167,7 @@ export interface CondizioneUsata {
  */
 export function condizioniUsate(k: Pick<Carrozzeria, 'mezzi'>, colonna: LeasingDelPartner, importo: number): CondizioneUsata[] {
   const cfg = k.mezzi?.leasing.partner.find((p) => p.partner === colonna.partner);
-  const listino = PARTNERS_LEASING.find((p) => p.key === colonna.partner);
+  const listino = PARTNERS_LEASING_MOTORE.find((p) => p.key === colonna.partner);
   if (!cfg || !listino || importo <= 0) return [];
 
   const gruppi: CondizioneUsata[] = [];
@@ -270,7 +270,7 @@ export function corpoMailMezzi(o: {
         <th style="${destra}">Prezzo</th><th style="${destra}">Totale</th>
       </tr>
       ${c.beni.map((b) => `<tr>
-        <td style="${cella}">${escapeHtml(b.descrizione)}<br><span style="color:#787782;font-size:12px">${escapeHtml(b.categoria)}, ${b.targato ? 'targato' : 'non targato'}</span></td>
+        <td style="${cella}">${escapeHtml(b.descrizione)}<br><span style="color:#787782;font-size:12px">${escapeHtml(b.categoria)}, ${b.usato ? 'usato' : 'nuovo'}, ${b.targato ? 'targato' : 'non targato'}</span></td>
         <td style="${destra}">${b.quantita}</td>
         <td style="${destra}">${euro(b.prezzo)}</td>
         <td style="${destra}">${euro(b.totale)}</td>

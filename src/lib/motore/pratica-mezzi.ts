@@ -12,7 +12,7 @@
 //    del browser;
 //  - il prodotto e' noleggio o leasing, e la durata dev'essere una di quelle che il
 //    preventivo aveva quotato per quel prodotto. Sul leasing il browser sceglie la
-//    colonna (A, B, C) e il server la risolve nel partner con la mappa salvata: un
+//    colonna (A, B, C, D) e il server la risolve nel partner con la mappa salvata: un
 //    partner o una durata che il preventivo non aveva sono un 400;
 //  - il venditore e' quello che firma l'offerta (ragione sociale dal preventivo);
 //  - il rosso del semaforo non blocca: la pratica parte marcata "da rivalutare". Vale il
@@ -27,7 +27,7 @@
 // una forma che non e' di un preventivo di mezzi (un altro settore, un JSON rovinato) e'
 // un errore, non un'eccezione.
 
-import { PARTNERS_LEASING } from '../../data/leasing';
+import { PARTNERS_LEASING_MOTORE } from '../../data/leasing';
 import { controllaDatiCliente } from '../dati-cliente-pratica';
 import { queryUna } from '../db';
 import { ricercaVisibile } from './calcolo-proposta';
@@ -41,7 +41,7 @@ type Sessione = Extract<EsitoMotore, { ok: true }>;
 export const VOCE_BILANCIO_ANALITICO =
   "Bilancio analitico dell'ultimo esercizio (bilancio di verifica o situazione contabile dettagliata)";
 
-const PARTNER_NOTI: readonly PartnerConfronto[] = ['sella', 'credem', 'alba'];
+const PARTNER_NOTI: readonly PartnerConfronto[] = ['sella', 'credem', 'alba', 'aleasing'];
 
 // --- la scelta ----------------------------------------------------------------
 
@@ -109,7 +109,7 @@ export function sceltaPratica(
 
   if (prodotto === 'noleggio') {
     const durate = durateQuotate(oggetto(numeri.noleggio)?.rate);
-    // Nessun noleggio salvato (mezzo targato, nessun canale): non c'e' una pratica di noleggio da aprire
+    // Nessun noleggio salvato (mezzo usato o targato, nessun canale): non c'e' una pratica di noleggio da aprire
     if (durate.length === 0) return no('prodotto_non_valido');
     if (durata === null || !durate.includes(durata)) return no('durata_non_valida');
     return { ok: true, prodotto, durata, partner: null, importo, rivalutare };
@@ -152,7 +152,7 @@ interface PropostaSalvata {
   numeri: unknown;
 }
 
-const nomePartner = (p: PartnerConfronto) => PARTNERS_LEASING.find((x) => x.key === p)?.label ?? p;
+const nomePartner = (p: PartnerConfronto) => PARTNERS_LEASING_MOTORE.find((x) => x.key === p)?.label ?? p;
 
 /**
  * Crea la pratica di un preventivo di mezzi. Corpo: quello della pratica generica piu'

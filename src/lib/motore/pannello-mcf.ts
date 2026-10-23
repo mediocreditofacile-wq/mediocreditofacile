@@ -29,7 +29,7 @@ import {
 } from './config-distinta';
 import { dataValidita, numero } from './catalogo-import';
 import { ANTICIPO_MAX_MEZZI, condizioneDaSpread, leggiConfigMezzi, type ConfigMezzi, type PartnerConfronto } from './config-mezzi';
-import { PARTNERS_LEASING, getCondizioniPerDurata } from '../../data/leasing';
+import { PARTNERS_LEASING_MOTORE, getCondizioniPerDurata } from '../../data/leasing';
 import { pivaValida, pulisciPiva } from '../piva';
 
 export type Esito<T> = { ok: true; valore: T } | { ok: false; errore: string };
@@ -117,6 +117,7 @@ const ETICHETTE_CANALE: Record<string, string> = {
   sogliaProvvisorio: 'soglia del bilancio provvisorio',
   // Condizioni sul bene (settore mezzi)
   venditori: 'venditori', categorieEscluse: 'categorie escluse', escludiTargati: 'esclude i mezzi targati',
+  escludiUsati: 'esclude i mezzi usati',
 };
 
 const leggiUnCanale = (x: unknown) => leggiCanali([x])?.[0] ?? null;
@@ -292,12 +293,14 @@ const ETICHETTE_CATEGORIA_MEZZO: Record<string, string> = { nome: 'nome', targat
 const ETICHETTE_LEASING: Record<string, string> = { anticipoPerc: 'anticipo', partner: 'partner' };
 const ETICHETTE_PARTNER: Record<string, string> = {
   partner: 'partner', spreadFinoA48: 'spread fino a 48 mesi', spreadDa60: 'spread da 60 mesi',
+  soloUsato: 'solo sui mezzi usati',
 };
 
 // Stessa regola del lettore: se cambia la' deve cambiare qui, e un test lo fa notare
 const CODICE_VENDITORE = /^[a-z0-9-]{2,30}$/;
-const PARTNER_CONFRONTO: readonly PartnerConfronto[] = ['sella', 'credem', 'alba'];
-const nomePartner = (p: string) => p.charAt(0).toUpperCase() + p.slice(1);
+const PARTNER_CONFRONTO: readonly PartnerConfronto[] = ['sella', 'credem', 'alba', 'aleasing'];
+const NOMI_PARTNER: Record<string, string> = { aleasing: 'A-Leasing' };
+const nomePartner = (p: string) => NOMI_PARTNER[p] ?? p.charAt(0).toUpperCase() + p.slice(1);
 
 /** 3.1 -> "3,10": lo spread come si scrive nei listini */
 function spreadATesto(n: number): string {
@@ -410,7 +413,15 @@ function sbagliLeasingMezzi(v: unknown): string | null {
     const nome = nomePartner(id);
     if (visti.has(id)) return `Leasing, ${nome} compare due volte`;
     visti.add(id);
-    const listino = PARTNERS_LEASING.find((l) => l.key === id)!;
+    const solo = p.soloUsato;
+    if (solo !== undefined && solo !== null && typeof solo !== 'boolean') {
+      return `Leasing, ${nome}, solo sui mezzi usati «${mostra(solo)}»: serve true o false (true: compare solo se un bene è usato)`;
+    }
+    // Le condizioni di A-Leasing vengono da preventivi sull'usato: sul nuovo non si propone
+    if (id === 'aleasing' && solo !== true) {
+      return `Leasing, ${nome}: va solo sui mezzi usati, serve "soloUsato": true (le sue condizioni vengono da due preventivi sull'usato)`;
+    }
+    const listino = PARTNERS_LEASING_MOTORE.find((l) => l.key === id)!;
     // Una durata per lato del cambio di listino di Alba (48 mesi e 60 mesi)
     for (const [campo, durata, quando] of [['spreadFinoA48', 36, 'fino a 48 mesi'], ['spreadDa60', 60, 'da 60 mesi']] as const) {
       const s = p[campo];

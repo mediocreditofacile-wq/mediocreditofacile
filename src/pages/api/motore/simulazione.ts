@@ -10,7 +10,7 @@ export const prerender = false;
 // locatore, nessuna maggiorazione (canale e importi del locatore escono solo verso MCF).
 // La regola sta in src/lib/motore/simulazione-distinta.ts.
 //
-// Sul settore mezzi il corpo e' { f, importo, categoria, targato, venditore? }: un bene
+// Sul settore mezzi il corpo e' { f, importo, categoria, targato, usato?, venditore? }: un bene
 // solo e un cliente che non si conosce, quindi Econocom non regge mai. La risposta e'
 // mezziPerSchermo() senza semaforo; `documento` si ignora e non si salva ne' si genera
 // niente. Un targato che manca (Movimento terra, Piattaforme aeree) o un venditore che

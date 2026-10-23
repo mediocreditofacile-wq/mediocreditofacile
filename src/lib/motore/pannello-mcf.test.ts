@@ -241,6 +241,13 @@ describe('canali sui mezzi: le condizioni sul bene', () => {
     c[1].escludiTargati = 'si';
     expect(errore(controllaCanali(c, esisteMezzi))).toMatch(/Grenke, esclude i mezzi targati «si»: non si legge/);
   });
+  it('l\'esclusione dei mezzi usati passa com\'e\', e illeggibile si rifiuta col suo nome', () => {
+    const ok = copia(CANALI_MEZZI).map((x: Record<string, unknown>) => ({ ...x, escludiUsati: true }));
+    expect(controllaCanali(copia(ok), esisteMezzi)).toEqual({ ok: true, valore: ok });
+    const no = copia(ok);
+    no[0].escludiUsati = 'si';
+    expect(errore(controllaCanali(no, esisteMezzi))).toMatch(/Econocom, esclude i mezzi usati «si»: non si legge/);
+  });
 });
 
 describe('configurazione dei mezzi', () => {
@@ -418,8 +425,28 @@ describe('configurazione dei mezzi', () => {
       expect(rifiutata(con((c) => (c.leasing.anticipoPerc = 31)))).toMatch(/«31»/);
     });
     it('partner sconosciuto o ripetuto', () => {
-      expect(rifiutata(con((c) => (c.leasing.partner[1].partner = 'ifis')))).toMatch(/Leasing, partner n\. 2 «ifis»: sono ammessi Sella, Credem, Alba/);
+      expect(rifiutata(con((c) => (c.leasing.partner[1].partner = 'ifis')))).toMatch(/Leasing, partner n\. 2 «ifis»: sono ammessi Sella, Credem, Alba, A-Leasing/);
       expect(rifiutata(con((c) => c.leasing.partner.push({ partner: 'sella', spreadFinoA48: 2.25, spreadDa60: 2.25 })))).toMatch(/Leasing, Sella compare due volte/);
+    });
+    it('A-Leasing passa solo sull\'usato: soloUsato vero', () => {
+      const v = con((c) => c.leasing.partner.push({ partner: 'aleasing', spreadFinoA48: 4, spreadDa60: 4, soloUsato: true }));
+      expect(controllaMezzi(v)).toEqual({ ok: true, valore: v });
+    });
+    it('A-Leasing con soloUsato falso o assente: rifiutato, le sue condizioni vengono da preventivi sull\'usato', () => {
+      for (const extra of [{ soloUsato: false }, {}, { soloUsato: null }]) {
+        expect(rifiutata(con((c) => c.leasing.partner.push({ partner: 'aleasing', spreadFinoA48: 4, spreadDa60: 4, ...extra }))), JSON.stringify(extra))
+          .toMatch(/Leasing, A-Leasing: va solo sui mezzi usati, serve "soloUsato": true/);
+      }
+    });
+    it('soloUsato falso su un altro partner si salva com\'e\'', () => {
+      const v = con((c) => (c.leasing.partner[0].soloUsato = false));
+      expect(controllaMezzi(v)).toEqual({ ok: true, valore: v });
+    });
+    it('A-Leasing: soloUsato illeggibile o spread che il suo listino non ha', () => {
+      expect(rifiutata(con((c) => c.leasing.partner.push({ partner: 'aleasing', spreadFinoA48: 4, spreadDa60: 4, soloUsato: 'si' }))))
+        .toMatch(/Leasing, A-Leasing, solo sui mezzi usati «si»: serve true o false/);
+      expect(rifiutata(con((c) => c.leasing.partner.push({ partner: 'aleasing', spreadFinoA48: 3.5, spreadDa60: 4, soloUsato: true }))))
+        .toMatch(/Leasing, A-Leasing, spread fino a 48 mesi «3,50»: il listino non lo prevede \(ci sono 4,00\)/);
     });
     it('leasing o partner che non hanno la forma giusta', () => {
       expect(rifiutata(con((c) => (c.leasing = []) ))).toMatch(/Leasing: dati non leggibili/);

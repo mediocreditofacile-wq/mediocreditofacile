@@ -127,6 +127,7 @@ const MESSAGGI: Record<string, string> = {
   beni_vuoti: 'Aggiungi almeno un bene al preventivo.',
   troppi_beni: 'Un preventivo arriva al massimo a 60 beni.',
   targato_mancante: 'Indica se il mezzo è targato.',
+  usato_non_valido: 'Indica se il mezzo è nuovo o usato.',
   venditore_non_valido: 'Scegli chi vende i beni: quello indicato non è fra le società di questo portale.',
   anticipo_non_valido: "L'anticipo va da 0 a 30%.",
   // Settore mezzi: la pratica parte solo dal preventivo salvato, e prende quello che aveva

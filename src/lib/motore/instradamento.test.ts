@@ -404,8 +404,8 @@ const GRENKE_MANC: CanaleConfig = {
 };
 const BERGAMELLI: CanaleConfig[] = [ECONOCOM_NOLSYSTEM, GRENKE_MANC];
 
-const gru: BeneInstradamento = { venditore: 'manc', categorie: ['Gru a torre'], targato: false };
-const nolsystem: BeneInstradamento = { venditore: 'nolsystem', categorie: ['Gru a torre'], targato: false };
+const gru: BeneInstradamento = { venditore: 'manc', categorie: ['Gru a torre'], targato: false, usato: false };
+const nolsystem: BeneInstradamento = { venditore: 'nolsystem', categorie: ['Gru a torre'], targato: false, usato: false };
 
 describe('il bene: Manc su Grenke Sputnik', () => {
   it('gru non targata a 50.000: Grenke, rate su tutte le durate del listino, nessuna maggiorazione', () => {
@@ -521,5 +521,34 @@ describe('il bene: i canali senza condizioni non cambiano', () => {
       expect(instrada(LO, cliente, beni, OGGI, gru)).toEqual(senza);
       expect(instrada(LO, cliente, beni, OGGI, { ...gru, targato: true })).toEqual(senza);
     }
+  });
+});
+
+describe('il bene usato (23/10/2026)', () => {
+  // I canali di Bergamelli escludono anche l'usato: il noleggio dell'usato si chiede a MCF
+  const SENZA_USATO: CanaleConfig[] = BERGAMELLI.map((c) => ({ ...c, escludiUsati: true }));
+
+  it('gru nuova: Grenke come prima', () => {
+    expect(instrada(SENZA_USATO, piccolo, 50_000, OGGI, gru)).toMatchObject({ canale: 'grenke' });
+  });
+
+  it('gru usata: nessun canale, ne\' Grenke per Manc ne\' Econocom per Nol System', () => {
+    expect(instrada(SENZA_USATO, piccolo, 50_000, OGGI, { ...gru, usato: true })).toBeNull();
+    expect(instrada(SENZA_USATO, { ...grande, fatturato: 6_000_000 }, 200_000, OGGI, { ...nolsystem, usato: true })).toBeNull();
+  });
+
+  it('senza la risposta sull\'usato un canale che lo esclude non regge: un dato che manca non prova niente', () => {
+    const { usato: _, ...senza } = gru;
+    expect(instrada(SENZA_USATO, piccolo, 50_000, OGGI, senza as BeneInstradamento)).toBeNull();
+  });
+
+  it('un canale senza escludiUsati quota anche l\'usato', () => {
+    expect(instrada(BERGAMELLI, piccolo, 50_000, OGGI, { ...gru, usato: true })).toMatchObject({ canale: 'grenke' });
+  });
+
+  it('escludiUsati da solo e\' una condizione sul bene: senza bene il canale non regge', () => {
+    const solo: CanaleConfig = { canale: 'pagarent', attivo: true, tabella: 'pagarent', maggiorazionePerc: 0, escludiUsati: true };
+    expect(instrada([solo], piccolo, 20_000, OGGI, null)).toBeNull();
+    expect(instrada([solo], piccolo, 20_000, OGGI, { ...gru, usato: false })).toMatchObject({ canale: 'pagarent' });
   });
 });

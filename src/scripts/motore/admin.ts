@@ -139,7 +139,7 @@ function canaliDalPannello(): any[] {
 
 function sezioneMezzi(): string {
   return `
-    <p class="mt-nota" style="margin-top:0">I venditori che firmano le offerte, le categorie con la domanda sul targato, l'anticipo e gli spread del leasing, e se mostrare i nomi dei partner a schermo. Ci sono partite IVA e spread: la vede solo MCF. È un testo JSON che si salva com'è o non si salva: un campo non previsto o un valore che non si legge fa rifiutare il salvataggio, e il messaggio dice quale.</p>
+    <p class="mt-nota" style="margin-top:0">I venditori che firmano le offerte, le categorie con la domanda sul targato, l'anticipo e gli spread del leasing (un partner con "soloUsato": true compare solo se un bene è usato), e se mostrare i nomi dei partner a schermo. Ci sono partite IVA e spread: la vede solo MCF. È un testo JSON che si salva com'è o non si salva: un campo non previsto o un valore che non si legge fa rifiutare il salvataggio, e il messaggio dice quale.</p>
     <textarea id="mz-config" class="mt-input" rows="28" spellcheck="false" style="font-family:ui-monospace,Menlo,monospace;font-size:13px;white-space:pre;overflow:auto">${esc(configInTesto(dati.mezzi))}</textarea>
     ${dati.mezzi ? '' : '<p class="mt-nota">Nessuna configurazione salvata, oppure quella salvata non si legge: il portale dei mezzi non parte finché non ne salvi una valida.</p>'}
     <div class="mt-azioni"><button type="button" id="mz-salva" class="mt-btn">Salva</button></div>

@@ -95,13 +95,14 @@ describe('configurazione dei mezzi di Bergamelli', () => {
     }
   });
 
-  it('leasing: anticipo 10, Sella e Credem piatti, Alba cambia a 60 mesi', () => {
+  it('leasing: anticipo 10, Sella e Credem piatti, Alba cambia a 60 mesi, A-Leasing in fondo e solo sull\'usato', () => {
     expect(CONFIG_MEZZI_BERGAMELLI.leasing).toEqual({
       anticipoPerc: 10,
       partner: [
         { partner: 'sella', spreadFinoA48: 2.25, spreadDa60: 2.25 },
         { partner: 'credem', spreadFinoA48: 2.9, spreadDa60: 2.9 },
         { partner: 'alba', spreadFinoA48: 3.1, spreadDa60: 2.5 },
+        { partner: 'aleasing', spreadFinoA48: 4, spreadDa60: 4, soloUsato: true },
       ],
     });
   });
@@ -139,11 +140,16 @@ describe('canali di Bergamelli', () => {
       importoMin: 150_000,
       venditori: ['nolsystem'],
       escludiTargati: true,
+      escludiUsati: true,
     });
   });
 
   it('nessun canale quota i mezzi targati: il noleggio lo valuta MCF su richiesta', () => {
     for (const canale of CANALI_BERGAMELLI) expect(canale.escludiTargati, canale.canale).toBe(true);
+  });
+
+  it('nessun canale quota i mezzi usati: il noleggio dell\'usato lo valuta MCF su richiesta (23/10/2026)', () => {
+    for (const canale of CANALI_BERGAMELLI) expect(canale.escludiUsati, canale.canale).toBe(true);
   });
 
   it('Grenke: solo Manc, niente mezzi targati, niente Ponteggi', () => {
@@ -155,6 +161,7 @@ describe('canali di Bergamelli', () => {
       venditori: ['manc'],
       categorieEscluse: ['Ponteggi'],
       escludiTargati: true,
+      escludiUsati: true,
     });
     expect(grenke.categorieEscluse).toContain('Ponteggi');
   });
@@ -174,7 +181,7 @@ describe('canali di Bergamelli', () => {
       formaCodice: 'SR', inizioAttivita: '2015-03-10', fatturato: 800_000, atecoCodice: '412000',
     };
     const grande: ClienteInstradamento = { ...piccolo, fatturato: 6_000_000 };
-    const bene = (venditore: string, categorie: string[], targato: boolean): BeneInstradamento => ({ venditore, categorie, targato });
+    const bene = (venditore: string, categorie: string[], targato: boolean, usato = false): BeneInstradamento => ({ venditore, categorie, targato, usato });
 
     it('una gru a torre non targata di Manc va su Grenke', () => {
       const r = instrada(CANALI_BERGAMELLI, piccolo, 50_000, OGGI, bene('manc', ['Gru a torre'], false));
@@ -209,6 +216,11 @@ describe('canali di Bergamelli', () => {
 
     it('i ponteggi di Nol System non hanno noleggio sotto i 150.000, e Grenke non li prende mai', () => {
       expect(instrada(CANALI_BERGAMELLI, piccolo, 30_000, OGGI, bene('nolsystem', ['Ponteggi'], false))).toBeNull();
+    });
+
+    it('la stessa gru di Manc usata non ha noleggio, ne\' il carrello usato di Nol System con cliente da 6 milioni', () => {
+      expect(instrada(CANALI_BERGAMELLI, piccolo, 50_000, OGGI, bene('manc', ['Gru a torre'], false, true))).toBeNull();
+      expect(instrada(CANALI_BERGAMELLI, grande, 200_000, OGGI, bene('nolsystem', ['Carrelli elevatori'], false, true))).toBeNull();
     });
 
     it('i ponteggi non vanno su Grenke nemmeno se Enrico li assegna a Manc', () => {

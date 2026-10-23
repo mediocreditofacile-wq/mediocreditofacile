@@ -69,6 +69,10 @@ describe('condizioniSulBene', () => {
   it('categorie escluse vuote ed esclusione dei targati spenta non cambiano niente: non si mostrano', () => {
     expect(condizioniSulBene({ categorieEscluse: [], escludiTargati: false })).toEqual([]);
   });
+  it('l\'esclusione degli usati si mostra solo accesa', () => {
+    expect(condizioniSulBene({ escludiTargati: true, escludiUsati: true })).toEqual(['esclude i mezzi targati: sì', 'esclude i mezzi usati: sì']);
+    expect(condizioniSulBene({ escludiUsati: false })).toEqual([]);
+  });
 });
 
 describe('canaleConservato', () => {

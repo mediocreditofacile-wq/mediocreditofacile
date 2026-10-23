@@ -1,7 +1,7 @@
 // I mezzi nel browser (settore "mezzi", Bergamelli): le regole pure delle schede
 // Simulazione, Proposte e Pratiche. Chi vende i beni di una categoria, la risposta di
-// partenza sul targato, i corpi per il server, l'anticipo del leasing, la colonna che
-// va nel PDF e che cosa offre la pratica partendo dal preventivo salvato.
+// partenza sul targato e sull'usato, i corpi per il server, l'anticipo del leasing, la
+// colonna che va nel PDF e che cosa offre la pratica partendo dal preventivo salvato.
 // Spec mcf_spec-bergamelli-motore_v2, sezioni 3, 4 e 5.
 //
 // Niente DOM, niente rete: si testa da solo. Il server ricontrolla tutto. Dai moduli
@@ -23,6 +23,8 @@ export interface RigaInPagina {
   prezzo: string;
   /** Null = l'agente non ha risposto: il server usa il default della categoria, se c'e' */
   targato: boolean | null;
+  /** Falso = nuovo, la risposta di partenza. Vero toglie il noleggio e aggiunge A-Leasing */
+  usato: boolean;
 }
 
 export type ColonnaLeasing = MezziSchermo['leasing'][number];
@@ -69,6 +71,7 @@ export function corpoProposte(
       quantita: r.quantita,
       prezzo: r.prezzo,
       targato: r.targato,
+      usato: r.usato,
     })),
     venditore,
     anticipoPerc,
@@ -93,13 +96,13 @@ export function rigaVuota(r: RigaInPagina): boolean {
 }
 
 /**
- * Una riga aggiunta e mai toccata: niente scritto, la quantita' di partenza (o nessuna)
- * e nessuna risposta sul targato. Piu' stretta di rigaVuota: chi ha cambiato la
+ * Una riga aggiunta e mai toccata: niente scritto, la quantita' di partenza (o nessuna),
+ * nessuna risposta sul targato e ancora "nuovo". Piu' stretta di rigaVuota: chi ha cambiato la
  * quantita' sta scrivendo quella riga, e deve sapere cosa le manca.
  */
 export function rigaIntatta(r: RigaInPagina): boolean {
   const q = r.quantita.trim();
-  return rigaVuota(r) && (q === '' || q === '1') && r.targato === null;
+  return rigaVuota(r) && (q === '' || q === '1') && r.targato === null && !r.usato;
 }
 
 /**
@@ -121,6 +124,9 @@ export function rigaASchermo(indici: number[], riga: number | null | undefined):
 /** La risposta del menu "È targato?": Sì e No, tutto il resto ("Da indicare") e' nessuna risposta */
 export const targatoDaMenu = (v: string): boolean | null => (v === 'si' ? true : v === 'no' ? false : null);
 
+/** La risposta del menu "Nuovo o usato?": usato solo se scelto, la partenza e' nuovo */
+export const usatoDaMenu = (v: string): boolean => v === 'usato';
+
 const CAMPO_ERRORE: Record<string, keyof RigaInPagina> = {
   descrizione_mancante: 'descrizione',
   categoria_non_valida: 'categoria',
@@ -129,6 +135,7 @@ const CAMPO_ERRORE: Record<string, keyof RigaInPagina> = {
   // Il totale della riga oltre il tetto: si corregge il prezzo (o la quantita')
   importo_non_valido: 'prezzo',
   targato_mancante: 'targato',
+  usato_non_valido: 'usato',
 };
 
 /** La casella da segnare per un errore di riga; null per gli errori di tutto il preventivo */
@@ -203,6 +210,8 @@ export interface SimulazioneInPagina {
   categoria: string;
   /** Null = nessuna risposta: il server usa il default della categoria, se c'e' */
   targato: boolean | null;
+  /** Falso = nuovo, la partenza */
+  usato: boolean;
   venditore: string;
 }
 
@@ -216,7 +225,7 @@ export type ProvaSimulazione = 'incompleta' | 'pronta' | 'importo_non_valido' | 
  */
 export function provaSimulazione(categorie: CategoriaMezzo[], s: SimulazioneInPagina): ProvaSimulazione {
   if (!s.importo.trim() || !s.categoria) return 'incompleta';
-  const v = validaBeni(categorie, [{ descrizione: 'Simulazione', categoria: s.categoria, quantita: 1, prezzo: s.importo, targato: s.targato }]);
+  const v = validaBeni(categorie, [{ descrizione: 'Simulazione', categoria: s.categoria, quantita: 1, prezzo: s.importo, targato: s.targato, usato: s.usato }]);
   if (v.ok) return 'pronta';
   if (v.error === 'prezzo_non_valido' || v.error === 'importo_non_valido') return 'importo_non_valido';
   return v.error === 'targato_mancante' ? 'targato_mancante' : 'categoria_non_valida';
@@ -224,17 +233,19 @@ export function provaSimulazione(categorie: CategoriaMezzo[], s: SimulazioneInPa
 
 /**
  * Il corpo di /api/motore/simulazione sui mezzi. L'importo va come l'ha scritto l'agente
- * (lo legge il server), il targato true, false o null, mai una stringa. Niente anticipo
+ * (lo legge il server), il targato true, false o null, mai una stringa, l'usato true o
+ * false. Niente anticipo
  * (vale quello del fornitore) e niente documento: la simulazione non salva.
  */
 export function corpoSimulazione(slug: string, s: SimulazioneInPagina): Record<string, unknown> {
-  return { f: slug, importo: s.importo, categoria: s.categoria, targato: s.targato, venditore: s.venditore };
+  return { f: slug, importo: s.importo, categoria: s.categoria, targato: s.targato, usato: s.usato, venditore: s.venditore };
 }
 
 const CAMPO_SIMULAZIONE: Record<string, keyof SimulazioneInPagina> = {
   importo_non_valido: 'importo',
   categoria_non_valida: 'categoria',
   targato_mancante: 'targato',
+  usato_non_valido: 'usato',
   venditore_non_valido: 'venditore',
 };
 
@@ -244,7 +255,7 @@ export const campoSimulazione = (errore: string): keyof SimulazioneInPagina | nu
 /** Il messaggio quando quello generico non aiuta: "61.000" si spiega come nelle righe */
 export function messaggioSimulazione(errore: string, s: SimulazioneInPagina): string | null {
   if (errore !== 'importo_non_valido') return null;
-  return messaggioRiga('prezzo_non_valido', { descrizione: '', categoria: s.categoria, quantita: '1', prezzo: s.importo, targato: s.targato });
+  return messaggioRiga('prezzo_non_valido', { descrizione: '', categoria: s.categoria, quantita: '1', prezzo: s.importo, targato: s.targato, usato: s.usato });
 }
 
 // --- la pratica ---------------------------------------------------------------------

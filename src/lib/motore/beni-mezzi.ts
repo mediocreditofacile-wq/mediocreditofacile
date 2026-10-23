@@ -14,6 +14,11 @@
 // rispondere, e senza risposta l'elenco si ferma. Se la riga risponde con un booleano,
 // vale la riga anche contro il default: e' l'agente che conferma o corregge. Un valore
 // presente ma non booleano ("si", 1) ferma l'elenco su qualunque categoria.
+//
+// L'usato (23/10/2026) decide due cose: sull'usato il noleggio non si quota e il leasing
+// aggiunge A-Leasing. La domanda parte da "nuovo", quindi un campo assente vale nuovo
+// (cosi' erano tutti i beni prima). Un valore presente ma non booleano invece non vale
+// mai "nuovo": l'elenco si ferma con usato_non_valido, come sul targato.
 
 import { testo } from './catalogo-import';
 import { leggiPrezzo, leggiQuantita, MAX_RIGHE, MAX_TOTALE, totaleRighe } from './distinta';
@@ -28,6 +33,7 @@ export interface BeneMezzo {
   /** Unitario, arrotondato al centesimo */
   prezzo: number;
   targato: boolean;
+  usato: boolean;
   /** Prezzo per quantita', arrotondato al centesimo */
   totale: number;
 }
@@ -40,6 +46,7 @@ export type ErroreBeni =
   | 'quantita_non_valida'
   | 'prezzo_non_valido'
   | 'targato_mancante'
+  | 'usato_non_valido'
   | 'importo_non_valido';
 
 export type EsitoBeni =
@@ -49,6 +56,8 @@ export type EsitoBeni =
       totale: number;
       /** Vero se almeno un bene e' targato */
       targato: boolean;
+      /** Vero se almeno un bene e' usato */
+      usato: boolean;
       /** Le categorie dei beni, senza doppioni, nell'ordine in cui compaiono */
       categorie: string[];
     }
@@ -85,9 +94,14 @@ function leggiBene(grezza: unknown, categorie: CategoriaMezzo[]): Letto {
     risposta === undefined || risposta === null ? categoria.targato : typeof risposta === 'boolean' ? risposta : null;
   if (typeof targato !== 'boolean') return no('targato_mancante');
 
+  // Assente (non mandato o null) = nuovo; un booleano vale com'e'; il resto si richiede
+  const u = r.usato;
+  const usato: unknown = u === undefined || u === null ? false : u;
+  if (typeof usato !== 'boolean') return no('usato_non_valido');
+
   return {
     ok: true,
-    bene: { descrizione, categoria: categoria.nome, quantita, prezzo, targato, totale: totaleRighe([{ quantita, prezzo }]) },
+    bene: { descrizione, categoria: categoria.nome, quantita, prezzo, targato, usato, totale: totaleRighe([{ quantita, prezzo }]) },
   };
 }
 
@@ -117,6 +131,7 @@ export function validaBeni(categorie: CategoriaMezzo[], grezze: unknown): EsitoB
     beni,
     totale,
     targato: beni.some((b) => b.targato),
+    usato: beni.some((b) => b.usato),
     categorie: [...new Set(beni.map((b) => b.categoria))],
   };
 }

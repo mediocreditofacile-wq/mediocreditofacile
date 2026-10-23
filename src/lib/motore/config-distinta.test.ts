@@ -57,6 +57,10 @@ describe('leggiCanali', () => {
     expect(leggiCanali([{ ...base, venditori: ['manc', 7] }])).toEqual([]);
     expect(leggiCanali([{ ...base, categorieEscluse: 'Ponteggi' }])).toEqual([]);
     expect(leggiCanali([{ ...base, escludiTargati: 'si' }])).toEqual([]);
+    // L'usato si legge come il targato: booleano o niente
+    expect(leggiCanali([{ ...base, escludiUsati: true }])![0].escludiUsati).toBe(true);
+    expect(leggiCanali([{ ...base, escludiUsati: false }])![0].escludiUsati).toBe(false);
+    expect(leggiCanali([{ ...base, escludiUsati: 'si' }])).toEqual([]);
   });
 
   it('una condizione scritta male fa scartare il canale: non lo si allarga di nascosto', () => {

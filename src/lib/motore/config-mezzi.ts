@@ -19,7 +19,7 @@
 
 import {
   getCondizioniPerDurata,
-  PARTNERS_LEASING,
+  PARTNERS_LEASING_MOTORE,
   type CondizioneLeasing,
   type PartnerLeasing,
 } from '../../data/leasing';
@@ -44,13 +44,18 @@ export interface CategoriaMezzo {
   targato: boolean | null;
 }
 
-export type PartnerConfronto = 'sella' | 'credem' | 'alba';
+export type PartnerConfronto = 'sella' | 'credem' | 'alba' | 'aleasing';
 
-/** Gli spread applicati a un partner: uno fino a 48 mesi, uno da 60 in su (Alba cambia listino) */
+/**
+ * Gli spread applicati a un partner: uno fino a 48 mesi, uno da 60 in su (Alba cambia
+ * listino). `soloUsato` vero = il partner compare solo se almeno un bene e' usato
+ * (A-Leasing); falso o assente = sempre.
+ */
 export interface LeasingPartnerConfig {
   partner: PartnerConfronto;
   spreadFinoA48: number;
   spreadDa60: number;
+  soloUsato?: boolean;
 }
 
 export interface ConfigMezzi {
@@ -73,7 +78,7 @@ export interface MezziBrowser {
 export const ANTICIPO_MAX_MEZZI = 30;
 
 const CODICE_VENDITORE = /^[a-z0-9-]{2,30}$/;
-const PARTNER: readonly PartnerConfronto[] = ['sella', 'credem', 'alba'];
+const PARTNER: readonly PartnerConfronto[] = ['sella', 'credem', 'alba', 'aleasing'];
 const TOLLERANZA_SPREAD = 0.001;
 
 // Le due durate con cui si controlla uno spread: una per lato del cambio di listino di Alba
@@ -135,13 +140,15 @@ function leggiPartner(x: unknown): LeasingPartnerConfig | null {
   const o = oggetto(x);
   if (!o) return null;
   const partner = PARTNER.find((p) => p === o.partner);
-  const listino = PARTNERS_LEASING.find((p) => p.key === partner);
-  const { spreadFinoA48, spreadDa60 } = o;
+  const listino = PARTNERS_LEASING_MOTORE.find((p) => p.key === partner);
+  const { spreadFinoA48, spreadDa60, soloUsato } = o;
   if (!partner || !listino || typeof spreadFinoA48 !== 'number' || typeof spreadDa60 !== 'number') return null;
   // Lo spread deve esistere fra le condizioni del listino di quella durata
   if (!condizioneDaSpread(listino, DURATA_FINO_A_48, spreadFinoA48)) return null;
   if (!condizioneDaSpread(listino, DURATA_DA_60, spreadDa60)) return null;
-  return { partner, spreadFinoA48, spreadDa60 };
+  // Assente o null = sempre, e non si scrive; un booleano resta com'e'; il resto non si legge
+  if (soloUsato !== undefined && soloUsato !== null && typeof soloUsato !== 'boolean') return null;
+  return { partner, spreadFinoA48, spreadDa60, ...(typeof soloUsato === 'boolean' ? { soloUsato } : {}) };
 }
 
 function leggiLeasing(v: unknown): ConfigMezzi['leasing'] | null {

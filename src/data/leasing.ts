@@ -251,7 +251,7 @@ export interface CondizioneLeasing {
 }
 
 export interface PartnerLeasing {
-  key: 'sella' | 'alba' | 'credem';
+  key: 'sella' | 'alba' | 'credem' | 'aleasing';
   label: string;
   shortLabel: string;
   badgeColor: string;
@@ -269,6 +269,10 @@ export interface PartnerLeasing {
   // Va sempre cercato fra le condizioni disponibili per la durata corrente (con fallback alla
   // condizione con spread immediatamente >= a questo valore).
   spreadFornitori: number;
+  // Mesi fra l'ultimo canone e il pagamento del riscatto (A-Leasing: 1). Assente = 0
+  dilazioneRiscattoMesi?: number;
+  // Il canone si arrotonda all'euro in su (A-Leasing). Assente = ai centesimi
+  canoneAllEuroInSu?: boolean;
 }
 
 // Riscatto massimo per durata (validato sia per SELLA sia per ALBA in fase di test)
@@ -471,6 +475,46 @@ export const CREDEM: PartnerLeasing = {
 
 export const PARTNERS_LEASING: PartnerLeasing[] = [SELLA, ALBA, CREDEM];
 
+// A-LEASING SPA (Raiffeisen, Treviso), per i mezzi USATI del motore dei portali
+// Fonte: due preventivi A-Leasing del 23/09/2026, prodotto "Leasing veicoli pesanti",
+// autocarro con piattaforma aerea da 80.000 euro, anticipo 10%, riscatto 1%, tasso di
+// riferimento "Euribor 3 mesi M.A." 2,70%, provvigioni 3% (2.400 euro), istruttoria 250,
+// RID 5 a rata: 47 canoni da 1.790,00 a 48 mesi, 59 da 1.473,00 a 60 mesi.
+// Il modello e' quello di Sella: la provvigione sta nel capitale (72.000 + 2.400) al
+// tasso Euribor + 4,00, il riscatto si paga un mese dopo l'ultimo canone ("dilazione
+// riscatto: 1 mesi") e il canone si arrotonda all'euro in su. Cosi' tornano tutti e due
+// i canoni; i tassi "cliente" che A-Leasing stampa (8,4385% e 8,1151%) e quelli
+// "interni" (6,7204% e 6,7238%) sono il risultato dell'arrotondamento, non l'origine.
+// Solo 48 e 60 mesi, le durate dei preventivi; riscatto solo 1%, l'unico quotato.
+// Il 4,00 e' misurato sul loro "Euribor 3 mesi M.A." (2,70), il sito usa EURIBOR_3M (fixing
+// EMMI in base 365): la differenza, dopo l'arrotondamento all'euro, sta intorno a un euro.
+// Nessun importo minimo o massimo comunicato: valgono i limiti del portale.
+// Non sta in PARTNERS_LEASING: i simulatori leasing del sito restano sui tre partner
+// di Affida. La usa solo il motore (PARTNERS_LEASING_MOTORE), sui mezzi usati.
+export const ALEASING: PartnerLeasing = {
+  key: 'aleasing',
+  label: 'A-Leasing',
+  shortLabel: 'A-LEASING',
+  badgeColor: '#787782',
+  modello: 'capitale-gonfiato',
+  importoMin: 0,
+  importoMax: 9_999_999,
+  durateAmmesse: [48, 60],
+  riscattoMaxPerDurata: { 48: 1, 60: 1 },
+  speseIstruttoria: 250,
+  speseIncassoRata: 5,
+  spreadFornitori: 4.0,
+  dilazioneRiscattoMesi: 1,
+  canoneAllEuroInSu: true,
+  condizioniPerDurata: {
+    // Un solo id: A-Leasing non passa dal quotatore Affida, che numera le condizioni
+    default: [{ id: 1, spread: 4.0, provvigionePerc: 3 }],
+  },
+};
+
+/** I partner del leasing che il motore dei portali conosce: quelli di Affida e A-Leasing */
+export const PARTNERS_LEASING_MOTORE: PartnerLeasing[] = [...PARTNERS_LEASING, ALEASING];
+
 /**
  * Recupera la lista condizioni applicabili a un partner per una data durata.
  * Per SELLA: sempre 'default'. Per ALBA: '36' se durata <=48, altrimenti 'default'.
@@ -543,6 +587,8 @@ export function calcolaRataLeasingPartner(
   anticipoPerc: number,
   riscattoPerc: number,
   condizioneId: number,
+  // Solo per rifare un preventivo con il suo tasso di riferimento: altrimenti vale EURIBOR_3M
+  euribor: number = EURIBOR_3M,
 ): RisultatoLeasing {
   const condizioni = getCondizioniPerDurata(partner, durata);
   const condizione = condizioni.find(c => c.id === condizioneId) ?? condizioni[0];
@@ -553,7 +599,7 @@ export function calcolaRataLeasingPartner(
   const provvigione = calcolaProvvigione(condizione, importo);
 
   // Tasso effettivo usato nel calcolo della rata
-  const tassoEffettivo = condizione.spread + EURIBOR_3M;
+  const tassoEffettivo = condizione.spread + euribor;
   const r = tassoEffettivo / 100 / 12; // tasso mensile
 
   // Capitale su cui calcolare la rata: dipende dal modello
@@ -564,10 +610,12 @@ export function calcolaRataLeasingPartner(
     ? capitaleBase + provvigione
     : capitaleBase;
 
-  // Rata francese con riscatto attualizzato
-  const pvRiscatto = riscatto / Math.pow(1 + r, numRate);
+  // Rata francese con riscatto attualizzato (alla scadenza, o piu' in la' se il partner lo dilaziona)
+  const pvRiscatto = riscatto / Math.pow(1 + r, numRate + (partner.dilazioneRiscattoMesi ?? 0));
   const capitaleFinanziato = capitaleAmmortizzabile - pvRiscatto;
-  const rataMensile = capitaleFinanziato * (r * Math.pow(1 + r, numRate)) / (Math.pow(1 + r, numRate) - 1);
+  const rataEsatta = capitaleFinanziato * (r * Math.pow(1 + r, numRate)) / (Math.pow(1 + r, numRate) - 1);
+  // All'euro in su sui centesimi, non sul valore grezzo: 1.790,0000001 resta 1.790
+  const rataMensile = partner.canoneAllEuroInSu ? Math.ceil(Math.round(rataEsatta * 100) / 100) : rataEsatta;
 
   // Tasso del piano: per entrambi i partner = Spread + Euribor.
   // Il "Tasso leasing" che SELLA mostra nel quotatore Affida (4,94% in baseline) e' un display

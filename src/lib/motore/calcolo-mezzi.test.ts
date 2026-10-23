@@ -18,6 +18,7 @@ import {
   simulaMezzi,
   TESTO_NOLEGGIO_NON_DISPONIBILE,
   TESTO_TARGATO,
+  TESTO_USATO,
   type CalcoloMezzi,
 } from './calcolo-mezzi';
 import { carrozzeriaDaRiga, type Carrozzeria, type RigaCarrozzeria } from './carrozzeria';
@@ -58,8 +59,8 @@ const OGGI = new Date(2026, 9, 23);
 // --- la carrozzeria: Bergamelli, come la scrive il seed ----------------------
 
 const CANALI = [
-  { canale: 'econocom', attivo: true, tabella: 'econocom-pa', maggiorazionePerc: 0, fatturatoMin: 5_000_000, importoMin: 150_000, venditori: ['nolsystem'], escludiTargati: true },
-  { canale: 'grenke', attivo: true, tabella: 'sputnik', maggiorazionePerc: 0, venditori: ['manc'], categorieEscluse: ['Ponteggi'], escludiTargati: true },
+  { canale: 'econocom', attivo: true, tabella: 'econocom-pa', maggiorazionePerc: 0, fatturatoMin: 5_000_000, importoMin: 150_000, venditori: ['nolsystem'], escludiTargati: true, escludiUsati: true },
+  { canale: 'grenke', attivo: true, tabella: 'sputnik', maggiorazionePerc: 0, venditori: ['manc'], categorieEscluse: ['Ponteggi'], escludiTargati: true, escludiUsati: true },
 ];
 
 const MEZZI = {
@@ -89,6 +90,7 @@ const MEZZI = {
       { partner: 'sella', spreadFinoA48: 2.25, spreadDa60: 2.25 },
       { partner: 'credem', spreadFinoA48: 2.9, spreadDa60: 2.9 },
       { partner: 'alba', spreadFinoA48: 3.1, spreadDa60: 2.5 },
+      { partner: 'aleasing', spreadFinoA48: 4, spreadDa60: 4, soloUsato: true },
     ],
   },
   mostraNomiPartner: true,
@@ -197,7 +199,7 @@ describe('componiMezzi: la configurazione di Bergamelli si legge', () => {
     expect(K.regoleSemaforo).toBe('locatore');
     expect(K.canali).toHaveLength(2);
     expect(K.mezzi?.venditori.map((v) => v.codice)).toEqual(['manc', 'nolsystem']);
-    expect(K.mezzi?.leasing.partner.map((p) => p.partner)).toEqual(['sella', 'credem', 'alba']);
+    expect(K.mezzi?.leasing.partner.map((p) => p.partner)).toEqual(['sella', 'credem', 'alba', 'aleasing']);
   });
 });
 
@@ -262,6 +264,63 @@ describe('componiMezzi: i quattro casi della spec', () => {
   it('i due testi fissi sono quelli della spec', () => {
     expect(TESTO_TARGATO).toBe('Mezzo targato: noleggio su richiesta a Mediocredito Facile.');
     expect(TESTO_NOLEGGIO_NON_DISPONIBILE).toBe('Noleggio non disponibile per questo cliente e questo bene: resta il leasing.');
+  });
+});
+
+describe('componiMezzi: il mezzo usato (23/10/2026)', () => {
+  const GRU_USATA = { beni: [bene('Gru a torre', 50_000, { usato: true })] };
+
+  it('gru usata: nessun noleggio, il testo dell\'usato, e A-Leasing in fondo alle tre colonne', () => {
+    const c = calcolo(GRU_USATA);
+    expect(c.beni[0].usato).toBe(true);
+    expect(c.noleggio).toBeNull();
+    expect(c.motivoNoNoleggio).toBe(TESTO_USATO);
+    expect(TESTO_USATO).toBe('Mezzo usato: noleggio su richiesta a Mediocredito Facile.');
+    expect(c.leasing.map((l) => l.partner)).toEqual(['sella', 'credem', 'alba', 'aleasing']);
+    expect(c.leasing[3].righe.map((r) => r.durata)).toEqual([48, 60]);
+  });
+
+  it('la stessa gru nuova: Grenke e le tre colonne di sempre, che sono identiche sull\'usato', () => {
+    const nuova = calcolo(GRU);
+    expect(nuova.beni[0].usato).toBe(false);
+    expect(nuova.noleggio?.canale).toBe('grenke');
+    expect(nuova.leasing.map((l) => l.partner)).toEqual(['sella', 'credem', 'alba']);
+    expect(calcolo(GRU_USATA).leasing.slice(0, 3)).toEqual(nuova.leasing);
+  });
+
+  it('basta un bene usato fra piu\' beni: niente noleggio sull\'offerta, A-Leasing compare', () => {
+    const c = calcolo({ beni: [bene('Gru a torre', 50_000), bene('Gru a torre', 20_000, { usato: true })] });
+    expect(c.noleggio).toBeNull();
+    expect(c.leasing.at(-1)?.partner).toBe('aleasing');
+  });
+
+  it('usato e targato insieme: vale il testo dell\'usato', () => {
+    const c = calcolo({ beni: [bene('Autogru', 80_000, { usato: true })] });
+    expect(c.motivoNoNoleggio).toBe(TESTO_USATO);
+  });
+
+  it('il carrello usato di Nol System con cliente da 6 milioni: niente Econocom', () => {
+    const c = calcolo({ beni: [bene('Carrelli elevatori', 200_000, { usato: true })] }, ricerca(6_000_000));
+    expect(c.noleggio).toBeNull();
+    expect(c.motivoNoNoleggio).toBe(TESTO_USATO);
+  });
+
+  it('a schermo A-Leasing e\' la colonna D, col nome solo se i nomi sono accesi', () => {
+    const conNomi = mezziPerSchermo(calcolo(GRU_USATA), true);
+    expect(conNomi.leasing.map((l) => l.chiave)).toEqual(['A', 'B', 'C', 'D']);
+    expect(conNomi.leasing[3].nome).toBe('A-Leasing');
+    expect(mezziPerSchermo(calcolo(GRU_USATA), false).leasing[3].nome).toBeNull();
+  });
+
+  it('una risposta illeggibile sull\'usato si ferma con l\'indice della riga', () => {
+    expect(errore({ beni: [bene('Gru a torre', 50_000), bene('Gru a torre', 1_000, { usato: 'si' })] })).toMatchObject({ error: 'usato_non_valido', riga: 1 });
+  });
+
+  it('la simulazione porta l\'usato: niente noleggio e A-Leasing', () => {
+    const s = simulaMezzi(K, { importo: 50_000, categoria: 'Gru a torre', targato: false, usato: true }, OGGI);
+    expect(s.ok && s.calcolo.noleggio).toBeNull();
+    expect(s.ok && s.calcolo.leasing.map((l) => l.partner)).toEqual(['sella', 'credem', 'alba', 'aleasing']);
+    expect(simulaMezzi(K, { importo: 50_000, categoria: 'Gru a torre', targato: false, usato: 'si' }, OGGI)).toMatchObject({ ok: false, error: 'usato_non_valido' });
   });
 });
 

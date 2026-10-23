@@ -173,7 +173,7 @@ export function contenutoNoleggioMezzi(
 
 /**
  * Il prospetto di leasing del partner chiesto, a marchio MCF. `chiave` e' la lettera
- * della colonna (A, B, C nell'ordine della configurazione): una chiave che non c'e', o
+ * della colonna (A, B, C, D come in leasingConfronto): una chiave che non c'e', o
  * una colonna senza righe (importo fuori dai limiti del partner), non da' il documento.
  * Senza ricerca (simulazione) non c'e' un cliente a cui intestarlo.
  */
@@ -192,7 +192,7 @@ export function contenutoLeasingMezzi(
   const etichetta = k.etichettaBene || 'Bene';
   const beni: [string, string][] = c.beni.map((b, i) => [
     c.beni.length > 1 ? `${etichetta} ${i + 1}` : etichetta,
-    `${b.descrizione} (${b.categoria}), ${b.quantita} x ${euro(b.prezzo)} euro`,
+    `${b.descrizione} (${b.categoria}${b.usato ? ', usato' : ''}), ${b.quantita} x ${euro(b.prezzo)} euro`,
   ]);
 
   return {

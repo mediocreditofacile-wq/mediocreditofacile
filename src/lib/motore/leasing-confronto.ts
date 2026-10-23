@@ -1,4 +1,5 @@
-// Il leasing dei tre partner affiancati, per il settore "mezzi".
+// Il leasing dei partner affiancati, per il settore "mezzi": Sella, Credem e Alba, piu'
+// A-Leasing quando almeno un bene e' usato (`soloUsato` nella configurazione).
 //
 // ATTENZIONE — FILE SERVER-ONLY: sceglie le condizioni del listino per spread e
 // ne calcola le rate. Verso il browser escono solo rate, anticipi e totali per
@@ -9,7 +10,7 @@
 // proprio a quel confine). La rata e' quella del modello vero del partner, la
 // stessa di leasingPartner; qui non c'e' markup perche' il settore non lo usa.
 
-import { PARTNERS_LEASING, type PartnerLeasing } from '../../data/leasing';
+import { PARTNERS_LEASING_MOTORE, type PartnerLeasing } from '../../data/leasing';
 import type { LeasingEsterno } from '../prospetti-pv';
 import { condizioneDaSpread, type ConfigMezzi, type LeasingPartnerConfig, type PartnerConfronto } from './config-mezzi';
 import { DURATE_LEASING_MOTORE, leasingPartner } from './proposte';
@@ -37,7 +38,7 @@ export interface LeasingDelPartner {
 
 /** Il listino del partner: la configurazione e' gia' validata, quindi un partner ignoto e' un errore */
 function listinoDi(partner: PartnerConfronto): PartnerLeasing {
-  const listino = PARTNERS_LEASING.find((p) => p.key === partner);
+  const listino = PARTNERS_LEASING_MOTORE.find((p) => p.key === partner);
   if (!listino) throw new Error(`Partner di leasing sconosciuto: ${partner}`);
   return listino;
 }
@@ -46,14 +47,19 @@ function listinoDi(partner: PartnerConfronto): PartnerLeasing {
  * Una colonna per partner, nell'ordine della configurazione. Fuori dai limiti di
  * importo del partner non ci sono righe e c'e' il motivo; gli altri partner non ne
  * risentono. Una durata la cui condizione non esiste nel listino si salta: uno
- * spread non si inventa.
+ * spread non si inventa. Un partner `soloUsato` entra solo con `usato` vero, e sempre
+ * dopo gli altri, in qualunque punto della configurazione sia scritto: cosi' le lettere
+ * delle colonne di sempre (A, B, C) non cambiano fra nuovo e usato.
  */
 export function leasingConfronto(
   cfg: ConfigMezzi['leasing'],
   importo: number,
   anticipoPerc: number,
+  usato = false,
 ): LeasingDelPartner[] {
-  return cfg.partner.map((p) => {
+  const sempre = cfg.partner.filter((p) => p.soloUsato !== true);
+  const sullUsato = usato ? cfg.partner.filter((p) => p.soloUsato === true) : [];
+  return [...sempre, ...sullUsato].map((p) => {
     const listino = listinoDi(p.partner);
     const nome = listino.label;
     if (importo < listino.importoMin || importo > listino.importoMax) {

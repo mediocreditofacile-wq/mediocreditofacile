@@ -18,7 +18,7 @@ export const prerender = false;
 // per durata. Canale, maggiorazione e imponibile restano sul server.
 //
 // Sul settore mezzi (Bergamelli) il corpo e' un altro ancora:
-// { f, ricercaId, beni: [{ descrizione, categoria, quantita, prezzo, targato? }],
+// { f, ricercaId, beni: [{ descrizione, categoria, quantita, prezzo, targato?, usato? }],
 //   venditore?: string, anticipoPerc?: number }
 // e la risposta e' mezziPerSchermo(): semaforo, beni, totale, venditore, noleggio con
 // le rate (o il motivo per cui non c'e') e una colonna di leasing per partner. Senza

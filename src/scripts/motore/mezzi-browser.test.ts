@@ -31,6 +31,7 @@ import {
   sceltePratica,
   targatoDaMenu,
   targatoIniziale,
+  usatoDaMenu,
   venditoreSuggerito,
   VOCE_BILANCIO_ANALITICO,
   type PreventivoPerPratica,
@@ -65,6 +66,7 @@ const riga = (r: Partial<RigaInPagina> = {}): RigaInPagina => ({
   quantita: '1',
   prezzo: '48.500,00',
   targato: false,
+  usato: false,
   ...r,
 });
 
@@ -110,7 +112,7 @@ describe('corpoProposte', () => {
     expect(c).toEqual({
       f: 'bergamelli',
       ricercaId: 'r-1',
-      beni: [{ descrizione: 'Gru Potain MDT 219', categoria: 'Gru a torre', quantita: '2', prezzo: '48.500,00', targato: false }],
+      beni: [{ descrizione: 'Gru Potain MDT 219', categoria: 'Gru a torre', quantita: '2', prezzo: '48.500,00', targato: false, usato: false }],
       venditore: 'manc',
       anticipoPerc: 10,
     });
@@ -137,9 +139,9 @@ describe('corpoProposte', () => {
     expect(validaBeni(CFG.categorie, c.beni)).toEqual({ ok: false, error: 'targato_mancante', riga: 2 });
   });
 
-  it('ogni bene porta solo i cinque campi che il server legge', () => {
+  it('ogni bene porta solo i sei campi che il server legge', () => {
     const c = corpoProposte('b', 'r', [{ ...riga(), extra: 'x' } as RigaInPagina], 'manc', 10);
-    expect(Object.keys((c.beni as object[])[0]).sort()).toEqual(['categoria', 'descrizione', 'prezzo', 'quantita', 'targato']);
+    expect(Object.keys((c.beni as object[])[0]).sort()).toEqual(['categoria', 'descrizione', 'prezzo', 'quantita', 'targato', 'usato']);
   });
 });
 
@@ -163,14 +165,14 @@ describe('leggiAnticipo', () => {
 
 describe('rigaVuota', () => {
   it('una riga appena aggiunta e vuota, anche con la quantita 1 di partenza', () => {
-    expect(rigaVuota({ descrizione: '', categoria: '', quantita: '1', prezzo: '', targato: null })).toBe(true);
-    expect(rigaVuota({ descrizione: '  ', categoria: '', quantita: '3', prezzo: ' ', targato: null })).toBe(true);
+    expect(rigaVuota({ descrizione: '', categoria: '', quantita: '1', prezzo: '', targato: null, usato: false })).toBe(true);
+    expect(rigaVuota({ descrizione: '  ', categoria: '', quantita: '3', prezzo: ' ', targato: null, usato: false })).toBe(true);
   });
 
   it('basta la descrizione, la categoria o il prezzo per non essere vuota', () => {
-    expect(rigaVuota({ descrizione: 'Gru', categoria: '', quantita: '1', prezzo: '', targato: null })).toBe(false);
-    expect(rigaVuota({ descrizione: '', categoria: 'Autogru', quantita: '1', prezzo: '', targato: true })).toBe(false);
-    expect(rigaVuota({ descrizione: '', categoria: '', quantita: '1', prezzo: '100', targato: null })).toBe(false);
+    expect(rigaVuota({ descrizione: 'Gru', categoria: '', quantita: '1', prezzo: '', targato: null, usato: false })).toBe(false);
+    expect(rigaVuota({ descrizione: '', categoria: 'Autogru', quantita: '1', prezzo: '', targato: true, usato: false })).toBe(false);
+    expect(rigaVuota({ descrizione: '', categoria: '', quantita: '1', prezzo: '100', targato: null, usato: false })).toBe(false);
   });
 });
 
@@ -299,7 +301,7 @@ describe('i messaggi del settore mezzi', () => {
 
 // --- le righe che vanno al server ---------------------------------------------------
 
-const intatta = (): RigaInPagina => ({ descrizione: '', categoria: '', quantita: '1', prezzo: '', targato: null });
+const intatta = (): RigaInPagina => ({ descrizione: '', categoria: '', quantita: '1', prezzo: '', targato: null, usato: false });
 
 describe('rigaIntatta', () => {
   it('la riga appena aggiunta, anche senza la quantita di partenza', () => {
@@ -351,7 +353,7 @@ describe('righeDaMandare e rigaASchermo', () => {
 // --- la simulazione ------------------------------------------------------------------
 
 const sim = (s: Partial<SimulazioneInPagina> = {}): SimulazioneInPagina => ({
-  importo: '48.500,00', categoria: 'Gru a torre', targato: false, venditore: 'manc', ...s,
+  importo: '48.500,00', categoria: 'Gru a torre', targato: false, usato: false, venditore: 'manc', ...s,
 });
 
 describe('provaSimulazione', () => {
@@ -386,14 +388,14 @@ describe('provaSimulazione', () => {
 describe('corpoSimulazione', () => {
   it("l'importo com'e scritto, il targato true, false o null, chi vende", () => {
     expect(corpoSimulazione('bergamelli', sim())).toEqual({
-      f: 'bergamelli', importo: '48.500,00', categoria: 'Gru a torre', targato: false, venditore: 'manc',
+      f: 'bergamelli', importo: '48.500,00', categoria: 'Gru a torre', targato: false, usato: false, venditore: 'manc',
     });
     expect(corpoSimulazione('b', sim({ categoria: 'Movimento terra', targato: null })).targato).toBeNull();
     expect(corpoSimulazione('b', sim({ categoria: 'Autogru', targato: true })).targato).toBe(true);
   });
 
   it('niente anticipo, niente documento: la simulazione non salva', () => {
-    expect(Object.keys(corpoSimulazione('b', sim())).sort()).toEqual(['categoria', 'f', 'importo', 'targato', 'venditore']);
+    expect(Object.keys(corpoSimulazione('b', sim())).sort()).toEqual(['categoria', 'f', 'importo', 'targato', 'usato', 'venditore']);
   });
 });
 
@@ -711,4 +713,34 @@ describe('import nei file del browser', () => {
       }
     });
   }
+});
+
+describe('nuovo o usato', () => {
+  it('il menu da\' usato solo se scelto: la partenza e tutto il resto sono nuovo', () => {
+    expect(usatoDaMenu('usato')).toBe(true);
+    expect(usatoDaMenu('nuovo')).toBe(false);
+    expect(usatoDaMenu('')).toBe(false);
+  });
+
+  it('l\'usato va al server com\'e\', e il server lo legge', () => {
+    const c = corpoProposte('b', 'r', [riga({ usato: true })], 'manc', 10);
+    expect((c.beni as Record<string, unknown>[])[0].usato).toBe(true);
+    const letti = validaBeni(CFG.categorie, c.beni);
+    expect(letti.ok && letti.usato).toBe(true);
+    expect(corpoSimulazione('b', sim({ usato: true })).usato).toBe(true);
+  });
+
+  it('una riga messa su usato non e\' piu\' intatta: va al server', () => {
+    expect(rigaIntatta({ ...intatta(), usato: true })).toBe(false);
+  });
+
+  it('l\'errore del server sull\'usato segna la sua casella, con un messaggio', () => {
+    expect(campoDiErrore('usato_non_valido')).toBe('usato');
+    expect(campoSimulazione('usato_non_valido')).toBe('usato');
+    expect(traduci('usato_non_valido')).toBe('Indica se il mezzo è nuovo o usato.');
+  });
+
+  it('la simulazione con l\'usato e\' pronta come quella col nuovo', () => {
+    expect(provaSimulazione(CFG.categorie, sim({ usato: true }))).toBe('pronta');
+  });
 });

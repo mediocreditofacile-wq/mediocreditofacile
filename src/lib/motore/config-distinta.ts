@@ -42,6 +42,8 @@ export interface CanaleConfig {
   categorieEscluse?: string[];
   /** Il canale non quota i mezzi targati */
   escludiTargati?: boolean;
+  /** Il canale non quota i mezzi usati */
+  escludiUsati?: boolean;
 }
 
 /** La societa' che firma i documenti verso il cliente */
@@ -140,6 +142,7 @@ const CONDIZIONI_CANALE: readonly [keyof CanaleConfig, (x: unknown) => unknown][
   ['venditori', elencoTesti],
   ['categorieEscluse', elencoTesti],
   ['escludiTargati', booleano],
+  ['escludiUsati', booleano],
 ];
 
 function leggiCanale(x: unknown): CanaleConfig | null {

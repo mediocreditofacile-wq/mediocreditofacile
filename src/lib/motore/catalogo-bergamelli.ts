@@ -63,6 +63,9 @@ export const CONFIG_MEZZI_BERGAMELLI: ConfigMezzi = {
       { partner: 'sella', spreadFinoA48: 2.25, spreadDa60: 2.25 },
       { partner: 'credem', spreadFinoA48: 2.9, spreadDa60: 2.9 },
       { partner: 'alba', spreadFinoA48: 3.1, spreadDa60: 2.5 },
+      // Sui mezzi usati (decisione del 23/10/2026): le condizioni dei due preventivi A-Leasing
+      // del 23/09/2026, solo 48 e 60 mesi. Compare sempre dopo gli altri (leasingConfronto): e' la colonna D
+      { partner: 'aleasing', spreadFinoA48: 4, spreadDa60: 4, soloUsato: true },
     ],
   },
   // A schermo i nomi dei partner si vedono, nei PDF mai
@@ -73,16 +76,18 @@ export const CONFIG_MEZZI_BERGAMELLI: ConfigMezzi = {
 
 export const CANALI_BERGAMELLI: CanaleConfig[] = [
   // Nol System: solo clienti oltre 5 milioni di fatturato e beni da 150.000 euro, mai i mezzi
-  // targati (come su Grenke: il noleggio del targato lo valuta MCF su richiesta). La tabella
+  // targati ne' gli usati (come su Grenke: il noleggio li valuta MCF su richiesta). La tabella
   // si chiama ancora econocom-pa perche' e' l'id salvato nella configurazione dei canali
   {
     canale: 'econocom', attivo: true, tabella: 'econocom-pa', maggiorazionePerc: 0,
     fatturatoMin: 5_000_000, importoMin: 150_000, venditori: ['nolsystem'], escludiTargati: true,
+    escludiUsati: true,
   },
-  // Manc: Sputnik, ma non i mezzi targati e non i ponteggi
+  // Manc: Sputnik, ma non i mezzi targati, non gli usati e non i ponteggi
   {
     canale: 'grenke', attivo: true, tabella: 'sputnik', maggiorazionePerc: 0,
     venditori: ['manc'], categorieEscluse: ['Ponteggi'], escludiTargati: true,
+    escludiUsati: true,
   },
 ];
 

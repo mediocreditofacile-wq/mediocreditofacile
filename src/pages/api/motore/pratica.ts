@@ -27,7 +27,7 @@ export const prerender = false;
 // parte solo da un preventivo salvato, e importo, venditore e partner del leasing si
 // rileggono da li: dal browser contano solo il prodotto, la durata e, sul leasing, la
 // colonna scelta. Il corpo, in piu' di quello sopra:
-//   { propostaId (obbligatorio), leasingChiave?: 'A' | 'B' | 'C' }
+//   { propostaId (obbligatorio), leasingChiave?: 'A' | 'B' | 'C' | 'D' }
 // La risposta dice solo { ok, id } (o { ok: false, error, messaggio? }): niente partner,
 // venditore ne' semaforo. Il rosso non blocca; MCF lo legge nella mail.
 

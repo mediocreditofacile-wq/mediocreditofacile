@@ -1,7 +1,7 @@
 // Scheda Simulazione del settore "mezzi" (Bergamelli), prima della verifica del cliente:
-// importo, categoria, "È targato?" e chi vende. Escono le stesse tabelle della scheda
-// Proposte, noleggio e leasing, senza semaforo e senza PDF: un cliente che non si
-// conosce non si valuta e non ha un preventivo. Spec mcf_spec-bergamelli-motore_v2,
+// importo, categoria, "È targato?", "Nuovo o usato?" e chi vende. Escono le stesse
+// tabelle della scheda Proposte, noleggio e leasing, senza semaforo e senza PDF: un
+// cliente che non si conosce non si valuta e non ha un preventivo. Spec mcf_spec-bergamelli-motore_v2,
 // sezione 3.
 //
 // Il conto lo fa il server (/api/motore/simulazione), che non salva niente: qui nessun
@@ -21,10 +21,11 @@ import {
   provaSimulazione,
   targatoDaMenu,
   targatoIniziale,
+  usatoDaMenu,
   venditoreSuggerito,
   type SimulazioneInPagina,
 } from './mezzi-browser';
-import { opzioniCategoria, opzioniTargato, opzioniVenditore, riquadroNoleggio, tabellaLeasing } from './proposte-mezzi';
+import { opzioniCategoria, opzioniTargato, opzioniUsato, opzioniVenditore, riquadroNoleggio, tabellaLeasing } from './proposte-mezzi';
 
 /** Pausa fra l'ultima cifra scritta e il conto */
 const ATTESA_MS = 350;
@@ -38,10 +39,11 @@ const CASELLA: Record<keyof SimulazioneInPagina, string> = {
   importo: 'sm-importo',
   categoria: 'sm-categoria',
   targato: 'sm-targato',
+  usato: 'sm-usato',
   venditore: 'sm-venditore',
 };
 
-const s: SimulazioneInPagina = { importo: '', categoria: '', targato: null, venditore: '' };
+const s: SimulazioneInPagina = { importo: '', categoria: '', targato: null, usato: false, venditore: '' };
 /** L'agente ha cambiato "Vende" a mano: da quel momento non segue piu' la categoria */
 let venditoreManuale = false;
 let timer: ReturnType<typeof setTimeout> | undefined;
@@ -134,6 +136,8 @@ export function montaSimulazioneMezzi() {
           <select id="sm-categoria" class="mt-input">${opzioniCategoria(cfg, '')}</select></label>
         <label class="mt-campo"><span>È targato?</span>
           <select id="sm-targato" class="mt-input">${opzioniTargato(cfg.categorie, s)}</select></label>
+        <label class="mt-campo"><span>Nuovo o usato?</span>
+          <select id="sm-usato" class="mt-input">${opzioniUsato(s.usato)}</select></label>
         <label class="mt-campo"><span>Vende</span>
           <select id="sm-venditore" class="mt-input">${opzioniVenditore(cfg)}</select>
           <small>La società che firma l'offerta. Segue la categoria finché non la cambi.</small></label>
@@ -162,6 +166,8 @@ export function montaSimulazioneMezzi() {
       suggerisciVenditore(cfg);
     } else if (t.id === 'sm-targato') {
       s.targato = targatoDaMenu(t.value);
+    } else if (t.id === 'sm-usato') {
+      s.usato = usatoDaMenu(t.value);
     } else if (t.id === 'sm-venditore') {
       s.venditore = t.value;
       venditoreManuale = true;

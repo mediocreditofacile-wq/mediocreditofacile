@@ -147,6 +147,41 @@ describe('leasingConfronto: limiti di importo del partner', () => {
   });
 });
 
+describe('leasingConfronto: A-Leasing solo sull\'usato', () => {
+  const CON_A: ConfigMezzi['leasing'] = {
+    ...CFG,
+    partner: [...CFG.partner, { partner: 'aleasing', spreadFinoA48: 4, spreadDa60: 4, soloUsato: true }],
+  };
+
+  it('sul nuovo restano le tre colonne di sempre, anche senza dire niente', () => {
+    expect(leasingConfronto(CON_A, 80000, 10).map((x) => x.partner)).toEqual(['sella', 'credem', 'alba']);
+    expect(leasingConfronto(CON_A, 80000, 10, false).map((x) => x.partner)).toEqual(['sella', 'credem', 'alba']);
+  });
+
+  it('sull\'usato A-Leasing in fondo, col suo nome e le sole righe a 48 e 60 mesi', () => {
+    const c = leasingConfronto(CON_A, 80000, 10, true);
+    expect(c.map((x) => x.partner)).toEqual(['sella', 'credem', 'alba', 'aleasing']);
+    expect(c[3].nome).toBe('A-Leasing');
+    expect(c[3].righe.map((r) => r.durata)).toEqual([48, 60]);
+    expect(c[3].motivo).toBeNull();
+  });
+
+  it('le colonne degli altri partner sono le stesse sul nuovo e sull\'usato', () => {
+    expect(leasingConfronto(CON_A, 80000, 10, true).slice(0, 3)).toEqual(leasingConfronto(CON_A, 80000, 10, false));
+  });
+
+  it('un partner soloUsato scritto per primo finisce comunque in fondo: le lettere degli altri non cambiano', () => {
+    const primo: ConfigMezzi['leasing'] = { ...CFG, partner: [CON_A.partner[3], ...CFG.partner] };
+    expect(leasingConfronto(primo, 80000, 10, true).map((x) => x.partner)).toEqual(['sella', 'credem', 'alba', 'aleasing']);
+    expect(leasingConfronto(primo, 80000, 10, false).map((x) => x.partner)).toEqual(['sella', 'credem', 'alba']);
+  });
+
+  it('un partner senza soloUsato compare anche sul nuovo', () => {
+    const sempre: ConfigMezzi['leasing'] = { ...CFG, partner: [{ partner: 'aleasing', spreadFinoA48: 4, spreadDa60: 4 }] };
+    expect(leasingConfronto(sempre, 80000, 10).map((x) => x.partner)).toEqual(['aleasing']);
+  });
+});
+
 describe('leasingConfronto: verso il browser', () => {
   it('nell\'uscita non c\'e\' nessuno spread, tasso o provvigione', () => {
     const json = JSON.stringify(leasingConfronto(CFG, 50000, 10));
@@ -185,6 +220,14 @@ describe('rate di riferimento (Euribor 3M 2,71)', () => {
       [2771.35, 2813.73, 2775.37],
       [1726.24, 1763.39, 1717.51],
     ]);
+  });
+
+  it('A-Leasing sull\'usato: 50.000 e 80.000 euro a 48 e 60 mesi, all\'euro in su', () => {
+    const CON_A: ConfigMezzi['leasing'] = { ...CFG, partner: [{ partner: 'aleasing', spreadFinoA48: 4, spreadDa60: 4, soloUsato: true }] };
+    expect([50000, 80000].map((importo) => {
+      const c = leasingConfronto(CON_A, importo, 10, true);
+      return [48, 60].map((d) => rataDi(c, 'aleasing', d));
+    })).toEqual([[1119, 921], [1790, 1473]]);
   });
 });
 

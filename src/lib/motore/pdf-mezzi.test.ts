@@ -23,8 +23,8 @@ const AGENTE = { nome: 'Mario Rossi', email: 'mario@example.invalid' };
 // --- la carrozzeria: Bergamelli, come la scrive il seed ----------------------
 
 const CANALI = [
-  { canale: 'econocom', attivo: true, tabella: 'econocom-pa', maggiorazionePerc: 0, fatturatoMin: 5_000_000, importoMin: 150_000, venditori: ['nolsystem'], escludiTargati: true },
-  { canale: 'grenke', attivo: true, tabella: 'sputnik', maggiorazionePerc: 0, venditori: ['manc'], categorieEscluse: ['Ponteggi'], escludiTargati: true },
+  { canale: 'econocom', attivo: true, tabella: 'econocom-pa', maggiorazionePerc: 0, fatturatoMin: 5_000_000, importoMin: 150_000, venditori: ['nolsystem'], escludiTargati: true, escludiUsati: true },
+  { canale: 'grenke', attivo: true, tabella: 'sputnik', maggiorazionePerc: 0, venditori: ['manc'], categorieEscluse: ['Ponteggi'], escludiTargati: true, escludiUsati: true },
 ];
 
 const MEZZI = {
@@ -51,6 +51,7 @@ const MEZZI = {
       { partner: 'sella', spreadFinoA48: 2.25, spreadDa60: 2.25 },
       { partner: 'credem', spreadFinoA48: 2.9, spreadDa60: 2.9 },
       { partner: 'alba', spreadFinoA48: 3.1, spreadDa60: 2.5 },
+      { partner: 'aleasing', spreadFinoA48: 4, spreadDa60: 4, soloUsato: true },
     ],
   },
   mostraNomiPartner: true,
@@ -288,6 +289,27 @@ describe('preventivo di noleggio', () => {
 });
 
 // --- prospetto di leasing ----------------------------------------------------
+
+describe('mezzo usato: niente preventivo di noleggio, A-Leasing nel prospetto di leasing se scelto', () => {
+  const usata = calcolo({ beni: [bene('Gru a torre', 50_000, { usato: true })] });
+
+  it('senza noleggio non c\'e\' il preventivo di noleggio', () => {
+    expect(usata.noleggio).toBeNull();
+    expect(contenutoNoleggioMezzi(usata, K, 'BG-30', AGENTE, OGGI)).toBeNull();
+  });
+
+  it('la colonna D e\' A-Leasing: solo 48 e 60 mesi, e nel documento nessun nome di societa\' ne\' tasso', () => {
+    expect(usata.leasing[3].partner).toBe('aleasing');
+    const d = contenutoLeasingMezzi(usata, K, 'BG-30', 'D', OGGI)!;
+    expect(tabelle(d)[0].righe.map((r) => r[0])).toEqual(['48 mesi', '60 mesi']);
+    // Il bene dice che e' usato: il cliente non deve leggerlo come nuovo
+    const bene = d.blocchi.filter((b): b is Extract<Blocco, { tipo: 'coppie' }> => b.tipo === 'coppie')[1].righe[0][1];
+    expect(bene).toBe('Gru a torre di prova (Gru a torre, usato), 1 x 50.000,00 euro');
+    const serializzato = JSON.stringify(d).toLowerCase();
+    for (const parola of [...VIETATE, 'a-leasing', 'aleasing', 'raiffeisen']) expect(serializzato, parola).not.toContain(parola);
+  });
+});
+
 
 describe('prospetto di leasing', () => {
   const d = contenutoLeasingMezzi(CAL_GRU, K, 'BG-20261023-100000', 'A', OGGI)!;

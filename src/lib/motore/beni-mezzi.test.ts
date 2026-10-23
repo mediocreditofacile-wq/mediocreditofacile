@@ -27,7 +27,7 @@ describe('validaBeni: un bene valido', () => {
     expect(e.ok).toBe(true);
     if (!e.ok) return;
     expect(e.beni).toEqual([
-      { descrizione: 'Gru Potain', categoria: 'Gru a torre', quantita: 1, prezzo: 48500, targato: false, totale: 48500 },
+      { descrizione: 'Gru Potain', categoria: 'Gru a torre', quantita: 1, prezzo: 48500, targato: false, usato: false, totale: 48500 },
     ]);
     expect(e.totale).toBe(48500);
     expect(e.targato).toBe(false);
@@ -243,5 +243,34 @@ describe('validaBeni: i rifiuti', () => {
     for (const riga of [null, 'gru', 5, [gru]]) {
       expect(validaBeni(CAT, [riga])).toEqual({ ok: false, error: 'descrizione_mancante', riga: 0 });
     }
+  });
+});
+
+describe('validaBeni: nuovo o usato', () => {
+  it('senza risposta il bene e\' nuovo, come tutti i beni prima della domanda', () => {
+    for (const usato of [undefined, null]) {
+      const e = validaBeni(CAT, [{ ...gru, usato }]);
+      expect(e.ok && e.beni[0].usato).toBe(false);
+      expect(e.ok && e.usato).toBe(false);
+    }
+  });
+
+  it('un booleano vale com\'e\', e basta un bene usato perche\' l\'elenco lo sia', () => {
+    const e = validaBeni(CAT, [gru, { ...gru, descrizione: 'Gru usata', usato: true }]);
+    expect(e.ok).toBe(true);
+    if (!e.ok) return;
+    expect(e.beni.map((b) => b.usato)).toEqual([false, true]);
+    expect(e.usato).toBe(true);
+  });
+
+  it('una risposta illeggibile non vale mai nuovo: si ferma con usato_non_valido e dice la riga', () => {
+    for (const usato of ['si', 'no', 1, 0, 'true', {}]) {
+      expect(validaBeni(CAT, [gru, { ...gru, usato }])).toEqual({ ok: false, error: 'usato_non_valido', riga: 1 });
+    }
+  });
+
+  it('usato e targato sono domande indipendenti', () => {
+    const e = validaBeni(CAT, [{ descrizione: 'Autocarro', categoria: 'Autocarri', quantita: 1, prezzo: 30000, usato: true }]);
+    expect(e.ok && e.beni[0]).toMatchObject({ targato: true, usato: true });
   });
 });

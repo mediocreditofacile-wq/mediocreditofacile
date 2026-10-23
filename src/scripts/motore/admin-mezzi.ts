@@ -47,14 +47,15 @@ export function notaConfigurazione(settore: string): string | null {
 /**
  * Le condizioni sul bene di un canale come righe di testo, con i nomi del pannello.
  * Si mostrano e non si cambiano da qui. Una condizione che non cambia niente
- * (categorie escluse vuote, esclusione dei targati spenta) non compare; "venditori"
+ * (categorie escluse vuote, esclusione dei targati o degli usati spenta) non compare; "venditori"
  * vuoto si', perche' vuol dire che il canale non quota nessun bene.
  */
-export function condizioniSulBene(c: Pick<CanaleConfig, 'venditori' | 'categorieEscluse' | 'escludiTargati'>): string[] {
+export function condizioniSulBene(c: Pick<CanaleConfig, 'venditori' | 'categorieEscluse' | 'escludiTargati' | 'escludiUsati'>): string[] {
   const righe: string[] = [];
   if (c.venditori !== undefined) righe.push(`venditori: ${c.venditori.length ? c.venditori.join(', ') : 'nessuno'}`);
   if (c.categorieEscluse?.length) righe.push(`categorie escluse: ${c.categorieEscluse.join(', ')}`);
   if (c.escludiTargati === true) righe.push('esclude i mezzi targati: sì');
+  if (c.escludiUsati === true) righe.push('esclude i mezzi usati: sì');
   return righe;
 }
 

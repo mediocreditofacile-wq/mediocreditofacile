@@ -60,7 +60,7 @@ export default function SimulatoreLeasing({ varianteFornitori = false, varianteL
   // Sia la variante fornitori che quella Lo Martire sono "locked"
   const lockedVariant = varianteFornitori || varianteLoMartire;
   // --- Stato simulazione ---
-  const [partnerKey, setPartnerKey] = useState<'sella' | 'alba' | 'credem'>('sella');
+  const [partnerKey, setPartnerKey] = useState<PartnerLeasing['key']>('sella');
   const [tipologia, setTipologia] = useState<TipologiaBene>('strumentale-generico');
   const [importo, setImporto] = useState<number>(50_000);
   const [durata, setDurata] = useState<number>(60);
