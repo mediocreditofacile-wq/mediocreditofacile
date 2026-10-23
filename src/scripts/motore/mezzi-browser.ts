@@ -1,12 +1,16 @@
-// I mezzi nel browser (settore "mezzi", Bergamelli): le regole pure della scheda
-// Proposte. Chi vende i beni di una categoria, la risposta di partenza sul targato,
-// il corpo per il server, l'anticipo del leasing e la colonna che va nel PDF.
-// Spec mcf_spec-bergamelli-motore_v2, sezioni 4 e 5.
+// I mezzi nel browser (settore "mezzi", Bergamelli): le regole pure delle schede
+// Simulazione, Proposte e Pratiche. Chi vende i beni di una categoria, la risposta di
+// partenza sul targato, i corpi per il server, l'anticipo del leasing, la colonna che
+// va nel PDF e che cosa offre la pratica partendo dal preventivo salvato.
+// Spec mcf_spec-bergamelli-motore_v2, sezioni 3, 4 e 5.
 //
 // Niente DOM, niente rete: si testa da solo. Il server ricontrolla tutto. Dai moduli
 // del server si importano solo i tipi: config-mezzi porta gli spread dei partner,
-// calcolo-mezzi i listini e il database, e nessuno dei due entra nel bundle.
+// calcolo-mezzi e pratica-mezzi i listini e il database, e nessuno entra nel bundle.
+// beni-mezzi e checklist-pratica sono moduli puri, gli stessi del server.
 
+import { buildChecklist } from '../../lib/checklist-pratica';
+import { validaBeni } from '../../lib/motore/beni-mezzi';
 import type { MezziSchermo } from '../../lib/motore/calcolo-mezzi';
 import type { CategoriaMezzo, MezziBrowser } from '../../lib/motore/config-mezzi';
 
@@ -87,6 +91,35 @@ export function rigaVuota(r: RigaInPagina): boolean {
   return !r.descrizione.trim() && !r.categoria && !r.prezzo.trim();
 }
 
+/**
+ * Una riga aggiunta e mai toccata: niente scritto, la quantita' di partenza (o nessuna)
+ * e nessuna risposta sul targato. Piu' stretta di rigaVuota: chi ha cambiato la
+ * quantita' sta scrivendo quella riga, e deve sapere cosa le manca.
+ */
+export function rigaIntatta(r: RigaInPagina): boolean {
+  const q = r.quantita.trim();
+  return rigaVuota(r) && (q === '' || q === '1') && r.targato === null;
+}
+
+/**
+ * Le righe che vanno al server: la prima sempre, le altre a meno che non siano ancora
+ * intatte. Il bene appena aggiunto non chiede un conto e non si prende un rimprovero
+ * prima che l'agente ci scriva. `indici` dice, per ogni riga mandata, il suo posto a
+ * schermo: l'errore del server torna sulla riga giusta con rigaASchermo.
+ */
+export function righeDaMandare(righe: RigaInPagina[]): { righe: RigaInPagina[]; indici: number[] } {
+  const indici = righe.flatMap((r, i) => (i === 0 || !rigaIntatta(r) ? [i] : []));
+  return { righe: indici.map((i) => righe[i]), indici };
+}
+
+/** La riga a schermo di un errore del server sulle righe mandate; null per gli errori di tutto il preventivo */
+export function rigaASchermo(indici: number[], riga: number | null | undefined): number | null {
+  return riga == null ? null : indici[riga] ?? null;
+}
+
+/** La risposta del menu "È targato?": Sì e No, tutto il resto ("Da indicare") e' nessuna risposta */
+export const targatoDaMenu = (v: string): boolean | null => (v === 'si' ? true : v === 'no' ? false : null);
+
 const CAMPO_ERRORE: Record<string, keyof RigaInPagina> = {
   descrizione_mancante: 'descrizione',
   categoria_non_valida: 'categoria',
@@ -159,4 +192,175 @@ export function chiavePdf(leasing: ColonnaLeasing[], scelta: string | null): str
   let migliore = colonne[0];
   for (const c of colonne.slice(1)) if (rata(c) < rata(migliore)) migliore = c;
   return migliore.chiave;
+}
+
+// --- la simulazione -----------------------------------------------------------------
+
+/** La simulazione come sta nelle caselle: un bene solo, l'importo come l'ha scritto l'agente */
+export interface SimulazioneInPagina {
+  importo: string;
+  categoria: string;
+  /** Null = nessuna risposta: il server usa il default della categoria, se c'e' */
+  targato: boolean | null;
+  venditore: string;
+}
+
+export type ProvaSimulazione = 'incompleta' | 'pronta' | 'importo_non_valido' | 'categoria_non_valida' | 'targato_mancante';
+
+/**
+ * Prima di chiedere il conto: 'incompleta' finche' mancano l'importo o la categoria
+ * (niente da dire e niente da rimproverare), poi lo stesso controllo del server sul
+ * bene unico (validaBeni), con l'errore del prezzo chiamato col nome del campo che
+ * l'agente vede, l'importo. 'pronta' se si puo' mandare.
+ */
+export function provaSimulazione(categorie: CategoriaMezzo[], s: SimulazioneInPagina): ProvaSimulazione {
+  if (!s.importo.trim() || !s.categoria) return 'incompleta';
+  const v = validaBeni(categorie, [{ descrizione: 'Simulazione', categoria: s.categoria, quantita: 1, prezzo: s.importo, targato: s.targato }]);
+  if (v.ok) return 'pronta';
+  if (v.error === 'prezzo_non_valido' || v.error === 'importo_non_valido') return 'importo_non_valido';
+  return v.error === 'targato_mancante' ? 'targato_mancante' : 'categoria_non_valida';
+}
+
+/**
+ * Il corpo di /api/motore/simulazione sui mezzi. L'importo va come l'ha scritto l'agente
+ * (lo legge il server), il targato true, false o null, mai una stringa. Niente anticipo
+ * (vale quello del fornitore) e niente documento: la simulazione non salva.
+ */
+export function corpoSimulazione(slug: string, s: SimulazioneInPagina): Record<string, unknown> {
+  return { f: slug, importo: s.importo, categoria: s.categoria, targato: s.targato, venditore: s.venditore };
+}
+
+const CAMPO_SIMULAZIONE: Record<string, keyof SimulazioneInPagina> = {
+  importo_non_valido: 'importo',
+  categoria_non_valida: 'categoria',
+  targato_mancante: 'targato',
+  venditore_non_valido: 'venditore',
+};
+
+/** La casella da segnare per un errore della simulazione; null per gli altri */
+export const campoSimulazione = (errore: string): keyof SimulazioneInPagina | null => CAMPO_SIMULAZIONE[errore] ?? null;
+
+/** Il messaggio quando quello generico non aiuta: "61.000" si spiega come nelle righe */
+export function messaggioSimulazione(errore: string, s: SimulazioneInPagina): string | null {
+  if (errore !== 'importo_non_valido') return null;
+  return messaggioRiga('prezzo_non_valido', { descrizione: '', categoria: s.categoria, quantita: '1', prezzo: s.importo, targato: s.targato });
+}
+
+// --- la pratica ---------------------------------------------------------------------
+
+/**
+ * La voce in piu' della checklist sul leasing: la stessa stringa di pratica-mezzi.ts,
+ * che e' un modulo del server (legge il database) e qui non si importa. Un test le
+ * confronta parola per parola.
+ */
+export const VOCE_BILANCIO_ANALITICO =
+  "Bilancio analitico dell'ultimo esercizio (bilancio di verifica o situazione contabile dettagliata)";
+
+/** La durata di partenza del leasing, come quella in evidenza a schermo */
+const DURATA_LEASING_PRATICA = 60;
+
+/** L'ultimo preventivo salvato, come lo tiene la pagina: di quale cliente e con quali numeri */
+export interface PreventivoPerPratica {
+  id: string;
+  /** La ricerca (il cliente) su cui e' stato fatto */
+  ricercaId: string;
+  schermo: {
+    totale: number;
+    noleggio: { rate: { durata: number }[]; durataEvidenza: number | null } | null;
+    leasing: { chiave: string; nome: string | null; righe: { durata: number }[] }[];
+  };
+  /** La colonna del leasing messa nel PDF; null se il leasing non quotava */
+  chiaveLeasing: string | null;
+}
+
+export interface SceltePratica {
+  propostaId: string;
+  ricercaId: string;
+  /** Il totale dei beni del preventivo: si mostra, non si scrive */
+  importo: number;
+  /** Null se il preventivo non quotava il noleggio (mezzo targato, nessun canale) */
+  noleggio: { durate: number[]; durata: number } | null;
+  /** Solo le colonne che quotano, nell'ordine dello schermo */
+  leasing: { chiave: string; etichetta: string; durate: number[]; durata: number }[];
+  /** La colonna di partenza; null senza leasing */
+  colonna: string | null;
+  prodotto: 'noleggio' | 'leasing';
+}
+
+/**
+ * Che cosa offre la pratica: solo quello che il preventivo aveva. Null se il preventivo
+ * manca, e' di un altro cliente (la ricerca aperta adesso e' un'altra) o non quotava
+ * niente: la pratica parte da un preventivo di questo cliente. Il noleggio parte dalla
+ * durata in evidenza, se no dall'ultima; il leasing dalla colonna del PDF se quota, se
+ * no dalla prima che quota, a 60 mesi se la colonna li ha, se no all'ultima durata.
+ */
+export function sceltePratica(p: PreventivoPerPratica | null, ricercaId: string | null | undefined): SceltePratica | null {
+  if (!p || !ricercaId || p.ricercaId !== ricercaId) return null;
+
+  const rate = p.schermo.noleggio?.rate.map((r) => r.durata) ?? [];
+  const evidenza = p.schermo.noleggio?.durataEvidenza ?? null;
+  const noleggio = rate.length
+    ? { durate: rate, durata: evidenza !== null && rate.includes(evidenza) ? evidenza : rate[rate.length - 1] }
+    : null;
+
+  const leasing = p.schermo.leasing
+    .filter((c) => c.righe.length > 0)
+    .map((c) => {
+      const durate = c.righe.map((r) => r.durata);
+      return {
+        chiave: c.chiave,
+        etichetta: etichettaColonna(c),
+        durate,
+        durata: durate.includes(DURATA_LEASING_PRATICA) ? DURATA_LEASING_PRATICA : durate[durate.length - 1],
+      };
+    });
+  if (!noleggio && leasing.length === 0) return null;
+
+  const colonna = leasing.some((c) => c.chiave === p.chiaveLeasing) ? p.chiaveLeasing : leasing[0]?.chiave ?? null;
+  return {
+    propostaId: p.id,
+    ricercaId: p.ricercaId,
+    importo: p.schermo.totale,
+    noleggio,
+    leasing,
+    colonna,
+    prodotto: noleggio ? 'noleggio' : 'leasing',
+  };
+}
+
+/** La checklist a schermo: quella di forma e importo e, sul leasing, il bilancio analitico in coda, come sul server */
+export function checklistPraticaMezzi(forma: string, importo: number, documentiExtra: string[], prodotto: string): string[] {
+  return [...buildChecklist(forma, importo, documentiExtra), ...(prodotto === 'leasing' ? [VOCE_BILANCIO_ANALITICO] : [])];
+}
+
+/** I campi della pratica comuni a ogni settore, gia' controllati */
+export interface CampiPratica {
+  f: string;
+  ricercaId: string;
+  bozza: string;
+  formaGiuridica: string;
+  referente: { nome: string; telefono: string; email: string };
+  iban: string;
+  note: string;
+  documenti: { nome: string; pathname: string; size: number }[];
+}
+
+/**
+ * Il corpo di /api/motore/pratica sui mezzi: i campi di sempre, il preventivo e, sul
+ * leasing, la colonna scelta. Nessun importo: il server lo rilegge dal preventivo.
+ */
+export function corpoPraticaMezzi(
+  campi: CampiPratica,
+  propostaId: string,
+  prodotto: string,
+  durata: number,
+  leasingChiave: string | null,
+): Record<string, unknown> {
+  return {
+    ...campi,
+    propostaId,
+    prodotto,
+    durata,
+    ...(prodotto === 'leasing' && leasingChiave ? { leasingChiave } : {}),
+  };
 }

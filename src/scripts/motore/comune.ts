@@ -20,10 +20,11 @@ export interface Stato {
   /** L'ultimo preventivo salvato su questa ricerca: la pratica ci si aggancia */
   ultimoPreventivo: string | null;
   /**
-   * Settore mezzi: i numeri a schermo con cui e' uscito l'ultimo preventivo e la colonna
-   * del leasing messa nel PDF (null se il leasing non quotava). La pratica parte da qui.
+   * Settore mezzi: i numeri a schermo con cui e' uscito l'ultimo preventivo, la ricerca
+   * (il cliente) su cui e' stato fatto e la colonna del leasing messa nel PDF (null se il
+   * leasing non quotava). La pratica parte da qui, e solo se la ricerca e' quella aperta.
    */
-  mezziPreventivo: { id: string; schermo: MezziSchermo; chiaveLeasing: string | null } | null;
+  mezziPreventivo: { id: string; ricercaId: string; schermo: MezziSchermo; chiaveLeasing: string | null } | null;
 }
 
 export const stato: Stato = {
@@ -127,6 +128,11 @@ const MESSAGGI: Record<string, string> = {
   targato_mancante: 'Indica se il mezzo è targato.',
   venditore_non_valido: 'Scegli chi vende i beni: quello indicato non è fra le società di questo portale.',
   anticipo_non_valido: "L'anticipo va da 0 a 30%.",
+  // Settore mezzi: la pratica parte solo dal preventivo salvato, e prende quello che aveva
+  preventivo_mancante: 'Scarica prima il preventivo nella scheda Proposte: la pratica parte da lì.',
+  preventivo_non_trovato: 'Il preventivo non è di questo cliente o non si trova più: rifallo nella scheda Proposte.',
+  prodotto_non_valido: 'Questo prodotto non era nel preventivo: rifai il preventivo nella scheda Proposte.',
+  partner_non_valido: 'Questa soluzione di leasing non era nel preventivo: rifai il preventivo nella scheda Proposte.',
 };
 // Sul settore distinta alcune azioni si chiamano diversamente: lo stesso codice, un altro consiglio
 const MESSAGGI_DISTINTA: Record<string, string> = {

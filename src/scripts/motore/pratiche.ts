@@ -2,12 +2,15 @@
 // stato, e per MCF il cambio di stato libero (anche saltando passaggi, anche
 // su piu' pratiche insieme) e l'esito della verifica eventi negativi.
 // Sul settore distinta il modulo di caricamento e' quello di pratiche-distinta.ts.
+// Sul settore mezzi il modulo e' questo, ma parte solo dal preventivo salvato: importo,
+// prodotti, partner del leasing e durate sono quelli del preventivo (rendiModuloMezzi).
 
 import { upload } from '@vercel/blob/client';
 import { buildChecklist } from '../../lib/checklist-pratica';
 import { controllaDatiCliente } from '../../lib/dati-cliente-pratica';
 import { initCampoIban, type CampoIban } from '../campo-iban';
-import { $, apiJson, data, esc, euro, messaggio, stato, traduci } from './comune';
+import { $, apiJson, data, esc, euro, euroEsatto, messaggio, stato, traduci } from './comune';
+import { checklistPraticaMezzi, corpoPraticaMezzi, sceltePratica, type SceltePratica } from './mezzi-browser';
 import { montaPraticheDistinta, rendiModuloDistinta } from './pratiche-distinta';
 import { bottoneDoc, caricaStorico, suStorico, type DatiStorico } from './storico';
 
@@ -27,6 +30,8 @@ let campoIban: CampoIban | null = null;
 let pratiche: any[] = [];
 /** Pratiche lavorate prima del portale: l'API le manda solo a referente e MCF */
 let esterne: any[] = [];
+/** Settore mezzi: il preventivo da cui parte il modulo aperto, con quello che offre */
+let mezzi: SceltePratica | null = null;
 
 /** La forma giuridica del Registro, ridotta alle voci della checklist */
 function formaDaScheda(forma: string | null): string {
@@ -46,8 +51,12 @@ function opzioniDurata(prodotto: string): number[] {
 
 function rendiChecklist() {
   const forma = (document.getElementById('pr-forma') as HTMLSelectElement | null)?.value ?? '';
-  const importo = Number((document.getElementById('pr-importo') as HTMLInputElement | null)?.value) || 0;
-  const lista = buildChecklist(forma, importo, stato.carrozzeria?.documentiExtra ?? []);
+  const extra = stato.carrozzeria?.documentiExtra ?? [];
+  // Settore mezzi: l'importo e' quello del preventivo, e il leasing chiede il bilancio analitico
+  const prodotto = (document.getElementById('pr-prodotto') as HTMLSelectElement | null)?.value ?? '';
+  const lista = stato.settore === 'mezzi' && mezzi
+    ? checklistPraticaMezzi(forma, mezzi.importo, extra, prodotto)
+    : buildChecklist(forma, Number((document.getElementById('pr-importo') as HTMLInputElement | null)?.value) || 0, extra);
   const el = document.getElementById('pr-checklist');
   if (el) el.innerHTML = lista.map((v) => `<li>${esc(v)}</li>`).join('');
 }
@@ -61,42 +70,19 @@ function rendiFile() {
     : '<li class="mt-id">Nessun documento ancora.</li>';
 }
 
-function rendiModulo(evento?: Event) {
-  // Settore distinta: un caricamento per voce, niente forma, prodotto e importo,
-  // e la segnalazione a Mediocredito Facile (pratiche-distinta.ts)
-  if (stato.settore === 'distinta') return rendiModuloDistinta(Boolean((evento as CustomEvent | undefined)?.detail?.segnalazione));
-  const r = stato.ricerca;
-  const box = $('pratica-nuova');
-  if (!r) {
-    box.innerHTML = `<p class="mt-vuoto">Per caricare una pratica verifica prima il cliente nella sezione ${stato.settore === 'macchine' ? 'Verifica cliente' : 'Cliente'}.</p>`;
-    box.hidden = false;
-    return;
-  }
-  bozza = crypto.randomUUID();
-  file = [];
-  const e = stato.proposta?.esito;
-  const prodotto = e && !e.noleggio?.length && e.leasing?.length ? 'leasing' : 'noleggio';
-  const scelta = e?.bp?.durata ?? e?.macchine?.durata ?? 60;
-  box.hidden = false;
-  box.innerHTML = `
-    <article class="mt-card mt-card--evidenza">
-      <p class="mt-semaforo__tit">Nuova pratica per ${esc(r.scheda.ragioneSociale)}</p>
-      <p class="mt-meta" style="margin-top:0">P.IVA ${esc(r.scheda.piva)}${stato.ultimoPreventivo ? ` · preventivo ${esc(stato.ultimoPreventivo)}` : ''}</p>
-      <div class="mt-griglia" style="margin-top:16px">
-        <label class="mt-campo"><span>Prodotto</span>
-          <select id="pr-prodotto" class="mt-input">
-            <option value="noleggio" ${prodotto === 'noleggio' ? 'selected' : ''}>Noleggio operativo</option>
-            ${stato.carrozzeria?.leasing === false ? '' : `<option value="leasing" ${prodotto === 'leasing' ? 'selected' : ''}>Leasing finanziario</option>`}
-          </select></label>
-        <label class="mt-campo"><span>Durata</span><select id="pr-durata" class="mt-input"></select></label>
-        <label class="mt-campo"><span>Importo, IVA esclusa</span>
-          <input type="number" id="pr-importo" class="mt-input" min="1" step="100" value="${esc(e?.importo ?? '')}" /></label>
+/** La forma giuridica, partendo da quella del Registro */
+const campoForma = (r: NonNullable<typeof stato.ricerca>) => `
         <label class="mt-campo"><span>Forma giuridica</span>
-          <select id="pr-forma" class="mt-input">${FORME.map((f) => `<option ${f === formaDaScheda(r.scheda.formaGiuridica) ? 'selected' : ''}>${f}</option>`).join('')}</select></label>
+          <select id="pr-forma" class="mt-input">${FORME.map((f) => `<option ${f === formaDaScheda(r.scheda.formaGiuridica) ? 'selected' : ''}>${f}</option>`).join('')}</select></label>`;
+
+/** Referente, cellulare ed email: le stesse caselle su ogni settore */
+const CAMPI_REFERENTE = `
         <label class="mt-campo"><span>Referente del cliente</span><input type="text" id="pr-ref-nome" class="mt-input" placeholder="Nome e cognome" /></label>
         <label class="mt-campo"><span>Cellulare del referente *</span><input type="tel" id="pr-ref-tel" class="mt-input" required autocomplete="off" /></label>
-        <label class="mt-campo"><span>Email del referente *</span><input type="email" id="pr-ref-email" class="mt-input" required autocomplete="off" /></label>
-      </div>
+        <label class="mt-campo"><span>Email del referente *</span><input type="email" id="pr-ref-email" class="mt-input" required autocomplete="off" /></label>`;
+
+/** IBAN, note, documenti e invio: lo stesso modulo su ogni settore */
+const CODA_MODULO = `
       <label class="mt-campo" style="margin-top:16px"><span>IBAN del conto aziendale *</span>
         <input type="text" id="pr-iban" class="mt-input mt-input--iban" required autocomplete="off" spellcheck="false"
           inputmode="text" maxlength="48" placeholder="27 caratteri, inizia con IT" aria-describedby="pr-iban-esito" />
@@ -121,7 +107,116 @@ function rendiModulo(evento?: Event) {
         <button type="button" id="pr-invia" class="mt-btn">Invia la pratica</button>
         <button type="button" id="pr-annulla" class="mt-link">annulla</button>
       </div>
-      <p id="pr-msg" class="mt-msg" hidden></p>
+      <p id="pr-msg" class="mt-msg" hidden></p>`;
+
+/** Documenti e IBAN: gli stessi collegamenti su ogni settore, dopo quelli del prodotto */
+function collegaModulo() {
+  $<HTMLInputElement>('pr-file').addEventListener('change', (ev) => {
+    const el = ev.target as HTMLInputElement;
+    file.push(...Array.from(el.files ?? []));
+    el.value = '';
+    rendiFile();
+  });
+  campoIban = initCampoIban($<HTMLInputElement>('pr-iban'), $('pr-iban-esito'));
+  rendiChecklist();
+  rendiFile();
+}
+
+/**
+ * Settore mezzi: la pratica parte solo dall'ultimo preventivo salvato su questo cliente.
+ * L'importo si mostra e non si scrive; il prodotto offre solo quello che il preventivo
+ * aveva; col leasing compare il partner (il nome, o "Soluzione A") e le durate sono
+ * quelle della sua colonna. Il server ricontrolla tutto sul preventivo salvato.
+ */
+function rendiModuloMezzi(r: NonNullable<typeof stato.ricerca>, box: HTMLElement) {
+  box.hidden = false;
+  mezzi = sceltePratica(stato.mezziPreventivo, r.id);
+  if (!mezzi) {
+    box.innerHTML = '<p class="mt-vuoto">Scarica prima il preventivo nella scheda Proposte: la pratica parte da lì.</p>';
+    return;
+  }
+  const m = mezzi;
+  bozza = crypto.randomUUID();
+  file = [];
+  box.innerHTML = `
+    <article class="mt-card mt-card--evidenza">
+      <p class="mt-semaforo__tit">Nuova pratica per ${esc(r.scheda.ragioneSociale)}</p>
+      <p class="mt-meta" style="margin-top:0">P.IVA ${esc(r.scheda.piva)} · preventivo ${esc(m.propostaId)}</p>
+      <div class="mt-griglia" style="margin-top:16px">
+        <label class="mt-campo"><span>Prodotto</span>
+          <select id="pr-prodotto" class="mt-input">
+            ${m.noleggio ? `<option value="noleggio" ${m.prodotto === 'noleggio' ? 'selected' : ''}>Noleggio operativo</option>` : ''}
+            ${m.leasing.length ? `<option value="leasing" ${m.prodotto === 'leasing' ? 'selected' : ''}>Leasing finanziario</option>` : ''}
+          </select></label>
+        ${m.leasing.length ? `
+        <label class="mt-campo" id="pr-partner-campo"><span>Partner del leasing</span>
+          <select id="pr-partner" class="mt-input">${m.leasing
+            .map((c) => `<option value="${esc(c.chiave)}" ${c.chiave === m.colonna ? 'selected' : ''}>${esc(c.etichetta)}</option>`).join('')}</select></label>` : ''}
+        <label class="mt-campo"><span>Durata</span><select id="pr-durata" class="mt-input"></select></label>
+        <div class="mt-campo"><span>Importo, IVA esclusa</span>
+          <output class="mt-pr-importo">${esc(euroEsatto(m.importo))}</output>
+          <small>Il totale dei beni del preventivo: per cambiarlo rifai il preventivo.</small></div>
+        ${campoForma(r)}
+        ${CAMPI_REFERENTE}
+      </div>
+      ${CODA_MODULO}
+    </article>`;
+
+  const prodotto = $<HTMLSelectElement>('pr-prodotto');
+  const durata = $<HTMLSelectElement>('pr-durata');
+  const aggiorna = () => {
+    const leasing = prodotto.value === 'leasing';
+    const partner = document.getElementById('pr-partner') as HTMLSelectElement | null;
+    const campo = document.getElementById('pr-partner-campo');
+    if (campo) campo.hidden = !leasing;
+    // Le durate di quel prodotto o di quella colonna, dalla sua durata di partenza
+    const scelta = leasing ? m.leasing.find((c) => c.chiave === partner?.value) : m.noleggio;
+    if (!scelta) return;
+    durata.innerHTML = scelta.durate.map((x) => `<option value="${x}" ${x === scelta.durata ? 'selected' : ''}>${x} mesi</option>`).join('');
+    rendiChecklist();
+  };
+  aggiorna();
+  prodotto.addEventListener('change', aggiorna);
+  document.getElementById('pr-partner')?.addEventListener('change', aggiorna);
+  $('pr-forma').addEventListener('change', rendiChecklist);
+  collegaModulo();
+}
+
+function rendiModulo(evento?: Event) {
+  // Settore distinta: un caricamento per voce, niente forma, prodotto e importo,
+  // e la segnalazione a Mediocredito Facile (pratiche-distinta.ts)
+  if (stato.settore === 'distinta') return rendiModuloDistinta(Boolean((evento as CustomEvent | undefined)?.detail?.segnalazione));
+  const r = stato.ricerca;
+  const box = $('pratica-nuova');
+  if (!r) {
+    box.innerHTML = `<p class="mt-vuoto">Per caricare una pratica verifica prima il cliente nella sezione ${stato.settore === 'macchine' ? 'Verifica cliente' : 'Cliente'}.</p>`;
+    box.hidden = false;
+    return;
+  }
+  if (stato.settore === 'mezzi') return rendiModuloMezzi(r, box);
+  bozza = crypto.randomUUID();
+  file = [];
+  const e = stato.proposta?.esito;
+  const prodotto = e && !e.noleggio?.length && e.leasing?.length ? 'leasing' : 'noleggio';
+  const scelta = e?.bp?.durata ?? e?.macchine?.durata ?? 60;
+  box.hidden = false;
+  box.innerHTML = `
+    <article class="mt-card mt-card--evidenza">
+      <p class="mt-semaforo__tit">Nuova pratica per ${esc(r.scheda.ragioneSociale)}</p>
+      <p class="mt-meta" style="margin-top:0">P.IVA ${esc(r.scheda.piva)}${stato.ultimoPreventivo ? ` · preventivo ${esc(stato.ultimoPreventivo)}` : ''}</p>
+      <div class="mt-griglia" style="margin-top:16px">
+        <label class="mt-campo"><span>Prodotto</span>
+          <select id="pr-prodotto" class="mt-input">
+            <option value="noleggio" ${prodotto === 'noleggio' ? 'selected' : ''}>Noleggio operativo</option>
+            ${stato.carrozzeria?.leasing === false ? '' : `<option value="leasing" ${prodotto === 'leasing' ? 'selected' : ''}>Leasing finanziario</option>`}
+          </select></label>
+        <label class="mt-campo"><span>Durata</span><select id="pr-durata" class="mt-input"></select></label>
+        <label class="mt-campo"><span>Importo, IVA esclusa</span>
+          <input type="number" id="pr-importo" class="mt-input" min="1" step="100" value="${esc(e?.importo ?? '')}" /></label>
+        ${campoForma(r)}
+        ${CAMPI_REFERENTE}
+      </div>
+      ${CODA_MODULO}
     </article>`;
 
   const durata = $<HTMLSelectElement>('pr-durata');
@@ -133,15 +228,7 @@ function rendiModulo(evento?: Event) {
   $('pr-prodotto').addEventListener('change', aggiornaDurate);
   $('pr-forma').addEventListener('change', rendiChecklist);
   $('pr-importo').addEventListener('input', rendiChecklist);
-  $<HTMLInputElement>('pr-file').addEventListener('change', (ev) => {
-    const el = ev.target as HTMLInputElement;
-    file.push(...Array.from(el.files ?? []));
-    el.value = '';
-    rendiFile();
-  });
-  campoIban = initCampoIban($<HTMLInputElement>('pr-iban'), $('pr-iban-esito'));
-  rendiChecklist();
-  rendiFile();
+  collegaModulo();
 }
 
 /** Il campo del modulo a cui si riferisce un errore sui dati del cliente */
@@ -202,22 +289,41 @@ async function invia(btn: HTMLButtonElement) {
 
   // 2. la pratica, con l'elenco dei documenti caricati
   btn.textContent = 'Invio la pratica...';
+  // Settore mezzi: il cliente e il preventivo del modulo aperto, la colonna del leasing, nessun importo
+  const m = stato.settore === 'mezzi' ? mezzi : null;
   const { res, corpo } = await apiJson('/api/motore/pratica', {
     method: 'POST',
-    body: JSON.stringify({
-      f: stato.slug,
-      ricercaId: stato.ricerca?.id,
-      propostaId: stato.ultimoPreventivo,
-      bozza,
-      prodotto: $<HTMLSelectElement>('pr-prodotto').value,
-      durata: Number($<HTMLSelectElement>('pr-durata').value),
-      importo: Number(val('pr-importo')),
-      formaGiuridica: $<HTMLSelectElement>('pr-forma').value,
-      referente: { nome: val('pr-ref-nome'), telefono: cliente.telefono, email: cliente.email },
-      iban: cliente.iban,
-      note: $<HTMLTextAreaElement>('pr-note').value.trim(),
-      documenti,
-    }),
+    body: JSON.stringify(m
+      ? corpoPraticaMezzi(
+        {
+          f: stato.slug,
+          ricercaId: m.ricercaId,
+          bozza,
+          formaGiuridica: $<HTMLSelectElement>('pr-forma').value,
+          referente: { nome: val('pr-ref-nome'), telefono: cliente.telefono, email: cliente.email },
+          iban: cliente.iban,
+          note: $<HTMLTextAreaElement>('pr-note').value.trim(),
+          documenti,
+        },
+        m.propostaId,
+        $<HTMLSelectElement>('pr-prodotto').value,
+        Number($<HTMLSelectElement>('pr-durata').value),
+        (document.getElementById('pr-partner') as HTMLSelectElement | null)?.value ?? null,
+      )
+      : {
+        f: stato.slug,
+        ricercaId: stato.ricerca?.id,
+        propostaId: stato.ultimoPreventivo,
+        bozza,
+        prodotto: $<HTMLSelectElement>('pr-prodotto').value,
+        durata: Number($<HTMLSelectElement>('pr-durata').value),
+        importo: Number(val('pr-importo')),
+        formaGiuridica: $<HTMLSelectElement>('pr-forma').value,
+        referente: { nome: val('pr-ref-nome'), telefono: cliente.telefono, email: cliente.email },
+        iban: cliente.iban,
+        note: $<HTMLTextAreaElement>('pr-note').value.trim(),
+        documenti,
+      }),
   });
   btn.disabled = false;
   btn.textContent = 'Invia la pratica';

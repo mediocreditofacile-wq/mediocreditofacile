@@ -15,7 +15,7 @@
 
 import { validaBeni } from '../../lib/motore/beni-mezzi';
 import type { MezziSchermo } from '../../lib/motore/calcolo-mezzi';
-import type { MezziBrowser } from '../../lib/motore/config-mezzi';
+import type { CategoriaMezzo, MezziBrowser } from '../../lib/motore/config-mezzi';
 import { leggiPrezzo, leggiQuantita, totaleRighe } from '../../lib/motore/distinta';
 import { bloccoSemaforo } from './cliente';
 import { $, apiJsonSicura, apriTab, esc, euro, euroEsatto, messaggio, num, stato, traduci } from './comune';
@@ -29,7 +29,10 @@ import {
   etichettaColonna,
   leggiAnticipo,
   messaggioRiga,
+  rigaASchermo,
+  righeDaMandare,
   rigaVuota,
+  targatoDaMenu,
   targatoIniziale,
   venditoreSuggerito,
   type ColonnaLeasing,
@@ -51,6 +54,10 @@ let sceltaPdf: string | null = null;
 /** L'ultima risposta del server e il corpo che l'ha prodotta: il preventivo riparte da li' */
 let ultimoEsito: MezziSchermo | null = null;
 let ultimoCorpo: Record<string, unknown> | null = null;
+/** Per ogni bene di ultimoCorpo, la sua riga a schermo: l'errore del preventivo torna li' */
+let ultimiIndici: number[] = [];
+/** L'errore a schermo: "Aggiungi un bene" ridisegna le caselle, e il segno va rimesso */
+let erroreAttuale: { riga: number | null; errore: string } | null = null;
 /** Un conto e' in arrivo: il pulsante resta spento finche' non torna */
 let inAttesa = false;
 /** Un preventivo si sta generando: niente doppio clic */
@@ -75,7 +82,7 @@ export function inputMezzi(): Record<string, unknown> | null {
   if (!stato.ricerca || !cfg) return null;
   const anticipo = leggiAnticipo(anticipoTesto);
   if (anticipo === null) return null;
-  const corpo = corpoProposte(stato.slug, stato.ricerca.id, righe, venditore, anticipo);
+  const corpo = corpoProposte(stato.slug, stato.ricerca.id, righeDaMandare(righe).righe, venditore, anticipo);
   return validaBeni(cfg.categorie, corpo.beni).ok ? corpo : null;
 }
 
@@ -161,20 +168,30 @@ function aggiornaTotali() {
   if (cella) cella.textContent = euroEsatto(Math.round(totale * 100) / 100);
 }
 
-/** Le risposte del menu "targato": con la categoria che porta una risposta, solo Sì e No */
-function opzioniTargato(r: RigaInPagina): string {
-  const senzaDefault = targatoIniziale(config()?.categorie ?? [], r.categoria) === null;
+/**
+ * Le risposte del menu "targato": con la categoria che porta una risposta, solo Sì e No.
+ * La riusa la simulazione.
+ */
+export function opzioniTargato(categorie: CategoriaMezzo[], r: Pick<RigaInPagina, 'categoria' | 'targato'>): string {
+  const senzaDefault = targatoIniziale(categorie, r.categoria) === null;
   const opzione = (valore: string, testo: string, scelta: boolean) =>
     `<option value="${valore}" ${scelta ? 'selected' : ''}>${testo}</option>`;
   return `${senzaDefault ? opzione('', 'Da indicare', r.targato === null) : ''}${opzione('si', 'Sì', r.targato === true)}${opzione('no', 'No', r.targato === false)}`;
 }
 
+/** Il menu delle categorie, con "Scegli" finche' non ce n'e' una. La riusa la simulazione */
+export const opzioniCategoria = (cfg: MezziBrowser, scelta: string) =>
+  `<option value="" ${scelta ? '' : 'selected'}>Scegli</option>${cfg.categorie
+    .map((c) => `<option value="${esc(c.nome)}" ${c.nome === scelta ? 'selected' : ''}>${esc(c.nome)}</option>`).join('')}`;
+
+/** Il menu "Vende": il valore lo mette chi lo usa. La riusa la simulazione */
+export const opzioniVenditore = (cfg: MezziBrowser) =>
+  cfg.venditori.map((v) => `<option value="${esc(v.codice)}">${esc(v.ragioneSociale)}</option>`).join('');
+
 function rendiRighe() {
   const cfg = config();
   if (!cfg) return;
-  const categorie = (scelta: string) =>
-    `<option value="" ${scelta ? '' : 'selected'}>Scegli</option>${cfg.categorie
-      .map((c) => `<option value="${esc(c.nome)}" ${c.nome === scelta ? 'selected' : ''}>${esc(c.nome)}</option>`).join('')}`;
+  const categorie = (scelta: string) => opzioniCategoria(cfg, scelta);
   $('mr-tabella').innerHTML = `
     <div class="mt-scorri"><table class="mt-tabella mt-tabella--righe">
       <thead><tr><th>#</th><th>Bene</th><th>Categoria</th><th>È targato?</th><th class="num">Quantità</th><th class="num">Prezzo unitario</th><th class="num">Totale</th><th></th></tr></thead>
@@ -184,7 +201,7 @@ function rendiRighe() {
           <td><input type="text" class="mt-input mt-input--testo mt-input--desc" data-campo="descrizione" data-i="${i}" maxlength="200"
             value="${esc(r.descrizione)}" placeholder="Marca e modello" aria-label="Descrizione, riga ${i + 1}" autocomplete="off" /></td>
           <td><select class="mt-input mt-input--testo mt-input--cat" data-campo="categoria" data-i="${i}" aria-label="Categoria, riga ${i + 1}">${categorie(r.categoria)}</select></td>
-          <td><select class="mt-input mt-input--testo mt-input--targa" data-campo="targato" data-i="${i}" aria-label="Il mezzo è targato? Riga ${i + 1}">${opzioniTargato(r)}</select></td>
+          <td><select class="mt-input mt-input--testo mt-input--targa" data-campo="targato" data-i="${i}" aria-label="Il mezzo è targato? Riga ${i + 1}">${opzioniTargato(cfg.categorie, r)}</select></td>
           <td class="num"><input type="text" class="mt-input mt-input--q" data-campo="quantita" data-i="${i}" inputmode="numeric"
             value="${esc(r.quantita)}" aria-label="Quantità, riga ${i + 1}" autocomplete="off" /></td>
           <td class="num"><input type="text" class="mt-input mt-input--p" data-campo="prezzo" data-i="${i}" inputmode="decimal"
@@ -214,7 +231,12 @@ function testoErrore(riga: number | null, errore: string): string {
 
 /** L'errore sotto le righe, e la casella giusta segnata */
 function mostraErrore(riga: number | null, errore: string) {
+  erroreAttuale = { riga, errore };
   messaggio($('mr-msg'), testoErrore(riga, errore), false);
+  segnaCasella(riga, errore);
+}
+
+function segnaCasella(riga: number | null, errore: string) {
   const campo = campoDiErrore(errore);
   const casella = riga != null && campo
     ? document.querySelector(`#mr-tabella [data-campo="${campo}"][data-i="${riga}"]`)
@@ -227,6 +249,7 @@ function mostraErrore(riga: number | null, errore: string) {
 }
 
 function pulisciErrori() {
+  erroreAttuale = null;
   messaggio($('mr-msg'), '', false);
   for (const el of document.querySelectorAll('#mezzi-righe [aria-invalid]')) el.removeAttribute('aria-invalid');
 }
@@ -237,6 +260,7 @@ function pulisciErrori() {
 function azzera() {
   ultimoEsito = null;
   ultimoCorpo = null;
+  ultimiIndici = [];
   stato.proposta = null;
 }
 
@@ -276,21 +300,23 @@ async function calcola() {
     return rendiAzioni();
   }
 
-  // Lo stesso controllo del server, prima di mandargli la richiesta
+  // Lo stesso controllo del server, prima di mandargli la richiesta. Le righe appena
+  // aggiunte e mai toccate restano fuori: niente conto e niente rimprovero per loro
   const ricercaId = stato.ricerca.id;
-  const prova = validaBeni(cfg.categorie, corpoProposte(stato.slug, ricercaId, righe, venditore, 0).beni);
+  const { righe: daMandare, indici } = righeDaMandare(righe);
+  const prova = validaBeni(cfg.categorie, corpoProposte(stato.slug, ricercaId, daMandare, venditore, 0).beni);
   const anticipo = leggiAnticipo(anticipoTesto);
   if (!prova.ok || anticipo === null) {
     turno.nuovo();
     fine();
     azzera();
     box.innerHTML = '';
-    if (!prova.ok) mostraErrore(prova.riga, prova.error);
+    if (!prova.ok) mostraErrore(rigaASchermo(indici, prova.riga), prova.error);
     else mostraErrore(null, 'anticipo_non_valido');
     return rendiAzioni();
   }
 
-  const corpo = corpoProposte(stato.slug, ricercaId, righe, venditore, anticipo);
+  const corpo = corpoProposte(stato.slug, ricercaId, daMandare, venditore, anticipo);
   const mio = turno.nuovo();
   box.classList.add('mt-in-attesa');
   const risposta = await apiJsonSicura('/api/motore/proposte', { method: 'POST', body: JSON.stringify(corpo) });
@@ -301,12 +327,13 @@ async function calcola() {
   if (!risposta || !risposta.res.ok || !r?.ok) {
     azzera();
     box.innerHTML = '';
-    mostraErrore(risposta ? r?.riga ?? null : null, risposta ? r?.error ?? '' : 'connessione_assente');
+    mostraErrore(risposta ? rigaASchermo(indici, r?.riga) : null, risposta ? r?.error ?? '' : 'connessione_assente');
     return rendiAzioni();
   }
   const { ok: _ok, ...schermo } = r;
   ultimoEsito = schermo as MezziSchermo;
   ultimoCorpo = corpo;
+  ultimiIndici = indici;
   stato.proposta = { input: corpo, esito: schermo };
   rendiEsito();
   rendiAzioni();
@@ -387,7 +414,9 @@ async function scaricaPreventivo(btn: HTMLButtonElement) {
   // Il preventivo riparte dal corpo che ha prodotto i numeri a schermo: sono quelli che l'agente guarda
   const schermo = ultimoEsito;
   const corpo = ultimoCorpo;
-  if (!schermo || !corpo) return;
+  const indici = ultimiIndici;
+  const ricercaId = stato.ricerca?.id;
+  if (!schermo || !corpo || !ricercaId) return;
   const chiave = chiaveNelPdf();
   const esitoBox = $('mz-esito');
   esitoBox.innerHTML = '';
@@ -406,17 +435,23 @@ async function scaricaPreventivo(btn: HTMLButtonElement) {
     ultimiBottoni = '';
     rendiAzioni();
   }
+  // Nel frattempo l'agente ha verificato un altro cliente: il preventivo e' salvato (lo
+  // Storico lo mostra), ma non e' di questo cliente e la pratica non deve partire da li'
+  if (stato.ricerca?.id !== ricercaId) {
+    void caricaStorico();
+    return;
+  }
   if (!risposta) {
     esitoBox.innerHTML = `<p class="mt-msg mt-msg--errore">${esc(traduci('connessione_assente'))}</p>`;
     return;
   }
   const { res, corpo: r } = risposta;
   if (!res.ok || !r?.ok) {
-    esitoBox.innerHTML = `<p class="mt-msg mt-msg--errore">${esc(testoErrore(r?.riga ?? null, r?.error ?? ''))}</p>`;
+    esitoBox.innerHTML = `<p class="mt-msg mt-msg--errore">${esc(testoErrore(rigaASchermo(indici, r?.riga), r?.error ?? ''))}</p>`;
     return;
   }
   stato.ultimoPreventivo = r.id;
-  stato.mezziPreventivo = { id: r.id, schermo, chiaveLeasing: chiave };
+  stato.mezziPreventivo = { id: r.id, ricercaId, schermo, chiaveLeasing: chiave };
   const docs = (r.documenti ?? []) as { nome: string; pathname: string }[];
   esitoBox.innerHTML = `
     <div class="mt-card" style="margin-top:16px">
@@ -485,8 +520,7 @@ export function montaProposteMezzi() {
     </div>
     <div class="mt-griglia" style="margin-top:24px">
       <label class="mt-campo"><span>Vende</span>
-        <select id="mr-venditore" class="mt-input">${cfg.venditori
-          .map((v) => `<option value="${esc(v.codice)}">${esc(v.ragioneSociale)}</option>`).join('')}</select>
+        <select id="mr-venditore" class="mt-input">${opzioniVenditore(cfg)}</select>
         <small>La società che firma l'offerta. Segue la categoria del primo bene finché non la cambi.</small></label>
       <label class="mt-campo"><span>Anticipo del leasing, %</span>
         <input type="text" id="mr-anticipo" class="mt-input" inputmode="numeric" maxlength="3" autocomplete="off" />
@@ -530,12 +564,12 @@ export function montaProposteMezzi() {
       r.targato = targatoIniziale(cfg.categorie, r.categoria);
       const menu = righeBox.querySelector<HTMLSelectElement>(`[data-campo="targato"][data-i="${i}"]`);
       if (menu) {
-        menu.innerHTML = opzioniTargato(r);
+        menu.innerHTML = opzioniTargato(cfg.categorie, r);
         menu.removeAttribute('aria-invalid');
       }
       if (i === 0) suggerisciVenditore();
     } else if (t.dataset.campo === 'targato') {
-      r.targato = t.value === 'si' ? true : t.value === 'no' ? false : null;
+      r.targato = targatoDaMenu(t.value);
     } else return;
     t.removeAttribute('aria-invalid');
     dopoCambio(0);
@@ -543,10 +577,13 @@ export function montaProposteMezzi() {
   righeBox.addEventListener('click', (e) => {
     const t = e.target as HTMLElement;
     if (t.id === 'mr-aggiungi') {
+      // Il bene nuovo e' ancora da scrivere: resta fuori dal conto, quindi niente
+      // richiesta e niente rimprovero finche' l'agente non ci scrive
       righe.push(rigaNuova());
       rendiRighe();
+      if (erroreAttuale) segnaCasella(erroreAttuale.riga, erroreAttuale.errore);
       document.querySelector<HTMLInputElement>(`#mr-tabella [data-campo="descrizione"][data-i="${righe.length - 1}"]`)?.focus();
-      return dopoCambio();
+      return;
     }
     const togli = t.closest('[data-togli-bene]') as HTMLElement | null;
     if (!togli) return;

@@ -2,10 +2,12 @@
 // Alberto il 21/10/2026 con Maurizio Palumbo: il commerciale scrive l'importo e vede i
 // canoni a 24, 36, 48 e 60 mesi senza verificare il cliente, e dal tablet scarica il
 // preventivo del canone da dare subito. Il conto lo fa il server
-// (/api/motore/simulazione): qui non c'e' nessun coefficiente.
+// (/api/motore/simulazione): qui non c'e' nessun coefficiente. Sul settore mezzi la
+// scheda e' quella di simulazione-mezzi.ts.
 
 import { $, apiJsonSicura, esc, euro, messaggio, stato, traduci } from './comune';
 import { leggiNumero } from './distinta-browser';
+import { montaSimulazioneMezzi } from './simulazione-mezzi';
 import { bottoneDoc, caricaStorico } from './storico';
 
 /** Pausa fra l'ultima cifra scritta e il conto */
@@ -114,8 +116,9 @@ async function scaricaPreventivo(btn: HTMLButtonElement) {
 
 export function montaSimulazione() {
   const box = document.getElementById('simulazione');
-  // Sui mezzi la simulazione chiede anche categoria e targa: questa, del solo importo, non vale
-  if (!box || stato.settore === 'mezzi') return;
+  if (!box) return;
+  // Sui mezzi la simulazione chiede anche categoria, targa e chi vende: e' un'altra scheda
+  if (stato.settore === 'mezzi') return montaSimulazioneMezzi();
   box.innerHTML = `
     <div class="mt-griglia">
       <label class="mt-campo"><span>Importo della fornitura, IVA esclusa</span>

@@ -9,17 +9,31 @@ import { ANTICIPO_MAX_MEZZI, type MezziBrowser } from '../../lib/motore/config-m
 import { stato, traduci } from './comune';
 import {
   campoDiErrore,
+  campoSimulazione,
+  checklistPraticaMezzi,
   chiavePdf,
   colonneConRighe,
+  corpoPraticaMezzi,
   corpoProposte,
+  corpoSimulazione,
   durateLeasing,
   etichettaColonna,
   leggiAnticipo,
   messaggioRiga,
+  messaggioSimulazione,
+  provaSimulazione,
+  rigaASchermo,
+  rigaIntatta,
+  righeDaMandare,
   rigaVuota,
+  sceltePratica,
+  targatoDaMenu,
   targatoIniziale,
   venditoreSuggerito,
+  VOCE_BILANCIO_ANALITICO,
+  type PreventivoPerPratica,
   type RigaInPagina,
+  type SimulazioneInPagina,
 } from './mezzi-browser';
 
 // La configurazione come la vede il browser: quella di Bergamelli (piano, Task 12)
@@ -280,13 +294,292 @@ describe('i messaggi del settore mezzi', () => {
   });
 });
 
+// --- le righe che vanno al server ---------------------------------------------------
+
+const intatta = (): RigaInPagina => ({ descrizione: '', categoria: '', quantita: '1', prezzo: '', targato: null });
+
+describe('rigaIntatta', () => {
+  it('la riga appena aggiunta, anche senza la quantita di partenza', () => {
+    expect(rigaIntatta(intatta())).toBe(true);
+    expect(rigaIntatta({ ...intatta(), quantita: '' })).toBe(true);
+    expect(rigaIntatta({ ...intatta(), descrizione: '  ', prezzo: ' ' })).toBe(true);
+  });
+
+  it('basta toccare un campo, quantita e targato compresi, perche la riga conti', () => {
+    expect(rigaIntatta({ ...intatta(), descrizione: 'Gru' })).toBe(false);
+    expect(rigaIntatta({ ...intatta(), categoria: 'Autogru', targato: true })).toBe(false);
+    expect(rigaIntatta({ ...intatta(), prezzo: '100' })).toBe(false);
+    expect(rigaIntatta({ ...intatta(), quantita: '3' })).toBe(false);
+    expect(rigaIntatta({ ...intatta(), targato: false })).toBe(false);
+  });
+});
+
+describe('righeDaMandare e rigaASchermo', () => {
+  it('la riga appena aggiunta resta fuori: il conto e quello di prima, senza errori', () => {
+    const { righe, indici } = righeDaMandare([riga(), intatta()]);
+    expect(righe).toEqual([riga()]);
+    expect(indici).toEqual([0]);
+    expect(validaBeni(CFG.categorie, corpoProposte('b', 'r', righe, 'manc', 10).beni).ok).toBe(true);
+  });
+
+  it('la prima riga va sempre, anche intatta: il server dice che manca la descrizione', () => {
+    expect(righeDaMandare([intatta()]).righe).toEqual([intatta()]);
+    const { righe, indici } = righeDaMandare([intatta(), riga()]);
+    expect(indici).toEqual([0, 1]);
+    expect(righe).toHaveLength(2);
+  });
+
+  it("l'errore del server torna sulla riga a schermo, saltando quelle rimaste fuori", () => {
+    const aSchermo = [riga(), intatta(), riga({ prezzo: '61.000' }), intatta()];
+    const { righe, indici } = righeDaMandare(aSchermo);
+    expect(indici).toEqual([0, 2]);
+    const v = validaBeni(CFG.categorie, corpoProposte('b', 'r', righe, 'manc', 10).beni);
+    expect(v).toEqual({ ok: false, error: 'prezzo_non_valido', riga: 1 });
+    expect(rigaASchermo(indici, v.ok ? null : v.riga)).toBe(2);
+  });
+
+  it('un errore senza riga resta senza riga, e un indice che non esiste non si inventa', () => {
+    expect(rigaASchermo([0, 2], null)).toBeNull();
+    expect(rigaASchermo([0, 2], undefined)).toBeNull();
+    expect(rigaASchermo([0, 2], 5)).toBeNull();
+  });
+});
+
+// --- la simulazione ------------------------------------------------------------------
+
+const sim = (s: Partial<SimulazioneInPagina> = {}): SimulazioneInPagina => ({
+  importo: '48.500,00', categoria: 'Gru a torre', targato: false, venditore: 'manc', ...s,
+});
+
+describe('provaSimulazione', () => {
+  it('senza importo o senza categoria non si chiede niente e non si rimprovera niente', () => {
+    expect(provaSimulazione(CFG.categorie, sim({ importo: '' }))).toBe('incompleta');
+    expect(provaSimulazione(CFG.categorie, sim({ importo: '   ' }))).toBe('incompleta');
+    expect(provaSimulazione(CFG.categorie, sim({ categoria: '' }))).toBe('incompleta');
+  });
+
+  it('un importo che il server non legge, o oltre il tetto, e importo_non_valido', () => {
+    expect(provaSimulazione(CFG.categorie, sim({ importo: '61.000' }))).toBe('importo_non_valido');
+    expect(provaSimulazione(CFG.categorie, sim({ importo: 'tanti' }))).toBe('importo_non_valido');
+    expect(provaSimulazione(CFG.categorie, sim({ importo: '0' }))).toBe('importo_non_valido');
+    expect(provaSimulazione(CFG.categorie, sim({ importo: '99999999' }))).toBe('importo_non_valido');
+  });
+
+  it('movimento terra senza risposta sul targato si ferma: mai "non targato"', () => {
+    expect(provaSimulazione(CFG.categorie, sim({ categoria: 'Movimento terra', targato: null }))).toBe('targato_mancante');
+    expect(provaSimulazione(CFG.categorie, sim({ categoria: 'Movimento terra', targato: true }))).toBe('pronta');
+  });
+
+  it('una categoria che non e del fornitore si segna', () => {
+    expect(provaSimulazione(CFG.categorie, sim({ categoria: 'Elicotteri' }))).toBe('categoria_non_valida');
+  });
+
+  it('importo e categoria a posto: si chiede il conto', () => {
+    expect(provaSimulazione(CFG.categorie, sim())).toBe('pronta');
+    expect(provaSimulazione(CFG.categorie, sim({ importo: '61000' }))).toBe('pronta');
+  });
+});
+
+describe('corpoSimulazione', () => {
+  it("l'importo com'e scritto, il targato true, false o null, chi vende", () => {
+    expect(corpoSimulazione('bergamelli', sim())).toEqual({
+      f: 'bergamelli', importo: '48.500,00', categoria: 'Gru a torre', targato: false, venditore: 'manc',
+    });
+    expect(corpoSimulazione('b', sim({ categoria: 'Movimento terra', targato: null })).targato).toBeNull();
+    expect(corpoSimulazione('b', sim({ categoria: 'Autogru', targato: true })).targato).toBe(true);
+  });
+
+  it('niente anticipo, niente documento: la simulazione non salva', () => {
+    expect(Object.keys(corpoSimulazione('b', sim())).sort()).toEqual(['categoria', 'f', 'importo', 'targato', 'venditore']);
+  });
+});
+
+describe('targatoDaMenu', () => {
+  it('Sì e No sono booleani, "Da indicare" e tutto il resto null', () => {
+    expect(targatoDaMenu('si')).toBe(true);
+    expect(targatoDaMenu('no')).toBe(false);
+    expect(targatoDaMenu('')).toBeNull();
+    expect(targatoDaMenu('forse')).toBeNull();
+  });
+});
+
+describe('campoSimulazione e messaggioSimulazione', () => {
+  it('ogni errore segna la sua casella', () => {
+    expect(campoSimulazione('importo_non_valido')).toBe('importo');
+    expect(campoSimulazione('categoria_non_valida')).toBe('categoria');
+    expect(campoSimulazione('targato_mancante')).toBe('targato');
+    expect(campoSimulazione('venditore_non_valido')).toBe('venditore');
+    expect(campoSimulazione('calcolo_non_riuscito')).toBeNull();
+  });
+
+  it('"61.000" dice come scriverlo, gli altri errori restano quelli di sempre', () => {
+    expect(messaggioSimulazione('importo_non_valido', sim({ importo: '61.000' })))
+      .toBe('Scrivi 61000 oppure 61.000,00: con il solo punto non si capisce se sono migliaia o decimali.');
+    expect(messaggioSimulazione('importo_non_valido', sim({ importo: '0' }))).toBeNull();
+    expect(messaggioSimulazione('targato_mancante', sim({ importo: '61.000' }))).toBeNull();
+  });
+});
+
+// --- la pratica ------------------------------------------------------------------------
+
+const preventivo = (p: Partial<PreventivoPerPratica> = {}): PreventivoPerPratica => ({
+  id: 'EB-20261023-0001',
+  ricercaId: 'r-1',
+  chiaveLeasing: 'B',
+  schermo: {
+    totale: 48_500,
+    noleggio: { rate: [24, 36, 48, 60].map((durata) => ({ durata })), durataEvidenza: 60 },
+    leasing: [
+      { chiave: 'A', nome: null, righe: [] },
+      { chiave: 'B', nome: null, righe: [36, 48, 60, 72, 84].map((durata) => ({ durata })) },
+      { chiave: 'C', nome: null, righe: [36, 48].map((durata) => ({ durata })) },
+    ],
+  },
+  ...p,
+});
+
+describe('sceltePratica', () => {
+  it('senza preventivo, o col preventivo di un altro cliente, la pratica non parte', () => {
+    expect(sceltePratica(null, 'r-1')).toBeNull();
+    expect(sceltePratica(preventivo(), null)).toBeNull();
+    expect(sceltePratica(preventivo(), 'r-2')).toBeNull();
+  });
+
+  it("importo e preventivo vengono dal preventivo salvato: l'importo non si scrive", () => {
+    const s = sceltePratica(preventivo(), 'r-1')!;
+    expect(s.propostaId).toBe('EB-20261023-0001');
+    expect(s.ricercaId).toBe('r-1');
+    expect(s.importo).toBe(48_500);
+  });
+
+  it('il noleggio offre le sue durate e parte dalla durata in evidenza', () => {
+    const s = sceltePratica(preventivo(), 'r-1')!;
+    expect(s.noleggio).toEqual({ durate: [24, 36, 48, 60], durata: 60 });
+    expect(s.prodotto).toBe('noleggio');
+  });
+
+  it("senza durata in evidenza il noleggio parte dall'ultima", () => {
+    const p = preventivo();
+    p.schermo.noleggio = { rate: [36, 48].map((durata) => ({ durata })), durataEvidenza: null };
+    expect(sceltePratica(p, 'r-1')!.noleggio).toEqual({ durate: [36, 48], durata: 48 });
+  });
+
+  it('il leasing offre solo le colonne che quotano, con le loro durate, a 60 mesi o all ultima', () => {
+    const s = sceltePratica(preventivo(), 'r-1')!;
+    expect(s.leasing).toEqual([
+      { chiave: 'B', etichetta: 'Soluzione B', durate: [36, 48, 60, 72, 84], durata: 60 },
+      { chiave: 'C', etichetta: 'Soluzione C', durate: [36, 48], durata: 48 },
+    ]);
+  });
+
+  it('coi nomi accesi il menu dice il partner', () => {
+    const p = preventivo();
+    p.schermo.leasing[1].nome = 'Credem Leasing';
+    expect(sceltePratica(p, 'r-1')!.leasing[0].etichetta).toBe('Credem Leasing');
+  });
+
+  it('la colonna di partenza e quella del PDF, se quota; se no la prima che quota', () => {
+    expect(sceltePratica(preventivo(), 'r-1')!.colonna).toBe('B');
+    expect(sceltePratica(preventivo({ chiaveLeasing: 'C' }), 'r-1')!.colonna).toBe('C');
+    expect(sceltePratica(preventivo({ chiaveLeasing: 'A' }), 'r-1')!.colonna).toBe('B');
+    expect(sceltePratica(preventivo({ chiaveLeasing: null }), 'r-1')!.colonna).toBe('B');
+  });
+
+  it('senza noleggio (mezzo targato) il prodotto e il leasing', () => {
+    const p = preventivo();
+    p.schermo.noleggio = null;
+    const s = sceltePratica(p, 'r-1')!;
+    expect(s.noleggio).toBeNull();
+    expect(s.prodotto).toBe('leasing');
+  });
+
+  it('senza leasing che quota resta il noleggio', () => {
+    const p = preventivo({ chiaveLeasing: null });
+    p.schermo.leasing = [{ chiave: 'A', nome: null, righe: [] }];
+    const s = sceltePratica(p, 'r-1')!;
+    expect(s.leasing).toEqual([]);
+    expect(s.colonna).toBeNull();
+    expect(s.prodotto).toBe('noleggio');
+  });
+
+  it('un preventivo che non quota niente non apre una pratica', () => {
+    const p = preventivo();
+    p.schermo.noleggio = null;
+    p.schermo.leasing = [];
+    expect(sceltePratica(p, 'r-1')).toBeNull();
+  });
+});
+
+describe('checklistPraticaMezzi', () => {
+  it('sul leasing, in coda, il bilancio analitico; sul noleggio no', () => {
+    const noleggio = checklistPraticaMezzi('Società di capitali', 48_500, ['Offerta del venditore'], 'noleggio');
+    const leasing = checklistPraticaMezzi('Società di capitali', 48_500, ['Offerta del venditore'], 'leasing');
+    expect(noleggio).not.toContain(VOCE_BILANCIO_ANALITICO);
+    expect(leasing).toEqual([...noleggio, VOCE_BILANCIO_ANALITICO]);
+  });
+
+  it('e la stessa lista che arriva a MCF con la pratica', async () => {
+    const { checklistPratica } = await import('../../lib/motore/pratica');
+    const extra = (prodotto: string) => ({
+      venditore: 'MANC SRL', partner: null, rivalutare: false,
+      checklistExtra: prodotto === 'leasing' ? [VOCE_BILANCIO_ANALITICO] : [],
+    });
+    for (const [forma, importo] of [['Ditta individuale', 8_000], ['Società di capitali', 48_500]] as const) {
+      for (const prodotto of ['noleggio', 'leasing']) {
+        expect(checklistPraticaMezzi(forma, importo, ['Offerta del venditore'], prodotto))
+          .toEqual(checklistPratica(forma, importo, extra(prodotto), ['Offerta del venditore']));
+      }
+    }
+  });
+
+  it('la voce del bilancio analitico e parola per parola quella del server', async () => {
+    const server = await import('../../lib/motore/pratica-mezzi');
+    expect(VOCE_BILANCIO_ANALITICO).toBe(server.VOCE_BILANCIO_ANALITICO);
+  });
+});
+
+describe('corpoPraticaMezzi', () => {
+  const campi = {
+    f: 'bergamelli', ricercaId: 'r-1', bozza: 'b-1', formaGiuridica: 'Società di capitali',
+    referente: { nome: 'Mario Rossi', telefono: '3331234567', email: 'm@x.it' },
+    iban: 'IT60X0542811101000000123456', note: '', documenti: [],
+  };
+
+  it('il preventivo e la colonna del leasing; nessun importo, lo rilegge il server', () => {
+    const c = corpoPraticaMezzi(campi, 'EB-1', 'leasing', 60, 'B');
+    expect(c).toEqual({ ...campi, propostaId: 'EB-1', prodotto: 'leasing', durata: 60, leasingChiave: 'B' });
+    expect(c).not.toHaveProperty('importo');
+  });
+
+  it('sul noleggio la colonna non va', () => {
+    const c = corpoPraticaMezzi(campi, 'EB-1', 'noleggio', 48, 'B');
+    expect(c).toEqual({ ...campi, propostaId: 'EB-1', prodotto: 'noleggio', durata: 48 });
+    expect(c).not.toHaveProperty('leasingChiave');
+  });
+});
+
+describe('i messaggi della pratica dei mezzi', () => {
+  it('ogni rifiuto del server ha un testo per l agente', () => {
+    const prima = stato.settore;
+    try {
+      stato.settore = 'mezzi';
+      expect(traduci('preventivo_mancante')).toBe('Scarica prima il preventivo nella scheda Proposte: la pratica parte da lì.');
+      for (const codice of ['preventivo_non_trovato', 'prodotto_non_valido', 'partner_non_valido', 'durata_non_valida']) {
+        expect(traduci(codice), codice).not.toBe('Qualcosa non ha funzionato. Riprova.');
+      }
+    } finally {
+      stato.settore = prima;
+    }
+  });
+});
+
 // --- quello che il browser importa ------------------------------------------------
 
 describe('import nei file del browser', () => {
   // config-mezzi porta gli spread, gli altri moduli i listini e il database: dal
   // browser se ne importano solo i tipi, altrimenti finiscono nel bundle degli agenti
-  const RISERVATI = ['config-mezzi', 'calcolo-mezzi', 'preventivo-mezzi', 'leasing-confronto', 'pratica-mezzi', 'instradamento'];
-  for (const file of ['./mezzi-browser.ts', './proposte-mezzi.ts']) {
+  const RISERVATI = ['config-mezzi', 'calcolo-mezzi', 'preventivo-mezzi', 'leasing-confronto', 'pratica-mezzi', 'instradamento', 'pratica'];
+  for (const file of ['./mezzi-browser.ts', './proposte-mezzi.ts', './simulazione-mezzi.ts', './simulazione.ts', './pratiche.ts']) {
     it(`${file} importa solo tipi dai moduli del server`, () => {
       const sorgente = readFileSync(new URL(file, import.meta.url), 'utf8');
       const importazioni = [...sorgente.matchAll(/^import\s+(type\s+)?[^;]*?from\s+'([^']+)'/gms)];
