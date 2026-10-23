@@ -120,7 +120,7 @@ export interface RigaCarrozzeria {
   societa_fornitrice?: unknown;
   checklist?: unknown;
   categorie?: unknown;
-  // Come le quattro sopra, dallo SQL 012: la SELECT nomina c.mezzi, quindi lo SQL va
+  // Come le quattro sopra, dallo SQL 013: la SELECT nomina c.mezzi, quindi lo SQL va
   // applicato PRIMA di pubblicare questo codice
   mezzi?: unknown;
 }

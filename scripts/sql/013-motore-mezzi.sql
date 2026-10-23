@@ -11,6 +11,10 @@
 -- mezzi: Led Office, Duplex, Fas Italia e il demo non cambiano. Il settore non ha un
 -- check (008 lo lascia libero): 'mezzi' non chiede altro.
 --
+-- Numerata 013 perche' lo 012 e' quello degli stati "inserita" della pratica
+-- (22/10/2026, gia' in produzione). Le due non si toccano: lo 012 cambia il check di
+-- app.pratica, questa aggiunge una colonna ad app.carrozzeria.
+--
 -- Va applicata PRIMA di pubblicare il codice: la SELECT di carrozzeria.ts nomina la
 -- colonna per tutti i fornitori del motore, e senza di lei la query fallisce.
 -- Idempotente: rilanciare il file non fa danni.
