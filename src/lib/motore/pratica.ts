@@ -117,6 +117,32 @@ export async function negativitaAllInvio(e: Sessione, piva: string) {
   }
 }
 
+/**
+ * Quello che una pratica porta in piu' sul settore mezzi (pratica-mezzi.ts): il venditore
+ * che firma l'offerta, il partner del leasing scelto (il suo nome, solo per MCF), se il
+ * semaforo e' rosso e le voci di checklist in piu'. Senza `extra` la pratica e' quella di
+ * sempre, parola per parola.
+ */
+export interface ExtraPratica {
+  venditore: string;
+  /** Il nome del partner del leasing; null sul noleggio */
+  partner: string | null;
+  /** Semaforo rosso: la pratica parte lo stesso, MCF la deve rivalutare */
+  rivalutare: boolean;
+  /** Voci di checklist in coda a quelle della forma giuridica e dell'importo */
+  checklistExtra: string[];
+}
+
+/** La checklist di una pratica: quella di forma e importo, piu' le voci dell'extra */
+export function checklistPratica(
+  forma: string,
+  importo: number,
+  extra: ExtraPratica | null | undefined,
+  documentiExtra: string[],
+): string[] {
+  return [...buildChecklist(forma, importo, documentiExtra), ...(extra?.checklistExtra ?? [])];
+}
+
 export interface InputPratica {
   ricerca: RicercaSalvata;
   propostaId: string | null;
@@ -130,11 +156,13 @@ export interface InputPratica {
   iban: string;
   note: string;
   documenti: DocumentoPratica[];
+  /** Solo il settore mezzi: venditore, partner, rosso da rivalutare, voci di checklist */
+  extra?: ExtraPratica;
 }
 
 export async function creaPratica(e: Sessione, p: InputPratica): Promise<string> {
   const { contesto, carrozzeria } = e;
-  const checklist = buildChecklist(p.formaGiuridica, p.importo, carrozzeria.documentiExtra);
+  const checklist = checklistPratica(p.formaGiuridica, p.importo, p.extra, carrozzeria.documentiExtra);
   const negativita = await negativitaAllInvio(e, codiceVerifica(p.ricerca));
   const adesso = new Date().toISOString();
   const dati = {
@@ -146,6 +174,7 @@ export async function creaPratica(e: Sessione, p: InputPratica): Promise<string>
     note: p.note,
     checklist,
     bozza: p.bozza,
+    ...(p.extra ? { extra: p.extra } : {}),
   };
   const storia = [{ a: 'ricevuta', chi: contesto.nome || contesto.email, quando: adesso }];
 
@@ -185,9 +214,10 @@ async function mailPratica(e: Sessione, id: string, p: InputPratica, checklist: 
     ? 'gia\' in registro, esito nel pannello'
     : negativita.id ? 'avviata, l\'esito arriva nel pannello' : `non avviata (${negativita.saltata}): lanciala da /tools/valutazione`;
   const link = `${BASE_URL}${percorsoPortale(carrozzeria.slug)}`;
+  const x = p.extra;
   return inviaMail({
     to: DESTINATARIO_MCF,
-    subject: `Pratica ${carrozzeria.nome} — ${s.ragioneSociale} — ${euro(p.importo, 0)} euro`,
+    subject: `Pratica ${carrozzeria.nome} — ${s.ragioneSociale} — ${euro(p.importo, 0)} euro${x?.rivalutare ? ' — rosso, da rivalutare' : ''}`,
     html: layoutMail('Nuova pratica dal portale', `
       <p style="font-size:14px;color:#787782;margin:0 0 18px">
         Portale ${escapeHtml(carrozzeria.nome)}${carrozzeria.demo ? ' (dimostrativo)' : ''} — pratica ${escapeHtml(id)}<br>
@@ -200,8 +230,11 @@ async function mailPratica(e: Sessione, id: string, p: InputPratica, checklist: 
         ${riga('Cellulare', p.referente.telefono)}
         ${riga('Email', p.referente.email)}
         ${riga('IBAN', formattaIban(p.iban))}
+        ${x ? riga('Venditore', x.venditore) : ''}
         ${riga('Prodotto', `${p.prodotto === 'leasing' ? 'Leasing finanziario' : 'Noleggio operativo'}, ${p.durata} mesi`)}
+        ${x?.partner ? riga('Partner del leasing', x.partner) : ''}
         ${riga('Importo', `${euro(p.importo, 0)} euro`)}
+        ${x?.rivalutare ? riga('Semaforo', 'rosso, da rivalutare') : ''}
         ${riga('Rating', s.rating ? `${s.rating.classe} (${s.rating.descrizione ?? ''})` : 'non assegnato')}
         ${riga('Eventi negativi', neg)}
         ${riga('Documenti caricati', `${p.documenti.length}`)}

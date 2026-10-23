@@ -22,6 +22,14 @@ export const prerender = false;
 //   { segnalazione?: true, righe?, consegna?, motivazioni?, ledwallConfermato?,
 //     documenti: [{ nome, pathname, size, voce }] }
 // La risposta dice solo { ok, id, segnalazione }: niente canale ne' importi del locatore.
+//
+// Settore mezzi (Bergamelli): tutta la richiesta passa da creaPraticaMezzi. Una pratica
+// parte solo da un preventivo salvato, e importo, venditore e partner del leasing si
+// rileggono da li: dal browser contano solo il prodotto, la durata e, sul leasing, la
+// colonna scelta. Il corpo, in piu' di quello sopra:
+//   { propostaId (obbligatorio), leasingChiave?: 'A' | 'B' | 'C' }
+// La risposta dice solo { ok, id } (o { ok: false, error, messaggio? }): niente partner,
+// venditore ne' semaforo. Il rosso non blocca; MCF lo legge nella mail.
 
 import { controllaDatiCliente } from '../../../lib/dati-cliente-pratica';
 import { queryUna } from '../../../lib/db';
@@ -29,6 +37,7 @@ import { ricercaVisibile } from '../../../lib/motore/calcolo-proposta';
 import { prodottoAmmesso } from '../../../lib/motore/carrozzeria';
 import { creaPratica, documentiDellaBozza, bozzaValida, FORME } from '../../../lib/motore/pratica';
 import { creaPraticaDistinta } from '../../../lib/motore/pratica-distinta';
+import { creaPraticaMezzi } from '../../../lib/motore/pratica-mezzi';
 import { corpoJson, filtroVisibilita, json, sessioneMotore } from '../../../lib/motore/sessione';
 
 const testo = (v: unknown, max = 200) => String(v ?? '').trim().slice(0, max);
@@ -44,6 +53,19 @@ export async function POST({ request }: { request: Request }) {
     try {
       const r = await creaPraticaDistinta(e, corpo);
       if (r.ok) return json({ ok: true, id: r.id, segnalazione: r.segnalazione });
+      const { ok: _ok, status, ...errore } = r;
+      return json({ ok: false, ...errore }, status);
+    } catch (err) {
+      console.error(JSON.stringify({ evento: 'motore_pratica_errore', fornitore: e.carrozzeria.slug, msg: String(err) }));
+      return json({ ok: false, error: 'pratica_non_riuscita' }, 500);
+    }
+  }
+
+  // Settore mezzi: mai il percorso di sempre, che prende l'importo dal browser
+  if (e.carrozzeria.settore === 'mezzi') {
+    try {
+      const r = await creaPraticaMezzi(e, corpo);
+      if (r.ok) return json({ ok: true, id: r.id });
       const { ok: _ok, status, ...errore } = r;
       return json({ ok: false, ...errore }, status);
     } catch (err) {
