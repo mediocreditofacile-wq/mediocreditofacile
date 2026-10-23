@@ -19,6 +19,7 @@
     "seed:motore-fas-italia": "tsx --env-file=.env.local scripts/seed-motore-fas-italia.ts",
     "seed:motore-duplex": "tsx --env-file=.env.local scripts/seed-motore-duplex.ts",
     "seed:motore-led-office": "tsx --env-file=.env.local scripts/seed-motore-led-office.ts",
+    "seed:motore-bergamelli": "tsx --env-file=.env.local scripts/seed-motore-bergamelli.ts",
     "seed:stilo": "tsx --env-file=.env.local scripts/seed-stilo.ts"
   },
   "dependencies": {

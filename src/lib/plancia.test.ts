@@ -26,9 +26,16 @@ describe('plancia', () => {
     expect(v!.password).toBeUndefined();
   });
 
+  it('Bergamelli sta fra i portali pratiche, ad accesso personale, col settore dell indice', () => {
+    const v = sezione('pratiche').voci.find((x) => x.percorso === '/portale/bergamelli');
+    expect(v).toMatchObject({ tipo: 'personale', settore: 'Gru, macchine e mezzi da cantiere' });
+    expect(v!.password).toBeUndefined();
+  });
+
   it('i portali che non stanno nell indice finiscono a parte', () => {
     expect(percorsi('fuori')).toEqual(expect.arrayContaining(['/portale/fas-italia-orby1x', '/tools/edilizia-gierre', '/tools/gruppo-barone', '/tools/datron']));
     expect(percorsi('fuori')).not.toContain('/portale/led-office');
+    expect(percorsi('fuori')).not.toContain('/portale/bergamelli');
   });
 
   it('gli strumenti interni hanno la loro scheda', () => {

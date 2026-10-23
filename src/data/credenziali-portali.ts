@@ -50,6 +50,8 @@ export const CREDENZIALI: AccessoPortale[] = [
     nota: 'Sul motore dei portali. Referenti Leo e Rossano, agenti Stefano e Giovanni Stara (da invitare).' },
   { nome: 'Led Office (Emme 2 Servizi)', percorso: '/portale/led-office', tipo: 'personale',
     nota: 'Sul motore dei portali. Referente Luca Maimone, agente Maurizio Palumbo: da invitare quando lo dice Alberto.' },
+  { nome: 'Enrico Bergamelli (Manc e Nol System)', percorso: '/portale/bergamelli', tipo: 'personale',
+    nota: 'Sul motore dei portali, settore mezzi. Referente Enrico Bergamelli: da invitare da "La tua rete" dopo il seed.' },
   { nome: 'Fas Italia (prototipo)', percorso: '/portale/fas-italia-orby1x', tipo: 'personale',
     nota: 'Proposta per Fas Italia, fuori dall\'indice Portali Clienti. L\'account demo dello stand TTG e\' stato cancellato il 16/10/2026.' },
   { nome: 'Portale dimostrativo', percorso: '/portale/demo-fotovoltaico', tipo: 'personale',

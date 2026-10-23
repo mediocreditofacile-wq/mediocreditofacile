@@ -40,6 +40,7 @@ const FOTOVOLTAICO: Famiglia = { tipo: 'preventivi-fotovoltaico' };
 const PRATICHE: Famiglia = { tipo: 'pratiche' };
 const FAS_ITALIA: Famiglia = { tipo: 'motore', settore: 'generico', leasing: true };
 const DUPLEX: Famiglia = { tipo: 'motore', settore: 'macchine', leasing: false };
+const BERGAMELLI: Famiglia = { tipo: 'motore', settore: 'mezzi', leasing: true };
 
 const dati = (slug: string, ruolo = 'agente', organizzazione = 'Prova Srl') => ({
   invitationId: 'inv-123',
@@ -131,9 +132,47 @@ describe('testoInvito, motore sugli altri settori', () => {
   });
 });
 
+describe('testoInvito, motore sul settore mezzi (Bergamelli)', () => {
+  it('parla delle sue macchine, di noleggio operativo e di leasing', () => {
+    const { subject, html } = testoInvito(dati('bergamelli', 'agente', 'Enrico Bergamelli'), BERGAMELLI, true);
+    const t = leggibile(html);
+    expect(t).toContain(
+      'Alberto Amà ti ha aperto un accesso al portale con cui Enrico Bergamelli prepara i preventivi di noleggio operativo e leasing sulle sue macchine.',
+    );
+    expect(t).not.toMatch(/forniture|fotovoltaic|impiant|prospetti in PDF|kWp/i);
+    expect(subject).toBe('Il tuo accesso al portale Enrico Bergamelli — Mediocredito Facile');
+  });
+
+  it("all'agente descrive il percorso vero: la verifica viene prima delle proposte", () => {
+    const t = leggibile(testoInvito(dati('bergamelli', 'agente', 'Enrico Bergamelli'), BERGAMELLI, true).html);
+    expect(t).toContain('Dalla partita IVA verifichi il cliente, descrivi i mezzi e scarichi il preventivo di noleggio');
+    expect(t).toContain('il prospetto di leasing da consegnare');
+    expect(t).toContain('Quando il cliente accetta, carichi la pratica con i suoi documenti');
+    // Su Duplex il preventivo si scarica anche prima di verificare: sui mezzi no
+    expect(t).not.toContain('anche prima di verificare il cliente');
+  });
+
+  it('il leasing segue la carrozzeria: spento, la parola non compare', () => {
+    const senza: Famiglia = { tipo: 'motore', settore: 'mezzi', leasing: false };
+    const t = leggibile(testoInvito(dati('bergamelli', 'agente', 'Enrico Bergamelli'), senza, true).html);
+    expect(t).toContain('prepara i preventivi di noleggio operativo sulle sue macchine.');
+    expect(t).not.toMatch(/leasing/i);
+  });
+
+  it('al referente parla della rete', () => {
+    const t = leggibile(testoInvito(dati('bergamelli', 'referente', 'Enrico Bergamelli'), BERGAMELLI, true).html);
+    expect(t).toContain('Da lì prepari preventivi e pratiche, vedi quelli di tutta la tua rete e apri gli accessi personali dei tuoi agenti');
+    expect(t).toContain('rispondi a questa email');
+  });
+
+  it('porta la sola guida al noleggio', () => {
+    expect(guideInvito(BERGAMELLI)).toEqual(['noleggio']);
+  });
+});
+
 describe('testoInvito, regole comuni', () => {
   it("nessuna famiglia scrive l'accento con l'apostrofo", () => {
-    for (const f of [FOTOVOLTAICO, PRATICHE, FAS_ITALIA, DUPLEX]) {
+    for (const f of [FOTOVOLTAICO, PRATICHE, FAS_ITALIA, DUPLEX, BERGAMELLI]) {
       for (const ruolo of ['agente', 'referente']) {
         const t = leggibile(testoInvito(dati('x', ruolo), f, true).html);
         expect(t).not.toMatch(/\b(e|li|la|perche|cosi)'(\s|$)/);
@@ -183,6 +222,8 @@ describe('famigliaInvito', () => {
     expect(await famigliaInvito('fas-italia-orby1x')).toEqual(FAS_ITALIA);
     carrozzeria = { settore: 'macchine', leasing: false };
     expect(await famigliaInvito('duplex')).toEqual(DUPLEX);
+    carrozzeria = { settore: 'mezzi', leasing: true };
+    expect(await famigliaInvito('bergamelli')).toEqual(BERGAMELLI);
   });
 
   it('una carrozzeria che non porta il campo leasing ha il leasing acceso', async () => {
@@ -218,6 +259,17 @@ describe('mailInvito', () => {
     expect(inviate[0].to).toBe('agente@example.invalid');
     expect(inviate[0].allegati?.map((a) => a.filename)).toEqual(['noleggio.pdf']);
     expect(leggibile(inviate[0].html)).toContain('sulle sue macchine');
+  });
+
+  it('a Bergamelli manda il testo delle macchine e del leasing con la sola guida al noleggio', async () => {
+    carrozzeria = { settore: 'mezzi', leasing: true };
+    const esito = await mailInvito(opts('bergamelli', 'Enrico Bergamelli'));
+    expect(esito.ok).toBe(true);
+    expect(tipiChiesti).toEqual(['noleggio']);
+    expect(inviate[0].allegati?.map((a) => a.filename)).toEqual(['noleggio.pdf']);
+    const t = leggibile(inviate[0].html);
+    expect(t).toContain('sulle sue macchine');
+    expect(t).toContain('noleggio operativo e leasing');
   });
 
   it('a Green-Go manda le due guide', async () => {

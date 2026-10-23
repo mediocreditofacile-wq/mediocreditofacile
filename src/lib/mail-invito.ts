@@ -9,9 +9,9 @@
 //  - preventivi fotovoltaico: Green-Go e le carrozzerie del motore sul settore
 //    fotovoltaico, dove si preparano i prospetti dell'impianto;
 //  - motore: le carrozzerie del motore sugli altri settori (Fas Italia sul
-//    generico, Duplex sulle macchine). Li' si verifica il cliente, si scarica il
-//    preventivo e si carica la pratica; di impianti non si parla, e il leasing
-//    si nomina solo se la carrozzeria ce l'ha acceso.
+//    generico, Duplex sulle macchine, Bergamelli sui mezzi). Li' si verifica il
+//    cliente, si scarica il preventivo e si carica la pratica; di impianti non si
+//    parla, e il leasing si nomina solo se la carrozzeria ce l'ha acceso.
 // La famiglia la decide famigliaInvito() dal registro e dal database; il testo
 // lo scrive testoInvito(), che e' pura e si prova senza mandare niente.
 
@@ -93,21 +93,31 @@ export function testoInvito(
        come si fattura o quali documenti servono, sono lì.`;
   } else {
     const prodotto = famiglia.leasing ? 'noleggio operativo e leasing' : 'noleggio operativo';
-    const macchine = famiglia.settore === 'macchine';
+    const mezzi = famiglia.settore === 'mezzi';
+    // Gru, escavatori e carrelli si raccontano come macchine, come per Duplex
+    const macchine = famiglia.settore === 'macchine' || mezzi;
+    const daConsegnare = famiglia.leasing
+      ? "il preventivo di noleggio, quando c'è, e il prospetto di leasing"
+      : 'il preventivo di noleggio';
     apertura = `${invitante} ti ha aperto un accesso al portale con cui ${org} prepara i
        preventivi di ${prodotto} ${macchine ? 'sulle sue macchine' : 'sulle sue forniture'}.`;
     cosaPuoiFare = referente
       ? `Da lì prepari preventivi e pratiche, vedi quelli di tutta la tua rete e apri gli accessi
          personali dei tuoi agenti: ognuno riceve un invito come questo e sceglie la propria password,
          senza credenziali da girare a voce.`
-      : macchine
-        // Duplex si apre sulle proposte: la verifica viene quando la trattativa si fa seria
-        ? `Scegli la macchina e la durata e scarichi il preventivo in PDF da consegnare, anche prima di
-           verificare il cliente. Quando la trattativa si fa seria verifichi la partita IVA del cliente,
-           e quando accetta carichi la pratica con i suoi documenti, senza passare da noi per ogni richiesta.`
-        : `Dalla partita IVA verifichi il cliente, scegli la fornitura e la durata e scarichi il
-           preventivo in PDF da consegnare. Quando il cliente accetta, carichi la pratica con i suoi
-           documenti, senza passare da noi per ogni richiesta.`;
+      : mezzi
+        // Sui mezzi la verifica viene prima delle proposte: i numeri da consegnare escono dopo
+        ? `Dalla partita IVA verifichi il cliente, descrivi i mezzi e scarichi ${daConsegnare} da
+           consegnare. Quando il cliente accetta, carichi la pratica con i suoi documenti, senza
+           passare da noi per ogni richiesta.`
+        : macchine
+          // Duplex si apre sulle proposte: la verifica viene quando la trattativa si fa seria
+          ? `Scegli la macchina e la durata e scarichi il preventivo in PDF da consegnare, anche prima di
+             verificare il cliente. Quando la trattativa si fa seria verifichi la partita IVA del cliente,
+             e quando accetta carichi la pratica con i suoi documenti, senza passare da noi per ogni richiesta.`
+          : `Dalla partita IVA verifichi il cliente, scegli la fornitura e la durata e scarichi il
+             preventivo in PDF da consegnare. Quando il cliente accetta, carichi la pratica con i suoi
+             documenti, senza passare da noi per ogni richiesta.`;
     notaGuide = NOTA_GUIDA_NOLEGGIO;
   }
 

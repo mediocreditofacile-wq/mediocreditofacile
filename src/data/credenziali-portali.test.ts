@@ -9,7 +9,7 @@ const per = (percorso: string) => CREDENZIALI.find((c) => c.percorso === percors
 
 describe('accessi ai portali', () => {
   it('i portali ad accesso personale ci sono tutti, senza password', () => {
-    for (const p of ['/portale/duplex', '/portale/led-office', '/portale/fas-italia-orby1x', '/portale/demo-fotovoltaico', '/tools/green-go', '/tools/stilo']) {
+    for (const p of ['/portale/duplex', '/portale/led-office', '/portale/bergamelli', '/portale/fas-italia-orby1x', '/portale/demo-fotovoltaico', '/tools/green-go', '/tools/stilo']) {
       const c = per(p);
       expect(c, p).toBeDefined();
       expect(c!.tipo, p).toBe('personale');

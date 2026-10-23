@@ -102,6 +102,15 @@ export const PORTALI_PRATICHE: PortaleCard[] = [
     descrizione:
       'Ogni commerciale ha il proprio accesso: verifica la partita IVA e vede subito se il cliente è presentabile, compone la fornitura dal listino Led Office con il prezzo trattato riga per riga, scarica il preventivo del canone e la proposta di vendita, poi carica la pratica con i documenti. Il referente vede tutta la rete.',
   },
+  {
+    // Indice pubblico: mai i nomi dei locatori né dei partner del leasing
+    nome: 'Enrico Bergamelli',
+    href: '/portale/bergamelli',
+    icona: 'precision_manufacturing',
+    settore: 'Gru, macchine e mezzi da cantiere',
+    descrizione:
+      'Ogni agente ha il proprio accesso: verifica la partita IVA del cliente, descrive i mezzi con categoria, prezzo e targa, e vede il noleggio, quando c\'è, accanto al leasing di più società a confronto. Scarica il preventivo di noleggio e il prospetto di leasing da consegnare, poi carica la pratica con i documenti. Il referente vede tutta la rete.',
+  },
 ];
 
 export const AREE_PARTNER: PortaleCard[] = [
