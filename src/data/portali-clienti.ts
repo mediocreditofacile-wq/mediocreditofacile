@@ -147,6 +147,14 @@ export const AREE_PARTNER: PortaleCard[] = [
       'Stessa impostazione di Arca Energia, noleggio o leasing con agevolazioni, più il download del preventivo PDF brandizzato Mediocredito Facile da mandare al cliente finale.',
   },
   {
+    nome: 'Evolution Service Holding',
+    href: '/tools/evolution-holding',
+    icona: 'solar_power',
+    settore: 'Fotovoltaico',
+    descrizione:
+      'Stesso simulatore di Arca Energia, noleggio o leasing con iperammortamento 4.0 e Nuova Sabatini, con la zona di irraggiamento scelta cliente per cliente.',
+  },
+  {
     nome: 'EnergyTeam',
     href: '/tools/energyteam',
     icona: 'solar_power',

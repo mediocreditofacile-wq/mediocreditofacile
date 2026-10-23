@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'preact/hooks';
 import './simulatore-fotovoltaico.css';
+import { documentoAnno } from '../../lib/checklist-pratica';
 import {
   calcolaRataLeasing,
   calcolaIperammortamento,
@@ -116,7 +117,8 @@ const ENERGYTEAM_DOCS = [
   'Codice fiscale del legale rappresentante',
   'IBAN',
   'Ultimi due bilanci depositati',
-  'Situazione contabile provvisoria 2025',
+  // anno calcolato sulla data della visita (vedi documentoAnno)
+  documentoAnno('societa'),
 ];
 
 // Checklist Arca Energia: stessi documenti base + condizionali per leasing/agevolazioni
@@ -126,7 +128,7 @@ const ARCAENERGIA_DOCS_BASE = [
   'Codice fiscale del legale rappresentante',
   'IBAN',
   'Ultimi due bilanci depositati',
-  'Situazione contabile provvisoria 2025',
+  documentoAnno('societa'),
 ];
 const ARCAENERGIA_DOCS_LEASING = ['Preventivo fornitore impianto'];
 const ARCAENERGIA_DOCS_IPER = ['Perizia asseverata 4.0 (per investimenti > €300.000)'];
@@ -175,9 +177,11 @@ interface Props {
   // Default OFF: la rata mostrata e' il canone puro, l'assicurazione e' solo informativa.
   assicurazioneOpzionale?: boolean;
   // Variante del form di richiesta in fondo al simulatore.
-  varianteForm?: 'standard' | 'energyteam' | 'arcaenergia' | 'age-srl';
+  varianteForm?: 'standard' | 'energyteam' | 'arcaenergia' | 'age-srl' | 'evolution-holding';
   // Se settata, forza un coefficiente di irraggiamento unico indipendentemente dalla zona selezionata.
   zonaFissa?: 'nord' | 'centro' | 'sud' | 'isole';
+  // Zona preselezionata nel menu quando la zona non e' fissa. Default 'nord'.
+  zonaIniziale?: 'nord' | 'centro' | 'sud' | 'isole';
   // Quando true: mostra lo switch Noleggio Operativo / Leasing Finanziario
   abilitaLeasing?: boolean;
   // Quando true: mostra i toggle iperammortamento, Sabatini e ZES in modalita' leasing (indipendenti dal business plan)
@@ -189,6 +193,7 @@ export default function SimulatoreFotovoltaico({
   assicurazioneOpzionale = false,
   varianteForm = 'standard',
   zonaFissa,
+  zonaIniziale = 'nord',
   abilitaLeasing = false,
   abilitaAgevolazioni = false,
 }: Props) {
@@ -255,7 +260,7 @@ export default function SimulatoreFotovoltaico({
   const [accumuloInput, setAccumuloInput] = useState('');
   const [bolletta, setBolletta] = useState(250);
   const [bollettaInput, setBollettaInput] = useState('250');
-  const [zona, setZona] = useState('nord');
+  const [zona, setZona] = useState<string>(zonaIniziale);
   const [tipoAttivita, setTipoAttivita] = useState('commerciale');
 
   // Durate disponibili per l'importo corrente
@@ -435,6 +440,7 @@ export default function SimulatoreFotovoltaico({
   // GTM tracking
   const toolName = varianteForm === 'arcaenergia' ? 'simulatore_arcaenergia'
     : varianteForm === 'age-srl' ? 'simulatore_age_srl'
+    : varianteForm === 'evolution-holding' ? 'simulatore_evolution_holding'
     : varianteForm === 'energyteam' ? 'simulatore_energyteam' : 'simulatore_fotovoltaico';
 
   const pushCalcolo = () => {
@@ -497,7 +503,9 @@ export default function SimulatoreFotovoltaico({
     return docs;
   }, [isLeasing, includiIper, includiSabatini, includiZES]);
 
-  const currentDocs = (varianteForm === 'arcaenergia' || varianteForm === 'age-srl') ? arcaEnergiaDocs : ENERGYTEAM_DOCS;
+  // Varianti partner sul flusso di Arca Energia: checklist dinamica, invio pratica e PDF
+  const flussoArca = varianteForm === 'arcaenergia' || varianteForm === 'age-srl' || varianteForm === 'evolution-holding';
+  const currentDocs = flussoArca ? arcaEnergiaDocs : ENERGYTEAM_DOCS;
   const [etDocsSpuntati, setEtDocsSpuntati] = useState<boolean[]>(() => new Array(20).fill(false));
 
   const toggleEtDoc = (idx: number) => {
@@ -648,7 +656,7 @@ export default function SimulatoreFotovoltaico({
     setFormInvio(true);
 
     if (typeof window !== 'undefined' && (window as any).dataLayer) {
-      (window as any).dataLayer.push({ event: 'form_inviato', tool: 'simulatore_arcaenergia' });
+      (window as any).dataLayer.push({ event: 'form_inviato', tool: toolName });
     }
 
     const pronti: string[] = [];
@@ -658,7 +666,7 @@ export default function SimulatoreFotovoltaico({
       else mancanti.push(doc);
     });
 
-    const fonte = varianteForm === 'age-srl' ? 'age-srl' : 'arcaenergia';
+    const fonte = varianteForm === 'age-srl' || varianteForm === 'evolution-holding' ? varianteForm : 'arcaenergia';
     const body = new FormData();
     body.append('fonte', fonte);
     body.append('tool', `simulatore_${fonte}`);
@@ -1538,7 +1546,7 @@ export default function SimulatoreFotovoltaico({
       </div>
 
       {/* Bottone Scarica PDF — disponibile su tutte le varianti partner, fuori dal form invia pratica */}
-      {risultato && (varianteForm === 'age-srl' || varianteForm === 'arcaenergia' || varianteForm === 'energyteam') && (
+      {risultato && (flussoArca || varianteForm === 'energyteam') && (
         <div class="simpv__pdf-bar">
           <button
             type="button"
@@ -1557,7 +1565,7 @@ export default function SimulatoreFotovoltaico({
       )}
 
       {/* --- FORM INVIO RICHIESTA (variante EnergyTeam / ArcaEnergia / AGE SRL) --- */}
-      {(varianteForm === 'energyteam' || varianteForm === 'arcaenergia' || varianteForm === 'age-srl') ? (
+      {(varianteForm === 'energyteam' || flussoArca) ? (
         <div class="simpv__lead-bar simpv__lead-bar--energyteam" id="contatti">
           <div class="simpv__lead-bar-info">
             <span class="material-icons-outlined simpv__lead-icon" aria-hidden="true">send</span>
@@ -1572,7 +1580,7 @@ export default function SimulatoreFotovoltaico({
           </div>
 
           <form class="simpv__lead-bar-form simpv__et-form" onSubmit={
-            (varianteForm === 'arcaenergia' || varianteForm === 'age-srl') ? handleArcaenergiaSubmit : handleEnergyteamSubmit
+            flussoArca ? handleArcaenergiaSubmit : handleEnergyteamSubmit
           }>
             {/* Dati partner */}
             <div class="simpv__et-section">
@@ -1684,7 +1692,7 @@ export default function SimulatoreFotovoltaico({
                 disabled={!formEnergyteamValido || formInvio}
               >
                 {formInvio ? 'Generazione preventivo…' :
-                  (varianteForm === 'arcaenergia' || varianteForm === 'age-srl')
+                  flussoArca
                     ? 'Invia e scarica preventivo PDF'
                     : 'Invia richiesta a Mediocredito Facile'
                 }
