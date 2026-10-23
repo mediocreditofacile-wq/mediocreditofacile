@@ -78,11 +78,12 @@ function leggiBene(grezza: unknown, categorie: CategoriaMezzo[]): Letto {
 
   // Assente (non mandato o null) = vale il default della categoria. Un booleano batte il
   // default. Presente ma non booleano ("si", 1, "true") e' una risposta illeggibile: mai
-  // "non targato", si richiede, su qualunque categoria.
+  // "non targato", si richiede, su qualunque categoria. Lo stesso se il default della
+  // categoria non e' un booleano (null, o un campo che manca nel database): si richiede.
   const risposta = r.targato;
-  const targato =
+  const targato: unknown =
     risposta === undefined || risposta === null ? categoria.targato : typeof risposta === 'boolean' ? risposta : null;
-  if (targato === null) return no('targato_mancante');
+  if (typeof targato !== 'boolean') return no('targato_mancante');
 
   return {
     ok: true,

@@ -135,6 +135,17 @@ describe('validaBeni: la domanda sul targato', () => {
     expect(e).toEqual({ ok: false, error: 'targato_mancante', riga: 0 });
   });
 
+  it('una categoria il cui targato non e\' un booleano (undefined dal database): la riga deve rispondere', () => {
+    // Il tipo dice boolean o null, ma una configurazione scritta a mano puo' non avere il campo
+    const rotta = [{ nome: 'Escavatori', targato: undefined } as unknown as CategoriaMezzo];
+    const riga = { descrizione: 'Escavatore', categoria: 'Escavatori', quantita: 1, prezzo: 60000 };
+    expect(validaBeni(rotta, [riga])).toEqual({ ok: false, error: 'targato_mancante', riga: 0 });
+    expect(validaBeni(rotta, [{ ...riga, targato: null }])).toEqual({ ok: false, error: 'targato_mancante', riga: 0 });
+    // con la risposta, invece, il bene passa
+    const e = validaBeni(rotta, [{ ...riga, targato: true }]);
+    expect(e.ok && e.targato).toBe(true);
+  });
+
   it('targato dell\'elenco e\' vero se lo e\' almeno un bene', () => {
     const e = validaBeni(CAT, [gru, { descrizione: 'Autocarro', categoria: 'Autocarri', quantita: 1, prezzo: 50000 }]);
     expect(e.ok).toBe(true);
