@@ -27,7 +27,7 @@ const LOGO = 'brand/emme2-servizi.jpg';
 
 // Bergamelli come la scrive il seed: Manc firma le gru e le autogru, Nol System tutto il resto
 const CANALI_MEZZI = [
-  { canale: 'econocom', attivo: true, tabella: 'econocom-pa', maggiorazionePerc: 0, fatturatoMin: 5_000_000, importoMin: 150_000, venditori: ['nolsystem'] },
+  { canale: 'econocom', attivo: true, tabella: 'econocom-pa', maggiorazionePerc: 0, fatturatoMin: 5_000_000, importoMin: 150_000, venditori: ['nolsystem'], escludiTargati: true },
   { canale: 'grenke', attivo: true, tabella: 'sputnik', maggiorazionePerc: 0, venditori: ['manc'], categorieEscluse: ['Ponteggi'], escludiTargati: true },
 ];
 const MEZZI = {

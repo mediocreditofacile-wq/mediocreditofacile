@@ -395,8 +395,9 @@ describe('vistaCommerciale', () => {
 // --- il bene: venditore, categoria, targa (settore mezzi) ----------------------
 
 // I canali di Bergamelli (spec, sezione 4): Nol System va su Econocom solo per i
-// clienti grandi e i beni grandi, Manc su Grenke Sputnik escluso il targato e i ponteggi.
-const ECONOCOM_NOLSYSTEM: CanaleConfig = { ...ECONOCOM, venditori: ['nolsystem'] };
+// clienti grandi e i beni grandi, Manc su Grenke Sputnik escluso i ponteggi; nessuno dei
+// due quota il targato.
+const ECONOCOM_NOLSYSTEM: CanaleConfig = { ...ECONOCOM, venditori: ['nolsystem'], escludiTargati: true };
 const GRENKE_MANC: CanaleConfig = {
   canale: 'grenke', attivo: true, tabella: 'sputnik', maggiorazionePerc: 0,
   venditori: ['manc'], categorieEscluse: ['Ponteggi'], escludiTargati: true,
@@ -466,6 +467,10 @@ describe('il bene: Nol System su Econocom', () => {
 
   it('fatturato sconosciuto: nessun canale', () => {
     expect(instrada(BERGAMELLI, { ...grande, fatturato: null }, 200_000, OGGI, nolsystem)).toBeNull();
+  });
+
+  it('un mezzo targato: nessun canale, nemmeno col cliente e i beni da Econocom', () => {
+    expect(instrada(BERGAMELLI, { ...grande, fatturato: 6_000_000 }, 200_000, OGGI, { ...nolsystem, targato: true })).toBeNull();
   });
 });
 

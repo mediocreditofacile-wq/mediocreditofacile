@@ -23,7 +23,7 @@ const AGENTE = { nome: 'Mario Rossi', email: 'mario@example.invalid' };
 // --- la carrozzeria: Bergamelli, come la scrive il seed ----------------------
 
 const CANALI = [
-  { canale: 'econocom', attivo: true, tabella: 'econocom-pa', maggiorazionePerc: 0, fatturatoMin: 5_000_000, importoMin: 150_000, venditori: ['nolsystem'] },
+  { canale: 'econocom', attivo: true, tabella: 'econocom-pa', maggiorazionePerc: 0, fatturatoMin: 5_000_000, importoMin: 150_000, venditori: ['nolsystem'], escludiTargati: true },
   { canale: 'grenke', attivo: true, tabella: 'sputnik', maggiorazionePerc: 0, venditori: ['manc'], categorieEscluse: ['Ponteggi'], escludiTargati: true },
 ];
 

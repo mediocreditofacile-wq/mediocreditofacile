@@ -21,6 +21,7 @@ import {
   type CalcoloMezzi,
 } from './calcolo-mezzi';
 import { carrozzeriaDaRiga, type Carrozzeria, type RigaCarrozzeria } from './carrozzeria';
+import { CANALI_BERGAMELLI } from './catalogo-bergamelli';
 import type { EventiRicerca } from './eventi-stato';
 import type { DatiCreditoMotore, SchedaRidotta } from './merito';
 import { POST as proposte } from '../../pages/api/motore/proposte';
@@ -57,7 +58,7 @@ const OGGI = new Date(2026, 9, 23);
 // --- la carrozzeria: Bergamelli, come la scrive il seed ----------------------
 
 const CANALI = [
-  { canale: 'econocom', attivo: true, tabella: 'econocom-pa', maggiorazionePerc: 0, fatturatoMin: 5_000_000, importoMin: 150_000, venditori: ['nolsystem'] },
+  { canale: 'econocom', attivo: true, tabella: 'econocom-pa', maggiorazionePerc: 0, fatturatoMin: 5_000_000, importoMin: 150_000, venditori: ['nolsystem'], escludiTargati: true },
   { canale: 'grenke', attivo: true, tabella: 'sputnik', maggiorazionePerc: 0, venditori: ['manc'], categorieEscluse: ['Ponteggi'], escludiTargati: true },
 ];
 
@@ -187,6 +188,10 @@ const errore = (corpo: Record<string, unknown>, k: Carrozzeria = K) => {
 // --- componiMezzi ------------------------------------------------------------
 
 describe('componiMezzi: la configurazione di Bergamelli si legge', () => {
+  it('i canali della riga finta sono quelli veri di Bergamelli', () => {
+    expect(CANALI).toEqual(CANALI_BERGAMELLI);
+  });
+
   it('canali e configurazione mezzi arrivano dalla riga', () => {
     expect(K.settore).toBe('mezzi');
     expect(K.regoleSemaforo).toBe('locatore');
@@ -229,6 +234,22 @@ describe('componiMezzi: i quattro casi della spec', () => {
     expect(c.noleggio?.daConfermare).toBe(true);
     expect(c.motivoNoNoleggio).toBeNull();
     expect(c.leasing).toHaveLength(3);
+  });
+
+  it('autocarro targato di Nol System da 200.000 e cliente da 6 milioni: niente Econocom, il testo del targato', () => {
+    const c = calcolo({ beni: [bene('Autocarri', 200_000)] }, ricerca(6_000_000));
+    expect(c.venditore.codice).toBe('nolsystem');
+    expect(c.beni[0].targato).toBe(true);
+    expect(c.noleggio).toBeNull();
+    expect(c.motivoNoNoleggio).toBe(TESTO_TARGATO);
+    expect(c.leasing.every((l) => l.righe.length > 0)).toBe(true);
+  });
+
+  it('lo stesso autocarro dichiarato non targato: Econocom a 36, 48 e 60', () => {
+    const c = calcolo({ beni: [bene('Autocarri', 200_000, { targato: false })] }, ricerca(6_000_000));
+    expect(c.noleggio?.canale).toBe('econocom');
+    expect(c.noleggio?.rate.map((r) => r.durata)).toEqual([36, 48, 60]);
+    expect(c.motivoNoNoleggio).toBeNull();
   });
 
   it('lo stesso carrello con un cliente da 4 milioni: niente noleggio, il leasing resta', () => {

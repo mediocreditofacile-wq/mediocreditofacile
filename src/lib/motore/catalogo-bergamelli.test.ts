@@ -129,7 +129,7 @@ describe('canali di Bergamelli', () => {
     expect(CANALI_BERGAMELLI.map((c) => c.canale)).toEqual(['econocom', 'grenke']);
   });
 
-  it('Econocom: solo Nol System, clienti oltre 5 milioni di fatturato, beni da 150.000, nessuna maggiorazione', () => {
+  it('Econocom: solo Nol System, clienti oltre 5 milioni di fatturato, beni da 150.000, niente targati, nessuna maggiorazione', () => {
     expect(econocom).toEqual({
       canale: 'econocom',
       attivo: true,
@@ -138,7 +138,12 @@ describe('canali di Bergamelli', () => {
       fatturatoMin: 5_000_000,
       importoMin: 150_000,
       venditori: ['nolsystem'],
+      escludiTargati: true,
     });
+  });
+
+  it('nessun canale quota i mezzi targati: il noleggio lo valuta MCF su richiesta', () => {
+    for (const canale of CANALI_BERGAMELLI) expect(canale.escludiTargati, canale.canale).toBe(true);
   });
 
   it('Grenke: solo Manc, niente mezzi targati, niente Ponteggi', () => {
@@ -190,6 +195,16 @@ describe('canali di Bergamelli', () => {
       expect(instrada(CANALI_BERGAMELLI, grande, 200_000, OGGI, b)?.canale).toBe('econocom');
       expect(instrada(CANALI_BERGAMELLI, grande, 140_000, OGGI, b)).toBeNull();
       expect(instrada(CANALI_BERGAMELLI, piccolo, 200_000, OGGI, b)).toBeNull();
+    });
+
+    it('un autocarro targato di Nol System non ha noleggio, nemmeno con cliente da 6 milioni e 200.000 di beni', () => {
+      expect(instrada(CANALI_BERGAMELLI, grande, 200_000, OGGI, bene('nolsystem', ['Autocarri'], true))).toBeNull();
+    });
+
+    it('lo stesso autocarro non targato va su Econocom, a 36, 48 e 60 mesi', () => {
+      const r = instrada(CANALI_BERGAMELLI, grande, 200_000, OGGI, bene('nolsystem', ['Autocarri'], false));
+      expect(r?.canale).toBe('econocom');
+      expect(r?.rate.map((x) => x.durata)).toEqual([36, 48, 60]);
     });
 
     it('i ponteggi di Nol System non hanno noleggio sotto i 150.000, e Grenke non li prende mai', () => {

@@ -72,11 +72,12 @@ export const CONFIG_MEZZI_BERGAMELLI: ConfigMezzi = {
 // --- canali, in ordine di priorita' (spec, sezione 4) ---------------------------------
 
 export const CANALI_BERGAMELLI: CanaleConfig[] = [
-  // Nol System: solo clienti oltre 5 milioni di fatturato e beni da 150.000 euro. La tabella
+  // Nol System: solo clienti oltre 5 milioni di fatturato e beni da 150.000 euro, mai i mezzi
+  // targati (come su Grenke: il noleggio del targato lo valuta MCF su richiesta). La tabella
   // si chiama ancora econocom-pa perche' e' l'id salvato nella configurazione dei canali
   {
     canale: 'econocom', attivo: true, tabella: 'econocom-pa', maggiorazionePerc: 0,
-    fatturatoMin: 5_000_000, importoMin: 150_000, venditori: ['nolsystem'],
+    fatturatoMin: 5_000_000, importoMin: 150_000, venditori: ['nolsystem'], escludiTargati: true,
   },
   // Manc: Sputnik, ma non i mezzi targati e non i ponteggi
   {
