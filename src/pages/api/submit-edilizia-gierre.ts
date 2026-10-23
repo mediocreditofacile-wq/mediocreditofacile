@@ -1,5 +1,7 @@
 export const prerender = false;
 
+import { documentoAnno } from '../../lib/checklist-pratica';
+
 // Endpoint dedicato all'area pratiche di Edilizia GIERRE SRL (/tools/edilizia-gierre).
 // Riceve i dati di una pratica di noleggio operativo caricata dal partner e:
 //  - manda una mail Resend completa a MCF con tutti i dati pratica + checklist documenti
@@ -48,7 +50,7 @@ function buildChecklist(formaGiuridica: string, importoNum: number): string[] {
     return [
       ...base,
       'Ultime 2 dichiarazioni dei redditi (Modello Unico)',
-      'Situazione contabile aggiornata 2025',
+      documentoAnno('ditta'),
     ];
   }
 
@@ -56,7 +58,7 @@ function buildChecklist(formaGiuridica: string, importoNum: number): string[] {
   return [
     ...base,
     'Ultimi 2 bilanci depositati',
-    'Bilancio definitivo 2025 (anche pre-deposito)',
+    documentoAnno('societa'),
   ];
 }
 

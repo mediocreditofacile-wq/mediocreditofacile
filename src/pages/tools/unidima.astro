@@ -18,6 +18,7 @@ import Icon from '../../components/Icon.astro';
  * e Grenke paga il fornitore a collaudo avvenuto.
  */
 import ToolLayout from '../../layouts/ToolLayout.astro';
+import { documentoAnno } from '../../lib/checklist-pratica';
 import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
 ---
 <ToolLayout
@@ -288,7 +289,7 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
                 <td>Solo Ditta Individuale, importo &gt; 10.000 €</td>
               </tr>
               <tr class="ud__row-extra" data-extra="di" hidden>
-                <td>Situazione contabile aggiornata 2025</td>
+                <td data-doc-anno="ditta">{documentoAnno('ditta')}</td>
                 <td>Solo Ditta Individuale, importo &gt; 10.000 €</td>
               </tr>
               <tr class="ud__row-extra" data-extra="srl" hidden>
@@ -296,7 +297,7 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
                 <td>Solo societa' di capitali, importo &gt; 10.000 €</td>
               </tr>
               <tr class="ud__row-extra" data-extra="srl" hidden>
-                <td>Bilancio definitivo 2025 (anche pre-deposito)</td>
+                <td data-doc-anno="societa">{documentoAnno('societa')}</td>
                 <td>Solo societa' di capitali, importo &gt; 10.000 €</td>
               </tr>
             </tbody>
@@ -360,6 +361,8 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
 </ToolLayout>
 
 <script>
+  import { fraseDocumentoAnno } from '../../lib/checklist-pratica';
+  import { aggiornaDocumentiAnno } from '../../scripts/documento-anno';
   import { upload } from '@vercel/blob/client';
   import { initBeniRows } from '../../scripts/beni-rows';
   import { initDatiCliente } from '../../scripts/dati-cliente-form';
@@ -490,8 +493,8 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
       banner.classList.add('ud__banner--full');
       bannerTitle.textContent = `Documenti completi (${isDi ? 'Ditta Individuale' : 'Societa\' di capitali'})`;
       bannerSub.textContent = isDi
-        ? 'Importo sopra 10.000 €: oltre ai documenti base servono le ultime 2 dichiarazioni dei redditi e la situazione contabile 2025.'
-        : 'Importo sopra 10.000 €: oltre ai documenti base servono gli ultimi 2 bilanci depositati e il bilancio definitivo 2025.';
+        ? `Importo sopra 10.000 €: oltre ai documenti base servono le ultime 2 dichiarazioni dei redditi e ${fraseDocumentoAnno('ditta')}.`
+        : `Importo sopra 10.000 €: oltre ai documenti base servono gli ultimi 2 bilanci depositati e ${fraseDocumentoAnno('societa')}.`;
     } else if (sopraSoglia && !fg) {
       banner.classList.add('ud__banner--base');
       bannerTitle.textContent = 'Seleziona la forma giuridica';
@@ -503,6 +506,8 @@ import SimulatorePortale from '../../components/tools/SimulatorePortale.tsx';
     }
   }
 
+  // Il documento dell'anno si ricalcola sulla data di oggi, non su quella della build
+  aggiornaDocumentiAnno();
   formaGiuridica.addEventListener('change', updateChecklist);
   importoInput.addEventListener('input', updateChecklist);
 

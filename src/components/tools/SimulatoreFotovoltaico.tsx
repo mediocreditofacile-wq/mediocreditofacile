@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'preact/hooks';
 import './simulatore-fotovoltaico.css';
+import { documentoAnno } from '../../lib/checklist-pratica';
 import {
   calcolaRataLeasing,
   calcolaIperammortamento,
@@ -116,7 +117,8 @@ const ENERGYTEAM_DOCS = [
   'Codice fiscale del legale rappresentante',
   'IBAN',
   'Ultimi due bilanci depositati',
-  'Situazione contabile provvisoria 2025',
+  // anno calcolato sulla data della visita (vedi documentoAnno)
+  documentoAnno('societa'),
 ];
 
 // Checklist Arca Energia: stessi documenti base + condizionali per leasing/agevolazioni
@@ -126,7 +128,7 @@ const ARCAENERGIA_DOCS_BASE = [
   'Codice fiscale del legale rappresentante',
   'IBAN',
   'Ultimi due bilanci depositati',
-  'Situazione contabile provvisoria 2025',
+  documentoAnno('societa'),
 ];
 const ARCAENERGIA_DOCS_LEASING = ['Preventivo fornitore impianto'];
 const ARCAENERGIA_DOCS_IPER = ['Perizia asseverata 4.0 (per investimenti > €300.000)'];
