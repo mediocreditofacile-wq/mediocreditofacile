@@ -25,10 +25,10 @@ import { MANROPE_BOLD, MANROPE_REGULAR } from './font-manrope';
 
 export const NOTA_DEMO_PDF = 'Documento dimostrativo: catalogo e importi di esempio, non è un\'offerta.';
 
-const PIEDE_NOLEGGIO =
+export const PIEDE_NOLEGGIO =
   'In collaborazione con Mediocredito Facile, intermediario del credito. Canoni indicativi: ogni operazione ' +
   'è soggetta a valutazione e delibera della società di noleggio. www.mediocreditofacile.it';
-const PIEDE_LEASING =
+export const PIEDE_LEASING =
   'Mediocredito Facile · Collaboratore del Mediatore Affida · Iscrizione OAM M325. Documento a scopo ' +
   'illustrativo: non costituisce offerta vincolante né promessa di approvazione. www.mediocreditofacile.it';
 
