@@ -3,9 +3,11 @@
 // categorie del catalogo.
 //
 // Modulo puro: niente database, niente dati, niente rete. Lo importano il server
-// e, per la checklist, anche il browser. I valori stanno in app.carrozzeria come
-// jsonb scritto dal Pannello MCF o dal seed, con le chiavi in camelCase come nei
-// tipi qui sotto.
+// e, per la checklist, anche il browser. I lettori dei canali (leggiCanali,
+// CanaleConfig) e quelli elementari (oggetto, testo, elencoTesti, nonNull) sono
+// condivisi col settore mezzi (config-mezzi.ts, calcolo-mezzi.ts, carrozzeria.ts).
+// I valori stanno in app.carrozzeria come jsonb scritto dal Pannello MCF o dal
+// seed, con le chiavi in camelCase come nei tipi qui sotto.
 //
 // Regola di lettura, uguale per tutti: un valore che non si legge si scarta, non si
 // indovina. Un elemento con un campo scritto male esce dall'elenco (un canale con
