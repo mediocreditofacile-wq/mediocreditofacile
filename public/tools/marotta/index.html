@@ -1699,10 +1699,13 @@ function applicaPrezzoInverso(){
 // --- Leasing Sella (per il confronto soluzioni) — modello "capitale-gonfiato" da src/data/leasing.ts MCF ---
 // Tasso effettivo = spread + Euribor 3M; la provvigione è caricata nel capitale finanziato.
 // Spread = medio commerciale 2,75% (stesso usato nella variante fornitori). Provvigione 1%.
-// Euribor 3M: 2,66% dal preventivo Sella Leasing n. 17714/2 del 22/09/2026 (indicizzazione
-// "Euribor 3 mesi 365"). Da aggiornare a mano quando il mercato si muove; prima era 2,23 (09/05/2026).
-const EURIBOR_3M=2.66;          // % annuo
-const EURIBOR_3M_DATA='22/09/2026';
+// Euribor 3M: fixing EMMI del 22/10/2026, 2,677% (base 360, letto su euribor-rates.eu il
+// 23/10/2026), riportato in base 365 come l'indicizzazione "Euribor 3 mesi 365" dei preventivi
+// Sella: 2,677 x 365/360 = 2,714 -> 2,71. Stesso valore e stessa fonte di src/data/leasing.ts
+// nel sito MCF: si aggiornano insieme. Storia: 2,23 (09/05/2026), 2,66 (22/09/2026, preventivo
+// Sella n. 17714/2, cioe' il fixing del 21/09 per 365/360), 2,71 (22/10/2026).
+const EURIBOR_3M=2.71;          // % annuo
+const EURIBOR_3M_DATA='22/10/2026';
 const SELLA_LEASING={spread:2.75,provvigionePerc:1,istruttoria:380,incassoRata:6,durate:[24,36,48,60,72,84],
   // riscatto massimo per durata, RISCATTO_MAX_STD di src/data/leasing.ts MCF (validato sul quotatore Affida)
   riscattoMax:{24:50,36:40,48:30,60:20,72:15,84:10},

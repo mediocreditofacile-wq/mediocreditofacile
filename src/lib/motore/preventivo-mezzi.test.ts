@@ -226,9 +226,11 @@ describe('chiavePerPdf: la colonna del leasing che finisce nel PDF', () => {
     expect(chiavePerPdf(c, undefined)).toBe(attesa);
   });
 
-  // I numeri della spec valgono solo con l'Euribor di quel giorno, come in leasing-confronto.test.ts
-  it.runIf(EURIBOR_3M === 2.66)('50.000 euro: Alba, 857,72 a 60 mesi contro 862,07 di Sella e 880,63 di Credem', () => {
-    expect([rataA(c, 'A', 60), rataA(c, 'B', 60), rataA(c, 'C', 60)]).toEqual([862.07, 880.63, 857.72]);
+  // Rate di riferimento con l'Euribor 2,71 (scripts/rate-riferimento-leasing.py, come in
+  // leasing-confronto.test.ts): se l'Euribor cambia falliscono apposta
+  it('50.000 euro: Alba, 858,76 a 60 mesi contro 863,12 di Sella e 881,69 di Credem', () => {
+    expect(EURIBOR_3M, 'Euribor cambiato: ricalcola con scripts/rate-riferimento-leasing.py').toBe(2.71);
+    expect([rataA(c, 'A', 60), rataA(c, 'B', 60), rataA(c, 'C', 60)]).toEqual([863.12, 881.69, 858.76]);
     // La configurazione ha Alba al terzo posto: e' la colonna C
     expect(K.mezzi?.leasing.partner[2].partner).toBe('alba');
     expect(chiavePerPdf(c, undefined)).toBe('C');
@@ -353,10 +355,11 @@ describe('sceltaMezzi: durata, canone e rata del leasing in evidenza', () => {
     expect(sceltaMezzi(c, chiave)).toEqual({ durata: 60, canone: canoneA(c, 60), rataLeasing: rataA(c, chiave, 60) });
   });
 
-  // Il valore assoluto vale con l'Euribor di quel giorno, come in leasing-confronto.test.ts
-  it.runIf(EURIBOR_3M === 2.66)('gru da 50.000: la rata del leasing e\' quella di Alba, 857,72', () => {
+  // Il valore assoluto vale con l'Euribor 2,71, come sopra
+  it('gru da 50.000: la rata del leasing e\' quella di Alba, 858,76', () => {
+    expect(EURIBOR_3M, 'Euribor cambiato: ricalcola con scripts/rate-riferimento-leasing.py').toBe(2.71);
     const c = calcolo(GRU);
-    expect(sceltaMezzi(c, chiavePerPdf(c, undefined)).rataLeasing).toBe(857.72);
+    expect(sceltaMezzi(c, chiavePerPdf(c, undefined)).rataLeasing).toBe(858.76);
   });
 
   it('segue la colonna scelta: A, B o C danno la loro rata a 60 mesi', () => {

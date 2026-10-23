@@ -2,8 +2,9 @@
 //
 // I confronti sulle rate non scrivono numeri a mano: ricalcolano con
 // calcolaRataLeasingPartner dallo stesso listino, cosi' il test non dipende
-// dall'Euribor. Le rate di riferimento della spec valgono solo con l'Euribor di
-// quel giorno (2,66) e girano solo se e' ancora quello.
+// dall'Euribor. Le rate di riferimento invece sono numeri fissi, calcolati a parte da
+// scripts/rate-riferimento-leasing.py per l'Euribor di src/data/leasing.ts: quando
+// l'Euribor cambia falliscono apposta, e si ricalcolano con quello script.
 
 import { describe, expect, it } from 'vitest';
 import {
@@ -162,17 +163,27 @@ describe('spreadPerDurata', () => {
   });
 });
 
-describe('rate di riferimento della spec (Euribor 3M 2,66)', () => {
-  it.runIf(EURIBOR_3M === 2.66)('50.000 e 100.000 euro a 36 e 60 mesi', () => {
+// Le rate della spec erano a 2,66 (22/09/2026): 857,72 Alba a 60 mesi su 50.000.
+// Queste sono a 2,71 (22/10/2026), da python3 scripts/rate-riferimento-leasing.py 2.71
+const EURIBOR_DELLE_RATE = 2.71;
+
+describe('rate di riferimento (Euribor 3M 2,71)', () => {
+  it('sono calcolate per l\'Euribor in uso', () => {
+    expect(EURIBOR_3M, 'Euribor cambiato in src/data/leasing.ts: ricalcola le rate con '
+      + 'python3 scripts/rate-riferimento-leasing.py <euribor> e aggiornale qui e in preventivo-mezzi.test.ts')
+      .toBe(EURIBOR_DELLE_RATE);
+  });
+
+  it('50.000 e 100.000 euro a 36 e 60 mesi', () => {
     const c50 = leasingConfronto(CFG, 50000, 10);
     expect([36, 60].map((d) => [rataDi(c50, 'sella', d), rataDi(c50, 'credem', d), rataDi(c50, 'alba', d)])).toEqual([
-      [1384.64, 1405.82, 1386.66],
-      [862.07, 880.63, 857.72],
+      [1385.67, 1406.86, 1387.69],
+      [863.12, 881.69, 858.76],
     ]);
     const c100 = leasingConfronto(CFG, 100000, 10);
     expect([36, 60].map((d) => [rataDi(c100, 'sella', d), rataDi(c100, 'credem', d), rataDi(c100, 'alba', d)])).toEqual([
-      [2769.29, 2811.64, 2773.32],
-      [1724.14, 1761.26, 1715.43],
+      [2771.35, 2813.73, 2775.37],
+      [1726.24, 1763.39, 1717.51],
     ]);
   });
 });
