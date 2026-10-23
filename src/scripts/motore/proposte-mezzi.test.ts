@@ -15,7 +15,7 @@ const quante = (html: string) => (html.match(/da confermare/gi) ?? []).length;
 
 describe('riquadroNoleggio: "da confermare" una volta sola', () => {
   it('Econocom, con la nota vera del listino: la dice la nota, la frase fissa non si aggiunge', () => {
-    const nota = TABELLE['econocom-pa'].nota;
+    const nota = TABELLE['econocom-pa'].nota ?? '';
     expect(nota).toMatch(/da confermare/i);
     const html = riquadro(true, nota);
     expect(quante(html)).toBe(1);
@@ -30,7 +30,7 @@ describe('riquadroNoleggio: "da confermare" una volta sola', () => {
   });
 
   it('Grenke, rata non da confermare: nessuna frase', () => {
-    expect(quante(riquadro(false, TABELLE.sputnik.nota))).toBe(0);
+    expect(quante(riquadro(false, TABELLE.sputnik.nota ?? null))).toBe(0);
     expect(quante(riquadro(false, null))).toBe(0);
   });
 

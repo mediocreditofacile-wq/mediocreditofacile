@@ -347,7 +347,7 @@ export interface PreventivoStorico extends Partial<ColonneMezziStorico> {
   prezzo: number | string;
   creato: string;
   /** La scelta in evidenza salvata col preventivo: la sua durata e' quella di partenza del noleggio */
-  scelta?: { durata?: unknown } | null;
+  scelta?: { durata?: unknown; canone?: unknown; rataLeasing?: unknown } | null;
 }
 
 /**
