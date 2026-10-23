@@ -20,7 +20,7 @@
 // pratica in segnalazione, e la pagina lo dice.
 
 import { upload } from '@vercel/blob/client';
-import { documentiMancanti, formatoAmmesso, testoFormati, vociPerInvio } from '../../lib/motore/pratica-distinta-regole';
+import { documentiMancanti, formatoAmmesso, testoFormati, vociPerInvio, VOCE_ZIP, zipAmmesso } from '../../lib/motore/pratica-distinta-regole';
 import { TESTI_PREFILTRO } from '../../lib/motore/prefiltro';
 import { initCampoIban, type CampoIban } from '../campo-iban';
 import { $, apiJsonSicura, data, esc, euro, messaggio, stato, traduci } from './comune';
@@ -160,27 +160,37 @@ function rendiChecklist() {
   const box = document.getElementById('prd-checklist');
   if (!r || !box) return;
   const tutte = (stato.carrozzeria?.checklist?.voci ?? []) as VoceChecklistBrowser[];
-  voci = vociPerInvio(vociDaChiedere(tutte, classeDaForma(r.scheda.formaGiuridica), opzioneScelta()?.beni ?? NaN), segnalazione);
+  // In fondo, sempre, lo ZIP unico: al posto della lista (VOCE_ZIP, 22/10/2026)
+  voci = [
+    ...vociPerInvio(vociDaChiedere(tutte, classeDaForma(r.scheda.formaGiuridica), opzioneScelta()?.beni ?? NaN), segnalazione),
+    { nome: VOCE_ZIP, obbligatoria: false },
+  ];
   // I file delle voci che non si chiedono piu' non partono
   for (const nome of [...file.keys()]) if (!voci.some((v) => v.nome === nome)) file.delete(nome);
-  box.innerHTML = voci.map((v, i) => `
-    <li data-voce-doc="${i}">
-      <p class="mt-voce-doc">${esc(v.nome)}${v.obbligatoria ? ' <span class="mt-obbligatoria">obbligatoria</span>' : ''}</p>
-      <input type="file" data-file-voce="${i}" accept="application/pdf,image/jpeg" multiple aria-label="${esc(v.nome)}" />
+  box.innerHTML = voci.map((v, i) => {
+    const zip = v.nome === VOCE_ZIP;
+    return `
+    <li data-voce-doc="${i}"${zip ? ' class="mt-voce-zip"' : ''}>
+      <p class="mt-voce-doc">${zip ? 'Oppure: tutti i documenti in un unico ZIP' : esc(v.nome)}${v.obbligatoria ? ' <span class="mt-obbligatoria">obbligatoria</span>' : ''}</p>
+      ${zip ? '<p class="mt-nota" style="margin:0">Con lo ZIP la pratica parte anche senza le voci qui sopra: la completezza la controlla Mediocredito Facile.</p>' : ''}
+      <input type="file" data-file-voce="${i}" accept="${zip ? '.zip,application/zip,application/x-zip-compressed' : 'application/pdf,image/jpeg'}" ${zip ? '' : 'multiple'} aria-label="${esc(v.nome)}" />
       <span class="mt-campo__errore" data-errore-voce="${i}" role="alert" hidden></span>
       <ul class="mt-criteri" data-lista-voce="${i}">${elencoFile(v.nome)}</ul>
-    </li>`).join('');
+    </li>`;
+  }).join('');
 }
 
 /** I file scelti per una voce: passano solo PDF e JPG, il resto si dice sulla voce */
 function aggiungiFile(i: number, scelti: File[]) {
   const voce = voci[i];
   if (!voce) return;
-  const lista = file.get(voce.nome) ?? [];
+  const zip = voce.nome === VOCE_ZIP;
+  // Lo ZIP e' uno solo: quello nuovo prende il posto del precedente
+  const lista = zip ? [] : file.get(voce.nome) ?? [];
   const scartati: string[] = [];
   const grandi: string[] = [];
   for (const f of scelti) {
-    if (!formatoAmmesso(f.name, f.type, formati())) scartati.push(f.name);
+    if (zip ? !zipAmmesso(f.name, f.type) : !formatoAmmesso(f.name, f.type, formati())) scartati.push(f.name);
     else if (f.size > MAX_FILE_BYTES) grandi.push(f.name);
     else lista.push(f);
   }
@@ -188,7 +198,7 @@ function aggiungiFile(i: number, scelti: File[]) {
   const errore = document.querySelector<HTMLElement>(`[data-errore-voce="${i}"]`);
   if (errore) {
     const testi = [
-      scartati.length ? `${testoFormati(formati())}: ${scartati.join(', ')} non ${scartati.length === 1 ? 'è stato aggiunto' : 'sono stati aggiunti'}.` : '',
+      scartati.length ? `${zip ? 'Solo file ZIP' : testoFormati(formati())}: ${scartati.join(', ')} non ${scartati.length === 1 ? 'è stato aggiunto' : 'sono stati aggiunti'}.` : '',
       grandi.length ? `Oltre 25 MB: ${grandi.join(', ')}.` : '',
     ].filter(Boolean);
     errore.textContent = testi.join(' ');
@@ -259,7 +269,7 @@ export function rendiModuloDistinta(chiesta: boolean) {
        <p class="mt-meta" style="margin-top:0">${esc(r.scheda.ragioneSociale)} · P.IVA ${esc(r.scheda.piva)}</p>
        <p class="mt-nota">La rata e i documenti per il cliente non escono. Mediocredito Facile riceve la distinta, i tuoi dati e i
          documenti, guarda il cliente e ti dice come procedere.</p>`
-    : `<p class="mt-semaforo__tit">Nuova pratica per ${esc(r.scheda.ragioneSociale)}</p>
+    : `<p class="mt-semaforo__tit">Crea la pratica per ${esc(r.scheda.ragioneSociale)}</p>
        <p class="mt-meta" style="margin-top:0">P.IVA ${esc(r.scheda.piva)}</p>`;
 
   box.innerHTML = `
@@ -288,11 +298,11 @@ export function rendiModuloDistinta(chiesta: boolean) {
       <label class="mt-campo" style="margin-top:16px"><span>Note per Mediocredito Facile</span>
         <textarea id="prd-note" class="mt-input" rows="3" maxlength="2000"></textarea></label>
       <p class="mt-semaforo__tit" style="margin-top:24px">Documenti</p>
-      <p class="mt-nota" style="margin-top:0">Un caricamento per voce, solo PDF o JPG, fino a 25 MB a file. Le voci obbligatorie servono
-        per l'invio; le altre possono arrivare dopo, e Mediocredito Facile sa cosa manca.</p>
+      <p class="mt-nota" style="margin-top:0">Un caricamento per voce, solo PDF o JPG, fino a 25 MB a file, oppure tutto in un unico ZIP.
+        Le voci obbligatorie servono per creare la pratica; le altre possono arrivare dopo, e Mediocredito Facile sa cosa manca.</p>
       <ul class="mt-checklist" id="prd-checklist"></ul>
       <div class="mt-azioni">
-        <button type="button" id="prd-invia" class="mt-btn">${segnalazione ? 'Invia la segnalazione' : 'Invia la pratica'}</button>
+        <button type="button" id="prd-invia" class="mt-btn">${segnalazione ? 'Invia la segnalazione' : 'Crea pratica'}</button>
         <button type="button" id="prd-annulla" class="mt-link">annulla</button>
       </div>
       <p id="prd-msg" class="mt-msg" hidden></p>
@@ -349,7 +359,7 @@ async function invia(btn: HTMLButtonElement) {
   if (!r || !o) return;
   const msg = $('prd-msg');
   const val = (id: string) => $<HTMLInputElement>(id).value.trim();
-  const etichetta = segnalazione ? 'Invia la segnalazione' : 'Invia la pratica';
+  const etichetta = segnalazione ? 'Invia la segnalazione' : 'Crea pratica';
 
   // Prima quello che il server rifiuterebbe: inutile caricare file per un invio che non parte
   if (val('prd-iban')) campoIban?.verifica();
@@ -387,7 +397,7 @@ async function invia(btn: HTMLButtonElement) {
     }
 
     // 2. la pratica (o la segnalazione), con l'elenco dei documenti caricati
-    btn.textContent = segnalazione ? 'Invio la segnalazione...' : 'Invio la pratica...';
+    btn.textContent = segnalazione ? 'Invio la segnalazione...' : 'Creo la pratica...';
     const risposta = await apiJsonSicura('/api/motore/pratica', {
       method: 'POST',
       body: JSON.stringify({
@@ -415,7 +425,9 @@ async function invia(btn: HTMLButtonElement) {
     const diventata = corpo.segnalazione && !segnalazione
       ? ' Il prefiltro nel frattempo è diventato rosso: è partita come segnalazione, e Mediocredito Facile ti dice come procedere.'
       : '';
-    $('pratica-nuova').innerHTML = `<p class="mt-msg mt-msg--ok">${corpo.segnalazione ? 'Segnalazione' : 'Pratica'} ${esc(corpo.id)} inviata${quanti}.${diventata} Lo stato lo segui qui sotto.</p>`;
+    // Il modulo puo' stare sotto la proposta (scheda Proposte) o nella scheda Pratiche
+    const inProposte = Boolean($('pratica-nuova').closest('[data-pannello="proposte"]'));
+    $('pratica-nuova').innerHTML = `<p class="mt-msg mt-msg--ok">${corpo.segnalazione ? 'Segnalazione' : 'Pratica'} ${esc(corpo.id)} ${corpo.segnalazione ? 'inviata' : 'creata'}${quanti}.${diventata} ${inProposte ? 'La trovi nella sezione Pratiche, con il suo stato.' : 'Lo stato lo segui qui sotto.'}</p>`;
     void caricaStorico();
   } finally {
     // Il pulsante torna com'era anche se la rete cade a meta'

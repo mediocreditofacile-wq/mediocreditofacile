@@ -41,6 +41,7 @@ import { leggiVerifica } from '../openapi';
 import { percorsoPortale } from '../percorso-portale';
 import { euro } from '../prospetti-pv';
 import { decidiVerifica, type Decisione } from '../verifiche-cache';
+import { nomiUnici, ordineAllegati, scegliAllegati } from './allegati-pratica';
 import { componiCalcolo, type Consegna } from './calcolo-distinta';
 import { ricercaVisibile, type RicercaSalvata } from './calcolo-proposta';
 import { catalogo } from './carrozzeria';
@@ -58,6 +59,8 @@ import { bozzaValida, documentiDellaBozza, negativitaAllInvio } from './pratica'
 import {
   decidiInvio,
   documentiMancanti,
+  documentoAlPostoGiusto,
+  VOCE_ZIP,
   type DocumentoVoce,
 } from './pratica-distinta-regole';
 import {
@@ -216,6 +219,12 @@ export interface InputMailPratica {
   ledwallConfermato: boolean;
   consegna: Consegna;
   documenti: DocumentoVoce[];
+  /**
+   * I documenti caricati che non sono in allegato (oltre il limite della mail o non
+   * letti dallo store): restano nel portale. Assente = mail senza documenti allegati,
+   * come prima del 22/10/2026.
+   */
+  nonAllegati?: string[];
   mancanti: { obbligatori: string[]; facoltativi: string[] };
   negativita: any;
   /** La proposta per il locatore: in allegato, non leggibile dall'archivio, o non c'e' */
@@ -331,9 +340,19 @@ export function corpoMailPratica(o: InputMailPratica): { subject: string; html: 
     ${senzaRisposta.length ? `${h3('Motivazioni non scritte')}${elenco(senzaRisposta)}` : ''}
     <p style="font-size:13px;color:#787782;margin:12px 0 0">Valutazione indicativa, non è una delibera.</p>`;
 
+  const conZip = o.documenti.some((d) => d.voce === VOCE_ZIP);
+  const nonAllegati = o.nonAllegati ?? null;
+  const allegati = nonAllegati === null ? 0 : o.documenti.length - nonAllegati.length;
+  const notaAllegati = nonAllegati === null || !o.documenti.length
+    ? ''
+    : nonAllegati.length
+      ? `<p style="font-size:14px;margin:8px 0 0">In allegato ${allegati} di ${o.documenti.length}. Restano nel portale, oltre il limite della mail o non letti: ${escapeHtml(nonAllegati.join(', '))}.</p>`
+      : '<p style="font-size:14px;margin:8px 0 0">Tutti in allegato a questa mail.</p>';
   const documenti = `
     ${h3(`Documenti caricati (${o.documenti.length})`)}
     ${o.documenti.length ? elenco(o.documenti.map((d) => `${d.voce}: ${d.nome}`)) : '<p style="font-size:14px;margin:0">Nessuno.</p>'}
+    ${notaAllegati}
+    ${conZip ? '<p style="font-size:14px;color:#8A2D0E;margin:8px 0 0">I documenti sono arrivati in un unico ZIP: la completezza della checklist va controllata aprendo il file.</p>' : ''}
     ${o.mancanti.obbligatori.length || o.mancanti.facoltativi.length
       ? `${h3('Documenti che mancano')}${elenco([
         ...o.mancanti.obbligatori.map((m) => `${m} (obbligatorio)`),
@@ -440,6 +459,34 @@ async function allegatoLocatore(
     console.error(JSON.stringify({ evento: 'motore_pratica_locatore_errore', pathname: doc.pathname, msg: String(err) }));
     return illeggibile;
   }
+}
+
+/**
+ * I documenti del cliente da allegare alla mail, letti dallo store (la cartella della
+ * bozza l'ha gia' controllata documentiDellaBozza). Si allegano finche' stanno nel
+ * limite della mail (allegati-pratica.ts); un file illeggibile o di troppo resta nel
+ * portale e la mail lo nomina. Le letture sono operazioni semplici dello store, non
+ * avanzate: non pesano sul tetto mensile.
+ */
+async function allegatiDocumenti(documenti: DocumentoVoce[]): Promise<{ allegati: Allegato[]; nonAllegati: string[] }> {
+  const token = env('BLOB_READ_WRITE_TOKEN');
+  if (!token || !documenti.length) return { allegati: [], nonAllegati: documenti.map((d) => d.nome) };
+  const letti = await Promise.all(ordineAllegati(documenti).map(async (d) => {
+    try {
+      const r = await get(d.pathname, { access: 'private', token });
+      const contenuto = r?.stream ? Buffer.from(await new Response(r.stream).arrayBuffer()) : Buffer.alloc(0);
+      return { d, contenuto, byte: contenuto.length };
+    } catch (err) {
+      console.error(JSON.stringify({ evento: 'motore_pratica_allegato_errore', pathname: d.pathname, msg: String(err) }));
+      return { d, contenuto: Buffer.alloc(0), byte: 0 };
+    }
+  }));
+  const { allegati, esclusi } = scegliAllegati(letti);
+  const nomi = nomiUnici(allegati.map((x) => x.d.nome));
+  return {
+    allegati: allegati.map((x, i) => ({ filename: nomi[i], content: x.contenuto.toString('base64') })),
+    nonAllegati: esclusi.map((x) => x.d.nome),
+  };
 }
 
 // --- la pratica ----------------------------------------------------------------------
@@ -601,9 +648,11 @@ export async function creaPraticaDistinta(
   // 8. i documenti della bozza, solo quelli caricati sotto una voce di questo cliente
   const bozza = testo(corpo.bozza, 40);
   if (!bozzaValida(bozza)) return no(400, 'bozza_non_valida');
-  const nomiVoci = new Set(voci.map((x) => x.nome));
+  // Lo ZIP unico e' una voce in piu' che il portale offre sempre (VOCE_ZIP)
+  const nomiVoci = new Set([...voci.map((x) => x.nome), VOCE_ZIP]);
   const documenti = documentiDellaBozza(k.slug, bozza, corpo.documenti)
-    .filter((d): d is DocumentoVoce => typeof d.voce === 'string' && nomiVoci.has(d.voce));
+    .filter((d): d is DocumentoVoce => typeof d.voce === 'string' && nomiVoci.has(d.voce))
+    .filter(documentoAlPostoGiusto);
 
   // 9. le voci obbligatorie fermano l'invio; le altre possono arrivare dopo
   const mancanti = documentiMancanti(voci, documenti, segnalazione);
@@ -668,6 +717,7 @@ export async function creaPraticaDistinta(
   let mailOk = false;
   try {
     const locatore = await allegatoLocatore(k.slug, c.riservato);
+    const cliente_ = await allegatiDocumenti(documenti);
     const m = corpoMailPratica({
       k: { nome: k.nome, demo: k.demo },
       agente: { nome: contesto.nome ?? '', email: contesto.email },
@@ -698,6 +748,7 @@ export async function creaPraticaDistinta(
       ledwallConfermato: c.ledwallConfermato,
       consegna: c.consegna,
       documenti,
+      nonAllegati: cliente_.nonAllegati,
       mancanti,
       negativita,
       locatore: locatore.stato,
@@ -707,7 +758,8 @@ export async function creaPraticaDistinta(
       to: DESTINATARIO_MCF,
       subject: m.subject,
       html: m.html,
-      allegati: locatore.allegato ? [locatore.allegato] : [],
+      // I documenti del cliente prima, poi la proposta per il locatore
+      allegati: [...cliente_.allegati, ...(locatore.allegato ? [locatore.allegato] : [])],
     });
     mailOk = esito.ok;
     if (!esito.ok) console.error(JSON.stringify({ evento: 'motore_pratica_mail_errore', id, msg: esito.err }));

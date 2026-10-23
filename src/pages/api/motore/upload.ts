@@ -11,11 +11,12 @@ export const prerender = false;
 // tipi che lo store accetta a quelli (tipiAmmessi): application/pdf e image/jpeg. Le
 // foto HEIC dell'iPhone arrivano gia' convertite in JPEG da Safari, grazie all'accept
 // dell'input; il browser controlla prima con formatoAmmesso e dice "Solo PDF o JPG".
+// Dal 22/10/2026 passa anche lo ZIP unico (VOCE_ZIP), al posto della checklist.
 
 import { handleUpload, type HandleUploadBody } from '@vercel/blob/client';
 import { env } from '../../../lib/db';
 import { bozzaValida, cartellaBozza } from '../../../lib/motore/pratica';
-import { tipiAmmessi } from '../../../lib/motore/pratica-distinta-regole';
+import { TIPI_ZIP, tipiAmmessi } from '../../../lib/motore/pratica-distinta-regole';
 import { json, sessioneMotore } from '../../../lib/motore/sessione';
 
 const MAX_FILE_BYTES = 25 * 1024 * 1024;
@@ -61,7 +62,9 @@ export async function POST({ request }: { request: Request }) {
         }
         const formati = e.carrozzeria.checklist?.formati;
         return {
-          allowedContentTypes: formati ? tipiAmmessi(formati) : TIPI_DI_SEMPRE,
+          // Con i formati in checklist (Led Office) passa anche lo ZIP unico: che stia sotto la
+          // sua voce lo controlla il server all'invio (documentoAlPostoGiusto)
+          allowedContentTypes: formati ? [...tipiAmmessi(formati), ...TIPI_ZIP] : TIPI_DI_SEMPRE,
           maximumSizeInBytes: MAX_FILE_BYTES,
           addRandomSuffix: true,
         };

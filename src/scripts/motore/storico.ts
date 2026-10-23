@@ -6,7 +6,11 @@ import { riapriRicerca } from './cliente';
 import { $, api, apiJson, data, esc, euro, stato } from './comune';
 
 /** esterne = pratiche lavorate prima del portale: arrivano solo a referente e MCF */
-export interface DatiStorico { ricerche: any[]; proposte: any[]; pratiche: any[]; esterne: any[] }
+export interface DatiStorico {
+  ricerche: any[]; proposte: any[]; pratiche: any[]; esterne: any[];
+  /** Solo per MCF: il menu degli stati della pratica, coi canali */
+  stati?: [string, string][];
+}
 
 let ultimo: DatiStorico = { ricerche: [], proposte: [], pratiche: [], esterne: [] };
 /** Mese delle verifiche mostrate (AAAA-MM) e richieste per mese, dal server */
@@ -24,7 +28,10 @@ export function suStorico(fn: (d: DatiStorico) => void) {
 export async function caricaStorico(meseScelto = mese) {
   const { res, corpo } = await apiJson(api('storico', meseScelto ? { mese: meseScelto } : {}));
   if (!res.ok || !corpo?.ok) return;
-  ultimo = { ricerche: corpo.ricerche ?? [], proposte: corpo.proposte ?? [], pratiche: corpo.pratiche ?? [], esterne: corpo.esterne ?? [] };
+  ultimo = {
+    ricerche: corpo.ricerche ?? [], proposte: corpo.proposte ?? [], pratiche: corpo.pratiche ?? [], esterne: corpo.esterne ?? [],
+    stati: Array.isArray(corpo.stati) ? corpo.stati : undefined,
+  };
   mese = corpo.mese ?? '';
   mesi = corpo.mesi ?? [];
   conteggio = Boolean(corpo.conteggio);
@@ -67,21 +74,45 @@ function rendi() {
         </tr>`).join('')}</tbody></table></div>`
     : `<p class="mt-vuoto">Nessuna verifica ${mese ? `a ${esc(etichettaMese(mese))}` : 'ancora'}.</p>`;
 
+  // Settore distinta: dal preventivo con la proposta di vendita si crea la pratica (22/10/2026)
+  const distinta = stato.settore === 'distinta';
+  const praticaDi = new Map<string, string>(ultimo.pratiche.filter((x) => x.proposta_id).map((x) => [x.proposta_id, x.id]));
+  const conVendita = (p: any) => (p.documenti ?? []).some((d: any) => /proposta-vendita/i.test(String(d?.nome ?? '')));
+  const cellaPratica = (p: any) => {
+    if (praticaDi.has(p.id)) return `<span class="mt-id">Pratica ${esc(praticaDi.get(p.id))}</span>`;
+    if (!p.ricerca_id) return '';
+    return conVendita(p)
+      ? `<button type="button" class="mt-link" data-crea-pratica="${esc(p.id)}" data-ricerca="${esc(p.ricerca_id)}">Crea pratica</button>`
+      : '<span class="mt-id">solo canone</span>';
+  };
   const preventivi = ultimo.proposte.length
     ? `<div class="mt-scorri"><table class="mt-tabella">
-        <thead><tr><th>Quando</th>${colAgente}<th>Cliente</th><th>Offerta</th><th class="num">Prezzo</th><th>Documenti</th></tr></thead>
+        <thead><tr><th>Quando</th>${colAgente}<th>Cliente</th><th>Offerta</th><th class="num">Prezzo</th><th>Documenti</th>${distinta ? '<th>Pratica</th>' : ''}</tr></thead>
         <tbody>${ultimo.proposte.map((p) => `<tr>
           <td>${data(p.creato)}<br><span class="mt-id">${esc(p.id)}</span></td>${agente ? `<td>${esc(p.agente_nome)}</td>` : ''}
           <td>${esc(p.cliente_nome)}</td>
           <td>${esc(p.descrizione)}</td>
           <td class="num">${euro(p.prezzo)}</td>
           <td>${(p.documenti ?? []).length ? p.documenti.map((d: any) => bottoneDoc(d)).join('<br>') : '<span class="mt-id">PDF non disponibili</span>'}</td>
+          ${distinta ? `<td>${cellaPratica(p)}</td>` : ''}
         </tr>`).join('')}</tbody></table></div>`
     : '<p class="mt-vuoto">Nessun preventivo ancora.</p>';
 
   $('storico').innerHTML = `
     <h3 class="mt-h3" style="margin-top:0">Verifiche</h3>${sceltaMese}${ricerche}
     <h3 class="mt-h3">Preventivi</h3>${preventivi}`;
+}
+
+/**
+ * "Crea pratica" su un preventivo dello Storico: riapre la sua verifica, porta alla scheda
+ * Pratiche e apre il modulo con quel preventivo gia' scelto. Serve ai preventivi fatti
+ * prima, senza rifare la proposta.
+ */
+async function creaPraticaDa(propostaId: string, ricercaId: string) {
+  if (!(await riapriRicerca(ricercaId, 'pratiche'))) return;
+  // Dopo la riapertura, che azzera l'ultimo preventivo della sessione
+  stato.ultimoPreventivo = propostaId;
+  document.dispatchEvent(new CustomEvent('mt:nuova-pratica', { detail: { dove: 'pratiche' } }));
 }
 
 /** Download autenticato: lo store e' privato, passa dalla guardia del portale */
@@ -111,6 +142,8 @@ export function montaStorico() {
     const t = e.target as HTMLElement;
     const riapri = t.closest('[data-riapri]') as HTMLElement | null;
     if (riapri) return void riapriRicerca(riapri.dataset.riapri!);
+    const crea = t.closest('[data-crea-pratica]') as HTMLElement | null;
+    if (crea) return void creaPraticaDa(crea.dataset.creaPratica!, crea.dataset.ricerca!);
     const doc = t.closest('[data-doc]') as HTMLButtonElement | null;
     if (doc) void scarica(doc);
   });

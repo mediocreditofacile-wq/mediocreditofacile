@@ -6,7 +6,8 @@ export const prerender = false;
 // Da qualunque stato a qualunque altro, anche saltando passaggi, e su piu'
 // pratiche alla volta. Ogni cambio resta nella storia della pratica.
 
-import { spostaStato, STATI, type StatoPratica } from '../../../lib/motore/pratica';
+import { spostaStato } from '../../../lib/motore/pratica';
+import { statoValido } from '../../../lib/motore/stati-pratica';
 import { corpoJson, json, sessioneMotore } from '../../../lib/motore/sessione';
 
 export async function POST({ request }: { request: Request }) {
@@ -16,8 +17,8 @@ export async function POST({ request }: { request: Request }) {
   if (!e.ok) return e.risposta;
   if (e.contesto.ruolo !== 'admin') return json({ ok: false, error: 'permesso_negato' }, 403);
 
-  const stato = String(corpo.stato ?? '') as StatoPratica;
-  if (!STATI.includes(stato)) return json({ ok: false, error: 'stato_non_valido' }, 400);
+  const stato = String(corpo.stato ?? '');
+  if (!statoValido(stato)) return json({ ok: false, error: 'stato_non_valido' }, 400);
   const ids = Array.isArray(corpo.ids) ? corpo.ids.map(String).filter(Boolean).slice(0, 200) : [];
   if (!ids.length) return json({ ok: false, error: 'nessuna_pratica' }, 400);
 

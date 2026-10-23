@@ -536,11 +536,15 @@ async function genera(btn: HTMLButtonElement, conProposta: boolean) {
            ${r.pdfPronti === false ? '<p class="mt-nota">Un documento non è stato salvato: rifai il preventivo tra qualche minuto.</p>' : ''}
            ${senzaProposta ? '<p class="mt-nota">La proposta di vendita non è uscita: controlla i dati per la proposta e rifai.</p>' : ''}`
         : '<p class="mt-nota" style="margin:0">I PDF non sono pronti: la generazione non è andata a buon fine. Il preventivo è salvato nello Storico, riprova tra qualche minuto.</p>'}
-      <div class="mt-azioni" style="margin-top:12px">
-        <button type="button" class="mt-btn mt-btn--secondario" id="dz-pratica">Carica la pratica</button>
-      </div>
+      ${docs.some((d) => /proposta-vendita/i.test(d.nome))
+        ? '<p class="mt-nota" style="margin:12px 0 0">Qui sotto carichi i documenti del cliente e crei la pratica.</p>'
+        : '<p class="mt-nota" style="margin:12px 0 0">Per creare la pratica servono i dati per la proposta di vendita: completali qui sopra e scarica il preventivo e la proposta.</p>'}
     </div>`;
   void caricaStorico();
+  // Con la proposta di vendita la pratica si crea da qui: documenti e "Crea pratica" sotto la proposta
+  if (docs.some((d) => /proposta-vendita/i.test(d.nome))) {
+    document.dispatchEvent(new CustomEvent('mt:nuova-pratica', { detail: { dove: 'proposte' } }));
+  }
 }
 
 // --- montaggio -----------------------------------------------------------------------------
@@ -624,7 +628,8 @@ export function montaProposteDistinta() {
     <div id="dr-consegna"></div>
     <div id="dr-motivazioni"></div>
     <div id="dr-ledwall"></div>`;
-  $('distinta-azioni').innerHTML = '<div id="dz-bottoni" class="mt-azioni"></div><div id="dz-esito"></div>';
+  // dz-pratica-modulo: il posto dove si apre il modulo della pratica dopo la proposta di vendita
+  $('distinta-azioni').innerHTML = '<div id="dz-bottoni" class="mt-azioni"></div><div id="dz-esito"></div><div id="dz-pratica-modulo"></div>';
   rendiCatalogo();
 
   // catalogo
@@ -699,9 +704,9 @@ export function montaProposteDistinta() {
     const t = e.target as HTMLElement;
     if (t.id === 'dz-tutto') void genera(t as HTMLButtonElement, true);
     if (t.id === 'dz-canone') void genera(t as HTMLButtonElement, false);
-    if (t.id === 'dz-pratica' || t.id === 'dz-segnala') {
+    if (t.id === 'dz-segnala') {
       apriTab('pratiche');
-      document.dispatchEvent(new CustomEvent('mt:nuova-pratica', { detail: { segnalazione: t.id === 'dz-segnala' } }));
+      document.dispatchEvent(new CustomEvent('mt:nuova-pratica', { detail: { segnalazione: true } }));
     }
   });
 

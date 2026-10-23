@@ -21,6 +21,7 @@ export const prerender = false;
 
 import { query } from '../../../lib/db';
 import { praticheEsternePerRuolo, type RigaEsterna } from '../../../lib/motore/pratiche-esterne';
+import { statiPerAdmin, statoPerRuolo, storiaPerRuolo } from '../../../lib/motore/stati-pratica';
 import { meseDi, meseRichiesto, riepilogoMesi, verificheContate } from '../../../lib/motore/richieste';
 import { filtroVisibilita, json, sessioneMotore } from '../../../lib/motore/sessione';
 import { colonneMezziStorico } from '../../../lib/motore/storico-mezzi';
@@ -82,7 +83,9 @@ export async function GET({ request }: { request: Request }) {
     ricerche: delMese.map((r) => ({ ...r, conta: contate.has(r.id) })),
     // Le colonne lette per i mezzi escono ridotte: niente rate, spese o totali
     proposte: mezzi ? (proposte as Record<string, unknown>[]).map((p) => ({ ...p, ...colonneMezziStorico(p) })) : proposte,
-    pratiche,
+    // Il canale su cui MCF ha caricato la pratica lo legge solo MCF: agli altri arriva "inserita"
+    pratiche: (pratiche as any[]).map((p) => ({ ...p, stato: statoPerRuolo(p.stato, admin), storia: storiaPerRuolo(p.storia, admin) })),
+    ...(admin ? { stati: statiPerAdmin() } : {}),
     esterne: praticheEsternePerRuolo(esterne, e.contesto.ruolo, e.vedeTutto),
   });
 }

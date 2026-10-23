@@ -62,15 +62,46 @@ export function vociPerInvio(voci: VoceChecklist[], segnalazione: boolean): Voce
 }
 
 /**
+ * La voce dello ZIP unico (22/10/2026, deciso da Alberto dopo la telefonata con Luca
+ * Maimone): il commerciale puo' mandare tutti i documenti in un solo file ZIP al posto
+ * della checklist. Con lo ZIP le voci obbligatorie non fermano l'invio: la completezza
+ * la controlla MCF aprendo il file, e la mail lo dice. Non sta nella checklist del
+ * Pannello: la offre sempre il portale, sotto le voci.
+ */
+export const VOCE_ZIP = 'Tutti i documenti in un unico ZIP';
+
+/** I tipi con cui i browser dichiarano un file ZIP (Windows: x-zip-compressed) */
+export const TIPI_ZIP = ['application/zip', 'application/x-zip-compressed', 'application/x-zip', 'multipart/x-zip'];
+
+/** E' uno ZIP? L'estensione deve esserci; il tipo, se il browser lo dichiara, deve essere uno dei TIPI_ZIP */
+export function zipAmmesso(nome: string, contentType: string): boolean {
+  const tipo = String(contentType ?? '').split(';')[0].trim().toLowerCase();
+  return estensione(String(nome ?? '')) === 'zip' && (tipo === '' || TIPI_ZIP.includes(tipo));
+}
+
+/**
+ * Il documento sta sotto la voce giusta: sotto la voce ZIP solo file .zip, sotto le
+ * altre nessun .zip. Lo store accetta gli ZIP per tutta la bozza (non sa sotto quale
+ * voce finira' il file), quindi il controllo vero lo fa il server all'invio. Il nome
+ * sullo store tiene l'estensione: il suffisso casuale va prima del punto.
+ */
+export function documentoAlPostoGiusto(d: Pick<DocumentoVoce, 'voce' | 'pathname'>): boolean {
+  const zip = estensione(d.pathname) === 'zip';
+  return d.voce === VOCE_ZIP ? zip : !zip;
+}
+
+/**
  * Le voci per cui non e' arrivato nessun documento, nell'ordine della checklist. Le
  * obbligatorie fermano l'invio; le facoltative possono arrivare dopo e la mail a MCF
  * dice cosa manca. Un documento conta solo per la voce scritta esattamente uguale.
+ * Con lo ZIP unico non manca niente: la completezza la controlla MCF.
  */
 export function documentiMancanti(
   voci: VoceChecklist[],
   documenti: DocumentoVoce[],
   segnalazione: boolean,
 ): { obbligatori: string[]; facoltativi: string[] } {
+  if (documenti.some((d) => d.voce === VOCE_ZIP)) return { obbligatori: [], facoltativi: [] };
   const arrivate = new Set(documenti.map((d) => d.voce));
   const mancanti = vociPerInvio(voci, segnalazione).filter((v) => !arrivate.has(v.nome));
   return {
