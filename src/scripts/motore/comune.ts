@@ -2,6 +2,7 @@
 // Nel browser non c'e' niente di riservato: coefficienti, listini e dati dei
 // clienti arrivano dalle API, che ricavano il fornitore dalla sessione.
 
+import type { MezziSchermo } from '../../lib/motore/calcolo-mezzi';
 import { TESTI_PREFILTRO } from '../../lib/motore/prefiltro';
 
 export interface Stato {
@@ -18,6 +19,11 @@ export interface Stato {
   proposta: { input: any; esito: any } | null;
   /** L'ultimo preventivo salvato su questa ricerca: la pratica ci si aggancia */
   ultimoPreventivo: string | null;
+  /**
+   * Settore mezzi: i numeri a schermo con cui e' uscito l'ultimo preventivo e la colonna
+   * del leasing messa nel PDF (null se il leasing non quotava). La pratica parte da qui.
+   */
+  mezziPreventivo: { id: string; schermo: MezziSchermo; chiaveLeasing: string | null } | null;
 }
 
 export const stato: Stato = {
@@ -31,6 +37,7 @@ export const stato: Stato = {
   ricerca: null,
   proposta: null,
   ultimoPreventivo: null,
+  mezziPreventivo: null,
 };
 
 export const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
@@ -114,13 +121,24 @@ const MESSAGGI: Record<string, string> = {
   cliente_bloccato: TESTI_PREFILTRO.bloccato,
   configurazione_mancante: 'Il portale non è configurato per le pratiche. Scrivi a Mediocredito Facile.',
   connessione_assente: 'Connessione assente, riprova.',
+  // Settore mezzi: i beni descritti a mano, chi vende e l'anticipo del leasing
+  beni_vuoti: 'Aggiungi almeno un bene al preventivo.',
+  troppi_beni: 'Un preventivo arriva al massimo a 60 beni.',
+  targato_mancante: 'Indica se il mezzo è targato.',
+  venditore_non_valido: 'Scegli chi vende i beni: quello indicato non è fra le società di questo portale.',
+  anticipo_non_valido: "L'anticipo va da 0 a 30%.",
 };
 // Sul settore distinta alcune azioni si chiamano diversamente: lo stesso codice, un altro consiglio
 const MESSAGGI_DISTINTA: Record<string, string> = {
   proposta_bloccata: 'Su questa fornitura non si genera un preventivo: segnala il cliente a Mediocredito Facile.',
 };
+// Sul settore mezzi la configurazione che manca e' quella dei venditori e dei partner, non solo della pratica
+const MESSAGGI_MEZZI: Record<string, string> = {
+  configurazione_mancante: 'Il portale non è ancora configurato per i mezzi. Scrivi a Mediocredito Facile.',
+};
+const PER_SETTORE: Record<string, Record<string, string>> = { distinta: MESSAGGI_DISTINTA, mezzi: MESSAGGI_MEZZI };
 export const traduci = (codice: string) =>
-  (stato.settore === 'distinta' ? MESSAGGI_DISTINTA[codice] : undefined) ?? MESSAGGI[codice] ?? 'Qualcosa non ha funzionato. Riprova.';
+  PER_SETTORE[stato.settore]?.[codice] ?? MESSAGGI[codice] ?? 'Qualcosa non ha funzionato. Riprova.';
 
 export async function apiJson(url: string, opts: RequestInit = {}) {
   const res = await fetch(url, {

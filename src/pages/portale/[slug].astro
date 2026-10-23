@@ -9,12 +9,14 @@
  * codice nuovo, chiede righe nuove.
  *
  * Il percorso dell'agente:
- *   0. Simulazione (solo settore distinta): dall'importo ai canoni, senza cliente
+ *   0. Simulazione (settori distinta e mezzi): dall'importo ai canoni, senza cliente
  *   1. Cliente: partita IVA, scheda di merito ridotta col semaforo
  *   2. Info aggiuntive: soci, amministratori, bilancio riclassificato, indici
  *   3. Proposte: pacchetto del catalogo, prezzo trattato, noleggio e leasing,
  *      business plan energetico sui fornitori fotovoltaico; sul settore distinta
- *      (Led Office) la fornitura a piu' righe col prefiltro e la proposta di vendita
+ *      (Led Office) la fornitura a piu' righe col prefiltro e la proposta di vendita;
+ *      sul settore mezzi (Bergamelli) i beni descritti a mano, chi vende, il noleggio
+ *      e il leasing dei partner a confronto
  *   4. Preventivo PDF e pratica con i documenti
  *
  * La pagina gira sul server (prerender = false) solo per vestire il gate col
@@ -42,6 +44,10 @@ const fotovoltaico = c.settore === 'fotovoltaico';
 const macchine = c.settore === 'macchine';
 // Settore distinta (Led Office): la fornitura a piu' righe, il prefiltro e la proposta di vendita
 const distinta = c.settore === 'distinta';
+// Settore mezzi (Bergamelli): beni descritti a mano, piu' venditori, noleggio e leasing a confronto
+const mezzi = c.settore === 'mezzi';
+// La simulazione prima della verifica, come prima scheda
+const conSimulazione = distinta || mezzi;
 ---
 <ToolLayout
   title={`Portale ${c.nome} | Mediocredito Facile`}
@@ -66,7 +72,9 @@ const distinta = c.settore === 'distinta';
               ? `Scegli dal catalogo e porta via le ${proposteOfferte(c)} da consegnare. Quando la trattativa si fa seria, verifica il cliente con la partita IVA.`
               : distinta
                 ? 'Verifica il cliente con la partita IVA, componi la fornitura e porta via il preventivo del canone e la proposta di vendita da far firmare.'
-                : `Verifica il cliente con la partita IVA, scegli dal catalogo e porta via le ${proposteOfferte(c)} da consegnare.`}
+                : mezzi
+                  ? 'Verifica il cliente con la partita IVA, descrivi i mezzi e porta via il preventivo di noleggio e il prospetto di leasing da consegnare.'
+                  : `Verifica il cliente con la partita IVA, scegli dal catalogo e porta via le ${proposteOfferte(c)} da consegnare.`}
           </p>
           <div class="mt-gate__form">
             <input type="email" id="login-email" class="mt-input" placeholder="La tua email" autocomplete="username" />
@@ -162,8 +170,8 @@ const distinta = c.settore === 'distinta';
           </>
         ) : (
           <>
-            {distinta && <button role="tab" class="mt-tab" data-tab="simulazione" aria-selected="true">Simulazione</button>}
-            <button role="tab" class="mt-tab" data-tab="cliente" aria-selected={distinta ? 'false' : 'true'}>Cliente</button>
+            {conSimulazione && <button role="tab" class="mt-tab" data-tab="simulazione" aria-selected="true">Simulazione</button>}
+            <button role="tab" class="mt-tab" data-tab="cliente" aria-selected={conSimulazione ? 'false' : 'true'}>Cliente</button>
             <button role="tab" class="mt-tab" data-tab="info" aria-selected="false">Info aggiuntive</button>
             <button role="tab" class="mt-tab" data-tab="proposte" aria-selected="false">Proposte</button>
           </>
@@ -174,21 +182,29 @@ const distinta = c.settore === 'distinta';
         <button role="tab" class="mt-tab" data-tab="mcf" aria-selected="false" hidden>Pannello MCF</button>
       </nav>
 
-      <!-- 0. Simulazione, prima della verifica: solo settore distinta -->
-      {distinta && (
+      <!-- 0. Simulazione, prima della verifica: settori distinta e mezzi -->
+      {conSimulazione && (
         <section class="mt-pannello" data-pannello="simulazione" role="tabpanel">
           <h1 class="mt-h1">Simulazione del canone</h1>
-          <p class="mt-lead">
-            Scrivi l'importo della fornitura, IVA esclusa: escono i canoni a 24, 36, 48 e 60 mesi, senza partita IVA.
-            Il preventivo in PDF si può dare subito al cliente. La rata è indicativa: quella definitiva arriva dopo la
-            verifica del cliente nella sezione Cliente.
-          </p>
+          {mezzi ? (
+            <p class="mt-lead">
+              Scrivi importo e categoria del mezzo, IVA esclusa: escono il noleggio, quando c'è, e il leasing dei
+              partner, senza partita IVA. I numeri sono indicativi: quelli da dare al cliente escono dopo la verifica,
+              nella sezione Proposte.
+            </p>
+          ) : (
+            <p class="mt-lead">
+              Scrivi l'importo della fornitura, IVA esclusa: escono i canoni a 24, 36, 48 e 60 mesi, senza partita IVA.
+              Il preventivo in PDF si può dare subito al cliente. La rata è indicativa: quella definitiva arriva dopo la
+              verifica del cliente nella sezione Cliente.
+            </p>
+          )}
           <div id="simulazione"></div>
         </section>
       )}
 
       <!-- 1. Cliente -->
-      <section class="mt-pannello" data-pannello="cliente" role="tabpanel" hidden={macchine || distinta}>
+      <section class="mt-pannello" data-pannello="cliente" role="tabpanel" hidden={macchine || conSimulazione}>
         <h1 class="mt-h1">Verifica il cliente</h1>
         {macchine ? (
           <p class="mt-lead">
@@ -201,6 +217,12 @@ const distinta = c.settore === 'distinta';
             Inserisci la partita IVA del cliente: arrivano anagrafica, bilancio e il prefiltro sul cliente. Se il
             prefiltro lo consente, nella sezione Proposte componi la fornitura: il prefiltro si completa su beni,
             quantità e consegna.
+          </p>
+        ) : mezzi ? (
+          <p class="mt-lead">
+            Inserisci la partita IVA del cliente: arrivano anagrafica, bilancio e una prima valutazione. Nella sezione
+            Proposte descrivi i mezzi: escono il noleggio, quando c'è, e il leasing dei partner a confronto, con il
+            preventivo da consegnare.
           </p>
         ) : (
           <p class="mt-lead">
@@ -232,8 +254,15 @@ const distinta = c.settore === 'distinta';
         <p id="proposte-cliente" class="mt-lead">Verifica prima un cliente nella sezione Cliente.</p>
 
         <div id="proposte-corpo" hidden={!macchine}>
-          <h3 class="mt-h3">{fotovoltaico ? 'Scegli il pacchetto' : macchine ? 'Scegli la macchina' : distinta ? 'Componi la fornitura' : 'Scegli dal catalogo'}</h3>
-          {distinta ? (
+          <h3 class="mt-h3">{fotovoltaico ? 'Scegli il pacchetto' : macchine ? 'Scegli la macchina' : distinta ? 'Componi la fornitura' : mezzi ? 'I beni del preventivo' : 'Scegli dal catalogo'}</h3>
+          {mezzi ? (
+            <div class="mt-mezzi">
+              <!-- Settore mezzi: il markup lo disegna proposte-mezzi.ts -->
+              <div id="mezzi-righe"></div>
+              <div id="mezzi-esito"></div>
+              <div id="mezzi-azioni"></div>
+            </div>
+          ) : distinta ? (
             <>
               <!-- Settore distinta: il markup lo disegna proposte-distinta.ts -->
               <div id="distinta-catalogo"></div>
@@ -544,6 +573,25 @@ const distinta = c.settore === 'distinta';
   .mt-da-confermare { font-weight: 700; color: var(--mt-black); margin: 12px 0 0; }
   .mt-in-attesa { opacity: 0.6; transition: opacity 0.15s; }
   #distinta-azioni .mt-btn:disabled { cursor: not-allowed; }
+
+  /* mezzi (settore Bergamelli): beni descritti a mano, chi vende, leasing dei partner a confronto */
+  #motore .mt-mezzi .mt-tabella--righe { min-width: 920px; }
+  #motore .mt-mezzi .mt-tabella--righe .mt-input--testo { text-align: left; }
+  #motore .mt-mezzi .mt-input--desc { min-width: 220px; }
+  #motore .mt-mezzi .mt-input--cat { min-width: 180px; }
+  #motore .mt-mezzi .mt-input--targa { min-width: 128px; }
+  #motore .mt-mezzi .mt-tabella--leasing { min-width: 680px; }
+  #motore .mt-mezzi .mt-tabella--leasing td { line-height: 1.45; }
+  #motore .mt-mezzi .mt-tabella--leasing td:first-child { white-space: nowrap; }
+  #motore .mt-mezzi .mt-tabella--leasing td.mt-mz-nelpdf { background: rgba(102, 76, 205, 0.06); }
+  #motore .mt-mezzi .mt-mz-segno { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; opacity: 0.85; }
+  #motore .mt-mezzi .mt-mz-rata { font-size: 1.0625rem; font-weight: 700; color: var(--mt-black); }
+  #motore .mt-mezzi .mt-mz-voce { display: block; font-size: 13px; color: var(--mt-charcoal); }
+  #motore .mt-mezzi .mt-mz-motivo { vertical-align: middle; font-size: 14px; color: var(--mt-taupe); background: #fff; }
+  #motore .mt-mezzi .mt-mz-pdf { border: 0; padding: 0; margin: 24px 0 0; display: flex; flex-wrap: wrap; gap: 8px 24px; }
+  #motore .mt-mezzi .mt-mz-pdf legend { padding: 0; margin: 0 0 8px; font-weight: 700; color: var(--mt-black); }
+  #motore .mt-mezzi .mt-mz-pdf .mt-nota { flex-basis: 100%; margin: 0; }
+  #motore .mt-mezzi .mt-btn:disabled { cursor: not-allowed; }
   .mt-checklist { list-style: none; padding: 0; margin: 8px 0 0; display: grid; gap: 12px; }
   .mt-checklist > li { border: 1px solid var(--mt-platinum); border-radius: 10px; padding: 12px 14px; display: grid; gap: 8px; }
   .mt-voce-doc { margin: 0; font-weight: 600; color: var(--mt-black); }

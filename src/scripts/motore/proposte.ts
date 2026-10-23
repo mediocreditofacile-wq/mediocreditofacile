@@ -1,6 +1,7 @@
 // Sezione Proposte: catalogo, prezzo trattato, proposte di noleggio e leasing,
-// business plan energetico sui fornitori fotovoltaico. I settori macchine e
-// distinta hanno una scheda loro (proposte-macchine.ts, proposte-distinta.ts).
+// business plan energetico sui fornitori fotovoltaico. I settori macchine,
+// distinta e mezzi hanno una scheda loro (proposte-macchine.ts,
+// proposte-distinta.ts, proposte-mezzi.ts).
 //
 // Il calcolo e' tutto lato server (/api/motore/proposte): qui si raccolgono le
 // scelte dell'agente e si disegna quello che torna. Ogni cambio rifa' il conto
@@ -10,6 +11,7 @@ import { bloccoSemaforo } from './cliente';
 import { $, apiJson, esc, euro, num, stato, traduci } from './comune';
 import { aggiornaProposteDistinta, inputDistinta, montaProposteDistinta } from './proposte-distinta';
 import { aggiornaCatalogoMacchine, inputMacchine, montaProposteMacchine } from './proposte-macchine';
+import { aggiornaProposteMezzi, inputMezzi, montaProposteMezzi } from './proposte-mezzi';
 
 let voceScelta: any = null;
 let timer: ReturnType<typeof setTimeout> | undefined;
@@ -49,6 +51,7 @@ function scegliVoce(codice: string) {
 export function inputCorrente() {
   if (stato.settore === 'macchine') return inputMacchine();
   if (stato.settore === 'distinta') return inputDistinta();
+  if (stato.settore === 'mezzi') return inputMezzi();
   if (!stato.ricerca || !voceScelta) return null;
   const val = (id: string) => campo(id)?.value ?? '';
   return {
@@ -249,6 +252,7 @@ function suNuovaRicerca() {
 export function aggiornaCatalogo(lista: any[]) {
   if (stato.settore === 'macchine') return aggiornaCatalogoMacchine(lista);
   if (stato.settore === 'distinta') return aggiornaProposteDistinta(lista);
+  if (stato.settore === 'mezzi') return aggiornaProposteMezzi(lista);
   stato.catalogo = lista;
   if (voceScelta && !lista.some((v) => v.codice === voceScelta.codice)) voceScelta = null;
   rendiCatalogo();
@@ -257,6 +261,7 @@ export function aggiornaCatalogo(lista: any[]) {
 export function montaProposte() {
   if (stato.settore === 'macchine') return montaProposteMacchine();
   if (stato.settore === 'distinta') return montaProposteDistinta();
+  if (stato.settore === 'mezzi') return montaProposteMezzi();
   rendiCatalogo();
   document.addEventListener('mt:ricerca', suNuovaRicerca);
   $('catalogo').addEventListener('click', (e) => {

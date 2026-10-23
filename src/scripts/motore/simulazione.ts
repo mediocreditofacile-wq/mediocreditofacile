@@ -114,7 +114,8 @@ async function scaricaPreventivo(btn: HTMLButtonElement) {
 
 export function montaSimulazione() {
   const box = document.getElementById('simulazione');
-  if (!box) return;
+  // Sui mezzi la simulazione chiede anche categoria e targa: questa, del solo importo, non vale
+  if (!box || stato.settore === 'mezzi') return;
   box.innerHTML = `
     <div class="mt-griglia">
       <label class="mt-campo"><span>Importo della fornitura, IVA esclusa</span>
