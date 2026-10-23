@@ -11,13 +11,18 @@
 
 import { PARTNERS_LEASING, type PartnerLeasing } from '../../data/leasing';
 import type { LeasingEsterno } from '../prospetti-pv';
-import { condizioneDaSpread, type ConfigMezzi, type PartnerConfronto } from './config-mezzi';
+import { condizioneDaSpread, type ConfigMezzi, type LeasingPartnerConfig, type PartnerConfronto } from './config-mezzi';
 import { DURATE_LEASING_MOTORE, leasingPartner } from './proposte';
 
 /** Le durate fino a questa usano `spreadFinoA48`, le successive `spreadDa60` */
 const ULTIMA_DURATA_FINO_A_48 = 48;
 /** Nessuna maggiorazione sulle rate di questo settore */
 const MARKUP_MEZZI = 0;
+
+/** Lo spread di un partner per quella durata: quello "fino a 48 mesi" o quello "da 60". Lo usa anche la mail a MCF */
+export function spreadPerDurata(p: LeasingPartnerConfig, durata: number): number {
+  return durata <= ULTIMA_DURATA_FINO_A_48 ? p.spreadFinoA48 : p.spreadDa60;
+}
 
 const MOTIVO_FUORI_LIMITI = 'Importo fuori dai limiti di questo partner.';
 
@@ -56,7 +61,7 @@ export function leasingConfronto(
     }
     const righe: LeasingEsterno[] = [];
     for (const durata of DURATE_LEASING_MOTORE) {
-      const spread = durata <= ULTIMA_DURATA_FINO_A_48 ? p.spreadFinoA48 : p.spreadDa60;
+      const spread = spreadPerDurata(p, durata);
       const condizione = condizioneDaSpread(listino, durata, spread);
       if (!condizione) continue;
       // Il partner non ammette quella durata: leasingPartner risponde null e la riga manca

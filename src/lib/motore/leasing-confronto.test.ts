@@ -16,7 +16,7 @@ import {
   type PartnerLeasing,
 } from '../../data/leasing';
 import type { ConfigMezzi } from './config-mezzi';
-import { leasingConfronto } from './leasing-confronto';
+import { leasingConfronto, spreadPerDurata } from './leasing-confronto';
 import { DURATE_LEASING_MOTORE, leasingPartner } from './proposte';
 
 const r2 = (v: number) => Math.round(v * 100) / 100;
@@ -150,6 +150,15 @@ describe('leasingConfronto: verso il browser', () => {
   it('nell\'uscita non c\'e\' nessuno spread, tasso o provvigione', () => {
     const json = JSON.stringify(leasingConfronto(CFG, 50000, 10));
     expect(json).not.toMatch(/spread|tasso|provvigione|euribor/i);
+  });
+});
+
+describe('spreadPerDurata', () => {
+  const alba = CFG.partner[2];
+
+  it('fino a 48 mesi lo spread "fino a 48", da 60 mesi quello "da 60"', () => {
+    expect([36, 48].map((d) => spreadPerDurata(alba, d))).toEqual([3.1, 3.1]);
+    expect([60, 72, 84].map((d) => spreadPerDurata(alba, d))).toEqual([2.5, 2.5, 2.5]);
   });
 });
 
