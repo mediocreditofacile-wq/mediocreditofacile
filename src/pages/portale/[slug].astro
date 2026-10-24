@@ -29,6 +29,7 @@
  */
 import Icon from '../../components/Icon.astro';
 import ToolLayout from '../../layouts/ToolLayout.astro';
+import { appDelPortale } from '../../lib/motore/app-portale';
 import { carrozzeriaDaSlug, proposteOfferte } from '../../lib/motore/carrozzeria';
 
 export const prerender = false;
@@ -48,14 +49,34 @@ const distinta = c.settore === 'distinta';
 const mezzi = c.settore === 'mezzi';
 // La simulazione prima della verifica, come prima scheda
 const conSimulazione = distinta || mezzi;
+// L'app da mettere sulla schermata Home, sui portali che l'hanno accesa
+const app = appDelPortale(c.slug);
 ---
 <ToolLayout
   title={`Portale ${c.nome} | Mediocredito Facile`}
   description={`Portale riservato ${c.nome}: valutazione del cliente e ${proposteOfferte(c)}.`}
   noindex={true}
   breadcrumbs={[{ name: `Portale ${c.nome}`, href: `/portale/${c.slug}` }]}
+  appleTouchIcon={app?.iconaApple}
 >
-  <div class="mt" id="motore" data-slug={c.slug} data-settore={c.settore} style={`--carrozzeria:${colore}`}>
+  {app && (
+    <Fragment slot="head">
+      <link rel="manifest" href={`/portale/${c.slug}/app.webmanifest`} />
+      <meta name="theme-color" content={colore} />
+      <meta name="mobile-web-app-capable" content="yes" />
+      <meta name="apple-mobile-web-app-capable" content="yes" />
+      <meta name="apple-mobile-web-app-title" content={app.nome} />
+    </Fragment>
+  )}
+  <div
+    class="mt"
+    id="motore"
+    data-slug={c.slug}
+    data-settore={c.settore}
+    data-app={app?.nome}
+    data-app-icona={app?.iconaApple}
+    style={`--carrozzeria:${colore}`}
+  >
     <!-- Gate: login, recupero, nuova password, invito, richiesta di accesso -->
     <div id="gate" class="mt-gate">
       <div class="mt-gate__card">
@@ -441,6 +462,25 @@ const conSimulazione = distinta || mezzi;
   .mt-msg--errore { border-left-color: #B23A12; color: #8A2D0E; }
   .mt-msg--ok { border-left-color: var(--mt-accent); }
   .mt-scaduta { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; margin: 0 0 16px; position: sticky; top: 8px; z-index: 5; background: #fff; }
+
+  /* fascia "Scarica l'app" (app-installa.ts): solo telefono e tablet, fuori dall'app */
+  .mt-app { display: flex; gap: 16px; align-items: flex-start; margin: 16px 0 0; padding: 16px; background: #fff; border: 1px solid var(--mt-platinum); border-left: 4px solid var(--carrozzeria); border-radius: 12px; color: var(--mt-charcoal); }
+  .mt-app__icona { width: 56px; height: 56px; border-radius: 13px; flex: none; }
+  .mt-app__corpo { flex: 1; min-width: 0; }
+  .mt-app__corpo p { margin: 0 0 8px; line-height: 1.5; }
+  .mt-app__tit { font-size: 1.0625rem; font-weight: 700; color: var(--mt-black); margin: 0 0 2px !important; }
+  .mt-app__sotto { color: var(--mt-taupe); }
+  .mt-app__passi { margin: 8px 0 12px; padding-left: 22px; display: grid; gap: 8px; line-height: 1.5; }
+  .mt-app__simbolo { width: 20px; height: 20px; vertical-align: -4px; color: #0A84FF; fill: currentColor; }
+  .mt-app__simbolo path[fill="none"] { fill: none; }
+  .mt-app__nota { font-size: 14px; color: var(--mt-taupe); }
+  .mt-app__indirizzo { font-size: 14px; word-break: break-all; padding: 8px 10px; background: var(--mt-ghost); border-radius: 8px; user-select: all; -webkit-user-select: all; }
+  .mt-app__dopo { margin: 8px 0 0 !important; }
+
+  /* dentro l'app installata il portale e' tutto: via menu, briciole e piede del sito */
+  @media (display-mode: standalone) {
+    .header, .breadcrumb, .footer { display: none !important; }
+  }
 
   /* gate */
   .mt-gate { display: flex; justify-content: center; padding: 48px 0; }

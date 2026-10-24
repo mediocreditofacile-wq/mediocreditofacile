@@ -4,7 +4,7 @@
 
 import { $, apiJson, apriTab, esc, messaggio, stato, traduci } from './comune';
 import { inputCorrente } from './proposte';
-import { bottoneDoc, caricaStorico } from './storico';
+import { apriSubito, bottoneDoc, caricaStorico } from './storico';
 
 const ETICHETTA_DOC = (nome: string) =>
   /leasing/i.test(nome) ? 'Prospetto di leasing'
@@ -48,6 +48,7 @@ async function genera(btn: HTMLButtonElement) {
            <p>${docs.map((d) => bottoneDoc(d, ETICHETTA_DOC(d.nome))).join(' · ')}</p>`
         : `<p class="mt-nota" style="margin:0">I PDF non sono pronti: la generazione non è andata a buon fine. Il preventivo è salvato, riprova tra qualche minuto.</p>`}
     </div>`;
+  apriSubito(box, docs);
   void caricaStorico();
 }
 

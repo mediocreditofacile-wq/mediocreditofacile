@@ -28,7 +28,7 @@ import {
   type OpzioneConsegna,
   type RigaBrowser,
 } from './distinta-browser';
-import { bottoneDoc, caricaStorico } from './storico';
+import { apriSubito, bottoneDoc, caricaStorico } from './storico';
 import { aggiornaVendita, datiVenditaCorrenti, rendiVendita, venditaMancanti } from './vendita-distinta';
 
 interface Riga extends RigaBrowser {
@@ -540,6 +540,7 @@ async function genera(btn: HTMLButtonElement, conProposta: boolean) {
         ? '<p class="mt-nota" style="margin:12px 0 0">Qui sotto carichi i documenti del cliente e crei la pratica.</p>'
         : '<p class="mt-nota" style="margin:12px 0 0">Per creare la pratica servono i dati per la proposta di vendita: completali qui sopra e scarica il preventivo e la proposta.</p>'}
     </div>`;
+  apriSubito(esitoBox, docs);
   void caricaStorico();
   // Con la proposta di vendita la pratica si crea da qui: documenti e "Crea pratica" sotto la proposta
   if (docs.some((d) => /proposta-vendita/i.test(d.nome))) {

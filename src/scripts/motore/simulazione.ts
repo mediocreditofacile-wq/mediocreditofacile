@@ -8,7 +8,7 @@
 import { $, apiJsonSicura, esc, euro, messaggio, stato, traduci } from './comune';
 import { leggiNumero } from './distinta-browser';
 import { montaSimulazioneMezzi } from './simulazione-mezzi';
-import { bottoneDoc, caricaStorico } from './storico';
+import { apriSubito, bottoneDoc, caricaStorico } from './storico';
 
 /** Pausa fra l'ultima cifra scritta e il conto */
 const ATTESA_MS = 350;
@@ -111,6 +111,7 @@ async function scaricaPreventivo(btn: HTMLButtonElement) {
         : '<p class="mt-nota" style="margin:0">Il PDF non è pronto: la simulazione è salvata nello Storico, riprova tra qualche minuto.</p>'}
       <p class="mt-nota">Per la proposta di vendita e la pratica, verifica il cliente nella sezione Cliente.</p>
     </div>`;
+  apriSubito(esito, docs);
   void caricaStorico();
 }
 

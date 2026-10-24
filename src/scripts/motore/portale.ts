@@ -1,6 +1,7 @@
 // Punto d'ingresso del portale del motore: legge la carrozzeria dalla pagina,
 // passa dal gate e monta le sezioni.
 
+import { mostraInvitoApp, preparaApp } from './app-installa';
 import { montaAzioni } from './azioni';
 import { montaCliente } from './cliente';
 import { $, apriTab, stato } from './comune';
@@ -48,6 +49,7 @@ function entra(s: any) {
   montaStorico();
   montaRete();
   void caricaStorico();
+  mostraInvitoApp();
 }
 
 export function avviaPortale() {
@@ -59,5 +61,6 @@ export function avviaPortale() {
     t.addEventListener('click', () => apriTab(t.dataset.tab!));
   });
   document.addEventListener('mt:sessione-scaduta', () => { if (!$('tool').hidden) avvisaSessioneScaduta(); });
+  preparaApp();
   void avviaGate(entra);
 }

@@ -4,6 +4,7 @@
 import { etichettaMese } from '../../lib/motore/richieste';
 import { riapriRicerca } from './cliente';
 import { $, api, apiJson, data, esc, euro, stato } from './comune';
+import { documentoDaAprire } from './documento-da-aprire';
 
 /** esterne = pratiche lavorate prima del portale: arrivano solo a referente e MCF */
 export interface DatiStorico {
@@ -42,6 +43,19 @@ export async function caricaStorico(meseScelto = mese) {
 /** Bottone di download di un documento dallo store privato */
 export const bottoneDoc = (d: { nome: string; pathname: string }, etichetta?: string) =>
   `<button type="button" class="mt-link" data-doc="${esc(d.pathname)}">${esc(etichetta ?? d.nome)}</button>`;
+
+/**
+ * Appena generato il preventivo apre da solo il PDF per il cliente, senza il
+ * tocco in piu' sul bottone (richiesta di Alberto del 24/10/2026). Passa dal
+ * bottone gia' disegnato in `box`: se il telefono blocca l'apertura senza
+ * tocco, il bottone resta li' com'era.
+ */
+export function apriSubito(box: HTMLElement, docs: { nome: string; pathname: string }[]) {
+  const d = documentoDaAprire(docs);
+  if (!d) return;
+  const btn = [...box.querySelectorAll<HTMLButtonElement>('[data-doc]')].find((b) => b.dataset.doc === d.pathname);
+  if (btn) void scarica(btn);
+}
 
 function rendi() {
   const agente = stato.vedeTutto;
@@ -129,7 +143,10 @@ async function scarica(btn: HTMLButtonElement) {
     a.href = URL.createObjectURL(blob);
     a.download = percorso.split('/').pop() ?? 'documento.pdf';
     a.click();
-    URL.revokeObjectURL(a.href);
+    // Il file temporaneo si butta dopo un minuto, non subito: nell'app
+    // installata sull'iPhone il PDF si apre dopo il clic e sparirebbe
+    const indirizzo = a.href;
+    setTimeout(() => URL.revokeObjectURL(indirizzo), 60_000);
   } catch {
     alert('Non sono riuscito a scaricare il documento. Riprova tra poco.');
   }
