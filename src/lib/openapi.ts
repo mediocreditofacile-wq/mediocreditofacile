@@ -76,6 +76,8 @@ export const LISTINO_OLTRE_FRANCHIGIA: Partial<Record<Servizio, number>> = {
  *   'valutazione'        /tools/valutazione (schede, verifiche, documenti, estero): nessun tetto
  *   'marotta'            il tool Marotta (/api/azienda-base, /api/azienda-estera): tetto suo
  *   'fiera'              la pagina /fiera, col tetto di fiera-guardia.ts
+ *   'simulatore'         la verifica del cliente sul simulatore di noleggio operativo,
+ *                        col tetto OPENAPI_TETTO_SIMULATORE (guardia-simulatore.ts)
  *   'carrozzeria/<slug>' un fornitore sul motore dei portali, col tetto nel database
  *   'sito'               il default e la cartella storica: fino al 20/10/2026 ci
  *                        finivano insieme valutazione e Marotta. Oggi raccoglie
@@ -83,7 +85,7 @@ export const LISTINO_OLTRE_FRANCHIGIA: Partial<Record<Servizio, number>> = {
  * Tetti separati: un picco in padiglione, un fornitore che esagera o le visure
  * del tool interno non devono mangiare il budget di qualcun altro.
  */
-export type Sorgente = 'sito' | 'fiera' | 'marotta' | 'valutazione' | `carrozzeria/${string}`;
+export type Sorgente = 'sito' | 'fiera' | 'simulatore' | 'marotta' | 'valutazione' | `carrozzeria/${string}`;
 
 /** Sorgente di un fornitore sul motore. Lo slug finisce in un percorso: si valida. */
 export function sorgenteCarrozzeria(slug: string): Sorgente {
@@ -306,6 +308,7 @@ export interface ConsumoParziale {
 export type ConsumoPerSorgente = {
   sito: ConsumoParziale;
   fiera: ConsumoParziale;
+  simulatore: ConsumoParziale;
   marotta: ConsumoParziale;
   valutazione: ConsumoParziale;
 } & Record<string, ConsumoParziale>;
@@ -325,18 +328,19 @@ export interface Consumo extends ConsumoParziale {
 }
 
 const vuoto = (): ConsumoParziale => ({ chiamate: 0, totale: 0, perServizio: {} });
-const sorgentiVuote = (): ConsumoPerSorgente => ({ sito: vuoto(), fiera: vuoto(), marotta: vuoto(), valutazione: vuoto() });
+const sorgentiVuote = (): ConsumoPerSorgente => ({ sito: vuoto(), fiera: vuoto(), simulatore: vuoto(), marotta: vuoto(), valutazione: vuoto() });
 
 /**
  * Sorgente dal percorso del blob, gia' privato del nome del file:
  *   openapi/costi/<mese>/                     -> 'sito' (il percorso storico)
  *   openapi/costi/<mese>/fiera/               -> 'fiera'
+ *   openapi/costi/<mese>/simulatore/          -> 'simulatore'
  *   openapi/costi/<mese>/marotta/             -> 'marotta'
  *   openapi/costi/<mese>/valutazione/         -> 'valutazione'
  *   openapi/costi/<mese>/carrozzeria/<slug>/  -> 'carrozzeria/<slug>'
  */
 export function sorgenteDaPercorso(parti: string[]): Sorgente {
-  if (parti[3] === 'fiera' || parti[3] === 'marotta' || parti[3] === 'valutazione') return parti[3];
+  if (parti[3] === 'fiera' || parti[3] === 'simulatore' || parti[3] === 'marotta' || parti[3] === 'valutazione') return parti[3];
   if (parti[3] === 'carrozzeria' && parti[4]) return `carrozzeria/${parti[4]}`;
   return 'sito';
 }
@@ -530,7 +534,9 @@ export async function entroIlTetto(
   }
   const tetto = tettoEuro != null && tettoEuro >= 0
     ? tettoEuro
-    : numeroEnv(sorgente === 'marotta' ? 'OPENAPI_TETTO_MAROTTA' : 'OPENAPI_TETTO_MESE', 30);
+    : sorgente === 'simulatore'
+      ? numeroEnv('OPENAPI_TETTO_SIMULATORE', 20)
+      : numeroEnv(sorgente === 'marotta' ? 'OPENAPI_TETTO_MAROTTA' : 'OPENAPI_TETTO_MESE', 30);
   if (mio.totale >= tetto) {
     return {
       ok: false,
@@ -784,6 +790,8 @@ export interface RicercaBase {
   fonte: 'openapi' | 'cache' | 'scheda';
   ragioneSociale: string | null;
   formaGiuridica: string | null;
+  /** Codice del Registro (SR, SN, DI...): decide la classe della forma. Assente nelle ricerche salvate prima del 24/10/2026 */
+  formaCodice?: string | null;
   stato: string | null;
   ateco: string | null;
   indirizzo: string | null;
@@ -846,6 +854,7 @@ function normalizza(A: any, piva: string, fonte: RicercaBase['fonte']): RicercaB
     fonte,
     ragioneSociale: A?.companyName ?? null,
     formaGiuridica: A?.detailedLegalForm?.description ?? null,
+    formaCodice: A?.detailedLegalForm?.code ?? null,
     stato: A?.activityStatus ?? null,
     ateco: componiAteco(A),
     indirizzo,
@@ -893,10 +902,14 @@ async function ricercaDallaCache(piva: string): Promise<RicercaBase | null> {
  */
 export async function ricercaBase(
   piva: string,
-  opts: { sorgente?: Sorgente } = {},
+  opts: { sorgente?: Sorgente; cacheGiaGuardata?: boolean } = {},
 ): Promise<RicercaBase> {
-  const daCache = await ricercaSoloCache(piva);
-  if (daCache) return daCache;
+  // Chi ha gia' guardato la cache (con ricercaSoloCacheLettura) non la riguarda:
+  // ogni list() e' un'operazione avanzata sullo store Blob, che ha un tetto
+  if (!opts.cacheGiaGuardata) {
+    const daCache = await ricercaSoloCache(piva);
+    if (daCache) return daCache;
+  }
 
   const res = await chiama(`${COMPANY}/IT-advanced/${piva}`, 'IT-advanced', undefined, opts.sorgente ?? 'sito');
   if (!res.trovato || !res.dati) {
@@ -941,6 +954,40 @@ export async function ricercaSoloCache(piva: string): Promise<RicercaBase | null
   }
 
   return ricercaDallaCache(piva);
+}
+
+/**
+ * Come ricercaSoloCache, ma senza list(): legge i due file per nome con get(),
+ * che sullo store Blob e' un'operazione semplice e non avanzata. Serve agli
+ * endpoint pubblici (verifica del simulatore), dove ogni invio non deve
+ * consumare il tetto delle operazioni avanzate. Stessa scadenza di 30 giorni.
+ */
+export async function ricercaSoloCacheLettura(piva: string): Promise<RicercaBase | null> {
+  const leggi = async (percorso: string, ttl: number): Promise<any | null> => {
+    try {
+      const b = await get(percorso, { access: 'private', token: blobToken() });
+      if (!b || b.statusCode !== 200) return null;
+      if (Date.now() - new Date(b.blob.uploadedAt).getTime() > ttl) return null;
+      return JSON.parse(await new Response(b.stream).text());
+    } catch {
+      return null;
+    }
+  };
+  const scheda = await leggi(`openapi/aziende/${piva}.json`, TTL_CACHE);
+  if (scheda?.advanced) {
+    const r = normalizza(scheda.advanced, piva, 'scheda');
+    r.patrimonioNetto = num(scheda.full?.ecofin?.netWorth);
+    if (scheda.score) {
+      r.punteggio = {
+        rating: scheda.score.rating ?? null,
+        classe: scheda.score.risk_score ?? null,
+        descrizione: scheda.score.risk_score_description ?? null,
+      };
+    }
+    return r;
+  }
+  const ricerca = await leggi(`openapi/ricerche/${piva}.json`, TTL_RICERCA);
+  return ricerca ? { ...ricerca, fonte: 'cache' as const } : null;
 }
 
 /**

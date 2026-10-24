@@ -642,6 +642,7 @@ function rigaSpesa(s: RiepilogoSpesa): string {
     `tool Marotta ${euroCent(s.marotta)}`,
     `portali ${euroCent(s.portali)}`,
     `fiera ${euroCent(s.fiera)}`,
+    `simulatore ${euroCent(s.simulatore ?? 0)}`,
     `non attribuiti ${euroCent(s.nonAttribuiti)}`,
   ].join(' · ');
   return `<span>Openapi, ${esc(s.meseLeggibile)}: tool interno <strong>${euroCent(s.valutazione.totale)}</strong> · totale del conto <strong>${euroCent(s.conto)}</strong></span>`

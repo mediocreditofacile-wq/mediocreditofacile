@@ -35,6 +35,7 @@ describe('messaggio quando un tetto scatta', () => {
     expect(nomeBudget('valutazione')).toBe('del tool di valutazione');
     expect(nomeBudget('carrozzeria/duplex')).toBe('del portale duplex');
     expect(nomeBudget('fiera')).toBe('della pagina /fiera');
+    expect(nomeBudget('simulatore')).toBe('del simulatore di noleggio');
   });
 });
 
@@ -76,6 +77,7 @@ describe('riepilogo per la pagina', () => {
       valutazione: { totale: 1.3, chiamate: 4 },
       marotta: 0.22,
       fiera: 0,
+      simulatore: 0,
       portali: 1.86,
       nonAttribuiti: 93.61,
       conto: 96.79,

@@ -42,6 +42,7 @@ export function nomeBudget(sorgente: Sorgente): string {
   if (sorgente === 'marotta') return 'del tool Marotta';
   if (sorgente === 'valutazione') return 'del tool di valutazione';
   if (sorgente === 'fiera') return 'della pagina /fiera';
+  if (sorgente === 'simulatore') return 'del simulatore di noleggio';
   if (sorgente.startsWith('carrozzeria/')) return `del portale ${sorgente.slice('carrozzeria/'.length)}`;
   return 'degli strumenti MCF';
 }
@@ -94,6 +95,8 @@ export interface RiepilogoSpesa {
   valutazione: { totale: number; chiamate: number };
   marotta: number;
   fiera: number;
+  /** La verifica del cliente sul simulatore di noleggio operativo */
+  simulatore: number;
   /** Somma di tutte le carrozzerie del motore dei portali */
   portali: number;
   /**
@@ -120,6 +123,7 @@ export function riepilogoSpesa(c: Consumo): RiepilogoSpesa {
     valutazione: { totale: per.valutazione?.totale ?? 0, chiamate: per.valutazione?.chiamate ?? 0 },
     marotta: per.marotta?.totale ?? 0,
     fiera: per.fiera?.totale ?? 0,
+    simulatore: per.simulatore?.totale ?? 0,
     portali: tondo(portali),
     nonAttribuiti: per.sito?.totale ?? 0,
     conto: c.totale,

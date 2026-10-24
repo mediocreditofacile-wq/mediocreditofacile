@@ -1,0 +1,147 @@
+/* === Verifica del cliente sotto il simulatore di noleggio === */
+.vsim {
+  background: #ffffff;
+  border: 1px solid var(--color-border, #E1DEE3);
+  border-radius: var(--radius, 12px);
+  padding: 2rem;
+  box-shadow: 0 2px 8px rgba(15, 16, 32, 0.04);
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.vsim__schede {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  background: #F8F7FA;
+  border-radius: 10px;
+  padding: 0.3rem;
+  margin-bottom: 1.25rem;
+}
+
+.vsim__scheda {
+  border: 0;
+  background: transparent;
+  border-radius: 8px;
+  padding: 0.7rem 0.75rem;
+  font-family: var(--font-family);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #444451;
+  cursor: pointer;
+}
+
+.vsim__scheda--attiva {
+  background: #ffffff;
+  color: #664CCD;
+  box-shadow: 0 1px 4px rgba(15, 16, 32, 0.08);
+}
+
+.vsim__intro {
+  color: #444451;
+  line-height: 1.6;
+  margin: 0 0 1.25rem;
+}
+
+.vsim__form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.vsim__campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.vsim__campo label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #664CCD;
+}
+
+.vsim__campo input {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border: 1.5px solid var(--color-border, #E1DEE3);
+  border-radius: 8px;
+  font-family: var(--font-family);
+  font-size: 1rem;
+  color: #0F1020;
+  box-sizing: border-box;
+}
+
+.vsim__campo input:focus {
+  outline: none;
+  border-color: #664CCD;
+}
+
+.vsim__doppio {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.vsim__riepilogo {
+  background: #F8F7FA;
+  border-radius: 8px;
+  padding: 0.7rem 1rem;
+  margin: 0;
+  font-size: 0.9rem;
+  color: #444451;
+}
+
+.vsim__privacy {
+  display: flex;
+  gap: 0.6rem;
+  align-items: flex-start;
+  font-size: 0.875rem;
+  color: #444451;
+  line-height: 1.5;
+}
+
+.vsim__privacy input { margin-top: 0.2rem; }
+.vsim__privacy a { color: #664CCD; }
+
+.vsim__errore {
+  margin: 0;
+  color: #CC3333;
+  font-size: 0.9rem;
+}
+
+.vsim__invia {
+  background: #FE6F3A;
+  color: #ffffff;
+  border: 0;
+  border-radius: 8px;
+  padding: 0.95rem 1.25rem;
+  font-family: var(--font-family);
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.vsim__invia:hover { background: #D45A2E; }
+.vsim__invia:disabled { opacity: 0.7; cursor: wait; }
+
+.vsim__nota {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #787782;
+  text-align: center;
+}
+
+.vsim__trappola {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+@media (max-width: 600px) {
+  .vsim { padding: 1.25rem; }
+  .vsim__schede, .vsim__doppio { grid-template-columns: 1fr; }
+}

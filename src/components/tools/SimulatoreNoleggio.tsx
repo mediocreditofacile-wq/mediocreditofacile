@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'preact/hooks';
+import { useState, useMemo, useEffect } from 'preact/hooks';
 import { RISCATTI, DURATE_BASE, DURATE_FOTOVOLTAICO, getAdjustedCoeff, getPioneerCoeff, eur } from '../../data/grenke';
 import { ESG_MIN, ESG_MAX } from '../../data/esg';
 import './simulatore-noleggio.css';
@@ -79,6 +79,19 @@ export default function SimulatoreNoleggio() {
   const fuoriTabellaEsg =
     calcolato && !isSoftware && !isNonDisponibile && durataEsg && valore >= 500 &&
     getAdjustedCoeff(valore, durata) === null;
+
+  // Il modulo di verifica sotto il simulatore (VerificaSimulatore.tsx) ascolta
+  // questo evento per sapere importo, durata, tipologia e canone calcolati
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const canone = risultati
+      ? `${risultati.canoneMensile.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} € al mese`
+      : '';
+    const detail = { importo: calcolato && valore >= 500 ? valore : null, durata, tipologia, canone };
+    // Anche in memoria: il modulo si idrata quando entra nello schermo, spesso dopo il calcolo
+    (window as any).__mcfSimulazione = detail;
+    window.dispatchEvent(new CustomEvent('simulatore:calcolo', { detail }));
+  }, [risultati, calcolato, valore, durata, tipologia]);
 
   // Gestione input valore con validazione
   const handleValoreChange = (e: Event) => {

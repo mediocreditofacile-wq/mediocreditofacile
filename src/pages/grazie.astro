@@ -31,9 +31,49 @@ import Footer from '../components/Footer.astro';
       <p class="grazie__sub">Ti ricontatteremo entro 24 ore lavorative per fornirti il preventivo personalizzato.</p>
       <a href="/" class="grazie__cta">Torna alla home</a>
     </div>
+    <!-- Esito della verifica del simulatore di noleggio: lo riempie lo script qui sotto -->
+    <div class="grazie-esito" id="grazie-esito" hidden></div>
   </main>
   <Footer />
 </Layout>
+
+<script>
+  // Verifica del cliente sul simulatore di noleggio operativo: il modulo salva
+  // l'esito in sessionStorage e rimanda qui, perche' la conversione Google Ads
+  // scatta sulla visita a /grazie. Senza esito (tutti gli altri moduli) la
+  // pagina resta quella di sempre. L'esito si cancella appena letto.
+  import { mostraEsitoSimulatore } from '../scripts/esito-grazie';
+  mostraEsitoSimulatore();
+</script>
+
+<style is:global>
+  /* Markup creato dallo script: lo scoping di Astro non lo raggiunge */
+  .grazie--esito { align-items: flex-start; }
+  .grazie--esito .grazie__inner { display: none; }
+  .grazie-esito { max-width: 640px; width: 100%; text-align: left; }
+  .grazie-esito h1 { font-size: 1.75rem; font-weight: 800; color: #0F1020; margin: 0 0 0.5rem; }
+  .grazie-esito__azienda { color: #444451; margin: 0 0 1.25rem; line-height: 1.5; }
+  .grazie-esito__azienda strong { color: #0F1020; }
+  .grazie-esito__colore { display: flex; gap: 0.75rem; align-items: flex-start; border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 1.25rem; line-height: 1.55; }
+  .grazie-esito__punto { flex: none; width: 14px; height: 14px; border-radius: 50%; margin-top: 0.3rem; background: currentColor; }
+  .grazie-esito__colore p { margin: 0; color: #444451; }
+  .grazie-esito__colore--verde { background: rgba(45,143,78,0.10); color: #2D8F4E; }
+  .grazie-esito__colore--giallo { background: rgba(230,168,23,0.14); color: #9A6B00; }
+  .grazie-esito__colore--rosso { background: rgba(204,51,51,0.08); color: #CC3333; }
+  .grazie-esito__colore--neutro { background: #F8F7FA; color: #664CCD; }
+  .grazie-esito h2 { font-size: 1rem; color: #664CCD; margin: 1.5rem 0 0.5rem; }
+  .grazie-esito ul { margin: 0; padding: 0; list-style: none; }
+  .grazie-esito__criteri li { padding: 0.35rem 0 0.35rem 1.6rem; position: relative; color: #444451; border-bottom: 1px solid #E1DEE3; }
+  .grazie-esito__criteri li::before { position: absolute; left: 0; font-weight: 800; }
+  .grazie-esito__criteri li.ok::before { content: '✓'; color: #2D8F4E; }
+  .grazie-esito__criteri li.ko::before { content: '✗'; color: #CC3333; }
+  .grazie-esito__criteri li.nd::before { content: '–'; color: #787782; }
+  .grazie-esito__indicazioni li, .grazie-esito__documenti li { padding: 0.3rem 0 0.3rem 1.1rem; position: relative; color: #444451; line-height: 1.55; }
+  .grazie-esito__indicazioni li::before, .grazie-esito__documenti li::before { content: ''; position: absolute; left: 0; top: 0.85rem; width: 6px; height: 6px; border-radius: 50%; background: #FE6F3A; }
+  .grazie-esito__nota { font-size: 0.85rem; color: #787782; margin: 1.5rem 0 0; }
+  .grazie-esito__azioni { margin-top: 1.5rem; display: flex; gap: 1rem; flex-wrap: wrap; }
+  .grazie-esito__azioni a { color: #664CCD; font-weight: 600; }
+</style>
 
 <style>
   .grazie {

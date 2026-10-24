@@ -24,6 +24,7 @@ describe('sorgente dal percorso', () => {
     const parti = (p: string) => p.split('/').slice(0, -1);
     expect(sorgenteDaPercorso(parti(`openapi/costi/${MESE}/1-IT-full-x.json`))).toBe('sito');
     expect(sorgenteDaPercorso(parti(`openapi/costi/${MESE}/fiera/1-IT-advanced-x.json`))).toBe('fiera');
+    expect(sorgenteDaPercorso(parti(`openapi/costi/${MESE}/simulatore/1-IT-advanced-x.json`))).toBe('simulatore');
     expect(sorgenteDaPercorso(parti(`openapi/costi/${MESE}/carrozzeria/demo-fv/1-IT-full-x.json`)))
       .toBe('carrozzeria/demo-fv');
   });
