@@ -129,7 +129,10 @@ async function scarica(btn: HTMLButtonElement) {
     a.href = URL.createObjectURL(blob);
     a.download = percorso.split('/').pop() ?? 'documento.pdf';
     a.click();
-    URL.revokeObjectURL(a.href);
+    // Il file temporaneo si butta dopo un minuto, non subito: nell'app
+    // installata sull'iPhone il PDF si apre dopo il clic e sparirebbe
+    const indirizzo = a.href;
+    setTimeout(() => URL.revokeObjectURL(indirizzo), 60_000);
   } catch {
     alert('Non sono riuscito a scaricare il documento. Riprova tra poco.');
   }
