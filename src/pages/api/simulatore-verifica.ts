@@ -24,6 +24,7 @@ import {
 import { chiudi, impronta, ipDellaRichiesta, prenota } from '../../lib/guardia-simulatore';
 import { corpoMail, oggettoMail, type AziendaLetta, type LeadSimulatore } from '../../lib/mail-simulatore';
 import { inviaMail, DESTINATARIO_MCF } from '../../lib/mail-portale';
+import { pdfPreventivo, tipologiaValida } from '../../lib/preventivo-simulatore';
 
 function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -180,7 +181,7 @@ export async function POST({ request }: { request: Request }) {
     email,
     importo,
     durata: testo(data, 'durata'),
-    tipologia: testo(data, 'tipologia'),
+    tipologia: tipologiaValida(testo(data, 'tipologia')),
     canone: testo(data, 'canone'),
     clientePiva,
     cliente: cliente ? letta(cliente) : null,
@@ -192,8 +193,32 @@ export async function POST({ request }: { request: Request }) {
 
   // Oltre il tetto degli invii del giorno la mail non parte: la quota Resend e'
   // la stessa di inviti e reset password. La lead resta nel log.
+  // Il preventivo lo scarica chi ha compilato, con qualunque esito, e lo stesso
+  // PDF va in allegato ad Alberto (decisione del 24/10/2026)
+  const documenti = cliente?.trovata ? documentiSimulatore(classe, importo) : documentiSimulatore(classe, Math.min(importo, 10_000));
+  let preventivo: { filename: string; base64: string } | null = null;
+  try {
+    const durata = parseInt(lead.durata, 10);
+    preventivo = pdfPreventivo({
+      intestatario: cliente?.trovata ? cliente.ragioneSociale : null,
+      piva: clientePiva,
+      tipologia: lead.tipologia,
+      importo,
+      durataScelta: Number.isFinite(durata) ? durata : null,
+      documenti,
+    });
+  } catch (err) {
+    console.error(JSON.stringify({ evento: 'simulatore_pdf_errore', msg: err instanceof Error ? err.message : String(err) }));
+  }
+
   const mail = pren.invio
-    ? await inviaMail({ to: DESTINATARIO_MCF, subject: oggettoMail(lead), html: corpoMail(lead), replyTo: email })
+    ? await inviaMail({
+        to: DESTINATARIO_MCF,
+        subject: oggettoMail(lead),
+        html: corpoMail(lead),
+        replyTo: email,
+        allegati: preventivo ? [{ filename: preventivo.filename, content: preventivo.base64 }] : undefined,
+      })
     : { ok: false, err: 'tetto_invii' };
 
   const esitoRiga = !pren.invio ? 'tetto_invii' : esito?.colore ?? motivo ?? 'errore';
@@ -216,8 +241,9 @@ export async function POST({ request }: { request: Request }) {
       criteri: esito?.criteri ?? [],
       indicazioni: esito?.indicazioni ?? [],
       // Senza verifica la forma non si conosce: lista base, la reddituale la chiedo io
-      documenti: cliente?.trovata ? documentiSimulatore(classe, importo) : documentiSimulatore(classe, Math.min(importo, 10_000)),
+      documenti,
       importo,
     },
+    preventivo,
   });
 }

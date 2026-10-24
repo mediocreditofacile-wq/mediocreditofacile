@@ -100,7 +100,7 @@ export function valutaSimulatore(d: DatiEsito): EsitoSimulatore {
   const bilancioOk = d.annoBilancio == null ? null : d.annoBilancio >= atteso;
   criteri.push({
     chiave: 'bilancio',
-    nome: 'Ultimo bilancio nel registro',
+    nome: 'Ultimo bilancio depositato',
     valore: d.annoBilancio == null ? 'non disponibile' : String(d.annoBilancio),
     ok: capitali ? (bilancioOk ?? false) : bilancioOk,
   });
@@ -132,13 +132,13 @@ export function valutaSimulatore(d: DatiEsito): EsitoSimulatore {
     indicazioni.push('Se l\'attività viene dal conferimento di un\'azienda precedente, o i soci hanno una storia nello stesso settore, quella storia conta e va documentata.');
   }
   if (anni == null) {
-    indicazioni.push('Il registro non riporta la data di inizio attività: la verifico io dalla visura.');
+    indicazioni.push('Le banche dati non riportano la data di inizio attività: la verifico io dalla visura.');
   }
   if (capitali && d.annoBilancio != null && d.annoBilancio < atteso) {
-    indicazioni.push(`Il registro ha ancora il bilancio ${d.annoBilancio}. Se il ${atteso} è chiuso, anche non depositato, conviene averlo pronto: è il primo documento che chiederanno.`);
+    indicazioni.push(`L'ultimo bilancio disponibile è il ${d.annoBilancio}. Se il ${atteso} è chiuso, anche non depositato, conviene averlo pronto: è il primo documento che chiederanno.`);
   }
   if (capitali && d.annoBilancio == null) {
-    indicazioni.push(`Nel registro non c'è un bilancio leggibile. Serve il bilancio ${atteso} con la ricevuta di deposito.`);
+    indicazioni.push(`Nelle banche dati non c'è un bilancio leggibile. Serve il bilancio ${atteso} con la ricevuta di deposito.`);
   }
   if (rapporto != null && rapporto > QUOTA_FATTURATO) {
     indicazioni.push('Le società di noleggio di solito finanziano fino a circa un quinto del fatturato annuo. Un anticipo o una durata più lunga possono riportare la richiesta in linea.');

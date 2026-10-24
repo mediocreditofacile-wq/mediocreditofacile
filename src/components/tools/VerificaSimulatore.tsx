@@ -8,7 +8,7 @@ import './verifica-simulatore.css';
 // Due moduli: "per la mia azienda" (compila l'imprenditore) e "per un mio
 // cliente" (compila il fornitore). Importo, durata, tipologia e canone arrivano
 // dal simulatore con l'evento 'simulatore:calcolo'. Il server verifica il
-// cliente nel registro imprese e risponde con l'esito, che passa a /grazie in
+// cliente nelle banche dati e risponde con l'esito, che passa a /grazie in
 // sessionStorage: /grazie resta la pagina di destinazione perche' la conversione
 // Google Ads scatta sulla sua visita. Nell'URL non va niente.
 
@@ -81,7 +81,7 @@ export default function VerificaSimulatore() {
         return;
       }
       try {
-        if (j.risultato) sessionStorage.setItem(CHIAVE_ESITO, JSON.stringify({ ...j.risultato, consegnato: j.consegnato }));
+        if (j.risultato) sessionStorage.setItem(CHIAVE_ESITO, JSON.stringify({ ...j.risultato, consegnato: j.consegnato, preventivo: j.preventivo ?? null }));
       } catch { /* senza sessionStorage /grazie mostra il messaggio generico */ }
       evento('simulatore_verifica_inviata', { variante, esito: j.risultato?.colore ?? j.risultato?.motivo ?? 'nessuno' });
       window.location.href = '/grazie';
@@ -106,8 +106,8 @@ export default function VerificaSimulatore() {
 
       <p class="vsim__intro">
         {perCliente
-          ? 'Scrivi la partita IVA del tuo cliente: lo verifico nel registro imprese e ti dico subito come si presenta a una società di noleggio. Poi seguo io la trattativa con te.'
-          : 'Scrivi la partita IVA della tua azienda: la verifico nel registro imprese e ti dico subito come si presenta a una società di noleggio. Poi ti richiamo con il preventivo.'}
+          ? "Scrivi la partita IVA del tuo cliente: interroghiamo le banche dati e ti dico subito come si presenta a una società di noleggio e la fattibilità dell'operazione. Scarichi subito il preventivo; entro 24 ore lavorative ti richiamo per i chiarimenti e i dettagli."
+          : "Scrivi la partita IVA della tua azienda: interroghiamo le banche dati e ti dico subito come si presenta a una società di noleggio e la fattibilità dell'operazione. Scarichi subito il preventivo; entro 24 ore lavorative ti richiamo per i chiarimenti e i dettagli."}
       </p>
 
       <form class="vsim__form" onSubmit={invia} noValidate={false}>
@@ -164,9 +164,9 @@ export default function VerificaSimulatore() {
         {errore && <p class="vsim__errore" role="alert">{errore}</p>}
 
         <button type="submit" class="vsim__invia" disabled={invio}>
-          {invio ? 'Verifico nel registro imprese…' : perCliente ? 'Verifica il mio cliente' : 'Verifica la mia azienda'}
+          {invio ? 'Interrogo le banche dati…' : 'Verifica e scarica il preventivo'}
         </button>
-        <p class="vsim__nota">Gratis e senza impegno. Valutazione indicativa sui dati pubblici del registro imprese, non è una delibera.</p>
+        <p class="vsim__nota">Gratis e senza impegno. Valutazione indicativa sui dati pubblici delle banche dati, non è una delibera.</p>
       </form>
     </div>
   );

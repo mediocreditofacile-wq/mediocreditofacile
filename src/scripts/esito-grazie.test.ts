@@ -39,6 +39,17 @@ describe('esito su /grazie', () => {
     expect(htmlEsito(r())).not.toContain('wa.me');
   });
 
+  it('col preventivo c\'e\' il pulsante per scaricarlo', () => {
+    expect(htmlEsito(r({ preventivo: { filename: 'p.pdf', base64: 'JVBERg==' } }))).toContain('Scarica il preventivo');
+    expect(htmlEsito(r())).not.toContain('Scarica il preventivo');
+  });
+
+  it('non nomina il registro imprese', () => {
+    for (const colore of ['verde', 'giallo', 'rosso', null] as const) {
+      expect(htmlEsito(r({ colore, motivo: colore ? null : 'non_verificata' }))).not.toContain('registro');
+    }
+  });
+
   it('senza colore niente nota sulla valutazione', () => {
     expect(htmlEsito(r({ colore: null, motivo: 'non_trovata', criteri: [] }))).not.toContain('non è una delibera');
   });

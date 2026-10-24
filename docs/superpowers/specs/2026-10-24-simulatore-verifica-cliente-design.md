@@ -131,6 +131,10 @@ Le due ricerche dello stesso invio contano per due.
 
 La revisione del codice ha trovato tre punti, corretti prima della consegna: invii in parallelo che scavalcavano i tetti (ora ogni invio prenota una riga sotto lock prima di spendere), operazioni Blob consumate a ogni invio (la cache si legge con `get()` per nome, i tetti si contano dal database), quota Resend esauribile (tetto di 30 invii al giorno, oltre i quali la mail non parte e la pagina offre WhatsApp). Il tetto delle ricerche scende a 20 al giorno per limitare le scritture sullo store. Due minori: la virgola delle migliaia nell'importo si rifiuta, e senza verifica la lista documenti resta quella base.
 
+### Preventivo e testi, 24/10/2026 (seconda richiesta di Alberto)
+
+Chi lascia i dati scarica subito un preventivo PDF, con qualunque esito: canone su tutte le durate, intestato all'azienda verificata, lo stesso PDF in allegato alla mail ad Alberto. La telefonata entro 24 ore serve per i chiarimenti, i dettagli del caso e del bene e i controlli di congruità, non per avere il preventivo. Nei testi rivolti al cliente non si nomina il "registro imprese": si scrive "interroghiamo le banche dati e ti dico subito come si presenta a una società di noleggio e la fattibilità dell'operazione". Questa parte supera il non obiettivo "niente preventivo PDF automatico" scritto sopra.
+
 ## Tracciamento
 
 Il campo `fonte` resta `simulatore-noleggio-operativo`, con `variante` = `azienda` o `cliente`. Eventi GTM: `simulatore_verifica_inviata` (con `variante` ed `esito`) e lo stesso `generate_lead` delle altre pagine.
