@@ -40,7 +40,7 @@ import {
   type ColonnaLeasing,
   type RigaInPagina,
 } from './mezzi-browser';
-import { bottoneDoc, caricaStorico } from './storico';
+import { apriSubito, bottoneDoc, caricaStorico } from './storico';
 
 /** Pausa fra l'ultima cifra scritta e il conto, come nella simulazione */
 const ATTESA_MS = 350;
@@ -476,6 +476,7 @@ async function scaricaPreventivo(btn: HTMLButtonElement) {
         <button type="button" class="mt-btn mt-btn--secondario" id="mz-pratica">Carica la pratica</button>
       </div>
     </div>`;
+  apriSubito(esitoBox, docs);
   void caricaStorico();
 }
 
